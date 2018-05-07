@@ -1,7 +1,7 @@
-function reactionTimes=plotOnlyFirstReach(tbt,ds,whichReach,useAsCue,out,outfield,firstReachWindow)
+function [reactionTimes,useTheseTrials]=plotOnlyFirstReach(tbt,ds,whichReach,useAsCue,out,outfield,firstReachWindow)
 
 excludePawOnWheelBeforeCue=1;
-excludeReachesDuringCue=1;
+excludeReachesDuringCue=0;
 cueDuration=0.2; % in seconds
 cueDurationInds=floor(cueDuration/mode(diff(nanmean(tbt.times,1))));
 

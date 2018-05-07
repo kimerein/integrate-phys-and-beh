@@ -38,7 +38,6 @@ out.led_4back=[nan; nan; nan; nan; led(1:end-4)];
 pawOutDuringWheel=zeros(size(tbt.cueZone_onVoff,1),1);
 out.rewarded=nan(size(tbt.cueZone_onVoff,1),1);
 out.reachedAfterCue=nan(size(tbt.cueZone_onVoff,1),1);
-out.touchedPellet=nan(size(tbt.cueZone_onVoff,1),1);
 for i=1:size(tbt.cueZone_onVoff,1)
     presentInd=find(tbt.pelletPresented(i,:)>lowThresh,1,'first');
     temp=tbt.cueZone_onVoff;
@@ -68,11 +67,7 @@ for i=1:size(tbt.cueZone_onVoff,1)
     
     % If mouse touched pellet in this trial, even if animal did not
     % successfully consume pellet
-    if any(tbt.success_reachStarts(i,cueInd:ind)>lowThresh) || any(tbt.success_reachStarts_pawOnWheel(i,cueInd:ind)>lowThresh) || any(tbt.drop_reachStarts(i,cueInd:ind)>lowThresh) || any(tbt.drop_reachStarts_pawOnWheel(i,cueInd:ind)>lowThresh)
-        out.touchedPellet(i)=1;
-    else
-        out.touchedPellet(i)=0;
-    end
+    if any(tbt.success_reachStarts(i,cueInd:ind)>lowThresh) || any(tbt.success_reachStarts_pawOnWheel(i,cueInd:ind)>lowThresh) || any(tbt.success_reachStarts(i,cueInd:ind)>lowThresh) || any(tbt.drop_reachStarts_pawOnWheel(i,cueInd:ind)>lowThresh)
     
     % If mouse reached within a few seconds of cue
     if any(tbt.reachStarts(i,cueInd:cueInd+reachAfterCueWindow_inds)>lowThresh)
@@ -94,10 +89,6 @@ out.rewarded_4back=[nan; nan; nan; nan; out.rewarded(1:end-4)];
 out.reachedAfterCue_2back=[nan; nan; out.reachedAfterCue(1:end-2)];
 out.reachedAfterCue_3back=[nan; nan; nan; out.reachedAfterCue(1:end-3)];
 out.reachedAfterCue_4back=[nan; nan; nan; nan; out.reachedAfterCue(1:end-4)];
-out.touchedPellet_previousTrial=[nan; out.touchedPellet(1:end-1)];
-out.touchedPellet_2back=[nan; nan; out.touchedPellet(1:end-2)];
-out.touchedPellet_3back=[nan; nan; nan; out.touchedPellet(1:end-3)];
-out.touchedPellet_4back=[nan; nan; nan; nan; out.touchedPellet(1:end-4)];
 
 % Classify trial types
 % out.trialTypes=classifyTrialTypes(tbt,led);

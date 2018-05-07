@@ -1,0 +1,14 @@
+function plotDistribution(data,nbins,condition,useTheseTrials)
+
+data=data(useTheseTrials);
+condition=condition(useTheseTrials);
+
+u=unique(condition);
+u=u(~isnan(u));
+n=cell(1,length(u));
+trialsPerU=nan(1,length(u));
+for i=1:length(u)
+    [n{i},x]=histcounts(data(condition==u{i}),nbins);
+
+[n,x]=histcounts(data(useTheseTrials==1),nbins);
+figure();
