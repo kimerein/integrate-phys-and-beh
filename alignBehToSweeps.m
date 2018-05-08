@@ -1,4 +1,4 @@
-function alignBehToSweeps(beh_sweeps,spikes_sweeps)
+function D=alignBehToSweeps(beh_sweeps,spikes_sweeps)
 
 % Assumes led is random
 % Try to align based on led

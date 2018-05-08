@@ -8,7 +8,11 @@ u=u(~isnan(u));
 n=cell(1,length(u));
 trialsPerU=nan(1,length(u));
 for i=1:length(u)
-    [n{i},x]=histcounts(data(condition==u(i)),nbins);
+    if i==1
+        [n{i},x]=histcounts(data(condition==u(i)),nbins);
+    else
+        [n{i},x]=histcounts(data(condition==u(i)),x);
+    end
     trialsPerU(i)=sum(condition==u(i));
 end
 

@@ -1,13 +1,19 @@
 function out=getSweepsFromBeh(tbt,cueName)
 
 lowThresh=0.05;
-durationOfWheelTurn=1; % in seconds
+durationOfWheelTurn=1.029; % in seconds
+wheelStopsThisManySecsBeforeCue=0.1; % in seconds
 durationOfWheelTurn_inds=floor(durationOfWheelTurn/mode(diff(nanmean(tbt.times,1))));
+stopped_inds=floor(wheelStopsThisManySecsBeforeCue/mode(diff(nanmean(tbt.times,1))));
 includePawOnWheelDuringCue=0;
 cueDuration=0.2; % in seconds
 cueDuration_inds=floor(cueDuration/mode(diff(nanmean(tbt.times,1))));
 reachAfterCueWindow=1; % in seconds
 reachAfterCueWindow_inds=floor(reachAfterCueWindow/mode(diff(nanmean(tbt.times,1))));
+reachAfterCueWindow_start=1; % in seconds
+reachAfterCueWindow_start_inds=floor(reachAfterCueWindow_start/mode(diff(nanmean(tbt.times,1))));
+reachAfterCueWindow_end=3; % in seconds
+reachAfterCueWindow_end_inds=floor(reachAfterCueWindow_end/mode(diff(nanmean(tbt.times,1))));
 
 % Get trial durations from tbt
 figure();
@@ -47,13 +53,13 @@ for i=1:size(tbt.cueZone_onVoff,1)
         cueInd=cueInd+cueDuration_inds;
     end
     if cueInd-durationOfWheelTurn_inds<1
-        if any(tbt.reach_ongoing(i,1:cueInd)>lowThresh) || any(tbt.isHold(i,1:cueInd)>lowThresh) || any(tbt.reachStarts(i,1:cueInd)>lowThresh)
+        if any(tbt.reach_ongoing(i,1:cueInd-stopped_inds)>lowThresh) || any(tbt.isHold(i,1:cueInd-stopped_inds)>lowThresh) || any(tbt.reachStarts(i,1:cueInd-stopped_inds)>lowThresh)
             pawOutDuringWheel(i)=1;
         else
             pawOutDuringWheel(i)=0;
         end
 %     elseif any(tbt.reach_ongoing(i,cueInd-durationOfWheelTurn_inds:cueInd)>lowThresh) || any(tbt.reachStarts(i,cueInd-durationOfWheelTurn_inds:cueInd)>lowThresh)
-    elseif any(tbt.reach_ongoing(i,cueInd-durationOfWheelTurn_inds:cueInd)>lowThresh) || any(tbt.isHold(i,cueInd-durationOfWheelTurn_inds:cueInd)>lowThresh) || any(tbt.reachStarts(i,cueInd-durationOfWheelTurn_inds:cueInd)>lowThresh)
+    elseif any(tbt.reach_ongoing(i,cueInd-durationOfWheelTurn_inds:cueInd-stopped_inds)>lowThresh) || any(tbt.isHold(i,cueInd-durationOfWheelTurn_inds:cueInd-stopped_inds)>lowThresh) || any(tbt.reachStarts(i,cueInd-durationOfWheelTurn_inds:cueInd-stopped_inds)>lowThresh)
         pawOutDuringWheel(i)=1;
     else
         pawOutDuringWheel(i)=0;
@@ -68,14 +74,16 @@ for i=1:size(tbt.cueZone_onVoff,1)
     
     % If mouse touched pellet in this trial, even if animal did not
     % successfully consume pellet
-    if any(tbt.success_reachStarts(i,cueInd:ind)>lowThresh) || any(tbt.success_reachStarts_pawOnWheel(i,cueInd:ind)>lowThresh) || any(tbt.drop_reachStarts(i,cueInd:ind)>lowThresh) || any(tbt.drop_reachStarts_pawOnWheel(i,cueInd:ind)>lowThresh)
+%     if any(tbt.success_reachStarts(i,cueInd:ind)>lowThresh) || any(tbt.success_reachStarts_pawOnWheel(i,cueInd:ind)>lowThresh) || any(tbt.drop_reachStarts(i,cueInd:ind)>lowThresh) || any(tbt.drop_reachStarts_pawOnWheel(i,cueInd:ind)>lowThresh)
+    if any(tbt.success_reachStarts(i,cueInd:cueInd+reachAfterCueWindow_inds)>lowThresh) || any(tbt.success_reachStarts_pawOnWheel(i,cueInd:cueInd+reachAfterCueWindow_inds)>lowThresh) || any(tbt.drop_reachStarts(i,cueInd:cueInd+reachAfterCueWindow_inds)>lowThresh) || any(tbt.drop_reachStarts_pawOnWheel(i,cueInd:cueInd+reachAfterCueWindow_inds)>lowThresh)
         out.touchedPellet(i)=1;
     else
         out.touchedPellet(i)=0;
     end
     
     % If mouse reached within a few seconds of cue
-    if any(tbt.reachStarts(i,cueInd:cueInd+reachAfterCueWindow_inds)>lowThresh)
+    if any(tbt.reachStarts(i,cueInd:cueInd+reachAfterCueWindow_inds)>lowThresh)  
+%     if any(tbt.reachStarts(i,cueInd+reachAfterCueWindow_start_inds:cueInd+reachAfterCueWindow_end_inds)>lowThresh)  
         out.reachedAfterCue(i)=1;
     else
         out.reachedAfterCue(i)=0;

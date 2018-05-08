@@ -1,13 +1,14 @@
 function [reactionTimes,useTheseTrials]=plotOnlyFirstReach(tbt,ds,whichReach,useAsCue,out,outfield,firstReachWindow)
 
-excludePawOnWheelBeforeCue=1;
-excludeReachesDuringCue=0;
+excludePawOnWheelBeforeCue=0;
+excludeReachesDuringCue=0; % leave this 0!!!!
 cueDuration=0.2; % in seconds
 cueDurationInds=floor(cueDuration/mode(diff(nanmean(tbt.times,1))));
 
-useTheseTrials=ones(size(tbt.(whichReach),1),1);
 if excludePawOnWheelBeforeCue==1
-    useTheseTrials(out.pawOutDuringWheel==0)=0;
+    useTheseTrials=out.pawOutDuringWheel==0;
+else
+    useTheseTrials=ones(size(out.pawOutDuringWheel));
 end
 
 % cue ind
@@ -58,3 +59,5 @@ for i=1:length(u)
     disp(['For out.' outfield ' values equal to ' num2str(u(i))]);
     disp(sum(reactionTimes(out.(outfield)==u(i) & useTheseTrials==1)<firstReachWindow)./sum(out.(outfield)==u(i) & useTheseTrials==1));
 end
+
+% reactionTimes=reactionTimes(out.(outfield)==1 & useTheseTrials==1);
