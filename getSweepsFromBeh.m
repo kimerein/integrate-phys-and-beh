@@ -8,6 +8,7 @@ stopped_inds=floor(wheelStopsThisManySecsBeforeCue/mode(diff(nanmean(tbt.times,1
 includePawOnWheelDuringCue=0;
 cueDuration=0.2; % in seconds
 cueDuration_inds=floor(cueDuration/mode(diff(nanmean(tbt.times,1))));
+% reachAfterCueWindow=3; % in seconds
 reachAfterCueWindow=1; % in seconds
 reachAfterCueWindow_inds=floor(reachAfterCueWindow/mode(diff(nanmean(tbt.times,1))));
 reachAfterCueWindow_start=1; % in seconds

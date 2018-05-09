@@ -18,6 +18,7 @@ avcue=nanmean(tbt.(useAsCue),1);
 % which reaches to plot
 temp=tbt.(whichReach);
 oldtemp=tbt.(whichReach);
+newtemp=nan(size(tbt.(whichReach)));
 
 % plot only first reaches?
 firstreaches=nan(1,size(temp,1));
@@ -36,21 +37,23 @@ for i=1:size(temp,1)
         fi=fi(1);
         firstreaches(i)=fi;
     end
-    temp(i,:)=zeros(size(temp(i,:)));
     if ~isempty(fi)
+        newtemp(i,:)=zeros(size(newtemp(i,:)));
 %         temp(i,fi)=oldtemp(i,fi);
-        temp(i,fi)=1;
+        newtemp(i,fi)=1;
     end
 end
 [~,maind]=max(avcue);
 reactionTimes=(firstreaches-maind).*mode(diff(nanmean(tbt.times,1)));
+temp=newtemp;
 
 figure(); 
 % plot(downSampAv(nanmean(tbt.times-0.2,1),ds),downSampAv(nanmean(tbt.(useAsCue),1),ds),'Color','b');
 plot(downSampAv(nanmean(tbt.times,1),ds),downSampAv(nanmean(tbt.(useAsCue),1),ds),'Color','b');
 hold on; 
-plot(downSampAv(nanmean(tbt.times,1),ds),downSampAv(nansum(temp(out.(outfield)==0 & useTheseTrials==1,:),1)./sum(out.(outfield)==0 & useTheseTrials==1),ds),'Color','k');
-plot(downSampAv(nanmean(tbt.times,1),ds),downSampAv(nansum(temp(out.(outfield)==1 & useTheseTrials==1,:),1)./sum(out.(outfield)==1 & useTheseTrials==1),ds),'Color','r');
+noreachtrial=all(isnan(temp),2);
+plot(downSampAv(nanmean(tbt.times,1),ds),downSampAv(nansum(temp(out.(outfield)==0 & useTheseTrials==1 & noreachtrial==0,:),1)./sum(out.(outfield)==0 & useTheseTrials==1 & noreachtrial==0),ds),'Color','k');
+plot(downSampAv(nanmean(tbt.times,1),ds),downSampAv(nansum(temp(out.(outfield)==1 & useTheseTrials==1 & noreachtrial==0,:),1)./sum(out.(outfield)==1 & useTheseTrials==1 & noreachtrial==0),ds),'Color','r');
 
 disp(['Fraction of trials with first reach within first ' num2str(firstReachWindow) ' seconds after cue']);
 u=unique(out.(outfield));
