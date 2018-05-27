@@ -3,17 +3,6 @@ function out=getSweepsFromBeh(tbt,cueName)
 % Get user-defined settings from this file
 settings=RTanalysis_settings();
 lowThresh=settings.lowThresh;
-durationOfWheelTurn=settings.durationOfWheelTurn;
-wheelStopsThisManySecsBeforeCue=settings.wheelStopsThisManySecsBeforeCue;
-durationOfWheelTurn_inds=floor(durationOfWheelTurn/mode(diff(nanmean(tbt.times,1))));
-stopped_inds=floor(wheelStopsThisManySecsBeforeCue/mode(diff(nanmean(tbt.times,1))));
-excludePawOnWheelDuringCue=settings.excludePawOnWheelDuringCue;
-cueDuration=settings.cueDuration;
-cueDuration_inds=floor(cueDuration/mode(diff(nanmean(tbt.times,1))));
-reachAfterCueWindow_start=settings.reachAfterCueWindow_start;
-reachAfterCueWindow_end=settings.reachAfterCueWindow_end;
-reachAfterCueWindow_start_inds=floor(reachAfterCueWindow_start/mode(diff(nanmean(tbt.times,1))));
-reachAfterCueWindow_end_inds=floor(reachAfterCueWindow_end/mode(diff(nanmean(tbt.times,1))));
 
 % Fix hold lacking expts
 if ~isfield(tbt,'isHold')
@@ -23,23 +12,16 @@ end
 % Get opto
 out=getOptoTrials(tbt,cueName,lowThresh);
 
-% Get trial durations from tbt
-figure();
-plot(nanmean(tbt.(cueName),1));
-xlabel('indices');
-ylabel('av');
-title('average of movie cue across trials');
-ind=input('Enter index showing minimum trial length -- note that any opto within a trial should occur before this index. ');
-if ~isnumeric(ind)
-    error('Please enter a number.');
-end
+% Classify trial types
+out.trialtypes=classifyTrialTypes(alltbt);
 
-% Get trials with opto
-led=any(tbt.optoOn(:,1:ind)>lowThresh,2);
-led=single(led);
+% Get states of previous trials (up to 2 back)
+f=fieldnames(out);
+for i=1:length(f)
+    temp=out.f{i};
+    newfieldname=[f{i} '_previousTrial'];
+    out.(newfieldname)=[nan; temp(1:end-1)];
 
-% Save to structure for output
-out.led=led;
 
 % Opto status from previous trial
 out.led_previousTrial=[nan; led(1:end-1)];
@@ -120,4 +102,24 @@ out.touchedPellet_4back=[nan; nan; nan; nan; out.touchedPellet(1:end-4)];
 
 end
 
+function out=getOptoTrials(tbt,cueName,lowThresh)
 
+% Get trial durations from tbt
+figure();
+plot(nanmean(tbt.(cueName),1));
+xlabel('indices');
+ylabel('av');
+title('average of movie cue across trials');
+ind=input('Enter index showing minimum trial length -- note that any opto within a trial should occur before this index. ');
+if ~isnumeric(ind)
+    error('Please enter a number.');
+end
+
+% Get trials with opto
+led=any(tbt.optoOn(:,1:ind)>lowThresh,2);
+led=single(led);
+
+% Save to structure for output
+out.led=led;
+
+end

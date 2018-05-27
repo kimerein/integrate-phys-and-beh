@@ -6,70 +6,53 @@ settings=trialTypeSettings();
 % Find and convert reach batches
 tbt=findReachBatches(tbt,settings.lowThresh,1);
 
+% Evaluate boolean tests
 for i=1:length(settings.bool_test)
     curr_test=settings.bool_test(i);
-    out.bool_test(i).testResults=nan(1,size(tbt.times,1)); % test each trial
-    switch curr_test.test
-        case 'any'
-            useFunc='any';
-        case 'first'
-            useFunc='find';
-            n=1;
-        otherwise
-            useFunc='any'; % default mode
-    end
-    switch curr_test.testwhat
-        case 'single reach'
-            temp=tbt.(fieldname);
-            
-            
-        case 'reach batch'
-            
-            
-            
-        otherwise
-    end
+    out.bool_test(i).testResults=evaluateTest(tbt,curr_test,settings);
 end
 
-bool_test(i).testwhat='single reach';
-bool_test(i).fieldname='reach_ongoing';
-bool_test(i).test='any';
-bool_test(i).thresh=settings.lowThresh;
-bool_test(i).comparator='>';
-bool_test(i).window='wheel_turning';
+% Combine outcomes of boolean tests to get trial type classifications
+for i=1:length(settings.trialtype)
+    curr_type=settings.trialtype(i);
+    out.trialtype(i).isThisType=classifyUsingBoolTests(out.bool,curr_type,settings);
+end
 
+end
 
+function out=classifyUsingBoolTests(bool_out,curr_type,settings)
 
-trialtype(1).outcomes=[0 1 0 0 0 nan nan nan nan nan];
-trialtype(1).name='after_cue_success';
-trialtype(1).bool='&';
+parts=cell(1,length(curr_type.outcomes));
+useThese=zeros(1,length(curr_type.outcomes));
+for i=1:length(curr_type.outcomes)
+    if isnan(curr_type.outcomes(i))
+        % skip this criterion
+        parts{i}='';
+    elseif curr_type.outcomes(i)==0
+        parts{i}=[' (bool_out(' num2str(i) ').testResults==0) '];
+        useThese(i)=1;
+    elseif curr_type.outcomes(i)==1
+        parts{i}=[' (bool_out(' num2str(i) ').testResults==1) ']; 
+        useThese(i)=1;
+    end
+end
+parts=parts(useThese==1);
 
-
-
-% Exclude trials where paw was on wheel while wheel turning
-if excludePawOnWheelTrials==1
-    % Find trials where paw was on wheel while wheel turning
-    plot_cues=[];
-    for i=1:size(tbt.(nameOfCue),1)
-        presentInd=find(tbt.pelletPresented(i,:)>0.5,1,'first');
-        temp=tbt.(nameOfCue);
-        cueInd=find(temp(i,:)>0.5,1,'first');
-        pawWasOnWheel=0;
-        if any(tbt.pawOnWheel(i,presentInd:cueInd)>0.5)
-            pawWasOnWheel=1;
-        else
-            plot_cues=[plot_cues i];
+switch curr_type.bool
+    case '&'
+        statementToEval=parts{1};
+        for i=2:length(parts)
+            statementToEval=[statementToEval '&' parts{i}];
         end
-    end
-else
-    plot_cues=1:size(tbt.(nameOfCue),1);
+    case '|'
+        statementToEval=parts{1};
+        for i=2:length(parts)
+            statementToEval=[statementToEval '|' parts{i}];
+        end
+    otherwise
+        error('unrecognized value in trialtype.bool from trialTypeSettings.m');
 end
-if settings.excludeFirstTrial==1
-    plot_cues=plot_cues(~ismember(plot_cues,1));
-end
-
-
-
+out=eval(statementToEval);
 
 end
 
@@ -122,36 +105,35 @@ elseif endInds>size(data,2)
 end
 
 switch curr_test.test
-out=evaluateBoolTest(data(:,startInds:endInds),curr_test,settings,2);
-
-end
-
-function out=evaluateBoolTest(data,curr_test,settings,dim)
-
-switch curr_test.test
     case 'any'
-        useFunc='any';
-        out=eval([useFunc '(data' curr_test.comparator num2str(curr_test.thresh) ',' num2str(dim) ')']);
-    case 'firstReach'
-        
-        
-        
-        
-        
-        useFunc='find';
-        if dim==1
-            for i=1:size(data,2)
-                out(i)=eval([useFunc '(data(:,i)' curr_test.comparator num2str(curr_test.thresh) ',1,first)']);
-            end
-        elseif dim==2
-            for i=1:size(data,1)
-                out(i)=eval([useFunc '(data(i,:)' curr_test.comparator num2str(curr_test.thresh) ',1,first)']);
-            end
-        end
+        out=evaluateAnyTest(data(:,startInds:endInds),curr_test,settings,2);
+    case 'first'
+        % Check whether first in event set is of indicated type
+        largerSet=tbt.(curr_test.inEventSet);
+        out=isFirstEventThis(data(:,startInds:endInds),largerSet(:,startInds:endInds),curr_test,settings);
     otherwise
-        useFunc='any'; % default mode
-        out=eval([useFunc '(data' curr_test.comparator num2str(curr_test.thresh) ',' num2str(dim) ')']);
+        % let 'any' be default mode
+        out=evaluateBoolTest(data(:,startInds:endInds),curr_test,settings,2);
 end
+
+end
+
+function isThisEventType=isFirstEventThis(theseEvents,largerEventSet,curr_test,settings)
+
+isThisEventType=zeros(1,size(theseEvents,1));
+for i=1:size(theseEvents,1)
+   f=find(eval(['theseEvents(i,:) ' curr_test.comparator num2str(curr_test.thresh)]),1,'first');
+   f2=find(eval(['largerEventSet(i,:) ' curr_test.comparator num2str(curr_test.thresh)]),1,'first');
+   if f==f2
+       isThisEventType(i)=1;
+   end
+end
+
+end
+
+function out=evaluateAnyTest(data,curr_test,settings,dim)
+
+out=eval(['any(data' curr_test.comparator num2str(curr_test.thresh) ',' num2str(dim) ')']);
 
 end
 

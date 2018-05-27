@@ -1,106 +1,44 @@
-function out=getSweepsFromBeh(tbt,cueName)
+function out=getSweepsFromBeh(tbt)
 
 % Get user-defined settings from this file
 settings=RTanalysis_settings();
 lowThresh=settings.lowThresh;
-durationOfWheelTurn=settings.durationOfWheelTurn;
-wheelStopsThisManySecsBeforeCue=settings.wheelStopsThisManySecsBeforeCue;
-durationOfWheelTurn_inds=floor(durationOfWheelTurn/mode(diff(nanmean(tbt.times,1))));
-stopped_inds=floor(wheelStopsThisManySecsBeforeCue/mode(diff(nanmean(tbt.times,1))));
-excludePawOnWheelDuringCue=settings.excludePawOnWheelDuringCue;
-cueDuration=settings.cueDuration;
-cueDuration_inds=floor(cueDuration/mode(diff(nanmean(tbt.times,1))));
-reachAfterCueWindow_start=settings.reachAfterCueWindow_start;
-reachAfterCueWindow_end=settings.reachAfterCueWindow_end;
-reachAfterCueWindow_start_inds=floor(reachAfterCueWindow_start/mode(diff(nanmean(tbt.times,1))));
-reachAfterCueWindow_end_inds=floor(reachAfterCueWindow_end/mode(diff(nanmean(tbt.times,1))));
+ttsettings=trialTypeSettings();
 
 % Fix hold lacking expts
 if ~isfield(tbt,'isHold')
-    tbt.isHold=zeros(size(tbt.(cueName)));
+    tbt.isHold=zeros(size(tbt.(ttsettings.nameOfCue)));
 end
 
 % Get opto
-out=getOptoTrials(tbt,cueName,lowThresh);
-
-
-
-% Opto status from previous trial
-out.led_previousTrial=[nan; led(1:end-1)];
-out.led_2back=[nan; nan; led(1:end-2)];
-out.led_3back=[nan; nan; nan; led(1:end-3)];
-out.led_4back=[nan; nan; nan; nan; led(1:end-4)];
-
-% Get trials where reach occurred before cue
-cueInd=find(nanmean(tbt.cueZone_onVoff,1)>0,1,'first');
-pawOutDuringWheel=zeros(size(tbt.cueZone_onVoff,1),1);
-out.rewarded=nan(size(tbt.cueZone_onVoff,1),1);
-out.reachedAfterCue=nan(size(tbt.cueZone_onVoff,1),1);
-out.touchedPellet=nan(size(tbt.cueZone_onVoff,1),1);
-for i=1:size(tbt.cueZone_onVoff,1)
-    presentInd=find(tbt.pelletPresented(i,:)>lowThresh,1,'first');
-    temp=tbt.cueZone_onVoff;
-%     cueInd=find(temp(i,:)>lowThresh,1,'first');
-    if excludePawOnWheelDuringCue==1
-        cueInd=cueInd+cueDuration_inds;
-    end
-    if cueInd-durationOfWheelTurn_inds<1
-        if any(tbt.reach_ongoing(i,1:cueInd-stopped_inds)>lowThresh) || any(tbt.isHold(i,1:cueInd-stopped_inds)>lowThresh) || any(tbt.reachStarts(i,1:cueInd-stopped_inds)>lowThresh)
-            pawOutDuringWheel(i)=1;
-        else
-            pawOutDuringWheel(i)=0;
-        end
-%     elseif any(tbt.reach_ongoing(i,cueInd-durationOfWheelTurn_inds:cueInd)>lowThresh) || any(tbt.reachStarts(i,cueInd-durationOfWheelTurn_inds:cueInd)>lowThresh)
-    elseif any(tbt.reach_ongoing(i,cueInd-durationOfWheelTurn_inds:cueInd-stopped_inds)>lowThresh) || any(tbt.isHold(i,cueInd-durationOfWheelTurn_inds:cueInd-stopped_inds)>lowThresh) || any(tbt.reachStarts(i,cueInd-durationOfWheelTurn_inds:cueInd-stopped_inds)>lowThresh)
-        pawOutDuringWheel(i)=1;
-    else
-        pawOutDuringWheel(i)=0;
-    end
-    
-    % If mouse got a pellet successfully in this trial
-    if any(tbt.success_reachStarts(i,cueInd:ind)>lowThresh) || any(tbt.success_reachStarts_pawOnWheel(i,cueInd:ind)>lowThresh)
-        out.rewarded(i)=1;
-    else
-        out.rewarded(i)=0;
-    end
-    
-    % If mouse touched pellet in this trial, even if animal did not
-    % successfully consume pellet
-%     if any(tbt.success_reachStarts(i,cueInd:ind)>lowThresh) || any(tbt.success_reachStarts_pawOnWheel(i,cueInd:ind)>lowThresh) || any(tbt.drop_reachStarts(i,cueInd:ind)>lowThresh) || any(tbt.drop_reachStarts_pawOnWheel(i,cueInd:ind)>lowThresh)
-    if any(tbt.success_reachStarts(i,cueInd:cueInd+reachAfterCueWindow_inds)>lowThresh) || any(tbt.success_reachStarts_pawOnWheel(i,cueInd:cueInd+reachAfterCueWindow_inds)>lowThresh) || any(tbt.drop_reachStarts(i,cueInd:cueInd+reachAfterCueWindow_inds)>lowThresh) || any(tbt.drop_reachStarts_pawOnWheel(i,cueInd:cueInd+reachAfterCueWindow_inds)>lowThresh)
-        out.touchedPellet(i)=1;
-    else
-        out.touchedPellet(i)=0;
-    end
-    
-    % If mouse reached within a few seconds of cue
-%     if any(tbt.reachStarts(i,cueInd:cueInd+reachAfterCueWindow_inds)>lowThresh)  
-    if any(tbt.reachStarts(i,cueInd-cueDuration_inds+reachAfterCueWindow_start_inds:cueInd-cueDuration_inds+reachAfterCueWindow_end_inds)>lowThresh)  
-        out.reachedAfterCue(i)=1;
-    else
-        out.reachedAfterCue(i)=0;
-    end
-end
-out.pawOutDuringWheel=pawOutDuringWheel;
-out.pawOutDuringWheel_previousTrial=[nan; out.pawOutDuringWheel(1:end-1)];
-out.pawOutDuringWheel_2back=[nan; nan; out.pawOutDuringWheel(1:end-2)];
-
-% Rewarded status and behavior from previous trial
-out.rewarded_previousTrial=[nan; out.rewarded(1:end-1)];
-out.reachedAfterCue_previousTrial=[nan; out.reachedAfterCue(1:end-1)];
-out.rewarded_2back=[nan; nan; out.rewarded(1:end-2)];
-out.rewarded_3back=[nan; nan; nan; out.rewarded(1:end-3)];
-out.rewarded_4back=[nan; nan; nan; nan; out.rewarded(1:end-4)];
-out.reachedAfterCue_2back=[nan; nan; out.reachedAfterCue(1:end-2)];
-out.reachedAfterCue_3back=[nan; nan; nan; out.reachedAfterCue(1:end-3)];
-out.reachedAfterCue_4back=[nan; nan; nan; nan; out.reachedAfterCue(1:end-4)];
-out.touchedPellet_previousTrial=[nan; out.touchedPellet(1:end-1)];
-out.touchedPellet_2back=[nan; nan; out.touchedPellet(1:end-2)];
-out.touchedPellet_3back=[nan; nan; nan; out.touchedPellet(1:end-3)];
-out.touchedPellet_4back=[nan; nan; nan; nan; out.touchedPellet(1:end-4)];
+out=getOptoTrials(tbt,ttsettings.nameOfCue,lowThresh);
 
 % Classify trial types
-% out.trialTypes=classifyTrialTypes(tbt,led);
+tt=classifyTrialTypes(tbt);
+for i=1:length(tt.trialtype)
+    out.(tt.trialtype(i).name)=tt.trialtype(i).isThisType;
+end
+
+% Get states of previous trials (up to 4 back)
+f=fieldnames(out);
+for i=1:length(f)
+    if ~(isnumeric(out.(f{i})) || islogical(out.(f{i})))
+        continue
+    end
+    temp=out.(f{i});
+    % 1 back
+    newfieldname=[f{i} '_1back'];
+    out.(newfieldname)=[nan; temp(1:end-1)];
+    % 2 back
+    newfieldname=[f{i} '_2back'];
+    out.(newfieldname)=[nan; nan; temp(1:end-2)];
+    % 3 back
+    newfieldname=[f{i} '_3back'];
+    out.(newfieldname)=[nan; nan; nan; temp(1:end-3)];
+    % 4 back
+    newfieldname=[f{i} '_4back'];
+    out.(newfieldname)=[nan; nan; nan; nan; temp(1:end-4)];
+end
 
 end
 
