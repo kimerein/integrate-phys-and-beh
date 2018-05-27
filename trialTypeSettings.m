@@ -3,22 +3,34 @@ function settings=trialTypeSettings()
 % This function defines types of behavioral trials
 % Modify this function to change trial-type classification scheme
 
+
 RTsettings=RTanalysis_settings(); % go to this file to change experiment-specific parameters
+
 
 % Threshold for event detection
 settings.lowThresh=RTsettings.lowThresh; % threshold for detecting events in trial-by-trial behavior data structure
+
+
+% Name of cue in data structure
+settings.nameOfCue='cueZone_onVoff';
+
 
 % Get information about trial structure from RTsettings
 trialStructure.durationOfWheelTurn=RTsettings.durationOfWheelTurn; % duration of pellet presenter wheel turn, in seconds 
 trialStructure.wheelStopsThisManySecsBeforeCue=RTsettings.wheelStopsThisManySecsBeforeCue; % time window between pellet presenter wheel stopping and cue onset, in seconds
 trialStructure.cueDuration=RTsettings.cueDuration; % duration of cue, in seconds
 trialStructure.maxTrialDuration=RTsettings.maxTrialDuration; % maximum duration of a trial, in seconds
+trialStructure.timeSlop=RTsettings.timeSlop; % max possible error in timing due to frame rate in movie and/or alignment approach, in seconds
+
 
 % "Reach batch" definition
-reach_batch.window=0.3; % in seconds, reaches must occur within this many seconds of each other to be in same batch
+reach_batch.window=0.4; % in seconds, reaches must occur within this many seconds of each other to be in same batch
 reach_batch.firstreach_type={'miss_reachStarts'}; % first reach must be one of these types
 reach_batch.secondreach_type={'success_reachStarts_pawOnWheel','drop_reachStarts_pawOnWheel','miss_reachStarts_pawOnWheel'}; % second reach must be one of these types
 reach_batch.take_first_or_second_type=2; % number indicates whether to convert batch to the type of the first or second reach
+reach_batch.take_first_or_second_timing=1; % number indicates whether to set reach timing at the timing of the first or second reach in batch
+reach_batch.removePawOnWheel=1; % if removePawOnWheel=1, will change reach from reach_pawOnWheel to just reach type
+
 
 % Define time windows within a trial relative to cue onset
 % Mouse "reached after cue" if mouse reached within cued_reach_window:
@@ -31,68 +43,172 @@ timeWindow(2).start=-trialStructure.durationOfWheelTurn-trialStructure.wheelStop
 timeWindow(2).end=-trialStructure.wheelStopsThisManySecsBeforeCue;
 % after_cue is time window from cue onset to end of trial
 timeWindow(3).name='after_cue';
-timeWindow(3).start=0; % in seconds from cue onset
+timeWindow(3).start=0-trialStructure.timeSlop; % in seconds from cue onset
 timeWindow(3).end=trialStructure.maxTrialDuration; 
+% all_times refers to entire trial
+timeWindow(4).name='all_times';
+timeWindow(4).start=0-trialStructure.durationOfWheelTurn-trialStructure.wheelStopsThisManySecsBeforeCue; % trial begins when pellet presenter wheel begins to turn
+timeWindow(4).end=trialStructure.maxTrialDuration; 
 
-% Test whether paw was on wheel while wheel turning
-bool_test(1).testwhat='single reach';
-bool_test(1).fieldname='pawOnWheel';
-bool_test(1).test='any';
-bool_test(1).thresh=lowThresh;
-bool_test(1).comparator='>';
-bool_test(1).window='wheel_turning';
 
 % Result of first "reach batch" after cue
 % Note that "reach batch" refers to the outcome of the last reach in set of
-% contiguous reaches
-bool_test(2).testwhat='reach batch';
-bool_test(2).fieldname='success_reachStarts';
-bool_test(2).test='first';
-bool_test(2).thresh=0.5;
-bool_test(2).comparator='>';
-bool_test(2).window='after_cue';
+% contiguous reaches, per definition above
+i=1;
+bool_test(i).testwhat='reach batch';
+bool_test(i).fieldname='success_reachStarts';
+bool_test(i).test='firstReach';
+bool_test(i).thresh=settings.lowThresh;
+bool_test(i).comparator='>';
+bool_test(i).window='after_cue';
 
-bool_test(3).testwhat='reach batch';
-bool_test(3).fieldname='drop_reachStarts';
-bool_test(3).test='first';
-bool_test(3).thresh=0.5;
-bool_test(3).comparator='>';
-bool_test(3).window='after_cue';
+i=2;
+bool_test(i).testwhat='reach batch';
+bool_test(i).fieldname='drop_reachStarts';
+bool_test(i).test='firstReach';
+bool_test(i).thresh=settings.lowThresh;
+bool_test(i).comparator='>';
+bool_test(i).window='after_cue';
 
-bool_test(4).testwhat='reach batch';
-bool_test(4).fieldname='miss_reachStarts';
-bool_test(4).test='first';
-bool_test(4).thresh=0.5;
-bool_test(4).comparator='>';
-bool_test(4).window='after_cue';
+i=3;
+bool_test(i).testwhat='reach batch';
+bool_test(i).fieldname='miss_reachStarts';
+bool_test(i).test='firstReach';
+bool_test(i).thresh=settings.lowThresh;
+bool_test(i).comparator='>';
+bool_test(i).window='after_cue';
 
-bool_test(5).testwhat='reach batch';
-bool_test(5).fieldname='pelletmissingreach_reachStarts';
-bool_test(5).test='first';
-bool_test(5).thresh=0.5;
-bool_test(5).comparator='>';
-bool_test(5).window='after_cue';
+i=4;
+bool_test(i).testwhat='reach batch';
+bool_test(i).fieldname='pelletmissingreach_reachStarts';
+bool_test(i).test='firstReach';
+bool_test(i).thresh=settings.lowThresh;
+bool_test(i).comparator='>';
+bool_test(i).window='after_cue';
+
+% Did mouse consume pellet on this trial?
+% Build up boolean tests to assess this
+i=5;
+bool_test(i).testwhat='single reach';
+bool_test(i).fieldname='success_reachStarts_pawOnWheel';
+bool_test(i).test='any';
+bool_test(i).thresh=settings.lowThresh;
+bool_test(i).comparator='>';
+bool_test(i).window='all_times';
+
+i=6;
+bool_test(i).testwhat='single reach';
+bool_test(i).fieldname='success_reachStarts';
+bool_test(i).test='any';
+bool_test(i).thresh=settings.lowThresh;
+bool_test(i).comparator='>';
+bool_test(i).window='all_times';
+
+% Did mouse touch pellet on this trial?
+% Build up boolean tests to assess this
+i=7;
+bool_test(i).testwhat='single reach';
+bool_test(i).fieldname='drop_reachStarts_pawOnWheel';
+bool_test(i).test='any';
+bool_test(i).thresh=settings.lowThresh;
+bool_test(i).comparator='>';
+bool_test(i).window='all_times';
+
+i=8;
+bool_test(i).testwhat='single reach';
+bool_test(i).fieldname='drop_reachStarts';
+bool_test(i).test='any';
+bool_test(i).thresh=settings.lowThresh;
+bool_test(i).comparator='>';
+bool_test(i).window='all_times';
+
+% Did mouse perform a cued reach?
+% Build up boolean tests to assess this
+i=9;
+bool_test(i).testwhat='single reach';
+bool_test(i).fieldname='reach_starts';
+bool_test(i).test='any';
+bool_test(i).thresh=settings.lowThresh;
+bool_test(i).comparator='>';
+bool_test(i).window='cued_reach_window';
+
+% Test whether paw was on wheel while wheel turning
+i=10;
+bool_test(i).testwhat='single reach';
+bool_test(i).fieldname='reach_ongoing';
+bool_test(i).test='any';
+bool_test(i).thresh=settings.lowThresh;
+bool_test(i).comparator='>';
+bool_test(i).window='wheel_turning';
+
+i=11;
+bool_test(i).testwhat='single reach';
+bool_test(i).fieldname='isHold';
+bool_test(i).test='any';
+bool_test(i).thresh=settings.lowThresh;
+bool_test(i).comparator='>';
+bool_test(i).window='wheel_turning';
+
+i=12;
+bool_test(i).testwhat='single reach';
+bool_test(i).fieldname='reachStarts';
+bool_test(i).test='any';
+bool_test(i).thresh=settings.lowThresh;
+bool_test(i).comparator='>';
+bool_test(i).window='wheel_turning';
 
 % Put together bool_test results to get trial classifications
 % Each index into trialtype(i).outcomes vector of length n refers to outcome of bool_tests 1:n
-trialtype(1).outcomes=[0 1 0 0 0];
-trialtype(1).name='success';
-trialtype(2).outcomes=[0 0 1 0 0];
-trialtype(2).name='drop';
-trialtype(3).outcomes=[0 0 0 1 0];
-trialtype(3).name='miss';
-trialtype(4).outcomes=[0 0 0 0 1];
-trialtype(4).name='no pellet';
-trialtype(5).outcomes=[1 1 0 0 0];
-trialtype(5).name='on wheel success';
-trialtype(6).outcomes=[1 0 1 0 0];
-trialtype(6).name='on wheel drop';
-trialtype(7).outcomes=[1 0 0 1 0];
-trialtype(7).name='on wheel miss';
-trialtype(8).outcomes=[1 0 0 0 1];
-trialtype(8).name='on wheel no pellet';
+% If index i is nan, bool_tests(i) can be either 0 or 1 (false or true)
+trialtype(1).outcomes=[1 0 0 0 nan nan nan nan nan 0 0 0];
+trialtype(1).name='after_cue_success';
+trialtype(1).bool='&';
 
+trialtype(2).outcomes=[0 1 0 0 nan nan nan nan nan 0 0 0];
+trialtype(2).name='after_cue_drop';
+trialtype(2).bool='&';
+
+trialtype(3).outcomes=[0 0 1 0 nan nan nan nan nan 0 0 0];
+trialtype(3).name='after_cue_miss';
+trialtype(3).bool='&';
+
+trialtype(4).outcomes=[0 0 0 1 nan nan nan nan nan 0 0 0];
+trialtype(4).name='after_cue_no_pellet';
+trialtype(4).bool='&';
+
+trialtype(5).outcomes=[1 0 0 0 nan nan nan nan nan 0 0 0];
+trialtype(5).name='paw_during_wheel_after_cue_success';
+trialtype(5).bool='&';
+
+trialtype(6).outcomes=[0 1 0 0 nan nan nan nan nan 0 0 0];
+trialtype(6).name='paw_during_wheel_after_cue_drop';
+trialtype(6).bool='&';
+
+trialtype(7).outcomes=[0 0 1 0 nan nan nan nan nan 0 0 0];
+trialtype(7).name='paw_during_wheel_after_cue_miss';
+trialtype(7).bool='&';
+
+trialtype(8).outcomes=[0 0 0 1 nan nan nan nan nan 0 0 0];
+trialtype(8).name='paw_during_wheel_after_cue_no_pellet';
+trialtype(8).bool='&';
+
+trialtype(9).outcomes=[nan nan nan nan 1 1 nan nan nan nan nan nan];
+trialtype(9).name='consumed_pellet';
+trialtype(9).bool='|';
+
+trialtype(10).outcomes=[nan nan nan nan 1 1 1 1 nan nan nan nan];
+trialtype(10).name='touched_pellet';
+trialtype(10).bool='|';
+
+trialtype(11).outcomes=[nan nan nan nan nan nan nan nan 1 nan nan nan];
+trialtype(11).name='cued_reach';
+trialtype(11).bool='&';
+
+
+% Output settings
 settings.reach_batch=reach_batch;
+settings.trialStructure=trialStructure;
+settings.timeWindow=timeWindow;
 settings.bool_test=bool_test;
 settings.trialtype=trialtype;
 

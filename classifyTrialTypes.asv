@@ -122,20 +122,36 @@ elseif endInds>size(data,2)
 end
 
 switch curr_test.test
+out=evaluateBoolTest(data(:,startInds:endInds),curr_test,settings,2);
+
+end
+
+function out=evaluateBoolTest(data,curr_test,settings,dim)
+
+switch curr_test.test
     case 'any'
-        out=evaluateAnyTest(data(:,startInds:endInds),curr_test,settings,2);
+        useFunc='any';
+        out=eval([useFunc '(data' curr_test.comparator num2str(curr_test.thresh) ',' num2str(dim) ')']);
     case 'firstReach'
         
+        
+        
+        
+        
+        useFunc='find';
+        if dim==1
+            for i=1:size(data,2)
+                out(i)=eval([useFunc '(data(:,i)' curr_test.comparator num2str(curr_test.thresh) ',1,first)']);
+            end
+        elseif dim==2
+            for i=1:size(data,1)
+                out(i)=eval([useFunc '(data(i,:)' curr_test.comparator num2str(curr_test.thresh) ',1,first)']);
+            end
+        end
     otherwise
-        % let 'any' be default mode
-        out=evaluateBoolTest(data(:,startInds:endInds),curr_test,settings,2);
+        useFunc='any'; % default mode
+        out=eval([useFunc '(data' curr_test.comparator num2str(curr_test.thresh) ',' num2str(dim) ')']);
 end
-
-end
-
-function out=evaluateAnyTest(data,curr_test,settings,dim)
-
-out=eval([useFunc '(data' curr_test.comparator num2str(curr_test.thresh) ',' num2str(dim) ')']);
 
 end
 
