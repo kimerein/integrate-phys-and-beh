@@ -1,0 +1,8 @@
+function [n,x]=cityscape_hist(n,x)
+
+new_x=nan(1,length(x)*2-1);
+j=1;
+for i=1:length(x)
+    new_x(j)=x(i);
+    j=j+1;
+    new_x(j)=x

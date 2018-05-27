@@ -41,8 +41,8 @@ for i=1:length(useInds)
     unitFx(useInds(i)).response_x_led=x_led;
     unitFx(useInds(i)).response_y_led=y_led;
     % get spiking activity in time window
-    unitFx(useInds(i)).no_led_FR=nanmean(y(x>=led_window(1) & x<=led_window(2)));
-    unitFx(useInds(i)).led_FR=nanmean(y_led(x_led>=led_window(1) & x_led<=led_window(2)));
+    unitFx(useInds(i)).no_led_FR=nanmean(y(x>=led_window(1) & x<=led_window(2)))./(led_window(2)-led_window(1));
+    unitFx(useInds(i)).led_FR=nanmean(y_led(x_led>=led_window(1) & x_led<=led_window(2)))./(led_window(2)-led_window(1));
     unitFx(useInds(i)).isGoodUnit=1;
     all_frs(i,1)=unitFx(useInds(i)).no_led_FR;
     all_frs(i,2)=unitFx(useInds(i)).led_FR;

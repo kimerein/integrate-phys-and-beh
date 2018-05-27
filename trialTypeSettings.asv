@@ -12,7 +12,6 @@ settings.lowThresh=RTsettings.lowThresh; % threshold for detecting events in tri
 trialStructure.durationOfWheelTurn=RTsettings.durationOfWheelTurn; % duration of pellet presenter wheel turn, in seconds 
 trialStructure.wheelStopsThisManySecsBeforeCue=RTsettings.wheelStopsThisManySecsBeforeCue; % time window between pellet presenter wheel stopping and cue onset, in seconds
 trialStructure.cueDuration=RTsettings.cueDuration; % duration of cue, in seconds
-trialStructure.maxTrialDuration=RTsettings.maxTrialDuration; % maximum duration of a trial, in seconds
 
 % "Reach batch" definition
 reach_batch.window=0.3; % in seconds, reaches must occur within this many seconds of each other to be in same batch
@@ -29,10 +28,9 @@ timeWindow(1).end=RTsettings.reachAfterCueWindow_end;  % define end of time wind
 timeWindow(2).name='wheel_turning';
 timeWindow(2).start=-trialStructure.durationOfWheelTurn-trialStructure.wheelStopsThisManySecsBeforeCue;
 timeWindow(2).end=-trialStructure.wheelStopsThisManySecsBeforeCue;
-% after_cue is time window from cue onset to end of trial
-timeWindow(3).name='after_cue';
-timeWindow(3).start=0; % in seconds from cue onset
-timeWindow(3).end=trialStructure.maxTrialDuration; 
+% after 
+
+
 
 % Test whether paw was on wheel while wheel turning
 bool_test(1).testwhat='single reach';

@@ -23,7 +23,23 @@ end
 % Get opto
 out=getOptoTrials(tbt,cueName,lowThresh);
 
+% Get trial durations from tbt
+figure();
+plot(nanmean(tbt.(cueName),1));
+xlabel('indices');
+ylabel('av');
+title('average of movie cue across trials');
+ind=input('Enter index showing minimum trial length -- note that any opto within a trial should occur before this index. ');
+if ~isnumeric(ind)
+    error('Please enter a number.');
+end
 
+% Get trials with opto
+led=any(tbt.optoOn(:,1:ind)>lowThresh,2);
+led=single(led);
+
+% Save to structure for output
+out.led=led;
 
 % Opto status from previous trial
 out.led_previousTrial=[nan; led(1:end-1)];
@@ -104,24 +120,4 @@ out.touchedPellet_4back=[nan; nan; nan; nan; out.touchedPellet(1:end-4)];
 
 end
 
-function out=getOptoTrials(tbt,cueName,lowThresh)
 
-% Get trial durations from tbt
-figure();
-plot(nanmean(tbt.(cueName),1));
-xlabel('indices');
-ylabel('av');
-title('average of movie cue across trials');
-ind=input('Enter index showing minimum trial length -- note that any opto within a trial should occur before this index. ');
-if ~isnumeric(ind)
-    error('Please enter a number.');
-end
-
-% Get trials with opto
-led=any(tbt.optoOn(:,1:ind)>lowThresh,2);
-led=single(led);
-
-% Save to structure for output
-out.led=led;
-
-end

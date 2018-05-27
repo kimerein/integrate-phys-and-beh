@@ -16,7 +16,7 @@ for i=1:length(settings.bool_test)
     end
 end
     
-    bool_test(1).testwhat='single reach';
+bool_test(1).testwhat='single reach';
 bool_test(1).fieldname='pawOnWheel';
 bool_test(1).test='any';
 bool_test(1).thresh=0.5;
