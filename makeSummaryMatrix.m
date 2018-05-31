@@ -25,8 +25,13 @@ end
 % All event fields as double
 f=fieldnames(tbt_events);
 for i=1:length(f)
+    if ~isempty(strfind(f{i},'backup'))
+        continue
+    end
     summary.(f{i})=tbt_events.(f{i});
 end
+
+% Also get indices of event fields
 
 end
 

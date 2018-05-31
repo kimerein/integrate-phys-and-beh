@@ -30,19 +30,9 @@ temp=newtemp;
 tbt.firstReachesAfterCueOnset=newtemp;
 
 if doPlot==1
-    if excludePawOnWheelDuringCue==1
-        useTrials=out.paw_during_wheel==0;
-    else
-        useTrials=ones(length(out.paw_during_wheel),1);
-    end
     figure();
     plot(downSampAv(nanmean(tbt.times,1),ds),downSampAv(nanmean(tbt.(useAsCue),1),ds),'Color','b');
     hold on;
     noreachtrial=all(isnan(temp),2);
-    plot(downSampAv(nanmean(tbt.times,1),ds),downSampAv(nansum(temp(out.(outfield)==0 & useTrials==1 & noreachtrial==0,:),1)./sum(out.(outfield)==0 & useTrials==1 & noreachtrial==0),ds),'Color','k');
-    plot(downSampAv(nanmean(tbt.times,1),ds),downSampAv(nansum(temp(out.(outfield)==1 & useTrials==1 & noreachtrial==0,:),1)./sum(out.(outfield)==1 & useTrials==1 & noreachtrial==0),ds),'Color','r');
-    xlabel('Time (seconds)');
-    ylabel('# reaches / # trials');
-    leg={'cue','out.field FALSE','out.field TRUE'};
-    legend(leg);
-end
+    plot(downSampAv(nanmean(tbt.times,1),ds),downSampAv(nansum(temp(out.(outfield)==0 & useTheseTrials==1 & noreachtrial==0,:),1)./sum(out.(outfield)==0 & useTheseTrials==1 & noreachtrial==0),ds),'Color','k');
+    plot(downSampAv(nanmean(tbt.times,1),ds),downSampAv(nansum(temp(out.(outfield)==1 & useTheseTrials==1 & noreachtrial==0,:),1)./sum(out.(outfield)==1 & useTheseTrials==1 & noreachtrial==0),ds),'Color','r');
