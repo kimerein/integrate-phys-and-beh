@@ -1,76 +1,140 @@
-function [alltbt,out,rt_noLED,useTheseTrials_noLED,rt_LED,useTheseTrials_LED]=analyzeRTchanges(filedir)
+function analyzeRTchanges(alltbt,out,metadata)
 
-alltbt=combineExptPieces(filedir,'cueZone_onVoff',0.25,1);
+nbins=200; % for histograms
 
-out=getSweepsFromBeh(alltbt,'cueZone_onVoff');
+% Get reaction times for all trials where mouse reached after cue onset
+[reactionTimes,alltbt]=plotOnlyFirstReach(alltbt,1,'reachStarts_noPawOnWheel','cueZone_onVoff',out,'led',0);
 
-% out.reachedLastTimeNoLED_noPawOut=out.led_previousTrial==0  & out.reachedAfterCue_previousTrial==1 & out.touchedPellet_previousTrial==1 & out.rewarded_previousTrial==1 & out.pawOutDuringWheel_previousTrial==0;
-out.reachedLastTimeNoLED_noPawOut=out.led_previousTrial==0 & out.reachedAfterCue_previousTrial==1 & out.touchedPellet_previousTrial==1 & out.pawOutDuringWheel_previousTrial==0;
-% out.reachedLastTimeNoLED_noPawOut=out.led_previousTrial==0;
-[rt_noLED,useTheseTrials_noLED]=plotOnlyFirstReach(alltbt,1,'reachStarts','cueZone_onVoff',out,'reachedLastTimeNoLED_noPawOut',1);
-% useTheseTrials_noLED=useTheseTrials_noLED==1 & out.reachedLastTimeNoLED_noPawOut==1 & out.pawOutDuringWheel==0 & out.reachedAfterCue==1 & out.rewarded_previousTrial==0;
-useTheseTrials_noLED=useTheseTrials_noLED==1 & out.reachedLastTimeNoLED_noPawOut==1;
-f=find(useTheseTrials_noLED==1);
-% f=find(out.led_previousTrial==0 & out.reachedAfterCue_previousTrial==1 & out.touchedPellet_previousTrial==1);
-changeInRT=rt_noLED(f-1)-rt_noLED(f);
+% Get trials where mouse paw was on pellet presenter wheel during wheel turn
+% Note that enforcing this requires that the mouse not have extra
+% information about pellet presentation / cue timing
+dontUse=out.paw_during_wheel==1;
+dontUse_1back=out.paw_during_wheel_1back==1;
+dontUse_sequence=dontUse | dontUse_1back;
 
-% out.reachedLastTimeAndLED_noPawOut=out.led_previousTrial==1  & out.reachedAfterCue_previousTrial==1 & out.touchedPellet_previousTrial==1 & out.rewarded_previousTrial==1 & out.pawOutDuringWheel_previousTrial==0;
-out.reachedLastTimeAndLED_noPawOut=out.led_previousTrial==1 & out.reachedAfterCue_previousTrial==1 & out.touchedPellet_previousTrial==1 & out.pawOutDuringWheel_previousTrial==0;
-% out.reachedLastTimeAndLED_noPawOut=out.led_previousTrial==1;
-[rt_LED,useTheseTrials_LED]=plotOnlyFirstReach(alltbt,1,'reachStarts','cueZone_onVoff',out,'reachedLastTimeAndLED_noPawOut',1);
-% useTheseTrials_LED=useTheseTrials_LED==1 & out.reachedLastTimeAndLED_noPawOut==1 & out.pawOutDuringWheel==0 & out.reachedAfterCue==1 & out.rewarded_previousTrial==0;
-useTheseTrials_LED=useTheseTrials_LED==1 & out.reachedLastTimeAndLED_noPawOut==1;
-f=find(useTheseTrials_LED==1);
-% f=find(out.led_previousTrial==1 & out.reachedAfterCue_previousTrial==1 & out.touchedPellet_previousTrial==1);
-changeInRT_LED=rt_LED(f-1)-rt_LED(f);
+% Change in reaction time, all trials
+condition=ones(length(out.led),1); % take all trials
+curr_rt=reactionTimes;
+curr_rt(~(condition==1))=nan;
+plotCurrRT(curr_rt,'All trials',[]);
+histRTchange(curr_rt,nbins,'All trials',[]);
 
+% Change in reaction time, no preemptive reach
+condition=ones(length(out.led),1); % take all trials
+curr_rt=reactionTimes;
+curr_rt(~(condition==1) | dontUse_sequence)=nan;
+plotCurrRT(curr_rt,'All trials, no reach during wheel turn (2 trials in a row)',[]);
+histRTchange(curr_rt,nbins,'All trials, no reach during wheel turn (2 trials in a row)',[]);
+
+% Change in reaction time, no preemptive reach
+% Test effects of LED on current trial
+condition=ones(length(out.led),1); % take all trials
+curr_rt=reactionTimes;
+curr_rt(~(condition==1) | dontUse_sequence)=nan;
+plotCurrRT(curr_rt,'All trials, no reach during wheel turn (2 trials in a row)',out.led==1);
+histRTchange(curr_rt,nbins,'All trials, no reach during wheel turn (2 trials in a row)',out.led==1);
+
+% Change in reaction time, no preemptive reach
+% Test effects of LED on PREVIOUS trial
+condition=ones(length(out.led),1); % take all trials
+curr_rt=reactionTimes;
+curr_rt(~(condition==1) | dontUse_sequence)=nan;
+plotCurrRT(curr_rt,'All trials, no reach during wheel turn (2 trials in a row)',out.led_1back==1);
+histRTchange(curr_rt,nbins,'All trials, no reach during wheel turn (2 trials in a row)',out.led_1back==1);
+
+% Change in reaction time, no preemptive reach
+% Test effects of LED on PREVIOUS trial 
+% given that mouse successfully touched pellet and performed cued reach on
+% previous trial
+condition=out.cued_reach_1back==1 & out.touched_pellet_1back==1;
+curr_rt=reactionTimes;
+curr_rt(~(condition==1) | dontUse_sequence)=nan;
+plotCurrRT(curr_rt,'Cued reach & touched pellet 1 back & no preemptive reach for 2 trials in a row',out.led_1back==1);
+histRTchange(curr_rt,nbins,'Cued reach & touched pellet 1 back & no preemptive reach for 2 trials in a row',out.led_1back==1);
+
+% Change in reaction time, no preemptive reach
+% Test effects of LED on PREVIOUS trial 
+% given that mouse successfully touched pellet and performed cued reach on
+% previous trial
+condition=out.cued_reach_1back==1 & out.touched_pellet_1back==1;
+curr_rt=reactionTimes;
+curr_rt(~(condition==1))=nan;
+plotCurrRT(curr_rt,'Cued reach & touched pellet 1 back',out.led_1back==1);
+histRTchange(curr_rt,nbins,'Cued reach & touched pellet 1 back',out.led_1back==1);
+
+% Change in reaction time, no preemptive reach
+% Test effects of LED on PREVIOUS trial 
+% given that mouse failed to touch pellet despite performing a cued reach on
+% previous trial
+condition=out.cued_reach_1back==1 & out.touched_pellet_1back==0;
+curr_rt=reactionTimes;
+curr_rt(~(condition==1) | dontUse_sequence)=nan;
+plotCurrRT(curr_rt,'Cued reach but failed to touch pellet 1 back & no preemptive reach for 2 trials in a row',out.led_1back==1);
+histRTchange(curr_rt,nbins,'Cued reach but failed to touch pellet 1 back & no preemptive reach for 2 trials in a row',out.led_1back==1);
+
+end
+
+function plotCurrRT(curr_rt,tit,testcond)
+
+if ~isempty(testcond)
+    backup_rt=curr_rt;
+    curr_rt(~(testcond==0))=nan; % test condition is false
+end
+
+if all(isnan(curr_rt(1:end-1)) | isnan(curr_rt(2:end)))
+        return
+    end
 figure();
-% f=find(useTheseTrials_noLED==1 & out.pawOutDuringWheel==0);
-f=find(useTheseTrials_noLED==1);
-scatter(rt_noLED(f-1)+rand(size(rt_noLED(f-1))).*0.01,rt_noLED(f)+rand(size(rt_noLED(f))).*0.01,[],'k','filled');
-% f=find(useTheseTrials_LED==1 & out.pawOutDuringWheel==0);
-f=find(useTheseTrials_LED==1);
-hold on; scatter(rt_LED(f-1)+rand(size(rt_LED(f-1))).*0.01,rt_LED(f)+rand(size(rt_LED(f))).*0.01,[],'r','filled');
-line([0 10],[0 10]);
+scatter(curr_rt(1:end-1)+rand(size(curr_rt(1:end-1))).*0.01,curr_rt(2:end)+rand(size(curr_rt(2:end))).*0.01,[],'k','filled');
+xlabel('RT previous trial in sec');
+ylabel('RT current trial in sec');
+title(tit);
 
-% [n,x]=histcounts(changeInRT,130);
-[n,x]=histcounts(changeInRT,260);
+if ~isempty(testcond)
+    hold on;
+    curr_rt=backup_rt;
+    curr_rt(~(testcond==1))=nan; % test condition is true
+    if all(isnan(curr_rt(1:end-1)) | isnan(curr_rt(2:end)))
+        return
+    end
+    scatter(curr_rt(1:end-1)+rand(size(curr_rt(1:end-1))).*0.01,curr_rt(2:end)+rand(size(curr_rt(2:end))).*0.01,[],'r','filled');
+    leg={'testcond FALSE','testcond TRUE'};
+    legend(leg);
+end
+
+end
+
+function histRTchange(curr_rt,bins,tit,testcond)
+
+if ~isempty(testcond)
+    backup_rt=curr_rt;
+    curr_rt(~(testcond==0))=nan; % test condition is false
+end
+
+if all(isnan(curr_rt(1:end-1)-curr_rt(2:end)))
+    return
+end
+[n,x]=histcounts(curr_rt(1:end-1)-curr_rt(2:end),bins);
 x_backup=x;
 [n,x]=cityscape_hist(n,x);
-figure(); plot(x,n./nansum(n),'Color','k');
-hold on;
-[n,x]=histcounts(changeInRT_LED,x_backup); 
-[n,x]=cityscape_hist(n,x);
-plot(x,n./nansum(n),'Color','r');
-
-p=ranksum(changeInRT,changeInRT_LED);
-disp('p-value of ranksum');
-disp(p);
-
-out.noReachLastTimeNoLED_noPawOut=out.led_previousTrial==0 & out.reachedAfterCue_previousTrial==0 & out.rewarded_previousTrial==0;
-[rt_noLED,useTheseTrials_noLED]=plotOnlyFirstReach(alltbt,1,'reachStarts','cueZone_onVoff',out,'noReachLastTimeNoLED_noPawOut',1);
-useTheseTrials_noLED=useTheseTrials_noLED==1 & out.noReachLastTimeNoLED_noPawOut==1 & out.pawOutDuringWheel==0;
-f=find(useTheseTrials_noLED==1);
-changeInRT=rt_noLED(f-1)-rt_noLED(f);
-
-out.noReachLastTimeAndLED_noPawOut=out.led_previousTrial==1 & out.reachedAfterCue_previousTrial==0 & out.rewarded_previousTrial==0;
-[rt_LED,useTheseTrials_LED]=plotOnlyFirstReach(alltbt,1,'reachStarts','cueZone_onVoff',out,'noReachLastTimeAndLED_noPawOut',1);
-useTheseTrials_LED=useTheseTrials_LED==1 & out.noReachLastTimeAndLED_noPawOut==1 & out.pawOutDuringWheel==0;
-f=find(useTheseTrials_LED==1);
-changeInRT_LED=rt_LED(f-1)-rt_LED(f);
-
 figure();
-f=find(useTheseTrials_noLED==1);
-scatter(rt_noLED(f-1)+rand(size(rt_noLED(f-1))).*0.01,rt_noLED(f)+rand(size(rt_noLED(f))).*0.01,[],'k','filled');
-f=find(useTheseTrials_LED==1);
-hold on; scatter(rt_LED(f-1)+rand(size(rt_LED(f-1))).*0.01,rt_LED(f)+rand(size(rt_LED(f))).*0.01,[],'r','filled');
-line([0 10],[0 10]);
+plot(x,n./nansum(n),'Color','k');
+xlabel('Change in RT (sec)');
+ylabel('Count');
+title(tit);
 
-[n,x]=histcounts(changeInRT,260);
-x_backup=x;
-[n,x]=cityscape_hist(n,x);
-figure(); plot(x,n./nansum(n),'Color','k');
-hold on;
-[n,x]=histcounts(changeInRT_LED,x_backup); 
-[n,x]=cityscape_hist(n,x);
-plot(x,n./nansum(n),'Color','r');
+if ~isempty(testcond)
+    hold on;
+    curr_rt=backup_rt;
+    curr_rt(~(testcond==1))=nan; % test condition is true
+    if all(isnan(curr_rt(1:end-1)-curr_rt(2:end)))
+        return
+    end
+    [n,x]=histcounts(curr_rt(1:end-1)-curr_rt(2:end),x_backup);
+    [n,x]=cityscape_hist(n,x);
+    plot(x,n./nansum(n),'Color','r');
+    leg={'testcond FALSE','testcond TRUE'};
+    legend(leg);
+end
+
+end

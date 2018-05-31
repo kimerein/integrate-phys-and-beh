@@ -33,6 +33,8 @@ end
 
 % Also get indices of event fields
 
+
+
 end
 
 function metadata=getTrialStartAndEnd(metadata,tbt_events)
