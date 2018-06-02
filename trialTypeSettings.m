@@ -49,6 +49,10 @@ timeWindow(3).end=trialStructure.maxTrialDuration;
 timeWindow(4).name='all_times';
 timeWindow(4).start=0-trialStructure.durationOfWheelTurn-trialStructure.wheelStopsThisManySecsBeforeCue; % trial begins when pellet presenter wheel begins to turn
 timeWindow(4).end=trialStructure.maxTrialDuration; 
+% trial_start refers to beginning of trial
+timeWindow(5).name='trial_start';
+timeWindow(5).start=0-3;
+timeWindow(5).end=0-2.2;
 
 
 % Result of first "reach batch" after cue
@@ -161,56 +165,69 @@ bool_test(i).thresh=settings.lowThresh;
 bool_test(i).comparator='>';
 bool_test(i).window='wheel_turning';
 
+% Was mouse still chewing at the beginning of this trial?
+i=13;
+bool_test(i).testwhat='single reach';
+bool_test(i).fieldname='isChewing';
+bool_test(i).test='any';
+bool_test(i).thresh=settings.lowThresh;
+bool_test(i).comparator='>';
+bool_test(i).window='trial_start';
+
 % Put together bool_test results to get trial classifications
 % Each index into trialtype(i).outcomes vector of length n refers to outcome of bool_tests 1:n
 % If index i is nan, bool_tests(i) can be either 0 or 1 (false or true)
-trialtype(1).outcomes=[1 0 0 0 nan nan nan nan nan 0 0 0];
+trialtype(1).outcomes=[1 0 0 0 nan nan nan nan nan 0 0 0 nan];
 trialtype(1).name='after_cue_success';
 trialtype(1).bool='&';
 
-trialtype(2).outcomes=[0 1 0 0 nan nan nan nan nan 0 0 0];
+trialtype(2).outcomes=[0 1 0 0 nan nan nan nan nan 0 0 0 nan];
 trialtype(2).name='after_cue_drop';
 trialtype(2).bool='&';
 
-trialtype(3).outcomes=[0 0 1 0 nan nan nan nan nan 0 0 0];
+trialtype(3).outcomes=[0 0 1 0 nan nan nan nan nan 0 0 0 nan];
 trialtype(3).name='after_cue_miss';
 trialtype(3).bool='&';
 
-trialtype(4).outcomes=[0 0 0 1 nan nan nan nan nan 0 0 0];
+trialtype(4).outcomes=[0 0 0 1 nan nan nan nan nan 0 0 0 nan];
 trialtype(4).name='after_cue_no_pellet';
 trialtype(4).bool='&';
 
-trialtype(5).outcomes=[1 0 0 0 nan nan nan nan nan 0 0 0];
+trialtype(5).outcomes=[1 0 0 0 nan nan nan nan nan 0 0 0 nan];
 trialtype(5).name='paw_during_wheel_after_cue_success';
 trialtype(5).bool='&';
 
-trialtype(6).outcomes=[0 1 0 0 nan nan nan nan nan 0 0 0];
+trialtype(6).outcomes=[0 1 0 0 nan nan nan nan nan 0 0 0 nan];
 trialtype(6).name='paw_during_wheel_after_cue_drop';
 trialtype(6).bool='&';
 
-trialtype(7).outcomes=[0 0 1 0 nan nan nan nan nan 0 0 0];
+trialtype(7).outcomes=[0 0 1 0 nan nan nan nan nan 0 0 0 nan];
 trialtype(7).name='paw_during_wheel_after_cue_miss';
 trialtype(7).bool='&';
 
-trialtype(8).outcomes=[0 0 0 1 nan nan nan nan nan 0 0 0];
+trialtype(8).outcomes=[0 0 0 1 nan nan nan nan nan 0 0 0 nan];
 trialtype(8).name='paw_during_wheel_after_cue_no_pellet';
 trialtype(8).bool='&';
 
-trialtype(9).outcomes=[nan nan nan nan 1 1 nan nan nan nan nan nan];
+trialtype(9).outcomes=[nan nan nan nan 1 1 nan nan nan nan nan nan nan];
 trialtype(9).name='consumed_pellet';
 trialtype(9).bool='|';
 
-trialtype(10).outcomes=[nan nan nan nan 1 1 1 1 nan nan nan nan];
+trialtype(10).outcomes=[nan nan nan nan 1 1 1 1 nan nan nan nan nan];
 trialtype(10).name='touched_pellet';
 trialtype(10).bool='|';
 
-trialtype(11).outcomes=[nan nan nan nan nan nan nan nan 1 nan nan nan];
+trialtype(11).outcomes=[nan nan nan nan nan nan nan nan 1 nan nan nan nan];
 trialtype(11).name='cued_reach';
 trialtype(11).bool='&';
 
-trialtype(12).outcomes=[nan nan nan nan nan nan nan nan nan 1 1 1];
+trialtype(12).outcomes=[nan nan nan nan nan nan nan nan nan 1 1 1 nan];
 trialtype(12).name='paw_during_wheel';
 trialtype(12).bool='|';
+
+trialtype(13).outcomes=[nan nan nan nan nan nan nan nan nan nan nan nan 1];
+trialtype(13).name='chewing_at_trial_start';
+trialtype(13).bool='&';
 
 % Output settings
 settings.reach_batch=reach_batch;

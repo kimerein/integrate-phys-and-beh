@@ -50,7 +50,10 @@ condition=out.cued_reach_1back==1 & out.touched_pellet_1back==1;
 curr_rt=reactionTimes;
 curr_rt(~(condition==1) | dontUse_sequence)=nan;
 plotCurrRT(curr_rt,'Cued reach & touched pellet 1 back & no preemptive reach for 2 trials in a row',out.led_1back==1);
-histRTchange(curr_rt,nbins,'Cued reach & touched pellet 1 back & no preemptive reach for 2 trials in a row',out.led_1back==1);
+rtchange=histRTchange(curr_rt,nbins,'Cued reach & touched pellet 1 back & no preemptive reach for 2 trials in a row',out.led_1back==1);
+% [p,h]=ranksum(rtchange.rt_change_testcond0,rtchange.rt_change_testcond1);
+% disp('p-value of cued reach & touched pellet 1 back & no preemptive reach for 2 trials in a row');
+% disp(p);
 
 % Change in reaction time, no preemptive reach
 % Test effects of LED on PREVIOUS trial 
@@ -60,7 +63,10 @@ condition=out.cued_reach_1back==1 & out.touched_pellet_1back==1;
 curr_rt=reactionTimes;
 curr_rt(~(condition==1))=nan;
 plotCurrRT(curr_rt,'Cued reach & touched pellet 1 back',out.led_1back==1);
-histRTchange(curr_rt,nbins,'Cued reach & touched pellet 1 back',out.led_1back==1);
+rtchange=histRTchange(curr_rt,nbins,'Cued reach & touched pellet 1 back',out.led_1back==1);
+[p,h]=ranksum(rtchange.rt_change_testcond0,rtchange.rt_change_testcond1);
+disp('p-value of cued reach & touched pellet 1 back');
+disp(p);
 
 % Change in reaction time, no preemptive reach
 % Test effects of LED on PREVIOUS trial 
@@ -71,6 +77,37 @@ curr_rt=reactionTimes;
 curr_rt(~(condition==1) | dontUse_sequence)=nan;
 plotCurrRT(curr_rt,'Cued reach but failed to touch pellet 1 back & no preemptive reach for 2 trials in a row',out.led_1back==1);
 histRTchange(curr_rt,nbins,'Cued reach but failed to touch pellet 1 back & no preemptive reach for 2 trials in a row',out.led_1back==1);
+
+% Playing
+condition=out.cued_reach_1back==1 & out.touched_pellet_1back==1 & (out.paw_during_wheel==0 | out.paw_during_wheel_1back==0);
+curr_rt=reactionTimes;
+curr_rt(~(condition==1))=nan;
+plotCurrRT(curr_rt,'Playing',out.led_1back==1);
+rtchange=histRTchange(curr_rt,nbins,'Playing',out.led_1back==1);
+[p,h]=ranksum(rtchange.rt_change_testcond0,rtchange.rt_change_testcond1);
+disp('p-value of playing');
+disp(p);
+
+% Playing 2
+condition=out.dprime>0.1 & out.cued_reach_1back==1 & out.touched_pellet_1back==1 & out.consumed_pellet_1back==0;
+% condition=out.dprime>0.1 & out.cued_reach_1back==1 & out.touched_pellet_1back==1;
+curr_rt=reactionTimes;
+curr_rt(~(condition==1))=nan;
+plotCurrRT(curr_rt,'Playing 2',out.led_1back==1);
+rtchange=histRTchange(curr_rt,nbins,'Playing 2',out.led_1back==1);
+[p,h]=ranksum(rtchange.rt_change_testcond0,rtchange.rt_change_testcond1);
+disp('p-value of playing 2');
+disp(p);
+
+% Playing 3
+condition=out.dprime>0.1 & out.cued_reach_1back==1 & out.touched_pellet_1back==1 & out.chewing_at_trial_start==0;
+curr_rt=reactionTimes;
+curr_rt(~(condition==1))=nan;
+plotCurrRT(curr_rt,'Playing 3',out.led_1back==1);
+rtchange=histRTchange(curr_rt,nbins,'Playing 3',out.led_1back==1);
+[p,h]=ranksum(rtchange.rt_change_testcond0,rtchange.rt_change_testcond1);
+disp('p-value of playing 3');
+disp(p);
 
 end
 
@@ -104,7 +141,7 @@ end
 
 end
 
-function histRTchange(curr_rt,bins,tit,testcond)
+function out=histRTchange(curr_rt,bins,tit,testcond)
 
 if ~isempty(testcond)
     backup_rt=curr_rt;
@@ -115,6 +152,7 @@ if all(isnan(curr_rt(1:end-1)-curr_rt(2:end)))
     return
 end
 [n,x]=histcounts(curr_rt(1:end-1)-curr_rt(2:end),bins);
+out.rt_change_testcond0=curr_rt(1:end-1)-curr_rt(2:end);
 x_backup=x;
 [n,x]=cityscape_hist(n,x);
 figure();
@@ -131,6 +169,7 @@ if ~isempty(testcond)
         return
     end
     [n,x]=histcounts(curr_rt(1:end-1)-curr_rt(2:end),x_backup);
+    out.rt_change_testcond1=curr_rt(1:end-1)-curr_rt(2:end);
     [n,x]=cityscape_hist(n,x);
     plot(x,n./nansum(n),'Color','r');
     leg={'testcond FALSE','testcond TRUE'};

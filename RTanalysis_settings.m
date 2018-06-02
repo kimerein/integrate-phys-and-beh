@@ -9,3 +9,5 @@ settings.reachAfterCueWindow_start=0; % define start of time window in which to 
 settings.reachAfterCueWindow_end=1.5; % define end of time window in which to say mouse "reached after cue", seconds from cue onset 
 settings.maxTrialDuration=35; % maximum duration of a trial, in seconds
 settings.timeSlop=0.1; % max possible error in timing due to frame rate in movie and/or alignment approach, in seconds
+settings.preCueWindow_start=0; % define start of time window from trial onset, in seconds
+settings.preCueWindow_end=1.5; % define end of time window from trial onset, in seconds
