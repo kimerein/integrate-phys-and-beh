@@ -38,6 +38,19 @@ for i=1:length(f)
     % 4 back
     newfieldname=[f{i} '_4back'];
     out.(newfieldname)=[nan; nan; nan; nan; temp(1:end-4)];
+    
+    % 1 forward
+    newfieldname=[f{i} '_1forward'];
+    out.(newfieldname)=[temp(2:end); nan];
+    % 2 forward
+    newfieldname=[f{i} '_2forward'];
+    out.(newfieldname)=[temp(3:end); nan; nan];
+    % 3 forward
+    newfieldname=[f{i} '_3forward'];
+    out.(newfieldname)=[temp(4:end); nan; nan; nan];
+    % 4 forward
+    newfieldname=[f{i} '_4forward'];
+    out.(newfieldname)=[temp(5:end); nan; nan; nan; nan];
 end
 
 end

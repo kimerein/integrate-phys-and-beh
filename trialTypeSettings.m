@@ -52,7 +52,7 @@ timeWindow(4).end=trialStructure.maxTrialDuration;
 % trial_start refers to beginning of trial
 timeWindow(5).name='trial_start';
 timeWindow(5).start=0-3;
-timeWindow(5).end=0-2.2;
+timeWindow(5).end=0-2.3;
 
 
 % Result of first "reach batch" after cue

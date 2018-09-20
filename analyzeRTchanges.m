@@ -51,9 +51,9 @@ curr_rt=reactionTimes;
 curr_rt(~(condition==1) | dontUse_sequence)=nan;
 plotCurrRT(curr_rt,'Cued reach & touched pellet 1 back & no preemptive reach for 2 trials in a row',out.led_1back==1);
 rtchange=histRTchange(curr_rt,nbins,'Cued reach & touched pellet 1 back & no preemptive reach for 2 trials in a row',out.led_1back==1);
-% [p,h]=ranksum(rtchange.rt_change_testcond0,rtchange.rt_change_testcond1);
-% disp('p-value of cued reach & touched pellet 1 back & no preemptive reach for 2 trials in a row');
-% disp(p);
+[p,h]=ranksum(rtchange.rt_change_testcond0,rtchange.rt_change_testcond1);
+disp('p-value of cued reach & touched pellet 1 back & no preemptive reach for 2 trials in a row');
+disp(p);
 
 % Change in reaction time, no preemptive reach
 % Test effects of LED on PREVIOUS trial 
@@ -74,9 +74,10 @@ disp(p);
 % previous trial
 condition=out.cued_reach_1back==1 & out.touched_pellet_1back==0;
 curr_rt=reactionTimes;
-curr_rt(~(condition==1) | dontUse_sequence)=nan;
+% curr_rt(~(condition==1) | dontUse_sequence)=nan;
+curr_rt(~(condition==1))=nan;
 plotCurrRT(curr_rt,'Cued reach but failed to touch pellet 1 back & no preemptive reach for 2 trials in a row',out.led_1back==1);
-histRTchange(curr_rt,nbins,'Cued reach but failed to touch pellet 1 back & no preemptive reach for 2 trials in a row',out.led_1back==1);
+histRTchange(curr_rt,160,'Cued reach but failed to touch pellet 1 back & no preemptive reach for 2 trials in a row',out.led_1back==1);
 
 % Playing
 condition=out.cued_reach_1back==1 & out.touched_pellet_1back==1 & (out.paw_during_wheel==0 | out.paw_during_wheel_1back==0);
@@ -89,7 +90,7 @@ disp('p-value of playing');
 disp(p);
 
 % Playing 2
-condition=out.dprime>0.1 & out.cued_reach_1back==1 & out.touched_pellet_1back==1 & out.consumed_pellet_1back==0;
+condition=out.cued_reach_1back==1 & out.touched_pellet_1back==1 & out.consumed_pellet_1back==0;
 % condition=out.dprime>0.1 & out.cued_reach_1back==1 & out.touched_pellet_1back==1;
 curr_rt=reactionTimes;
 curr_rt(~(condition==1))=nan;
@@ -100,7 +101,7 @@ disp('p-value of playing 2');
 disp(p);
 
 % Playing 3
-condition=out.dprime>0.1 & out.cued_reach_1back==1 & out.touched_pellet_1back==1 & out.chewing_at_trial_start==0;
+condition=out.cued_reach_1back==1 & out.touched_pellet_1back==1 & out.chewing_at_trial_start==0;
 curr_rt=reactionTimes;
 curr_rt(~(condition==1))=nan;
 plotCurrRT(curr_rt,'Playing 3',out.led_1back==1);
@@ -108,6 +109,33 @@ rtchange=histRTchange(curr_rt,nbins,'Playing 3',out.led_1back==1);
 [p,h]=ranksum(rtchange.rt_change_testcond0,rtchange.rt_change_testcond1);
 disp('p-value of playing 3');
 disp(p);
+% figure();
+% plot(nanmean(alltbt.reachStarts_noPawOnWheel(condition==1 & out.led_1back==0,:),1),'Color','k');
+% hold on;
+% plot(nanmean(alltbt.reachStarts_noPawOnWheel(condition==1 & out.led_1back==1,:),1),'Color','r');
+% plot(nanmean(alltbt.cueZone_onVoff,1),'Color','b');
+figure();
+plot(nanmean(alltbt.times,1),nanmean(alltbt.miss_reachStarts(out.chewing_at_trial_start==0 & out.led_1back==0,:),1),'Color','k');
+hold on;
+plot(nanmean(alltbt.times,1),nanmean(alltbt.miss_reachStarts(out.chewing_at_trial_start==0 & out.led_1back==1,:),1),'Color','r');
+plot(nanmean(alltbt.times,1),nanmean(alltbt.cueZone_onVoff,1),'Color','b');
+
+condition=out.cued_reach_1back==1 & out.touched_pellet_1back==1;
+x=nanmean(alltbt.times,1);
+% y1=nanmean(alltbt.reachStarts_noPawOnWheel(out.chewing_at_trial_start==0 & out.led_1back==0,:),1);
+% y2=nanmean(alltbt.reachStarts_noPawOnWheel(out.chewing_at_trial_start==0 & out.led_1back==1,:),1);
+x=0:0.025:max(reactionTimes);
+[y1,x]=histcounts(reactionTimes(out.chewing_at_trial_start==0 & out.led_1back==0),x);
+xbackup=x;
+[y2,x]=histcounts(reactionTimes(out.chewing_at_trial_start==0 & out.led_1back==1),x);
+% [y1,x]=cityscape_hist(y1,[xbackup-mode(diff(xbackup)) xbackup(end)+mode(diff(xbackup))]);
+[y1,x]=cityscape_hist(y1,xbackup);
+figure();
+plot(x,y1./nansum(y1(x<=1.5)),'Color','k'); 
+hold on;
+% [y2,x]=cityscape_hist(y2,[xbackup-mode(diff(xbackup)) xbackup(end)+mode(diff(xbackup))]);
+[y2,x]=cityscape_hist(y2,xbackup);
+plot(x,y2./nansum(y2(x<=1.5)),'Color','r');
 
 end
 
