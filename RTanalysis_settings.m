@@ -11,3 +11,7 @@ settings.maxTrialDuration=35; % maximum duration of a trial, in seconds
 settings.timeSlop=0.1; % max possible error in timing due to frame rate in movie and/or alignment approach, in seconds
 settings.preCueWindow_start=0; % define start of time window from trial onset, in seconds
 settings.preCueWindow_end=1.5; % define end of time window from trial onset, in seconds
+% settings.preCueWindow_start=3; % define start of time window from trial onset, in seconds
+% settings.preCueWindow_end=4.5; % define end of time window from trial onset, in seconds
+% settings.preCueWindow_start={[0 1.5],[3 14]}; % define start of time window from trial onset, in seconds
+% settings.preCueWindow_end=1.5; % doesn't matter

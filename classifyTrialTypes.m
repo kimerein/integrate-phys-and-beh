@@ -1,10 +1,10 @@
-function out=classifyTrialTypes(tbt)
+function [out,tbt]=classifyTrialTypes(tbt)
 
 % User-defined settings in trialTypeSettings.m
 settings=trialTypeSettings();
 
 % Find and convert reach batches
-tbt=findReachBatches(tbt,settings.lowThresh,1);
+tbt=findReachBatches(tbt,settings.lowThresh,0); % last argument is 1 if plot, else 0
 
 % Evaluate boolean tests
 for i=1:length(settings.bool_test)

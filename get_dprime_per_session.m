@@ -1,4 +1,4 @@
-function [dprimes,hit_rates,FA_rates,out]=get_dprime_per_session(tbt,out,metadata,whichReach,nameOfCue)
+function [dprimes,hit_rates,FA_rates]=get_dprime_per_session(tbt,out,metadata,whichReach,nameOfCue,settings)
 
 % signal in this case is cue
 % response if mouse performed a "cued reach" -- definition in
@@ -10,11 +10,37 @@ function [dprimes,hit_rates,FA_rates,out]=get_dprime_per_session(tbt,out,metadat
 % and correct rejection is when mouse did not reach without cue (for
 % example, in pre-cue window)
 
-settings=RTanalysis_settings();
+if isempty(settings)
+    settings=RTanalysis_settings();
+end
 hitWindow_start=settings.reachAfterCueWindow_start; % wrt cue onset
 hitWindow_end=settings.reachAfterCueWindow_end; % wrt cue onset
 FAWindow_start=settings.preCueWindow_start; % wrt trial onset
 FAWindow_end=settings.preCueWindow_end; % wrt trial onset
+
+% if settings.excludePawOnWheelDuringCue
+%     f=fieldnames(tbt);
+%     paw_during_wheel=out.paw_during_wheel;
+%     for i=1:length(f)
+%         temp=tbt.(f{i});
+%         tbt.(f{i})=temp(paw_during_wheel==0,:);
+%     end
+%     f=fieldnames(metadata);
+%     for i=1:length(f)
+%         temp=metadata.(f{i});
+%         if isnumeric(temp)
+%             metadata.(f{i})=temp(paw_during_wheel==0,:);
+%         else
+%             % is cell
+%             metadata.(f{i})=temp(paw_during_wheel==0);
+%         end
+%     end
+%     f=fieldnames(out);
+%     for i=1:length(f)
+%         temp=out.(f{i});
+%         out.(f{i})=temp(paw_during_wheel==0);
+%     end
+% end
 
 % calculate hit rates per session
 
@@ -46,16 +72,34 @@ hit_rates=trials_per_session(metadata,hits==1,allnantrials==0);
 % calculate false alarm rate
 
 % Convert time window wrt trial onset into indices into data
-startInds=floor(FAWindow_start/mode(diff(nanmean(tbt.times,1))));
-endInds=floor(FAWindow_end/mode(diff(nanmean(tbt.times,1))));
-if startInds<1
-    startInds=1;
-end
-if endInds>size(tbt.times,2)
-    endInds=size(tbt.times,2);
+if ~iscell(FAWindow_start)
+    useInds=zeros(1,size(temp,2));
+    startInds=floor(FAWindow_start/mode(diff(nanmean(tbt.times,1))));
+    endInds=floor(FAWindow_end/mode(diff(nanmean(tbt.times,1))));
+    if startInds<1
+        startInds=1;
+    end
+    if endInds>size(tbt.times,2)
+        endInds=size(tbt.times,2);
+    end
+    useInds(startInds:endInds)=1;
+else
+    useInds=zeros(1,size(temp,2));
+    for i=1:length(FAWindow_start)
+        currStretch=FAWindow_start{i};
+        startInds=floor(currStretch(1)/mode(diff(nanmean(tbt.times,1))));
+        endInds=floor(currStretch(2)/mode(diff(nanmean(tbt.times,1))));
+        if startInds<1
+            startInds=1;
+        end
+        if endInds>size(tbt.times,2)
+            endInds=size(tbt.times,2);
+        end
+        useInds(startInds:endInds)=1;
+    end
 end
 
-FAs=any(temp(:,startInds:endInds),2);
+FAs=any(temp(:,useInds==1),2);
 FA_rates=trials_per_session(metadata,FAs==1,allnantrials==0);
 
 dprimes=dprime(hit_rates,FA_rates);

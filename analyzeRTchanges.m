@@ -1,6 +1,6 @@
 function analyzeRTchanges(alltbt,out,metadata)
 
-nbins=200; % for histograms
+nbins=1000; % for histograms
 
 % Get reaction times for all trials where mouse reached after cue onset
 [reactionTimes,alltbt]=plotOnlyFirstReach(alltbt,1,'reachStarts_noPawOnWheel','cueZone_onVoff',out,'led',0);

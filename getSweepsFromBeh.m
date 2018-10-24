@@ -1,4 +1,4 @@
-function out=getSweepsFromBeh(tbt)
+function [out,tbt]=getSweepsFromBeh(tbt)
 
 % Get user-defined settings from this file
 settings=RTanalysis_settings();
@@ -14,7 +14,7 @@ end
 out=getOptoTrials(tbt,ttsettings.nameOfCue,lowThresh);
 
 % Classify trial types
-tt=classifyTrialTypes(tbt);
+[tt,tbt]=classifyTrialTypes(tbt);
 for i=1:length(tt.trialtype)
     out.(tt.trialtype(i).name)=tt.trialtype(i).isThisType;
 end
