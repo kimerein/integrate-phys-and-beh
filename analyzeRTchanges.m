@@ -1,6 +1,6 @@
 function analyzeRTchanges(alltbt,out,metadata)
 
-nbins=1000; % for histograms
+nbins=500; % for histograms
 
 % Get reaction times for all trials where mouse reached after cue onset
 [reactionTimes,alltbt]=plotOnlyFirstReach(alltbt,1,'reachStarts_noPawOnWheel','cueZone_onVoff',out,'led',0);
@@ -77,7 +77,7 @@ curr_rt=reactionTimes;
 % curr_rt(~(condition==1) | dontUse_sequence)=nan;
 curr_rt(~(condition==1))=nan;
 plotCurrRT(curr_rt,'Cued reach but failed to touch pellet 1 back & no preemptive reach for 2 trials in a row',out.led_1back==1);
-histRTchange(curr_rt,160,'Cued reach but failed to touch pellet 1 back & no preemptive reach for 2 trials in a row',out.led_1back==1);
+histRTchange(curr_rt,nbins,'Cued reach but failed to touch pellet 1 back & no preemptive reach for 2 trials in a row',out.led_1back==1);
 
 % Playing
 condition=out.cued_reach_1back==1 & out.touched_pellet_1back==1 & (out.paw_during_wheel==0 | out.paw_during_wheel_1back==0);

@@ -1,0 +1,5 @@
+function interpLearningCurve(isreaching_out,dprimes,breakHere)
+
+getTheseSess=2:2:40;
+
+interp_dprime

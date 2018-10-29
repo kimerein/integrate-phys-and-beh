@@ -1,0 +1,248 @@
+function putTogetherRTdata(alltbt,out,metadata)
+
+bins=500;
+
+unique_sess=unique(metadata.sessid);
+
+f=fieldnames(alltbt);
+fout=fieldnames(out);
+
+allout.cued1back_touched1back_noPreempt.ledFalse=cell(1,length(unique_sess));
+allout.cued1back_touched1back_noPreempt.ledTrue=cell(1,length(unique_sess));
+allout.cued1back_touched1back.ledFalse=cell(1,length(unique_sess));
+allout.cued1back_touched1back.ledTrue=cell(1,length(unique_sess));
+allout.cued1back_failed1back.ledFalse=cell(1,length(unique_sess));
+allout.cued1back_failed1back.ledTrue=cell(1,length(unique_sess));
+allout.cued1back_touched1back_didnteat1back.ledFalse=cell(1,length(unique_sess));
+allout.cued1back_touched1back_didnteat1back.ledTrue=cell(1,length(unique_sess));
+allout.cued1back_touched1back_nochewTrialstart.ledFalse=cell(1,length(unique_sess));
+allout.cued1back_touched1back_nochewTrialstart.ledTrue=cell(1,length(unique_sess));
+
+for i=1:length(unique_sess)
+    currsessid=unique_sess(i);
+    for j=1:length(f)
+        temp=alltbt.(f{j});
+        currtbt.(f{j})=temp(metadata.sessid==currsessid,:);
+    end
+    for j=1:length(fout)
+        temp=out.(fout{j});
+        currout.(fout{j})=temp(metadata.sessid==currsessid);
+    end
+    output=getRTanalysis(currtbt,currout);
+    allout.cued1back_touched1back_noPreempt.ledFalse{i}=output.cued1back_touched1back_noPreempt.ledFalse;
+    allout.cued1back_touched1back_noPreempt.ledTrue{i}=output.cued1back_touched1back_noPreempt.ledTrue;
+    allout.cued1back_touched1back.ledFalse{i}=output.cued1back_touched1back.ledFalse;
+    allout.cued1back_touched1back.ledTrue{i}=output.cued1back_touched1back.ledTrue;
+    allout.cued1back_failed1back.ledFalse{i}=output.cued1back_failed1back.ledFalse;
+    allout.cued1back_failed1back.ledTrue{i}=output.cued1back_failed1back.ledTrue;
+    allout.cued1back_touched1back_didnteat1back.ledFalse{i}=output.cued1back_touched1back_didnteat1back.ledFalse;
+    allout.cued1back_touched1back_didnteat1back.ledTrue{i}=output.cued1back_touched1back_didnteat1back.ledTrue;
+    allout.cued1back_touched1back_nochewTrialstart.ledFalse{i}=output.cued1back_touched1back_nochewTrialstart.ledFalse;
+    allout.cued1back_touched1back_nochewTrialstart.ledTrue{i}=output.cued1back_touched1back_nochewTrialstart.ledTrue;
+end
+
+% Choose which to use
+success_ledFalse=allout.cued1back_touched1back.ledFalse;
+success_ledTrue=allout.cued1back_touched1back.ledTrue;
+fail_ledFalse=allout.cued1back_failed1back.ledFalse;
+fail_ledTrue=allout.cued1back_failed1back.ledTrue;
+% success_ledFalse=allout.cued1back_touched1back_noPreempt.ledFalse;
+% success_ledTrue=allout.cued1back_touched1back_noPreempt.ledTrue;
+% fail_ledFalse=allout.cued1back_failed1back.ledFalse;
+% fail_ledTrue=allout.cued1back_failed1back.ledTrue;
+
+for i=1:length(unique_sess)
+    success_med_ledFalse(i)=nanmedian(success_ledFalse{i});
+    success_med_ledTrue(i)=nanmedian(success_ledTrue{i});
+    fail_med_ledFalse(i)=nanmedian(fail_ledFalse{i});
+    fail_med_ledTrue(i)=nanmedian(fail_ledTrue{i}); 
+end
+
+figure();
+for i=1:length(unique_sess)
+    plot([1 2],[success_med_ledFalse(i) success_med_ledTrue(i)]);
+    hold on;
+end
+disp('p-value comparing medians');
+if all(isnan(success_med_ledFalse) | isnan(success_med_ledTrue))
+    disp('not enough data');
+else
+    disp(signrank(success_med_ledFalse, success_med_ledTrue));
+end
+
+% Put together all reaction times, but now subtract off median of fail
+all_success_ledFalse=[];
+all_success_ledTrue=[];
+all_fails_ledFalse=[];
+all_fails_ledTrue=[];
+for i=1:length(unique_sess)
+    all_success_ledFalse=[all_success_ledFalse success_ledFalse{i}-fail_med_ledFalse(i)];
+    all_success_ledTrue=[all_success_ledTrue success_ledTrue{i}-fail_med_ledFalse(i)];
+    all_fails_ledFalse=[all_fails_ledFalse fail_ledFalse{i}-fail_med_ledFalse(i)];
+    all_fails_ledTrue=[all_fails_ledTrue fail_ledTrue{i}-fail_med_ledFalse(i)];
+%     all_success_ledFalse=[all_success_ledFalse success_ledFalse{i}];
+%     all_success_ledTrue=[all_success_ledTrue success_ledTrue{i}];
+%     all_fails_ledFalse=[all_fails_ledFalse fail_ledFalse{i}];
+%     all_fails_ledTrue=[all_fails_ledTrue fail_ledTrue{i}];
+end
+% Plot results
+% [n,x]=histcounts(all_success_ledFalse,bins);
+[n,x]=histcounts(all_success_ledFalse,-100+0.03:0.06:100-0.06);
+x_backup=x;
+[n,x]=cityscape_hist(n,x);
+figure();
+plot(x,n./nansum(n),'Color','k');
+hold on;
+[n,x]=histcounts(all_success_ledTrue,x_backup);
+[n,x]=cityscape_hist(n,x);
+plot(x,n./nansum(n),'Color','r');
+leg={'LED FALSE','LED TRUE'};
+legend(leg);
+xlabel('Change in RT (sec)');
+ylabel('Count');
+disp('p-value of all together');
+if all(isnan(success_med_ledFalse) | isnan(success_med_ledTrue))
+    disp('not enough data');
+else
+    disp(ranksum(all_success_ledFalse,all_success_ledTrue));
+end
+
+% [n,x]=histcounts(all_success_ledFalse,bins);
+[n,x]=histcounts(all_success_ledFalse,-100+0.03:0.06:100-0.06);
+x_backup=x;
+[n,x]=cityscape_hist(n,x);
+figure();
+plot(x,n./nansum(n),'Color','k');
+hold on;
+[n,x]=histcounts(all_fails_ledFalse,x_backup);
+[n,x]=cityscape_hist(n,x);
+plot(x,n./nansum(n),'Color','c');
+leg={'LED FALSE','LED TRUE'};
+legend(leg);
+xlabel('Change in RT (sec)');
+ylabel('Count');
+disp('p-value of all together');
+if all(isnan(success_med_ledFalse) | isnan(success_med_ledTrue))
+    disp('not enough data');
+else
+    disp(ranksum(all_success_ledFalse,all_fails_ledFalse));
+end
+
+
+end
+
+function output=getRTanalysis(alltbt,out)
+
+nbins=[];
+
+% Get reaction times for all trials where mouse reached after cue onset
+[reactionTimes,alltbt]=plotOnlyFirstReach(alltbt,1,'reachStarts_noPawOnWheel','cueZone_onVoff',out,'led',0);
+
+% Get trials where mouse paw was on pellet presenter wheel during wheel turn
+% Note that enforcing this requires that the mouse not have extra
+% information about pellet presentation / cue timing
+dontUse=out.paw_during_wheel==1;
+dontUse_1back=out.paw_during_wheel_1back==1;
+dontUse_sequence=dontUse | dontUse_1back;
+
+% Change in reaction time, no preemptive reach
+% Test effects of LED on PREVIOUS trial 
+% given that mouse successfully touched pellet and performed cued reach on
+% previous trial
+condition=out.cued_reach_1back==1 & out.touched_pellet_1back==1;
+curr_rt=reactionTimes;
+curr_rt(~(condition==1) | dontUse_sequence)=nan;
+% plotCurrRT(curr_rt,'Cued reach & touched pellet 1 back & no preemptive reach for 2 trials in a row',out.led_1back==1);
+rtchange=histRTchange_local(curr_rt,nbins,'Cued reach & touched pellet 1 back & no preemptive reach for 2 trials in a row',out.led_1back==1);
+output.cued1back_touched1back_noPreempt.ledFalse=rtchange.rt_change_testcond0;
+output.cued1back_touched1back_noPreempt.ledTrue=rtchange.rt_change_testcond1;
+% [p,h]=ranksum(rtchange.rt_change_testcond0,rtchange.rt_change_testcond1);
+% disp('p-value of cued reach & touched pellet 1 back & no preemptive reach for 2 trials in a row');
+% disp(p);
+
+% Change in reaction time
+% Test effects of LED on PREVIOUS trial 
+% given that mouse successfully touched pellet and performed cued reach on
+% previous trial
+condition=out.cued_reach_1back==1 & out.touched_pellet_1back==1;
+curr_rt=reactionTimes;
+curr_rt(~(condition==1))=nan;
+% plotCurrRT(curr_rt,'Cued reach & touched pellet 1 back',out.led_1back==1);
+rtchange=histRTchange_local(curr_rt,nbins,'Cued reach & touched pellet 1 back',out.led_1back==1);
+output.cued1back_touched1back.ledFalse=rtchange.rt_change_testcond0;
+output.cued1back_touched1back.ledTrue=rtchange.rt_change_testcond1;
+% [p,h]=ranksum(rtchange.rt_change_testcond0,rtchange.rt_change_testcond1);
+% disp('p-value of cued reach & touched pellet 1 back');
+% disp(p);
+
+% Change in reaction time
+% Test effects of LED on PREVIOUS trial 
+% given that mouse failed to touch pellet despite performing a cued reach on
+% previous trial
+condition=out.cued_reach_1back==1 & out.touched_pellet_1back==0;
+curr_rt=reactionTimes;
+% curr_rt(~(condition==1) | dontUse_sequence)=nan;
+curr_rt(~(condition==1))=nan;
+% plotCurrRT(curr_rt,'Cued reach but failed to touch pellet 1 back & no preemptive reach for 2 trials in a row',out.led_1back==1);
+rtchange=histRTchange_local(curr_rt,nbins,'Cued reach but failed to touch pellet 1 back & no preemptive reach for 2 trials in a row',out.led_1back==1);
+output.cued1back_failed1back.ledFalse=rtchange.rt_change_testcond0;
+output.cued1back_failed1back.ledTrue=rtchange.rt_change_testcond1;
+
+condition=out.cued_reach_1back==1 & out.touched_pellet_1back==1 & out.consumed_pellet_1back==0;
+curr_rt=reactionTimes;
+curr_rt(~(condition==1))=nan;
+% plotCurrRT(curr_rt,'Playing 2',out.led_1back==1);
+rtchange=histRTchange_local(curr_rt,nbins,'Playing 2',out.led_1back==1);
+output.cued1back_touched1back_didnteat1back.ledFalse=rtchange.rt_change_testcond0;
+output.cued1back_touched1back_didnteat1back.ledTrue=rtchange.rt_change_testcond1;
+
+condition=out.cued_reach_1back==1 & out.touched_pellet_1back==1 & out.chewing_at_trial_start==0;
+curr_rt=reactionTimes;
+curr_rt(~(condition==1))=nan;
+% plotCurrRT(curr_rt,'Playing 3',out.led_1back==1);
+rtchange=histRTchange_local(curr_rt,nbins,'Playing 3',out.led_1back==1);
+output.cued1back_touched1back_nochewTrialstart.ledFalse=rtchange.rt_change_testcond0;
+output.cued1back_touched1back_nochewTrialstart.ledTrue=rtchange.rt_change_testcond1;
+
+
+end
+
+function out=histRTchange_local(curr_rt,bins,tit,testcond)
+
+out.rt_change_testcond0=nan;
+out.rt_change_testcond1=nan;
+
+if ~isempty(testcond)
+    backup_rt=curr_rt;
+    curr_rt(~(testcond==0))=nan; % test condition is false
+end
+
+if all(isnan(curr_rt(1:end-1)-curr_rt(2:end)))
+    return
+end
+% [n,x]=histcounts(curr_rt(1:end-1)-curr_rt(2:end),bins);
+out.rt_change_testcond0=curr_rt(1:end-1)-curr_rt(2:end);
+% x_backup=x;
+% [n,x]=cityscape_hist(n,x);
+% figure();
+% plot(x,n./nansum(n),'Color','k');
+% xlabel('Change in RT (sec)');
+% ylabel('Count');
+% title(tit);
+
+if ~isempty(testcond)
+%     hold on;
+    curr_rt=backup_rt;
+    curr_rt(~(testcond==1))=nan; % test condition is true
+    if all(isnan(curr_rt(1:end-1)-curr_rt(2:end)))
+        return
+    end
+%     [n,x]=histcounts(curr_rt(1:end-1)-curr_rt(2:end),x_backup);
+    out.rt_change_testcond1=curr_rt(1:end-1)-curr_rt(2:end);
+%     [n,x]=cityscape_hist(n,x);
+%     plot(x,n./nansum(n),'Color','r');
+%     leg={'testcond FALSE','testcond TRUE'};
+%     legend(leg);
+end
+
+end
