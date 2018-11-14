@@ -1,0 +1,34 @@
+function fitAndPlot(hax,data,fittype,binsForHist)
+
+axes(hax);
+
+% plot histogram of data
+[n,x]=histcounts(data,binsForHist);
+[n,x
+
+switch fittype
+    case 'lognfit'
+        [parmhat,parmci]=lognfit(data);
+    otherwise
+        disp('do not recognize this fittype');
+        return
+end
+
+[parmhat,parmci] = lognfit(data)
+
+
+[n,x]=histcounts(all_RT_ledFalse,0-0.015:0.03:15-0.03);
+x_backup=x;
+[n,x]=cityscape_hist(n,x);
+figure();
+% plot(x,n,'Color',[0.8 0.8 0.8]);
+plot(x,n./nansum(n),'Color',[0.8 0.8 0.8]);
+hold on;
+[n,x]=histcounts(all_RT_ledTrue,x_backup);
+[n,x]=cityscape_hist(n,x);
+% plot(x,n,'Color',[0.8 0.5 0.5]);
+plot(x,n./nansum(n),'Color',[0.8 0.5 0.5]);
+leg={'LED FALSE','LED TRUE'};
+legend(leg);
+xlabel('RT (sec)');
+ylabel('Count');

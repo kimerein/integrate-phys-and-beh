@@ -58,10 +58,8 @@ if settings.subtractBaselineReaching==1
     zeroTheseRT=binToRTmapping(whichBinsBelow);
     reactionTimes(ismember(reactionTimes,zeroTheseRT))=nan;
 end
-if settings.noRTlessThan~=0
-    reactionTimes(reactionTimes<settings.noRTlessThan)=nan;
-    binFirstRT=find(binToRTmapping<settings.noRTlessThan,1,'last');
-    tbt.firstReachesAfterCueOnset(:,1:binFirstRT)=0;
+if settings.noRTlessThan==1
+    reactionTimes(reactionTimes<
 end
 
 if doPlot==1

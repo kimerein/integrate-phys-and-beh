@@ -46,8 +46,11 @@ for i=1:length(unique_sess)
         allout.cued1back_touched1back_nochewTrialstart.ledTrue{i}=output.cued1back_touched1back_nochewTrialstart.ledTrue;
         allout.alltrials_nochewTrialstart.ledFalse{i}=output.alltrials_nochewTrialstart.ledFalse;
         allout.alltrials_nochewTrialstart.ledTrue{i}=output.alltrials_nochewTrialstart.ledTrue;
-        allout.allreactiontimes.ledFalse{i}=output.reactionTimes.ledFalse;
-        allout.allreactiontimes.ledTrue{i}=output.reactionTimes.ledTrue;
+%         allout.allreactiontimes.ledFalse{i}=output.reactionTimes.ledFalse;
+%         allout.allreactiontimes.ledTrue{i}=output.reactionTimes.ledTrue;
+        fracThrough=metadata.fractionThroughSess(metadata.sessid==currsessid);
+        allout.allreactiontimes.ledFalse{i}=output.reactionTimes.ledFalse(fracThrough>0.5);
+        allout.allreactiontimes.ledTrue{i}=output.reactionTimes.ledTrue(fracThrough>0.5);
     else
         allout.cued1back_touched1back_noPreempt.ledFalse{i}=nan;
         allout.cued1back_touched1back_noPreempt.ledTrue{i}=nan;
@@ -124,14 +127,16 @@ end
 
 % Plot results
 % [n,x]=histcounts(all_success_ledFalse,bins);
-[n,x]=histcounts(all_RT_ledFalse,0-0.015:0.03:14-0.03);
+[n,x]=histcounts(all_RT_ledFalse,0-0.015:0.03:15-0.03);
 x_backup=x;
 [n,x]=cityscape_hist(n,x);
 figure();
+% plot(x,n,'Color',[0.8 0.8 0.8]);
 plot(x,n./nansum(n),'Color',[0.8 0.8 0.8]);
 hold on;
 [n,x]=histcounts(all_RT_ledTrue,x_backup);
 [n,x]=cityscape_hist(n,x);
+% plot(x,n,'Color',[0.8 0.5 0.5]);
 plot(x,n./nansum(n),'Color',[0.8 0.5 0.5]);
 leg={'LED FALSE','LED TRUE'};
 legend(leg);
@@ -143,19 +148,25 @@ if all(isnan(all_RT_ledFalse)) | all(isnan(all_RT_ledTrue))
 else
     disp(ranksum(all_RT_ledFalse,all_RT_ledTrue));
 end
-
+figure();
+hax=gca;
+fitAndPlot(hax,all_RT_ledFalse,'lognfit',0-0.015:0.03:15-0.03,'k');
+fitAndPlot(hax,all_RT_ledTrue,'lognfit',0-0.015:0.03:15-0.03,'r');
 
 % Plot results
 % [n,x]=histcounts(all_success_ledFalse,bins);
-[n,x]=histcounts(all_success_ledFalse,-100+0.03:0.06:100-0.06);
-x_backup=x;
+% [n,x]=histcounts(all_success_ledFalse,-100+0.03:0.06:100-0.06);
+[n,x]=histcounts(all_success_ledFalse,0:0.15:100-0.1);
+x_backup=x; 
 [n,x]=cityscape_hist(n,x);
 figure();
 plot(x,n./nansum(n),'Color','k');
+% plot(x,n,'Color','k');
 hold on;
 [n,x]=histcounts(all_success_ledTrue,x_backup);
 [n,x]=cityscape_hist(n,x);
 plot(x,n./nansum(n),'Color','r');
+% plot(x,n,'Color','r');
 leg={'LED FALSE','LED TRUE'};
 legend(leg);
 xlabel('Change in RT (sec)');
@@ -164,17 +175,25 @@ disp('p-value of all together');
 if all(isnan(success_med_ledFalse)) | all(isnan(success_med_ledTrue))
     disp('not enough data');
 else
+    % Note that if mouse gets more than 1.5 seconds faster on next trial,
+    % animal is reaching BEFORE the cue, given that he did a cued reach on
+    % previous trial
+%     disp(ranksum(all_success_ledFalse(all_success_ledFalse<=1.5 & all_success_ledFalse>=-1.5),all_success_ledTrue(all_success_ledTrue<=1.5 & all_success_ledTrue>=-1.5)));
     disp(ranksum(all_success_ledFalse,all_success_ledTrue));
 end
+figure();
+hax=gca;
+fitAndPlot(hax,all_success_ledFalse,'lognfit',0:0.15:100-0.1,'k');
+fitAndPlot(hax,all_success_ledTrue,'lognfit',0:0.15:100-0.1,'r');
 
 % [n,x]=histcounts(all_success_ledFalse,bins);
-[n,x]=histcounts(all_success_ledFalse,-100+0.03:0.06:100-0.06);
+[n,x]=histcounts(all_fails_ledFalse,-100+0.03:0.06:100-0.06);
 x_backup=x;
 [n,x]=cityscape_hist(n,x);
 figure();
 plot(x,n./nansum(n),'Color','k');
 hold on;
-[n,x]=histcounts(all_fails_ledFalse,x_backup);
+[n,x]=histcounts(all_fails_ledTrue,x_backup);
 [n,x]=cityscape_hist(n,x);
 plot(x,n./nansum(n),'Color','c');
 leg={'LED FALSE','LED TRUE'};
@@ -185,7 +204,7 @@ disp('p-value of all together');
 if all(isnan(success_med_ledFalse)) | all(isnan(success_med_ledTrue))
     disp('not enough data');
 else
-    disp(ranksum(all_success_ledFalse,all_fails_ledFalse));
+    disp(ranksum(all_fails_ledFalse,all_fails_ledTrue));
 end
 
 
@@ -197,8 +216,14 @@ nbins=[];
 
 % Get reaction times for all trials where mouse reached after cue onset
 [reactionTimes,alltbt]=plotOnlyFirstReach(alltbt,1,'reachStarts_noPawOnWheel','cueZone_onVoff',out,'led',0);
-output.reactionTimes.ledFalse=reactionTimes(out.led_1back==0 & out.cued_reach_1back==1 & out.touched_pellet_1back==1 & out.chewing_at_trial_start==0);
-output.reactionTimes.ledTrue=reactionTimes(out.led_1back==1 & out.cued_reach_1back==1 & out.touched_pellet_1back==1 & out.chewing_at_trial_start==0);
+% output.reactionTimes.ledFalse=reactionTimes(out.led_1back==0 & out.cued_reach_1back==1 & out.touched_pellet_1back==1 & out.chewing_at_trial_start==0);
+% output.reactionTimes.ledTrue=reactionTimes(out.led_1back==1 & out.cued_reach_1back==1 & out.touched_pellet_1back==1 & out.chewing_at_trial_start==0);
+temp=reactionTimes;
+temp(out.led_1back==1)=nan;
+output.reactionTimes.ledFalse=temp;
+temp=reactionTimes;
+temp(out.led_1back==0)=nan;
+output.reactionTimes.ledTrue=temp;
 
 % Get trials where mouse paw was on pellet presenter wheel during wheel turn
 % Note that enforcing this requires that the mouse not have extra
@@ -261,6 +286,7 @@ output.cued1back_touched1back_didnteat1back.ledFalse=rtchange.rt_change_testcond
 output.cued1back_touched1back_didnteat1back.ledTrue=rtchange.rt_change_testcond1;
 
 condition=out.cued_reach_1back==1 & out.touched_pellet_1back==1 & out.chewing_at_trial_start==0;
+% condition=out.cued_reach_1back==1 & out.touched_pellet_1back==1;
 curr_rt=reactionTimes;
 curr_rt(~(condition==1))=nan;
 % plotCurrRT(curr_rt,'Playing 3',out.led_1back==1);
@@ -270,6 +296,7 @@ output.cued1back_touched1back_nochewTrialstart.ledFalse=rtchange.rt_change_testc
 output.cued1back_touched1back_nochewTrialstart.ledTrue=rtchange.rt_change_testcond1;
 
 condition=out.chewing_at_trial_start==0;
+% condition=ones(size(out.chewing_at_trial_start==0));
 curr_rt=reactionTimes;
 curr_rt(~(condition==1))=nan;
 % plotCurrRT(curr_rt,'Playing 3',out.led_1back==1);
@@ -295,7 +322,10 @@ if all(isnan(curr_rt(1:end-1)-curr_rt(2:end)))
     return
 end
 % [n,x]=histcounts(curr_rt(1:end-1)-curr_rt(2:end),bins);
-out.rt_change_testcond0=curr_rt(1:end-1)-curr_rt(2:end);
+% SUM
+% out.rt_change_testcond0=curr_rt(1:end-1)-curr_rt(2:end);
+% MULTIPLY
+out.rt_change_testcond0=curr_rt(2:end)./curr_rt(1:end-1);
 % x_backup=x;
 % [n,x]=cityscape_hist(n,x);
 % figure();
@@ -312,7 +342,10 @@ if ~isempty(testcond)
         return
     end
 %     [n,x]=histcounts(curr_rt(1:end-1)-curr_rt(2:end),x_backup);
-    out.rt_change_testcond1=curr_rt(1:end-1)-curr_rt(2:end);
+    % SUM
+%     out.rt_change_testcond1=curr_rt(1:end-1)-curr_rt(2:end);
+    % MULTIPLY
+    out.rt_change_testcond1=curr_rt(2:end)./curr_rt(1:end-1);
 %     [n,x]=cityscape_hist(n,x);
 %     plot(x,n./nansum(n),'Color','r');
 %     leg={'testcond FALSE','testcond TRUE'};
