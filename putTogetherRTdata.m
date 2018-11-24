@@ -49,8 +49,10 @@ for i=1:length(unique_sess)
 %         allout.allreactiontimes.ledFalse{i}=output.reactionTimes.ledFalse;
 %         allout.allreactiontimes.ledTrue{i}=output.reactionTimes.ledTrue;
         fracThrough=metadata.fractionThroughSess(metadata.sessid==currsessid);
-        allout.allreactiontimes.ledFalse{i}=output.reactionTimes.ledFalse(fracThrough>0.5);
-        allout.allreactiontimes.ledTrue{i}=output.reactionTimes.ledTrue(fracThrough>0.5);
+        allout.allreactiontimes.ledFalse{i}=output.reactionTimes.ledFalse(fracThrough>=0.8);
+        allout.allreactiontimes.ledTrue{i}=output.reactionTimes.ledTrue(fracThrough<=0.2);
+%         allout.allreactiontimes.ledFalse{i}=output.reactionTimes.ledFalse;
+%         allout.allreactiontimes.ledTrue{i}=output.reactionTimes.ledTrue;
     else
         allout.cued1back_touched1back_noPreempt.ledFalse{i}=nan;
         allout.cued1back_touched1back_noPreempt.ledTrue{i}=nan;
@@ -127,7 +129,9 @@ end
 
 % Plot results
 % [n,x]=histcounts(all_success_ledFalse,bins);
-[n,x]=histcounts(all_RT_ledFalse,0-0.015:0.03:15-0.03);
+% [n,x]=histcounts(all_RT_ledFalse,0-0.015:0.03:15-0.03);
+[n,x]=histcounts(all_RT_ledFalse,0-0.03:0.06:15-0.03);
+% [n,x]=histcounts(all_RT_ledFalse,0-0.015:0.045:15-0.03);
 x_backup=x;
 [n,x]=cityscape_hist(n,x);
 figure();
@@ -150,13 +154,17 @@ else
 end
 figure();
 hax=gca;
-fitAndPlot(hax,all_RT_ledFalse,'lognfit',0-0.015:0.03:15-0.03,'k');
-fitAndPlot(hax,all_RT_ledTrue,'lognfit',0-0.015:0.03:15-0.03,'r');
+parmhat=fitAndPlot(hax,all_RT_ledFalse,'lognfit',0-0.03:0.06:15-0.03,'k');
+fitAndPlot(hax,all_RT_ledTrue,'lognfit',0-0.03:0.06:15-0.03,'r');
 
 % Plot results
 % [n,x]=histcounts(all_success_ledFalse,bins);
 % [n,x]=histcounts(all_success_ledFalse,-100+0.03:0.06:100-0.06);
-[n,x]=histcounts(all_success_ledFalse,0:0.15:100-0.1);
+% [n,x]=histcounts(all_success_ledFalse,0:0.15:100-0.1);
+% [n,x]=histcounts(all_success_ledFalse,-0.08:0.18:100-0.1);
+% [n,x]=histcounts(all_success_ledFalse,-0.125:0.15:100-0.1);
+% [n,x]=histcounts(all_success_ledFalse,-0.3:0.6:100-0.1);
+[n,x]=histcounts(all_success_ledFalse,-0.1:0.2:100-0.1);
 x_backup=x; 
 [n,x]=cityscape_hist(n,x);
 figure();
@@ -183,8 +191,16 @@ else
 end
 figure();
 hax=gca;
-fitAndPlot(hax,all_success_ledFalse,'lognfit',0:0.15:100-0.1,'k');
-fitAndPlot(hax,all_success_ledTrue,'lognfit',0:0.15:100-0.1,'r');
+% parmhat_red=fitAndPlot(hax,all_success_ledTrue,'lognfit',0:0.18:100-0.1,'r'); % parmhat_red should account for regression to the mean
+% parmhat_red=fitAndPlot(hax,all_success_ledTrue,'lognfit',0:0.3:100-0.1,'r'); % parmhat_red should account for regression to the mean
+% Note bins should be centered over 1!
+parmhat_red=fitAndPlot(hax,all_success_ledTrue,'lognfit',-0.1:0.2:100-0.1,'r'); % parmhat_red should account for regression to the mean
+disp(['parmhat_red mean is ' num2str(parmhat_red(1))]);
+disp(['parmhat_red var is ' num2str(parmhat_red(2))]);
+% fitAndPlot(hax,all_success_ledFalse,'sum_2_lognfit',0:0.18:100-0.1,'k',[parmhat_red(1) parmhat_red(2)]);
+% fitAndPlot(hax,all_success_ledFalse,'sum_2_lognfit',0:0.3:100-0.1,'k',[parmhat_red(1) parmhat_red(2)]);
+% Note bins should be centered over 1!
+fitAndPlot(hax,all_success_ledFalse,'sum_2_lognfit',-0.1:0.2:100-0.1,'k',[parmhat_red(1) parmhat_red(2)]);
 
 % [n,x]=histcounts(all_success_ledFalse,bins);
 [n,x]=histcounts(all_fails_ledFalse,-100+0.03:0.06:100-0.06);
@@ -219,11 +235,18 @@ nbins=[];
 % output.reactionTimes.ledFalse=reactionTimes(out.led_1back==0 & out.cued_reach_1back==1 & out.touched_pellet_1back==1 & out.chewing_at_trial_start==0);
 % output.reactionTimes.ledTrue=reactionTimes(out.led_1back==1 & out.cued_reach_1back==1 & out.touched_pellet_1back==1 & out.chewing_at_trial_start==0);
 temp=reactionTimes;
-temp(out.led_1back==1)=nan;
+% temp(out.led_1back==1 & out.cued_reach_1back==1 & out.touched_pellet_1back==1 & out.chewing_at_trial_start==0)=nan;
+temp(~(out.led_1back==0 & out.led==0 & out.chewing_at_trial_start==0))=nan;
 output.reactionTimes.ledFalse=temp;
 temp=reactionTimes;
-temp(out.led_1back==0)=nan;
+% temp(out.led_1back==0 & out.cued_reach_1back==1 & out.touched_pellet_1back==1 & out.chewing_at_trial_start==0)=nan;
+temp(~(out.led_1back==0 & out.led==0 & out.chewing_at_trial_start==0))=nan;
 output.reactionTimes.ledTrue=temp;
+% temp(out.led_1back==1)=nan;
+% output.reactionTimes.ledFalse=temp;
+% temp=reactionTimes;
+% temp(out.led_1back==0)=nan;
+% output.reactionTimes.ledTrue=temp;
 
 % Get trials where mouse paw was on pellet presenter wheel during wheel turn
 % Note that enforcing this requires that the mouse not have extra
