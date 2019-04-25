@@ -37,16 +37,20 @@ function out=compareTrialCombos_wrapper(alltbt,trialTypes,metadata)
 % templateSequence1{1}=trialTypes.consumed_pellet==1 & trialTypes.led==0;
 % templateSequence1{2}=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
 % templateSequence1{2}=trialTypes.chewing_at_trial_start==0 & trialTypes.paw_during_wheel==0;
-templateSequence1{1}=trialTypes.touched_pellet==1 & trialTypes.cued_reach==1 & trialTypes.led==0;
-templateSequence1{2}=trialTypes.chewing_at_trial_start==0 & trialTypes.paw_during_wheel==0;
+% templateSequence1{1}=trialTypes.touched_pellet==1 & trialTypes.cued_reach==1 & trialTypes.led==0;
+% templateSequence1{2}=trialTypes.chewing_at_trial_start==0 & trialTypes.paw_during_wheel==0;
+templateSequence1{1}=trialTypes.led==1 | trialTypes.led==0;
+templateSequence1{2}=trialTypes.led==1 | trialTypes.led==0;
 nNext1=1;
 
 % template sequence 2 
 % templateSequence2{1}=trialTypes.consumed_pellet==1 & trialTypes.led==1;
 % templateSequence2{2}=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
 % templateSequence2{2}=trialTypes.chewing_at_trial_start==0 & trialTypes.paw_during_wheel==0;
-templateSequence2{1}=trialTypes.touched_pellet==1 & trialTypes.cued_reach==1 & trialTypes.led==1;
-templateSequence2{2}=trialTypes.chewing_at_trial_start==0 & trialTypes.paw_during_wheel==0;
+% templateSequence2{1}=trialTypes.touched_pellet==1 & trialTypes.cued_reach==1 & trialTypes.led==1;
+% templateSequence2{2}=trialTypes.chewing_at_trial_start==0 & trialTypes.paw_during_wheel==0;
+templateSequence2{1}=trialTypes.led==1 | trialTypes.led==0;
+templateSequence2{2}=trialTypes.led==1 | trialTypes.led==0 & trialTypes.cued_reach;
 nNext2=1;
 
 % Format 3 (10 args); tbt, trialTypes, metadata, templateSequence1,

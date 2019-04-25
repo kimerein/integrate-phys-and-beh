@@ -3,10 +3,10 @@ function [reactionTimes,RT_pairs]=getRTpairs_contingentOnTrialType(tbt,whichReac
 % if contingency2 is empty, will not consider this contingency
 % will just plot contingency1==true trials
 
-nbins=200; % for histograms
+nbins=100; % for histograms
 jitter=0.03; % for scatter plots
 addSlopeLine=0; % for scatter plots, will add fit to slope if 1
-zscore_RTs=1; % if 1, will use z-scored instead of raw reaction times
+zscore_RTs=0; % if 1, will use z-scored instead of raw reaction times
 
 [reactionTimes,RT_pairs,tbt]=getPairedReactionTimes(tbt,whichReach,useAsCue,metadata,zscore_RTs,selectTrials,nApart);
 if isempty(nApart)

@@ -13,18 +13,12 @@ end
 f=fieldnames(out);
 for i=1:length(f)
     temp=out.(f{i});
-    if length(temp)~=length(useTrials)
-        continue
-    end
     temp=temp(useTrials==1);
     out.(f{i})=temp;
 end
 f=fieldnames(metadata);
 for i=1:length(f)
     temp=metadata.(f{i});
-    if length(temp)~=length(useTrials)
-        continue
-    end
     temp=temp(useTrials==1);
     metadata.(f{i})=temp;
 end
