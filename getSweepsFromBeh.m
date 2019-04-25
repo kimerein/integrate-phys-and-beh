@@ -1,10 +1,15 @@
 function [out,tbt]=getSweepsFromBeh(tbt)
 
 % Get user-defined settings from this file
-settings=RTanalysis_settings();
-lowThresh=settings.lowThresh;
+% ------------------------------------------------------------------------
 ttsettings=trialTypeSettings();
+lowThresh=ttsettings.lowThresh;
+% RTanalysis_settings also important experiment-specific settings
 
+
+% Standardizing data
+% ------------------------------------------------------------------------
+% For older data sets
 % Fix hold lacking expts
 if ~isfield(tbt,'isHold')
     tbt.isHold=zeros(size(tbt.(ttsettings.nameOfCue)));
@@ -13,13 +18,17 @@ end
 % Get opto
 out=getOptoTrials(tbt,ttsettings.nameOfCue,lowThresh);
 
+
 % Classify trial types
-[tt,tbt]=classifyTrialTypes(tbt);
+% ------------------------------------------------------------------------
+[tt,tbt]=classifyTrialTypes(tbt,ttsettings);
 for i=1:length(tt.trialtype)
     out.(tt.trialtype(i).name)=tt.trialtype(i).isThisType;
 end
 
+
 % Get states of previous trials (up to 4 back)
+% ------------------------------------------------------------------------
 f=fieldnames(out);
 for i=1:length(f)
     if ~(isnumeric(out.(f{i})) || islogical(out.(f{i})))

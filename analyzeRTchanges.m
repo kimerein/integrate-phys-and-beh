@@ -31,16 +31,16 @@ histRTchange(curr_rt,nbins,'All trials, no reach during wheel turn (2 trials in 
 condition=ones(length(out.led),1); % take all trials
 curr_rt=reactionTimes;
 curr_rt(~(condition==1) | dontUse_sequence)=nan;
-plotCurrRT(curr_rt,'All trials, no reach during wheel turn (2 trials in a row)',out.led==1);
-histRTchange(curr_rt,nbins,'All trials, no reach during wheel turn (2 trials in a row)',out.led==1);
+plotCurrRT(curr_rt,'Trials w and wout current trial led on, no reach during wheel turn (2 trials in a row)',out.led==1);
+histRTchange(curr_rt,nbins,'Trials w and wout current trial led on, no reach during wheel turn (2 trials in a row)',out.led==1);
 
 % Change in reaction time, no preemptive reach
 % Test effects of LED on PREVIOUS trial
 condition=ones(length(out.led),1); % take all trials
 curr_rt=reactionTimes;
 curr_rt(~(condition==1) | dontUse_sequence)=nan;
-plotCurrRT(curr_rt,'All trials, no reach during wheel turn (2 trials in a row)',out.led_1back==1);
-histRTchange(curr_rt,nbins,'All trials, no reach during wheel turn (2 trials in a row)',out.led_1back==1);
+plotCurrRT(curr_rt,'Trials w and wout previous trial led on, no reach during wheel turn (2 trials in a row)',out.led_1back==1);
+histRTchange(curr_rt,nbins,'Trials w and wout previous trial led on, no reach during wheel turn (2 trials in a row)',out.led_1back==1);
 
 % Change in reaction time, no preemptive reach
 % Test effects of LED on PREVIOUS trial 
@@ -51,9 +51,12 @@ curr_rt=reactionTimes;
 curr_rt(~(condition==1) | dontUse_sequence)=nan;
 plotCurrRT(curr_rt,'Cued reach & touched pellet 1 back & no preemptive reach for 2 trials in a row',out.led_1back==1);
 rtchange=histRTchange(curr_rt,nbins,'Cued reach & touched pellet 1 back & no preemptive reach for 2 trials in a row',out.led_1back==1);
-[p,h]=ranksum(rtchange.rt_change_testcond0,rtchange.rt_change_testcond1);
-disp('p-value of cued reach & touched pellet 1 back & no preemptive reach for 2 trials in a row');
-disp(p);
+try
+    [p,h]=ranksum(rtchange.rt_change_testcond0,rtchange.rt_change_testcond1);
+    disp('p-value of cued reach & touched pellet 1 back & no preemptive reach for 2 trials in a row');
+    disp(p);
+catch
+end
 
 % Change in reaction time, no preemptive reach
 % Test effects of LED on PREVIOUS trial 
@@ -64,9 +67,11 @@ curr_rt=reactionTimes;
 curr_rt(~(condition==1))=nan;
 plotCurrRT(curr_rt,'Cued reach & touched pellet 1 back',out.led_1back==1);
 rtchange=histRTchange(curr_rt,nbins,'Cued reach & touched pellet 1 back',out.led_1back==1);
-[p,h]=ranksum(rtchange.rt_change_testcond0,rtchange.rt_change_testcond1);
-disp('p-value of cued reach & touched pellet 1 back');
-disp(p);
+try
+    [p,h]=ranksum(rtchange.rt_change_testcond0,rtchange.rt_change_testcond1);
+    disp('p-value of cued reach & touched pellet 1 back');
+    disp(p);
+end
 
 % Change in reaction time, no preemptive reach
 % Test effects of LED on PREVIOUS trial 
@@ -85,9 +90,12 @@ curr_rt=reactionTimes;
 curr_rt(~(condition==1))=nan;
 plotCurrRT(curr_rt,'Playing',out.led_1back==1);
 rtchange=histRTchange(curr_rt,nbins,'Playing',out.led_1back==1);
-[p,h]=ranksum(rtchange.rt_change_testcond0,rtchange.rt_change_testcond1);
-disp('p-value of playing');
-disp(p);
+try
+    [p,h]=ranksum(rtchange.rt_change_testcond0,rtchange.rt_change_testcond1);
+    disp('p-value of playing');
+    disp(p);
+catch
+end
 
 % Playing 2
 condition=out.cued_reach_1back==1 & out.touched_pellet_1back==1 & out.consumed_pellet_1back==0;
@@ -96,19 +104,27 @@ curr_rt=reactionTimes;
 curr_rt(~(condition==1))=nan;
 plotCurrRT(curr_rt,'Playing 2',out.led_1back==1);
 rtchange=histRTchange(curr_rt,nbins,'Playing 2',out.led_1back==1);
-[p,h]=ranksum(rtchange.rt_change_testcond0,rtchange.rt_change_testcond1);
-disp('p-value of playing 2');
-disp(p);
+try
+    [p,h]=ranksum(rtchange.rt_change_testcond0,rtchange.rt_change_testcond1);
+    disp('p-value of playing 2');
+    disp(p);
+catch
+end
 
 % Playing 3
-condition=out.cued_reach_1back==1 & out.touched_pellet_1back==1 & out.chewing_at_trial_start==0;
+condition=out.touched_pellet_1back==1 & (out.consumed_pellet_1back==0 | out.chewing_at_trial_start==0);
+% condition=out.cued_reach_1back==1 & out.touched_pellet_1back==1 & out.chewing_at_trial_start==0 & out.paw_during_wheel==0 & out.paw_during_wheel_1back==0;
+% condition=out.chewing_at_trial_start==0;
 curr_rt=reactionTimes;
 curr_rt(~(condition==1))=nan;
 plotCurrRT(curr_rt,'Playing 3',out.led_1back==1);
 rtchange=histRTchange(curr_rt,nbins,'Playing 3',out.led_1back==1);
-[p,h]=ranksum(rtchange.rt_change_testcond0,rtchange.rt_change_testcond1);
-disp('p-value of playing 3');
-disp(p);
+try
+    [p,h]=ranksum(rtchange.rt_change_testcond0,rtchange.rt_change_testcond1);
+    disp('p-value of playing 3');
+    disp(p);
+catch
+end
 % figure();
 % plot(nanmean(alltbt.reachStarts_noPawOnWheel(condition==1 & out.led_1back==0,:),1),'Color','k');
 % hold on;
@@ -147,10 +163,22 @@ if ~isempty(testcond)
 end
 
 if all(isnan(curr_rt(1:end-1)) | isnan(curr_rt(2:end)))
-        return
-    end
+    return
+end
 figure();
-scatter(curr_rt(1:end-1)+rand(size(curr_rt(1:end-1))).*0.01,curr_rt(2:end)+rand(size(curr_rt(2:end))).*0.01,[],'k','filled');
+jitter=0.03;
+% jitter=0;
+% disp('slope when passes through zero');
+% yvals=curr_rt(2:end)+rand(size(curr_rt(2:end)));
+% xvals=curr_rt(1:end-1)+rand(size(curr_rt(1:end-1)));
+% yvals(yvals>1.5)=nan;
+% xvals(xvals>1.5)=nan;
+% disp(nanmean(yvals./xvals));
+s=scatter(curr_rt(1:end-1)+rand(size(curr_rt(1:end-1))).*jitter,curr_rt(2:end)+rand(size(curr_rt(2:end))).*jitter,[],'k','filled');
+m=get(s,'MarkerHandle');
+% alpha=0.3;
+% m.FaceColorData=uint8(255*[0;0;0;alpha]);
+%m.EdgeColorData=uint8(255*[0;0;0;alpha]);
 xlabel('RT previous trial in sec');
 ylabel('RT current trial in sec');
 title(tit);
@@ -162,7 +190,16 @@ if ~isempty(testcond)
     if all(isnan(curr_rt(1:end-1)) | isnan(curr_rt(2:end)))
         return
     end
-    scatter(curr_rt(1:end-1)+rand(size(curr_rt(1:end-1))).*0.01,curr_rt(2:end)+rand(size(curr_rt(2:end))).*0.01,[],'r','filled');
+%     disp('slope when passes through zero');
+%     yvals=curr_rt(2:end)+rand(size(curr_rt(2:end)));
+%     xvals=curr_rt(1:end-1)+rand(size(curr_rt(1:end-1)));
+%     yvals(yvals>1.5)=nan;
+%     xvals(xvals>1.5)=nan;
+%     disp(nanmean(yvals./xvals));
+    s=scatter(curr_rt(1:end-1)+rand(size(curr_rt(1:end-1))).*jitter,curr_rt(2:end)+rand(size(curr_rt(2:end))).*jitter,[],'r','filled');
+    m=get(s,'MarkerHandle');
+%     alpha=0.3;
+%     m.FaceColorData=uint8(255*[1;0;0;alpha]);
     leg={'testcond FALSE','testcond TRUE'};
     legend(leg);
 end

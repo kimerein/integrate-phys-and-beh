@@ -4,6 +4,10 @@ excludeTheseTrials=isnan(metadata.(metadata_nanField));
 disp('excluding sess ids');
 disp(unique(metadata.sessid(excludeTheseTrials)));
 
+if any(excludeTheseTrials==1)==0
+    return
+end
+
 f=fieldnames(alltbt);
 for i=1:length(f)
     temp=alltbt.(f{i});

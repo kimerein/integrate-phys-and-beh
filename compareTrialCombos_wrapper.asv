@@ -1,0 +1,29 @@
+function compareTrialCombos_wrapper()
+
+% trial type 1
+% templateSequence{1}=trialTypes.chewing_at_trial_start==0 & trialTypes.touch_in_cued_window==1 & trialTypes.led==0 & trialTypes.nWheelTurns<3;
+% templateSequence{2}=trialTypes.chewing_at_trial_start==0 & trialTypes.paw_during_wheel==0;
+
+% templateSequence{1}=trialTypes.touch_in_cued_window==1 & trialTypes.cued_reach==1 & trialTypes.led==0 & trialTypes.nWheelTurns>2;
+% templateSequence{2}=trialTypes.chewing_at_trial_start==0 & trialTypes.paw_during_wheel==0;
+
+% templateSequence{1}=trialTypes.after_cue_drop==1 & trialTypes.led==0; 
+% templateSequence{2}=trialTypes.after_cue_drop==1 & trialTypes.led==0;
+% templateSequence{3}=trialTypes.chewing_at_trial_start==0 & trialTypes.paw_during_wheel==0 & trialTypes.dprimes>1 ;
+
+% templateSequence{1}=trialTypes.touched_pellet==1 & trialTypes.cued_reach==1 & trialTypes.chewing_at_trial_start==0 & trialTypes.led==0 & trialTypes.dprimes>1 & trialTypes.dprimes<4;
+% templateSequence{2}=trialTypes.chewing_at_trial_start==0 & trialTypes.paw_during_wheel==0 & trialTypes.dprimes>1 & trialTypes.dprimes<4;
+nNext1=1;
+
+% trial type 2
+% templateSequence{1}=trialTypes.chewing_at_trial_start==0 & trialTypes.touch_in_cued_window==1 & trialTypes.led==1 & trialTypes.nWheelTurns<3;
+% templateSequence{2}=trialTypes.chewing_at_trial_start==0 & trialTypes.paw_during_wheel==0;
+templateSequence=templateSequence2;
+% templateSequence{1}=trialTypes.touch_in_cued_window==1 & trialTypes.cued_reach==1 & trialTypes.led==1 & trialTypes.nWheelTurns>2;
+% templateSequence{2}=trialTypes.chewing_at_trial_start==0 & trialTypes.paw_during_wheel==0;
+% templateSequence{1}=trialTypes.after_cue_drop==1 & (trialTypes.led==1 | trialTypes.led_1forward==1); 
+% templateSequence{2}=trialTypes.after_cue_drop==1 & (trialTypes.led==1 | trialTypes.led_1back==1);
+% templateSequence{3}=trialTypes.after_cue_drop==0 & trialTypes.paw_during_wheel==0 & trialTypes.dprimes>1 ;
+% templateSequence{1}=trialTypes.touched_pellet==1 & trialTypes.cued_reach==1 & trialTypes.chewing_at_trial_start==0 & trialTypes.led==1 & trialTypes.dprimes>1 & trialTypes.dprimes<4;
+% templateSequence{2}=trialTypes.chewing_at_trial_start==0 & trialTypes.paw_during_wheel==0 & trialTypes.dprimes>1 & trialTypes.dprimes<4;
+nNext=1;

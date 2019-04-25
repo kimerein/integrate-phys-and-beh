@@ -1,0 +1,13 @@
+function Zscore_by_session(data,sessid)
+
+% all sessions with nan as sessid
+% Zscore together using same mean and variance 
+
+if any(isnan(sessid))
+    m=nanmax(sessid);
+    sessid(isnan(sessid))=m+1;
+    disp(['There are ' num2str(sum(isnan(sessid))) ' trials with nan as sessid. Grouping these all into a separate session.']);
+end
+
+u=unique(sessid
+

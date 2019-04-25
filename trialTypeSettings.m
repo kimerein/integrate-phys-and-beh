@@ -4,7 +4,7 @@ function settings=trialTypeSettings()
 % Modify this function to change trial-type classification scheme
 
 
-RTsettings=RTanalysis_settings(); % go to this file to change experiment-specific parameters
+RTsettings=reachExpt_analysis_settings(); % go to this file to change experiment-specific parameters
 
 
 % Threshold for event detection
@@ -23,16 +23,7 @@ trialStructure.maxTrialDuration=RTsettings.maxTrialDuration; % maximum duration 
 trialStructure.timeSlop=RTsettings.timeSlop; % max possible error in timing due to frame rate in movie and/or alignment approach, in seconds
 
 
-% "Reach batch" definition
-reach_batch.window=0.4; % in seconds, reaches must occur within this many seconds of each other to be in same batch
-reach_batch.firstreach_type={'miss_reachStarts'}; % first reach must be one of these types
-reach_batch.secondreach_type={'success_reachStarts_pawOnWheel','drop_reachStarts_pawOnWheel','miss_reachStarts_pawOnWheel'}; % second reach must be one of these types
-reach_batch.take_first_or_second_type=2; % number indicates whether to convert batch to the type of the first or second reach
-reach_batch.take_first_or_second_timing=1; % number indicates whether to set reach timing at the timing of the first or second reach in batch
-reach_batch.removePawOnWheel=1; % if removePawOnWheel=1, will change reach from reach_pawOnWheel to just reach type
-
-
-% Define time windows within a trial relative to cue onset
+% Define time windows within a trial RELATIVE TO CUE ONSET
 % Mouse "reached after cue" if mouse reached within cued_reach_window:
 timeWindow(1).name='cued_reach_window';
 timeWindow(1).start=RTsettings.reachAfterCueWindow_start; % define start of time window in which to say mouse "reached after cue", seconds from cue onset
@@ -62,7 +53,7 @@ i=1;
 bool_test(i).testwhat='reach batch';
 bool_test(i).fieldname='success_reachStarts';
 bool_test(i).test='first';
-bool_test(i).inEventSet='reachStarts_noPawOnWheel';
+bool_test(i).inEventSet='all_reachBatch';
 bool_test(i).thresh=settings.lowThresh;
 bool_test(i).comparator='>';
 bool_test(i).window='after_cue';
@@ -71,7 +62,7 @@ i=2;
 bool_test(i).testwhat='reach batch';
 bool_test(i).fieldname='drop_reachStarts';
 bool_test(i).test='first';
-bool_test(i).inEventSet='reachStarts_noPawOnWheel';
+bool_test(i).inEventSet='all_reachBatch';
 bool_test(i).thresh=settings.lowThresh;
 bool_test(i).comparator='>';
 bool_test(i).window='after_cue';
@@ -80,7 +71,7 @@ i=3;
 bool_test(i).testwhat='reach batch';
 bool_test(i).fieldname='miss_reachStarts';
 bool_test(i).test='first';
-bool_test(i).inEventSet='reachStarts_noPawOnWheel';
+bool_test(i).inEventSet='all_reachBatch';
 bool_test(i).thresh=settings.lowThresh;
 bool_test(i).comparator='>';
 bool_test(i).window='after_cue';
@@ -89,7 +80,7 @@ i=4;
 bool_test(i).testwhat='single reach';
 bool_test(i).fieldname='pelletmissingreach_reachStarts';
 bool_test(i).test='first';
-bool_test(i).inEventSet='reachStarts_noPawOnWheel';
+bool_test(i).inEventSet='all_reachBatch';
 bool_test(i).thresh=settings.lowThresh;
 bool_test(i).comparator='>';
 bool_test(i).window='after_cue';
@@ -134,7 +125,7 @@ bool_test(i).window='all_times';
 % Build up boolean tests to assess this
 i=9;
 bool_test(i).testwhat='single reach';
-bool_test(i).fieldname='reachStarts_noPawOnWheel';
+bool_test(i).fieldname='all_reachBatch';
 bool_test(i).test='any';
 bool_test(i).thresh=settings.lowThresh;
 bool_test(i).comparator='>';
@@ -174,63 +165,93 @@ bool_test(i).thresh=settings.lowThresh;
 bool_test(i).comparator='>';
 bool_test(i).window='trial_start';
 
+% Any reach batch successes or drops for touching pellet check
+i=14;
+bool_test(i).testwhat='reach batch';
+bool_test(i).fieldname='success_reachStarts';
+bool_test(i).test='any';
+bool_test(i).thresh=settings.lowThresh;
+bool_test(i).comparator='>';
+bool_test(i).window='all_times';
+
+i=15;
+bool_test(i).testwhat='reach batch';
+bool_test(i).fieldname='drop_reachStarts';
+bool_test(i).test='any';
+bool_test(i).thresh=settings.lowThresh;
+bool_test(i).comparator='>';
+bool_test(i).window='all_times';
+
+% Any success in cued window
+i=16;
+bool_test(i).testwhat='reach batch';
+bool_test(i).fieldname='success_reachStarts';
+bool_test(i).test='any';
+bool_test(i).thresh=settings.lowThresh;
+bool_test(i).comparator='>';
+bool_test(i).window='cued_reach_window';
+
+% Any drop in cued window
+i=17;
+bool_test(i).testwhat='reach batch';
+bool_test(i).fieldname='drop_reachStarts';
+bool_test(i).test='any';
+bool_test(i).thresh=settings.lowThresh;
+bool_test(i).comparator='>';
+bool_test(i).window='cued_reach_window';
+
 % Put together bool_test results to get trial classifications
 % Each index into trialtype(i).outcomes vector of length n refers to outcome of bool_tests 1:n
 % If index i is nan, bool_tests(i) can be either 0 or 1 (false or true)
-trialtype(1).outcomes=[1 0 0 0 nan nan nan nan nan 0 0 0 nan];
+trialtype(1).outcomes=[1 0 0 0 nan nan nan nan nan nan nan nan nan nan nan nan nan];
+% trialtype(1).outcomes=[1 0 0 0 nan nan nan nan nan 0 0 0 nan nan nan];
 trialtype(1).name='after_cue_success';
 trialtype(1).bool='&';
 
-trialtype(2).outcomes=[0 1 0 0 nan nan nan nan nan 0 0 0 nan];
+trialtype(2).outcomes=[0 1 0 0 nan nan nan nan nan nan nan nan nan nan nan nan nan];
+% trialtype(2).outcomes=[0 1 0 0 nan nan nan nan nan 0 0 0 nan nan nan];
 trialtype(2).name='after_cue_drop';
 trialtype(2).bool='&';
 
-trialtype(3).outcomes=[0 0 1 0 nan nan nan nan nan 0 0 0 nan];
+trialtype(3).outcomes=[0 0 1 0 nan nan nan nan nan nan nan nan nan nan nan nan nan];
+% trialtype(3).outcomes=[0 0 1 0 nan nan nan nan nan 0 0 0 nan nan nan];
 trialtype(3).name='after_cue_miss';
 trialtype(3).bool='&';
 
-trialtype(4).outcomes=[0 0 0 1 nan nan nan nan nan 0 0 0 nan];
+trialtype(4).outcomes=[0 0 0 1 nan nan nan nan nan nan nan nan nan nan nan nan nan];
+% trialtype(4).outcomes=[0 0 0 1 nan nan nan nan nan 0 0 0 nan nan nan];
 trialtype(4).name='after_cue_no_pellet';
 trialtype(4).bool='&';
 
-trialtype(5).outcomes=[1 0 0 0 nan nan nan nan nan 0 0 0 nan];
-trialtype(5).name='paw_during_wheel_after_cue_success';
-trialtype(5).bool='&';
+trialtype(5).outcomes=[nan nan nan nan 1 1 nan nan nan nan nan nan nan 1 nan nan nan];
+trialtype(5).name='consumed_pellet';
+trialtype(5).bool='|';
 
-trialtype(6).outcomes=[0 1 0 0 nan nan nan nan nan 0 0 0 nan];
-trialtype(6).name='paw_during_wheel_after_cue_drop';
-trialtype(6).bool='&';
+trialtype(6).outcomes=[nan nan nan nan 1 1 1 1 nan nan nan nan nan 1 1 nan nan];
+trialtype(6).name='touched_pellet';
+trialtype(6).bool='|';
 
-trialtype(7).outcomes=[0 0 1 0 nan nan nan nan nan 0 0 0 nan];
-trialtype(7).name='paw_during_wheel_after_cue_miss';
+trialtype(7).outcomes=[nan nan nan nan nan nan nan nan 1 nan nan nan nan nan nan nan nan];
+trialtype(7).name='cued_reach';
 trialtype(7).bool='&';
 
-trialtype(8).outcomes=[0 0 0 1 nan nan nan nan nan 0 0 0 nan];
-trialtype(8).name='paw_during_wheel_after_cue_no_pellet';
-trialtype(8).bool='&';
+trialtype(8).outcomes=[nan nan nan nan nan nan nan nan nan 1 1 1 nan nan nan nan nan];
+trialtype(8).name='paw_during_wheel';
+trialtype(8).bool='|';
 
-trialtype(9).outcomes=[nan nan nan nan 1 1 nan nan nan nan nan nan nan];
-trialtype(9).name='consumed_pellet';
-trialtype(9).bool='|';
+trialtype(9).outcomes=[nan nan nan nan nan nan nan nan nan nan nan nan 1 nan nan nan nan];
+trialtype(9).name='chewing_at_trial_start';
+trialtype(9).bool='&';
 
-trialtype(10).outcomes=[nan nan nan nan 1 1 1 1 nan nan nan nan nan];
-trialtype(10).name='touched_pellet';
-trialtype(10).bool='|';
+trialtype(10).outcomes=[nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 1 nan];
+trialtype(10).name='success_in_cued_window';
+trialtype(10).bool='&';
 
-trialtype(11).outcomes=[nan nan nan nan nan nan nan nan 1 nan nan nan nan];
-trialtype(11).name='cued_reach';
-trialtype(11).bool='&';
-
-trialtype(12).outcomes=[nan nan nan nan nan nan nan nan nan 1 1 1 nan];
-trialtype(12).name='paw_during_wheel';
-trialtype(12).bool='|';
-
-trialtype(13).outcomes=[nan nan nan nan nan nan nan nan nan nan nan nan 1];
-trialtype(13).name='chewing_at_trial_start';
-trialtype(13).bool='&';
+trialtype(11).outcomes=[nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 1 1];
+trialtype(11).name='touch_in_cued_window';
+trialtype(11).bool='|';
 
 % Output settings
-settings.reach_batch=reach_batch;
 settings.trialStructure=trialStructure;
 settings.timeWindow=timeWindow;
 settings.bool_test=bool_test;

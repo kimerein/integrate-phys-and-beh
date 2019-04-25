@@ -26,19 +26,45 @@ for i=1:length(unique_sess)
     fracThrough=metadata.fractionThroughSess(metadata.sessid==currsessid);
 %     allout.allreactiontimes.ledFalse{i}=output.reactionTimes.ledFalse;
     allout.allreactiontimes.ledFalse{i}=output.reactionTimes.ledFalse(fracThrough>=0.1 & fracThrough<=0.5);
+    figure();
     hax=axes(); 
-    parmhat=fitAndPlot(hax,allout.allreactiontimes.ledFalse{i},'lognfit',0-0.03:0.06:15-0.03,'k');
-    all_mu(i)=parmhat(1);
+    temp=allout.allreactiontimes.ledFalse{i};
+    parmhat=fitAndPlot(hax,temp,'lognfit',0-0.03:0.06:15-0.03,'r');
+%     [parmhat(1),parmhat(2)]=lognstat(parmhat(1),parmhat(2));
+    
+    figure(); 
+    hax=axes();
+    temp=output.precue_RT(fracThrough>=0 & fracThrough<=1);
+    parmhat_pre=fitAndPlot(hax,temp,'lognfit',0-0.03:0.06:15-0.03,'r');
+%     [parmhat_pre(1),parmhat_pre(2)]=lognstat(parmhat_pre(1),parmhat_pre(2));
+%     pause;
+    
+%     all_mu(i)=parmhat(1);
+    all_mu(i)=(parmhat(1)-parmhat_pre(1))/sqrt(0.5*(parmhat(2)+parmhat_pre(2)));
     all_sigma(i)=parmhat(2);
     nth_session=nanmean(metadata.nth_session(metadata.sessid==currsessid));
     whichmouse=nanmean(metadata.mouseid(metadata.sessid==currsessid));
-    allmouseids(i)=whichmouse;
+    allmouseids(i)=whichmouse;  
 %     disp(nth_session);
-    close all;
-    allout.allreactiontimes.ledTrue{i}=output.reactionTimes.ledFalse(fracThrough>=0.5 & fracThrough<=0.9);
+
+    allout.allreactiontimes.ledTrue{i}=output.reactionTimes.ledTrue(fracThrough>=0.5 & fracThrough<=0.9);
+    figure();
     hax=axes();
-    parmhat=fitAndPlot(hax,allout.allreactiontimes.ledTrue{i},'lognfit',0-0.03:0.06:15-0.03,'k');
-    all_mu_red(i)=parmhat(1);
+    temp=allout.allreactiontimes.ledTrue{i};
+    parmhat=fitAndPlot(hax,temp,'lognfit',0-0.03:0.06:15-0.03,'c');
+%     [parmhat(1),parmhat(2)]=lognstat(parmhat(1),parmhat(2));
+    
+    figure();
+    hax=axes();
+    temp=output.precue_RT(fracThrough>=0 & fracThrough<=1);
+    parmhat_pre=fitAndPlot(hax,temp,'lognfit',0-0.03:0.06:15-0.03,'r');
+%     [parmhat_pre(1),parmhat_pre(2)]=lognstat(parmhat_pre(1),parmhat_pre(2));
+%     if whichmouse==8
+%         pause
+%     end
+    close all;
+%     all_mu_red(i)=parmhat(1);
+    all_mu_red(i)=(parmhat(1)-parmhat_pre(1))/sqrt(0.5*(parmhat(2)+parmhat_pre(2)));
     all_sigma_red(i)=parmhat(2);
     % allout.allreactiontimes.ledFalse{i}=output.reactionTimes.ledFalse;
     % allout.allreactiontimes.ledTrue{i}=output.reactionTimes.ledTrue;
@@ -52,7 +78,7 @@ for i=1:length(unique_sess)
     all_med_ledTrue(i)=nanmedian(allRT_ledTrue{i});
 end
 
-useMetric=all_mu_red;
+useMetric=all_mu;
 
 % useMetric=exp(all_mu_red-all_sigma_red.^2);
 % all_mu=exp(all_mu-all_sigma.^2);
@@ -66,13 +92,16 @@ useMetric=all_mu_red;
 % all_mu=all_mu+0.5*all_sigma.^2;
 % all_mu_red=all_mu_red+0.5*all_sigma_red.^2;
 
-me=nanmean(useMetric);
-sd=nanstd(useMetric,[],2);
-useMetric(useMetric>me+10*sd | useMetric<me-10*sd)=nan;
+% me=nanmean(useMetric);
+% sd=nanstd(useMetric,[],2);
+% useMetric(useMetric>me+10*sd | useMetric<me-10*sd)=nan;
 
 figure(); 
 all_nth_sessions=nan(1,length(unique_sess));
 for i=1:length(unique_sess)
+%     if ~(allmouseids(i)==8)
+%         continue
+%     end
     currsessid=unique_sess(i);
     nth_session=nanmean(metadata.nth_session(metadata.sessid==currsessid));
     scatter(nth_session,all_mu(i),[],'r');
@@ -97,6 +126,7 @@ for i=1:length(unique_mouse)
 end
 
 useNthSess=zeros(size(all_nth_sessions));
+% useNthSess(1:20)=1;
 useNthSess=ones(size(all_nth_sessions));
 [r,p]=corrcoef(all_nth_sessions(useNthSess & ~isnan(all_nth_sessions) & ~isnan(useMetric)),useMetric(useNthSess & ~isnan(all_nth_sessions) & ~isnan(useMetric)));
 disp('corr coef');
@@ -111,15 +141,18 @@ function output=getRTanalysis(alltbt,out)
 nbins=[];
 
 % Get reaction times for all trials where mouse reached after cue onset
-[reactionTimes,alltbt]=plotOnlyFirstReach(alltbt,1,'reachStarts_noPawOnWheel','cueZone_onVoff',out,'led',0);
+[reactionTimes,alltbt,precue_RT]=plotOnlyFirstReach(alltbt,1,'reachStarts_noPawOnWheel','cueZone_onVoff',out,'led',0);
 % output.reactionTimes.ledFalse=reactionTimes(out.led_1back==0 & out.cued_reach_1back==1 & out.touched_pellet_1back==1 & out.chewing_at_trial_start==0);
 % output.reactionTimes.ledTrue=reactionTimes(out.led_1back==1 & out.cued_reach_1back==1 & out.touched_pellet_1back==1 & out.chewing_at_trial_start==0);
 temp=reactionTimes;
-temp(~(out.chewing_at_trial_start==0 & out.led==0))=nan;
+% temp(~(out.chewing_at_trial_start==0 & out.led==0))=nan;
+temp(~(out.chewing_at_trial_start==0))=nan;
 output.reactionTimes.ledFalse=temp;
 temp=reactionTimes;
-temp(~(out.chewing_at_trial_start==0 & out.led==0))=nan;
+temp(~(out.chewing_at_trial_start==0 & out.led==1))=nan;
+% temp(~(out.chewing_at_trial_start==0))=nan;
 output.reactionTimes.ledTrue=temp;
+output.precue_RT=precue_RT;
 % temp(out.led_1back==1)=nan;
 % output.reactionTimes.ledFalse=temp;
 % temp=reactionTimes;
