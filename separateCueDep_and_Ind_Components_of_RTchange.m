@@ -8,19 +8,21 @@ bins=200;
 
 %% choose trial types to analyze
 % template sequence 1 
-% templateSequence1{1}=trialTypes.consumed_pellet==1 & trialTypes.led==0;
-% templateSequence1{2}=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
+% templateSequence1{1}=trialTypes.success_in_cued_window==1 & trialTypes.led==0 & any(alltbt.isChewing(:,200:486),2)==0;
+% templateSequence1{2}=trialTypes.chewing_at_trial_start==0 & trialTypes.paw_during_wheel==0 & metadata.mouseid==1;
 % templateSequence1{2}=trialTypes.chewing_at_trial_start==0 & trialTypes.paw_during_wheel==0;
-templateSequence1{1}=trialTypes.touch_in_cued_window==1 & trialTypes.led==0 & any(alltbt.isChewing(:,200:486),2)==0;
-templateSequence1{2}=trialTypes.chewing_at_trial_start==0;
+% templateSequence1{1}=trialTypes.touch_in_cued_window==1 & trialTypes.led==0 & any(alltbt.isChewing(:,200:486),2)==0;
+templateSequence1{1}=trialTypes.touched_pellet==0 & trialTypes.cued_reach==1 & trialTypes.led==0 & any(alltbt.isChewing(:,200:486),2)==0;
+templateSequence1{2}=trialTypes.chewing_at_trial_start==0 & trialTypes.paw_during_wheel==0;
 nNext1=1;
 
 % template sequence 2 
-% templateSequence2{1}=trialTypes.consumed_pellet==1 & trialTypes.led==1;
-% templateSequence2{2}=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
+% templateSequence2{1}=trialTypes.success_in_cued_window==0 & trialTypes.after_cue_drop==1 & trialTypes.led==0 & any(alltbt.isChewing(:,200:486),2)==0;
+% templateSequence2{2}=trialTypes.chewing_at_trial_start==0 & trialTypes.paw_during_wheel==0 & metadata.mouseid==1;
 % templateSequence2{2}=trialTypes.chewing_at_trial_start==0 & trialTypes.paw_during_wheel==0;
-templateSequence2{1}=trialTypes.touch_in_cued_window==1 & trialTypes.led==1 & any(alltbt.isChewing(:,200:486),2)==0;
-templateSequence2{2}=trialTypes.chewing_at_trial_start==0;
+% templateSequence2{1}=trialTypes.touch_in_cued_window==0 & trialTypes.led==0 & any(alltbt.isChewing(:,200:486),2)==0;
+templateSequence2{1}=trialTypes.touched_pellet==0 & trialTypes.cued_reach==1 & trialTypes.led==1 & any(alltbt.isChewing(:,200:486),2)==0;
+templateSequence2{2}=trialTypes.chewing_at_trial_start==0 & trialTypes.paw_during_wheel==0;
 nNext2=1;
 
 %% Get RT change after real cue
@@ -99,7 +101,8 @@ else
     useY=RT_pairs1_y+jitter1;
 end
     
-s=scatter(useX,useY,[],'k','filled');
+s=scatter(useX,useY,300,'k','filled');
+set(gcf,'position',[10,10,1000,1000]);
 pause;
 m=get(s,'MarkerHandle');
 alpha=0.3;
@@ -107,6 +110,8 @@ m.FaceColorData=uint8(255*[0;0;0;alpha]);
 xlabel('real cue');
 ylabel('fake cue');
 title(tit);
+xlim([0 9.5]);
+ylim([0 9.5]);
 
 hold on;
 if length(jitter2)==1
@@ -116,7 +121,7 @@ else
     useX=RT_pairs2_x+jitter2;
     useY=RT_pairs2_y+jitter2;
 end
-s=scatter(useX,useY,[],'r','filled');
+s=scatter(useX,useY,300,'r','filled');
 pause;
 m=get(s,'MarkerHandle');
 alpha=0.3;

@@ -35,7 +35,6 @@ for i=1:length(u)
 end
 
 isreaching_out=countMouseSuccessDropMiss(alltbt,metadata,out);
-
 % Various methods for calculating dprimes
 settings=RTanalysis_settings();
 settings.preCueWindow_start=0; % define start of time window from trial onset, in seconds
@@ -47,7 +46,7 @@ settings.preCueWindow_start=3.81; % define start of time window from trial onset
 settings.preCueWindow_end=5.31; % define end of time window from trial onset, in seconds
 [dprimes_postCue,hit_rates,FA_rates]=get_dprime_per_session(alltbt,out,metadata,'reachStarts_noPawOnWheel',nameOfCue,settings);
 
-isreaching_out.dprimes_preCue=dprimes_preCue;
+isreaching_out.dprimes_preCue=dprimes_preCue; 
 isreaching_out.dprimes_postCue=dprimes_postCue;
 dprimes=min([dprimes_preCue; dprimes_postCue],[],1);
 

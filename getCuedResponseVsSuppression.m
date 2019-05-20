@@ -1,27 +1,38 @@
-function [dprimes,isreaching_out]=getLearningCurve(alltbt,metadata,out,nameOfCue,useTrials)
+function [isreaching_out,dprimes]=getCuedResponseVsSuppression(alltbt,metadata,out,nameOfCue,reachName,useTrials,firstSess)
+
+doPlot=1;
 
 % useTrials only
-f=fieldnames(alltbt);
-for i=1:length(f)
-    temp=alltbt.(f{i});
-    if size(temp,1)~=length(useTrials)
-        continue
+if ~isempty(useTrials)
+    f=fieldnames(alltbt);
+    for i=1:length(f)
+        temp=alltbt.(f{i});
+        if size(temp,1)~=length(useTrials)
+            continue
+        end
+        temp=temp(useTrials==1,:);
+        alltbt.(f{i})=temp;
     end
-    temp=temp(useTrials==1,:);
-    alltbt.(f{i})=temp;
+    f=fieldnames(out);
+    for i=1:length(f)
+        temp=out.(f{i});
+        if length(temp)~=length(useTrials)
+            continue
+        end
+        temp=temp(useTrials==1);
+        out.(f{i})=temp;
+    end
+    f=fieldnames(metadata);
+    for i=1:length(f)
+        temp=metadata.(f{i});
+        if length(temp)~=length(useTrials)
+            continue
+        end
+        temp=temp(useTrials==1);
+        metadata.(f{i})=temp;
+    end
 end
-f=fieldnames(out);
-for i=1:length(f)
-    temp=out.(f{i});
-    temp=temp(useTrials==1);
-    out.(f{i})=temp;
-end
-f=fieldnames(metadata);
-for i=1:length(f)
-    temp=metadata.(f{i});
-    temp=temp(useTrials==1);
-    metadata.(f{i})=temp;
-end
+
 % fix sessids in metadata
 u=unique(metadata.sessid);
 for i=1:length(u)
@@ -29,21 +40,49 @@ for i=1:length(u)
 end
 
 isreaching_out=countMouseSuccessDropMiss(alltbt,metadata,out);
-
 % Various methods for calculating dprimes
 settings=RTanalysis_settings();
 settings.preCueWindow_start=0; % define start of time window from trial onset, in seconds
 settings.preCueWindow_end=1.5; % define end of time window from trial onset, in seconds
-[dprimes_preCue,hit_rates,FA_rates]=get_dprime_per_session(alltbt,out,metadata,'reachStarts_noPawOnWheel',nameOfCue,settings);
+[dprimes_preCue,hit_rates,FA_rates_preCue]=get_dprime_per_session(alltbt,out,metadata,reachName,nameOfCue,settings);
 
 settings=RTanalysis_settings();
 settings.preCueWindow_start=3.81; % define start of time window from trial onset, in seconds
 settings.preCueWindow_end=5.31; % define end of time window from trial onset, in seconds
-[dprimes_postCue,hit_rates,FA_rates]=get_dprime_per_session(alltbt,out,metadata,'reachStarts_noPawOnWheel',nameOfCue,settings);
+[dprimes_postCue,hit_rates,FA_rates_postCue]=get_dprime_per_session(alltbt,out,metadata,reachName,nameOfCue,settings);
 
-isreaching_out.dprimes_preCue=dprimes_preCue;
+max_FA=max([FA_rates_preCue; FA_rates_postCue],[],1);
+
+isreaching_out.dprimes_preCue=dprimes_preCue; 
 isreaching_out.dprimes_postCue=dprimes_postCue;
+isreaching_out.max_FA=max_FA;
 dprimes=min([dprimes_preCue; dprimes_postCue],[],1);
+
+if ~isempty(firstSess)
+    if length(firstSess)==1
+        useSess=isreaching_out.nth_session>=firstSess;
+        isreaching_out.nth_session=isreaching_out.nth_session(useSess);
+        max_FA=max_FA(useSess);
+        hit_rates=hit_rates(useSess);
+    elseif length(firstSess)>1
+        % use these sessions
+        useSess=firstSess;
+        isreaching_out.nth_session=isreaching_out.nth_session(useSess);
+        max_FA=max_FA(useSess);
+        hit_rates=hit_rates(useSess);
+    end
+end
+
+% Plot hit rate vs false alarm
+if doPlot==1
+    figure();
+    [~,i]=sort(isreaching_out.nth_session);
+    scatter(max_FA(i(1)),hit_rates(i(1)),[],'k');
+    hold on;
+    plot(max_FA(i),hit_rates(i),'Color','k');
+    xlabel('Fraction trials with false alarm');
+    ylabel('Fraction trials with hit');
+end
 
 end
 

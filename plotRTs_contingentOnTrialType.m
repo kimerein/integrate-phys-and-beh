@@ -3,8 +3,8 @@ function plotRTs_contingentOnTrialType(tbt,whichReach,useAsCue,metadata,continge
 % if contingency2 is empty, will not consider this contingency
 % will just plot contingency1==true trials
 
-nbins=400; % for histograms
-zscore_RTs=0; % if 1, will use z-scored instead of raw reaction times
+nbins=200; % for histograms
+zscore_RTs=1; % if 1, will use z-scored instead of raw reaction times
 
 reactionTimes=getPairedReactionTimes(tbt,whichReach,useAsCue,metadata,zscore_RTs,[],[]);
 
@@ -57,6 +57,12 @@ plot(x,n./nansum(n),'Color','k');
 xlabel('RT (sec)');
 ylabel('Count');
 title(tit);
+
+% hold on;
+% [parmhat,parmci]=lognfit(reactionTimes(testcond1==true & ~isnan(reactionTimes)));
+% % plot fit
+% Y=lognpdf(nanmin(x):0.01:nanmax(x),parmhat(1),parmhat(2));
+% plot(nanmin(x):0.01:nanmax(x),Y*(x(2)-x(1))*0.55,'Color','c');
 
 if ~isempty(testcond2)
     [n,x]=histcounts(reactionTimes(testcond2==true),x_backup);

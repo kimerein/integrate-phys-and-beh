@@ -1,0 +1,24 @@
+function plotTrialRTchangesAndIntegral(outputOfCompareCombos,nApart,outputForIntegral,integral_nApart)
+
+rt_pairs1_contingent=outputOfCompareCombos.rt_pairs1_contingent;
+rt_pairs2_contingent=outputOfCompareCombos.rt_pairs2_contingent;
+
+rt_pairs1_integral=outputForIntegral.rt_pairs1_contingent;
+rt_pairs2_integral=outputForIntegral.rt_pairs2_contingent;
+
+trials=1:nApart:nApart*length(rt_pairs1_contingent);
+figure();
+subplot(2,1,1);
+plot(trials,rt_pairs1_contingent,'Color','k');
+subplot(2,1,2);
+trials=1:nApart:nApart*length(rt_pairs1_contingent);
+plot(trials,rt_pairs1_integral,'Color','k');
+
+trials=1:integral_nApart:integral_nApart*length(rt_pairs2_contingent);
+figure();
+subplot(2,1,1);
+plot(trials,rt_pairs2_contingent,'Color','r');
+subplot(2,1,2);
+trials=1:integral_nApart:integral_nApart*length(rt_pairs2_contingent);
+plot(trials,rt_pairs2_integral,'Color','r');
+

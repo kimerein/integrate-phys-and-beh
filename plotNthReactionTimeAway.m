@@ -35,12 +35,12 @@ sequenceMatchStarts=[sequenceMatchStarts zeros(1,length(templateSequence)-1)];
 
 % Iterate through different nNexts (i spacings between trials to get
 % reaction time pairs)
-currColor=[0    0.1; ...
-           0    0.6; ...
-           0    0.7];
-% currColor=[0    0.6; ...
-%            0    0.2; ...
-%            0    0.8];
+% currColor=[0    0.1; ...
+%            0    0.6; ...
+%            0    0.7];
+currColor=[0    0.6; ...
+           0    0.2; ...
+           0    0.8];
 % currColor=[0    0.5     0.9     0.9     0.9     0.6     0.2     0.1     0.1     0.1     0.3; ...
 %            0    0       0       0.5     0.8     0.9     0.5     0.6     0.3     0       0; ...
 %            0    0       0       0       0       0       0       0.7     0.9     0.7     0.5];
@@ -393,13 +393,16 @@ else
 end
 usePrev=RT_pairs.prev_trial_rt+rand(size(RT_pairs.prev_trial_rt)).*jitter;
 useCurr=RT_pairs.curr_trial_rt+rand(size(RT_pairs.curr_trial_rt)).*jitter;
-s=scatter(usePrev(RT_pairs.real_rt_pair==true & testcond1==true),useCurr(RT_pairs.real_rt_pair==true & testcond1==true),[],'k','filled');
+s=scatter(usePrev(RT_pairs.real_rt_pair==true & testcond1==true),useCurr(RT_pairs.real_rt_pair==true & testcond1==true),300,'k','filled');
+set(gcf,'position',[10,10,1000,1000]);
 pause;
 m=get(s,'MarkerHandle');
 alpha=0.3;
 m.FaceColorData=uint8(255*[currColor; alpha]);
 xlabel('RT previous trial in sec');
 ylabel('RT current trial in sec');
+xlim([0 9.5]);
+ylim([0 9.5]);
 title(tit);
 hold on;
 if addSlopeLine==1

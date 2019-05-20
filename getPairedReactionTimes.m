@@ -1,6 +1,6 @@
 function [reactionTimes,RT_pairs,tbt]=getPairedReactionTimes(tbt,whichReach,useAsCue,metadata,zscore_RTs,selectTrials,nApart)
 
-longRT_ifNoReach=1;
+longRT_ifNoReach=0;
 
 % cue ind
 avcue=nanmean(tbt.(useAsCue),1);

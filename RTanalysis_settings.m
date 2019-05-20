@@ -6,8 +6,8 @@ settings.wheelStopsThisManySecsBeforeCue=0.1; % time window between pellet prese
 settings.cueDuration=0.25; % duration of cue, in seconds
 settings.maxTrialDuration=35; % maximum duration of a trial, in seconds
 settings.timeSlop=0.1; % max possible error in timing due to frame rate in movie and/or alignment approach, in seconds
-settings.reachAfterCueWindow_start=0.15; % define start of time window in which to say mouse "reached after cue", seconds from cue onset
-settings.reachAfterCueWindow_end=3.5; % define end of time window in which to say mouse "reached after cue", seconds from cue onset 
+settings.reachAfterCueWindow_start=0; % define start of time window in which to say mouse "reached after cue", seconds from cue onset
+settings.reachAfterCueWindow_end=1.5; % define end of time window in which to say mouse "reached after cue", seconds from cue onset 
 settings.preCueWindow_start=0; % define start of time window from trial onset, in seconds
 settings.preCueWindow_end=1.5; % define end of time window from trial onset, in seconds
 

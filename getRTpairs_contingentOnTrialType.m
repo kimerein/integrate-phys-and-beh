@@ -96,10 +96,13 @@ if ~isempty(testcond2)
     end
 end
 
+
+
 figure();
 usePrev=RT_pairs.prev_trial_rt+rand(size(RT_pairs.prev_trial_rt)).*jitter;
 useCurr=RT_pairs.curr_trial_rt+rand(size(RT_pairs.curr_trial_rt)).*jitter;
-s=scatter(usePrev(RT_pairs.real_rt_pair==true & testcond1==true),useCurr(RT_pairs.real_rt_pair==true & testcond1==true),[],'k','filled');
+s=scatter(usePrev(RT_pairs.real_rt_pair==true & testcond1==true),useCurr(RT_pairs.real_rt_pair==true & testcond1==true),300,'k','filled');
+set(gcf,'position',[10,10,1000,1000]);
 pause;
 m=get(s,'MarkerHandle');
 alpha=0.3;
@@ -107,6 +110,8 @@ m.FaceColorData=uint8(255*[0;0;0;alpha]);
 xlabel('RT previous trial in sec');
 ylabel('RT current trial in sec');
 title(tit);
+xlim([0 9.5]);
+ylim([0 9.5]);
 if addSlopeLine==1
    dlm=fitlm(usePrev(RT_pairs.real_rt_pair==true & testcond1==true)',useCurr(RT_pairs.real_rt_pair==true & testcond1==true)','Intercept',false);
    xpoints=0:0.001:nanmax(usePrev(RT_pairs.real_rt_pair==true & testcond1==true));
@@ -117,7 +122,7 @@ end
 
 if ~isempty(testcond2)
     hold on;
-    s=scatter(usePrev(RT_pairs.real_rt_pair==true & testcond2==true),useCurr(RT_pairs.real_rt_pair==true & testcond2==true),[],'r','filled');
+    s=scatter(usePrev(RT_pairs.real_rt_pair==true & testcond2==true),useCurr(RT_pairs.real_rt_pair==true & testcond2==true),300,'r','filled');
     pause;
     m=get(s,'MarkerHandle');
     alpha=0.3;
