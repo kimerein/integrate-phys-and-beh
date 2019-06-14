@@ -39,14 +39,15 @@ function out=compareTrialCombos_wrapper(alltbt,trialTypes,metadata)
 % templateSequence1{2}=trialTypes.chewing_at_trial_start==0 & trialTypes.paw_during_wheel==0;
 % templateSequence1{1}=trialTypes.touched_pellet==1 & trialTypes.cued_reach==1 & trialTypes.led==0;
 % templateSequence1{2}=trialTypes.chewing_at_trial_start==0 & trialTypes.paw_during_wheel==0;
-sumAcross=10;
+sumAcross=25;
 sumsOfTouched=nan(1,length(trialTypes.touch_in_cued_window)-(sumAcross-1));
 for i=1:length(sumsOfTouched)
     sumsOfTouched(i)=sum(trialTypes.touch_in_cued_window(i:i+(sumAcross-1)));
+%     sumsOfTouched(i)=sum(trialTypes.touch_in_cued_window(i:i+(sumAcross-1))==0);
 end
 sumsOfTouched=[sumsOfTouched zeros(1,sumAcross-1)]';
 
-sumAcrossLED=10;
+sumAcrossLED=25;
 sumsOfLED=nan(1,length(trialTypes.led)-(sumAcross-1));
 for i=1:length(sumsOfLED)
     sumsOfLED(i)=sum(trialTypes.led(i:i+(sumAcrossLED-1)));
@@ -68,7 +69,10 @@ sumsOfLED=[sumsOfLED zeros(1,sumAcrossLED-1)]';
 % templateSequence1{12}=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
 
 templateSequence1{1}=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
-templateSequence1{2}=(sumsOfTouched>=5) & (sumsOfLED<=3);
+% templateSequence1{2}=(sumsOfTouched>=4) & (sumsOfLED<1);
+% templateSequence1{2}=(sumsOfTouched>=4) & (sumsOfLED>=3);
+templateSequence1{2}=(sumsOfTouched>=20) & (sumsOfLED>=12);
+% templateSequence1{2}=(sumsOfTouched>=20) & (sumsOfLED<16);
 % templateSequence1{2}=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
 templateSequence1{3}=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
 templateSequence1{4}=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;

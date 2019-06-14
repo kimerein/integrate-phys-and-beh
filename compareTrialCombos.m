@@ -134,7 +134,7 @@ figure();
 usePrev=RT_pairs1.prev_trial_rt+rand(size(RT_pairs1.prev_trial_rt)).*jitter;
 useCurr=RT_pairs1.curr_trial_rt+rand(size(RT_pairs1.curr_trial_rt)).*jitter;
 
-s=scatter(usePrev(RT_pairs1.real_rt_pair==true & testcond1==true),useCurr(RT_pairs1.real_rt_pair==true & testcond1==true),100,'k','filled');
+s=scatter(usePrev(RT_pairs1.real_rt_pair==true & testcond1==true),useCurr(RT_pairs1.real_rt_pair==true & testcond1==true),50,'k','filled');
 set(gcf,'position',[10,10,1000,1000]);
 pause;
 m=get(s,'MarkerHandle');
@@ -143,13 +143,13 @@ m.FaceColorData=uint8(255*[0;0;0;alpha]);
 xlabel('RT previous trial');
 ylabel('RT current trial');
 title(tit);
-xlim([0 5]);
-ylim([0 9.5]);
+% xlim([0 5]);
+% ylim([0 9.5]);
 
 hold on;
 usePrev=RT_pairs2.prev_trial_rt+rand(size(RT_pairs2.prev_trial_rt)).*jitter;
 useCurr=RT_pairs2.curr_trial_rt+rand(size(RT_pairs2.curr_trial_rt)).*jitter;
-s=scatter(usePrev(RT_pairs2.real_rt_pair==true & testcond2==true),useCurr(RT_pairs2.real_rt_pair==true & testcond2==true),100,'r','filled');
+s=scatter(usePrev(RT_pairs2.real_rt_pair==true & testcond2==true),useCurr(RT_pairs2.real_rt_pair==true & testcond2==true),50,'r','filled');
 pause;
 m=get(s,'MarkerHandle');
 alpha=0.25;
