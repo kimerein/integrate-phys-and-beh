@@ -13,7 +13,7 @@ bins=200;
 % templateSequence1{2}=trialTypes.chewing_at_trial_start==0 & trialTypes.paw_during_wheel==0;
 % templateSequence1{1}=trialTypes.touch_in_cued_window==1 & trialTypes.led==0 & any(alltbt.isChewing(:,200:486),2)==0;
 % templateSequence1{1}=trialTypes.touched_pellet==1 & trialTypes.cued_reach==1 & trialTypes.led==0 & any(alltbt.isChewing(:,200:486),2)==0;
-templateSequence1{1}=trialTypes.touched_pellet==1 & any(alltbt.all_reachBatch(:,94:151),2)==1 & trialTypes.consumed_pellet==0 & trialTypes.led==0;
+templateSequence1{1}=trialTypes.touch_in_cued_window==1 & trialTypes.consumed_pellet==0 & trialTypes.led==0;
 templateSequence1{2}=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
 % templateSequence1{2}=trialTypes.chewing_at_trial_start==0;
 % templateSequence1{3}=trialTypes.chewing_at_trial_start==0;
@@ -25,7 +25,7 @@ nNext1=1;
 % templateSequence2{2}=trialTypes.chewing_at_trial_start==0 & trialTypes.paw_during_wheel==0;
 % templateSequence2{1}=trialTypes.touch_in_cued_window==0 & trialTypes.led==0 & any(alltbt.isChewing(:,200:486),2)==0;
 % templateSequence2{1}=trialTypes.touched_pellet==1 & trialTypes.cued_reach==1 & trialTypes.led==1 & any(alltbt.isChewing(:,200:486),2)==0;
-templateSequence2{1}=trialTypes.touched_pellet==0 & any(alltbt.all_reachBatch(:,94:151),2)==1 & trialTypes.consumed_pellet==0 & trialTypes.led==0;
+templateSequence2{1}=~trialTypes.success_in_cued_window==1 & trialTypes.consumed_pellet==1 & trialTypes.led==0;
 templateSequence2{2}=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
 % templateSequence2{2}=trialTypes.chewing_at_trial_start==0;
 % templateSequence2{3}=trialTypes.chewing_at_trial_start==0;
@@ -37,16 +37,6 @@ nNext2=1;
 %   nNext1, templateSequence2, nNext2, useAsCue, whichReach, doPlot
 disp('Plotting results for real post-cue reaction times');
 [~,~,rt_pairs]=compareTrialCombos(alltbt,trialTypes,metadata,templateSequence1,nNext1,templateSequence2,nNext2,'cueZone_onVoff','all_reachBatch',1);
-% show where these template sequences come from as a function of fraction
-% through session
-[n,x]=hist(metadata.nth_session(rt_pairs.sequenceMatchStarts1==1)+metadata.fractionThroughSess(rt_pairs.sequenceMatchStarts1==1),bins);
-figure();
-plot(x,n,'Color','k');
-hold on;
-[n,x]=hist(metadata.nth_session(rt_pairs.sequenceMatchStarts2==1)+metadata.fractionThroughSess(rt_pairs.sequenceMatchStarts2==1),bins);
-plot(x,n,'Color','r');
-title('Template match from nth session');
-
 % rt_pairs.rt_pairs1_contingent contains reaction time pairs sub-sampled to
 % include only real pairs (not separated by a file split) and belonging to
 % templateSequence1

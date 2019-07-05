@@ -3,8 +3,8 @@ function plotRTs_contingentOnTrialType(tbt,whichReach,useAsCue,metadata,continge
 % if contingency2 is empty, will not consider this contingency
 % will just plot contingency1==true trials
 
-nbins=200; % for histograms
-zscore_RTs=1; % if 1, will use z-scored instead of raw reaction times
+nbins=40; % for histograms
+zscore_RTs=0; % if 1, will use z-scored instead of raw reaction times
 
 reactionTimes=getPairedReactionTimes(tbt,whichReach,useAsCue,metadata,zscore_RTs,[],[]);
 
@@ -54,6 +54,7 @@ x_backup=x;
 [n,x]=cityscape_hist(n,x);
 figure();
 plot(x,n./nansum(n),'Color','k');
+% plot(x,n,'Color','k');
 xlabel('RT (sec)');
 ylabel('Count');
 title(tit);
@@ -69,6 +70,7 @@ if ~isempty(testcond2)
     [n,x]=cityscape_hist(n,x);
     hold on;
     plot(x,n./nansum(n),'Color','r');
+%     plot(x,n,'Color','r');
     leg={'testcond 1','testcond 2'};
     legend(leg);
 end

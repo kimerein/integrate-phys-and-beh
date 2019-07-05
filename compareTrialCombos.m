@@ -77,6 +77,12 @@ out.sequenceMatchStarts1=sequenceMatchStarts1;
 out.sequenceMatchStarts2=sequenceMatchStarts2;
 out.all_rt1=reactionTimes1;
 out.all_rt2=reactionTimes2;
+out.rt_pairs1=RT_pairs1.rt_change;
+out.rt_pairs2=RT_pairs2.rt_change;
+out.real_rt_pair1=RT_pairs1.real_rt_pair;
+out.real_rt_pair2=RT_pairs2.real_rt_pair;
+out.forPairs_sequenceMatchStarts1=forPairs_sequenceMatchStarts1;
+out.forPairs_sequenceMatchStarts2=forPairs_sequenceMatchStarts2;
 
 if doPlot==1
     % reaction time pairs comparison
