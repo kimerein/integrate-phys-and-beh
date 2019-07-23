@@ -6,6 +6,12 @@ templateSequence1_end=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_
 templateSequence2_cond=trialTypes.touched_pellet==0 & trialTypes.led==0;
 templateSequence2_end=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
 
+% templateSequence1_cond=trialTypes.touched_pellet==1 & trialTypes.led==0;
+% templateSequence1_end=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
+% 
+% templateSequence2_cond=trialTypes.touched_pellet==1 & trialTypes.led==1;
+% templateSequence2_end=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
+
 nInSequence=[2 3 4];
 
 nRepsForBootstrap=20;
@@ -62,6 +68,8 @@ for i=1:length(nInSequence)
         dim2_closeup_p(i,j)=dim2_closeup.p;
         allVals1=[allVals1 dim2_closeup.vals1];
         allVals2=[allVals2 dim2_closeup.vals2];
+%         allVals1=[allVals1 dim1.vals1];
+%         allVals2=[allVals2 dim1.vals2];
     end
     forHists_cond1{i}=allVals1;
     forHists_cond2{i}=allVals2;
@@ -73,10 +81,15 @@ plotOutput(nInSequence,dim2_rt_change_cond1,dim2_rt_change_cond2,dim2_p,'Dimensi
 plotOutput(nInSequence,dim2_closeup_rt_change_cond1,dim2_closeup_rt_change_cond2,dim2_closeup_p,'Dimension 2 -- cue-dependent (close-up)',nRepsForBootstrap);
 
 i=2;
-plotHist(forHists_cond1{i},forHists_cond2{i},200,'Histo','y-vals');
-plotCDF(forHists_cond1{i},forHists_cond2{i},200,'CDF');
+temp1=forHists_cond1{i};
+temp2=forHists_cond2{i};
+plotHist(temp1,temp2,200,'Histo','y-vals');
+plotCDF(temp1,temp2,200,'CDF');
+range_learning=1; % in seconds
+plotHist(temp1(temp1>-range_learning & temp1<range_learning),temp2(temp2>-range_learning & temp2<range_learning),200,'Close-up Histo','y-vals');
+plotCDF(temp1(temp1>-range_learning & temp1<range_learning),temp2(temp2>-range_learning & temp2<range_learning),200,'Close-up CDF');
 disp('CLOSE-UP P-VAL');
-testRanksum(forHists_cond1{i},forHists_cond2{i},1);
+testRanksum(temp1(temp1>-4 & temp1<4),temp2(temp2>-4 & temp2<4),1);
 
 
 for i=1:length(nInSequence)
@@ -217,6 +230,11 @@ dim=1;
 dim1.p=p;
 dim1.med1=med1;
 dim1.med2=med2;
+temp1=Zpca(1,1:length(real_rt_pairs1));
+temp2=Zpca(1,length(real_rt_pairs1)+1:end);
+dim1.vals1=temp1;
+dim1.vals2=temp2;
+
 dim=2;
 % plotHist(Zpca(dim,1:length(real_rt_pairs1)),Zpca(dim,length(real_rt_pairs1)+1:end),bins,'Histo of dim 2','y-vals');
 % plotCDF(Zpca(dim,1:length(real_rt_pairs1)),Zpca(dim,length(real_rt_pairs1)+1:end),bins,'CDF of dim 2');
