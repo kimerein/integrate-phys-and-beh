@@ -1,41 +1,57 @@
-function getMouseAndSessionNumbers(forDir,lookInDir,mouseDatabase)
+function getMouseAndSessionNumbers(expt_dir,mouseDatabase)
 
 % get mouse ID database
-a=load(mouseDatabase);
-mouseDatabase=a.mouseDatabase;
+if isempty(mouseDatabase)
+    mouseDatabase=makeMouseDatabase;
+elseif isstr(mouseDatabase)
+    a=load(mouseDatabase);
+    mouseDatabase=a.mouseDatabase;
+else
+    % passed in mouseDatabase
+end
+    
 % this should be a structure with the following fields
 % 'mouse_name'          mouse's name
 % 'mouse_id'            mouse's ID number
 % 'description'         description of mouse genotype, injections and
-%                       experiments
+%                       experimental goals
+% 'trainers'            who trained this mouse
+% 'cue start date'      first date of cue training on rig
+% 'sac date'            date mouse was sac'ced
+% 'data_directories'    a list of all directories containing behavior data
+%                       related to this mouse
+% 'low_speed_videos'    a list of all low-speed videos (.AVI) with behavior
+%                       data for this mouse
 
+% use this list of data_directories and low_speed_videos associated with
+% each mouse to figure out mouse's id for analyzed data
 
-
+for i=1:length(mouseDatabase.dbs.vids_to_match_mouseIDs)
+    temp=mouseDatabase.dbs.vids_to_match_mouseIDs{i};
+    rout=regexp(temp,'\');
+    vidnames{i}=temp(rout(end)+1:end);
+end
 
 ls=dir(expt_dir);
 for i=1:length(ls)
     thisname=ls(i).name;
     thisisdir=ls(i).isdir;
-    % 
-    
-    if ~isempty(regexp(thisname,'processed_data')) && thisisdir==1
-        a=load([expt_dir '\' thisname '\tbt.mat']);
-        tbt=a.tbt;
-        interptimes=0:0.035:17;
-        figure(); 
-        plot(interptimes,nanmean(tbt.reachStarts,1),'Color','k'); 
-        hold on; 
-        plot(interptimes,nanmean(tbt.cueZone_onVoff,1),'Color','b');
-        th=questdlg('Pre-emptive reaching?','Does mouse reach consistently before cue?');
-        if isempty(th)
-            break
-        elseif strcmp(th,'Yes')
-            preemptCue=true;
-        elseif strcmp(th,'No')
-            preemptCue=false;
-        elseif strcmp(th,'Cancel')
-            break
+    r=regexp(thisname,'processed_data','ONCE');
+    if ~isempty(r) && thisisdir==1
+        avi_name=thisname(1:r-2);
+        % look for which mouse has this AVI video
+        % and in which session
+        f=find(ismember(vidnames,[avi_name '.AVI']));
+        mouse_id=mouseDatabase.dbs.mouseIDs_to_match_vids(f);
+        nth_session=mouseDatabase.dbs.sessIDs_to_match_vids(f);
+        if length(mouse_id)>1
+            if any(diff(mouse_id))~=0
+                error('Problem! Multiple mice associated with this video file');
+            end
+            mouse_id=mouse_id(1);
         end
-        save([expt_dir '\' thisname '\preemptCue.mat'],'preemptCue');
+        if length(
+        save([expt_dir '\' thisname '\mouse_id.mat'],'mouse_id');
+        save([expt_dir '\' thisname '\nth_session.mat'],'nth_session');
     end
 end

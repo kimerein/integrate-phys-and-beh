@@ -1,4 +1,7 @@
-function db=makeMouseDatabase()
+function outdbs=makeMouseDatabase()
+
+% Assumption about directory structure:
+% AVIs from the same session should be in the same directory!
 
 % Mouse Database should be a structure with the following fields
 % 'mouse_name'          mouse's name
@@ -7,11 +10,12 @@ function db=makeMouseDatabase()
 %                       experimental goals
 % 'trainers'            who trained this mouse
 % 'cue start date'      first date of cue training on rig
-% 'sac date'            date mouse was sac'ced
 % 'data_directories'    a list of all directories containing behavior data
 %                       related to this mouse
 % 'low_speed_videos'    a list of all low-speed videos (.AVI) with behavior
 %                       data for this mouse
+% 'directory_per_video' the directory in which each low-speed video file
+%                       is stored
 
 db=[];
 
@@ -148,7 +152,11 @@ db=addTrainer(db,mn,'Whitney');
 db=addDirectoriesRecursive(db,mn,'\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\JuliaG\Behavior Expts',false);
 db=addDirectoriesRecursive(db,mn,'\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\Whitney\Behavior Experiments',false);
 
+% assign mouse IDs and others
+[db,dbs]=assignIDnums(db);
 
+outdbs.db_bymouse=db;
+outdbs.dbs=dbs;
 
 end
 
@@ -167,7 +175,55 @@ disp(['Adding ' name ' to database']);
 
 end
 
-function assignIDnums
+function [db,dbs]=assignIDnums(db)
+
+notdefined=true;
+for i=1:length(db)
+    % for each mouse, assign a new ID
+    db(i).mouse_id=i;
+    % for each mouse, get the unique sessions
+    % AVIs from the same session should be in the same directory!
+    % [~,~,sessid]=unique(db(i).directory_per_video);
+    % db(i).sessids=sessid;
+    
+    % for each mouse, sort sessions according to date
+    [~,ui]=unique(db(i).date_per_video);
+    [~,si]=sort(db(i).date_per_video);
+    clear unique_sessids
+    unique_sessids(si)=1:length(db(i).date_per_video);
+    for j=1:length(ui)
+        currdatename=db(i).date_per_video(ui(j));
+        for k=1:length(db(i).date_per_video)
+            if strcmp(db(i).date_per_video(k),currdatename)==1
+                % this is a duplicate
+                unique_sessids(k)=unique_sessids(ui(j));
+            end
+        end
+    end 
+    ordered_sessids=nan(size(unique_sessids));
+    k=1;
+    for j=1:length(unique_sessids)
+        if any(unique_sessids==j)
+            ordered_sessids(unique_sessids==j)=k;
+            k=k+1;
+        end
+    end 
+    % rename sessids for this mouse to match order in which sessions
+    % occurred
+    db(i).sessids=ordered_sessids;
+    if notdefined==true
+        dbs.vids_to_match_mouseIDs(1:1+length(db(i).low_speed_videos)-1)=db(i).low_speed_videos;
+        dbs.mouseIDs_to_match_vids(1:1+length(db(i).low_speed_videos)-1)=db(i).mouse_id;
+        dbs.sessIDs_to_match_vids(1:1+length(db(i).low_speed_videos)-1)=db(i).sessids;
+        dbs.sessDates_to_match_vids(1:1+length(db(i).low_speed_videos)-1)=db(i).date_per_video;
+        notdefined=false;
+    else
+        dbs.vids_to_match_mouseIDs(length(dbs.vids_to_match_mouseIDs)+1:length(dbs.vids_to_match_mouseIDs)+1+length(db(i).low_speed_videos)-1)=db(i).low_speed_videos;
+        dbs.mouseIDs_to_match_vids(length(dbs.mouseIDs_to_match_vids)+1:length(dbs.mouseIDs_to_match_vids)+1+length(db(i).low_speed_videos)-1)=db(i).mouse_id;
+        dbs.sessIDs_to_match_vids(length(dbs.sessIDs_to_match_vids)+1:length(dbs.sessIDs_to_match_vids)+1+length(db(i).low_speed_videos)-1)=db(i).sessids;
+        dbs.sessDates_to_match_vids(length(dbs.sessDates_to_match_vids)+1:length(dbs.sessDates_to_match_vids)+1+length(db(i).low_speed_videos)-1)=db(i).date_per_video;
+    end
+end
 
 end
 
@@ -243,9 +299,17 @@ end
 if ~isfield(db(f),'low_speed_videos')
     db(f).low_speed_videos=[];
 end
+if ~isfield(db(f),'directory_per_video')
+    db(f).directory_per_video=[];
+end
+if ~isfield(db(f),'date_per_video')
+    db(f).date_per_video=[];
+end
 
 data_directories=db(f).data_directories;
 low_speed_videos=db(f).low_speed_videos;
+directory_per_video=db(f).directory_per_video;
+date_per_video=db(f).date_per_video;
 
 data_directories{length(data_directories)+1}=addDir;
 
@@ -253,12 +317,48 @@ ls=dir(addDir);
 for i=1:length(ls)
     thisname=ls(i).name;
     if ~isempty(regexp(thisname,'.AVI','ONCE')) % is a low-speed video file
+        temp=getDateFromFilename(addDir);
+        if isempty(temp) % no date associated with this .AVI file
+            continue
+        end
+        currind=length(low_speed_videos)+1;
+        date_per_video{currind}=temp;
         % add to list
-        low_speed_videos{length(low_speed_videos)+1}=[addDir '\' thisname];
+        low_speed_videos{currind}=[addDir '\' thisname];
+        directory_per_video{currind}=addDir;
     end
 end
 
 db(f).data_directories=data_directories;
 db(f).low_speed_videos=low_speed_videos;
+db(f).directory_per_video=directory_per_video;
+db(f).date_per_video=date_per_video;
+
+end
+
+function date=getDateFromFilename(fn)
+
+date=[];
+
+r=regexp(fn,'2019','ONCE');
+if ~isempty(r)
+    date=fn(r:r+7);
+    return
+end
+r=regexp(fn,'2018','ONCE');
+if ~isempty(r)
+    date=fn(r:r+7);
+    return
+end
+r=regexp(fn,'2017','ONCE');
+if ~isempty(r)
+    date=fn(r:r+7);
+    return
+end
+r=regexp(fn,'2016','ONCE');
+if ~isempty(r)
+    date=fn(r:r+7);
+    return
+end
 
 end
