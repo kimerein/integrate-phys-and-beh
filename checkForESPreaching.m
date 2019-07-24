@@ -1,10 +1,17 @@
 function checkForESPreaching(expt_dir)
 
+overwriteExisting=false;
+
 ls=dir(expt_dir);
 for i=1:length(ls)
     thisname=ls(i).name;
     thisisdir=ls(i).isdir;
-    if ~isempty(regexp(thisname,'processed_data')) && thisisdir==1
+    if ~isempty(regexp(thisname,'processed_data','ONCE')) && thisisdir==1
+        if exist([expt_dir '\' thisname '\preemptCue.mat'],'file')
+            if overwriteExisting==false
+                continue
+            end
+        end         
         a=load([expt_dir '\' thisname '\tbt.mat']);
         tbt=a.tbt;
         interptimes=0:0.035:17;
@@ -23,5 +30,6 @@ for i=1:length(ls)
             break
         end
         save([expt_dir '\' thisname '\preemptCue.mat'],'preemptCue');
+        close all;
     end
 end
