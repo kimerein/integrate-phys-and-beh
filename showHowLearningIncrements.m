@@ -1,4 +1,4 @@
-function showHowLearningIncrements(alltbt,trialTypes,metadata,fakeCueInd)
+function [forHists_cond1,forHists_cond2]=showHowLearningIncrements(alltbt,trialTypes,metadata,fakeCueInd)
 
 templateSequence1_cond=trialTypes.touched_pellet==1 & trialTypes.led==0;
 templateSequence1_end=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
@@ -12,7 +12,8 @@ templateSequence2_end=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_
 % templateSequence2_cond=trialTypes.touched_pellet==1 & trialTypes.led==1;
 % templateSequence2_end=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
 
-nInSequence=[2 3 4];
+% nInSequence=[2 3 4];
+nInSequence=[2 4];
 
 nRepsForBootstrap=20;
 
@@ -80,16 +81,16 @@ plotOutput(nInSequence,dim1_rt_change_cond1,dim1_rt_change_cond2,dim1_p,'Dimensi
 plotOutput(nInSequence,dim2_rt_change_cond1,dim2_rt_change_cond2,dim2_p,'Dimension 2 -- cue-dependent',nRepsForBootstrap);
 plotOutput(nInSequence,dim2_closeup_rt_change_cond1,dim2_closeup_rt_change_cond2,dim2_closeup_p,'Dimension 2 -- cue-dependent (close-up)',nRepsForBootstrap);
 
-i=2;
+i=1;
 temp1=forHists_cond1{i};
 temp2=forHists_cond2{i};
 plotHist(temp1,temp2,200,'Histo','y-vals');
 plotCDF(temp1,temp2,200,'CDF');
-range_learning=1; % in seconds
+range_learning=2; % in seconds
 plotHist(temp1(temp1>-range_learning & temp1<range_learning),temp2(temp2>-range_learning & temp2<range_learning),200,'Close-up Histo','y-vals');
 plotCDF(temp1(temp1>-range_learning & temp1<range_learning),temp2(temp2>-range_learning & temp2<range_learning),200,'Close-up CDF');
 disp('CLOSE-UP P-VAL');
-testRanksum(temp1(temp1>-4 & temp1<4),temp2(temp2>-4 & temp2<4),1);
+testRanksum(temp1(temp1>-range_learning & temp1<range_learning),temp2(temp2>-range_learning & temp2<range_learning),1);
 
 
 for i=1:length(nInSequence)

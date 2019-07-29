@@ -2,6 +2,9 @@ function [rt_pairs,used_as_rematch_inds]=correctInputDistribution(rt_pairs,match
 
 plotOutput=0;
 
+out.all_rt1_triali=[reactionTimes1(1+nNext1:end) nan(1,nNext1)];
+out.all_rt2_triali=[reactionTimes2(1+nNext2:end) nan(1,nNext2)];
+
 if ~isempty(used_as_rematch_inds)
     if matchTo==1
         temp=rt_pairs.all_rt2(rt_pairs.sequenceMatchStarts2==1);
@@ -20,8 +23,6 @@ if ~isempty(used_as_rematch_inds)
     elseif matchTo==2
         temp=rt_pairs.all_rt1(rt_pairs.sequenceMatchStarts1==1);
         rt_pairs.all_rt1=temp(used_as_rematch_inds);
-        temp=rt_pairs.all_rt1_triali(rt_pairs.sequenceMatchStarts1==1);
-        rt_pairs.all_rt1_triali=temp(used_as_rematch_inds);
         temp=rt_pairs.real_rt_pair1(rt_pairs.sequenceMatchStarts1==1);
         rt_pairs.real_rt_pair1=temp(used_as_rematch_inds);
         temp=rt_pairs.rt_pairs1(rt_pairs.sequenceMatchStarts1==1);
@@ -40,8 +41,6 @@ if matchTo==2
     sequenceMatchStarts2=rt_pairs.sequenceMatchStarts1;
     reactionTimes1=rt_pairs.all_rt2;
     reactionTimes2=rt_pairs.all_rt1;
-    rt1_triali=rt_pairs.all_rt2_triali;
-    rt2_triali=rt_pairs.all_rt1_triali;
     real_rt_pairs1=rt_pairs.real_rt_pair2;
     real_rt_pairs2=rt_pairs.real_rt_pair1;
     rt_pairs1=rt_pairs.rt_pairs2;
@@ -53,8 +52,6 @@ elseif matchTo==1
     sequenceMatchStarts2=rt_pairs.sequenceMatchStarts2;
     reactionTimes1=rt_pairs.all_rt1;
     reactionTimes2=rt_pairs.all_rt2;
-    rt1_triali=rt_pairs.all_rt1_triali;
-    rt2_triali=rt_pairs.all_rt2_triali;
     real_rt_pairs1=rt_pairs.real_rt_pair1;
     real_rt_pairs2=rt_pairs.real_rt_pair2;
     rt_pairs1=rt_pairs.rt_pairs1;
@@ -145,7 +142,6 @@ for i=1:length(n)
     end
 end
 newgroup2_reactionTimes2=[];
-newgroup2_rt2_triali=[];
 newgroup2_sequenceMatchStarts2=[];
 newgroup2_real_rt_pairs2=[];
 newgroup2_rt_pairs2=[];
@@ -159,8 +155,6 @@ for i=1:length(group2_for_bins)
     used_as_rematch_inds=[used_as_rematch_inds currindstouse];
     temp=reactionTimes2(sequenceMatchStarts2==1);
     newgroup2_reactionTimes2=[newgroup2_reactionTimes2 temp(currindstouse)];
-    temp=rt2_triali(sequenceMatchStarts2==1);
-    newgroup2_rt2_triali=[newgroup2_rt2_triali temp(currindstouse)];
     temp=real_rt_pairs2(sequenceMatchStarts2==1);
     newgroup2_real_rt_pairs2=[newgroup2_real_rt_pairs2 temp(currindstouse)];
     temp=rt_pairs2(sequenceMatchStarts2==1);
@@ -172,7 +166,6 @@ for i=1:length(group2_for_bins)
 end
 
 reactionTimes2=newgroup2_reactionTimes2;
-rt2_triali=newgroup2_rt2_triali;
 real_rt_pairs2=newgroup2_real_rt_pairs2;
 rt_pairs2=newgroup2_rt_pairs2;
 forPairs_sequenceMatch2=newgroup2_forPairs_sequenceMatch2;
@@ -184,8 +177,6 @@ if matchTo==2
     rt_pairs.sequenceMatchStarts1=sequenceMatchStarts2;
     rt_pairs.all_rt2=reactionTimes1;
     rt_pairs.all_rt1=reactionTimes2;
-    rt_pairs.all_rt2_triali=rt1_triali;
-    rt_pairs.all_rt1_triali=rt2_triali;
     rt_pairs.real_rt_pair2=real_rt_pairs1;
     rt_pairs.real_rt_pair1=real_rt_pairs2;
     rt_pairs.rt_pairs2_contingent=rt_pairs1(real_rt_pairs1==true & forPairs_sequenceMatch1==true);
@@ -195,8 +186,6 @@ elseif matchTo==1
     rt_pairs.sequenceMatchStarts2=sequenceMatchStarts2;
     rt_pairs.all_rt1=reactionTimes1;
     rt_pairs.all_rt2=reactionTimes2;
-    rt_pairs.all_rt1_triali=rt1_triali;
-    rt_pairs.all_rt2_triali=rt2_triali;
     rt_pairs.real_rt_pair1=real_rt_pairs1;
     rt_pairs.real_rt_pair2=real_rt_pairs2;
     rt_pairs.rt_pairs1_contingent=rt_pairs1(real_rt_pairs1==true & forPairs_sequenceMatch1==true);

@@ -83,6 +83,8 @@ out.real_rt_pair1=RT_pairs1.real_rt_pair;
 out.real_rt_pair2=RT_pairs2.real_rt_pair;
 out.forPairs_sequenceMatchStarts1=forPairs_sequenceMatchStarts1;
 out.forPairs_sequenceMatchStarts2=forPairs_sequenceMatchStarts2;
+out.all_rt1_triali=[reactionTimes1(1+nNext1:end) nan(1,nNext1)];
+out.all_rt2_triali=[reactionTimes2(1+nNext2:end) nan(1,nNext2)];
 
 if doPlot==1
     % reaction time pairs comparison
