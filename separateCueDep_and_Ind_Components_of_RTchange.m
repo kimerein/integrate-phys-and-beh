@@ -13,23 +13,23 @@ bins=200;
 % templateSequence1{2}=trialTypes.chewing_at_trial_start==0 & trialTypes.paw_during_wheel==0;
 % templateSequence1{1}=trialTypes.touch_in_cued_window==1 & trialTypes.led==0 & any(alltbt.isChewing(:,200:486),2)==0;
 % templateSequence1{1}=trialTypes.touched_pellet==1 & trialTypes.cued_reach==1 & trialTypes.led==0 & any(alltbt.isChewing(:,200:486),2)==0;
-templateSequence1{1}=trialTypes.touched_pellet==1 & any(alltbt.all_reachBatch(:,94:151),2)==1 & trialTypes.led==0 & metadata.dprimes>0 & metadata.dprimes<2;
-templateSequence1{2}=trialTypes.touched_pellet==1 & any(alltbt.all_reachBatch(:,94:151),2)==1 & trialTypes.consumed_pellet==0 & trialTypes.led==0 & metadata.dprimes>0 & metadata.dprimes<2;
-templateSequence1{3}=trialTypes.chewing_at_trial_start==0 & metadata.dprimes>0 & metadata.dprimes<2;
+% templateSequence1{1}=trialTypes.touched_pellet==1 & any(alltbt.all_reachBatch(:,94:151),2)==1 & trialTypes.led==0 & metadata.dprimes>0 & metadata.dprimes<2;
+% templateSequence1{2}=trialTypes.touched_pellet==1 & any(alltbt.all_reachBatch(:,94:151),2)==1 & trialTypes.consumed_pellet==0 & trialTypes.led==0 & metadata.dprimes>0 & metadata.dprimes<2;
+% templateSequence1{3}=trialTypes.chewing_at_trial_start==0 & metadata.dprimes>0 & metadata.dprimes<2;
 % templateSequence1{2}=trialTypes.chewing_at_trial_start==0;
 % templateSequence1{3}=trialTypes.chewing_at_trial_start==0; any(alltbt.all_reachBatch(:,94:151),2)==1
 
 
 templateSequence1{1}=trialTypes.touched_pellet==1 & trialTypes.led==0;
-templateSequence1{2}=trialTypes.touched_pellet==1 & trialTypes.led==0;
+% templateSequence1{2}=trialTypes.touched_pellet==1 & trialTypes.led==0;
 % templateSequence1{3}=trialTypes.touched_pellet==1 & trialTypes.led==0;
 % templateSequence1{4}=trialTypes.touched_pellet==1 & trialTypes.led==0;
 % templateSequence1{5}=trialTypes.touched_pellet==1 & trialTypes.led==0;
 % templateSequence1{6}=trialTypes.touched_pellet==1 & trialTypes.led==0;
 % templateSequence1{7}=trialTypes.touched_pellet==1 & trialTypes.led==0;
 % templateSequence1{8}=trialTypes.touched_pellet==1 & trialTypes.led==0;
-templateSequence1{3}=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
-nNext1=2;
+templateSequence1{2}=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
+nNext1=1;
 
 % template sequence 2 
 % templateSequence2{1}=trialTypes.success_in_cued_window==0 & trialTypes.after_cue_drop==1 & trialTypes.led==0 & any(alltbt.isChewing(:,200:486),2)==0;
@@ -37,23 +37,23 @@ nNext1=2;
 % templateSequence2{2}=trialTypes.chewing_at_trial_start==0 & trialTypes.paw_during_wheel==0;
 % templateSequence2{1}=trialTypes.touch_in_cued_window==0 & trialTypes.led==0 & any(alltbt.isChewing(:,200:486),2)==0;
 % templateSequence2{1}=trialTypes.touched_pellet==1 & trialTypes.cued_reach==1 & trialTypes.led==1 & any(alltbt.isChewing(:,200:486),2)==0;
-templateSequence2{1}=trialTypes.touched_pellet==0 & any(alltbt.all_reachBatch(:,94:151),2)==1 & trialTypes.led==0 & metadata.dprimes>0 & metadata.dprimes<2;
-templateSequence2{2}=trialTypes.touched_pellet==0 & trialTypes.consumed_pellet==0 & trialTypes.led==0 & metadata.dprimes>0 & metadata.dprimes<2;
-templateSequence2{3}=trialTypes.chewing_at_trial_start==0 & metadata.dprimes>0 & metadata.dprimes<2;
+% templateSequence2{1}=trialTypes.touched_pellet==0 & any(alltbt.all_reachBatch(:,94:151),2)==1 & trialTypes.led==0 & metadata.dprimes>0 & metadata.dprimes<2;
+% templateSequence2{2}=trialTypes.touched_pellet==0 & trialTypes.consumed_pellet==0 & trialTypes.led==0 & metadata.dprimes>0 & metadata.dprimes<2;
+% templateSequence2{3}=trialTypes.chewing_at_trial_start==0 & metadata.dprimes>0 & metadata.dprimes<2;
 % templateSequence2{2}=trialTypes.chewing_at_trial_start==0; any(alltbt.all_reachBatch(:,94:151),2)==1 
 % templateSequence2{3}=trialTypes.chewing_at_trial_start==0;
 nNext2=2;
 
 templateSequence2{1}=trialTypes.touched_pellet==0 & trialTypes.led==0;
-templateSequence2{2}=trialTypes.touched_pellet==0 & trialTypes.led==0;
+% templateSequence2{2}=trialTypes.touched_pellet==0 & trialTypes.led==0;
 % templateSequence2{3}=trialTypes.touched_pellet==0 & trialTypes.led==0;
 % templateSequence2{4}=trialTypes.touched_pellet==0 & trialTypes.led==0;
 % templateSequence2{5}=trialTypes.touched_pellet==0 & trialTypes.led==0;
 % templateSequence2{6}=trialTypes.touched_pellet==0 & trialTypes.led==0;
 % templateSequence2{7}=trialTypes.touched_pellet==0 & trialTypes.led==0;
 % templateSequence2{8}=trialTypes.touched_pellet==0 & trialTypes.led==0;
-templateSequence2{3}=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
-nNext2=2;
+templateSequence2{2}=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
+nNext2=1;
 
 
 
@@ -100,6 +100,10 @@ line([fakeCueInd fakeCueInd],[0 nanmax(nanmean(alltbt.all_reachBatch,1))]);
 
 alltbt.fakeCue_for_preCueRT=zeros(size(alltbt.cue));
 alltbt.fakeCue_for_preCueRT(:,fakeCueInd)=1;
+
+% noPreempt_alltbt=alltbt;
+% noPreempt_alltbt.all_reachBatch(:,73:94)=0;
+% noPreempt_alltbt.all_reachBatch(:,100:end)=0;
 
 disp('Plotting results for fake pre-cue reaction times');
 [~,~,rt_pairs]=compareTrialCombos(alltbt,trialTypes,metadata,templateSequence1,nNext1,templateSequence2,nNext2,'fakeCue_for_preCueRT','all_reachBatch',1);

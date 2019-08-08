@@ -10,6 +10,6 @@ for i=3:length(ls)
     temp=regexp(thisname,'.mat','once');
     if ~isempty(temp)
         a=load([datadir '\' thisname]);
-        correctedDistributions.(thisname(1:temp-1))=a.(thisname(1:temp-1));
+        correctedDistributions.(thisname(1:temp-1))=a.temp;
     end
 end

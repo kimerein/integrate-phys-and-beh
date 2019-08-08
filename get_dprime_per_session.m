@@ -1,4 +1,4 @@
-function [dprimes,hit_rates,FA_rates]=get_dprime_per_session(tbt,out,metadata,whichReach,nameOfCue,settings)
+function [dprimes,hit_rates,FA_rates,out]=get_dprime_per_session(tbt,out,metadata,whichReach,nameOfCue,settings)
 
 % signal in this case is cue
 % response if mouse performed a "cued reach" -- definition in

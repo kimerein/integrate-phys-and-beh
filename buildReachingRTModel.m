@@ -39,36 +39,48 @@ function [dataset,correctedDistributions]=buildReachingRTModel(alltbt,trialTypes
 % distribution across all trials and all mice
 
 
+
 templateSequence1_cond=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
 templateSequence1_end=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
 
 
-% Get effects of "Mouse touches pellet" on RT
+% Get effects of, e.g., "Mouse touches pellet" on RT
 nInSequence=[2 3 4];
 nRepsForBootstrap=20;
-templateSequence2_cond=trialTypes.touched_pellet==1 & trialTypes.led==0;
+%templateSequence2_cond=any(alltbt.all_reachBatch>0.5,2) & trialTypes.touched_pellet==1 & trialTypes.led==0;
+templateSequence2_cond=trialTypes.touched_pellet==1 & trialTypes.led==1;
 templateSequence2_end=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
 % Get raw reaching (all reaches)
 % Get reaction times
 % Get change in reaction times (non-corrected input distributions)
 % Get change in reaction times (corrected input distributions)
-dataset.event_name='mouse_touches_pellet';
-dataset.nInSequence=nInSequence;
-dataset.nRepsForBootstrap=nRepsForBootstrap;
-dataset.templateSequence1_cond=templateSequence1_cond;
-dataset.templateSequence1_end=templateSequence1_end;
-dataset.templateSequence2_cond=templateSequence2_cond;
-dataset.templateSequence2_end=templateSequence2_end;
+dataset.realDistributions.event_name='mouse_touches_pellet_str_led_on';
+dataset.realDistributions.nInSequence=nInSequence;
+dataset.realDistributions.nRepsForBootstrap=nRepsForBootstrap;
+dataset.realDistributions.templateSequence1_cond=templateSequence1_cond;
+dataset.realDistributions.templateSequence1_end=templateSequence1_end;
+dataset.realDistributions.templateSequence2_cond=templateSequence2_cond;
+dataset.realDistributions.templateSequence2_end=templateSequence2_end;
 
-saveDir=[saveDir '\' dataset.event_name];
+saveDir=[saveDir '\' dataset.realDistributions.event_name];
 mkdir(saveDir);
 
 doCorrectInputDistribution=false;
-[dim1_seq_rtchanges_cond1,dim1_seq_rtchanges_cond2,dim2_seq_rtchanges_cond1,dim2_seq_rtchanges_cond2,ns,cond1_isSeq,cond2_isSeq,rr_cond1_trial1,rr_cond1_triali,rr_cond2_trial1,rr_cond2_triali,cond1_rts_trial1,cond1_rts_triali,cond2_rts_trial1,cond2_rts_triali]=getFxOfBehaviorEvent(templateSequence1_cond,templateSequence1_end,templateSequence2_cond,templateSequence2_end,nInSequence,1,doCorrectInputDistribution,alltbt,trialTypes,metadata,fakeCueInd);
+[dim1_seq_rtchanges_cond1,dim1_seq_rtchanges_cond2,dim2_seq_rtchanges_cond1,dim2_seq_rtchanges_cond2,ns,cond1_isSeq,cond2_isSeq,rr_cond1_trial1,rr_cond1_triali,rr_cond2_trial1,rr_cond2_triali,cond1_rts_trial1,cond1_rts_triali,cond2_rts_trial1,cond2_rts_triali,rr_cond1_trial1_se,rr_cond1_triali_se,rr_cond2_trial1_se,rr_cond2_triali_se,realrtpair_seq1,realrtpair_seq2,alldim_seq_rtchanges_cond1,alldim_seq_rtchanges_cond2]=getFxOfBehaviorEvent(templateSequence1_cond,templateSequence1_end,templateSequence2_cond,templateSequence2_end,nInSequence,1,doCorrectInputDistribution,alltbt,trialTypes,metadata,fakeCueInd);
+dataset.realDistributions.(['alldim_rtchanges_allTrialsSequence'])=alldim_seq_rtchanges_cond1;
+dataset.realDistributions.(['alldim_rtchanges_event'])=alldim_seq_rtchanges_cond2;
+dataset.realDistributions.(['dim1_rtchanges_allTrialsSequence'])=dim1_seq_rtchanges_cond1;
+dataset.realDistributions.(['dim1_rtchanges_event'])=dim1_seq_rtchanges_cond2;
+dataset.realDistributions.(['dim2_rtchanges_allTrialsSequence'])=dim2_seq_rtchanges_cond1;
+dataset.realDistributions.(['dim2_rtchanges_event'])=dim2_seq_rtchanges_cond2;
 dataset.realDistributions.(['rawReaching_allTrialsSequence_trial1InSeq'])=rr_cond1_trial1;
 dataset.realDistributions.(['rawReaching_allTrialsSequence_trialiInSeq'])=rr_cond1_triali;
 dataset.realDistributions.(['rawReaching_event_trial1InSeq'])=rr_cond2_trial1;
 dataset.realDistributions.(['rawReaching_event_trialiInSeq'])=rr_cond2_triali;
+dataset.realDistributions.(['se_rawReaching_allTrialsSequence_trial1InSeq'])=rr_cond1_trial1_se;
+dataset.realDistributions.(['se_rawReaching_allTrialsSequence_trialiInSeq'])=rr_cond1_triali_se;
+dataset.realDistributions.(['se_rawReaching_event_trial1InSeq'])=rr_cond2_trial1_se;
+dataset.realDistributions.(['se_rawReaching_event_trialiInSeq'])=rr_cond2_triali_se;
 dataset.realDistributions.(['allTrialsSequence_isSeq'])=cond1_isSeq;
 dataset.realDistributions.(['event_isSeq'])=cond2_isSeq;
 dataset.realDistributions.(['allTrialsSequence_RT_trial1InSeq'])=cond1_rts_trial1;
@@ -76,19 +88,27 @@ dataset.realDistributions.(['allTrialsSequence_RT_trialiInSeq'])=cond1_rts_trial
 dataset.realDistributions.(['event_RT_trial1InSeq'])=cond2_rts_trial1;
 dataset.realDistributions.(['event_RT_trialiInSeq'])=cond2_rts_triali;
 dataset.realDistributions.(['ns'])=ns;
+dataset.realDistributions.(['realrtpair_seq1'])=realrtpair_seq1;
+dataset.realDistributions.(['realrtpair_seq2'])=realrtpair_seq2;
 
 mkdir([saveDir '\real_distributions']); 
 save([saveDir '\real_distributions\pdf.mat'],'dataset');
 
 doCorrectInputDistribution=true;
-[dim1_seq_rtchanges_cond1,dim1_seq_rtchanges_cond2,dim2_seq_rtchanges_cond1,dim2_seq_rtchanges_cond2,ns,cond1_isSeq,cond2_isSeq,rr_cond1_trial1,rr_cond1_triali,rr_cond2_trial1,rr_cond2_triali,cond1_rts_trial1,cond1_rts_triali,cond2_rts_trial1,cond2_rts_triali,rr_cond1_trial1_se,rr_cond1_triali_se,rr_cond2_trial1_se,rr_cond2_triali_se]=getFxOfBehaviorEvent(templateSequence1_cond,templateSequence1_end,templateSequence2_cond,templateSequence2_end,nInSequence,nRepsForBootstrap,doCorrectInputDistribution,alltbt,trialTypes,metadata,fakeCueInd);
-correctedDistributions.event_name='mouse_touches_pellet';
+[dim1_seq_rtchanges_cond1,dim1_seq_rtchanges_cond2,dim2_seq_rtchanges_cond1,dim2_seq_rtchanges_cond2,ns,cond1_isSeq,cond2_isSeq,rr_cond1_trial1,rr_cond1_triali,rr_cond2_trial1,rr_cond2_triali,cond1_rts_trial1,cond1_rts_triali,cond2_rts_trial1,cond2_rts_triali,rr_cond1_trial1_se,rr_cond1_triali_se,rr_cond2_trial1_se,rr_cond2_triali_se,realrtpair_seq1,realrtpair_seq2,alldim_seq_rtchanges_cond1,alldim_seq_rtchanges_cond2]=getFxOfBehaviorEvent(templateSequence1_cond,templateSequence1_end,templateSequence2_cond,templateSequence2_end,nInSequence,nRepsForBootstrap,doCorrectInputDistribution,alltbt,trialTypes,metadata,fakeCueInd);
+correctedDistributions.event_name=dataset.realDistributions.event_name;
 correctedDistributions.nInSequence=nInSequence;
 correctedDistributions.nRepsForBootstrap=nRepsForBootstrap;
 correctedDistributions.templateSequence1_cond=templateSequence1_cond;
 correctedDistributions.templateSequence1_end=templateSequence1_end;
 correctedDistributions.templateSequence2_cond=templateSequence2_cond;
 correctedDistributions.templateSequence2_end=templateSequence2_end;
+correctedDistributions.(['alldim_rtchanges_allTrialsSequence'])=alldim_seq_rtchanges_cond1;
+correctedDistributions.(['alldim_rtchanges_event'])=alldim_seq_rtchanges_cond2;
+correctedDistributions.(['dim1_rtchanges_allTrialsSequence'])=dim1_seq_rtchanges_cond1;
+correctedDistributions.(['dim1_rtchanges_event'])=dim1_seq_rtchanges_cond2;
+correctedDistributions.(['dim2_rtchanges_allTrialsSequence'])=dim2_seq_rtchanges_cond1;
+correctedDistributions.(['dim2_rtchanges_event'])=dim2_seq_rtchanges_cond2;
 correctedDistributions.(['rawReaching_allTrialsSequence_trial1InSeq'])=rr_cond1_trial1;
 correctedDistributions.(['rawReaching_allTrialsSequence_trialiInSeq'])=rr_cond1_triali;
 correctedDistributions.(['rawReaching_event_trial1InSeq'])=rr_cond2_trial1;
@@ -104,6 +124,8 @@ correctedDistributions.(['allTrialsSequence_RT_trialiInSeq'])=cond1_rts_triali;
 correctedDistributions.(['event_RT_trial1InSeq'])=cond2_rts_trial1;
 correctedDistributions.(['event_RT_trialiInSeq'])=cond2_rts_triali;
 correctedDistributions.(['ns'])=ns;
+correctedDistributions.(['realrtpair_seq1'])=realrtpair_seq1;
+correctedDistributions.(['realrtpair_seq2'])=realrtpair_seq2;
 
 % Save 
 f=fieldnames(correctedDistributions);
@@ -115,7 +137,7 @@ end
 
 end
 
-function [dim1_seq_rtchanges_cond1,dim1_seq_rtchanges_cond2,dim2_seq_rtchanges_cond1,dim2_seq_rtchanges_cond2,ns,cond1_isSeq,cond2_isSeq,rr_cond1_trial1,rr_cond1_triali,rr_cond2_trial1,rr_cond2_triali,cond1_rts_trial1,cond1_rts_triali,cond2_rts_trial1,cond2_rts_triali,rr_cond1_trial1_se,rr_cond1_triali_se,rr_cond2_trial1_se,rr_cond2_triali_se]=getFxOfBehaviorEvent(templateSequence1_cond,templateSequence1_end,templateSequence2_cond,templateSequence2_end,nInSequence,nRepsForBootstrap,doCorrectInputDistribution,alltbt,trialTypes,metadata,fakeCueInd)
+function [dim1_seq_rtchanges_cond1,dim1_seq_rtchanges_cond2,dim2_seq_rtchanges_cond1,dim2_seq_rtchanges_cond2,ns,cond1_isSeq,cond2_isSeq,rr_cond1_trial1,rr_cond1_triali,rr_cond2_trial1,rr_cond2_triali,cond1_rts_trial1,cond1_rts_triali,cond2_rts_trial1,cond2_rts_triali,rr_cond1_trial1_se,rr_cond1_triali_se,rr_cond2_trial1_se,rr_cond2_triali_se,realrtpair_seq1,realrtpair_seq2,alldim_seq_rtchanges_cond1,alldim_seq_rtchanges_cond2]=getFxOfBehaviorEvent(templateSequence1_cond,templateSequence1_end,templateSequence2_cond,templateSequence2_end,nInSequence,nRepsForBootstrap,doCorrectInputDistribution,alltbt,trialTypes,metadata,fakeCueInd)
 
 allDims_rt_change_cond1=nan(length(nInSequence),nRepsForBootstrap);
 allDims_rt_change_cond2=nan(length(nInSequence),nRepsForBootstrap);
@@ -149,6 +171,8 @@ rr_cond1_trial1_se=cell(1,length(nInSequence));
 rr_cond1_triali_se=cell(1,length(nInSequence));
 rr_cond2_trial1_se=cell(1,length(nInSequence));
 rr_cond2_triali_se=cell(1,length(nInSequence));
+realrtpair_seq1=cell(1,length(nInSequence));
+realrtpair_seq2=cell(1,length(nInSequence));
 for i=1:length(nInSequence)
     nSeq=nInSequence(i);
     disp(nSeq);
@@ -164,6 +188,8 @@ for i=1:length(nInSequence)
             templateSequence2{j}=templateSequence2_cond;
         end
     end
+    allVals1_alldim=[];
+    allVals2_alldim=[];
     allVals1_dim1=[];
     allVals2_dim1=[];
     allVals1_dim2=[];
@@ -180,9 +206,11 @@ for i=1:length(nInSequence)
     allRTs_cond1_triali=[];
     allRTs_cond2_trial1=[];
     allRTs_cond2_triali=[];
+    realpair_seq1=[];
+    realpair_seq2=[];
     for j=1:nRepsForBootstrap
         disp(j);
-        [allDims,dim1,dim2,dim2_closeup,rawReaching_cond1_trial1,rawReaching_cond1_triali,rawReaching_cond2_trial1,rawReaching_cond2_triali,isSeq1,isSeq2,rts_seq1_trial1,rts_seq1_triali,rts_seq2_trial1,rts_seq2_triali]=separateCueDep_and_Ind_Components(alltbt,trialTypes,metadata,fakeCueInd,templateSequence1,templateSequence2,nSeq-1,nSeq-1,doCorrectInputDistribution);
+        [allDims,dim1,dim2,dim2_closeup,rawReaching_cond1_trial1,rawReaching_cond1_triali,rawReaching_cond2_trial1,rawReaching_cond2_triali,isSeq1,isSeq2,rts_seq1_trial1,rts_seq1_triali,rts_seq2_trial1,rts_seq2_triali,rtpairs_real_seq1,rtpairs_real_seq2]=separateCueDep_and_Ind_Components(alltbt,trialTypes,metadata,fakeCueInd,templateSequence1,templateSequence2,nSeq-1,nSeq-1,doCorrectInputDistribution);
         allDims_rt_change_cond1(i,j)=allDims.med1;
         allDims_rt_change_cond2(i,j)=allDims.med2;
         allDims_p(i,j)=allDims.p;
@@ -197,6 +225,8 @@ for i=1:length(nInSequence)
         dim2_closeup_rt_change_cond1(i,j)=dim2_closeup.med1;
         dim2_closeup_rt_change_cond2(i,j)=dim2_closeup.med2;
         dim2_closeup_p(i,j)=dim2_closeup.p;
+        allVals1_alldim=[allVals1_alldim allDims.vals1];
+        allVals2_alldim=[allVals2_alldim allDims.vals2];
         allVals1_dim2=[allVals1_dim2 dim2.vals1];
         allVals2_dim2=[allVals2_dim2 dim2.vals2];
         allVals1_dim1=[allVals1_dim1 dim1.vals1];
@@ -215,7 +245,11 @@ for i=1:length(nInSequence)
         allRTs_cond1_triali=[allRTs_cond1_triali rts_seq1_triali];
         allRTs_cond2_trial1=[allRTs_cond2_trial1 rts_seq2_trial1];
         allRTs_cond2_triali=[allRTs_cond2_triali rts_seq2_triali];
+        realpair_seq1=[realpair_seq1 rtpairs_real_seq1];
+        realpair_seq2=[realpair_seq2 rtpairs_real_seq2];
     end
+    alldim_seq_rtchanges_cond1{i}=allVals1_alldim;
+    alldim_seq_rtchanges_cond2{i}=allVals2_alldim;
     dim1_seq_rtchanges_cond1{i}=allVals1_dim1;
     dim1_seq_rtchanges_cond2{i}=allVals2_dim1;
     dim2_seq_rtchanges_cond1{i}=allVals1_dim2;
@@ -234,6 +268,8 @@ for i=1:length(nInSequence)
     cond1_rts_triali{i}=allRTs_cond1_triali;
     cond2_rts_trial1{i}=allRTs_cond2_trial1;
     cond2_rts_triali{i}=allRTs_cond2_triali;
+    realrtpair_seq1{i}=realpair_seq1;
+    realrtpair_seq2{i}=realpair_seq2;
 end
 
 % i=1;
@@ -279,7 +315,7 @@ title(tit);
 
 end
 
-function [allDims,dim1,dim2,dim2_closeup,rawReaching_cond1_trial1,rawReaching_cond1_triali,rawReaching_cond2_trial1,rawReaching_cond2_triali,isSeq1,isSeq2,rts_seq1_trial1,rts_seq1_triali,rts_seq2_trial1,rts_seq2_triali]=separateCueDep_and_Ind_Components(alltbt,trialTypes,metadata,fakeCueInd,templateSequence1,templateSequence2,nNext1,nNext2,doCorrectInputDistribution)
+function [allDims,dim1,dim2,dim2_closeup,rawReaching_cond1_trial1,rawReaching_cond1_triali,rawReaching_cond2_trial1,rawReaching_cond2_triali,isSeq1,isSeq2,rts_seq1_trial1,rts_seq1_triali,rts_seq2_trial1,rts_seq2_triali,rtpairs_real_seq1,rtpairs_real_seq2]=separateCueDep_and_Ind_Components(alltbt,trialTypes,metadata,fakeCueInd,templateSequence1,templateSequence2,nNext1,nNext2,doCorrectInputDistribution)
 
 % separate cue-dependent and cue-independent components of RT change
 
@@ -316,6 +352,8 @@ if doCorrectInputDistribution==true
 end
 isSeq1=rt_pairs.sequenceMatchStarts1;
 isSeq2=rt_pairs.sequenceMatchStarts2;
+rtpairs_real_seq1=rt_pairs.real_rt_pair1(rt_pairs.sequenceMatchStarts1==1);
+rtpairs_real_seq2=rt_pairs.real_rt_pair2(rt_pairs.sequenceMatchStarts2==1);
 rts_seq1_trial1=rt_pairs.all_rt1(rt_pairs.sequenceMatchStarts1==1);
 rts_seq1_triali=rt_pairs.all_rt1_triali(rt_pairs.sequenceMatchStarts1==1);
 rts_seq2_trial1=rt_pairs.all_rt2(rt_pairs.sequenceMatchStarts2==1);
@@ -333,6 +371,8 @@ real_rt_pairs2=rt_pairs.rt_pairs2_contingent;
 allDims.p=p_allDims;
 allDims.med1=med1_allDims;
 allDims.med2=med2_allDims;
+allDims.vals1=real_rt_pairs1;
+allDims.vals2=real_rt_pairs2;
 allDims.n_cond1=nansum(rt_pairs.sequenceMatchStarts1==1);
 allDims.n_cond2=nansum(rt_pairs.sequenceMatchStarts2==1);
 
