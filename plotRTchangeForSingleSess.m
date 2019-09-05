@@ -1,18 +1,24 @@
 function plotRTchangeForSingleSess(dataset,alltbt,metadata,trialTypes)
 
+% use next two lines if don't have alltbt, metadata and trialTypes loaded
+if isempty(alltbt) | isempty(metadata) | isempty(trialTypes)
+    trialTypes.dprime=ones(size(dataset.allTrialsSequence_isSeq{1}))';
+    metadata.sessid=ones(size(dataset.allTrialsSequence_isSeq{1}))';
+end
+
 whichsess=unique(metadata.sessid(trialTypes.dprime<1.6));
 %whichsess=whichsess(3);
 plot_rt_pdf=false;
 plot_rt_cdf=false;
-plot_delta_rt_asFunc_rt=false;
-plot_delta_rt_asFunc_rt_removeMeanRegression=true;
+plot_delta_rt_asFunc_rt=true;
+plot_delta_rt_asFunc_rt_removeMeanRegression=false;
 plot_dim2_delta_asFunc_rt=false;
 scatterJitter=0.05;
 alpha=0.5;
 histo_nbins=100; % number of bins for reaction time histogram
 backup_histo_nbins=histo_nbins;
 nBinsFor2Dhist=200;
-smoothSize=15;
+smoothSize=2;
 
 if isfield(trialTypes,'dprime') && length(whichsess)==1
     disp(['dprime for this session is ' num2str(unique(trialTypes.dprime(ismember(metadata.sessid,whichsess))))]);
@@ -63,6 +69,7 @@ end
 % Plot change in RT as a function of RT
 if plot_delta_rt_asFunc_rt==true
     for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
+%     for i=1:1
         temp1=dataset.allTrialsSequence_RT_trial1InSeq{i};
         temp1=temp1(dataset.realrtpair_seq1{i}==1 & ismember(metadata.sessid(dataset.allTrialsSequence_isSeq{i}==1),whichsess)');
         temp2=dataset.allTrialsSequence_RT_trialiInSeq{i};
@@ -74,6 +81,41 @@ if plot_delta_rt_asFunc_rt==true
         temp2_seq2=temp2_seq2(dataset.realrtpair_seq2{i}==1 & ismember(metadata.sessid(dataset.event_isSeq{i}==1),whichsess)');
         rtchanges_seq2=temp1_seq2-temp2_seq2;
         plotScatter(temp1,rtchanges,temp1_seq2,rtchanges_seq2,scatterJitter,scatterJitter,['Change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later as a function of RT'],'RT trials 1','Change in RT',alpha);
+        if smoothSize>1
+            K=ones(smoothSize);
+            x2=temp1_seq2;
+            y2=rtchanges_seq2;
+            nBinsPerDim=nBinsFor2Dhist;
+            if size(x2,2)>1
+                % make column vector
+                x2=x2';
+                y2=y2';
+            end
+            if length(nBinsPerDim)>1
+                [n2,bin_c]=hist3([x2 y2],'Ctrs',nBinsPerDim);
+            else
+                [n2,bin_c]=hist3([x2 y2],[nBinsPerDim nBinsPerDim]);
+            end            
+            % Normalize 
+            n2=n2./nansum(nansum(n2,1),2);
+            x=bin_c{1};
+            y=bin_c{2};
+            smoothMat=conv2(n2',K,'same');
+            figure();
+            imagesc(x,y,log(smoothMat));
+            set(gca,'YDir','normal');
+            title(['Smoothed -- For event: RT changes as a function of RT']);
+            xlabel('Reaction time trial 1');
+            ylabel('Change in reaction times');
+            [diff_n,x,y]=compareWithHeatmaps(temp1,rtchanges,temp1_seq2,rtchanges_seq2,nBinsFor2Dhist,'Difference between event and all trials');
+            smoothMat=conv2(diff_n',K,'same');
+            figure();
+            imagesc(x(1:end-1),y(1:end-1),smoothMat(1:end-1,1:end-1));
+            set(gca,'YDir','normal');
+            title(['Smoothed -- Difference between event and all trials']);
+            xlabel('Reaction time trial 1');
+            ylabel('Change in reaction times');
+        end
     end
 end
 
@@ -95,16 +137,16 @@ if plot_delta_rt_asFunc_rt_removeMeanRegression==true
         %removeMeanRegression(temp1_seq2,temp1_seq2,rtchanges_seq2,scatterJitter,alpha,'Event',nBinsFor2Dhist); % get bootstrapped distribution from event pdf
         [diff2Dhist_event,x,y]=removeMeanRegression(temp1,temp1_seq2,rtchanges_seq2,scatterJitter,alpha,'Event',{x; y}); % get bootstrapped distribution from all trials pdf
         figure();
-        imagesc(x,y,diff2Dhist_event'-diff2Dhist_alltrials');
+        imagesc(x,y,log(diff2Dhist_event'-diff2Dhist_alltrials'-nanmin(nanmin(diff2Dhist_event'-diff2Dhist_alltrials'))));
         set(gca,'YDir','normal');
         title(['Difference of all trials and event histograms']);
         xlabel('Reaction time trial 1');
         ylabel('Change in reaction times');
         if smoothSize>1
             K=ones(smoothSize);
-            smoothMat=conv2(diff2Dhist_event'-diff2Dhist_alltrials',K,'same');
+            smoothMat=conv2(diff2Dhist_event'-diff2Dhist_alltrials'-nanmin(nanmin(diff2Dhist_event'-diff2Dhist_alltrials')),K,'same');
             figure();
-            imagesc(x,y,smoothMat);
+            imagesc(x,y,log(smoothMat));
             set(gca,'YDir','normal');
             title(['Smoothed -- Difference of all trials and event histograms']);
             xlabel('Reaction time trial 1');
@@ -184,21 +226,21 @@ n=n./nansum(nansum(n,1),2);
 
 diff_n=n2-n;
 figure();
-imagesc(bin_c{1},bin_c{2},n');
+imagesc(bin_c{1},bin_c{2},log(n'));
 set(gca,'YDir','normal');
 title([tit ' Bootstrap histogram']);
 xlabel('Reaction time trial 1');
 ylabel('Change in reaction times');
 
 figure();
-imagesc(bin_c{1},bin_c{2},n2');
+imagesc(bin_c{1},bin_c{2},log(n2'));
 set(gca,'YDir','normal');
 title([tit ' Real events histogram']);
 xlabel('Reaction time trial 1');
 ylabel('Change in reaction times');
 
 figure();
-imagesc(bin_c{1},bin_c{2},diff_n');
+imagesc(bin_c{1},bin_c{2},log(diff_n'-nanmin(nanmin(diff_n'))));
 set(gca,'YDir','normal');
 title([tit ' Difference histogram']);
 xlabel('Reaction time trial 1');

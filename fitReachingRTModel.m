@@ -1,17 +1,23 @@
 function prediction=fitReachingRTModel(dataset,alltbt,metadata,trialTypes,rateTermParams,behaviorEvent,ITI)
 
-bins=0:0.035:10;
+bins=0:0.035:9;
 rts=dataset.allTrialsSequence_RT_trial1InSeq{1};
+smoothSize=1;
+sameRTforEachTrial=false; % if true, will assume same reaction time for all subsequent trials, otherwise will sample randomly from current rt pdf
+n_update_steps=1; % How many update steps (e.g., trials)
 
 % Rate-based term and RPE-based term
 % Each of these makes a prediction about how the reaction time distribution
 % will update, given a particular input distribution and behavioral event
 
 % Get prediction for change in the reaction time distribution, as a
-% function of the reaction time distribution and current reaction time
+% function of the input reaction time distribution and current reaction time
+
+
 
 % Rate-based term
 
+% Get effects of behavioral event on rate of reaching
 fits=fitGammaAandBeta(alltbt,rateTermParams,true);
 if isempty(rateTermParams)
     save('\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\mouse summary data 20190726\gammafits.mat','fits');
@@ -20,190 +26,378 @@ end
 rt_pdf = @(rts,bins) histcounts(rts,bins)./nansum(histcounts(rts,bins));
 bin_centers = @(bins) nanmean([bins(1:end-1); bins(2:end)],1);
 
-update_rate_term(rt_pdf(rts,bins),bins,0,ITI,behaviorEvent,false,fits);
-return
+% As a function of different current reaction times
+try_curr_rts=bin_centers(bins);
+rt_change_pdfs=nan(length(try_curr_rts),length(bin_centers(unique([-fliplr(bins) bins]))));
+rt_pdf_outs=nan(length(try_curr_rts),length(bin_centers(bins)));
+for i=1:length(try_curr_rts)
+    rt_pdf_out=rt_pdf(rts,bins);
+    if sameRTforEachTrial==true
+        for j=1:n_update_steps % if RT is same for each trial
+            rt_pdf_out=update_rate_term(rt_pdf_out,bins,try_curr_rts(i),ITI,behaviorEvent,true,fits);
+        end
+    else
+        for j=1:n_update_steps % if RT is randomly sampled from RT distribution for each trial
+            if j==1
+                rt_pdf_out=update_rate_term(rt_pdf_out,bins,try_curr_rts(i),ITI,behaviorEvent,true,fits);
+            else
+                rt_pdf_out=update_rate_term(rt_pdf_out,bins,randsample(try_curr_rts,1,true,rt_pdf_out),ITI,behaviorEvent,true,fits);
+            end
+        end
+    end
+    rt_pdf_outs(i,:)=rt_pdf_out;
+    [rt_change_pdfs(i,:),rt_change_bins]=getRTchange_fromCurrAndUpdatedRTpdfs(rt_pdf(rts,bins),rt_pdf_out,bins,true,[bins(i) bins(i+1)]); % if last argument is empty, will plot change distribution for all current reaction times
+end
+
+prediction.rate_term.rt_change_pdfs=rt_change_pdfs;
+prediction.rate_term.rt_change_bins=rt_change_bins;
+prediction.rate_term.rt_pdf_outs=rt_pdf_outs;
+
+% Plot result
+K=ones(smoothSize);
+smoothMat=conv2(rt_change_pdfs',K,'same');
+figure();
+imagesc(try_curr_rts,bin_centers(rt_change_bins),log(smoothMat));
+set(gca,'YDir','normal');
+title(['Rate term -- Change in RT as a function of RT (smoothed)']);
+xlabel('Reaction time trial 1');
+ylabel('Change in reaction times');
 
 
-sum2exp = @(x,tau1,tau2,a,b) a*exp(-x/tau1)+b*exp(-x/tau2);
-getTimeIndShift = @(x_step,timeShift) floor(timeShift/x_step);
-applyDriveBasedTerm = @(reach_pdf,reach_suppress,timeIndShift) subplus(reach_pdf(1:end-timeIndShift)-reach_suppress(timeIndShift+1:end));
 
+% RPE-based term
 
+% Learning rate, alpha
+% alpha=0.03;
+alpha=1;
+
+temp1=dataset.allTrialsSequence_RT_trial1InSeq{1};
+temp1=temp1(dataset.realrtpair_seq1{1}==1);
+temp1_seq2=dataset.event_RT_trial1InSeq{1};
+temp1_seq2=temp1_seq2(dataset.realrtpair_seq2{1}==1);
+temp2_seq2=dataset.event_RT_trialiInSeq{1};
+temp2_seq2=temp2_seq2(dataset.realrtpair_seq2{1}==1);
+rtchanges_seq2=temp1_seq2-temp2_seq2;
+fitAlpha(temp1_seq2,temp1,temp1_seq2,rtchanges_seq2,{bin_centers(bins), bin_centers(rt_change_bins)});
+
+% RT pdf as proxy for value prediction
 rt_pdf = @(rts,bins) histcounts(rts,bins)./nansum(histcounts(rts,bins));
 bin_centers = @(bins) nanmean([bins(1:end-1); bins(2:end)],1);
-nTrials=1000;
-fake_rts1=nan(1,nTrials);
-fake_rts2=nan(1,nTrials);
-fake_rts3=nan(1,nTrials);
-fake_rts4=nan(1,nTrials);
-fake_rts5=nan(1,nTrials);
-for i=1:nTrials
-    % Get expected number of reaches per trial from pdf?
-    sampleFromFunc1=randsample(bin_centers(bins),1,true,rt_pdf(rts,bins));
-    sampleFromFunc2=randsample(bin_centers(bins),5,true,rt_pdf(rts,bins));
-    sampleFromFunc3=randsample(bin_centers(bins),10,true,rt_pdf(rts,bins));
-    sampleFromFunc4=randsample(bin_centers(bins),20,true,rt_pdf(rts,bins));
-    sampleFromFunc5=randsample(bin_centers(bins),40,true,rt_pdf(rts,bins));
-    % Get "reaction time" of first reach
-    fake_rts1(i)=min(sampleFromFunc1);
-    fake_rts2(i)=min(sampleFromFunc2);
-    fake_rts3(i)=min(sampleFromFunc3);
-    fake_rts4(i)=min(sampleFromFunc4);
-    fake_rts5(i)=min(sampleFromFunc5);
+
+% As a function of different current reaction times
+try_curr_rts=bin_centers(bins);
+rt_change_pdfs=nan(length(try_curr_rts),length(bin_centers(unique([-fliplr(bins) bins]))));
+rt_pdf_outs=nan(length(try_curr_rts),length(bin_centers(bins)));
+for i=1:length(try_curr_rts)
+    rt_pdf_out=rt_pdf(rts,bins);
+    if sameRTforEachTrial==true
+        for j=1:n_update_steps % if RT is same for each trial
+            rt_pdf_out=update_RPE_term(rt_pdf_out,bins,try_curr_rts(i),alpha,true);
+        end
+    else
+        for j=1:n_update_steps % if RT is randomly sampled from RT distribution for each trial
+            if j==1
+                rt_pdf_out=update_RPE_term(rt_pdf_out,bins,try_curr_rts(i),alpha,true);
+            else
+                rt_pdf_out=update_RPE_term(rt_pdf_out,bins,randsample(try_curr_rts,1,true,rt_pdf_out),alpha,true);
+            end
+        end
+    end
+    rt_pdf_outs(i,:)=rt_pdf_out;
+    [rt_change_pdfs(i,:),rt_change_bins]=getRTchange_fromCurrAndUpdatedRTpdfs(rt_pdf(rts,bins),rt_pdf_out,bins,true,[bins(i) bins(i+1)]);
 end
-histo_nbins=plotHist(fake_rts1,fake_rts2,2000,'Sample and get RTs','RT','c','m');
-plotHist(fake_rts3,fake_rts4,histo_nbins,'Sample and get RTs','RT','k','r');
-plotHist(fake_rts5,fake_rts4,histo_nbins,'Sample and get RTs','RT','b','r');
 
-return
+prediction.rpe_term.rt_change_pdfs=rt_change_pdfs;
+prediction.rpe_term.rt_change_bins=rt_change_bins;
+prediction.rpe_term.rt_pdf_outs=rt_pdf_outs;
 
-% % RPE-based term
-% alpha=0.03;
-% % RT pdf as proxy for value prediction
-% rt_pdf = @(rts,bins) histcounts(rts,bins)./nansum(histcounts(rts,bins));
-% bin_centers = @(bins) nanmean([bins(1:end-1); bins(2:end)],1);
-% n_steps_to_update=5000;
-% % sample reaction times from current RT PDF
-% curr_rts=randsample(bin_centers(bins),n_steps_to_update,true,rt_pdf(rts,bins));
-% suppressOutput=true;
-% [rt_pdf_out,bins]=update_RPE_term(rt_pdf(rts,bins),bins,curr_rts(1),alpha,false);
-% for i=2:n_steps_to_update-1
-%     if mod(i,200)==0
-%         disp(i);
-%     end
-%     [rt_pdf_out,bins]=update_RPE_term(rt_pdf_out,bins,curr_rts(i),alpha,suppressOutput);
+% Plot result
+K=ones(smoothSize);
+smoothMat=conv2(rt_change_pdfs',K,'same');
+figure();
+imagesc(try_curr_rts,bin_centers(rt_change_bins),log(smoothMat));
+set(gca,'YDir','normal');
+title(['RPE term -- Change in RT as a function of RT (smoothed)']);
+xlabel('Reaction time trial 1');
+ylabel('Change in reaction times');
+
+% Plot how RPE update accumulates over multiple trials, given different RTs
+% on different trials
+% If assume non-changing underlying RT pdf 
+% Note that this is the same as increasing alpha, the learning rate
+% update_matrix=rt_pdf_outs-repmat(rt_pdf(rts,bins),size(rt_pdf_outs,1),1);
+% n_update_steps=50;
+% rt_change_pdfs=nan(length(try_curr_rts),length(bin_centers(unique([-fliplr(bins) bins]))));
+% for i=1:length(try_curr_rts)
+%     [rt_change_pdfs(i,:),rt_change_bins]=getRTchange_fromCurrAndUpdatedRTpdfs(rt_pdf(rts,bins),rt_pdf(rts,bins)+n_update_steps.*update_matrix(i,:),bins,true,[bins(i) bins(i+1)]);
 % end
-% [rt_pdf_out,bins]=update_RPE_term(rt_pdf_out,bins,curr_rts(8),alpha,false);
-% 
-% return
-
-
-% Question 1: Can I fit RTs as Poisson?
-% As sum of 2 Poissons plus a baseline rate, yes
-% x=0:0.07:40;
-% poisspdf(x,17)/30+poisspdf(x,6)/4+0.00135
-% Question 1: Can I fit RTs as gammas?
-% As sum of 3 gammas, yes
-
-% Plot reaction times distribution
-% plot_rt_pdf=true;
-% histo_nbins=200; % number of bins for reaction time histogram
-% backup_histo_nbins=histo_nbins;
-% if plot_rt_pdf==true
-%     for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
-%         [histo_nbins,counts1,counts2]=plotHist(dataset.allTrialsSequence_RT_trial1InSeq{i},dataset.allTrialsSequence_RT_trialiInSeq{i},histo_nbins,['Reaction Times all trials reference: trial 1 (black) vs ' num2str(dataset.nInSequence(i)-1) ' later (magenta)'],'RT (sec)','k','r');
-%     end
-%     % Attempt to fit gamma 
-%     temp=dataset.allTrialsSequence_RT_trial1InSeq{i};
-%     %lambdahat=poissfit(temp(~isnan(temp))/0.07);
-%     figure(); 
-%     [n,x]=cityscape_hist(counts1,histo_nbins);
-%     plot(x,n./nansum(n),'Color','k');
-%     %plot(x/0.07,n./nansum(n),'Color','k');
-%     %hold on;
-%     %plot(x/0.07,poisspdf(x/0.07,lambdahat),'Color','b');
-%     y=gampdf(x,3,1/6)/1;
-%     y2=gampdf(x,3,5)/2;
-%     y3=gampdf(x,3,1)/4;
-%     hold on;
-%     plot(x,(y)./nansum(y),'Color','m');
-%     plot(x,(y2)./nansum(y2),'Color','c');
-%     plot(x,(y3)./nansum(y3),'Color','g');
-%     plot(x,(y+y2+y3)./nansum(y+y2+y3),'Color','b');
-%     
-%     temp=dataset.event_name;
-%     temp(regexp(temp,'_'))=' ';
-%     for i=1:length(dataset.event_RT_trial1InSeq)
-%         histo_nbins=plotHist(dataset.event_RT_trial1InSeq{i},dataset.event_RT_trialiInSeq{i},histo_nbins,['Reaction Times fx of ' temp ': trial 1 (black) vs ' num2str(dataset.nInSequence(i)-1) ' later (magenta)'],'RT (sec)','k','r');
-%     end
+% if smoothSize>1
+%     K=ones(smoothSize);
+%     smoothMat=conv2(rt_change_pdfs',K,'same');
+%     figure();
+%     imagesc(try_curr_rts,bin_centers(rt_change_bins),smoothMat);
+%     set(gca,'YDir','normal');
+%     title(['RPE term -- multiple update']);
+%     xlabel('Reaction time trial 1');
+%     ylabel('Change in reaction times');
 % end
 
+% Plot sum
+A=1;
+B=1;
+K=ones(smoothSize);
+smoothMat=conv2(A.*prediction.rpe_term.rt_change_pdfs'+B.*prediction.rate_term.rt_change_pdfs',K,'same');
+figure();
+imagesc(try_curr_rts,bin_centers(rt_change_bins),smoothMat);
+set(gca,'YDir','normal');
+title(['Sum of RPE and rate terms -- Change in RT as a function of RT (smoothed)']);
+xlabel('Reaction time trial 1');
+ylabel('Change in reaction times');
 
 
 
-
-
-
-
-
-
-
-
-% Drive-based term
-% Acts primarily on reach rate
-% Which will impact RT measurements
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-% Model change in RT as a shift in rate of a Poisson process
-
-% From relative suppression of reaching after mouse drops pellet wrt
-% missing pellet, which can be fit as sum of 2 exponentials
-sum2exp = @(x,tau1,tau2,a,b) a*exp(-x/tau1)+b*exp(-x/tau2);
-getTimeIndShift = @(x_step,timeShift) floor(timeShift/x_step);
-applyDriveBasedTerm = @(reach_pdf,reach_suppress,timeIndShift) subplus(reach_pdf(1:end-timeIndShift)-reach_suppress(timeIndShift+1:end));
-
-% Transform to change in reaction time, accounting for any decrease in rate
-
-
-
-x=0:0.001:15; y=0.1*lognpdf(x,0,0.5); figure(); plot(x,y);
-tau=0.5;
-tau2=5;
-a=0.7;
-b=0.3;
-x_exp=0:0.001:15; y_exp=a*exp(-x_exp/tau)+b*exp(-x_exp/tau2); figure(); plot(x_exp,y_exp);
-figure(); plot(x,y);
-addBaseline=0.005;
-% hold on; i=7000; func1=subplus(y(1:end-i)-y_exp(i+1:end))+ones(size(y_exp(i+1:end))).*addBaseline; plot(x(1:end-i),func1,'Color','c');
-% hold on; i=9000; func2=subplus(y(1:end-i)-y_exp(i+1:end))+ones(size(y_exp(i+1:end))).*addBaseline; plot(x(1:end-i),func2,'Color','m');
-hold on; i=7000; func1=subplus(y(1:end-i)-y_exp(i+1:end)); plot(x(1:end-i),func1,'Color','c');
-hold on; i=9000; func2=subplus(y(1:end-i)-y_exp(i+1:end)); plot(x(1:end-i),func2,'Color','m');
-
-sample_n=10000;
-sampleFromFunc1=randsample(x(1:length(func1)),sample_n,true,func1);
-sampleFromFunc2=randsample(x(1:length(func2)),sample_n,true,func2);
-plotHist(sampleFromFunc1,sampleFromFunc2,50,'Sampling','Reaches','c','m');
-
-nTrials=1000;
-rts1=nan(1,nTrials);
-rts2=nan(1,nTrials);
-for i=1:nTrials
-    sample_n=50;
-    % Get expected number of reaches per trial from pdf?
-    sampleFromFunc1=randsample(x(1:length(func1)),sample_n,true,func1);
-    sampleFromFunc2=randsample(x(1:length(func2)),sample_n,true,func2);
-    % Get "reaction time" of first reach
-    rts1(i)=min(sampleFromFunc1);
-    rts2(i)=min(sampleFromFunc2);
+% Feed RPE-updated RT pdf into rate adjustment
+try_curr_rts=bin_centers(bins);
+rt_change_pdfs=nan(length(try_curr_rts),length(bin_centers(unique([-fliplr(bins) bins]))));
+for i=1:length(try_curr_rts)
+    rt_pdf_out=update_RPE_term(rt_pdf(rts,bins),bins,try_curr_rts(i),alpha,true);
+    rt_pdf_out=update_rate_term(rt_pdf_out,bins,try_curr_rts(i),ITI,behaviorEvent,true,fits);
+    [rt_change_pdfs(i,:),rt_change_bins]=getRTchange_fromCurrAndUpdatedRTpdfs(rt_pdf(rts,bins),rt_pdf_out,bins,true,[bins(i) bins(i+1)]);
 end
-[histo_nbins,counts1,counts2]=plotHist(rts1,rts2,50,'Sample and get RTs','RT','c','m');
+
+prediction.rpe_then_rate_term.rt_change_pdfs=rt_change_pdfs;
+prediction.rpe_then_rate_term.rt_change_bins=rt_change_bins;
+
+% Plot RPE adjustment then rate adjustment, combined
+K=ones(smoothSize);
+smoothMat=conv2(prediction.rpe_then_rate_term.rt_change_pdfs',K,'same');
+figure();
+imagesc(try_curr_rts,bin_centers(rt_change_bins),smoothMat);
+set(gca,'YDir','normal');
+title(['RPE adjustment before rate adjustment -- Change in RT as a function of RT (smoothed)']);
+xlabel('Reaction time trial 1');
+ylabel('Change in reaction times');
+
+
+
+% Plot after removing regression to the mean
+rt_change_pdfs=prediction.rpe_term.rt_change_pdfs;
+rt_change_bins=prediction.rpe_term.rt_change_bins;
+[diff2Dhist,x,y]=removeMeanRegression(rts,rts,randsample(bin_centers(rt_change_bins),length(rts),true,rt_pdf(rts,bins)*rt_change_pdfs),{bin_centers(bins), bin_centers(rt_change_bins)});
+K=ones(smoothSize);
+smoothMat=conv2(diff2Dhist'-nanmin(nanmin(diff2Dhist')),K,'same');
+figure();
+imagesc(x,y,log(smoothMat(1:end-1,1:end-1)));
+set(gca,'YDir','normal');
+title(['Rate/RPE term -- regression to mean removed']);
+xlabel('Reaction time trial 1');
+ylabel('Change in reaction times');
+
+end
+
+function fitAlpha(rts1,rts2,actual_first_rts,actual_rt_changes,binsFor2Dhist)
+% pass in a dataset for quantifying RPE learning rate, alpha
+% alpha is the learning rate per trial
+% may vary as a function of learning stage, etc.
+% but here just approximate a single learning rate 
+
+RPE_slice_at=[0 0.25]; % bin of delta_rts where expect to see RPE
+nonRPE_slice_at=[-14 -0.5]; % bin of delta_rts where do not expect to see RPE
+
+% fit regression to the mean to the slowed reaction time pairs
+% fit putative RPE component to the faster reaction time pairs
+
+% get what we expect from regression to the mean
+% generate a distribution from reaction time pdf
+% bootstrap to sample change in rts
+% note that we are not taking actual paired reaction times, take instead
+% fake reaction time pairs that would result from a stationary rt pdf over
+% the course of the experiment
+% this will give the change resulting from regression to the mean
+n_bootstrap=10000; % how many times to run bootstrap, will take 1 pair randomly per iteration of bootstrap
+delta_rts=nan(1,n_bootstrap);
+first_rt=nan(1,n_bootstrap);
+second_rt=nan(1,n_bootstrap);
+for i=1:n_bootstrap
+    curr_rts=[rts1(randsample(length(rts1),1,true)) rts2(randsample(length(rts2),1,true))]; % with replacement
+    delta_rts(i)=diff(curr_rts(end:-1:1));
+    first_rt(i)=curr_rts(1);
+    second_rt(i)=curr_rts(2);
+end
+
+% make heatmap of regression to the mean
+% make heatmap of real, presumably RPE-containing data
+[diff_n,x,y,regToMean,realData]=compareWithHeatmaps(first_rt,delta_rts,actual_first_rts,actual_rt_changes,binsFor2Dhist);
+
+nonRPE_regToMean=getPDFat(x,y,regToMean,nonRPE_slice_at);
+nonRPE_realData=getPDFat(x,y,realData,nonRPE_slice_at);
+scaleFac=fitNonRPEtoData(nonRPE_regToMean,nonRPE_realData);
 
 figure();
-plot(x(1:length(func1)),accumulateDistribution(func1),'Color','c');
+plot(x,scaleFac.*nonRPE_regToMean,'Color','k');
 hold on;
-plot(x(1:length(func2)),accumulateDistribution(func2),'Color','m');
+plot(x,nonRPE_realData,'Color','r');
+legend({'Regress to mean','Real data'});
+title('Scale non-RPE components');
 
+RPE_regToMean=getPDFat(x,y,regToMean,RPE_slice_at);
+RPE_realData=getPDFat(x,y,realData,RPE_slice_at);
+
+figure();
+plot(x,scaleFac.*RPE_regToMean,'Color','k');
+hold on;
+plot(x,RPE_realData,'Color','r');
+legend({'Regress to mean','Real data'});
+title('RPE components, scaled');
+
+% Fit RT pdf to difference, in order to get alpha
+% Be sure that RT pdf sums to one
+actual_first_rts
+
+pause;
 
 end
 
-function update_rate_term(rt_pdf,bins,curr_rt,curr_ITI,curr_event,suppressOutput,fits)
+function scaleFac=fitNonRPEtoData(regToMean,realData)
+
+tryRange=0.01:0.01:50;
+cost=nan(1,length(tryRange));
+for i=1:length(tryRange)
+    currRange=tryRange(i);
+    cost(i)=nansum((currRange.*regToMean-realData).^2); % least sum of squares
+end
+[~,mi]=nanmin(cost);
+scaleFac=tryRange(mi);
+
+end
+
+function slice=getPDFat(x,y,pdf2D,y_bin)
+
+slice=nanmean(pdf2D(:,y>=y_bin(1) & y<=y_bin(2)),2);
+
+end
+
+function [diff2Dhist,x,y]=removeMeanRegression(rts,actual_first_rts,actual_rt_changes,binsFor2Dhist)
+
+% generate a distribution from reaction time pdf
+% bootstrap to sample change in rts
+% note that we are not taking actual paired reaction times, take instead
+% fake reaction time pairs that would result from a stationary rt pdf over
+% the course of the experiment
+% this will give the change resulting from regression to the mean
+n_bootstrap=10000; % how many times to run bootstrap, will take 1 pair randomly per iteration of bootstrap
+delta_rts=nan(1,n_bootstrap);
+first_rt=nan(1,n_bootstrap);
+second_rt=nan(1,n_bootstrap);
+for i=1:n_bootstrap
+    curr_rts=rts(randsample(length(rts),2,true)); % with replacement
+    delta_rts(i)=diff(curr_rts(end:-1:1));
+    first_rt(i)=curr_rts(1);
+    second_rt(i)=curr_rts(2);
+end
+
+% compare actual change in reaction times distribution to this bootstrapped
+% distribution
+% Heatmap comparison
+[diff2Dhist,x,y]=compareWithHeatmaps(first_rt,delta_rts,actual_first_rts,actual_rt_changes,binsFor2Dhist);
+
+end
+
+function [diff_n,x,y,n,n2]=compareWithHeatmaps(x1,y1,x2,y2,nBinsPerDim)
+
+% make 2D histogram
+if size(x1,2)>1
+    % make column vector
+    x1=x1';
+    y1=y1';
+    x2=x2';
+    y2=y2';
+end
+if length(nBinsPerDim)>1
+    [n,bin_c]=hist3([x1 y1],'Ctrs',nBinsPerDim);
+else
+    [n,bin_c]=hist3([x1 y1],[nBinsPerDim nBinsPerDim]);
+end
+[n2]=hist3([x2 y2],'Ctrs',bin_c);
+
+% Normalize each
+n2=n2./nansum(nansum(n2,1),2);
+n=n./nansum(nansum(n,1),2);
+
+diff_n=n2-n;
+figure();
+imagesc(bin_c{1},bin_c{2},log(n'));
+set(gca,'YDir','normal');
+title(['Regression to the mean only']);
+xlabel('Reaction time trial 1');
+ylabel('Change in reaction times');
+
+figure();
+imagesc(bin_c{1},bin_c{2},log(n2'));
+set(gca,'YDir','normal');
+title(['From RT pairs with Rate/RPE']);
+xlabel('Reaction time trial 1');
+ylabel('Change in reaction times');
+
+figure();
+imagesc(bin_c{1},bin_c{2},log(diff_n'-nanmin(nanmin(diff_n'))));
+set(gca,'YDir','normal');
+title(['RT pairs with Rate/RPE minus regression to the mean']);
+xlabel('Reaction time trial 1');
+ylabel('Change in reaction times');
+
+x=bin_c{1};
+y=bin_c{2};
+
+end
+
+function [rt_change_pdf,rt_change_bins]=getRTchange_fromCurrAndUpdatedRTpdfs(curr_rt_pdf,updated_rt_pdf,bins,suppressOutput,curr_rt)
+
+% Get the distribution of reaction time changes expected given the input
+% reaction time distribution (curr_rt_pdf) and the reaction time
+% distribution on the next trial (updated_rt_pdf)
+
+% This is the difference of these two random variables
+sample_n=30000;
+bin_centers = @(bins) nanmean([bins(1:end-1); bins(2:end)],1);
+rts1=randsample(bin_centers(bins),sample_n,true,curr_rt_pdf);
+rts2=randsample(bin_centers(bins),sample_n,true,updated_rt_pdf);
+rt_diff=rts1-rts2;
+[n,x]=histcounts(rts1,bins);
+if suppressOutput==false
+    [n,x]=cityscape_hist(n,x);
+    figure();
+    plot(x,n./nansum(n),'Color','b');
+    hold on;
+    [n,x]=cityscape_hist(curr_rt_pdf,bins);
+    plot(x,n./nansum(n),'Color','r');
+    legend({'Resample RT PDF','RT PDF'});
+    xlabel('Reaction times (sec)');
+    ylabel('Count');
+    title('Reaction time PDF');
+end
+if ~isempty(curr_rt)
+    % will take only rt pairs for which first rt is curr_rt
+    rt_diff=rt_diff(rts1>curr_rt(1) & rts1<=curr_rt(2));
+else 
+    % will take all rt pairs for differences
+end
+[n,x]=histcounts(rt_diff,unique([-fliplr(bins) bins]));
+rt_change_pdf=n;
+rt_change_bins=x;
+
+if suppressOutput==false
+    [n,x]=cityscape_hist(n,x);
+    figure();
+    plot(x,n./nansum(n),'Color','k');
+    xlabel('Reaction times (sec)');
+    ylabel('Count');
+    title('Change in reaction time');
+end
+
+end
+
+function update_rt_pdf=update_rate_term(rt_pdf,bins,curr_rt,curr_ITI,curr_event,suppressOutput,fits)
 
 % After a long time (ITI), effect of touching pellet on previous trial is
 % primarily a change in rate of reaching
@@ -219,8 +413,6 @@ pdf_wait = @(bins,a,b) gampdf(bin_centers(bins),a,b);
 
 % get a,b for pdf(wait time) from curr_rt
 [a,b]=getGammaAandBeta(curr_rt,curr_ITI,curr_event,fits);
-disp(a);
-disp(b);
 
 normFac=calibrateRateUpdate(fits,pdf_wait);
 
@@ -312,12 +504,12 @@ nIndsToTake=200;
 smoothFitParams=false; % will smooth fitted params over time
 useFitsToFits=true; % will use fits for how params change over time
 
-timeStep=mode(diff(nanmean(alltbt.times,1)));
-cueInd=find(nanmean(alltbt.cueZone_onVoff,1)>0,1,'first');
-
-withinRange_inds=[cueInd+ceil(withinRange(1)/timeStep) cueInd+ceil(withinRange(2)/timeStep)];
-
 if isempty(rateTermParams)
+    timeStep=mode(diff(nanmean(alltbt.times,1)));
+    cueInd=find(nanmean(alltbt.cueZone_onVoff,1)>0,1,'first');
+    
+    withinRange_inds=[cueInd+ceil(withinRange(1)/timeStep) cueInd+ceil(withinRange(2)/timeStep)];
+
     temp=alltbt.reachBatch_drop_reachStarts;
     touchAligned=alignToEvent(temp,withinRange_inds,alltbt.all_reachBatch,nIndsToTake);
     

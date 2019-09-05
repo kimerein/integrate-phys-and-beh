@@ -47,14 +47,14 @@ templateSequence1_end=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_
 % Get effects of, e.g., "Mouse touches pellet" on RT
 nInSequence=[2 3 4];
 nRepsForBootstrap=20;
-%templateSequence2_cond=any(alltbt.all_reachBatch>0.5,2) & trialTypes.touched_pellet==1 & trialTypes.led==0;
-templateSequence2_cond=trialTypes.touched_pellet==1 & trialTypes.led==1;
+% templateSequence2_cond=any(alltbt.all_reachBatch>0.5,2) & trialTypes.touched_pellet==1 & trialTypes.led==0;
+templateSequence2_cond=trialTypes.touched_pellet==1 & trialTypes.led==1 & trialTypes.consumed_pellet==1;
 templateSequence2_end=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
 % Get raw reaching (all reaches)
 % Get reaction times
 % Get change in reaction times (non-corrected input distributions)
 % Get change in reaction times (corrected input distributions)
-dataset.realDistributions.event_name='mouse_touches_pellet_str_led_on';
+dataset.realDistributions.event_name='mouse_consumes_pellet_str_led_on';
 dataset.realDistributions.nInSequence=nInSequence;
 dataset.realDistributions.nRepsForBootstrap=nRepsForBootstrap;
 dataset.realDistributions.templateSequence1_cond=templateSequence1_cond;
