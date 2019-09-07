@@ -137,13 +137,11 @@ prediction.rpe_term.rt_change_pdfs=prediction.rpe_term.rt_change_pdfs./nansum(na
 prediction.rpe_only_consec_update.rt_change_pdfs=prediction.rpe_only_consec_update.rt_change_pdfs./nansum(nansum(prediction.rpe_only_consec_update.rt_change_pdfs));
 n=n./nansum(nansum(n));
 [a,b,lse]=getFitCoefficients(n,prediction.rate_term.rt_change_pdfs,prediction.rpe_term.rt_change_pdfs,suppressOutput);
-% rateMask=repmat(bin_centers(rt_change_bins)>-0.5,length(bin_centers(bins)),1);
-% rateMask(bin_centers(bins)<0.5,:)=1;
-% rpeMask=repmat(bin_centers(rt_change_bins)<=0 | bin_centers(rt_change_bins)>=0.25,length(bin_centers(bins)),1);
+rateMask=repmat(bin_centers(rt_change_bins)>-0.5,length(bin_centers(bins)),1);
+rateMask(bin_centers(bins)<0.5,:)=1;
+rpeMask=repmat(bin_centers(rt_change_bins)<=0 | bin_centers(rt_change_bins)>=0.25,length(bin_centers(bins)),1);
 % [a,b,lse]=fitRateThenRPE(n,prediction.rate_term.rt_change_pdfs,prediction.rpe_only_consec_update.rt_change_pdfs,rateMask,rpeMask);
 if suppressOutput==0
-    disp('ratio of rpe to rate term');
-    disp(b/a);
     disp('rate term coefficient');
     disp(a);
     disp('rpe term coefficient');
@@ -224,7 +222,7 @@ fitqualval=fitqualval1+fitqualval2;
 
 end
 
-function [a,b,fitqualval,coefficients]=getFitCoefficients(data,rateTerm,rpeTerm,suppressOutput)
+function [a,b,fitqualval]=getFitCoefficients(data,rateTerm,rpeTerm,suppressOutput)
 
 % a is coefficient for rateTerm
 % b is coefficient for rpeTerm
@@ -257,26 +255,23 @@ for i=1:nSamples
     [a_i,b_i]=ind2sub(size(cost),fitind);
     minPairs(i,:)=[a_i b_i];
     cost(a_i,b_i)=maxout;
+    minPairVals(i,:)=
 end
 cost=backup_cost;
 
 if suppressOutput==0
     figure();
-    imagesc(try_a,try_b,cost');
-    set(gca,'YDir','normal');
-    xlabel('Rate coefficient');
-    ylabel('RPE coefficient');
-end
+    imagesc(cost);
+    xlabel('Rate coefficient inds');
+    ylabel('RPE coefficient inds');
     
-coefficients=polyfit(try_a(minPairs(:,1)),try_b(minPairs(:,2)),1);
-if suppressOutput==0
     figure();
-    scatter(try_a(minPairs(:,1)),try_b(minPairs(:,2)));
-    xFit=linspace(min(try_a(minPairs(:,1))),max(try_a(minPairs(:,1))),1000);
+    scatter(minPairs(:,1),minPairs(:,2));
+    coefficients=polyfit(minPairs(:,1),minPairs(:,2),1);
+    xFit=linspace(min(minPairs(:,1)),max(minPairs(:,1)),1000);
     yFit=polyval(coefficients,xFit);
     hold on;
     plot(xFit,yFit);
-end
 
 [fitqualval,fitind]=nanmin(cost(1:end)); 
 [a_i,b_i]=ind2sub(size(cost),fitind);

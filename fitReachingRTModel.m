@@ -2,6 +2,12 @@ function prediction=fitReachingRTModel(dataset,alltbt,metadata,trialTypes,rateTe
 
 bins=0:0.035:9;
 rts=dataset.allTrialsSequence_RT_trial1InSeq{1};
+temp=dataset.event_RT_trial1InSeq{1};
+temp=temp(dataset.realrtpair_seq2{1}==1);
+temp2_seq2=dataset.event_RT_trialiInSeq{1};
+temp2_seq2=temp2_seq2(dataset.realrtpair_seq2{1}==1);
+rtchanges_seq2=temp-temp2_seq2;
+% rts=temp;
 smoothSize=1;
 sameRTforEachTrial=false; % if true, will assume same reaction time for all subsequent trials, otherwise will sample randomly from current rt pdf
 n_update_steps=1; % How many update steps (e.g., trials)
@@ -39,7 +45,7 @@ for i=1:length(try_curr_rts)
     else
         for j=1:n_update_steps % if RT is randomly sampled from RT distribution for each trial
             if j==1
-                rt_pdf_out=update_rate_term(rt_pdf_out,bins,try_curr_rts(i),ITI,behaviorEvent,true,fits);
+                rt_pdf_out=update_rate_term(rt_pdf_out,bins,try_curr_rts(i),ITI,behaviorEvent,true,fits); 
             else
                 rt_pdf_out=update_rate_term(rt_pdf_out,bins,randsample(try_curr_rts,1,true,rt_pdf_out),ITI,behaviorEvent,true,fits);
             end
@@ -69,7 +75,9 @@ ylabel('Change in reaction times');
 
 % Learning rate, alpha
 % alpha=0.03;
-alpha=1;
+alpha=0.055;
+% alpha=0.034;
+% alpha=0;
 
 temp1=dataset.allTrialsSequence_RT_trial1InSeq{1};
 temp1=temp1(dataset.realrtpair_seq1{1}==1);
@@ -79,6 +87,7 @@ temp2_seq2=dataset.event_RT_trialiInSeq{1};
 temp2_seq2=temp2_seq2(dataset.realrtpair_seq2{1}==1);
 rtchanges_seq2=temp1_seq2-temp2_seq2;
 fitAlpha(temp1_seq2,temp1,temp1_seq2,rtchanges_seq2,{bin_centers(bins), bin_centers(rt_change_bins)});
+% fitAlphaAfterRateSubtract(temp1_seq2,temp1,temp1_seq2,rtchanges_seq2,{bin_centers(bins), bin_centers(rt_change_bins)},prediction);
 
 % RT pdf as proxy for value prediction
 rt_pdf = @(rts,bins) histcounts(rts,bins)./nansum(histcounts(rts,bins));
@@ -183,7 +192,14 @@ ylabel('Change in reaction times');
 % Plot after removing regression to the mean
 rt_change_pdfs=prediction.rpe_term.rt_change_pdfs;
 rt_change_bins=prediction.rpe_term.rt_change_bins;
-[diff2Dhist,x,y]=removeMeanRegression(rts,rts,randsample(bin_centers(rt_change_bins),length(rts),true,rt_pdf(rts,bins)*rt_change_pdfs),{bin_centers(bins), bin_centers(rt_change_bins)});
+% [diff2Dhist,x,y,n,n2]=removeMeanRegression(rts,rts,randsample(bin_centers(rt_change_bins),length(rts),true,rt_pdf(rts,bins)*rt_change_pdfs),{bin_centers(bins), bin_centers(rt_change_bins)});
+[diff2Dhist,x,y,n,n2]=removeMeanRegression(rts,rts,rtchanges_seq2,{bin_centers(bins), bin_centers(rt_change_bins)});
+prediction.regress_to_mean.rt_change_pdfs=n;
+prediction.regress_to_mean.rt_change_bins=rt_change_bins;
+prediction.from_theory_rpe.rt_change_pdfs=n2;
+prediction.from_theory_rpe.rt_change_bins=rt_change_bins;
+prediction.rt_bins=x;
+prediction.rt_change_bins=y;
 K=ones(smoothSize);
 smoothMat=conv2(diff2Dhist'-nanmin(nanmin(diff2Dhist')),K,'same');
 figure();
@@ -192,6 +208,89 @@ set(gca,'YDir','normal');
 title(['Rate/RPE term -- regression to mean removed']);
 xlabel('Reaction time trial 1');
 ylabel('Change in reaction times');
+
+end
+
+function fitAlphaAfterRateSubtract(rts1,rts2,actual_first_rts,actual_rt_changes,binsFor2Dhist,ratePred)
+% pass in a dataset for quantifying RPE learning rate, alpha
+% alpha is the learning rate per trial
+% may vary as a function of learning stage, etc.
+% but here just approximate a single learning rate 
+
+RPE_slice_at=[0 0.25]; % bin of delta_rts where expect to see RPE
+nonRPE_slice_at=[-14 -0.5]; % bin of delta_rts where do not expect to see RPE
+
+% fit regression to the mean to the slowed reaction time pairs
+% fit putative RPE component to the faster reaction time pairs
+
+% get what we expect from regression to the mean
+% generate a distribution from reaction time pdf
+% bootstrap to sample change in rts
+% note that we are not taking actual paired reaction times, take instead
+% fake reaction time pairs that would result from a stationary rt pdf over
+% the course of the experiment
+% this will give the change resulting from regression to the mean
+n_bootstrap=10000; % how many times to run bootstrap, will take 1 pair randomly per iteration of bootstrap
+delta_rts=nan(1,n_bootstrap);
+first_rt=nan(1,n_bootstrap);
+second_rt=nan(1,n_bootstrap);
+for i=1:n_bootstrap
+    curr_rts=[rts1(randsample(length(rts1),1,true)) rts2(randsample(length(rts2),1,true))]; % with replacement
+    delta_rts(i)=diff(curr_rts(end:-1:1));
+    first_rt(i)=curr_rts(1);
+    second_rt(i)=curr_rts(2);
+end
+
+% make heatmap of regression to the mean
+% make heatmap of real, presumably RPE-containing data
+[diff_n,x,y,regToMean,realData]=compareWithHeatmaps(first_rt,delta_rts,actual_first_rts,actual_rt_changes,binsFor2Dhist);
+
+regToMean=ratePred.rate_term.rt_change_pdfs;
+regToMean=regToMean./nansum(nansum(regToMean));
+
+figure();
+temp2=realData-regToMean;
+temp2=temp2-nanmin(nanmin(temp2));
+imagesc(x,y,log(temp2'));
+set(gca,'YDir','normal');
+
+nonRPE_regToMean=getPDFat(x,y,regToMean,nonRPE_slice_at);
+nonRPE_realData=getPDFat(x,y,realData,nonRPE_slice_at);
+scaleFac=fitNonRPEtoData(nonRPE_regToMean,nonRPE_realData);
+
+figure();
+plot(x,scaleFac.*nonRPE_regToMean,'Color','k');
+hold on;
+plot(x,nonRPE_realData,'Color','r');
+legend({'Regress to mean','Real data'});
+title('Scale non-RPE components');
+
+RPE_regToMean=getPDFat(x,y,regToMean,RPE_slice_at);
+RPE_realData=getPDFat(x,y,realData,RPE_slice_at);
+
+figure();
+plot(x,scaleFac.*RPE_regToMean,'Color','k');
+hold on;
+plot(x,RPE_realData,'Color','r');
+legend({'Regress to mean','Real data'});
+title('RPE components, scaled');
+
+pause;
+
+% Fit RT pdf to difference, in order to get alpha
+% Be sure that RT pdf sums to one
+putRPE=RPE_realData-scaleFac.*RPE_regToMean; 
+[n,x_centers]=histcounts(actual_first_rts,0:x(2)-x(1):9);
+n=n./nansum(n);
+scaleFacForAlpha=fitNonRPEtoData(n,putRPE');
+figure();
+plot(x,scaleFacForAlpha.*n,'Color','k');
+hold on;
+plot(x,putRPE,'Color','r');
+legend({'Fit RT pdf','Putative RPE'});
+title('Guess alpha');
+disp('alpha');
+disp(scaleFacForAlpha);
 
 end
 
@@ -252,22 +351,37 @@ title('RPE components, scaled');
 
 % Fit RT pdf to difference, in order to get alpha
 % Be sure that RT pdf sums to one
-actual_first_rts
-
-pause;
+putRPE=RPE_realData-scaleFac.*RPE_regToMean;
+[n,x_centers]=histcounts(actual_first_rts,0:x(2)-x(1):9);
+n=n./nansum(n);
+scaleFacForAlpha=fitNonRPEtoData(n,putRPE');
+figure();
+plot(x,scaleFacForAlpha.*n,'Color','k');
+hold on;
+plot(x,putRPE,'Color','r');
+legend({'Fit RT pdf','Putative RPE'});
+title('Guess alpha');
+disp('alpha');
+disp(scaleFacForAlpha);
 
 end
 
 function scaleFac=fitNonRPEtoData(regToMean,realData)
 
-tryRange=0.01:0.01:50;
+tryRange=0.001:0.001:50;
+% tryRange=0.00001:0.00001:1;
 cost=nan(1,length(tryRange));
 for i=1:length(tryRange)
     currRange=tryRange(i);
     cost(i)=nansum((currRange.*regToMean-realData).^2); % least sum of squares
+%     cost(i)=nansum(abs(currRange.*regToMean-realData)); 
 end
 [~,mi]=nanmin(cost);
 scaleFac=tryRange(mi);
+disp('scale fac mins and max');
+disp(num2str([min(tryRange) max(tryRange)]));
+disp('scale fac');
+disp(scaleFac);
 
 end
 
@@ -277,7 +391,7 @@ slice=nanmean(pdf2D(:,y>=y_bin(1) & y<=y_bin(2)),2);
 
 end
 
-function [diff2Dhist,x,y]=removeMeanRegression(rts,actual_first_rts,actual_rt_changes,binsFor2Dhist)
+function [diff2Dhist,x,y,n,n2]=removeMeanRegression(rts,actual_first_rts,actual_rt_changes,binsFor2Dhist)
 
 % generate a distribution from reaction time pdf
 % bootstrap to sample change in rts
@@ -299,7 +413,7 @@ end
 % compare actual change in reaction times distribution to this bootstrapped
 % distribution
 % Heatmap comparison
-[diff2Dhist,x,y]=compareWithHeatmaps(first_rt,delta_rts,actual_first_rts,actual_rt_changes,binsFor2Dhist);
+[diff2Dhist,x,y,n,n2]=compareWithHeatmaps(first_rt,delta_rts,actual_first_rts,actual_rt_changes,binsFor2Dhist);
 
 end
 

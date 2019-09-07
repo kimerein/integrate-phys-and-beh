@@ -69,7 +69,7 @@ ylabel('Change in reaction times');
 
 % Learning rate, alpha
 % alpha=0.03;
-alpha=1;
+alpha=0.055;
 
 temp1=dataset.allTrialsSequence_RT_trial1InSeq{1};
 temp1=temp1(dataset.realrtpair_seq1{1}==1);
@@ -78,7 +78,8 @@ temp1_seq2=temp1_seq2(dataset.realrtpair_seq2{1}==1);
 temp2_seq2=dataset.event_RT_trialiInSeq{1};
 temp2_seq2=temp2_seq2(dataset.realrtpair_seq2{1}==1);
 rtchanges_seq2=temp1_seq2-temp2_seq2;
-fitAlpha(temp1_seq2,temp1,temp1_seq2,rtchanges_seq2,{bin_centers(bins), bin_centers(rt_change_bins)});
+% fitAlpha(temp1_seq2,temp1,temp1_seq2,rtchanges_seq2,{bin_centers(bins), bin_centers(rt_change_bins)});
+fitAlphaAfterRateSubtract(temp1_seq2,temp1,temp1_seq2,rtchanges_seq2,{bin_centers(bins), bin_centers(rt_change_bins)},prediction);
 
 % RT pdf as proxy for value prediction
 rt_pdf = @(rts,bins) histcounts(rts,bins)./nansum(histcounts(rts,bins));
@@ -195,6 +196,89 @@ ylabel('Change in reaction times');
 
 end
 
+function fitAlphaAfterRateSubtract(rts1,rts2,actual_first_rts,actual_rt_changes,binsFor2Dhist,ratePred)
+% pass in a dataset for quantifying RPE learning rate, alpha
+% alpha is the learning rate per trial
+% may vary as a function of learning stage, etc.
+% but here just approximate a single learning rate 
+
+RPE_slice_at=[0 0.25]; % bin of delta_rts where expect to see RPE
+nonRPE_slice_at=[-14 -0.5]; % bin of delta_rts where do not expect to see RPE
+
+% fit regression to the mean to the slowed reaction time pairs
+% fit putative RPE component to the faster reaction time pairs
+
+% get what we expect from regression to the mean
+% generate a distribution from reaction time pdf
+% bootstrap to sample change in rts
+% note that we are not taking actual paired reaction times, take instead
+% fake reaction time pairs that would result from a stationary rt pdf over
+% the course of the experiment
+% this will give the change resulting from regression to the mean
+n_bootstrap=10000; % how many times to run bootstrap, will take 1 pair randomly per iteration of bootstrap
+delta_rts=nan(1,n_bootstrap);
+first_rt=nan(1,n_bootstrap);
+second_rt=nan(1,n_bootstrap);
+for i=1:n_bootstrap
+    curr_rts=[rts1(randsample(length(rts1),1,true)) rts2(randsample(length(rts2),1,true))]; % with replacement
+    delta_rts(i)=diff(curr_rts(end:-1:1));
+    first_rt(i)=curr_rts(1);
+    second_rt(i)=curr_rts(2);
+end
+
+% make heatmap of regression to the mean
+% make heatmap of real, presumably RPE-containing data
+[diff_n,x,y,regToMean,realData]=compareWithHeatmaps(first_rt,delta_rts,actual_first_rts,actual_rt_changes,binsFor2Dhist);
+
+% realData=realData./nansum(nansum(realData));
+temp=ratePred.rate_term.rt_change_pdfs;
+% temp=temp./nansum(nansum(temp));
+
+% figure();
+% temp2=realData-temp;
+% temp2=temp2-nanmin(nanmin(temp2));
+% imagesc(x,y,log(temp2'));
+% set(gca,'YDir','normal');
+
+nonRPE_regToMean=getPDFat(x,y,regToMean,nonRPE_slice_at);
+nonRPE_realData=getPDFat(x,y,realData,nonRPE_slice_at);
+scaleFac=fitNonRPEtoData(nonRPE_regToMean,nonRPE_realData);
+% 
+% figure();
+% plot(x,scaleFac.*nonRPE_regToMean,'Color','k');
+% hold on;
+% plot(x,nonRPE_realData,'Color','r');
+% legend({'Regress to mean','Real data'});
+% title('Scale non-RPE components');
+% 
+% RPE_regToMean=getPDFat(x,y,regToMean,RPE_slice_at);
+% RPE_realData=getPDFat(x,y,realData,RPE_slice_at);
+% 
+% figure();
+% plot(x,scaleFac.*RPE_regToMean,'Color','k');
+% hold on;
+% plot(x,RPE_realData,'Color','r');
+% legend({'Regress to mean','Real data'});
+% title('RPE components, scaled');
+
+% Fit RT pdf to difference, in order to get alpha
+% Be sure that RT pdf sums to one
+% putRPE=RPE_realData-scaleFac.*RPE_regToMean;
+putRPE=getPDFat(x,y,realData-temp,RPE_slice_at);
+[n,x_centers]=histcounts(actual_first_rts,0:x(2)-x(1):9);
+n=n./nansum(n);
+scaleFacForAlpha=fitNonRPEtoData(n,putRPE');
+figure();
+plot(x,scaleFacForAlpha.*n,'Color','k');
+hold on;
+plot(x,putRPE,'Color','r');
+legend({'Fit RT pdf','Putative RPE'});
+title('Guess alpha');
+disp('alpha');
+disp(scaleFacForAlpha);
+
+end
+
 function fitAlpha(rts1,rts2,actual_first_rts,actual_rt_changes,binsFor2Dhist)
 % pass in a dataset for quantifying RPE learning rate, alpha
 % alpha is the learning rate per trial
@@ -250,15 +334,26 @@ plot(x,RPE_realData,'Color','r');
 legend({'Regress to mean','Real data'});
 title('RPE components, scaled');
 
-% Fit 
-
-pause;
+% Fit RT pdf to difference, in order to get alpha
+% Be sure that RT pdf sums to one
+putRPE=RPE_realData-scaleFac.*RPE_regToMean;
+[n,x_centers]=histcounts(actual_first_rts,0:x(2)-x(1):9);
+n=n./nansum(n);
+scaleFacForAlpha=fitNonRPEtoData(n,putRPE');
+figure();
+plot(x,scaleFacForAlpha.*n,'Color','k');
+hold on;
+plot(x,putRPE,'Color','r');
+legend({'Fit RT pdf','Putative RPE'});
+title('Guess alpha');
+disp('alpha');
+disp(scaleFacForAlpha);
 
 end
 
 function scaleFac=fitNonRPEtoData(regToMean,realData)
 
-tryRange=0.01:0.01:50;
+tryRange=0.001:0.001:50;
 cost=nan(1,length(tryRange));
 for i=1:length(tryRange)
     currRange=tryRange(i);
