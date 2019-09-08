@@ -193,7 +193,7 @@ ylabel('Change in reaction times');
 rt_change_pdfs=prediction.rpe_term.rt_change_pdfs;
 rt_change_bins=prediction.rpe_term.rt_change_bins;
 % [diff2Dhist,x,y,n,n2]=removeMeanRegression(rts,rts,randsample(bin_centers(rt_change_bins),length(rts),true,rt_pdf(rts,bins)*rt_change_pdfs),{bin_centers(bins), bin_centers(rt_change_bins)});
-[diff2Dhist,x,y,n,n2]=removeMeanRegression(rts,rts,rtchanges_seq2,{bin_centers(bins), bin_centers(rt_change_bins)});
+[diff2Dhist,x,y,n,n2]=removeMeanRegression(rts,temp1_seq2,rtchanges_seq2,{bin_centers(bins), bin_centers(rt_change_bins)});
 prediction.regress_to_mean.rt_change_pdfs=n;
 prediction.regress_to_mean.rt_change_bins=rt_change_bins;
 prediction.from_theory_rpe.rt_change_pdfs=n2;

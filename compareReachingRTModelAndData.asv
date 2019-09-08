@@ -10,6 +10,12 @@ function [prediction,a,b,lse,err,n,best_predict,differ]=compareReachingRTModelAn
 bins=0:0.035:9;
 rts=dataForModel.allTrialsSequence_RT_trial1InSeq{1};
 rts_firstTrialInSequence=data.event_RT_trial1InSeq{1};
+shortestCuedRT=0.125; % in seconds, accounts for sensory detection + motor planning/execution delay
+preemptCue_secBeforeCue=0.1; % earliest that mouse can detect preemptive cue, in seconds before cue
+
+% Mouse is not doing a cued reach if reaches before shortestCuedRT, e.g., 125 ms
+rts(rts<=shortestCuedRT)=nan;
+rts_firstTrialInSequence(rts_firstTrialInSequence<=shortestCuedRT)=nan;
 
 % For default (i.e., comparing consecutive trials), do not change these
 sameRTforEachTrial=false; % if true, will assume same reaction time for all subsequent trials, otherwise will sample randomly from current rt pdf
@@ -50,20 +56,26 @@ prediction.rate_term.rt_pdf_outs=rt_pdf_outs;
 % RPE update
 % For consecutive trials, this is just the RT pdf pushing subsequent RTs
 % forward in time
+% Note that positive RPE update is proportional to 1-cdf of RTs
 smearSize=60;
 temp=zeros(size(rt_pdf_outs));
-curr_pdf=rt_pdf(rts_firstTrialInSequence,bins);
-curr_pdf(curr_pdf==0)=0.0001;
-curr_pdf=curr_pdf./nansum(curr_pdf);
+% Use the followed code (commented out) to convince yourself that the
+% RPE update to the PDF of reaction times is just rt_pdf
+% curr_cdf=accumulateDistribution(rt_pdf(rts_firstTrialInSequence,bins));
+% curr_updates=1-curr_cdf;
+% curr_updates=[0 diff(curr_updates)];
+curr_updates=rt_pdf(rts_firstTrialInSequence,bins);
+curr_updates(curr_updates==0)=0.00001;
+curr_updates=curr_updates./nansum(curr_updates);
 for i=1:size(temp,1)
     if i-(smearSize-1)<1
         useInd=1;
     else
         useInd=i-(smearSize-1);
     end
-    temp(i,useInd:i)=curr_pdf(i)/smearSize;
+    temp(i,useInd:i)=curr_updates(i)/smearSize;
 end
-temp(temp(1:end)==0)=0.00001;
+temp(temp(1:end)<=0)=0.00001;
 temp=temp./nansum(nansum(temp));
 rt_pdf_outs=temp;
 prediction.rpe_only_consec_update.rt_pdf_outs=rt_pdf_outs;
@@ -73,23 +85,23 @@ for i=1:length(try_curr_rts)
     rt_pdf_out=rt_pdf_outs(i,:);
     [rt_change_pdfs(i,:),rt_change_bins]=getRTchange_fromCurrAndUpdatedRTpdfs(rt_pdf(rts_firstTrialInSequence,bins),rt_pdf_out,bins,true,[bins(i) bins(i+1)]); % if last argument is empty, will plot change distribution for all current reaction times
 end
-% Plot imagesc(rt_pdf_outs) to see how pdf of RTs on next trial is expected
-% to change, given RPE only, not including regression to the mean
-% prediction.rpe_only_consec_update.rt_change_pdfs=rt_change_pdfs;
-prediction.rpe_only_consec_update.rt_change_pdfs=zeros(size(rt_change_pdfs));
-% prediction.rpe_only_consec_update.rt_change_pdfs(:,find(bin_centers(rt_change_bins)>0,1,'first'))=rt_pdf(rts_firstTrialInSequence,bins);
-for i=1:length(try_curr_rts)
-    f=find(bin_centers(rt_change_bins)>0 & bin_centers(rt_change_bins)<try_curr_rts(i));
-    if length(f)>smearSize % 160
-        f=f(1:smearSize);
-    end
-    if isempty(f)
-        continue
-    end
-    temp=rt_pdf(rts_firstTrialInSequence,bins);
-    prediction.rpe_only_consec_update.rt_change_pdfs(i,f)=repmat(temp(i)./length(f),1,length(f));
-end
+prediction.rpe_only_consec_update.rt_change_pdfs=rt_change_pdfs;
 prediction.rpe_only_consec_update.rt_change_bins=rt_change_bins;
+
+% prediction.rpe_only_consec_update.rt_change_pdfs=zeros(size(rt_change_pdfs));
+% % prediction.rpe_only_consec_update.rt_change_pdfs(:,find(bin_centers(rt_change_bins)>0,1,'first'))=rt_pdf(rts_firstTrialInSequence,bins);
+% for i=1:length(try_curr_rts)
+%     f=find(bin_centers(rt_change_bins)>0 & bin_centers(rt_change_bins)<try_curr_rts(i));
+%     if length(f)>smearSize % 160
+%         f=f(1:smearSize);
+%     end
+%     if isempty(f)
+%         continue
+%     end
+%     temp=rt_pdf(rts_firstTrialInSequence,bins);
+%     prediction.rpe_only_consec_update.rt_change_pdfs(i,f)=repmat(temp(i)./length(f),1,length(f));
+% end
+% prediction.rpe_only_consec_update.rt_change_bins=rt_change_bins;
 
 % RPE effects over multiple trials
 alpha=1;
@@ -136,12 +148,17 @@ prediction.rate_term.rt_change_pdfs=prediction.rate_term.rt_change_pdfs./nansum(
 prediction.rpe_term.rt_change_pdfs=prediction.rpe_term.rt_change_pdfs./nansum(nansum(prediction.rpe_term.rt_change_pdfs));
 prediction.rpe_only_consec_update.rt_change_pdfs=prediction.rpe_only_consec_update.rt_change_pdfs./nansum(nansum(prediction.rpe_only_consec_update.rt_change_pdfs));
 n=n./nansum(nansum(n));
-[a,b,lse]=getFitCoefficients(n,prediction.rate_term.rt_change_pdfs,prediction.rpe_term.rt_change_pdfs,suppressOutput);
-rateMask=repmat(bin_centers(rt_change_bins)>-0.5,length(bin_centers(bins)),1);
-rateMask(bin_centers(bins)<0.5,:)=1;
-rpeMask=repmat(bin_centers(rt_change_bins)<=0 | bin_centers(rt_change_bins)>=0.25,length(bin_centers(bins)),1);
+% fitMask=repmat(bin_centers(rt_change_bins)>0,length(bin_centers(bins)),1);
+fitMask=ones(size(prediction.rpe_term.rt_change_pdfs));
+% fitMask(bin_centers(bins)>2,:)=0;
+[a,b,lse]=getFitCoefficients(n,prediction.rate_term.rt_change_pdfs,prediction.rpe_term.rt_change_pdfs,suppressOutput,fitMask);
+% rateMask=repmat(bin_centers(rt_change_bins)>-0.5,length(bin_centers(bins)),1);
+% rateMask(bin_centers(bins)<0.5,:)=1;
+% rpeMask=repmat(bin_centers(rt_change_bins)<=0 | bin_centers(rt_change_bins)>=0.25,length(bin_centers(bins)),1);
 % [a,b,lse]=fitRateThenRPE(n,prediction.rate_term.rt_change_pdfs,prediction.rpe_only_consec_update.rt_change_pdfs,rateMask,rpeMask);
 if suppressOutput==0
+    disp('ratio of rpe to rate term');
+    disp(b/a);
     disp('rate term coefficient');
     disp(a);
     disp('rpe term coefficient');
@@ -164,12 +181,156 @@ if suppressOutput==0
 end
 
 % Plot difference between real data and fit
-differ=conv2(n,K,'same')-conv2(best_predict,K,'same');
+% differ=conv2(n,K,'same')-conv2(best_predict,K,'same');
+differ=n-best_predict;
 err=nansum(nansum(differ));
 differ=differ-nanmin(nanmin(differ));
 if suppressOutput==0
     plot_deltaRT_as_func_of_RT(x,y,differ,'Real Data Minus Fit');
 end
+
+
+
+% Preemptive reaching term
+prediction.preempt_term.preempt_details=fitPreemptiveReaching(x,y,differ,0,rts,bins,shortestCuedRT,preemptCue_secBeforeCue);
+process_a=gampdf(x,prediction.preempt_term.preempt_details.shape,prediction.preempt_term.preempt_details.rate);
+process_b=-prediction.preempt_term.preempt_details.subtractPDF;
+for i=1:length(try_curr_rts)
+%     rt_pdf_outs(i,:)=prediction.preempt_term.preempt_details.process_a_coefficients(i).*process_a+prediction.preempt_term.preempt_details.process_b_coefficients(i).*process_b;
+    rt_pdf_outs(i,:)=prediction.preempt_term.preempt_details.process_a_coefficients(i).*process_a;
+end
+rt_pdf_outs=rt_pdf_outs-nanmin(rt_pdf_outs(1:end));
+rt_pdf_outs(rt_pdf_outs<=0)=0.000000001;
+prediction.preempt_term.rt_pdf_outs=rt_pdf_outs;
+rt_change_pdfs=nan(length(try_curr_rts),length(bin_centers(unique([-fliplr(bins) bins]))));
+for i=1:length(try_curr_rts)
+    rt_pdf_out=rt_pdf_outs(i,:);
+    [rt_change_pdfs(i,:),rt_change_bins]=getRTchange_fromCurrAndUpdatedRTpdfs(rt_pdf(data.event_RT_trial1InSeq{1},bins),rt_pdf_out,bins,true,[bins(i) bins(i+1)]); % if last argument is empty, will plot change distribution for all current reaction times
+end
+prediction.preempt_term.rt_change_pdfs=rt_change_pdfs;
+prediction.preempt_term.rt_change_bins=rt_change_bins;
+if suppressOutput==0
+    plot_deltaRT_as_func_of_RT(x,y,rt_change_pdfs,'Preemptive reaching RT change PDF');
+end
+
+end
+
+function preempt=fitPreemptiveReaching(x,y,differ,suppressOutput,rts,bins,shortestCuedRT,preemptCue_secBeforeCue)
+
+rt_pdf = @(rts,bins) histcounts(rts,bins)./nansum(histcounts(rts,bins));
+bin_centers = @(bins) nanmean([bins(1:end-1); bins(2:end)],1);
+
+% Model preemptive reaching as a switch between 2 strategies (or states)
+% Cued reaching and pre-emptive reaching
+% Fit emission and transition probabilities
+% Cued reaching (> shortestCuedRT) follow the RT pdf
+% Preemptive reaching + counting as a reaction time combines the PDF of
+% emitting a preemptive reach and the requirement of RT (must be >0 sec, step function)
+% Fit preemptive reaching as gamma PDF
+preemptFalloff=getPDFat(x,y,differ,[-shortestCuedRT shortestCuedRT]);
+preemptFalloff=preemptFalloff-preemptFalloff(end);
+[best_a,best_rate,best_shape,fitqualval,subtractPDF,x_corrected,fitToPreempt,nadded]=fitGamma_w_transition(x,preemptFalloff,rt_pdf(rts,bins),preemptCue_secBeforeCue,bins);
+if suppressOutput==0
+    figure(); 
+    preemptFalloff=preemptFalloff./nansum(abs(preemptFalloff));
+    plot(x,preemptFalloff,'Color','k');
+    hold on; 
+    plot(x_corrected,fitToPreempt,'Color','r');
+    legend({'Data', 'Fit'});
+    title('Fit preemptive reaching');
+end
+preempt.scale=best_a;
+preempt.rate=best_rate;
+preempt.shape=best_shape;
+preempt.updateToRTpdf=fitToPreempt(1:end-nadded);
+preempt.subtractPDF=subtractPDF(1:end-nadded);
+preempt.process_a_coefficients=best_a.*gampdf(x_corrected,best_shape,best_rate);
+preempt.process_a_coefficients=preempt.process_a_coefficients(1:end-nadded);
+preempt.process_b_coefficients=(1-best_a).*subtractPDF;
+preempt.process_b_coefficients=preempt.process_b_coefficients(1:end-nadded);
+
+end
+
+function [best_a,best_rate,best_shape,fitqualval,subtractPDF,waittimes,y_w_subtract,n_to_add]=fitGamma_w_transition(waittimes,countwaits,subtractPDF,preemptCue_secBeforeCue,bins)
+
+% Range chosen from previous runs of grid search
+% actually, according to Matlab paramaterization of gamma pdf, rate is 1/try_rate_params
+try_rate_params=[0.01:0.01:0.2]; % from previous run, best rate is 0.1
+try_shape_params=[0.5:0.01:1.5]; % from previous run, best shape is 1
+try_a=[0.01:0.01:0.1]; % from previous run, best a is 0.02
+
+% Preemptive reach cue is BEFORE real cue
+bin_step=bins(2)-bins(1);
+n_to_add=floor(preemptCue_secBeforeCue./bin_step);
+waittimes=[waittimes-n_to_add*bin_step:bin_step:waittimes-bin_step waittimes];
+backup_waittimes=waittimes;
+waittimes=waittimes-min(waittimes); % start at preempt cue
+% countwaits=[zeros(n_to_add,1); countwaits];
+subtractPDF=[zeros(1,n_to_add) subtractPDF];
+countwaits=[countwaits; zeros(n_to_add,1)];
+% Am in preemptive reaching cue reference frame now (in terms of time)
+
+fitqual=nan(length(try_a),length(try_rate_params),length(try_shape_params));
+countwaits=countwaits./nansum(abs(countwaits));
+subtractPDF=subtractPDF./nansum(subtractPDF);
+for i=1:length(try_a)
+    curr_a=try_a(i);
+    for j=1:length(try_rate_params)
+        curr_rate_param=try_rate_params(j);
+        for k=1:length(try_shape_params)
+            curr_shape_param=try_shape_params(k);
+            y=gampdf(waittimes,curr_shape_param,curr_rate_param);
+            y_w_subtract=curr_a.*y-(1-curr_a).*subtractPDF; % Probability of cued reaching is 1 - probability of preemptive reaching
+            y_w_subtract=(y_w_subtract./nanmax(y_w_subtract)).*nanmax(countwaits);
+            fitqual(i,j,k)=nansum((countwaits-y_w_subtract').^2);
+        end
+    end
+end
+
+[fitqualval,fitind]=nanmin(fitqual(1:end)); 
+[a,b,c]=ind2sub(size(fitqual),fitind);
+best_a=try_a(a);
+disp(['try_a min and max ' num2str([nanmin(try_a) nanmax(try_a)])]);
+disp('best a');
+disp(best_a);
+best_rate=try_rate_params(b);
+disp(['try_rate min and max ' num2str([nanmin(try_rate_params) nanmax(try_rate_params)])]);
+disp('best rate');
+disp(best_rate);
+best_shape=try_shape_params(c);
+disp(['try_shape min and max ' num2str([nanmin(try_shape_params) nanmax(try_shape_params)])]);
+disp('best shape');
+disp(best_shape);
+
+curr_a=best_a; 
+y=gampdf(waittimes,best_shape,best_rate);
+y_w_subtract=curr_a.*y-(1-curr_a).*subtractPDF;
+
+end
+
+function [best_rate,best_shape,fitqualval]=fitGamma(waittimes,countwaits)
+
+% Range chosen from previous runs of grid search
+try_rate_params=[0.01:0.01:0.5]; % actually, according to Matlab paramaterization of gamma pdf, rate is 1/try_rate_params
+try_shape_params=[0.9:0.01:1.5];
+
+fitqual=nan(length(try_rate_params),length(try_shape_params));
+countwaits=countwaits-nanmin(countwaits);
+countwaits=countwaits./nansum(countwaits);
+for j=1:length(try_rate_params)
+    curr_rate_param=try_rate_params(j);
+    for k=1:length(try_shape_params)
+        curr_shape_param=try_shape_params(k);
+        y=gampdf(waittimes,curr_shape_param,curr_rate_param);
+        y=y./nansum(y); % this is a pdf
+        fitqual(j,k)=nansum((countwaits-y').^2);
+    end
+end
+
+[fitqualval,fitind]=nanmin(fitqual(1:end)); 
+[b,c]=ind2sub(size(fitqual),fitind);
+best_rate=try_rate_params(b);
+best_shape=try_shape_params(c);
 
 end
 
@@ -182,6 +343,12 @@ set(gca,'YDir','normal');
 xlabel('Reaction time (seconds)');
 ylabel('Change in reaction time (seconds)');
 title(tit);
+
+end
+
+function slice=getPDFat(x,y,pdf2D,y_bin)
+
+slice=nanmean(pdf2D(:,y>=y_bin(1) & y<=y_bin(2)),2);
 
 end
 
@@ -222,7 +389,7 @@ fitqualval=fitqualval1+fitqualval2;
 
 end
 
-function [a,b,fitqualval]=getFitCoefficients(data,rateTerm,rpeTerm,suppressOutput)
+function [a,b,fitqualval,coefficients]=getFitCoefficients(data,rateTerm,rpeTerm,suppressOutput,fitMask)
 
 % a is coefficient for rateTerm
 % b is coefficient for rpeTerm
@@ -240,7 +407,8 @@ for i=1:length(try_a)
     end
     for j=1:length(try_b)
         curr_b=try_b(j);
-        cost(i,j)=nansum(nansum((data-(curr_a.*rateTerm+curr_b.*rpeTerm)./nansum(nansum(curr_a.*rateTerm+curr_b.*rpeTerm))).^2));
+        temp=(data-(curr_a.*rateTerm+curr_b.*rpeTerm)./nansum(nansum(curr_a.*rateTerm+curr_b.*rpeTerm))).^2;
+        cost(i,j)=nansum(nansum(temp(fitMask==1)));
     end
 end
 % Best ratio of a and b defines a line in cost space
@@ -255,23 +423,26 @@ for i=1:nSamples
     [a_i,b_i]=ind2sub(size(cost),fitind);
     minPairs(i,:)=[a_i b_i];
     cost(a_i,b_i)=maxout;
-    minPairVals(i,:)=
 end
 cost=backup_cost;
 
 if suppressOutput==0
     figure();
-    imagesc(cost);
-    xlabel('Rate coefficient inds');
-    ylabel('RPE coefficient inds');
+    imagesc(try_a,try_b,cost');
+    set(gca,'YDir','normal');
+    xlabel('Rate coefficient');
+    ylabel('RPE coefficient');
+end
     
+coefficients=polyfit(try_a(minPairs(:,1)),try_b(minPairs(:,2)),1);
+if suppressOutput==0
     figure();
-    scatter(minPairs(:,1),minPairs(:,2));
-    coefficients=polyfit(minPairs(:,1),minPairs(:,2),1);
-    xFit=linspace(min(minPairs(:,1)),max(minPairs(:,1)),1000);
+    scatter(try_a(minPairs(:,1)),try_b(minPairs(:,2)));
+    xFit=linspace(min(try_a(minPairs(:,1))),max(try_a(minPairs(:,1))),1000);
     yFit=polyval(coefficients,xFit);
     hold on;
     plot(xFit,yFit);
+end
 
 [fitqualval,fitind]=nanmin(cost(1:end)); 
 [a_i,b_i]=ind2sub(size(cost),fitind);
@@ -298,6 +469,12 @@ end
 n=n./nansum(nansum(n,1),2);
 x=bin_c{1};
 y=bin_c{2};
+
+end
+
+function invertRTchange_to_rt_pdf_update(rt_change_pdf)
+
+
 
 end
 
