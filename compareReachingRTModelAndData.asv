@@ -1,4 +1,4 @@
-function [prediction,a,b,lse,err,n,best_predict,differ]=compareReachingRTModelAndData(data,dataForModel,fits,behaviorEvent,ITI,suppressOutput)
+function [prediction,a,b,lse,err,n,best_predict,differ]=compareReachingRTModelAndData(data,dataForModel,fits,behaviorEvent,ITI,suppressOutput,rt_pdf_outs_for_preempt,preemptive_process)
 
 % Model
 % Rate-based term is fit from data
@@ -11,7 +11,7 @@ bins=0:0.035:9;
 rts=dataForModel.allTrialsSequence_RT_trial1InSeq{1};
 rts_firstTrialInSequence=data.event_RT_trial1InSeq{1};
 shortestCuedRT=0.125; % in seconds, accounts for sensory detection + motor planning/execution delay
-preemptCue_secBeforeCue=0.1; % earliest that mouse can detect preemptive cue, in seconds before cue
+% preemptCue_secBeforeCue=0.1; % earliest that mouse can detect preemptive cue, in seconds before cue
 
 % Mouse is not doing a cued reach if reaches before shortestCuedRT, e.g., 125 ms
 rts(rts<=shortestCuedRT)=nan;
@@ -53,13 +53,112 @@ prediction.rate_term.rt_change_bins=rt_change_bins;
 prediction.rate_term.rt_pdf_outs=rt_pdf_outs;
 
 
+
+
+% Preemptive reaching term from previous fitting session
+if ~isempty(rt_pdf_outs_for_preempt)
+    rt_pdf_outs=rt_pdf_outs_for_preempt;
+    prediction.preempt_term.rt_pdf_outs=rt_pdf_outs./nansum(nansum(rt_pdf_outs));
+    preemptive_process.shape=1.7;
+    preemptive_process.rate=0.25;
+%     y=gampdf(bin_centers(bins),preemptive_process.shape,preemptive_process.rate);
+%     y=[y(4:end) zeros(1,3)];
+%     y=y./nansum(y);
+%     y(y<=0)=0.000000001;
+    y=preemptive_process.preempt_pdf;
+    isFirstZeroInd=41;
+    y=y-nanmean(y(isFirstZeroInd:end));
+    y(isFirstZeroInd:end)=0;
+    y=y./nansum(y);
+%     y(y<=0)=0.000000001;
+else
+%     preemptive_process.shape=1;
+%     preemptive_process.rate=0.1;
+    preemptive_process.shape=1.7;
+    preemptive_process.rate=0.25;
+    y=gampdf(bin_centers(bins),preemptive_process.shape,preemptive_process.rate);
+    y=[y(4:end) zeros(1,3)];
+    y=y./nansum(y);
+    y(y<=0)=0.000000001;
+    % Add preemptive reaching
+    temp=rt_pdf(rts,bins);
+    from_rt_pdf=repmat(temp,size(rt_pdf_outs,1),1).*repmat(temp',1,size(rt_pdf_outs,2));
+    for i=1:length(try_curr_rts)
+        rt_pdf_outs(i,1:length(y(i:end)))=y(i:end);
+    end
+    prediction.preempt_term.rt_pdf_outs=rt_pdf_outs-from_rt_pdf;
+end
+baserate=nanmin(nanmin(prediction.preempt_term.rt_pdf_outs));
+prediction.preempt_term.rt_pdf_outs=prediction.preempt_term.rt_pdf_outs-baserate;
+rt_change_pdfs=nan(length(try_curr_rts),length(bin_centers(unique([-fliplr(bins) bins]))));
+rt_change_pdfs_baseline=nan(length(try_curr_rts),length(bin_centers(unique([-fliplr(bins) bins]))));
+rt_change_pdfs_mask=nan(length(try_curr_rts),length(bin_centers(unique([-fliplr(bins) bins]))));
+% init_rt_pdf=rt_pdf(dataForModel.allTrialsSequence_RT_trial1InSeq{1},bins);
+init_rt_pdf=y;
+for i=1:length(try_curr_rts)
+    rt_pdf_out=prediction.preempt_term.rt_pdf_outs(i,:);
+    [rt_change_pdfs(i,:),rt_change_bins]=getRTchange_fromCurrAndUpdatedRTpdfs(init_rt_pdf,rt_pdf_out,bins,true,[bins(i) bins(i+1)]); % if last argument is empty, will plot change distribution for all current reaction times
+end
+rt_change_pdfs_baseline=nan(length(try_curr_rts),length(bin_centers(unique([-fliplr(bins) bins]))));
+for i=1:length(try_curr_rts)
+    rt_pdf_out=ones(size(prediction.preempt_term.rt_pdf_outs(i,:))).*abs(baserate);
+    [rt_change_pdfs_baseline(i,:),rt_change_bins]=getRTchange_fromCurrAndUpdatedRTpdfs(init_rt_pdf,rt_pdf_out,bins,true,[bins(i) bins(i+1)]); % if last argument is empty, will plot change distribution for all current reaction times
+end
+% Mask for preemptive reaching process
+rt_pdf_outs=repmat(y,size(rt_pdf_outs,1),1);
+for i=1:length(try_curr_rts)
+    rt_pdf_out=rt_pdf_outs(i,:);
+    [rt_change_pdfs_mask(i,:),rt_change_bins]=getRTchange_fromCurrAndUpdatedRTpdfs(ones(size(init_rt_pdf))./nansum(ones(size(init_rt_pdf))),rt_pdf_out,bins,true,[bins(i) bins(i+1)]); % if last argument is empty, will plot change distribution for all current reaction times
+end
+rt_change_pdfs_mask(1,:)=rt_change_pdfs_mask(2,:); % fill in first
+rt_change_pdfs_mask(rt_change_pdfs_mask<3)=0;
+% This method of separating the baseline amplifies noise, so get rid of
+% noise from final rt_change_pdfs
+% [ma,findPeak]=nanmax(init_rt_pdf.*y);
+% temp=init_rt_pdf.*y;
+% temp(1:findPeak)=ma;
+% findOffInd=find(temp<1.5*10^-7,1,'first');
+% rt_change_pdfs(findOffInd:end,:)=0;
+% temp=zeros(1,size(rt_change_pdfs,2));
+% temp(length(bin_centers(bins))+findOffInd:end)=1;
+% rt_change_pdfs(:,fliplr(temp)==1)=0;
+% rt_change_pdfs_baseline(findOffInd:end,:)=0;
+% rt_change_pdfs_baseline(:,fliplr(temp)==1)=0;
+
+% for i=1:length(bin_centers(bins))
+%     for_denoise(i,:)=[log(y(i:end)) zeros(1,i-1)];
+% end
+% denoised_rt_change_pdf=nan(size(rt_change_pdfs));
+% temp=rt_change_pdfs-rt_change_pdfs_baseline;
+% for i=1:length(bin_centers(bins))
+%     for j=1:length(bin_centers(bins))
+%         denoised_rt_change_pdf(i,j:j+length(bin_centers(bins))-1)=temp(i,j:j+length(bin_centers(bins))-1).*fliplr(for_denoise(i,:));
+%     end
+% end
+prediction.preempt_term.rt_change_pdfs=(rt_change_pdfs-rt_change_pdfs_baseline).*conv2(rt_change_pdfs_mask,ones(3),'same'); 
+% prediction.preempt_term.rt_change_pdfs(abs(prediction.preempt_term.rt_change_pdfs)<10^-5)=0; 
+prediction.preempt_term.rt_change_bins=rt_change_bins;
+% Smear only in time to account for uncertainty in reach timing due to
+% low-speed video alignment
+maxUncertainty=0.1; % in seconds
+% Note the following assumption: Neighboring trials will have similar
+% alignment shifts, so change in RT is more accurate than RT
+% Thus, smear only along the RT axis, not the change_in_RT axis
+nsmoothbins=floor(maxUncertainty./0.035);
+prediction.preempt_term.rt_change_pdfs(1:nsmoothbins,:)=repmat(prediction.preempt_term.rt_change_pdfs(nsmoothbins+1,:),nsmoothbins,1);
+% for i=1:size(prediction.preempt_term.rt_change_pdfs,2)
+%     prediction.preempt_term.rt_change_pdfs(:,i)=smooth(prediction.preempt_term.rt_change_pdfs(:,i),nsmoothbins);
+% end
+
+
+
 % RPE update
 % For consecutive trials, this is just the RT pdf pushing subsequent RTs
 % forward in time
 % Note that positive RPE update is proportional to 1-cdf of RTs
 smearSize=60;
 temp=zeros(size(rt_pdf_outs));
-% Use the followed code (commented out) to convince yourself that the
+% Use the following code (commented out) to convince yourself that the
 % RPE update to the PDF of reaction times is just rt_pdf
 % curr_cdf=accumulateDistribution(rt_pdf(rts_firstTrialInSequence,bins));
 % curr_updates=1-curr_cdf;
@@ -143,19 +242,23 @@ K=ones(7);
 n=conv2(n,K,'same');
 prediction.rate_term.rt_change_pdfs=conv2(prediction.rate_term.rt_change_pdfs,K,'same');
 prediction.rpe_term.rt_change_pdfs=conv2(prediction.rpe_term.rt_change_pdfs,K,'same');
+prediction.preempt_term.rt_change_pdfs=conv2(prediction.preempt_term.rt_change_pdfs,ones(2),'same');
 prediction.rpe_only_consec_update.rt_change_pdfs=conv2(prediction.rpe_only_consec_update.rt_change_pdfs,K,'same');
 prediction.rate_term.rt_change_pdfs=prediction.rate_term.rt_change_pdfs./nansum(nansum(prediction.rate_term.rt_change_pdfs));
 prediction.rpe_term.rt_change_pdfs=prediction.rpe_term.rt_change_pdfs./nansum(nansum(prediction.rpe_term.rt_change_pdfs));
 prediction.rpe_only_consec_update.rt_change_pdfs=prediction.rpe_only_consec_update.rt_change_pdfs./nansum(nansum(prediction.rpe_only_consec_update.rt_change_pdfs));
+prediction.preempt_term.rt_change_pdfs=prediction.preempt_term.rt_change_pdfs./nansum(nansum(abs(prediction.preempt_term.rt_change_pdfs)));
 n=n./nansum(nansum(n));
 % fitMask=repmat(bin_centers(rt_change_bins)>0,length(bin_centers(bins)),1);
 fitMask=ones(size(prediction.rpe_term.rt_change_pdfs));
-% fitMask(bin_centers(bins)>2,:)=0;
-[a,b,lse]=getFitCoefficients(n,prediction.rate_term.rt_change_pdfs,prediction.rpe_term.rt_change_pdfs,suppressOutput,fitMask);
+% fitMask(bin_centers(bins)>0.8,:)=0;
+% [a,b,lse]=getFitCoefficients(n,prediction.rate_term.rt_change_pdfs,prediction.rpe_term.rt_change_pdfs,suppressOutput,fitMask);
 % rateMask=repmat(bin_centers(rt_change_bins)>-0.5,length(bin_centers(bins)),1);
 % rateMask(bin_centers(bins)<0.5,:)=1;
 % rpeMask=repmat(bin_centers(rt_change_bins)<=0 | bin_centers(rt_change_bins)>=0.25,length(bin_centers(bins)),1);
 % [a,b,lse]=fitRateThenRPE(n,prediction.rate_term.rt_change_pdfs,prediction.rpe_only_consec_update.rt_change_pdfs,rateMask,rpeMask);
+[a,b,c,lse]=getFitCoefficients_all3terms(n,prediction.rate_term.rt_change_pdfs,prediction.rpe_term.rt_change_pdfs,prediction.preempt_term.rt_change_pdfs,suppressOutput,fitMask);
+% [a,b,c,lse]=getFitCoefficients_all3terms_atSameTime(n,prediction.rate_term.rt_change_pdfs,prediction.rpe_term.rt_change_pdfs,prediction.preempt_term.rt_change_pdfs,suppressOutput,fitMask);
 if suppressOutput==0
     disp('ratio of rpe to rate term');
     disp(b/a);
@@ -163,11 +266,13 @@ if suppressOutput==0
     disp(a);
     disp('rpe term coefficient');
     disp(b);
+    disp('preempt term coefficient');
+    disp(c);
     disp('least squares error');
     disp(lse);
 end
 
-best_predict=a.*prediction.rate_term.rt_change_pdfs+b.*prediction.rpe_only_consec_update.rt_change_pdfs;
+best_predict=a.*prediction.rate_term.rt_change_pdfs+b.*prediction.rpe_only_consec_update.rt_change_pdfs+c.*prediction.preempt_term.rt_change_pdfs;
 best_predict=best_predict./nansum(nansum(best_predict));
 
 if suppressOutput==0
@@ -183,12 +288,33 @@ end
 % Plot difference between real data and fit
 % differ=conv2(n,K,'same')-conv2(best_predict,K,'same');
 differ=n-best_predict;
-err=nansum(nansum(differ));
+err=nansum(nansum(abs(differ)));
 differ=differ-nanmin(nanmin(differ));
 if suppressOutput==0
     plot_deltaRT_as_func_of_RT(x,y,differ,'Real Data Minus Fit');
 end
 
+best_predict_withoutC=a.*prediction.rate_term.rt_change_pdfs+b.*prediction.rpe_only_consec_update.rt_change_pdfs;
+best_predict_withoutC=best_predict_withoutC./nansum(nansum(best_predict_withoutC));
+differ_withoutC=n-best_predict_withoutC;
+differ_withoutC=differ_withoutC-nanmin(nanmin(differ_withoutC));
+err_withoutC=nansum(nansum(abs(differ_withoutC)));
+figure(); 
+imagesc(bin_centers(bins),bin_centers(rt_change_bins),[differ differ_withoutC]'); set(gca,'YDir','normal');
+disp('Times reduction in error from data');
+disp(err_withoutC./err);
+
+disp('Total error divided by total sum of data 2D PDF');
+disp(err/nansum(nansum(abs(n))));
+
+differ_smoothed=conv2(n,K,'same')-conv2(best_predict,K,'same');
+err_smoothed=nansum(nansum(abs(differ_smoothed)));
+disp('From smoothed PDFs -- Total error divided by total sum of data 2D PDF');
+disp(err_smoothed/nansum(nansum(abs(conv2(n,K,'same')))));
+
+% rt_pdf_outs_update=invertRTchange_to_rt_pdf_update(differ,rt_change_bins,bins,try_curr_rts,prediction.rate_term.rt_pdf_outs);
+
+return
 
 
 % Preemptive reaching term
@@ -338,6 +464,9 @@ function plot_deltaRT_as_func_of_RT(x,y,pdf2D,tit)
 
 figure();
 % Note intensity is plotted on log scale!
+if any(any(pdf2D<=0))
+    pdf2D=pdf2D-nanmin(nanmin(pdf2D));
+end
 imagesc(x,y,log(pdf2D'));
 set(gca,'YDir','normal');
 xlabel('Reaction time (seconds)');
@@ -386,6 +515,122 @@ end
 [fitqualval2,fitind]=nanmin(cost);
 b=try_b(fitind);
 fitqualval=fitqualval1+fitqualval2;
+
+end
+
+function [a,b,c,fitqualval]=getFitCoefficients_all3terms_atSameTime(data,rateTerm,rpeTerm,preemptTerm,suppressOutput,fitMask)
+
+% a is coefficient for rateTerm
+% b is coefficient for rpeTerm
+% c is coefficient for preemptTerm
+% we know that c<<a and c<<b
+% so fit a and b first
+
+data=data./nansum(nansum(data));
+
+try_a=[0.001:0.05:3];
+try_b=[0.001:0.05:3];
+try_c=[0:0.01:1];
+% Looking for ratio of a and b that best fits data
+cost=nan(length(try_a),length(try_b),length(try_c));
+for i=1:length(try_a)
+    curr_a=try_a(i);
+    if mod(i,1)==0
+        disp(i);
+    end
+    for j=1:length(try_b)
+        curr_b=try_b(j);
+        for k=1:length(try_c)
+            curr_c=try_c(k);
+            temp=(data-(curr_a.*rateTerm+curr_b.*rpeTerm+curr_c.*preemptTerm)./nansum(nansum(curr_a.*rateTerm+curr_b.*rpeTerm+curr_c.*preemptTerm))).^2;
+            cost(i,j,k)=nansum(nansum(temp(fitMask==1)));
+        end
+    end
+end
+[fitqualval,fitind]=nanmin(cost(1:end)); 
+[a_i,b_i,c_i]=ind2sub(size(cost),fitind);
+a=try_a(a_i);
+b=try_b(b_i);
+c=try_c(c_i);
+
+end
+
+function [a,b,c,fitqualval,coefficients]=getFitCoefficients_all3terms(data,rateTerm,rpeTerm,preemptTerm,suppressOutput,fitMask)
+
+% a is coefficient for rateTerm
+% b is coefficient for rpeTerm
+% c is coefficient for preemptTerm
+% we know that c<<a and c<<b
+% so fit a and b first
+
+data=data./nansum(nansum(data));
+
+try_a=[0.001:0.05:3];
+try_b=[0.001:0.05:3];
+% Looking for ratio of a and b that best fits data
+cost=nan(length(try_a),length(try_b));
+for i=1:length(try_a)
+    curr_a=try_a(i);
+    if mod(i,100)==0
+        disp(i);
+    end
+    for j=1:length(try_b)
+        curr_b=try_b(j);
+        temp=(data-(curr_a.*rateTerm+curr_b.*rpeTerm)./nansum(nansum(curr_a.*rateTerm+curr_b.*rpeTerm))).^2;
+        cost(i,j)=nansum(nansum(temp(fitMask==1)));
+    end
+end
+% Best ratio of a and b defines a line in cost space
+% Find this line
+nSamples=20;
+minPairs=nan(nSamples,2);
+maxout=nanmax(cost(1:end));
+maxout=maxout+1000;
+backup_cost=cost;
+for i=1:nSamples
+    [~,fitind]=nanmin(cost(1:end)); 
+    [a_i,b_i]=ind2sub(size(cost),fitind);
+    minPairs(i,:)=[a_i b_i];
+    cost(a_i,b_i)=maxout;
+end
+cost=backup_cost;
+
+if suppressOutput==0
+    figure();
+    imagesc(try_a,try_b,cost');
+    set(gca,'YDir','normal');
+    xlabel('Rate coefficient');
+    ylabel('RPE coefficient');
+end
+    
+coefficients=polyfit(try_a(minPairs(:,1)),try_b(minPairs(:,2)),1);
+if suppressOutput==0
+    figure();
+    scatter(try_a(minPairs(:,1)),try_b(minPairs(:,2)));
+    xFit=linspace(min(try_a(minPairs(:,1))),max(try_a(minPairs(:,1))),1000);
+    yFit=polyval(coefficients,xFit);
+    hold on;
+    plot(xFit,yFit);
+end
+
+[fitqualval,fitind]=nanmin(cost(1:end)); 
+[a_i,b_i]=ind2sub(size(cost),fitind);
+a=try_a(a_i);
+b=try_b(b_i);
+
+% Now add preemptTerm to further improve fit
+try_c=[0:0.001:1];
+new_cost=nan(1,length(try_c));
+for i=1:length(try_c)
+    curr_c=try_c(i);
+    temp=(data-(a.*rateTerm+b.*rpeTerm+curr_c.*preemptTerm)./nansum(nansum(a.*rateTerm+b.*rpeTerm+curr_c.*preemptTerm))).^2;
+    new_cost(i)=nansum(nansum(temp(fitMask==1)));
+end
+[fitqualval,fitind]=nanmin(new_cost);
+figure(); imagesc([data-(a.*rateTerm+b.*rpeTerm)./nansum(nansum(a.*rateTerm+b.*rpeTerm)) try_c(fitind).*preemptTerm./nansum(nansum(try_c(fitind).*preemptTerm))]'); set(gca,'YDir','normal');
+temp1=data-(a.*rateTerm+b.*rpeTerm)./nansum(nansum(a.*rateTerm+b.*rpeTerm)); temp2=try_c(fitind).*preemptTerm./nansum(nansum(try_c(fitind).*preemptTerm));
+figure(); imagesc([temp1(1:25,:); temp2(1:25,:)]'); set(gca,'YDir','normal');
+c=try_c(fitind);
 
 end
 
@@ -472,9 +717,20 @@ y=bin_c{2};
 
 end
 
-function invertRTchange_to_rt_pdf_update(rt_change_pdf)
+function rt_pdf_outs_update=invertRTchange_to_rt_pdf_update(rt_change_pdf,rt_change_bins,bins,try_curr_rts,rt_pdf_outs)
 
-
+% For each reaction time, sample changes from rt_change_pdf
+% Apply these changes to curr_rt_pdf to get updated_rt_pdf
+sample_n=30000;
+bin_centers = @(bins) nanmean([bins(1:end-1); bins(2:end)],1);
+rt_pdf_outs_update=nan(size(rt_pdf_outs));
+for i=1:length(try_curr_rts)
+    rt_changes=randsample(bin_centers(rt_change_bins),sample_n,true,rt_change_pdf(i,:));
+    curr_rts=randsample(bin_centers(bins),sample_n,true,rt_pdf_outs(i,:));
+    updated_rts=curr_rts+rt_changes;
+    n=histcounts(updated_rts,bins);
+    rt_pdf_outs_update(i,:)=n;
+end
 
 end
 
@@ -486,6 +742,7 @@ function [rt_change_pdf,rt_change_bins]=getRTchange_fromCurrAndUpdatedRTpdfs(cur
 
 % This is the difference of these two random variables
 sample_n=30000;
+% sample_n=50000;
 bin_centers = @(bins) nanmean([bins(1:end-1); bins(2:end)],1);
 rts1=randsample(bin_centers(bins),sample_n,true,curr_rt_pdf);
 rts2=randsample(bin_centers(bins),sample_n,true,updated_rt_pdf);
