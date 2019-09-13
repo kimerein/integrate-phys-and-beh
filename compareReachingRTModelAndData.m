@@ -56,11 +56,24 @@ prediction.rate_term.rt_pdf_outs=rt_pdf_outs;
 
 
 % Preemptive reaching term from previous fitting session
-if ~isempty(rt_pdf_outs_for_preempt)
+if isfield(rt_pdf_outs_for_preempt,'addProcess')
+    rt_pdf_outs=rt_pdf_outs_for_preempt.subtractProcess;
+    prediction.preempt_term.rt_pdf_outs=rt_pdf_outs./nansum(nansum(abs(rt_pdf_outs)));
+    rt_pdf_outs_add=rt_pdf_outs_for_preempt.addProcess;
+    rt_pdf_outs_add=rt_pdf_outs_add./nansum(nansum(rt_pdf_outs_add));
+    rt_pdf_outs_add(rt_pdf_outs_add(1:end)<=0)=0.000000001;
+    y=preemptive_process.preempt_pdf;
+    isFirstZeroInd=53;
+    y=y-nanmean(y(isFirstZeroInd:end));
+    y(isFirstZeroInd:end)=0;
+    y=y./nansum(y);
+    y(y<=0)=0.000000001;
+elseif ~isempty(rt_pdf_outs_for_preempt)
     rt_pdf_outs=rt_pdf_outs_for_preempt;
     prediction.preempt_term.rt_pdf_outs=rt_pdf_outs./nansum(nansum(rt_pdf_outs));
-    preemptive_process.shape=1.7;
-    preemptive_process.rate=0.25;
+    prediction.preempt_term.rt_pdf_outs(prediction.preempt_term.rt_pdf_outs<=0)=0.00000000001;
+%     preemptive_process.shape=1.7;
+%     preemptive_process.rate=0.25;
 %     y=gampdf(bin_centers(bins),preemptive_process.shape,preemptive_process.rate);
 %     y=[y(4:end) zeros(1,3)];
 %     y=y./nansum(y);
@@ -91,64 +104,92 @@ end
 baserate=nanmin(nanmin(prediction.preempt_term.rt_pdf_outs));
 prediction.preempt_term.rt_pdf_outs=prediction.preempt_term.rt_pdf_outs-baserate;
 rt_change_pdfs=nan(length(try_curr_rts),length(bin_centers(unique([-fliplr(bins) bins]))));
-rt_change_pdfs_baseline=nan(length(try_curr_rts),length(bin_centers(unique([-fliplr(bins) bins]))));
-rt_change_pdfs_mask=nan(length(try_curr_rts),length(bin_centers(unique([-fliplr(bins) bins]))));
+% rt_change_pdfs_baseline=nan(length(try_curr_rts),length(bin_centers(unique([-fliplr(bins) bins]))));
+% rt_change_pdfs_mask=nan(length(try_curr_rts),length(bin_centers(unique([-fliplr(bins) bins]))));
 % init_rt_pdf=rt_pdf(dataForModel.allTrialsSequence_RT_trial1InSeq{1},bins);
-init_rt_pdf=y;
+% init_rt_pdf=y;
+init_rt_pdf=ones(size(y)); init_rt_pdf=init_rt_pdf./nansum(init_rt_pdf);
 for i=1:length(try_curr_rts)
     rt_pdf_out=prediction.preempt_term.rt_pdf_outs(i,:);
+    if all(rt_pdf_out==0)
+        rt_pdf_out(1:end)=0.000000001;
+    end
     [rt_change_pdfs(i,:),rt_change_bins]=getRTchange_fromCurrAndUpdatedRTpdfs(init_rt_pdf,rt_pdf_out,bins,true,[bins(i) bins(i+1)]); % if last argument is empty, will plot change distribution for all current reaction times
 end
-rt_change_pdfs_baseline=nan(length(try_curr_rts),length(bin_centers(unique([-fliplr(bins) bins]))));
+init_rt_pdf=rt_pdf(rts,bins);
 for i=1:length(try_curr_rts)
-    rt_pdf_out=ones(size(prediction.preempt_term.rt_pdf_outs(i,:))).*abs(baserate);
-    [rt_change_pdfs_baseline(i,:),rt_change_bins]=getRTchange_fromCurrAndUpdatedRTpdfs(init_rt_pdf,rt_pdf_out,bins,true,[bins(i) bins(i+1)]); % if last argument is empty, will plot change distribution for all current reaction times
+    rt_pdf_out=prediction.preempt_term.rt_pdf_outs(i,:);
+    if all(rt_pdf_out==0)
+        rt_pdf_out(1:end)=0.000000001;
+    end
+    [rt_change_pdfs2(i,:),rt_change_bins]=getRTchange_fromCurrAndUpdatedRTpdfs(init_rt_pdf,rt_pdf_out,bins,true,[bins(i) bins(i+1)]); % if last argument is empty, will plot change distribution for all current reaction times
 end
-% Mask for preemptive reaching process
-rt_pdf_outs=repmat(y,size(rt_pdf_outs,1),1);
-for i=1:length(try_curr_rts)
-    rt_pdf_out=rt_pdf_outs(i,:);
-    [rt_change_pdfs_mask(i,:),rt_change_bins]=getRTchange_fromCurrAndUpdatedRTpdfs(ones(size(init_rt_pdf))./nansum(ones(size(init_rt_pdf))),rt_pdf_out,bins,true,[bins(i) bins(i+1)]); % if last argument is empty, will plot change distribution for all current reaction times
-end
-rt_change_pdfs_mask(1,:)=rt_change_pdfs_mask(2,:); % fill in first
-rt_change_pdfs_mask(rt_change_pdfs_mask<3)=0;
-% This method of separating the baseline amplifies noise, so get rid of
-% noise from final rt_change_pdfs
-% [ma,findPeak]=nanmax(init_rt_pdf.*y);
-% temp=init_rt_pdf.*y;
-% temp(1:findPeak)=ma;
-% findOffInd=find(temp<1.5*10^-7,1,'first');
-% rt_change_pdfs(findOffInd:end,:)=0;
-% temp=zeros(1,size(rt_change_pdfs,2));
-% temp(length(bin_centers(bins))+findOffInd:end)=1;
-% rt_change_pdfs(:,fliplr(temp)==1)=0;
-% rt_change_pdfs_baseline(findOffInd:end,:)=0;
-% rt_change_pdfs_baseline(:,fliplr(temp)==1)=0;
+% rt_change_pdfs1=rt_change_pdfs;
+% rt_change_pdfs=0.7*rt_change_pdfs1-0.3*rt_change_pdfs2;
+prediction.preempt_term.rt_change_pdfs=rt_change_pdfs;
+prediction.preempt_term.rt_change_bins=rt_change_bins;
 
-% for i=1:length(bin_centers(bins))
-%     for_denoise(i,:)=[log(y(i:end)) zeros(1,i-1)];
+% rt_change_pdfs_baseline=nan(length(try_curr_rts),length(bin_centers(unique([-fliplr(bins) bins]))));
+% for i=1:length(try_curr_rts)
+%     rt_pdf_out=ones(size(prediction.preempt_term.rt_pdf_outs(i,:))).*abs(baserate);
+%     [rt_change_pdfs_baseline(i,:),rt_change_bins]=getRTchange_fromCurrAndUpdatedRTpdfs(init_rt_pdf,rt_pdf_out,bins,true,[bins(i) bins(i+1)]); % if last argument is empty, will plot change distribution for all current reaction times
 % end
-% denoised_rt_change_pdf=nan(size(rt_change_pdfs));
-% temp=rt_change_pdfs-rt_change_pdfs_baseline;
-% for i=1:length(bin_centers(bins))
-%     for j=1:length(bin_centers(bins))
-%         denoised_rt_change_pdf(i,j:j+length(bin_centers(bins))-1)=temp(i,j:j+length(bin_centers(bins))-1).*fliplr(for_denoise(i,:));
+% if isfield(rt_pdf_outs_for_preempt,'addProcess')
+%     for i=1:length(try_curr_rts)
+%         rt_pdf_out=rt_pdf_outs_add(i,:);
+%         [rt_change_pdfs_add(i,:),rt_change_bins]=getRTchange_fromCurrAndUpdatedRTpdfs(init_rt_pdf,rt_pdf_out,bins,true,[bins(i) bins(i+1)]); % if last argument is empty, will plot change distribution for all current reaction times
 %     end
 % end
-prediction.preempt_term.rt_change_pdfs=(rt_change_pdfs-rt_change_pdfs_baseline).*conv2(rt_change_pdfs_mask,ones(3),'same'); 
-% prediction.preempt_term.rt_change_pdfs(abs(prediction.preempt_term.rt_change_pdfs)<10^-5)=0; 
-prediction.preempt_term.rt_change_bins=rt_change_bins;
-% Smear only in time to account for uncertainty in reach timing due to
-% low-speed video alignment
-maxUncertainty=0.1; % in seconds
-% Note the following assumption: Neighboring trials will have similar
-% alignment shifts, so change in RT is more accurate than RT
-% Thus, smear only along the RT axis, not the change_in_RT axis
-nsmoothbins=floor(maxUncertainty./0.035);
-prediction.preempt_term.rt_change_pdfs(1:nsmoothbins,:)=repmat(prediction.preempt_term.rt_change_pdfs(nsmoothbins+1,:),nsmoothbins,1);
-% for i=1:size(prediction.preempt_term.rt_change_pdfs,2)
-%     prediction.preempt_term.rt_change_pdfs(:,i)=smooth(prediction.preempt_term.rt_change_pdfs(:,i),nsmoothbins);
+% % Mask for preemptive reaching process
+% rt_pdf_outs=repmat(y,size(rt_pdf_outs,1),1);
+% for i=1:length(try_curr_rts)
+%     rt_pdf_out=rt_pdf_outs(i,:);
+%     [rt_change_pdfs_mask(i,:),rt_change_bins]=getRTchange_fromCurrAndUpdatedRTpdfs(ones(size(init_rt_pdf))./nansum(ones(size(init_rt_pdf))),rt_pdf_out,bins,true,[bins(i) bins(i+1)]); % if last argument is empty, will plot change distribution for all current reaction times
 % end
+% rt_change_pdfs_mask(1,:)=rt_change_pdfs_mask(2,:); % fill in first
+% rt_change_pdfs_mask(rt_change_pdfs_mask<3)=0;
+% rt_change_pdfs_mask(bin_centers(bins)>0.25,:)=0;
+% % This method of separating the baseline amplifies noise, so get rid of
+% % noise from final rt_change_pdfs
+% % [ma,findPeak]=nanmax(init_rt_pdf.*y);
+% % temp=init_rt_pdf.*y;
+% % temp(1:findPeak)=ma;
+% % findOffInd=find(temp<1.5*10^-7,1,'first');
+% % rt_change_pdfs(findOffInd:end,:)=0;
+% % temp=zeros(1,size(rt_change_pdfs,2));
+% % temp(length(bin_centers(bins))+findOffInd:end)=1;
+% % rt_change_pdfs(:,fliplr(temp)==1)=0;
+% % rt_change_pdfs_baseline(findOffInd:end,:)=0;
+% % rt_change_pdfs_baseline(:,fliplr(temp)==1)=0;
+% 
+% % for i=1:length(bin_centers(bins))
+% %     for_denoise(i,:)=[log(y(i:end)) zeros(1,i-1)];
+% % end
+% % denoised_rt_change_pdf=nan(size(rt_change_pdfs));
+% % temp=rt_change_pdfs-rt_change_pdfs_baseline;
+% % for i=1:length(bin_centers(bins))
+% %     for j=1:length(bin_centers(bins))
+% %         denoised_rt_change_pdf(i,j:j+length(bin_centers(bins))-1)=temp(i,j:j+length(bin_centers(bins))-1).*fliplr(for_denoise(i,:));
+% %     end
+% % end
+% if isfield(rt_pdf_outs_for_preempt,'addProcess')
+%     prediction.preempt_term.rt_change_pdfs=((rt_change_pdfs-rt_change_pdfs_baseline)+rt_change_pdfs_add).*conv2(rt_change_pdfs_mask,ones(3),'same'); 
+% else
+%     prediction.preempt_term.rt_change_pdfs=(rt_change_pdfs-rt_change_pdfs_baseline).*conv2(rt_change_pdfs_mask,ones(3),'same'); 
+% end
+% % prediction.preempt_term.rt_change_pdfs(abs(prediction.preempt_term.rt_change_pdfs)<10^-5)=0; 
+% prediction.preempt_term.rt_change_bins=rt_change_bins;
+% % Smear only in time to account for uncertainty in reach timing due to
+% % low-speed video alignment
+% maxUncertainty=0.1; % in seconds
+% % Note the following assumption: Neighboring trials will have similar
+% % alignment shifts, so change in RT is more accurate than RT
+% % Thus, smear only along the RT axis, not the change_in_RT axis
+% nsmoothbins=floor(maxUncertainty./0.035);
+% prediction.preempt_term.rt_change_pdfs(1:nsmoothbins,:)=repmat(prediction.preempt_term.rt_change_pdfs(nsmoothbins+1,:),nsmoothbins,1);
+% % for i=1:size(prediction.preempt_term.rt_change_pdfs,2)
+% %     prediction.preempt_term.rt_change_pdfs(:,i)=smooth(prediction.preempt_term.rt_change_pdfs(:,i),nsmoothbins);
+% % end
 
 
 
@@ -249,9 +290,9 @@ prediction.rpe_term.rt_change_pdfs=prediction.rpe_term.rt_change_pdfs./nansum(na
 prediction.rpe_only_consec_update.rt_change_pdfs=prediction.rpe_only_consec_update.rt_change_pdfs./nansum(nansum(prediction.rpe_only_consec_update.rt_change_pdfs));
 prediction.preempt_term.rt_change_pdfs=prediction.preempt_term.rt_change_pdfs./nansum(nansum(abs(prediction.preempt_term.rt_change_pdfs)));
 n=n./nansum(nansum(n));
-% fitMask=repmat(bin_centers(rt_change_bins)>0,length(bin_centers(bins)),1);
-fitMask=ones(size(prediction.rpe_term.rt_change_pdfs));
-% fitMask(bin_centers(bins)>0.8,:)=0;
+fitMask=repmat(bin_centers(rt_change_bins)>0,length(bin_centers(bins)),1);
+% fitMask=ones(size(prediction.rpe_term.rt_change_pdfs));
+fitMask(bin_centers(bins)>0.8,:)=0;
 % [a,b,lse]=getFitCoefficients(n,prediction.rate_term.rt_change_pdfs,prediction.rpe_term.rt_change_pdfs,suppressOutput,fitMask);
 % rateMask=repmat(bin_centers(rt_change_bins)>-0.5,length(bin_centers(bins)),1);
 % rateMask(bin_centers(bins)<0.5,:)=1;
@@ -632,11 +673,15 @@ for i=1:length(try_c)
     temp=(data-(a.*rateTerm+b.*rpeTerm+curr_c.*preemptTerm)./nansum(nansum(a.*rateTerm+b.*rpeTerm+curr_c.*preemptTerm))).^2;
     new_cost(i)=nansum(nansum(temp(fitMask==1)));
 end
+figure();
+plot(try_c,new_cost);
+title('Fitting c');
 [fitqualval,fitind]=nanmin(new_cost);
 figure(); imagesc([data-(a.*rateTerm+b.*rpeTerm)./nansum(nansum(a.*rateTerm+b.*rpeTerm)) try_c(fitind).*preemptTerm./nansum(nansum(try_c(fitind).*preemptTerm))]'); set(gca,'YDir','normal');
 temp1=data-(a.*rateTerm+b.*rpeTerm)./nansum(nansum(a.*rateTerm+b.*rpeTerm)); temp2=try_c(fitind).*preemptTerm./nansum(nansum(try_c(fitind).*preemptTerm));
 figure(); imagesc([temp1(1:25,:); temp2(1:25,:)]'); set(gca,'YDir','normal');
 c=try_c(fitind);
+c=0; % only for fitting
 
 end
 

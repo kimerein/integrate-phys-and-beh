@@ -30,16 +30,35 @@ function [rt_pdf_outs,all_pdfs]=makeHMMforPreemptiveReaching(preemptive_process,
 % % reaching mode
 % p_pp=0.995;
 
+% % If in cued reaching mode, probability of switching to preemptive reaching mode
+% p_cp=0.30;
+% % If in preemptive reaching mode, probability of switching to cued reaching mode
+% p_pc=0.005;
+% % If in cued reaching mode, probability of staying in cued reaching mode
+% p_cc=0.70;
+% % If in preemptive reaching mode, probability of staying in preemptive
+% % reaching mode
+% p_pp=0.995;
+
+% % If in cued reaching mode, probability of switching to preemptive reaching mode
+% p_cp=0.02;
+% % If in preemptive reaching mode, probability of switching to cued reaching mode
+% p_pc=0.01;
+% % If in cued reaching mode, probability of staying in cued reaching mode
+% p_cc=0.99;
+% % If in preemptive reaching mode, probability of staying in preemptive
+% % reaching mode
+% p_pp=0.98;
+
 % If in cued reaching mode, probability of switching to preemptive reaching mode
-p_cp=0.30;
+p_cp=0.7;
 % If in preemptive reaching mode, probability of switching to cued reaching mode
-p_pc=0.005;
+p_pc=0.45;
 % If in cued reaching mode, probability of staying in cued reaching mode
-p_cc=0.70;
+p_cc=0.3;
 % If in preemptive reaching mode, probability of staying in preemptive
 % reaching mode
-p_pp=0.995;
-
+p_pp=0.55;
 
 % Transition probabilities from each state must sum to 1
 temp1=p_pp/(p_pp+p_pc);
@@ -84,32 +103,62 @@ nSamples=30000;
 state=rand<0.5; % if state is 0, cued reaching; if state is 1, preemptive reaching
 all_rts=nan(1,nSamples);
 all_pdfs=zeros(length(bin_centers(rt_bins)),length(bin_centers(rt_bins)));
+justSwitched=1;
+% switchingTimeCost=0.3; % in seconds
+switchingTimeCost=0.125; % in seconds
+timeStep=bin_centers(rt_bins);
+timeStep=timeStep(2)-timeStep(1);
 for i=1:nSamples
     if state==0
         % cued reaching
         % draw curr_rt from cued rt pdf
-        all_rts(i)=randsample(bin_centers(rt_bins),1,true,cued_pdf);
-        all_pdfs(find(bin_centers(rt_bins)>=all_rts(i),1,'first'),:)=all_pdfs(find(bin_centers(rt_bins)>=all_rts(i),1,'first'),:)-cued_pdf;
+        if justSwitched==1
+            all_rts(i)=randsample(switchingTimeCost+bin_centers(rt_bins),1,true,cued_pdf);
+            if all_rts(i)>bin_centers(rt_bins)
+                f=length(bin_centers(rt_bins));
+            else
+                f=find(bin_centers(rt_bins)>=all_rts(i),1,'first');
+            end
+            all_pdfs(f,:)=all_pdfs(f,:)+[zeros(1,floor(switchingTimeCost/timeStep)) cued_pdf(1:end-floor(switchingTimeCost/timeStep))];
+        else
+            all_rts(i)=randsample(bin_centers(rt_bins),1,true,cued_pdf);
+            %         all_pdfs(find(bin_centers(rt_bins)>=all_rts(i),1,'first'),:)=all_pdfs(find(bin_centers(rt_bins)>=all_rts(i),1,'first'),:)-cued_pdf;
+            all_pdfs(find(bin_centers(rt_bins)>=all_rts(i),1,'first'),:)=all_pdfs(find(bin_centers(rt_bins)>=all_rts(i),1,'first'),:)+cued_pdf;
+        end
         % test for transition
         % also transition in proportion to how certain I am that in this
         % state
         if rand<p_cc.*cued_pdf(find(bin_centers(rt_bins)>=all_rts(i),1,'first'))/(p_cc.*cued_pdf(find(bin_centers(rt_bins)>=all_rts(i),1,'first'))+p_cp.*preempt_pdf(find(bin_centers(rt_bins)>=all_rts(i),1,'first')))
             % stay in this state
+            justSwitched=0;
         else
             state=1;
+            justSwitched=1;
         end
     elseif state==1
         % preemptive reaching
         % draw curr_rt from preemptive rt pdf
-        all_rts(i)=randsample(bin_centers(rt_bins),1,true,preempt_pdf);
-        all_pdfs(find(bin_centers(rt_bins)>=all_rts(i),1,'first'),:)=all_pdfs(find(bin_centers(rt_bins)>=all_rts(i),1,'first'),:)+preempt_pdf;
+        if justSwitched==1
+            all_rts(i)=randsample(switchingTimeCost+bin_centers(rt_bins),1,true,preempt_pdf);
+            if all_rts(i)>bin_centers(rt_bins)
+                f=length(bin_centers(rt_bins));
+            else
+                f=find(bin_centers(rt_bins)>=all_rts(i),1,'first');
+            end
+            all_pdfs(f,:)=all_pdfs(f,:)+[zeros(1,floor(switchingTimeCost/timeStep)) preempt_pdf(1:end-floor(switchingTimeCost/timeStep))];
+        else
+            all_rts(i)=randsample(bin_centers(rt_bins),1,true,preempt_pdf);
+            all_pdfs(find(bin_centers(rt_bins)>=all_rts(i),1,'first'),:)=all_pdfs(find(bin_centers(rt_bins)>=all_rts(i),1,'first'),:)+preempt_pdf;
+        end
         % test for transition
         % also transition in proportion to how certain I am that in this
         % state
         if rand<p_pp.*preempt_pdf(find(bin_centers(rt_bins)>=all_rts(i),1,'first'))/(p_pp.*preempt_pdf(find(bin_centers(rt_bins)>=all_rts(i),1,'first'))+p_pc*cued_pdf(find(bin_centers(rt_bins)>=all_rts(i),1,'first')))
             % stay in this state
+            justSwitched=0;
         else
             state=0;
+            justSwitched=1;
         end
     end
 end
