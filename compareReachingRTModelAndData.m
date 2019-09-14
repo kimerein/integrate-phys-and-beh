@@ -242,14 +242,17 @@ figure(); imagesc(bin_centers(bins),bin_centers(rt_change_bins),prediction.preem
 % For consecutive trials, this is just the RT pdf pushing subsequent RTs
 % forward in time
 % Note that positive RPE update is proportional to 1-cdf of RTs
-smearSize=60;
+% smearSize=12;
+% smearSize=28;
+smearSize=57;
+% smearSize=80;
 temp=zeros(size(rt_pdf_outs));
 % Use the following code (commented out) to convince yourself that the
 % RPE update to the PDF of reaction times is just rt_pdf
 % curr_cdf=accumulateDistribution(rt_pdf(rts_firstTrialInSequence,bins));
 % curr_updates=1-curr_cdf;
 % curr_updates=[0 diff(curr_updates)];
-useBaseSubtractedCuedProcess=1;
+useBaseSubtractedCuedProcess=0;
 if useBaseSubtractedCuedProcess==1
     curr_updates=cued_process.rt_pdf;
 else
@@ -263,7 +266,7 @@ for i=1:size(temp,1)
     else
         useInd=i-(smearSize-1);
     end
-    temp(i,useInd:i)=curr_updates(i)/smearSize;
+    temp(i,useInd:i)=curr_updates(i)/length(useInd:i);
 end
 temp(temp(1:end)<=0)=0.00001;
 temp=temp./nansum(nansum(temp));
@@ -349,7 +352,7 @@ prediction.preempt_term.rt_change_pdfs=prediction.preempt_term.rt_change_pdfs./n
 n=n./nansum(nansum(n));
 fitMask=ones(size(prediction.rpe_term.rt_change_pdfs));
 % fitMask=repmat(bin_centers(rt_change_bins)>0,length(bin_centers(bins)),1);
-% fitMask(bin_centers(bins)>0.8,:)=0;
+% fitMask(bin_centers(bins)<0.4,:)=0;
 fitMask2=repmat(bin_centers(rt_change_bins)>-0.4 & bin_centers(rt_change_bins)<0.4,length(bin_centers(bins)),1);
 fitMask2(bin_centers(bins)>0.5,:)=0;
 % [a,b,lse]=getFitCoefficients(n,prediction.rate_term.rt_change_pdfs,prediction.rpe_term.rt_change_pdfs,suppressOutput,fitMask);
@@ -357,8 +360,8 @@ fitMask2(bin_centers(bins)>0.5,:)=0;
 % rateMask(bin_centers(bins)<0.5,:)=1;
 % rpeMask=repmat(bin_centers(rt_change_bins)<=0 | bin_centers(rt_change_bins)>=0.25,length(bin_centers(bins)),1);
 % [a,b,lse]=fitRateThenRPE(n,prediction.rate_term.rt_change_pdfs,prediction.rpe_only_consec_update.rt_change_pdfs,rateMask,rpeMask);
-[a,b,c,lse]=getFitCoefficients_all3terms(n,prediction.rate_term.rt_change_pdfs,prediction.rpe_term.rt_change_pdfs,prediction.preempt_term.rt_change_pdfs,suppressOutput,fitMask,fitMask2);
-% [a,b,c,lse]=getFitCoefficients_all3terms_atSameTime(n,prediction.rate_term.rt_change_pdfs,prediction.rpe_term.rt_change_pdfs,prediction.preempt_term.rt_change_pdfs,suppressOutput,fitMask);
+% [a,b,c,lse]=getFitCoefficients_all3terms(n,prediction.rate_term.rt_change_pdfs,prediction.rpe_term.rt_change_pdfs,prediction.preempt_term.rt_change_pdfs,suppressOutput,fitMask,fitMask2);
+[a,b,c,lse]=getFitCoefficients_all3terms_atSameTime(n,prediction.rate_term.rt_change_pdfs,prediction.rpe_term.rt_change_pdfs,prediction.preempt_term.rt_change_pdfs,suppressOutput,fitMask);
 if suppressOutput==0
     disp('ratio of rpe to rate term');
     disp(b/a);
@@ -633,11 +636,11 @@ function [a,b,c,fitqualval]=getFitCoefficients_all3terms_atSameTime(data,rateTer
 % we know that c<<a and c<<b
 % so fit a and b first
 
-data=data./nansum(nansum(data));
+data=data./nansum(nansum(abs(data(fitMask==1))));
 
-try_a=[0.001:0.05:3];
+try_a=[1:0.2:3];
 try_b=[0.001:0.05:3];
-try_c=[0:0.01:1];
+try_c=[0:0.02:1];
 % Looking for ratio of a and b that best fits data
 cost=nan(length(try_a),length(try_b),length(try_c));
 for i=1:length(try_a)
@@ -649,8 +652,14 @@ for i=1:length(try_a)
         curr_b=try_b(j);
         for k=1:length(try_c)
             curr_c=try_c(k);
-            temp=(data-(curr_a.*rateTerm+curr_b.*rpeTerm+curr_c.*preemptTerm)./nansum(nansum(curr_a.*rateTerm+curr_b.*rpeTerm+curr_c.*preemptTerm))).^2;
-            cost(i,j,k)=nansum(nansum(temp(fitMask==1)));
+            
+            temp=curr_a.*rateTerm+curr_b.*rpeTerm+curr_c.*preemptTerm;
+            temp=temp-nanmin(nanmin(temp));
+            temp=temp./nansum(nansum(abs(temp(fitMask==1))));
+            temp2=abs(data-temp);
+            
+%             temp=(data-(curr_a.*rateTerm+curr_b.*rpeTerm+curr_c.*preemptTerm)./nansum(nansum(curr_a.*rateTerm+curr_b.*rpeTerm+curr_c.*preemptTerm))).^2;
+            cost(i,j,k)=nansum(nansum(temp2(fitMask==1).*data(fitMask==1))); % weight cost in proportion to how much data is available at that point
         end
     end
 end
@@ -679,6 +688,7 @@ try_a=[0.001:0.05:3];
 try_b=[0.001:0.05:3];
 % try_a=[0.001:5:200];
 % try_b=[0.001:5:200];
+certainty_mask=conv2(data,ones(50),'same');
 % Looking for ratio of a and b that best fits data
 cost=nan(length(try_a),length(try_b));
 for i=1:length(try_a)
@@ -693,9 +703,10 @@ for i=1:length(try_a)
         temp=temp-nanmean(nanmean(temp));
         temp=temp./nansum(nansum(abs(temp(fitMask==1))));
         temp2=abs(data-temp);
+        temp2=temp2.^2;
         
         %temp=(data-(curr_a.*rateTerm+curr_b.*rpeTerm)./nansum(nansum(curr_a.*rateTerm+curr_b.*rpeTerm))).^2;
-        cost(i,j)=nansum(nansum(temp2(fitMask==1)));
+        cost(i,j)=nansum(nansum(temp2(fitMask==1).*certainty_mask(fitMask==1)));
     end
 end
 % Best ratio of a and b defines a line in cost space
@@ -742,6 +753,7 @@ data=data./nansum(nansum(abs(data(fitMask2==1))));
 % Now add preemptTerm to further improve fit
 try_c=[0:0.001:1];
 new_cost=nan(1,length(try_c));
+certainty_mask=conv2(data,ones(50),'same');
 for i=1:length(try_c)
     curr_c=try_c(i);
     
@@ -749,9 +761,10 @@ for i=1:length(try_c)
     temp=temp-nanmean(nanmean(temp));
     temp=temp./nansum(nansum(abs(temp(fitMask2==1))));
     temp2=abs(data-temp);
+    temp2=temp2.^2;
     
     %temp=(data-(a.*rateTerm+b.*rpeTerm+curr_c.*preemptTerm)./nansum(nansum(a.*rateTerm+b.*rpeTerm+curr_c.*preemptTerm))).^2;
-    new_cost(i)=nansum(nansum(temp2(fitMask2==1)));
+    new_cost(i)=nansum(nansum(temp2(fitMask2==1).*certainty_mask(fitMask2==1)));
 end
 figure();
 plot(try_c,new_cost);

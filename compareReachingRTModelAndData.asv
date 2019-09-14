@@ -11,7 +11,7 @@ bins=0:0.035:9;
 rts=dataForModel.allTrialsSequence_RT_trial1InSeq{1};
 rts_firstTrialInSequence=data.event_RT_trial1InSeq{1};
 shortestCuedRT=0.125; % in seconds, accounts for sensory detection + motor planning/execution delay
-removeShortRTs=1;
+removeShortRTs=0;
 % preemptCue_secBeforeCue=0.1; % earliest that mouse can detect preemptive cue, in seconds before cue
 
 % Mouse is not doing a cued reach if reaches before shortestCuedRT, e.g., 125 ms
@@ -242,7 +242,8 @@ figure(); imagesc(bin_centers(bins),bin_centers(rt_change_bins),prediction.preem
 % For consecutive trials, this is just the RT pdf pushing subsequent RTs
 % forward in time
 % Note that positive RPE update is proportional to 1-cdf of RTs
-smearSize=60;
+smearSize=18;
+% smearSize=60;
 temp=zeros(size(rt_pdf_outs));
 % Use the following code (commented out) to convince yourself that the
 % RPE update to the PDF of reaction times is just rt_pdf
@@ -633,11 +634,11 @@ function [a,b,c,fitqualval]=getFitCoefficients_all3terms_atSameTime(data,rateTer
 % we know that c<<a and c<<b
 % so fit a and b first
 
-data=data./nansum(nansum(data));
+data=data./nansum(nansum(abs(data(fitMask==1))));
 
-try_a=[0.001:0.05:3];
+try_a=[1:0.2:3];
 try_b=[0.001:0.05:3];
-try_c=[0:0.01:1];
+try_c=[0:0.02:1];
 % Looking for ratio of a and b that best fits data
 cost=nan(length(try_a),length(try_b),length(try_c));
 for i=1:length(try_a)
@@ -649,8 +650,14 @@ for i=1:length(try_a)
         curr_b=try_b(j);
         for k=1:length(try_c)
             curr_c=try_c(k);
-            temp=(data-(curr_a.*rateTerm+curr_b.*rpeTerm+curr_c.*preemptTerm)./nansum(nansum(curr_a.*rateTerm+curr_b.*rpeTerm+curr_c.*preemptTerm))).^2;
-            cost(i,j,k)=nansum(nansum(temp(fitMask==1)));
+            
+            temp=curr_a.*rateTerm+curr_b.*rpeTerm+curr_c.*preemptTerm;
+            temp=temp-nanmin(nanmin(temp));
+            temp=temp./nansum(nansum(abs(temp(fitMask==1))));
+            temp2=abs(data-temp);
+            
+%             temp=(data-(curr_a.*rateTerm+curr_b.*rpeTerm+curr_c.*preemptTerm)./nansum(nansum(curr_a.*rateTerm+curr_b.*rpeTerm+curr_c.*preemptTerm))).^2;
+            cost(i,j,k)=nansum(nansum(temp2(fitMask==1).*data(fitMask==1))); % weight cost in proportion to how much data is available at that point
         end
     end
 end
@@ -679,6 +686,7 @@ try_a=[0.001:0.05:3];
 try_b=[0.001:0.05:3];
 % try_a=[0.001:5:200];
 % try_b=[0.001:5:200];
+certainty_mask=conv2(data,ones(50),'same');
 % Looking for ratio of a and b that best fits data
 cost=nan(length(try_a),length(try_b));
 for i=1:length(try_a)
@@ -693,9 +701,10 @@ for i=1:length(try_a)
         temp=temp-nanmean(nanmean(temp));
         temp=temp./nansum(nansum(abs(temp(fitMask==1))));
         temp2=abs(data-temp);
+        temp2=temp2.^2;
         
         %temp=(data-(curr_a.*rateTerm+curr_b.*rpeTerm)./nansum(nansum(curr_a.*rateTerm+curr_b.*rpeTerm))).^2;
-        cost(i,j)=nansum(nansum(temp2(fitMask==1)));
+        cost(i,j)=nansum(nansum(temp2(fitMask==1).*certainty_mask(fitMask==1)));
     end
 end
 % Best ratio of a and b defines a line in cost space
@@ -749,9 +758,10 @@ for i=1:length(try_c)
     temp=temp-nanmean(nanmean(temp));
     temp=temp./nansum(nansum(abs(temp(fitMask2==1))));
     temp2=abs(data-temp);
+    temp2=temp2.^2;
     
     %temp=(data-(a.*rateTerm+b.*rpeTerm+curr_c.*preemptTerm)./nansum(nansum(a.*rateTerm+b.*rpeTerm+curr_c.*preemptTerm))).^2;
-    new_cost(i)=nansum(nansum(temp2(fitMask2==1)));
+    new_cost(i)=nansum(nansum(temp2(fitMask2==1).*certainty_mask(fitMask2==1)));
 end
 figure();
 plot(try_c,new_cost);
@@ -974,7 +984,7 @@ function update_rt_pdf=update_rate_term(rt_pdf,bins,curr_rt,curr_ITI,curr_event,
 % increases, i.e., shorter curr_rt means higher b
 
 bin_centers = @(bins) nanmean([bins(1:end-1); bins(2:end)],1);
-pdf_wait = @(bins,a,b,num_a,num_b) gampdf(bin_centers(bins),num_a,num_b)./gampdf(bin_centers(bins),a,b);
+pdf_wait = @(bins,a,b,den_a,den_b) gampdf(bin_centers(bins),a,b)./gampdf(bin_centers(bins),den_a,den_b);
 
 % get a,b,a_any,b_any for pdf(wait time) from curr_rt
 [a,b,a_any,b_any]=getGammaAandBeta(curr_rt,curr_ITI,curr_event,fits);

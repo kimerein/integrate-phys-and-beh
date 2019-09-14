@@ -1,11 +1,11 @@
-function applyReachingModel(use_dataset_dir,differ_file,fits_file,preempt_file,alltbt,out,metadata,dprime_range,event_type)
+function applyReachingModel(use_dataset_dir,fits_file,preempt_file,alltbt,out,metadata,dprime_range,event_type)
 
 % Load reaching data
 a=load([use_dataset_dir '\pdf.mat']);
 dataset=a.dataset;
 
 % Filter reaching data for sessions with d-prime in dprime_range
-[dprime_alltbt,dprime_out,dprime_metadata]=filtTbt(alltbt,out,'dprime',dprime_range,metadata);
+[dprime_alltbt]=filtTbt(alltbt,out,'dprime',dprime_range,metadata);
 
 % Get base-subtracted cued reaching
 cued_process=getCuedProcess(dprime_alltbt,false);
