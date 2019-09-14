@@ -11,11 +11,14 @@ bins=0:0.035:9;
 rts=dataForModel.allTrialsSequence_RT_trial1InSeq{1};
 rts_firstTrialInSequence=data.event_RT_trial1InSeq{1};
 shortestCuedRT=0.125; % in seconds, accounts for sensory detection + motor planning/execution delay
+removeShortRTs=0;
 % preemptCue_secBeforeCue=0.1; % earliest that mouse can detect preemptive cue, in seconds before cue
 
 % Mouse is not doing a cued reach if reaches before shortestCuedRT, e.g., 125 ms
-rts(rts<=shortestCuedRT)=nan;
-rts_firstTrialInSequence(rts_firstTrialInSequence<=shortestCuedRT)=nan;
+if removeShortRTs==1
+    rts(rts<=shortestCuedRT)=nan;
+    rts_firstTrialInSequence(rts_firstTrialInSequence<=shortestCuedRT)=nan;
+end
 
 % For default (i.e., comparing consecutive trials), do not change these
 sameRTforEachTrial=false; % if true, will assume same reaction time for all subsequent trials, otherwise will sample randomly from current rt pdf
@@ -28,8 +31,13 @@ bin_centers = @(bins) nanmean([bins(1:end-1); bins(2:end)],1);
 try_curr_rts=bin_centers(bins);
 rt_change_pdfs=nan(length(try_curr_rts),length(bin_centers(unique([-fliplr(bins) bins]))));
 rt_pdf_outs=nan(length(try_curr_rts),length(bin_centers(bins)));
+useOnlyCuedForRate=0;
 for i=1:length(try_curr_rts)
-    rt_pdf_out=rt_pdf(rts,bins);
+    if useOnlyCuedForRate==1
+        rt_pdf_out=cued_process.rt_pdf_outs(i,:);
+    else
+        rt_pdf_out=rt_pdf(rts,bins);
+    end
     if sameRTforEachTrial==true
         for j=1:n_update_steps % if RT is same for each trial
             rt_pdf_out=update_rate_term(rt_pdf_out,bins,try_curr_rts(i),ITI,behaviorEvent,true,fits);
@@ -51,7 +59,7 @@ end
 prediction.rate_term.rt_change_pdfs=rt_change_pdfs;
 prediction.rate_term.rt_change_bins=rt_change_bins;
 prediction.rate_term.rt_pdf_outs=rt_pdf_outs;
-
+figure(); imagesc(bin_centers(bins),bin_centers(rt_change_bins),prediction.rate_term.rt_change_pdfs'); set(gca,'YDir','normal'); xlabel('RT (sec)'); ylabel('Change in RT (sec)'); title('Rate term');
 
 
 
@@ -88,6 +96,7 @@ end
 
 prediction.preempt_term.rt_change_pdfs=rt_change_pdfs;
 prediction.preempt_term.rt_change_bins=rt_change_bins;
+figure(); imagesc(bin_centers(bins),bin_centers(rt_change_bins),prediction.preempt_term.rt_change_pdfs'); set(gca,'YDir','normal'); xlabel('RT (sec)'); ylabel('Change in RT (sec)'); title('Preempt term');
 
 % Preemptive reaching term from previous fitting session
 % if isfield(rt_pdf_outs_for_preempt,'addProcess')
@@ -272,6 +281,7 @@ for i=1:length(try_curr_rts)
 end
 prediction.rpe_only_consec_update.rt_change_pdfs=rt_change_pdfs;
 prediction.rpe_only_consec_update.rt_change_bins=rt_change_bins;
+figure(); imagesc(bin_centers(bins),bin_centers(rt_change_bins),prediction.rpe_only_consec_update.rt_change_pdfs'); set(gca,'YDir','normal'); xlabel('RT (sec)'); ylabel('Change in RT (sec)'); title('RPE only consec update term');
 
 % prediction.rpe_only_consec_update.rt_change_pdfs=zeros(size(rt_change_pdfs));
 % % prediction.rpe_only_consec_update.rt_change_pdfs(:,find(bin_centers(rt_change_bins)>0,1,'first'))=rt_pdf(rts_firstTrialInSequence,bins);
@@ -314,6 +324,7 @@ end
 prediction.rpe_term.rt_change_pdfs=rt_change_pdfs;
 prediction.rpe_term.rt_change_bins=rt_change_bins;
 prediction.rpe_term.rt_pdf_outs=rt_pdf_outs;
+figure(); imagesc(bin_centers(bins),bin_centers(rt_change_bins),prediction.rpe_term.rt_change_pdfs'); set(gca,'YDir','normal'); xlabel('RT (sec)'); ylabel('Change in RT (sec)'); title('RPE term');
 
 % Fit terms to data
 i=n_update_steps;
@@ -336,8 +347,8 @@ prediction.rpe_term.rt_change_pdfs=prediction.rpe_term.rt_change_pdfs./nansum(na
 prediction.rpe_only_consec_update.rt_change_pdfs=prediction.rpe_only_consec_update.rt_change_pdfs./nansum(nansum(prediction.rpe_only_consec_update.rt_change_pdfs));
 prediction.preempt_term.rt_change_pdfs=prediction.preempt_term.rt_change_pdfs./nansum(nansum(abs(prediction.preempt_term.rt_change_pdfs)));
 n=n./nansum(nansum(n));
-% fitMask=repmat(bin_centers(rt_change_bins)>0,length(bin_centers(bins)),1);
 fitMask=ones(size(prediction.rpe_term.rt_change_pdfs));
+% fitMask=repmat(bin_centers(rt_change_bins)>0,length(bin_centers(bins)),1);
 % fitMask(bin_centers(bins)>0.8,:)=0;
 fitMask2=repmat(bin_centers(rt_change_bins)>-0.4 & bin_centers(rt_change_bins)<0.4,length(bin_centers(bins)),1);
 fitMask2(bin_centers(bins)>0.5,:)=0;
@@ -389,7 +400,7 @@ differ_withoutC=n-best_predict_withoutC;
 differ_withoutC=differ_withoutC-nanmin(nanmin(differ_withoutC));
 err_withoutC=nansum(nansum(abs(differ_withoutC)));
 figure(); 
-imagesc(bin_centers(bins),bin_centers(rt_change_bins),[differ differ_withoutC]'); set(gca,'YDir','normal');
+imagesc(bin_centers(bins),bin_centers(rt_change_bins),[differ differ_withoutC]'); set(gca,'YDir','normal'); xlabel('RT (sec)'); ylabel('Change in RT (sec)'); title('Differ with and without preempt term');
 disp('Times reduction in error from data');
 disp(err_withoutC./err);
 
@@ -406,7 +417,7 @@ differ_withoutC_smoothed=differ_withoutC_smoothed-nanmin(nanmin(differ_withoutC_
 figure(); 
 imagesc(bin_centers(bins),bin_centers(rt_change_bins),[differ_smoothed conv2(best_predict,K,'same')]'); set(gca,'YDir','normal');
 % imagesc(bin_centers(bins),bin_centers(rt_change_bins),[differ_smoothed differ_withoutC_smoothed]'); set(gca,'YDir','normal');
-title('Smoothed');
+title('Prediction vs residual -- Smoothed');
 
 % rt_pdf_outs_update=invertRTchange_to_rt_pdf_update(differ,rt_change_bins,bins,try_curr_rts,prediction.rate_term.rt_pdf_outs);
 
@@ -666,6 +677,8 @@ data=data./nansum(nansum(abs(data(fitMask==1))));
 
 try_a=[0.001:0.05:3];
 try_b=[0.001:0.05:3];
+% try_a=[0.001:5:200];
+% try_b=[0.001:5:200];
 % Looking for ratio of a and b that best fits data
 cost=nan(length(try_a),length(try_b));
 for i=1:length(try_a)
@@ -961,14 +974,26 @@ function update_rt_pdf=update_rate_term(rt_pdf,bins,curr_rt,curr_ITI,curr_event,
 % increases, i.e., shorter curr_rt means higher b
 
 bin_centers = @(bins) nanmean([bins(1:end-1); bins(2:end)],1);
-pdf_wait = @(bins,a,b) gampdf(bin_centers(bins),a,b);
+pdf_wait = @(bins,a,b,den_a,den_b) gampdf(bin_centers(bins),a,b)./gampdf(bin_centers(bins),den_a,den_b);
 
-% get a,b for pdf(wait time) from curr_rt
-[a,b]=getGammaAandBeta(curr_rt,curr_ITI,curr_event,fits);
+% get a,b,a_any,b_any for pdf(wait time) from curr_rt
+[a,b,a_any,b_any]=getGammaAandBeta(curr_rt,curr_ITI,curr_event,fits);
 
-normFac=calibrateRateUpdate(fits,pdf_wait);
+normFac=calibrateRateUpdate(fits,pdf_wait); % normFac should be 1
 
-update_rt_pdf = normFac*rt_pdf.*pdf_wait(bins,a,b);
+% count_waits is the expected distribution of wait times before reach, given
+% no cue, aligned to pellet touch
+% count_waits_noTouch is the expected distribution of wait times before
+% reach, given no cue, aligned to reach without pellet touch
+% assume that, after reach but no pellet touch on previous trial, the
+% distribution of RTs on next trial is already multiplied by
+% count_waits_noTouch
+% so, to account for rate change associated with pellet touch, need to
+% divide out count_waits_noTouch and multiply by count_waits, or,
+% equivalently, multiply by count_waits/count_waits_noTouch
+
+
+update_rt_pdf = normFac*rt_pdf.*pdf_wait(bins,a,b,a_any,b_any);
 
 if suppressOutput==false
     figure(); 
@@ -990,15 +1015,16 @@ function normFac=calibrateRateUpdate(fits,pdf_wait)
 
 bins=0:0.01:1000;
 curr_ITI=nanmax(fits.nSecondsAfterTouch);
-[a,b]=getGammaAandBeta(0,curr_ITI,'drop',fits);
+[a,b,a_any,b_any]=getGammaAandBeta(0,curr_ITI,'drop',fits);
 rt_pdf=exp(-bins(2:end));
-update_rt_pdf = rt_pdf.*pdf_wait(bins,a,b);
+update_rt_pdf = rt_pdf.*pdf_wait(bins,a,b,a_any,b_any); % pdf wait should be 1
 % update_rt_pdf should have integral that matches integral of rt_pdf
 % because we have waited a very long time
 % need to multiply integral of update_rt_pdf by normFac to make this true
 rt_pdf_integral=nansum(rt_pdf);
 update_rt_pdf_integral=nansum(update_rt_pdf);
 normFac=rt_pdf_integral/update_rt_pdf_integral;
+% normFac should be 1
 
 % figure();
 % plot(rt_pdf,'Color','k');
@@ -1008,7 +1034,7 @@ normFac=rt_pdf_integral/update_rt_pdf_integral;
 
 end
 
-function [a,b]=getGammaAandBeta(curr_rt,curr_ITI,curr_event,fits)
+function [a,b,a_any,b_any]=getGammaAandBeta(curr_rt,curr_ITI,curr_event,fits)
 
 % curr_rt is the reaction time on the current trial
 % I am trying to predict the reaction time on the next trial
@@ -1045,5 +1071,9 @@ switch curr_event
     otherwise
         error('Do not recognize curr_event in getGammaAandBeta');
 end
+
+% a_any,b_any are parameters for steady-state reaching
+a_any=fits.shapeParam_dropPellet(end);
+b_any=fits.rateParam_dropPellet(end);
 
 end
