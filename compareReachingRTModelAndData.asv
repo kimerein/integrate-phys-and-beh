@@ -240,12 +240,7 @@ temp=zeros(size(rt_pdf_outs));
 % curr_cdf=accumulateDistribution(rt_pdf(rts_firstTrialInSequence,bins));
 % curr_updates=1-curr_cdf;
 % curr_updates=[0 diff(curr_updates)];
-useBaseSubtractedCuedProcess=1;
-if useBaseSubtractedCuedProcess==1
-    curr_updates=cued_process.rt_pdf;
-else
-    curr_updates=rt_pdf(rts_firstTrialInSequence,bins);
-end
+curr_updates=rt_pdf(rts_firstTrialInSequence,bins);
 curr_updates(curr_updates==0)=0.00001;
 curr_updates=curr_updates./nansum(curr_updates);
 for i=1:size(temp,1)
@@ -264,11 +259,7 @@ prediction.rpe_only_consec_update.rt_pdf_outs=rt_pdf_outs;
 rt_change_pdfs=nan(length(try_curr_rts),length(bin_centers(unique([-fliplr(bins) bins]))));
 for i=1:length(try_curr_rts)
     rt_pdf_out=rt_pdf_outs(i,:);
-    if useBaseSubtractedCuedProcess==1
-        [rt_change_pdfs(i,:),rt_change_bins]=getRTchange_fromCurrAndUpdatedRTpdfs(cued_process.rt_pdf,rt_pdf_out,bins,true,[bins(i) bins(i+1)]);
-    else
-        [rt_change_pdfs(i,:),rt_change_bins]=getRTchange_fromCurrAndUpdatedRTpdfs(rt_pdf(rts_firstTrialInSequence,bins),rt_pdf_out,bins,true,[bins(i) bins(i+1)]); % if last argument is empty, will plot change distribution for all current reaction times
-    end
+    [rt_change_pdfs(i,:),rt_change_bins]=getRTchange_fromCurrAndUpdatedRTpdfs(rt_pdf(rts_firstTrialInSequence,bins),rt_pdf_out,bins,true,[bins(i) bins(i+1)]); % if last argument is empty, will plot change distribution for all current reaction times
 end
 prediction.rpe_only_consec_update.rt_change_pdfs=rt_change_pdfs;
 prediction.rpe_only_consec_update.rt_change_bins=rt_change_bins;
@@ -323,13 +314,12 @@ temp2_seq2=data.event_RT_trialiInSeq{i};
 temp2_seq2=temp2_seq2(data.realrtpair_seq2{i}==1);
 rtchanges_seq2=temp1_seq2-temp2_seq2;
 [n,x,y]=make2Dpdf(temp1_seq2,rtchanges_seq2,{bin_centers(bins), bin_centers(rt_change_bins)});
-n=n./nansum(nansum(abs(n)));
 % Smooth all before fitting
 K=ones(7);
 n=conv2(n,K,'same');
 prediction.rate_term.rt_change_pdfs=conv2(prediction.rate_term.rt_change_pdfs,K,'same');
 prediction.rpe_term.rt_change_pdfs=conv2(prediction.rpe_term.rt_change_pdfs,K,'same');
-prediction.preempt_term.rt_change_pdfs=conv2(prediction.preempt_term.rt_change_pdfs,ones(1),'same');
+prediction.preempt_term.rt_change_pdfs=conv2(prediction.preempt_term.rt_change_pdfs,ones(7),'same');
 prediction.rpe_only_consec_update.rt_change_pdfs=conv2(prediction.rpe_only_consec_update.rt_change_pdfs,K,'same');
 prediction.rate_term.rt_change_pdfs=prediction.rate_term.rt_change_pdfs./nansum(nansum(prediction.rate_term.rt_change_pdfs));
 prediction.rpe_term.rt_change_pdfs=prediction.rpe_term.rt_change_pdfs./nansum(nansum(prediction.rpe_term.rt_change_pdfs));
@@ -362,7 +352,7 @@ if suppressOutput==0
 end
 
 best_predict=a.*prediction.rate_term.rt_change_pdfs+b.*prediction.rpe_only_consec_update.rt_change_pdfs+c.*prediction.preempt_term.rt_change_pdfs;
-best_predict=best_predict./nansum(nansum(abs(best_predict)));
+best_predict=best_predict./nansum(nansum(best_predict));
 
 if suppressOutput==0
     plot_deltaRT_as_func_of_RT(x,y,[n best_predict],'Real Data then Fit to Data');
@@ -404,8 +394,7 @@ differ_withoutC_smoothed=conv2(n,K,'same')-conv2(best_predict_withoutC,K,'same')
 differ_withoutC_smoothed=differ_withoutC_smoothed-nanmin(nanmin(differ_withoutC_smoothed));
 
 figure(); 
-imagesc(bin_centers(bins),bin_centers(rt_change_bins),[differ_smoothed conv2(best_predict,K,'same')]'); set(gca,'YDir','normal');
-% imagesc(bin_centers(bins),bin_centers(rt_change_bins),[differ_smoothed differ_withoutC_smoothed]'); set(gca,'YDir','normal');
+imagesc(bin_centers(bins),bin_centers(rt_change_bins),[differ_smoothed differ_withoutC_smoothed]'); set(gca,'YDir','normal');
 title('Smoothed');
 
 % rt_pdf_outs_update=invertRTchange_to_rt_pdf_update(differ,rt_change_bins,bins,try_curr_rts,prediction.rate_term.rt_pdf_outs);
@@ -744,9 +733,9 @@ figure();
 plot(try_c,new_cost);
 title('Fitting c');
 [fitqualval,fitind]=nanmin(new_cost);
-% figure(); imagesc([data-(a.*rateTerm+b.*rpeTerm)./nansum(nansum(a.*rateTerm+b.*rpeTerm)) try_c(fitind).*preemptTerm./nansum(nansum(try_c(fitind).*preemptTerm))]'); set(gca,'YDir','normal');
-% temp1=data-(a.*rateTerm+b.*rpeTerm)./nansum(nansum(a.*rateTerm+b.*rpeTerm)); temp2=try_c(fitind).*preemptTerm./nansum(nansum(try_c(fitind).*preemptTerm));
-% figure(); imagesc([temp1(1:25,:); temp2(1:25,:)]'); set(gca,'YDir','normal');
+figure(); imagesc([data-(a.*rateTerm+b.*rpeTerm)./nansum(nansum(a.*rateTerm+b.*rpeTerm)) try_c(fitind).*preemptTerm./nansum(nansum(try_c(fitind).*preemptTerm))]'); set(gca,'YDir','normal');
+temp1=data-(a.*rateTerm+b.*rpeTerm)./nansum(nansum(a.*rateTerm+b.*rpeTerm)); temp2=try_c(fitind).*preemptTerm./nansum(nansum(try_c(fitind).*preemptTerm));
+figure(); imagesc([temp1(1:25,:); temp2(1:25,:)]'); set(gca,'YDir','normal');
 c=try_c(fitind);
 
 end
