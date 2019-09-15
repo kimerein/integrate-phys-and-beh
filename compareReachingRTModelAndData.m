@@ -349,7 +349,7 @@ K=ones(7);
 n=conv2(n,K,'same');
 prediction.rate_term.rt_change_pdfs=conv2(prediction.rate_term.rt_change_pdfs,K,'same');
 prediction.rpe_term.rt_change_pdfs=conv2(prediction.rpe_term.rt_change_pdfs,K,'same');
-prediction.preempt_term.rt_change_pdfs=conv2(prediction.preempt_term.rt_change_pdfs,ones(1),'same');
+prediction.preempt_term.rt_change_pdfs=conv2(prediction.preempt_term.rt_change_pdfs,ones(7),'same');
 prediction.rpe_only_consec_update.rt_change_pdfs=conv2(prediction.rpe_only_consec_update.rt_change_pdfs,K,'same');
 prediction.rate_term.rt_change_pdfs=prediction.rate_term.rt_change_pdfs./nansum(nansum(prediction.rate_term.rt_change_pdfs));
 prediction.rpe_term.rt_change_pdfs=prediction.rpe_term.rt_change_pdfs./nansum(nansum(prediction.rpe_term.rt_change_pdfs));
@@ -359,8 +359,8 @@ n=n./nansum(nansum(n));
 fitMask=ones(size(prediction.rpe_term.rt_change_pdfs));
 % fitMask=repmat(bin_centers(rt_change_bins)>0,length(bin_centers(bins)),1);
 % fitMask(bin_centers(bins)<0.4,:)=0;
-fitMask2=repmat(bin_centers(rt_change_bins)>-0.4 & bin_centers(rt_change_bins)<0.4,length(bin_centers(bins)),1);
-fitMask2(bin_centers(bins)>0.5,:)=0;
+% fitMask2=repmat(bin_centers(rt_change_bins)>-0.4 & bin_centers(rt_change_bins)<0.4,length(bin_centers(bins)),1);
+% fitMask2(bin_centers(bins)>0.5,:)=0;
 % [a,b,lse]=getFitCoefficients(n,prediction.rate_term.rt_change_pdfs,prediction.rpe_term.rt_change_pdfs,suppressOutput,fitMask);
 % rateMask=repmat(bin_centers(rt_change_bins)>-0.5,length(bin_centers(bins)),1);
 % rateMask(bin_centers(bins)<0.5,:)=1;
@@ -646,9 +646,9 @@ data=data./nansum(nansum(abs(data(fitMask==1))));
 
 try_a=[1:0.2:3];
 try_b=[0.001:0.05:3];
-try_c=[0:0.02:1];
+% try_c=[0:0.005:0.03];
 % try_c=[0.04:0.02:1];
-% try_c=[0.20];
+try_c=[0.005:0.01:0.03];
 
 % Looking for ratio of a and b that best fits data
 cost=nan(length(try_a),length(try_b),length(try_c));
