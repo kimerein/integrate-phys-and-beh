@@ -7,8 +7,10 @@ bin_centers = @(bins) nanmean([bins(1:end-1); bins(2:end)],1);
 % preemptive_process.rate=0.1;
 % preemptive_process.shape=1.2; % best ss assumption
 % preemptive_process.rate=0.1; % best ss assumption
+% preemptive_process.shape=1.5; % best ss assumption
+% preemptive_process.rate=0.11; % best ss assumption
 preemptive_process.shape=1.5; % best ss assumption
-preemptive_process.rate=0.11; % best ss assumption
+preemptive_process.rate=0.15; % best ss assumption
 prepdf=gampdf(x,preemptive_process.shape,preemptive_process.rate);
 preemptive_process.preempt_pdf=prepdf;
 preemptive_process.preempt_pdf=preemptive_process.preempt_pdf./nansum(preemptive_process.preempt_pdf);
@@ -130,7 +132,7 @@ if subtractCued==1
 end
 
 figure(); imagesc(x,x,rt_pdf_outs); title('RT pdf outs');
-figure(); imagesc(x,y,rt_change_pdfs'); set(gca,'YDir','normal');
+figure(); imagesc(x,y,conv2(rt_change_pdfs,ones(7),'same')'); set(gca,'YDir','normal');
 figure(); imagesc(x,y,differ'); set(gca,'YDir','normal');
 figure(); imagesc(x,y,[differ rt_change_pdfs]'); set(gca,'YDir','normal');
 

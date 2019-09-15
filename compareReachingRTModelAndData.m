@@ -36,6 +36,9 @@ for i=1:length(try_curr_rts)
     if useOnlyCuedForRate==1
         rt_pdf_out=cued_process.rt_pdf_outs(i,:);
     else
+%         rt_pdf_out=rt_pdf(rts,bins)+0.6*cued_process.rt_pdf_outs(i,:);
+%         rt_pdf_out=rt_pdf(rts,bins)+0.8*cued_process.rt_pdf_outs(i,:);
+%         rt_pdf_out=rt_pdf(rts,bins)+0.2*cued_process.rt_pdf_outs(i,:);
         rt_pdf_out=rt_pdf(rts,bins);
     end
     if sameRTforEachTrial==true
@@ -93,6 +96,9 @@ if subtractCued==1
     rt_change_pdfs=rt_change_pdfs-nanmean(nanmean(rt_change_pdfs(repmat(rt_change_bins<-6,length(bin_centers(bins)),1))));
     rt_change_pdfs=rt_change_pdfs./nansum(nansum(abs(rt_change_pdfs)));
 end
+
+rt_change_pdfs(:,bin_centers(rt_change_bins)<-1)=0;
+rt_change_pdfs(bin_centers(bins)>1.25)=0;
 
 prediction.preempt_term.rt_change_pdfs=rt_change_pdfs;
 prediction.preempt_term.rt_change_bins=rt_change_bins;
@@ -641,6 +647,9 @@ data=data./nansum(nansum(abs(data(fitMask==1))));
 try_a=[1:0.2:3];
 try_b=[0.001:0.05:3];
 try_c=[0:0.02:1];
+% try_c=[0.04:0.02:1];
+% try_c=[0.20];
+
 % Looking for ratio of a and b that best fits data
 cost=nan(length(try_a),length(try_b),length(try_c));
 for i=1:length(try_a)

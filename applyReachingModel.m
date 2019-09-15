@@ -27,7 +27,8 @@ end
 
 function cued_process=getCuedProcess(dprime_alltbt,suppressOutput)
 
-shortestCuedRT=0.125; % in seconds, accounts for sensory detection + motor planning/execution delay
+% shortestCuedRT=0.125; % in seconds, accounts for sensory detection + motor planning/execution delay
+shortestCuedRT=0.2; % in seconds, accounts for sensory detection + motor planning/execution delay
 removeShortRTs=1;
 
 bin_centers = @(bins) nanmean([bins(1:end-1); bins(2:end)],1);
@@ -42,6 +43,7 @@ end
 n=histcounts(rts,bins);
 cued_process.rt_pdf=n;
 cued_process.rt_pdf=cued_process.rt_pdf./nansum(cued_process.rt_pdf);
+cued_process.rt_pdf(cued_process.rt_pdf==0)=0.002;
 cued_process.rt_pdf_outs=repmat(cued_process.rt_pdf,length(bin_centers(bins)),1);
 try_curr_rts=bin_centers(bins);
 for i=1:length(try_curr_rts)
