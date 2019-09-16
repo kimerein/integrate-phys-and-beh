@@ -259,7 +259,8 @@ figure(); imagesc(bin_centers(bins),bin_centers(rt_change_bins),conv2(prediction
 % forward in time
 % Note that positive RPE update is proportional to 1-cdf of RTs
 % smearSize=11;
-smearSize=57;
+% smearSize=57;
+smearSize=200;
 temp=zeros(size(rt_pdf_outs));
 % Use the following code (commented out) to convince yourself that the
 % RPE update to the PDF of reaction times is just rt_pdf
@@ -318,35 +319,53 @@ figure(); imagesc(bin_centers(bins),bin_centers(rt_change_bins),prediction.rpe_o
 
 % RPE effects over multiple trials
 
-n_update_steps=2;
-prediction.rpe_only_consec_update.rt_pdf_outs=ones(size(prediction.rpe_only_consec_update.rt_pdf_outs))./size(prediction.rpe_only_consec_update.rt_pdf_outs,2);
+if n_update_steps==1
+    simSteps=1;
+else
+    simSteps=10;
+end
 
-alpha=1;
-try_curr_rts=bin_centers(bins);
-rt_change_pdfs=nan(length(try_curr_rts),length(bin_centers(unique([-fliplr(bins) bins]))));
-rt_pdf_outs=nan(length(try_curr_rts),length(bin_centers(bins)));
-for i=1:length(try_curr_rts)
-    rt_pdf_out=prediction.rpe_only_consec_update.rt_pdf_outs(i,:);
-    if sameRTforEachTrial==true
-        for j=1:n_update_steps-1 % if RT is same for each trial
-            rt_pdf_out=update_RPE_term(rt_pdf_out,bins,try_curr_rts(i),alpha,true);
-        end
-    else
-        for j=1:n_update_steps-1 % if RT is randomly sampled from RT distribution for each trial
-            if j==1
+n_update_steps=n_update_steps+1;
+% prediction.rpe_only_consec_update.rt_pdf_outs=ones(size(prediction.rpe_only_consec_update.rt_pdf_outs))./size(prediction.rpe_only_consec_update.rt_pdf_outs,2);
+
+running_rt_pdf_outs=zeros(length(try_curr_rts),length(bin_centers(bins)));
+running_rt_change_pdfs=zeros(length(try_curr_rts),length(bin_centers(unique([-fliplr(bins) bins]))));
+for simI=1:simSteps
+    alpha=1;
+    try_curr_rts=bin_centers(bins);
+    rt_change_pdfs=nan(length(try_curr_rts),length(bin_centers(unique([-fliplr(bins) bins]))));
+    rt_pdf_outs=nan(length(try_curr_rts),length(bin_centers(bins)));
+    for i=1:length(try_curr_rts)
+        rt_pdf_out=prediction.rpe_only_consec_update.rt_pdf_outs(i,:);
+        if sameRTforEachTrial==true
+            for j=1:n_update_steps-1 % if RT is same for each trial
                 rt_pdf_out=update_RPE_term(rt_pdf_out,bins,try_curr_rts(i),alpha,true);
-            else
-                rt_pdf_out=update_RPE_term(rt_pdf_out,bins,randsample(try_curr_rts,1,true,rt_pdf(rts,bins)),alpha,true);
+            end
+        else
+            for j=1:n_update_steps-1 % if RT is randomly sampled from RT distribution for each trial
+                if j==1
+                    rt_pdf_out=update_RPE_term(rt_pdf_out,bins,try_curr_rts(i),alpha,true);
+                else
+                    rt_pdf_out=update_RPE_term(rt_pdf_out,bins,randsample(try_curr_rts,1,true,rt_pdf(rts,bins)),alpha,true);
+                end
             end
         end
+        rt_pdf_outs(i,:)=rt_pdf_out;
+        [rt_change_pdfs(i,:),rt_change_bins]=getRTchange_fromCurrAndUpdatedRTpdfs(rt_pdf(rts,bins),rt_pdf_out,bins,true,[bins(i) bins(i+1)]);
     end
-    rt_pdf_outs(i,:)=rt_pdf_out;
-    [rt_change_pdfs(i,:),rt_change_bins]=getRTchange_fromCurrAndUpdatedRTpdfs(rt_pdf(rts,bins),rt_pdf_out,bins,true,[bins(i) bins(i+1)]);
+    running_rt_pdf_outs=running_rt_pdf_outs+rt_pdf_outs;
+    running_rt_change_pdfs=running_rt_change_pdfs+rt_change_pdfs;
 end
+running_rt_pdf_outs=running_rt_pdf_outs./simSteps;
+running_rt_change_pdfs=running_rt_change_pdfs./simSteps;
+rt_pdf_outs=running_rt_pdf_outs;
+rt_change_pdfs=running_rt_change_pdfs;
 prediction.rpe_term.rt_change_pdfs=rt_change_pdfs;
 prediction.rpe_term.rt_change_bins=rt_change_bins;
 prediction.rpe_term.rt_pdf_outs=rt_pdf_outs;
 figure(); imagesc(bin_centers(bins),bin_centers(rt_change_bins),prediction.rpe_term.rt_change_pdfs'); set(gca,'YDir','normal'); xlabel('RT (sec)'); ylabel('Change in RT (sec)'); title('RPE term');
+
+n_update_steps=n_update_steps-1;
 
 % Fit terms to data
 i=n_update_steps;

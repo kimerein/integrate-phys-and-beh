@@ -318,9 +318,17 @@ figure(); imagesc(bin_centers(bins),bin_centers(rt_change_bins),prediction.rpe_o
 
 % RPE effects over multiple trials
 
-n_update_steps=2;
+if n_update_steps==1
+    simSteps=1;
+else
+    simSteps=10;
+end
+
+n_update_steps=n_update_steps+1;
 prediction.rpe_only_consec_update.rt_pdf_outs=ones(size(prediction.rpe_only_consec_update.rt_pdf_outs))./size(prediction.rpe_only_consec_update.rt_pdf_outs,2);
 
+running_rt_pdf_outs=nan(length(try_curr_rts),length(bin_centers(bins)));
+running_rt_change_pdfs
 alpha=1;
 try_curr_rts=bin_centers(bins);
 rt_change_pdfs=nan(length(try_curr_rts),length(bin_centers(unique([-fliplr(bins) bins]))));
@@ -347,6 +355,8 @@ prediction.rpe_term.rt_change_pdfs=rt_change_pdfs;
 prediction.rpe_term.rt_change_bins=rt_change_bins;
 prediction.rpe_term.rt_pdf_outs=rt_pdf_outs;
 figure(); imagesc(bin_centers(bins),bin_centers(rt_change_bins),prediction.rpe_term.rt_change_pdfs'); set(gca,'YDir','normal'); xlabel('RT (sec)'); ylabel('Change in RT (sec)'); title('RPE term');
+
+n_update_steps=n_update_steps-1;
 
 % Fit terms to data
 i=n_update_steps;
@@ -1043,7 +1053,7 @@ rpe_at_touch=zeros(size(rpe_per_bin));
 rpe_at_touch(1:length(rpe_at_touch)>=curr_touch(bins,curr_rt))=rpe_per_bin(curr_touch(bins,curr_rt));
 temp=1:length(rpe_at_touch)<curr_touch(bins,curr_rt);
 temp_bin_cent=bin_centers(bins);
-rpe_at_touch(temp)=rpe_per_bin(curr_touch(bins,curr_rt)).*fliplr(exp(-temp_bin_cent(1:find(temp>0.5,1,'last'))./tau));
+rpe_at_touch(temp)=rpe_per_bin(curr_touch(bins,curr_rt)).*fliplr(exp((-temp_bin_cent(1:find(temp>0.5,1,'last'))./tau)));
 value_update = @(rt_pdf,curr_touch,rpe_at_touch,alpha) rt_cdf(rt_pdf)+alpha.*rpe_at_touch;
 
 % Update to value prediction gives update to RT pdf
