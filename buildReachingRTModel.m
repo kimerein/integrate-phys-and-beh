@@ -54,7 +54,7 @@ templateSequence2_end=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_
 % Get reaction times
 % Get change in reaction times (non-corrected input distributions)
 % Get change in reaction times (corrected input distributions)
-dataset.realDistributions.event_name='dprime_1to1point5_mouse_touches_but_does_not_consume_pellet_str_led_on';
+dataset.realDistributions.event_name='dprime_1to2point5_mouse_touches_but_does_not_consume_pellet_str_led_on';
 dataset.realDistributions.nInSequence=nInSequence;
 dataset.realDistributions.nRepsForBootstrap=nRepsForBootstrap;
 dataset.realDistributions.templateSequence1_cond=templateSequence1_cond;
