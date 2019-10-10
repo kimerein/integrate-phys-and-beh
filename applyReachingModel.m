@@ -1,4 +1,4 @@
-function applyReachingModel(use_dataset_dir,fits_file,preempt_file,alltbt,out,metadata,dprime_range,event_type,override_file,n_update_steps)
+function rpe_component=applyReachingModel(use_dataset_dir,fits_file,preempt_file,alltbt,out,metadata,dprime_range,event_type,override_file,n_update_steps)
 
 % Load reaching data
 a=load([use_dataset_dir '\pdf.mat']);
@@ -29,7 +29,7 @@ else
 end
 
 % Get model fits
-compareReachingRTModelAndData(dataset.realDistributions,dataset.realDistributions,fits,event_type,9.5,0,rt_pdf_for_preemptModel,preemptive_process,ss,cued_process,override_prediction,n_update_steps);
+[~,~,~,~,~,~,~,~,rpe_component]=compareReachingRTModelAndData(dataset.realDistributions,dataset.realDistributions,fits,event_type,9.5,0,rt_pdf_for_preemptModel,preemptive_process,ss,cued_process,override_prediction,n_update_steps);
 
 end
 

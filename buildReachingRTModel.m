@@ -1,5 +1,24 @@
 function [dataset,correctedDistributions]=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir)
 
+% reverse_time=false;
+% if reverse_time==true
+%     f=fieldnames(alltbt);
+%     for i=1:length(f)
+%         currfield=f{i};
+%         alltbt.(currfield)=flipud(alltbt.(currfield));
+%     end
+%     f=fieldnames(trialTypes);
+%     for i=1:length(f)
+%         currfield=f{i};
+%         trialTypes.(currfield)=flipud(trialTypes.(currfield));
+%     end
+%     f=fieldnames(metadata);
+%     for i=1:length(f)
+%         currfield=f{i};
+%         metadata.(currfield)=flipud(metadata.(currfield));
+%     end
+% end
+
 % For the following behavioral events, get how delta_RT is changed
 % 1 trial forward, 2 trials forward, 3 trials forward, etc.
 % Try to get functions for the pdfs(delta_RT) for each of these behavioral
@@ -44,17 +63,22 @@ templateSequence1_cond=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing
 templateSequence1_end=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
 
 
+
 % Get effects of, e.g., "Mouse touches pellet" on RT
-nInSequence=[2 3 4];
+% nInSequence=[2 3 4 7 11];
+nInSequence=[2];
 nRepsForBootstrap=20;
 % templateSequence2_cond=any(alltbt.all_reachBatch>0.5,2) & trialTypes.touched_pellet==0 & trialTypes.led==0 & trialTypes.paw_during_wheel==0;
+% templateSequence2_cond=any(alltbt.all_reachBatch>0.5,2) & trialTypes.touched_pellet==0 & trialTypes.led==0;
 templateSequence2_cond=trialTypes.touched_pellet==1 & trialTypes.led==1 & trialTypes.consumed_pellet==0;
+% templateSequence2_cond=trialTypes.touched_pellet==1;
+% templateSequence2_cond=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
 templateSequence2_end=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
 % Get raw reaching (all reaches)
 % Get reaction times
 % Get change in reaction times (non-corrected input distributions)
 % Get change in reaction times (corrected input distributions)
-dataset.realDistributions.event_name='dprime_1to2point5_mouse_touches_but_does_not_consume_pellet_str_led_on';
+dataset.realDistributions.event_name='mouse_touches_but_does_not_consume_pellet_str_led_on';
 dataset.realDistributions.nInSequence=nInSequence;
 dataset.realDistributions.nRepsForBootstrap=nRepsForBootstrap;
 dataset.realDistributions.templateSequence1_cond=templateSequence1_cond;
@@ -436,7 +460,7 @@ end
 % plotScatter(Z_onto_pc1(1:length(real_rt_pairs1)),Z_onto_pc2(1:length(real_rt_pairs1)),Z_onto_pc1(length(real_rt_pairs1)+1:end),Z_onto_pc2(length(real_rt_pairs1)+1:end),jitter1,jitter2,'RT change after rotation');
 
 Zpca=[Z_onto_pc1; Z_onto_pc2];
-dim=1;
+dim=1; % Cue-independent
 % plotHist(Zpca(dim,1:length(real_rt_pairs1)),Zpca(dim,length(real_rt_pairs1)+1:end),bins,'Histo of dim 1','x-vals');
 % plotCDF(Zpca(dim,1:length(real_rt_pairs1)),Zpca(dim,length(real_rt_pairs1)+1:end),bins,'CDF of dim 1');
 [p,med1,med2]=testRanksum(Zpca(dim,1:length(real_rt_pairs1)),Zpca(dim,length(real_rt_pairs1)+1:end),0);
@@ -448,7 +472,7 @@ temp2=Zpca(1,length(real_rt_pairs1)+1:end);
 dim1.vals1=temp1;
 dim1.vals2=temp2;
 
-dim=2;
+dim=2; % Cue-dependent
 % plotHist(Zpca(dim,1:length(real_rt_pairs1)),Zpca(dim,length(real_rt_pairs1)+1:end),bins,'Histo of dim 2','y-vals');
 % plotCDF(Zpca(dim,1:length(real_rt_pairs1)),Zpca(dim,length(real_rt_pairs1)+1:end),bins,'CDF of dim 2');
 [p,med1,med2]=testRanksum(Zpca(dim,1:length(real_rt_pairs1)),Zpca(dim,length(real_rt_pairs1)+1:end),0);

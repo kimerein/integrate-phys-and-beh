@@ -1,17 +1,27 @@
-function plotBehaviorEventFx(dataset,alltbt)
+function returnThis=plotBehaviorEventFx(dataset,alltbt,ref)
+
+% Dim 2 conversion is 0.7885 sec in dim 2 is 1 sec real
+% Dim 1 conversion is 0.611 sec in dim 1 is 1 sec real
 
 plot_rawReaching=false;
-plot_rt_pdf=true;
+plot_rawReaching_cdf=false;
+plot_rt_pdf=false;
 plot_rt_cdf=false;
 plot_delta_rt_pdf=false;
-plot_delta_rt_cdf=false;
+plot_delta_rt_pdf_2D=false;
+plot_delta_rt_cdf_2D=false;
+plot_delta_rt_cdf=true;
 plot_delta_rt_asFunc_rt=false;
 plot_dim1_delta_asFunc_rt=false;
 plot_dim2_delta_asFunc_rt=false;
 plot_3D_dim1_dim2_asFunc_rt=false;
 plot_delta_rt_asFunc_rt_removeMeanRegression=false;
+plot_earth_mover_wander=false;
 
-histo_nbins=200; % number of bins for reaction time histogram
+% histo_nbins=200; % number of bins for reaction time histogram
+% histo_nbins=[-4*12.4245:0.2510:4*12.4245];
+% histo_nbins=[-4*12.4245-2*0.2510:4*0.2510:4*12.4245];
+histo_nbins=[-4*12.4245-0.75*0.2510:1.5*0.2510:4*12.4245];
 backup_histo_nbins=histo_nbins;
 scatterJitter=0.5;
 % alpha=0.01;
@@ -46,6 +56,23 @@ if plot_rawReaching==true
     end
 end
 
+% Plot raw reaching CDF
+if plot_rawReaching_cdf==true
+    timeStep=mode(diff(nanmean(alltbt.times,1)));
+    timeBinsForReaching=0:timeStep:(size(dataset.rawReaching_allTrialsSequence_trial1InSeq{1},2)-1)*timeStep;
+    % find cue ind
+    [~,f]=nanmax(nanmean(alltbt.cueZone_onVoff,1));
+    cueTime=timeBinsForReaching(f);
+    for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
+        plotCDF_rawReaches(dataset.rawReaching_allTrialsSequence_trial1InSeq{i},dataset.rawReaching_allTrialsSequence_trialiInSeq{i},timeBinsForReaching,cueTime,['CDF Raw Reaches all trials reference: trial 1 (black) vs ' num2str(dataset.nInSequence(i)-1) ' later (red)']);
+    end
+    temp=dataset.event_name;
+    temp(regexp(temp,'_'))=' ';
+    for i=1:length(dataset.event_RT_trial1InSeq)
+        plotCDF_rawReaches(dataset.rawReaching_event_trial1InSeq{i},dataset.rawReaching_event_trialiInSeq{i},timeBinsForReaching,cueTime,['CDF Raw Reaches fx of ' temp ': trial 1 (black) vs ' num2str(dataset.nInSequence(i)-1) ' later (red)']);
+    end
+end
+
 % Plot reaction times distribution
 if plot_rt_pdf==true
     for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
@@ -73,33 +100,78 @@ end
 
 % Plot change in reaction times
 if plot_delta_rt_pdf==true
+    temp=dataset.event_name;
+    temp(regexp(temp,'_'))=' ';
     histo_nbins=backup_histo_nbins;
     for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
         histo_nbins=plotHist(dataset.dim1_rtchanges_allTrialsSequence{i},dataset.dim1_rtchanges_event{i},histo_nbins,['Dim 1 of change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later, comparing reference vs ' temp],'Change in RT (sec)');
     end
+    for i=1:length(dataset.event_RT_trial1InSeq)
+        [histo_nbins,returnThis_temp]=plotHist(dataset.dim2_rtchanges_allTrialsSequence{i},dataset.dim2_rtchanges_event{i},histo_nbins,['Dim 2 of change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later, comparing reference vs ' temp],'Change in RT (sec)');
+        if i==1
+            returnThis=returnThis_temp;
+        end
+    end
+end
+
+% Plot change in reaction times 2D smear
+if plot_delta_rt_pdf_2D==true
     temp=dataset.event_name;
     temp(regexp(temp,'_'))=' ';
-    for i=1:length(dataset.event_RT_trial1InSeq)
-        histo_nbins=plotHist(dataset.dim2_rtchanges_allTrialsSequence{i},dataset.dim2_rtchanges_event{i},histo_nbins,['Dim 2 of change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later, comparing reference vs ' temp],'Change in RT (sec)');
+    histo_nbins=backup_histo_nbins;
+    for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
+        plotHist_2Dsmear(dataset.dim1_rtchanges_event{i},dataset.dim2_rtchanges_event{i},histo_nbins,'2D smear','Change in RT (sec)');
+    end
+end
+
+% Plot change in reaction times 2D smear CDF
+if plot_delta_rt_cdf_2D==true
+    temp=dataset.event_name;
+    temp(regexp(temp,'_'))=' ';
+    histo_nbins=backup_histo_nbins;
+    for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
+        plotCDF_2Dsmear(dataset.dim1_rtchanges_allTrialsSequence{i},dataset.dim2_rtchanges_allTrialsSequence{i},dataset.dim1_rtchanges_event{i},dataset.dim2_rtchanges_event{i},histo_nbins,'2D smear','Change in RT (sec)');
+    end
+end
+
+% Plot wander in dim 1 and 2
+if plot_earth_mover_wander==true
+    temp=dataset.event_name;
+    temp(regexp(temp,'_'))=' ';
+    histo_nbins=backup_histo_nbins;
+    for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
+%     for i=1:1
+        if isempty(ref)
+            plot_earthmover_wander(dataset.dim1_rtchanges_allTrialsSequence{i},dataset.dim2_rtchanges_allTrialsSequence{i},dataset.dim1_rtchanges_event{i},dataset.dim2_rtchanges_event{i},histo_nbins);
+        else
+            plot_earthmover_wander(ref.dim1,ref.dim2,dataset.dim1_rtchanges_event{i},dataset.dim2_rtchanges_event{i},histo_nbins);
+        end
     end
 end
 
 % Plot CDF
 if plot_delta_rt_cdf==true
     histo_nbins=backup_histo_nbins;
+    temp=dataset.event_name;
+    temp(regexp(temp,'_'))=' ';
+    for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
+        histo_nbins=plotCDF(dataset.alldim_rtchanges_allTrialsSequence{i},dataset.alldim_rtchanges_event{i},histo_nbins,['CDF All Dim change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later, comparing reference vs ' temp]);
+    end
     for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
         histo_nbins=plotCDF(dataset.dim1_rtchanges_allTrialsSequence{i},dataset.dim1_rtchanges_event{i},histo_nbins,['CDF Dim 1 of change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later, comparing reference vs ' temp]);
     end
-    temp=dataset.event_name;
-    temp(regexp(temp,'_'))=' ';
     for i=1:length(dataset.event_RT_trial1InSeq)
-        histo_nbins=plotCDF(dataset.dim2_rtchanges_allTrialsSequence{i},dataset.dim2_rtchanges_event{i},histo_nbins,['CDF Dim 2 of change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later, comparing reference vs ' temp]);
+        [histo_nbins,returnThis_temp]=plotCDF(dataset.dim2_rtchanges_allTrialsSequence{i},dataset.dim2_rtchanges_event{i},histo_nbins,['CDF Dim 2 of change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later, comparing reference vs ' temp]);
+        if i==1
+            returnThis=returnThis_temp;
+        end
     end
 end
 
 % Plot change in RT as a function of RT
 if plot_delta_rt_asFunc_rt==true
-    for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
+%     for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
+     for i=1:1
         temp1=dataset.allTrialsSequence_RT_trial1InSeq{i};
         temp2=dataset.allTrialsSequence_RT_trialiInSeq{i};
         rtchanges=temp1(dataset.realrtpair_seq1{i}==1)-temp2(dataset.realrtpair_seq1{i}==1);
@@ -109,6 +181,30 @@ if plot_delta_rt_asFunc_rt==true
         plotScatter(temp1(dataset.realrtpair_seq1{i}==1),dataset.alldim_rtchanges_allTrialsSequence{i},temp1_seq2(dataset.realrtpair_seq2{i}==1),dataset.alldim_rtchanges_event{i},scatterJitter,scatterJitter,['Change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later as a function of RT'],'RT trials 1','Change in RT',alpha);
         %plotScatter(temp1(dataset.realrtpair_seq1{i}==1),rtchanges,temp1_seq2(dataset.realrtpair_seq2{i}==1),rtchanges_seq2,scatterJitter,scatterJitter,['Change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later as a function of RT'],'RT trials 1','Change in RT',alpha);
         %plotScatter(temp1(dataset.realrtpair_seq1{i}==1),dataset.dim1_rtchanges_allTrialsSequence{i}+dataset.dim2_rtchanges_allTrialsSequence{i},temp1_seq2(dataset.realrtpair_seq2{i}==1),dataset.dim1_rtchanges_event{i}+dataset.dim2_rtchanges_event{i},scatterJitter,scatterJitter,['Dim1+2 change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later as a function of RT'],'RT trials 1','Change in RT',alpha);
+        if i==1
+            figure();
+            [diff_n,x,y,~,n]=compareWithHeatmaps(temp1(dataset.realrtpair_seq1{i}==1),dataset.alldim_rtchanges_allTrialsSequence{i},temp1_seq2(dataset.realrtpair_seq2{i}==1),dataset.alldim_rtchanges_event{i},{histo_nbins; histo_nbins},'Difference Ref v Event');
+%             for j=1:size(diff_n,2)
+%                 diff_n(:,j)=smooth(diff_n(:,j),5);
+%             end
+            for j=1:size(n,1)
+                n(j,:)=smooth(n(j,:),5);
+            end
+            temp=n;
+            temp=temp(x>0 & x<2,y>-9 & y<4);
+            temp=temp./nansum(temp(1:end));
+            returnThis=temp;
+            nSmooth=1;
+            K=ones(nSmooth);
+%             temp=conv2(log(diff_n-nanmin(diff_n(1:end))),K,'same');
+            temp=conv2(log(n),K,'same');
+            temp=temp(nSmooth:end-nSmooth,nSmooth:end-nSmooth);
+            imagesc(x(nSmooth:end-nSmooth),y(nSmooth:end-nSmooth),temp');
+            set(gca,'YDir','normal');
+            title(['Heatmap event diff']);
+            xlabel('Reaction time trial 1');
+            ylabel('Change in reaction times');
+        end
     end
 end
 if plot_3D_dim1_dim2_asFunc_rt==true
@@ -146,7 +242,8 @@ if plot_dim2_delta_asFunc_rt==true
         temp1_seq2=dataset.event_RT_trial1InSeq{i};
         plotScatter(temp1(dataset.realrtpair_seq1{i}==1),dataset.dim2_rtchanges_allTrialsSequence{i},temp1_seq2(dataset.realrtpair_seq2{i}==1),dataset.dim2_rtchanges_event{i},scatterJitter,scatterJitter,['Dim 2 of change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later as a function of RT'],'RT trials 1','Change in RT',alpha);
     end 
-    rtBins=[0 2; 2 4; 4 8; 8 15];
+%     rtBins=[0 2; 2 4; 4 8; 8 15];
+    rtBins=[0 15];
     histo_nbins=backup_histo_nbins;
     for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
         for j=1:size(rtBins,1)
@@ -215,7 +312,7 @@ plotScatter(first_rt,delta_rts,actual_first_rts,actual_rt_changes,scatterJitter,
 
 end
 
-function [diff_n,x,y]=compareWithHeatmaps(x1,y1,x2,y2,nBinsPerDim,tit)
+function [diff_n,x,y,n,n2]=compareWithHeatmaps(x1,y1,x2,y2,nBinsPerDim,tit)
 
 % make 2D histogram
 if size(x1,2)>1
@@ -266,6 +363,8 @@ end
 
 function plotTimeseries(data1_mean,data1_se,color1,data2_mean,data2_se,color2,timeBins)
 
+plotAsCityscape=true;
+
 data1_mean=nanmean(data1_mean,1);
 data2_mean=nanmean(data2_mean,1);
 data1_se=sqrt(nansum(data1_se.^2,1));
@@ -274,15 +373,33 @@ data2_se=sqrt(nansum(data2_se.^2,1));
 figure();
 %fill([timeBins fliplr(timeBins)],[data1_mean+data1_se fliplr(data1_mean-data1_se)],[0.5 0.5 0.5]);
 %hold on;
-plot(timeBins,data1_mean,'Color',color1); hold on;
-plot(timeBins,data1_mean+data1_se,'Color',color1);
-plot(timeBins,data1_mean-data1_se,'Color',color1);
+if plotAsCityscape==true
+    [n,x]=cityscape_hist(data1_mean,timeBins);
+    plot(x,n,'Color',color1); hold on;
+    [n,x]=cityscape_hist(data1_mean+data1_se,timeBins);
+    plot(x,n,'Color',color1);
+    [n,x]=cityscape_hist(data1_mean-data1_se,timeBins);
+    plot(x,n,'Color',color1);
+else
+    plot(timeBins,data1_mean,'Color',color1); hold on;
+    plot(timeBins,data1_mean+data1_se,'Color',color1);
+    plot(timeBins,data1_mean-data1_se,'Color',color1);
+end
 
 %fill([timeBins fliplr(timeBins)],[data2_mean+data2_se fliplr(data2_mean-data2_se)],[0.1 0.7 0.5]);
 %hold on;
-plot(timeBins,data2_mean,'Color',color2); hold on;
-plot(timeBins,data2_mean+data2_se,'Color',color2);
-plot(timeBins,data2_mean-data2_se,'Color',color2);   
+if plotAsCityscape==true
+    [n,x]=cityscape_hist(data2_mean,timeBins);
+    plot(x,n,'Color',color2); hold on;
+    [n,x]=cityscape_hist(data2_mean+data2_se,timeBins);
+    plot(x,n,'Color',color2);
+    [n,x]=cityscape_hist(data2_mean-data2_se,timeBins);
+    plot(x,n,'Color',color2);
+else
+    plot(timeBins,data2_mean,'Color',color2); hold on;
+    plot(timeBins,data2_mean+data2_se,'Color',color2);
+    plot(timeBins,data2_mean-data2_se,'Color',color2);
+end
 
 end
 
@@ -376,13 +493,17 @@ if all(isnan(data1) | all(isnan(data2)))
 end
 [p,h]=ranksum(data1,data2);
 if dispStuff==1
-    disp('p-value');
+    disp('p-value of ranksum');
     disp(p);
 end
 
 end
 
-function [x_backup]=plotCDF(data1,data2,bins,tit)
+function [x_backup,returnThis]=plotCDF(data1,data2,bins,tit)
+
+returnThis=[];
+
+doKStest=true;
 
 [n,x]=histcounts(data1,bins);
 x_backup=x;
@@ -398,6 +519,33 @@ title(tit);
 hold on;
 cond2_cdf=accumulateDistribution(n);
 plot(x_mids,cond2_cdf./nanmax(cond2_cdf),'Color','r');
+returnThis.x=x_mids;
+returnThis.y=cond2_cdf./nanmax(cond2_cdf);
+
+if doKStest==true
+    [~,p]=kstest2(data1,data2);
+    disp('kstest pval');
+    disp(p);    
+end
+
+end
+
+function plotCDF_rawReaches(data1,data2,timesteps,cueTime,tit)
+
+% raw reaching data comes in as a timeseries (i.e., already a pdf)
+% so simply accumulate distribution, selecting only time points after the
+% cue
+
+cond1_cdf=accumulateDistribution(data1(timesteps>cueTime));
+figure();
+plot(timesteps(timesteps>cueTime),cond1_cdf./nanmax(cond1_cdf),'Color','k');
+xlabel('CDF');
+ylabel('Count');
+title(tit);
+
+hold on;
+cond2_cdf=accumulateDistribution(data2(timesteps>cueTime));
+plot(timesteps(timesteps>cueTime),cond2_cdf./nanmax(cond2_cdf),'Color','r');
 
 end
 
@@ -410,13 +558,19 @@ end
 
 end
 
-function [x_backup]=plotHist(data1,data2,bins,tit,xlab)
+function [x_backup,returnThis]=plotHist(data1,data2,bins,tit,xlab)
+
+useLogForY=false;
 
 [n,x]=histcounts(data1,bins);
 x_backup=x;
 [n,x]=cityscape_hist(n,x);
 figure();
-plot(x,n./nansum(n),'Color','k');
+if useLogForY==true
+    semilogy(x,n./nansum(n),'Color','k');
+else
+    plot(x,n./nansum(n),'Color','k');
+end
 xlabel(xlab);
 ylabel('Count');
 title(tit);
@@ -424,8 +578,132 @@ title(tit);
 [n,x]=histcounts(data2,x_backup);
 [n,x]=cityscape_hist(n,x);
 hold on;
-plot(x,n./nansum(n),'Color','r');
+if useLogForY==true
+    semilogy(x,n./nansum(n),'Color','r');
+else
+    plot(x,n./nansum(n),'Color','r');
+end
 leg={'data1','data2'};
 legend(leg);
+
+returnThis.x=x;
+returnThis.y=n./nansum(n);
+
+end
+
+function [x_backup]=plotHist_2Dsmear(data1_x,data1_y,bins,tit,xlab)
+
+useLogForY=false;
+
+[n,x]=histcounts(data1_x,bins);
+x_mids=nanmean([x(1:end-1); x(2:end)],1);
+x_backup=x;
+
+[n2,x]=histcounts(data1_y,x_backup);
+
+figure();
+if useLogForY==true
+    imagesc(x_mids,x_mids,log(repmat(n,length(x)-1,1)+repmat(n2',1,length(x)-1)));
+else
+    imagesc(x_mids,x_mids,repmat(n,length(x)-1,1)+repmat(n2',1,length(x)-1));
+end
+set(gca,'YDir','normal');
+
+end
+
+function [x_backup]=plotCDF_2Dsmear(data1_x,data1_y,data2_x,data2_y,bins,tit,xlab)
+
+useLogForY=false;
+
+[n,x]=histcounts(data1_x,bins);
+x_mids=nanmean([x(1:end-1); x(2:end)],1);
+x_cdf=accumulateDistribution(n);
+x_cdf=x_cdf./nanmax(x_cdf);
+x_backup=x;
+[n,x]=histcounts(data2_x,bins);
+x_cdf_cond2=accumulateDistribution(n);
+x_cdf_cond2=x_cdf_cond2./nanmax(x_cdf_cond2);
+
+[n2,x]=histcounts(data1_y,x_backup);
+y_cdf=accumulateDistribution(n2);
+y_cdf=y_cdf./nanmax(y_cdf);
+[n,x]=histcounts(data2_y,bins);
+y_cdf_cond2=accumulateDistribution(n);
+y_cdf_cond2=y_cdf_cond2./nanmax(y_cdf_cond2);
+
+temp=repmat(x_cdf_cond2-x_cdf,length(x)-1,1)+repmat(y_cdf'-y_cdf_cond2',1,length(x)-1);
+temp=temp(x_mids>0,x_mids<0);
+
+figure();
+if useLogForY==true
+    imagesc(x_mids,x_mids,log(temp));
+else
+    imagesc(x_mids,x_mids,temp);
+end
+set(gca,'YDir','normal');
+
+end
+
+function plot_earthmover_wander(data1_x,data1_y,data2_x,data2_y,bins)
+
+doBootstrap=true;
+
+if doBootstrap==true
+    nReps=100;
+    earth_mover_dim1=nan(1,nReps);
+    earth_mover_dim2=nan(1,nReps);
+    for i=1:nReps
+        curr_data1_x=data1_x(randsample(1:length(data1_x),length(data1_x),true));
+        curr_data1_y=data1_y(randsample(1:length(data1_y),length(data1_y),true));
+        curr_data2_x=data2_x(randsample(1:length(data2_x),length(data2_x),true));
+        curr_data2_y=data2_y(randsample(1:length(data2_y),length(data2_y),true));
+        [earth_mover_dim1(i),earth_mover_dim2(i)]=sub_earthmover_wander(curr_data1_x,curr_data1_y,curr_data2_x,curr_data2_y,bins);
+    end
+    em_dim1=prctile(earth_mover_dim1,[5 50 95]);
+    em_dim2=prctile(earth_mover_dim2,[5 50 95]);
+    figure();
+    scatter(em_dim1(2),em_dim2(2));
+    hold on;
+    line([em_dim1(1) em_dim1(3)],[em_dim2(2) em_dim2(2)]);
+    line([em_dim1(2) em_dim1(2)],[em_dim2(1) em_dim2(3)]);
+else
+    [earth_mover_dim1,earth_mover_dim2]=sub_earthmover_wander(data1_x,data1_y,data2_x,data2_y,bins);
+    figure();
+    scatter(earth_mover_dim1,earth_mover_dim2);
+end
+
+end
+
+function [earth_mover_dim1,earth_mover_dim2]=sub_earthmover_wander(data1_x,data1_y,data2_x,data2_y,bins)
+        
+% Dim 2 conversion is 0.7885 sec in dim 2 is 1 sec real
+% Dim 1 conversion is 0.611 sec in dim 1 is 1 sec real
+
+x_binsize=1/0.611;
+y_binsize=1/0.7885;
+
+[n,x]=histcounts(data1_x,bins);
+x_mids=nanmean([x(1:end-1); x(2:end)],1);
+x_cdf=accumulateDistribution(n);
+x_cdf=x_cdf./nanmax(x_cdf);
+x_backup=x;
+[n,x]=histcounts(data2_x,bins);
+x_cdf_cond2=accumulateDistribution(n);
+x_cdf_cond2=x_cdf_cond2./nanmax(x_cdf_cond2);
+
+[n2,x]=histcounts(data1_y,x_backup);
+y_cdf=accumulateDistribution(n2);
+y_cdf=y_cdf./nanmax(y_cdf);
+[n,x]=histcounts(data2_y,bins);
+y_cdf_cond2=accumulateDistribution(n);
+y_cdf_cond2=y_cdf_cond2./nanmax(y_cdf_cond2);
+
+earth_mover_dim1=nansum(abs(x_cdf-x_cdf_cond2))*x_binsize;
+sign_of_dim1=sign(nanmean(x_cdf-x_cdf_cond2));
+earth_mover_dim1=sign_of_dim1*earth_mover_dim1;
+
+earth_mover_dim2=nansum(abs(y_cdf-y_cdf_cond2))*y_binsize;
+sign_of_dim2=sign(nanmean(y_cdf-y_cdf_cond2));
+earth_mover_dim2=sign_of_dim2*earth_mover_dim2;
 
 end

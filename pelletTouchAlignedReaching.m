@@ -1,9 +1,10 @@
 function pelletTouchAlignedReaching(alltbt,out,metadata)
 
 % note that pellet is only present after cue
-% withinRange=[3 6];  % take reaches in this range, time is in seconds from onset of cue
-withinRange=[0.25 6];  % take reaches in this range, time is in seconds from onset of cue
+withinRange=[3 6];  % take reaches in this range, time is in seconds from onset of cue
+% withinRange=[0.25 6];  % take reaches in this range, time is in seconds from onset of cue
 nIndsToTake=200;
+interpNans=true; % will interp nan values if true
 
 timeStep=mode(diff(nanmean(alltbt.times,1)));
 cueInd=find(nanmean(alltbt.cueZone_onVoff,1)>0,1,'first');
@@ -26,8 +27,14 @@ xlabel('Time (seconds)');
 ylabel('Reaching');
 legend({'Aligned to touch of pellet','Aligned to reach but no touch of pellet'});
 
+temp=nanmean(touchAligned,1)./nanmean(reachNoTouchAligned,1);
+if interpNans==true
+    temp(isinf(temp))=nan;
+    temp_x=0:timeStep:timeStep*(nIndsToTake-1);
+    temp=interp1(temp_x(~isnan(temp)),temp(~isnan(temp)),temp_x);
+end
 figure();
-plot(0:timeStep:timeStep*(nIndsToTake-1),nanmean(touchAligned,1)./nanmean(reachNoTouchAligned,1),'Color','b');
+plot(0:timeStep:timeStep*(nIndsToTake-1),temp,'Color','b');
 xlabel('Time (seconds)');
 ylabel('Fractional suppression of reaching after pellet touch');
 

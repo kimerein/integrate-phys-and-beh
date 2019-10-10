@@ -1,4 +1,4 @@
-function [prediction,a,b,lse,err,n,best_predict,differ]=compareReachingRTModelAndData(data,dataForModel,fits,behaviorEvent,ITI,suppressOutput,rt_pdf_outs_for_preempt,preemptive_process,ss,cued_process,overridePrediction,nSeq_ind)
+function [prediction,a,b,lse,err,n,best_predict,differ,rpe_component]=compareReachingRTModelAndData(data,dataForModel,fits,behaviorEvent,ITI,suppressOutput,rt_pdf_outs_for_preempt,preemptive_process,ss,cued_process,overridePrediction,nSeq_ind)
 
 % Model
 % Rate-based term is fit from data
@@ -461,11 +461,12 @@ imagesc(bin_centers(bins),bin_centers(rt_change_bins),[differ_smoothed conv2(bes
 % imagesc(bin_centers(bins),bin_centers(rt_change_bins),[differ_smoothed differ_withoutC_smoothed]'); set(gca,'YDir','normal');
 title('Prediction vs residual -- Smoothed');
 
-test_predict=(a/(a+c)).*prediction.rate_term.rt_change_pdfs+(c/(a+c)).*prediction.preempt_term.rt_change_pdfs;
+% test_predict=(a/(a+c)).*prediction.rate_term.rt_change_pdfs+(c/(a+c)).*prediction.preempt_term.rt_change_pdfs;
+test_predict=(a/(a+b+c)).*prediction.rate_term.rt_change_pdfs+(c/(a+b+c)).*prediction.preempt_term.rt_change_pdfs;
 % test_predict=test_predict./nansum(nansum(abs(test_predict)));
 figure();
 imagesc(bin_centers(bins),bin_centers(rt_change_bins),log((n-test_predict)-nanmin(nanmin((n-test_predict))))'); set(gca,'YDir','normal');
-temp=n-test_predict;
+rpe_component=n-test_predict;
 
 % rt_pdf_outs_update=invertRTchange_to_rt_pdf_update(differ,rt_change_bins,bins,try_curr_rts,prediction.rate_term.rt_pdf_outs);
 
@@ -684,6 +685,9 @@ function [a,b,c,fitqualval]=getFitCoefficients_inHierarchy(data,rateTerm,rpeTerm
 try_a=[0:0.05:5];
 try_b=[0:0.05:3];
 try_c=[0:0.05:3];
+
+try_a=0.7;
+try_c=0.05;
 
 cost=nan(length(try_a));
 for i=1:length(try_a)
