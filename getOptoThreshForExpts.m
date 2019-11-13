@@ -1,9 +1,11 @@
-function getOptoThreshForExpts(expt_dir,optoFromArduino)
+function getOptoThreshForExpts(expt_dir,optoFromArduino,arduinoOptoForWhichMice)
 
 overwriteExistingThresh=false;
 
 ls=dir(expt_dir);
+currOptoFromArduino=optoFromArduino;
 for i=1:length(ls)
+    currOptoFromArduino=optoFromArduino;
     thisname=ls(i).name;
     thisisdir=ls(i).isdir;
     if ~isempty(regexp(thisname,'processed_data','once')) && thisisdir==1
@@ -14,20 +16,27 @@ for i=1:length(ls)
         end                
         a=load([expt_dir '\' thisname '\final_aligned_data.mat']);
         alignment=a.alignment;
-        if optoFromArduino==true
+        if ~isempty(arduinoOptoForWhichMice)
+            a=load([expt_dir '\' thisname '\mouse_id.mat']);
+            mouse_id=a.mouse_id;
+            if ismember(mouse_id,arduinoOptoForWhichMice)
+                currOptoFromArduino=true;
+            end
+        end
+        if currOptoFromArduino==true
             a=load([expt_dir '\' thisname '\tbt.mat']);
             tbt=a.tbt;
         end
         figure(); 
-        if optoFromArduino==false
+        if currOptoFromArduino==false
             plot(alignment.optoZone);
         else
             plot(alignment.optoOn);
         end
-        th=input('Opto thresh for this? (Enter -10 if no opto here.) ');
+        th=input([thisname ' Opto thresh for this? (Enter -10 if no opto here.) ']);
         optoThresh=th;
         hold on;
-        if optoFromArduino==false
+        if currOptoFromArduino==false
             line([0 length(alignment.optoZone)],[optoThresh optoThresh],'Color','r');
         else
             line([0 length(alignment.optoOn)],[optoThresh optoThresh],'Color','r');
@@ -39,7 +48,7 @@ for i=1:length(ls)
         end
         save([expt_dir '\' thisname '\optoThresh.mat'],'optoThresh');
         save([expt_dir '\' thisname '\optoOnHere.mat'],'optoOnHere');
-        if optoFromArduino==true
+        if currOptoFromArduino==true
             alignment.optoZone=alignment.optoOn;
             save([expt_dir '\' thisname '\final_aligned_data.mat'],'alignment')
             tbt.optoZone=tbt.optoOn;

@@ -152,6 +152,30 @@ db=addTrainer(db,mn,'Whitney');
 db=addDirectoriesRecursive(db,mn,'\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\JuliaG\Behavior Expts',false);
 db=addDirectoriesRecursive(db,mn,'\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\Whitney\Behavior Experiments',false);
 
+% April_white
+mn='April_white';
+db=addNameAndDescription(db,mn,'A2a-Cre x D1-Cre, batch opto during learning');
+db=addTrainer(db,mn,'Marci');
+db=addDirectoriesRecursive(db,mn,'\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\KER Behavior',false);
+
+% May
+mn='May';
+db=addNameAndDescription(db,mn,'A2a-Cre x D1-Cre, batch opto during learning');
+db=addTrainer(db,mn,'Marci');
+db=addDirectoriesRecursive(db,mn,'\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\KER Behavior',false);
+
+% April_short
+mn='April_short';
+db=addNameAndDescription(db,mn,'NkxCre X ReaChR, batch opto during learning');
+db=addTrainer(db,mn,'Marci');
+db=addDirectoriesRecursive(db,mn,'\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\KER Behavior',false);
+
+% April_long
+mn='April_long';
+db=addNameAndDescription(db,mn,'NkxCre X ReaChR, batch opto during learning');
+db=addTrainer(db,mn,'Marci');
+db=addDirectoriesRecursive(db,mn,'\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\KER Behavior',false);
+
 % assign mouse IDs and others
 [db,dbs]=assignIDnums(db);
 

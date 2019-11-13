@@ -10,7 +10,7 @@ rtchanges_seq2=temp-temp2_seq2;
 % rts=temp;
 smoothSize=1;
 sameRTforEachTrial=false; % if true, will assume same reaction time for all subsequent trials, otherwise will sample randomly from current rt pdf
-n_update_steps=1; % How many update steps (e.g., trials)
+n_update_steps=1; % How many update steps (e.g., trials) 
 
 % Rate-based term and RPE-based term
 % Each of these makes a prediction about how the reaction time distribution
@@ -75,7 +75,8 @@ ylabel('Change in reaction times');
 
 % Learning rate, alpha
 % alpha=0.03;
-alpha=0.055;
+% alpha=0.055;
+alpha=0.5;
 % alpha=0.034;
 % alpha=0;
 
@@ -105,7 +106,7 @@ for i=1:length(try_curr_rts)
         end
     else
         for j=1:n_update_steps % if RT is randomly sampled from RT distribution for each trial
-            if j==1
+            if j==1 
                 rt_pdf_out=update_RPE_term(rt_pdf_out,bins,try_curr_rts(i),alpha,true);
             else
                 rt_pdf_out=update_RPE_term(rt_pdf_out,bins,randsample(try_curr_rts,1,true,rt_pdf_out),alpha,true);
@@ -150,6 +151,7 @@ ylabel('Change in reaction times');
 %     xlabel('Reaction time trial 1');
 %     ylabel('Change in reaction times');
 % end
+return
 
 % Plot sum
 A=1;
