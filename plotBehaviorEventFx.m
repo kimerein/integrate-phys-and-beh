@@ -155,7 +155,7 @@ if plot_delta_rt_cdf==true
 %         histo_nbins=plotCDF(dataset.alldim_rtchanges_allTrialsSequence{i},dataset.alldim_rtchanges_event{i},histo_nbins,['CDF All Dim change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later, comparing reference vs ' temp]);
         if i==1
             
-            rtBins=[0 3];
+            rtBins=[6 9];
             j=1;
             temp1=dataset.allTrialsSequence_RT_trial1InSeq{i};
             temp1_seq2=dataset.event_RT_trial1InSeq{i};
@@ -163,8 +163,8 @@ if plot_delta_rt_cdf==true
             dimall_event=dataset.alldim_rtchanges_event{i};
             temp_RTdiffs1=dimall_all(temp1(dataset.realrtpair_seq1{i}==1)>=rtBins(j,1) & temp1(dataset.realrtpair_seq1{i}==1)<rtBins(j,2));
             temp_RTdiffsevent=dimall_event(temp1_seq2(dataset.realrtpair_seq2{i}==1)>=rtBins(j,1) & temp1_seq2(dataset.realrtpair_seq2{i}==1)<rtBins(j,2));
-            temp_RTdiffs1=temp_RTdiffs1(temp_RTdiffs1>=-5);
-            temp_RTdiffsevent=temp_RTdiffsevent(temp_RTdiffsevent>=-5);
+            temp_RTdiffs1=temp_RTdiffs1(temp_RTdiffs1<=-5);
+            temp_RTdiffsevent=temp_RTdiffsevent(temp_RTdiffsevent<=-5);
             histo_nbins=plotHist(temp_RTdiffs1,temp_RTdiffsevent,histo_nbins,['PDF RT change for RTs ' num2str(dataset.nInSequence(i)-1) ' trials later, RTs less than ' num2str(rtBins(j,2))],'Change in RT');
             plotCDF(temp_RTdiffs1,temp_RTdiffsevent,histo_nbins,['CDF RT change for RTs ' num2str(dataset.nInSequence(i)-1) ' trials later, RTs less than ' num2str(rtBins(j,2))]);
         end
