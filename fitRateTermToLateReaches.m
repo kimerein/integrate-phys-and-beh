@@ -1,4 +1,4 @@
-function fitRateTermToLateReaches(dataset)
+function bestTau=fitRateTermToLateReaches(dataset)
 
 rtBins=[6 9];
 maxTrialLength=9.5; % in seconds
@@ -27,24 +27,26 @@ disp(bestTau);
 bestTau=fitSingleTau(temp_RTdiffsevent,b(b>=rtBins(j,1) & b<=rtBins(j,2)),[rtBins(2)-maxTrialLength rtBins(2)],histo_nbins);
 disp(bestTau);
 
+return
+
 rtBins=[6 9];
-[slope_early,slope_late]=fitTwoTaus(dimall_all(a>=rtBins(j,1) & a<rtBins(j,2)),histo_nbins);
+[slope_early,slope_late]=fitTwoTaus(dimall_all(a>=rtBins(j,1) & a<rtBins(j,2)),histo_nbins,[]);
 disp(slope_early);
 disp(slope_late);
 x=0:0.001:20;
-y=randsample(x,length(dimall_all(a>=rtBins(j,1) & a<rtBins(j,2))),true,-(exp(-abs(slope_late).*x)-exp(-abs(slope_early).*x)));
+y=randsample(x,length(temp_RTdiffs1),true,-(exp(-abs(slope_late).*x)-exp(-abs(slope_early).*x)));
 plotHist(a(a>=rtBins(j,1) & a<=rtBins(j,2))-dimall_all(a>=rtBins(j,1) & a<rtBins(j,2)),y,histo_nbins,'Fitting tau','RT (sec)');
 
-[slope_early,slope_late]=fitTwoTaus(dimall_event(b>=rtBins(j,1) & b<rtBins(j,2)),histo_nbins);
+[slope_early,slope_late]=fitTwoTaus(dimall_event(b>=rtBins(j,1) & b<rtBins(j,2)),histo_nbins,[]);
 disp(slope_early);
 disp(slope_late);
 x=0:0.001:20;
-y=randsample(x,length(dimall_event(b>=rtBins(j,1) & b<rtBins(j,2))),true,-(exp(-abs(slope_late).*x)-exp(-abs(slope_early).*x)));
+y=randsample(x,length(temp_RTdiffs1),true,-(exp(-abs(slope_late).*x)-exp(-abs(slope_early).*x)));
 plotHist(b(b>=rtBins(j,1) & b<=rtBins(j,2))-dimall_event(b>=rtBins(j,1) & b<rtBins(j,2)),y,histo_nbins,'Fitting tau','RT (sec)');
 
 end
 
-function [slope_early,slope_late]=fitTwoTaus(dataToFit,histo_nbins)
+function [slope_early,slope_late]=fitTwoTaus(dataToFit,histo_nbins,forceEarlySlope)
 
 [n_data,xhist]=histcounts(dataToFit,histo_nbins);
 x_log=nanmean([xhist(1:end-1); xhist(2:end)],1);
@@ -71,6 +73,9 @@ lateIndBegin=input('First index for late exponent ');
 % Fit late tau
 log_n_data(isinf(log_n_data))=nan;
 slope_early=nanmean(diff(log_n_data(1:earlyIndEnd))./diff(x_log(1:earlyIndEnd)));
+if ~isempty(forceEarlySlope)
+    slope_early=forceEarlySlope;
+end
 slope_late=nanmean(diff(log_n_data(lateIndBegin:end))./diff(x_log(lateIndBegin:end)));
 
 figure();

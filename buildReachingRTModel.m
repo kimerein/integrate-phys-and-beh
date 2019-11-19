@@ -71,14 +71,17 @@ nRepsForBootstrap=20;
 % templateSequence2_cond=any(alltbt.all_reachBatch>0.5,2) & trialTypes.touched_pellet==0 & trialTypes.led==0 & trialTypes.paw_during_wheel==0;
 % templateSequence2_cond=any(alltbt.all_reachBatch>0.5,2) & trialTypes.touched_pellet==1 & trialTypes.led==0 & trialTypes.consumed_pellet==0;
 % templateSequence2_cond=trialTypes.touched_pellet==1 & trialTypes.led==1 & trialTypes.consumed_pellet==0;
-templateSequence2_cond=any(alltbt.all_reachBatch(:,94:end)>0.5,2) & trialTypes.touched_pellet==0 & trialTypes.led==0;
-% templateSequence2_cond=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
-templateSequence2_end=trialTypes.chewing_at_trial_start==0;
+% templateSequence2_cond=any(alltbt.all_reachBatch(:,94:end)>0.5,2) & trialTypes.touched_pellet==0 & trialTypes.led==1 & trialTypes.consumed_pellet==0;
+templateSequence2_cond=trialTypes.touched_pellet==0 & trialTypes.led==1;
+% templateSequence2_cond=any(alltbt.all_reachBatch>0.5,2) & trialTypes.touched_pellet==0 & trialTypes.led==0;
+templateSequence2_end=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
+% templateSequence2_end=trialTypes.chewing_at_trial_start==1;
 % Get raw reaching (all reaches)
 % Get reaction times
 % Get change in reaction times (non-corrected input distributions)
 % Get change in reaction times (corrected input distributions)
-dataset.realDistributions.event_name='mouse_reaches_after_cue_but_does_not_touch_pellet_no_chewing_at_trial_start_dprime0point5to1point5';
+dataset.realDistributions.event_name='mouse_does_not_touch_pellet_led_on_dprime_1to3';
+% dataset.realDistributions.event_name='mouse_touches_pellet_dprime_1to3';
 dataset.realDistributions.nInSequence=nInSequence;
 dataset.realDistributions.nRepsForBootstrap=nRepsForBootstrap;
 dataset.realDistributions.templateSequence1_cond=templateSequence1_cond;

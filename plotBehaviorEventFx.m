@@ -104,6 +104,9 @@ if plot_delta_rt_pdf==true
     temp(regexp(temp,'_'))=' ';
     histo_nbins=backup_histo_nbins;
     for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
+        histo_nbins=plotHist(dataset.alldim_rtchanges_allTrialsSequence{i},dataset.alldim_rtchanges_event{i},histo_nbins,['All dim of change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later, comparing reference vs ' temp],'Change in RT (sec)');
+    end
+    for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
         histo_nbins=plotHist(dataset.dim1_rtchanges_allTrialsSequence{i},dataset.dim1_rtchanges_event{i},histo_nbins,['Dim 1 of change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later, comparing reference vs ' temp],'Change in RT (sec)');
     end
     for i=1:length(dataset.event_RT_trial1InSeq)
