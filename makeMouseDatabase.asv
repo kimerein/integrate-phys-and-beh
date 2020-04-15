@@ -395,17 +395,11 @@ end
 function [db,dbs]=assignIDnums(db,existIDs)
 
 notdefined=true;
-currAddedMouse=1;
 for i=1:length(db)
     % for each mouse, assign a new ID
     if ~isempty(existIDs)
         indx=find(strcmp(existIDs.name,db(i).mouse_name));
-        if ~isempty(indx)
-            db(i).mouse_id=existIDs.id(indx);
-        else
-            db(i).mouse_id=nanmax(existIDs.id)+currAddedMouse;
-            currAddedMouse=currAddedMouse+1;
-        end
+        db(i).mouse_id
     else
         db(i).mouse_id=i;
     end
