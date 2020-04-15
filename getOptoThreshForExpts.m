@@ -2,12 +2,24 @@ function getOptoThreshForExpts(expt_dir,optoFromArduino,arduinoOptoForWhichMice)
 
 overwriteExistingThresh=false;
 
-ls=dir(expt_dir);
 currOptoFromArduino=optoFromArduino;
+
+if ~iscell(expt_dir)
+    ls=dir(expt_dir);
+else
+    ls=expt_dir;
+end
 for i=1:length(ls)
     currOptoFromArduino=optoFromArduino;
-    thisname=ls(i).name;
-    thisisdir=ls(i).isdir;
+    if ~iscell(expt_dir)
+        thisname=ls(i).name;
+        thisisdir=ls(i).isdir;
+    else
+        currdir=ls{i};
+        temp=regexp(currdir,'\');
+        thisname=currdir(temp(end)+1:end);
+        thisisdir=isempty(regexp(thisname,'\.','ONCE'));
+    end
     if ~isempty(regexp(thisname,'processed_data','once')) && thisisdir==1
         if exist([expt_dir '\' thisname '\optoThresh.mat'],'file') && exist([expt_dir '\' thisname '\optoOnHere.mat'],'file')
             if overwriteExistingThresh==false

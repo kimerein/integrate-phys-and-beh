@@ -32,10 +32,21 @@ for i=1:length(mouseDatabase.dbs.vids_to_match_mouseIDs)
     vidnames{i}=temp(rout(end)+1:end);
 end
 
-ls=dir(expt_dir);
+if ~iscell(expt_dir)
+    ls=dir(expt_dir);
+else
+    ls=expt_dir;
+end
 for i=1:length(ls)
-    thisname=ls(i).name;
-    thisisdir=ls(i).isdir;
+    if ~iscell(expt_dir)
+        thisname=ls(i).name;
+        thisisdir=ls(i).isdir;
+    else
+        currdir=ls{i};
+        temp=regexp(currdir,'\');
+        thisname=currdir(temp(end)+1:end);
+        thisisdir=isempty(regexp(thisname,'\.','ONCE'));
+    end
     r=regexp(thisname,'processed_data','ONCE');
     if ~isempty(r) && thisisdir==1
         avi_name=thisname(1:r-2);

@@ -291,7 +291,8 @@ end
 dbs.indsInto_behLog=nan(size(dbs.mouseIDs_to_match_vids));
 for i=1:length(dbs.mouseIDs_to_match_vids)
     for j=1:length(behLog.indsInto_vids)
-        temp=behLog.indsInto_vids{1};
+        temp=behLog.indsInto_vids(j);
+        temp=temp{1};
         if any(ismember(temp,i))
             dbs.indsInto_behLog(i)=j;
             break

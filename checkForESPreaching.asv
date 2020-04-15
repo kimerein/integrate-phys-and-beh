@@ -2,12 +2,15 @@ function checkForESPreaching(expt_dir)
 
 overwriteExisting=false;
 
+ls=dir(expt_dir);
+
 if ~iscell(expt_dir)
     ls=dir(expt_dir);
 else
     ls=expt_dir;
 end
 for i=1:length(ls)
+    currOptoFromArduino=optoFromArduino;
     if ~iscell(expt_dir)
         thisname=ls(i).name;
         thisisdir=ls(i).isdir;
@@ -17,6 +20,10 @@ for i=1:length(ls)
         thisname=currdir(temp(end)+1:end);
         thisisdir=isempty(regexp(thisname,'\.','ONCE'));
     end
+
+for i=1:length(ls)
+    thisname=ls(i).name;
+    thisisdir=ls(i).isdir;
     if ~isempty(regexp(thisname,'processed_data','ONCE')) && thisisdir==1
         if exist([expt_dir '\' thisname '\preemptCue.mat'],'file')
             if overwriteExisting==false
