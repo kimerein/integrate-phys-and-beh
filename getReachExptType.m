@@ -1,4 +1,4 @@
-function reachExptType=getReachExptType(continuingAnalysisDir,dbs_procData,behLog,writeToDir)
+function [reachExptType,dbs_procData]=getReachExptType(continuingAnalysisDir,dbs_procData,behLog,writeToDir)
 
 reachExptType=false(1,length(dbs_procData.vids_to_match_mouseIDs));
 for i=1:length(dbs_procData.vids_to_match_mouseIDs)
@@ -21,3 +21,5 @@ for i=1:length(dbs_procData.vids_to_match_mouseIDs)
         end
     end
 end
+
+dbs_procData.areControls=dbs_procData.areControls==1 && reachExptType==true;

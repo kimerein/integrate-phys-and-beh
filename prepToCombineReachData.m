@@ -54,7 +54,14 @@ db=a.db;
 getMouseAndSessionNumbers(continuingAnalysisDir,db); % assign mouse ID and session numbers based on mouse database
 getOptoThreshForExpts(continuingAnalysisDir,false,[]); % manually set optogenetic stimulation threshold for experiments
 checkForESPreaching(continuingAnalysisDir); % manually check for preemptive reaching
-checkForControl(continuingAnalysisDir); % use the parsedOutput.mat file to check for missing cues, suggesting a control experiment
+dbs_procData=checkForControl(continuingAnalysisDir,dbs_procData); % use the parsedOutput.mat file to check for missing cues, suggesting a control experiment
 if isfield(db,'behLog')
-    getReachExptType(continuingAnalysisDir,dbs_procData,db.behLog); % use the behavior log to check for control experiments
+    [~,dbs_procData]=getReachExptType(continuingAnalysisDir,dbs_procData,db.behLog); % use the behavior log to check for control experiments
 end
+
+% save database of processed_data folders
+save([DB_savedir 'db_processed_data.mat'],'dbs_procData');
+
+% save mouse database
+db.dbs_procData=dbs_procData;
+save([DB_savedir DB_filename 'wProcData.mat'],'db');

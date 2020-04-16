@@ -26,6 +26,7 @@ for i=1:length(f)
     temp=db.dbs.(f{i});
     dbs_matchDataFolders.(f{i})=temp(usedWhichVids);
 end
+dbs_matchDataFolders.usedWhichVids=usedWhichVids;
 
 % Get rid of duplicates
 % Take the first instance of any duplicated processed_data folders
@@ -36,4 +37,5 @@ for i=1:length(f)
     dbs_matchDataFolders.(f{i})=temp(si);
 end
 
+dbs_matchDataFolders.dataFolders=dataFolders;
 end

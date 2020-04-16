@@ -12,7 +12,7 @@ settings.lowThresh=RTsettings.lowThresh; % threshold for detecting events in tri
 
 
 % Name of cue in data structure
-settings.nameOfCue='cueZone_onVoff';
+settings.nameOfCue=RTsettings.nameOfCue;
 
 
 % Get information about trial structure from RTsettings

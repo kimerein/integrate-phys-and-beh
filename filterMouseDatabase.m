@@ -44,6 +44,21 @@ switch firstField
         if isfield(db,'behLog')
             db_out.behLog=db.behLog(takeRowsInBehLog,:);
         end  
+        % filt dbs_procData
+        if isfield(db,'dbs_procData')
+            temp_dbsToProcData=nan(1,length(takeIndsInDbs));
+            temp_dbsToProcData(db.dbs_procData.usedWhichVids)=1:length(db.dbs_procData.usedWhichVids);
+            takeIndsInProcData=ismember(db.dbs_procData.usedWhichVids,find(takeIndsInDbs==1));
+            db_out.dbs_procData.usedWhichVids=db.dbs_procData.usedWhichVids(temp_dbsToProcData(takeIndsInDbs==1));
+            f=fieldnames(db.dbs_procData);
+            for j=1:length(f)
+                if strcmp(f{j},'usedWhichVids')
+                    continue
+                end
+                temp=db.dbs_procData.(f{j});
+                db_out.dbs_procData.(f{j})=temp(takeIndsInProcData);
+            end
+        end
     case 'dbs'
         takeIndsInDbs=ismember(filtfirst.(secondField),values);
         f=fieldnames(db.dbs);
@@ -70,10 +85,78 @@ switch firstField
             takeRowsInBehLog=dbs.indsInto_behLog(takeIndsInDbs==1);
         end
         if isfield(db,'behLog')
-            db_out.behLog=db.begLog(takeRowsInBehLog,:);
+            db_out.behLog=db.behLog(takeRowsInBehLog,:);
+        end
+        % filt dbs_procData
+        if isfield(db,'dbs_procData')
+            temp_dbsToProcData=nan(1,length(takeIndsInDbs));
+            temp_dbsToProcData(db.dbs_procData.usedWhichVids)=1:length(db.dbs_procData.usedWhichVids);
+            takeIndsInProcData=ismember(db.dbs_procData.usedWhichVids,find(takeIndsInDbs==1));
+            db_out.dbs_procData.usedWhichVids=db.dbs_procData.usedWhichVids(temp_dbsToProcData(takeIndsInDbs==1));
+            f=fieldnames(db.dbs_procData);
+            for j=1:length(f)
+                if strcmp(f{j},'usedWhichVids')
+                    continue
+                end
+                temp=db.dbs_procData.(f{j});
+                db_out.dbs_procData.(f{j})=temp(takeIndsInProcData);
+            end
         end
     case 'behLog'
-        
+        takeIndsInBeh=ismember(filtfirst.(secondField),values);
+        f=fieldnames(filtfirst.(secondField));
+        for i=1:length(f)
+            temp=db.behLog.(f{i});
+            db_out.behLog.(f{i})=temp(takeIndsInBeh);
+        end
+        takeIndsInDbs=db_out.behLog.indsInto_vids;
+        f=fieldnames(db.dbs);
+        for j=1:length(f)
+            temp=db.dbs(f{j});
+            db_out.dbs.(f{j})=temp(takeIndsInDbs==1);
+        end
+        % filt mouse by mouse
+        for j=1:length(db.db_bymouse)
+            takeIndsInMouse=db.dbs.musbymus_indsInVids(takeIndsInDbs==1 && ismember(db.dbs.mouseIDs_to_match_vids,db.db_bymouse(j).mouse_id));
+            expectedLength=length(db.db_bymouse(j).sessids);
+            f=fieldnames(db.db_bymouse(j));
+            for l=1:length(f)
+                temp=db.db_bymouse(j).(f{l});
+                if length(temp)==expectedLength
+                    db_out.db_bymouse(j).(f{l})=temp(takeIndsInMouse);
+                else
+                    db_out.db_bymouse(j).(f{l})=temp;
+                end
+            end
+        end
+        % filt dbs_procData
+        if isfield(db,'dbs_procData')
+            temp_dbsToProcData=nan(1,length(takeIndsInDbs));
+            temp_dbsToProcData(db.dbs_procData.usedWhichVids)=1:length(db.dbs_procData.usedWhichVids);
+            takeIndsInProcData=ismember(db.dbs_procData.usedWhichVids,find(takeIndsInDbs==1));
+            db_out.dbs_procData.usedWhichVids=db.dbs_procData.usedWhichVids(temp_dbsToProcData(takeIndsInDbs==1));
+            f=fieldnames(db.dbs_procData);
+            for j=1:length(f)
+                if strcmp(f{j},'usedWhichVids')
+                    continue
+                end
+                temp=db.dbs_procData.(f{j});
+                db_out.dbs_procData.(f{j})=temp(takeIndsInProcData);
+            end
+        end
     otherwise
         error('firstField is not a field of mouse database');
+end
+
+% exclude controls?
+if excludeControls==true
+    if isfield(db,'dbs_procData')
+        f=fieldnames(db.dbs_procData);
+        for i=1:length(f)
+            temp=db.dbs_procData.(f{j});
+            db_out.dbs_procData.(f{j})=temp(dbs_procData.areControls==true);
+        end
+    else
+        warning('Could not exclude control sessions, because db did not have field dbs_procData.areControls');
+    end
 end
