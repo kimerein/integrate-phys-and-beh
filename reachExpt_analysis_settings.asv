@@ -1,0 +1,46 @@
+function outSettings=reachExpt_analysis_settings(varargin)
+
+persistent settings
+
+displ=false;
+if ~isempty(varargin)
+    if strcmp(varargin{1},'display settings');
+        displ=true;
+    end
+end
+
+if isempty(settings)
+    % default settings
+    settings.nameOfCue='cueZone_onVoff'; % name of cue in tbt data structure
+    settings.lowThresh=0.05; % threshold for detecting events in trial-by-trial behavior data structure
+    settings.durationOfWheelTurn=1.029; % duration of pellet presenter wheel turn, in seconds
+    settings.wheelStopsThisManySecsBeforeCue=0.1; % time window between pellet presenter wheel stopping and cue onset, in seconds
+    settings.cueDuration=0.25; % duration of cue, in seconds
+    settings.maxTrialDuration=35; % maximum duration of a trial, in seconds
+    settings.timeSlop=0.1; % max possible error in timing due to frame rate in movie and/or alignment approach, in seconds
+    settings.reachAfterCueWindow_start=0.05; % define start of time window in which to say mouse "reached after cue", seconds from cue onset
+    settings.reachAfterCueWindow_end=0.05+1.5; % define end of time window in which to say mouse "reached after cue", seconds from cue onset
+    settings.preCueWindow_start=0; % define start of time window from trial onset, in seconds
+    settings.preCueWindow_end=1.5; % define end of time window from trial onset, in seconds
+end
+
+if displ==true
+    fldname={'nameOfCue','lowThresh','durationOfWheelTurn','wheelStopsThisManySecsBeforeCue','cueDuration','maxTrialDuration','timeSlop','reachAfterCueWindow_start',''};
+    prompt={'name of cue:','tbt thresh:','duration of wheel turn (s):','time between wheel stop and cue (s):','cue duration (s):','max trial duration (s):',...
+            'time uncertainty (s):','"reached after cue" window s from cue on START:','"reached after cue" window s from cue on END:',...
+            'pre-cue window from trial onset START (s):','pre-cue window from trial onset END (s):'};
+    dlgtitle='Check or modify experiment-specific settings';
+    dims=[1 35];
+    definput={settings.nameOfCue,num2str(settings.lowThresh),num2str(settings.durationOfWheelTurn),num2str(settings.wheelStopsThisManySecsBeforeCue),num2str(settings.cueDuration),num2str(settings.maxTrialDuration),...
+              num2str(settings.timeSlop),num2str(settings.reachAfterCueWindow_start),num2str(settings.reachAfterCueWindow_end),...
+              num2str(settings.preCueWindow_start),num2str(settings.preCueWindow_end)};
+    answer=inputdlg(prompt,dlgtitle,dims,definput);
+    if ~strcmp(settings.nameOfCue,answer{1})
+        settings.nameOfCue=answer{1};
+    end
+    f=fieldnames(settings);
+    for i=2:length(answer)
+        if str2num(answer{i})~=settings.(f{i});
+        end
+    end
+end

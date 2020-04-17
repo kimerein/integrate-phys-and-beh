@@ -1,0 +1,24 @@
+% runReactionTimeAnalysis.m
+
+% script for running a frequently used subset of reaction time analyses
+
+%% load in data
+
+% loadStructFieldByField.m
+
+
+%% build reaction time model
+
+% putTogetherTermsForRTModel.m
+
+% buildRachingRTModel.m
+
+%% plot
+
+% plotBehaviorEventFx.m
+
+% fitRTMtermToOtherReaches.m
+
+% fitLocalCorrelationStructureOfReaches.m
+
+% fitRateTerm

@@ -33,23 +33,13 @@ end
 %% combine experiments
 
 % settings for how to combine experiments
-settings.check_for_human=1; % 1 if want to exclude data without humanChecked.txt
-settings.discardPreemptive=true; % true if want to discard data sets with preemptive reaching
-useAsCue='cueZone_onVoff'; % name of cue in tbt
-cueDuration=0.25
+settings=reachExpt_analysis_settings('display settings'); % modify settings in reachExpt_analysis_settings.m to change experiment-specific settings
 
-
-[alltbt,allmetadata]=combineExptPieces(continuingAnalysisDir,useAsCue,cueDuration,doRealign,settings);
-
-% cueDuration in seconds
-
-% settings.discardPreemptive
-% settings.check_for_human
-
-%% save combined data set and filter
-
-[alltbt,metadata]=combineExptPieces('\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\mouse summary data\bi_both','cueZone_onVoff',0.25,1);
-
+% combine data
+[alltbt,metadata]=combineExptPieces(continuingAnalysisDir,settings.nameOfCue,settings.cueDuration,settings.doRealign,settings);
+% define and classify trial types
+% modify settings in trialTypeSettings.m to change trial types
 [out,alltbt]=getSweepsFromBeh(alltbt);
-
 metadata=howFarThroughSession(metadata);
+
+% save field by field

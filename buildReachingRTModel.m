@@ -1,23 +1,23 @@
 function [dataset,correctedDistributions]=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir)
 
-% reverse_time=false;
-% if reverse_time==true
-%     f=fieldnames(alltbt);
-%     for i=1:length(f)
-%         currfield=f{i};
-%         alltbt.(currfield)=flipud(alltbt.(currfield));
-%     end
-%     f=fieldnames(trialTypes);
-%     for i=1:length(f)
-%         currfield=f{i};
-%         trialTypes.(currfield)=flipud(trialTypes.(currfield));
-%     end
-%     f=fieldnames(metadata);
-%     for i=1:length(f)
-%         currfield=f{i};
-%         metadata.(currfield)=flipud(metadata.(currfield));
-%     end
-% end
+reverse_time=false;
+if reverse_time==true
+    f=fieldnames(alltbt);
+    for i=1:length(f)
+        currfield=f{i};
+        alltbt.(currfield)=flipud(alltbt.(currfield));
+    end
+    f=fieldnames(trialTypes);
+    for i=1:length(f)
+        currfield=f{i};
+        trialTypes.(currfield)=flipud(trialTypes.(currfield));
+    end
+    f=fieldnames(metadata);
+    for i=1:length(f)
+        currfield=f{i};
+        metadata.(currfield)=flipud(metadata.(currfield));
+    end
+end
 
 % For the following behavioral events, get how delta_RT is changed
 % 1 trial forward, 2 trials forward, 3 trials forward, etc.

@@ -23,7 +23,7 @@
 %   otherwise, a new mapping is generated every time you run
 %   makeMouseDatabase.m
 
-DB_savedir='\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\';
+DB_savedir='\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\current mouse database\';
 DB_filename='mouse_database';
 DB_filename(~ismember(DB_filename,['A':'Z' 'a':'z' '0':'9']))='';
 DB_filename=DB_filename(~isspace(DB_filename));

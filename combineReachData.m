@@ -32,19 +32,24 @@ end
 
 %% combine experiments
 
-% settings for how to combine experiments
-settings.check_for_human=1; % 1 if want to exclude data without humanChecked.txt
-settings.discardPreemptive=true; % true if want to discard data sets with preemptive reaching
-useAsCue='cueZone_onVoff'; % name of cue in tbt
-cueDuration=0.25; % in seconds
-doRealign=1; % 1 if want to realign data based on cue starts (i.e., align all cue onsets)
+temp=datestr(datetime('now'));
+temp(~ismember(temp,['A':'Z' 'a':'z' '0':'9']))=''; 
+temp=temp(~isspace(temp));
+saveDir=['\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\' 'alltbt' temp]; % save combined data to this directory
 
-[alltbt,allmetadata]=combineExptPieces(continuingAnalysisDir,useAsCue,cueDuration,doRealign,settings);
+% settings for how to combine experiments
+settings=reachExpt_analysis_settings('display settings'); % modify settings in reachExpt_analysis_settings.m to change experiment-specific settings
+
+% combine data
+[alltbt,metadata]=combineExptPieces(continuingAnalysisDir,settings.nameOfCue,settings.cueDuration,settings.doRealign,settings);
 % define and classify trial types
 % modify settings in trialTypeSettings.m to change trial types
-% modify settings in reachExpt_analysis_settings.m to change
-% experiment-specific settings
 [out,alltbt]=getSweepsFromBeh(alltbt);
 metadata=howFarThroughSession(metadata);
 
 % save field by field
+saveStructFieldByField(alltbt,saveDir); % save alltbt
+saveStructFieldByField(out,saveDir); % save out
+saveStructFieldByField(metadata,saveDir); % save metadata
+save([saveDir '\reachExptAnalysis_settings.mat'],'settings'); % save reach expt analysis settings
+save([saveDir '\mouse_database.mat'],'db'); % save filtered mouse database
