@@ -46,6 +46,7 @@ settings=reachExpt_analysis_settings('display settings'); % modify settings in r
 % modify settings in trialTypeSettings.m to change trial types
 [out,alltbt]=getSweepsFromBeh(alltbt);
 metadata=howFarThroughSession(metadata);
+[metadata,alltbt]=add_dprimes_to_tbt(alltbt,out,metadata,'all_reachBatch','cueZone_onVoff',settings);
 
 % save field by field
 saveStructFieldByField(alltbt,saveDir); % save alltbt

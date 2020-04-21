@@ -5,12 +5,12 @@ function returnThis=plotBehaviorEventFx(dataset,alltbt,ref)
 
 plot_rawReaching=false;
 plot_rawReaching_cdf=false;
-plot_rt_pdf=false;
+plot_rt_pdf=true;
 plot_rt_cdf=false;
 plot_delta_rt_pdf=false;
 plot_delta_rt_pdf_2D=false;
 plot_delta_rt_cdf_2D=false;
-plot_delta_rt_cdf=true;
+plot_delta_rt_cdf=false;
 plot_delta_rt_asFunc_rt=false;
 plot_dim1_delta_asFunc_rt=false;
 plot_dim2_delta_asFunc_rt=false;
@@ -154,24 +154,24 @@ if plot_delta_rt_cdf==true
     histo_nbins=backup_histo_nbins;
     temp=dataset.event_name;
     temp(regexp(temp,'_'))=' ';
-    for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
-%         histo_nbins=plotCDF(dataset.alldim_rtchanges_allTrialsSequence{i},dataset.alldim_rtchanges_event{i},histo_nbins,['CDF All Dim change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later, comparing reference vs ' temp]);
-        if i==1
-            
-            rtBins=[6 9];
-            j=1;
-            temp1=dataset.allTrialsSequence_RT_trial1InSeq{i};
-            temp1_seq2=dataset.event_RT_trial1InSeq{i};
-            dimall_all=dataset.alldim_rtchanges_allTrialsSequence{i};
-            dimall_event=dataset.alldim_rtchanges_event{i};
-            temp_RTdiffs1=dimall_all(temp1(dataset.realrtpair_seq1{i}==1)>=rtBins(j,1) & temp1(dataset.realrtpair_seq1{i}==1)<rtBins(j,2));
-            temp_RTdiffsevent=dimall_event(temp1_seq2(dataset.realrtpair_seq2{i}==1)>=rtBins(j,1) & temp1_seq2(dataset.realrtpair_seq2{i}==1)<rtBins(j,2));
-            temp_RTdiffs1=temp_RTdiffs1(temp_RTdiffs1<=-5);
-            temp_RTdiffsevent=temp_RTdiffsevent(temp_RTdiffsevent<=-5);
-            histo_nbins=plotHist(temp_RTdiffs1,temp_RTdiffsevent,histo_nbins,['PDF RT change for RTs ' num2str(dataset.nInSequence(i)-1) ' trials later, RTs less than ' num2str(rtBins(j,2))],'Change in RT');
-            plotCDF(temp_RTdiffs1,temp_RTdiffsevent,histo_nbins,['CDF RT change for RTs ' num2str(dataset.nInSequence(i)-1) ' trials later, RTs less than ' num2str(rtBins(j,2))]);
-        end
-    end
+%     for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
+% %         histo_nbins=plotCDF(dataset.alldim_rtchanges_allTrialsSequence{i},dataset.alldim_rtchanges_event{i},histo_nbins,['CDF All Dim change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later, comparing reference vs ' temp]);
+%         if i==1
+%             
+%             rtBins=[6 9];
+%             j=1;
+%             temp1=dataset.allTrialsSequence_RT_trial1InSeq{i};
+%             temp1_seq2=dataset.event_RT_trial1InSeq{i};
+%             dimall_all=dataset.alldim_rtchanges_allTrialsSequence{i};
+%             dimall_event=dataset.alldim_rtchanges_event{i};
+%             temp_RTdiffs1=dimall_all(temp1(dataset.realrtpair_seq1{i}==1)>=rtBins(j,1) & temp1(dataset.realrtpair_seq1{i}==1)<rtBins(j,2));
+%             temp_RTdiffsevent=dimall_event(temp1_seq2(dataset.realrtpair_seq2{i}==1)>=rtBins(j,1) & temp1_seq2(dataset.realrtpair_seq2{i}==1)<rtBins(j,2));
+%             temp_RTdiffs1=temp_RTdiffs1(temp_RTdiffs1<=-5);
+%             temp_RTdiffsevent=temp_RTdiffsevent(temp_RTdiffsevent<=-5);
+%             histo_nbins=plotHist(temp_RTdiffs1,temp_RTdiffsevent,histo_nbins,['PDF RT change for RTs ' num2str(dataset.nInSequence(i)-1) ' trials later, RTs less than ' num2str(rtBins(j,2))],'Change in RT');
+%             plotCDF(temp_RTdiffs1,temp_RTdiffsevent,histo_nbins,['CDF RT change for RTs ' num2str(dataset.nInSequence(i)-1) ' trials later, RTs less than ' num2str(rtBins(j,2))]);
+%         end
+%     end
     for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
         histo_nbins=plotCDF(dataset.alldim_rtchanges_allTrialsSequence{i},dataset.alldim_rtchanges_event{i},histo_nbins,['CDF All Dim of change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later, comparing reference vs ' temp]);
     end
@@ -188,8 +188,8 @@ end
 
 % Plot change in RT as a function of RT
 if plot_delta_rt_asFunc_rt==true
-%     for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
-     for i=1:1
+    for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
+%      for i=1:1
         temp1=dataset.allTrialsSequence_RT_trial1InSeq{i};
         temp2=dataset.allTrialsSequence_RT_trialiInSeq{i};
         rtchanges=temp1(dataset.realrtpair_seq1{i}==1)-temp2(dataset.realrtpair_seq1{i}==1);

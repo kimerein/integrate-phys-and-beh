@@ -11,7 +11,7 @@ function [dprimes,hit_rates,FA_rates,out]=get_dprime_per_session(tbt,out,metadat
 % example, in pre-cue window)
 
 if isempty(settings)
-    settings=RTanalysis_settings();
+    settings=reachExpt_analysis_settings();
 end
 hitWindow_start=settings.reachAfterCueWindow_start; % wrt cue onset
 hitWindow_end=settings.reachAfterCueWindow_end; % wrt cue onset

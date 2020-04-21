@@ -293,13 +293,13 @@ for i=1:length(nInSequence)
         allVals1_dim1=[allVals1_dim1 dim1.vals1];
         allVals2_dim1=[allVals2_dim1 dim1.vals2];
         % save means of bootstrap
-        if doCorrectInputDistribution==false && j==1
+        if doCorrectInputDistribution==false & j==1
             % take all trials, will need later
             rawR_cond1_trial1=[rawR_cond1_trial1; rawReaching_cond1_trial1];
             rawR_cond1_triali=[rawR_cond1_triali; rawReaching_cond1_triali];
-            rawR_cond2_trial1=[rawR_cond2_trial1; rawReaching_cond2_trial1];
-            rawR_cond2_triali=[rawR_cond2_triali; rawReaching_cond2_triali];
-        elseif doCorrectInputDistribution==true
+            rawR_cond2_trial1=[rawR_cond2_trial1; nanmean(rawReaching_cond2_trial1,1)];
+            rawR_cond2_triali=[rawR_cond2_triali; nanmean(rawReaching_cond2_triali,1)];
+        elseif 
             rawR_cond1_trial1=[rawR_cond1_trial1; nanmean(rawReaching_cond1_trial1,1)];
             rawR_cond1_triali=[rawR_cond1_triali; nanmean(rawReaching_cond1_triali,1)];
             rawR_cond2_trial1=[rawR_cond2_trial1; nanmean(rawReaching_cond2_trial1,1)];
