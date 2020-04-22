@@ -30,7 +30,7 @@ if displ==true
             '1 if want to fill in RT longer than trial length if mouse did not reach in trial:','1 if want to reverse trial order (for control if time goes backwards):'};
     dlgtitle='Check or modify RT analysis-specific settings';
     dims=[1 35];
-    definput={settings.(fldname{1}),num2str(settings.(fldname{2})),num2str(settings.(fldname{3})),num2str(settings.(fldname{4})),num2str(settings.(fldname{5})),num2str(settings.(fldname{6})),num2str(settings.(fldname{7})),num2str(settings.(fldname{8}))};
+    definput={num2str(settings.(fldname{1})),num2str(settings.(fldname{2})),num2str(settings.(fldname{3})),num2str(settings.(fldname{4})),num2str(settings.(fldname{5})),num2str(settings.(fldname{6})),num2str(settings.(fldname{7})),num2str(settings.(fldname{8}))};
     answer=inputdlg(prompt,dlgtitle,dims,definput);
     for i=1:length(answer)
         if ischar(settings.(fldname{i}))

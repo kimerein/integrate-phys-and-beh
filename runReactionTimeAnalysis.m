@@ -31,29 +31,34 @@ temp=temp(~isspace(temp));
 saveDir=['\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\RT pairs data sets\' temp]; % where to save details of alltbt filtering and RT pairs data set
 
 % filter settings
-tbt_filter.sortField='dprime';
-tbt_filter.range_values=[-100 100];
+tbt_filter.sortField='dprimes';
+tbt_filter.range_values=[1 3];
 tbt_filter.name=[tbt_filter.sortField num2str(tbt_filter.range_values(1)) 'to' num2str(tbt_filter.range_values(2))];
+tbt_filter.clock_progress=true;
 
 % filter alltbt
-[alltbt,trialTypes,metadata]=filtTbt(alltbt,trialTypes,tbt_filter.sortField,tbt_filter.range_values,metadata);
+[alltbt,trialTypes,metadata]=filtTbt(alltbt,trialTypes,tbt_filter.sortField,tbt_filter.range_values,metadata,tbt_filter.clock_progress);
 
 %% build relevant data sets
 
 % settings for paired RT data set
 % test.nInSequence=[2 3 4 7 11]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
-test.nInSequence=[2 3 4 5 6 7 8 9 10 11]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
+% test.nInSequence=[2 3 4 5 6 7 8 9 10 11]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
+test.nInSequence=[2]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
 % requirement for first trial in pair
 % trial1='any(alltbt.all_reachBatch>0.5,2) & trialTypes.touched_pellet==1 & trialTypes.led==0 & trialTypes.paw_during_wheel==0'; % e.g., mouse reached, touched pellet, no LED, no paw_during_wheel
 % trial1='any(alltbt.all_reachBatch(:,94:end)>0.5,2) & trialTypes.touched_pellet==0 & trialTypes.led==1 & trialTypes.consumed_pellet==0';
-trial1='any(alltbt.all_reachBatch(:,94:end)>0.5,2) & trialTypes.touched_pellet==1 & trialTypes.led==0'; % e.g., mouse reached, touched pellet, no LED
-test.templateSequence2_cond=(trial1);
+trial1='any(alltbt.all_reachBatch(:,94:end)>0.5,2) & trialTypes.touched_pellet==1 & trialTypes.led==1'; % e.g., mouse reached, touched pellet, no LED
+test.trial1=trial1;
+test.templateSequence2_cond=eval(trial1);
 % generally, second trial in pair should take all trial types
 trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
-test.templateSequence2_end=(trial2);
-test.event_name=['reachedAfterCue_touchedPellet_noLED' tbt_filter.name];
+test.trial2=trial2;
+test.templateSequence2_end=eval(trial2);
+test.event_name=['reachedAfterCue_touchedPellet_LED' tbt_filter.name];
 
-saveDir=[saveDir '\' test.eventName];
+saveDir=[saveDir '\' test.event_name];
+mkdir(saveDir);
 
 % save settings for paired RT data set
 save([saveDir '\test_settings.mat'],'test');
@@ -95,6 +100,15 @@ fakeCueInd=50; % in indices
 % load reference data set
 
 % putTogetherTermsForRTModel.m
+
+settings.trialDuration=9.5;
+settings.n_sems=1;
+settings.baselineWindow=[1 2];
+settings.cueName='cueZone_onVoff';
+settings.useAllDatasetTrialsAsRef=false;
+settings.n_trials_away=1;
+settings.histo_nbins=[-9:0.1:9];
+settings.bins=0:0.1:9;
 
 %% session-by-session change in RTs
 

@@ -1,10 +1,10 @@
-function [metadata,alltbt]=add_dprimes_to_tbt(alltbt,out,metadata)
+function [metadata,alltbt,out]=add_dprimes_to_tbt(varargin)
 
 if length(varargin)==3
     alltbt=varargin{1};
     out=varargin{2};
     metadata=varargin{3};
-elseif length(varargin)==5
+elseif length(varargin)==6
     alltbt=varargin{1};
     out=varargin{2};
     metadata=varargin{3};
@@ -23,3 +23,4 @@ for i=1:length(u)
 end
 
 alltbt.dprimes=metadata.dprimes;
+out.dprimes=metadata.dprimes;

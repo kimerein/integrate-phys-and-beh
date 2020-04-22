@@ -451,6 +451,43 @@ earth_mover_dim2=sign_of_dim2*earth_mover_dim2;
 
 end
 
+function isLong=getFractionLongerTrials(alltbt,trialDuration)
+
+disp('calculating fraction longer trials');
+
+trialTimeStarts=nan(1,size(alltbt.timesfromarduino,1));
+trialTimeEnds=nan(1,size(alltbt.timesfromarduino,1));
+for i=1:size(alltbt.timesfromarduino,1)
+    temp=alltbt.timesfromarduino(i,:);
+    f=find(~isnan(temp),1,'first');
+    if ~isempty(f)
+        trialTimeStarts(i)=temp(f);
+    else
+        trialTimeStarts(i)=nan;
+    end
+    tempflip=fliplr(temp);
+    f=find(~isnan(tempflip),1,'first');
+    if ~isempty(f)
+        trialTimeEnds(i)=tempflip(f);
+    else
+        trialTimeEnds(i)=nan;
+    end
+end
+trialLengths=trialTimeEnds-trialTimeStarts;
+
+[n,xout]=hist(trialLengths,100);
+figure();
+plot(xout,n);
+title('Histogram of trial lengths');
+xlabel('Seconds');
+
+breakLength=19;
+disp(['Using ' num2str(breakLength) ' sec as separation of short and long trials']);
+
+isLong=trialLengths>breakLength;
+
+end
+
 function rateFits=getRateFits(alltbt,dataset,reachType,useCuedRateData,withinRange,cueName,trialDuration)
 
 % Non-cued approach
@@ -460,6 +497,8 @@ nIndsToTake=200;
 timeStep=mode(diff(nanmean(alltbt.times,1)));
 cueInd=find(nanmean(alltbt.(cueName),1)>0,1,'first');
 withinRange_inds=[cueInd+ceil(withinRange(1)/timeStep) cueInd+ceil(withinRange(2)/timeStep)];
+temp=alltbt.all_reachBatch;
+anyReachAligned=alignToEvent(temp,withinRange_inds,alltbt.all_reachBatch,nIndsToTake);
 temp=alltbt.reachBatch_drop_reachStarts;
 touchAligned=alignToEvent(temp,withinRange_inds,alltbt.all_reachBatch,nIndsToTake);
 temp=alltbt.reachBatch_miss_reachStarts;
@@ -469,6 +508,7 @@ successTouchAligned=alignToEvent(temp,withinRange_inds,alltbt.all_reachBatch,nIn
 temp=alltbt.reachBatch_drop_reachStarts+alltbt.reachBatch_success_reachStarts;
 anyTouchAligned=alignToEvent(temp,withinRange_inds,alltbt.all_reachBatch,nIndsToTake);
 % Zero out first reach inds
+anyReachAligned(:,1)=0;
 touchAligned(:,1)=0;
 reachNoTouchAligned(:,1)=0;
 successTouchAligned(:,1)=0;
@@ -479,18 +519,40 @@ hold on;
 plot(0:timeStep:timeStep*(length(nanmean(reachNoTouchAligned,1))-1),nanmean(reachNoTouchAligned,1)./timeStep,'Color','r');
 plot(0:timeStep:timeStep*(length(nanmean(successTouchAligned,1))-1),nanmean(successTouchAligned,1)./timeStep,'Color','g');
 plot(0:timeStep:timeStep*(length(nanmean(anyTouchAligned,1))-1),nanmean(anyTouchAligned,1)./timeStep,'Color','b');
-legend({'drop','miss','success','any touch'});
+plot(0:timeStep:timeStep*(length(nanmean(anyReachAligned,1))-1),nanmean(anyReachAligned,1)./timeStep,'Color','c');
+legend({'drop','miss','success','any touch','any reach'});
+
+% there are 2 kinds of breaks between trials
+% 1. 0 sec break and 2. a wheel turn without a cue, in which case there are
+% 9.5 sec (or trial duration) between the end of one trial and the
+% beginning of the next
+% get the proportion of trials that are type 1 vs. type 2
+isLong=getFractionLongerTrials(alltbt,trialDuration);
+fractionIsLong=nansum(isLong)/length(isLong);
+% for each rate as a function of time, take weighted average given
+% proportion trial types 1 vs. 2
+afterALongTimeLambda=nanmean(nanmean(anyReachAligned(:,end),1)./timeStep); % rate of Poisson (uncued) reaching after a long time (at end of trial)
+
 rateFromNoncuedData.x=0:timeStep:timeStep*(length(nanmean(touchAligned,1))-1);
 if strcmp(reachType,'drop')
-    rateFromNoncuedData.y=nanmean(touchAligned,1)./timeStep; % reach rate in seconds
+    rateFromNoncuedData.y=(1-fractionIsLong)*nanmean(touchAligned,1)./timeStep + fractionIsLong.*afterALongTimeLambda.*ones(1,length(rateFromNoncuedData.x)); % reach rate in seconds
 elseif strcmp(reachType,'miss')
-    rateFromNoncuedData.y=nanmean(reachNoTouchAligned,1)./timeStep;
+    rateFromNoncuedData.y=(1-fractionIsLong)*nanmean(reachNoTouchAligned,1)./timeStep + fractionIsLong.*afterALongTimeLambda.*ones(1,length(rateFromNoncuedData.x));
 elseif strcmp(reachType,'success')
-    rateFromNoncuedData.y=nanmean(successTouchAligned,1)./timeStep;
+    rateFromNoncuedData.y=(1-fractionIsLong)*nanmean(successTouchAligned,1)./timeStep + fractionIsLong.*afterALongTimeLambda.*ones(1,length(rateFromNoncuedData.x));
 elseif strcmp(reachType,'anyTouch')
-    rateFromNoncuedData.y=nanmean(anyTouchAligned,1)./timeStep;
+    rateFromNoncuedData.y=(1-fractionIsLong)*nanmean(anyTouchAligned,1)./timeStep + fractionIsLong.*afterALongTimeLambda.*ones(1,length(rateFromNoncuedData.x));
+elseif strcmp(reachType,'anyReach')
+    rateFromNoncuedData.y=(1-fractionIsLong)*nanmean(anyReachAligned,1)./timeStep + fractionIsLong.*afterALongTimeLambda.*ones(1,length(rateFromNoncuedData.x));
 end
 rateFromNoncuedData.y(3:-1:1)=rateFromNoncuedData.y(3);
+
+figure();
+title('After adjusting for fraction of long trials');
+plot(rateFromNoncuedData.x,rateFromNoncuedData.y,'Color','k');
+hold on;
+line([0 timeStep*(length(nanmean(anyTouchAligned,1))-1)],[afterALongTimeLambda afterALongTimeLambda]);
+
 % Fit rates using cued approach
 if useCuedRateData==true
     [temp1,temp2]=fitRateTermToLateReaches_local(dataset,1); % last argument is suppressOutput
@@ -812,6 +874,8 @@ function [rt_pdf_out,best_a,rt_pdfs_combo_out,cuedLambdas]=solve_for_cued_term(b
 rt_pdf = @(rts,bins) histcounts(rts,bins)./nansum(histcounts(rts,bins));
 bin_centers = @(bins) nanmean([bins(1:end-1); bins(2:end)],1);
 
+offsettime=0.0075; % this should be a very small number
+bins=bins+offsettime; % avoid infinities at gampdf when t=0
 bincents=bin_centers(bins);
 rt_pdf_out=nan(length(bincents),length(bincents));
 rt_pdfs_combo_out=nan(length(bincents),length(bincents));
@@ -824,11 +888,12 @@ rawReaches=realDataset.rawReaching_event_trialiInSeq{n_trials_away};
 % then get rts from trial 1 from real dataset
 realData_rts1=realDataset.event_RT_trial1InSeq{n_trials_away};
 if length(realData_rts1)~=size(rawReaches,1)
-    takeRandNTrials=randsample(size(alltbt.all_reachBatch,1),length(realData_rts1));
-    rawReaches=alltbt.all_reachBatch(takeRandNTrials,:);
+    if size(rawReaches,1)>1
+        rawReaches=nanmean(rawReaches,1);
+    end
     warning('problem estimating cued vs uncued rates');
 end
-totalRate.x=0:timeStep:timeStep*(length(cueInd:size(rawReaches,2))-1);
+totalRate.x=0+offsettime:timeStep:timeStep*(length(cueInd:size(rawReaches,2))-1)+offsettime;
 for i=1:length(bincents)
     % get current rate term RT pdf
     ratePDF=rate_term.rt_pdf_outs(i,:);
@@ -837,13 +902,23 @@ for i=1:length(bincents)
     % get empirical RT pdf
     empiricalPDF=rt_pdf(empirical_rts2(empirical_rts1>=bins(i) & empirical_rts1<=bins(i+1)),bins);
     % get estimate of cued and uncued rates
-    curr_rawReaches=rawReaches(realData_rts1>=bins(i) & realData_rts1<=bins(i+1),cueInd:end);
-    totalRate.y=nanmean(curr_rawReaches,1)./timeStep;
+    % be sure that have enough trials with data to get a good estimate of
+    % the total reach rate 
+    if nansum(realData_rts1>=bins(i) & realData_rts1<=bins(i+1))<200
+        % expand bin size
+        bigger_i=i-3:i+3;
+        bigger_i=bigger_i(bigger_i>0 & bigger_i<=length(bins)-1);
+        curr_rawReaches=nanmean(rawReaches(realData_rts1>=bins(bigger_i(1)) & realData_rts1<=bins(bigger_i(end)+1),:),1);
+    else
+        curr_rawReaches=nanmean(rawReaches(realData_rts1>=bins(i) & realData_rts1<=bins(i+1),:),1);
+    end
+    curr_rawReaches=curr_rawReaches(cueInd:end);
+    totalRate.y=curr_rawReaches./timeStep;
     % consider moment-by-moment
     % then Gamma_empirical(1+a,1/(lambda+beta)) % know lambda and can estimate beta, need to fit a
     % thus, for each time point, solve for parameter a such that
     % Gamma_empirical(1+a,1/(lambda+beta)) = empiricalPDF(i,time point)
-    try_a=0.05:0.05:10; % a is in units of lambda
+    try_a=0.01:0.02:10; % a is in units of lambda
     disp('Fitting cued component of reaching');
     for j=1:length(bincents)
         % each time point
@@ -885,19 +960,20 @@ for i=1:length(bincents)
         end
         if isnan(y)
             rt_pdf_out(i,j)=nan; % will fill in later with nearest neighbor data
-        elseif isinf(temp)
-            temp=((1/estimateCuedRate)^best_a(i,j))/gamma(best_a(i,j));
-            rt_pdf_out(i,j)=temp;
         else
             rt_pdf_out(i,j)=temp;
         end
-
     end
 end
 
 % fill in missing data in rt_pdf_out
-
-
+rt_pdf_out=fillIn_wNearestRows(rt_pdf_out);
+% for i=1:10
+%     rt_pdf_out=fillIn2Dnans_wNearestNeighbor(rt_pdf_out);
+%     if all(~isnan(rt_pdf_out(1:end)))
+%         break
+%     end
+% end
 
 for i=1:size(rt_pdf_out,1)
     if all(rt_pdf_out(i,:)==0)
@@ -907,7 +983,52 @@ end
 
 end
 
-function data=fillIn2Dnans_wNearestNeighbor(data)
+function filledin_data=fillIn_wNearestRows(data)
+
+data(isnan(data))=0;
+
+filledin_data=data;
+for i=1:size(data,1)
+    if all(data(i,:)<0.01)
+        % fill in with nearest populated row
+        % direction 1
+        dir1_val=nan;
+        dir1_distance=nan;
+        for j=i+1:size(data,1)
+            if ~all(data(j,:)<0.01)
+                dir1_val=data(j,:);
+                dir1_distance=j-i;
+                break
+            end
+        end
+        % direction 2
+        dir2_val=nan;
+        dir2_distance=nan;
+        for j=i-1:-1:1
+            if ~all(data(j,:)<0.01)
+                dir2_val=data(j,:);
+                dir2_distance=i-j;
+                break
+            end
+        end
+        % take value from min distance
+        [themin,mi]=nanmin([dir1_distance dir2_distance]);
+        if isnan(themin)
+            % couldn't find neighboring row with data
+            continue
+        else
+            if mi==1
+                filledin_data(i,:)=dir1_val;
+            elseif mi==2
+                filledin_data(i,:)=dir2_val;
+            end
+        end
+    end     
+end
+
+end
+
+function filledin_data=fillIn2Dnans_wNearestNeighbor(data)
 
 % assume a continuous 2D function, where some data is missing, indicated by
 % presence of nans
@@ -968,7 +1089,7 @@ for i=1:size(data,1)
                 continue
             else
                 temp=[dir1_val dir2_val dir3_val dir4_val];
-                filledin_data(i,j)=;
+                filledin_data(i,j)=temp(mi);
             end
         end
     end
@@ -1020,8 +1141,8 @@ for i=1:length(j)
    uncued_integral=nansum(rate_term.rt_pdf_outs(i,:));
    cued_integral=nansum(cued_term.rt_pdf_outs(i,:));
    fractionUncued=uncued_integral/(uncued_integral+cued_integral);
-   pred_uncued=randsample(bin_centers(bins),floor(length(firstRTs)*fractionUncued),true,rate_term.rt_pdf_outs(mif,:));
-   pred_cued=randsample(bin_centers(bins),ceil(length(firstRTs)*(1-fractionUncued)),true,cued_term.rt_pdf_outs(mif,:));
+   pred_uncued=randsample(bin_centers(bins)+(bins(2)-bins(1)),floor(length(firstRTs)*fractionUncued),true,rate_term.rt_pdf_outs(mif,:));
+   pred_cued=randsample(bin_centers(bins)+(bins(2)-bins(1)),ceil(length(firstRTs)*(1-fractionUncued)),true,cued_term.rt_pdf_outs(mif,:));
    pred=[pred_uncued pred_cued]; 
    pred=pred(1:length(firstRTs));
    prediction=firstRTs-pred; 
