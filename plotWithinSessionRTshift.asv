@@ -8,7 +8,6 @@ n_sems=settings.n_sems;
 baselineWindow=settings.baselineWindow;
 
 backToBase=getReturnToBaseline(dataset,alltbt,cueName,n_sems,baselineWindow,n_trials_away,false);
-backToBase=4.55;
 
 % Get RT shift within session
 % Also consider rate change within this session
@@ -71,28 +70,24 @@ title('RT CDF');
 plotTimeseries(rt1_cdfs_late,[],'k',rt2_cdfs_late,[],'r',nanmean(rt_cdf_mids_late,1),[],[],true);
 title('RT CDF only late RTs after cued reaching');
 
-% figure();
-% scatter(dprimes,earth_movers);
-% title('dprimes vs earth movers all RTs');
-% plotHist(earth_movers,earth_movers,-1-0.025:0.05:1,'Histogram of earth movers','Earth mover');
-
-% figure();
-% scatter(dprimes,early_earth_movers-late_earth_movers);
-% title('dprimes vs earth movers early minus earth movers late');
-% plotHist(early_earth_movers-late_earth_movers,early_earth_movers-late_earth_movers,-0.1-0.0005:0.001:0.1,'Histogram of earth movers early minus late','Earth mover');
-% disp(['P-val of signrank test of earth movers early minus late is ' num2str(signrank(early_earth_movers-late_earth_movers))]);
+figure();
+scatter(dprimes,earth_movers);
+title('dprimes vs earth movers all RTs');
+plotHist(earth_movers,earth_movers,-1-0.025:0.05:1,'Histogram of earth movers','Earth mover');
 
 figure();
-% cutOff=0.1;
-cutOff=100;
+scatter(dprimes,early_earth_movers-late_earth_movers);
+title('dprimes vs earth movers early minus earth movers late');
+plotHist(early_earth_movers-late_earth_movers,early_earth_movers-late_earth_movers,-0.1-0.0005:0.001:0.1,'Histogram of earth movers early minus late','Earth mover');
+disp(['P-val of signrank test of earth movers early minus late is ' num2str(signrank(early_earth_movers-late_earth_movers))]);
+
+figure();
+cutOff=0.1;
 scatter(dprimes(rateChanges<=cutOff),early_earth_movers(rateChanges<=cutOff)-late_earth_movers(rateChanges<=cutOff));
-disp('Using n sessions');
-disp(nansum(rateChanges<=cutOff));
 title('Only sessions with little rate change');
 figure(); scatter(rateChanges,early_earth_movers-late_earth_movers);
 disp(['P-val of signrank test of earth movers early minus late no rate change only is ' num2str(signrank(early_earth_movers(rateChanges<=cutOff)-late_earth_movers(rateChanges<=cutOff)))]);
-plotHist(early_earth_movers(rateChanges<=cutOff),early_earth_movers(rateChanges<=cutOff),-0.1-0.0001:0.001:0.1,'Histogram of earth movers early','Earth mover');
-% plotHist(early_earth_movers(rateChanges<=cutOff)-late_earth_movers(rateChanges<=cutOff),early_earth_movers(rateChanges<=cutOff)-late_earth_movers(rateChanges<=cutOff),-0.1-0.0005:0.001:0.1,'Histogram of earth movers early minus late','Earth mover');
+plotHist(early_earth_movers-late_earth_movers,early_earth_movers-late_earth_movers,-0.1-0.0005:0.001:0.1,'Histogram of earth movers early minus late','Earth mover');
 plotTimeseries(rt1_cdfs(rateChanges<=cutOff,:),[],'k',rt2_cdfs(rateChanges<=cutOff,:),[],'r',nanmean(rt_cdf_mids,1),[],[],true);
 earth_movers_early=nan(1,length(sessids));
 earlyRTs1=[];
@@ -104,8 +99,7 @@ for i=1:length(sessids)
     rts1=allrts1(ismember(isTrial1_inds,indsInSess));
     rts2=allrts2(ismember(isTrial2_inds,indsInSess));
     temp=[bins(1)-(bins(2)-bins(1)):(bins(2)-bins(1))/100:bins(end)];
-%     temp=[bins(1)-(bins(2)-bins(1)):(bins(2)-bins(1))/1:bins(end)];
-    [earth_movers_early(i),rt1_cdfs_early(i,:),rt2_cdfs_early(i,:),rt_cdf_mids_early(i,:),~,~,~,~,~,rtpdfs1(i,:),rtpdfs2(i,:)]=getRTshift(rts1,rts2,temp(temp<backToBaseline),backToBaseline);
+    [earth_movers_early(i),rt1_cdfs_early(i,:),rt2_cdfs_early(i,:),rt_cdf_mids_early(i,:)]=getRTshift(rts1,rts2,temp(temp<backToBaseline),backToBaseline);
     if rateChanges(i)<=cutOff
         earlyRTs1=[earlyRTs1 rts1(rts1<backToBaseline)];
         earlyRTs2=[earlyRTs2 rts2(rts2<backToBaseline)];
@@ -114,8 +108,6 @@ end
 plotTimeseries(rt1_cdfs_early(rateChanges<=cutOff,:),[],'k',rt2_cdfs_early(rateChanges<=cutOff,:),[],'r',nanmean(rt_cdf_mids_early,1),[],[],false);
 [~,p]=kstest2(earlyRTs1,earlyRTs2);
 disp(['P-val of 2 sample KS test comparing early RTs for trial 1 vs trial 2 is ' num2str(p)]);
-
-plotTimeseries(rtpdfs1(rateChanges<=cutOff,:),[],'k',rtpdfs2(rateChanges<=cutOff,:),[],'r',nanmean(rt_cdf_mids_early,1),[],[],true);
 
 end
 
@@ -152,16 +144,14 @@ returnThis.y=n./nansum(n);
 
 end
 
-function [earth_mover,x_cdf,x_cdf_cond2,x_mids,earth_mover_early,earth_mover_late,x_cdf_late,x_cdf_cond2_late,x_mids_late,rtpdfs1,rtpdfs2]=getRTshift(rts1,rts2,bins,timeSplit)
+function [earth_mover,x_cdf,x_cdf_cond2,x_mids,earth_mover_early,earth_mover_late,x_cdf_late,x_cdf_cond2_late,x_mids_late]=getRTshift(rts1,rts2,bins,timeSplit)
 
 [n,x]=histcounts(rts1,bins);
-rtpdfs1=n./nansum(n);
 x_mids=nanmean([x(1:end-1); x(2:end)],1);
 x_cdf=accumulateDistribution(n);
 x_cdf=x_cdf./nanmax(x_cdf);
 x_backup=x;
 [n,x]=histcounts(rts2,bins);
-rtpdfs2=n./nansum(n);
 x_cdf_cond2=accumulateDistribution(n);
 x_cdf_cond2=x_cdf_cond2./nanmax(x_cdf_cond2);
 
@@ -248,11 +238,11 @@ figure();
 %hold on;
 if plotAsCityscape==true
     [n,x]=cityscape_hist(data1_mean,timeBins);
-    plot(x,n,'Color',color1,'LineWidth',1); hold on;
+    plot(x,n,'Color',color1); hold on;
     [n,x]=cityscape_hist(data1_mean+data1_se,timeBins);
-    plot(x,n,'Color',color1,'LineWidth',0.1);
+    plot(x,n,'Color',color1);
     [n,x]=cityscape_hist(data1_mean-data1_se,timeBins);
-    plot(x,n,'Color',color1,'LineWidth',0.1);
+    plot(x,n,'Color',color1);
 else
     plot(timeBins,data1_mean,'Color',color1); hold on;
 %     plot(timeBins,data1_mean+data1_se,'Color',color1);
@@ -263,11 +253,11 @@ end
 %hold on;
 if plotAsCityscape==true
     [n,x]=cityscape_hist(data2_mean,timeBins);
-    plot(x,n,'Color',color2,'LineWidth',1); hold on;
+    plot(x,n,'Color',color2); hold on;
     [n,x]=cityscape_hist(data2_mean+data2_se,timeBins);
-    plot(x,n,'Color',color2,'LineWidth',0.1);
+    plot(x,n,'Color',color2);
     [n,x]=cityscape_hist(data2_mean-data2_se,timeBins);
-    plot(x,n,'Color',color2,'LineWidth',0.1);
+    plot(x,n,'Color',color2);
 else
     plot(timeBins,data2_mean,'Color',color2); hold on;
 %     plot(timeBins,data2_mean+data2_se,'Color',color2);

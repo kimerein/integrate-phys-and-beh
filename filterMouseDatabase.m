@@ -25,13 +25,14 @@ switch firstField
                 % include this mouse
                 useMouse(i)=1;
                 db_out.db_bymouse(k)=filtfirst(i);
+                k=k+1;
                 takeIndsInDbs(db.db_bymouse(i).indInDbsByVids)=1;
             else
                 % exclude this mouse
                 useMouse(i)=0;
             end
         end
-        if isfield(dbs,'indsInto_behLog')
+        if isfield(db.dbs,'indsInto_behLog')
             takeRowsInBehLog=dbs.indsInto_behLog(takeIndsInDbs==1);
         end
         % filt dbs by mice

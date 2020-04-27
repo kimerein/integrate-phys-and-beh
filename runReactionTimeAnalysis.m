@@ -34,6 +34,10 @@ saveDir=['\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\RT pairs data
 tbt_filter.sortField='dprimes';
 tbt_filter.range_values=[1 3];
 tbt_filter.name=[tbt_filter.sortField num2str(tbt_filter.range_values(1)) 'to' num2str(tbt_filter.range_values(2))];
+temp=tbt_filter.name;
+temp(~ismember(temp,['A':'Z' 'a':'z' '0':'9']))=''; 
+temp=temp(~isspace(temp));
+tbt_filter.name=temp;
 tbt_filter.clock_progress=true;
 
 % filter alltbt
@@ -47,15 +51,17 @@ tbt_filter.clock_progress=true;
 test.nInSequence=[2]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
 % requirement for first trial in pair
 % trial1='any(alltbt.all_reachBatch>0.5,2) & trialTypes.touched_pellet==1 & trialTypes.led==0 & trialTypes.paw_during_wheel==0'; % e.g., mouse reached, touched pellet, no LED, no paw_during_wheel
-% trial1='any(alltbt.all_reachBatch(:,94:end)>0.5,2) & trialTypes.touched_pellet==0 & trialTypes.led==1 & trialTypes.consumed_pellet==0';
-trial1='any(alltbt.all_reachBatch(:,94:end)>0.5,2) & trialTypes.touched_pellet==1 & trialTypes.led==1'; % e.g., mouse reached, touched pellet, no LED
+% trial1='any(alltbt.all_reachBatch(:,94:end)>0.5,2) & trialTypes.touched_pellet==0 & trialTypes.led==0 & trialTypes.consumed_pellet==0';
+trial1='any(alltbt.all_reachBatch(:,94:end)>0.5,2) & trialTypes.touched_pellet==1 & trialTypes.led==0'; % e.g., mouse reached, touched pellet, no LED
 test.trial1=trial1;
 test.templateSequence2_cond=eval(trial1);
 % generally, second trial in pair should take all trial types
 trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
+% trial2='any(alltbt.all_reachBatch(:,94:end)>0.5,2) & trialTypes.touched_pellet==1';
 test.trial2=trial2;
 test.templateSequence2_end=eval(trial2);
-test.event_name=['reachedAfterCue_touchedPellet_LED' tbt_filter.name];
+test.fillInBetweenWithAnything=false; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1
+test.event_name=['reachedAfterCue_touched_noLED_thenAnything' tbt_filter.name 'inBetweenAnything' num2str(test.fillInBetweenWithAnything)];
 
 saveDir=[saveDir '\' test.event_name];
 mkdir(saveDir);
@@ -109,10 +115,14 @@ settings.useAllDatasetTrialsAsRef=false;
 settings.n_trials_away=1;
 settings.histo_nbins=[-9:0.1:9];
 settings.bins=0:0.1:9;
+settings.nTrialsAheadForRT1=-1;
+settings.trialStartCountAt1=2;
+settings.useReachType='all_reachBatch';
+
 
 %% session-by-session change in RTs
 
-plotWithinSessionRTshift(dataset.realDistributions,alltbt,trialTypes,metadata);
+plotWithinSessionRTshift(dataset.realDistributions,alltbt,trialTypes,metadata,settings,[0 3]);
 
 %% plot data sets
 

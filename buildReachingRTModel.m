@@ -13,6 +13,7 @@ elseif length(varargin)==6
     fakeCueInd=varargin{4};
     saveDir=varargin{5};
     testset_settings=varargin{6};
+    fillInBetweenWithAnything=testset_settings.fillInBetweenWithAnything;
 end
 
 % this function constructs a data set of reaction times changes as a
@@ -103,7 +104,7 @@ saveDir=[saveDir '\' dataset.realDistributions.event_name];
 mkdir(saveDir);
 
 doCorrectInputDistribution=false;
-[dim1_seq_rtchanges_cond1,dim1_seq_rtchanges_cond2,dim2_seq_rtchanges_cond1,dim2_seq_rtchanges_cond2,ns,cond1_isSeq,cond2_isSeq,rr_cond1_trial1,rr_cond1_triali,rr_cond2_trial1,rr_cond2_triali,cond1_rts_trial1,cond1_rts_triali,cond2_rts_trial1,cond2_rts_triali,rr_cond1_trial1_se,rr_cond1_triali_se,rr_cond2_trial1_se,rr_cond2_triali_se,realrtpair_seq1,realrtpair_seq2,alldim_seq_rtchanges_cond1,alldim_seq_rtchanges_cond2]=getFxOfBehaviorEvent(templateSequence1_cond,templateSequence1_end,templateSequence2_cond,templateSequence2_end,nInSequence,1,doCorrectInputDistribution,alltbt,trialTypes,metadata,fakeCueInd);
+[dim1_seq_rtchanges_cond1,dim1_seq_rtchanges_cond2,dim2_seq_rtchanges_cond1,dim2_seq_rtchanges_cond2,ns,cond1_isSeq,cond2_isSeq,rr_cond1_trial1,rr_cond1_triali,rr_cond2_trial1,rr_cond2_triali,cond1_rts_trial1,cond1_rts_triali,cond2_rts_trial1,cond2_rts_triali,rr_cond1_trial1_se,rr_cond1_triali_se,rr_cond2_trial1_se,rr_cond2_triali_se,realrtpair_seq1,realrtpair_seq2,alldim_seq_rtchanges_cond1,alldim_seq_rtchanges_cond2]=getFxOfBehaviorEvent(templateSequence1_cond,templateSequence1_end,templateSequence2_cond,templateSequence2_end,nInSequence,1,doCorrectInputDistribution,alltbt,trialTypes,metadata,fakeCueInd,fillInBetweenWithAnything);
 dataset.realDistributions.(['alldim_rtchanges_allTrialsSequence'])=alldim_seq_rtchanges_cond1;
 dataset.realDistributions.(['alldim_rtchanges_event'])=alldim_seq_rtchanges_cond2;
 dataset.realDistributions.(['dim1_rtchanges_allTrialsSequence'])=dim1_seq_rtchanges_cond1;
@@ -132,7 +133,7 @@ mkdir([saveDir '\real_distributions']);
 save([saveDir '\real_distributions\pdf.mat'],'dataset');
 
 doCorrectInputDistribution=true;
-[dim1_seq_rtchanges_cond1,dim1_seq_rtchanges_cond2,dim2_seq_rtchanges_cond1,dim2_seq_rtchanges_cond2,ns,cond1_isSeq,cond2_isSeq,rr_cond1_trial1,rr_cond1_triali,rr_cond2_trial1,rr_cond2_triali,cond1_rts_trial1,cond1_rts_triali,cond2_rts_trial1,cond2_rts_triali,rr_cond1_trial1_se,rr_cond1_triali_se,rr_cond2_trial1_se,rr_cond2_triali_se,realrtpair_seq1,realrtpair_seq2,alldim_seq_rtchanges_cond1,alldim_seq_rtchanges_cond2]=getFxOfBehaviorEvent(templateSequence1_cond,templateSequence1_end,templateSequence2_cond,templateSequence2_end,nInSequence,nRepsForBootstrap,doCorrectInputDistribution,alltbt,trialTypes,metadata,fakeCueInd);
+[dim1_seq_rtchanges_cond1,dim1_seq_rtchanges_cond2,dim2_seq_rtchanges_cond1,dim2_seq_rtchanges_cond2,ns,cond1_isSeq,cond2_isSeq,rr_cond1_trial1,rr_cond1_triali,rr_cond2_trial1,rr_cond2_triali,cond1_rts_trial1,cond1_rts_triali,cond2_rts_trial1,cond2_rts_triali,rr_cond1_trial1_se,rr_cond1_triali_se,rr_cond2_trial1_se,rr_cond2_triali_se,realrtpair_seq1,realrtpair_seq2,alldim_seq_rtchanges_cond1,alldim_seq_rtchanges_cond2]=getFxOfBehaviorEvent(templateSequence1_cond,templateSequence1_end,templateSequence2_cond,templateSequence2_end,nInSequence,nRepsForBootstrap,doCorrectInputDistribution,alltbt,trialTypes,metadata,fakeCueInd,fillInBetweenWithAnything);
 correctedDistributions.event_name=dataset.realDistributions.event_name;
 correctedDistributions.nInSequence=nInSequence;
 correctedDistributions.nRepsForBootstrap=nRepsForBootstrap;
@@ -198,7 +199,7 @@ end
 
 end
 
-function [dim1_seq_rtchanges_cond1,dim1_seq_rtchanges_cond2,dim2_seq_rtchanges_cond1,dim2_seq_rtchanges_cond2,ns,cond1_isSeq,cond2_isSeq,rr_cond1_trial1,rr_cond1_triali,rr_cond2_trial1,rr_cond2_triali,cond1_rts_trial1,cond1_rts_triali,cond2_rts_trial1,cond2_rts_triali,rr_cond1_trial1_se,rr_cond1_triali_se,rr_cond2_trial1_se,rr_cond2_triali_se,realrtpair_seq1,realrtpair_seq2,alldim_seq_rtchanges_cond1,alldim_seq_rtchanges_cond2]=getFxOfBehaviorEvent(templateSequence1_cond,templateSequence1_end,templateSequence2_cond,templateSequence2_end,nInSequence,nRepsForBootstrap,doCorrectInputDistribution,alltbt,trialTypes,metadata,fakeCueInd)
+function [dim1_seq_rtchanges_cond1,dim1_seq_rtchanges_cond2,dim2_seq_rtchanges_cond1,dim2_seq_rtchanges_cond2,ns,cond1_isSeq,cond2_isSeq,rr_cond1_trial1,rr_cond1_triali,rr_cond2_trial1,rr_cond2_triali,cond1_rts_trial1,cond1_rts_triali,cond2_rts_trial1,cond2_rts_triali,rr_cond1_trial1_se,rr_cond1_triali_se,rr_cond2_trial1_se,rr_cond2_triali_se,realrtpair_seq1,realrtpair_seq2,alldim_seq_rtchanges_cond1,alldim_seq_rtchanges_cond2]=getFxOfBehaviorEvent(templateSequence1_cond,templateSequence1_end,templateSequence2_cond,templateSequence2_end,nInSequence,nRepsForBootstrap,doCorrectInputDistribution,alltbt,trialTypes,metadata,fakeCueInd,fillInBetweenWithAnything)
 
 allDims_rt_change_cond1=nan(length(nInSequence),nRepsForBootstrap);
 allDims_rt_change_cond2=nan(length(nInSequence),nRepsForBootstrap);
@@ -238,15 +239,28 @@ for i=1:length(nInSequence)
     nSeq=nInSequence(i);
     disp(nSeq);
     for j=1:nSeq
-        if j==1
-            templateSequence1{j}=templateSequence1_cond;
-            templateSequence2{j}=templateSequence2_cond;
-        elseif j==nSeq
-            templateSequence1{j}=templateSequence1_end;
-            templateSequence2{j}=templateSequence2_end;
+        if fillInBetweenWithAnything==false
+            if j==1
+                templateSequence1{j}=templateSequence1_cond;
+                templateSequence2{j}=templateSequence2_cond;
+            elseif j==nSeq
+                templateSequence1{j}=templateSequence1_end;
+                templateSequence2{j}=templateSequence2_end;
+            else
+                templateSequence1{j}=templateSequence1_cond;
+                templateSequence2{j}=templateSequence2_cond;
+            end
         else
-            templateSequence1{j}=templateSequence1_cond;
-            templateSequence2{j}=templateSequence2_cond;
+            if j==1
+                templateSequence1{j}=templateSequence1_cond;
+                templateSequence2{j}=templateSequence2_cond;
+            elseif j==nSeq
+                templateSequence1{j}=templateSequence1_end;
+                templateSequence2{j}=templateSequence2_end;
+            else
+                templateSequence1{j}=templateSequence1_end;
+                templateSequence2{j}=templateSequence2_end;
+            end
         end
     end
     allVals1_alldim=[];

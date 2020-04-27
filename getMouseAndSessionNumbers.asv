@@ -69,10 +69,10 @@ for i=1:length(ls)
         end
         if iscell(expt_dir)
             save([currdir '\mouse_id.mat'],'mouse_id');
-            save([currdir '\nth_session.mat'],'nth_session');
+            save([currdir '\nth_session.mat'],'mouse_id');
         else
-            save([expt_dir '\' thisname '\mouse_id.mat'],'mouse_id');
-            save([expt_dir '\' thisname '\nth_session.mat'],'nth_session');
+            save([currdir '\' thisname '\mouse_id.mat'],'mouse_id');
+            save([currdir '\' thisname '\nth_session.mat'],'nth_session');
         end
     end
 end

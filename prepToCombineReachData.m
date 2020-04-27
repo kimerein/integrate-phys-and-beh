@@ -29,8 +29,13 @@ DB_filename(~ismember(DB_filename,['A':'Z' 'a':'z' '0':'9']))='';
 DB_filename=DB_filename(~isspace(DB_filename));
 behLogFile='\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\KER Behavior\By date\Behavior Log Starting 20190910 - Sheet1.tsv'; % make empty [] if unused
 existingDB='\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\20191106 batch opto update\mouse_database_20191106.mat'; % make empty [] if unused
+if ~isempty(existingDB)
+    a=load('\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\20191106 batch opto update\mouse_database_20191106.mat');
+    existingDB=a.db;
+end
 
-db=makeMouseDatabase(behLogFile,existingDB);
+% db=makeMouseDatabase(behLogFile,existingDB);
+db=makeMouseDatabase(behLogFile,existingDB,true);
 save([DB_savedir DB_filename '.mat'],'db');
 
 %% Add expt details to processed_data folders
@@ -52,7 +57,7 @@ db=a.db;
 [continuingAnalysisDir,dbs_procData]=getProcessedData(db);
 
 getMouseAndSessionNumbers(continuingAnalysisDir,db); % assign mouse ID and session numbers based on mouse database
-getOptoThreshForExpts(continuingAnalysisDir,false,[]); % manually set optogenetic stimulation threshold for experiments
+% getOptoThreshForExpts(continuingAnalysisDir,true,[]); % manually set optogenetic stimulation threshold for experiments, or don't run this and use optoOn from Arduino
 checkForESPreaching(continuingAnalysisDir); % manually check for preemptive reaching
 dbs_procData=checkForControl(continuingAnalysisDir,dbs_procData); % use the parsedOutput.mat file to check for missing cues, suggesting a control experiment
 if isfield(db,'behLog')

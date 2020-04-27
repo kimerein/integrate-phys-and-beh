@@ -23,12 +23,16 @@
 %   otherwise, a new mapping is generated every time you run
 %   makeMouseDatabase.m
 
-DB_savedir='\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\';
+DB_savedir='\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\current mouse database\';
 DB_filename='mouse_database';
 DB_filename(~ismember(DB_filename,['A':'Z' 'a':'z' '0':'9']))='';
 DB_filename=DB_filename(~isspace(DB_filename));
 behLogFile='\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\KER Behavior\By date\Behavior Log Starting 20190910 - Sheet1.tsv'; % make empty [] if unused
 existingDB='\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\20191106 batch opto update\mouse_database_20191106.mat'; % make empty [] if unused
+if ~isempty(existingDB)
+    a=load('\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\20191106 batch opto update\mouse_database_20191106.mat');
+    existingDB=a.db;
+end
 
 db=makeMouseDatabase(behLogFile,existingDB);
 save([DB_savedir DB_filename '.mat'],'db');
@@ -41,6 +45,9 @@ save([DB_savedir DB_filename '.mat'],'db');
 % load in mouse database
 a=load([DB_savedir DB_filename '.mat']);
 db=a.db;
+% AND/OR
+% combine mouse databases
+% be sure that you now have the biggest, most inclusive mouse database, before assigning mouse IDs and session numbers 
 
 % manually add all processed_data folders to one directory
 % continuingAnalysisDir='\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\20191106 batch opto update\interleaved and batch opto'; % this is the directory containing all processed_data folders for further analysis
@@ -49,9 +56,17 @@ db=a.db;
 [continuingAnalysisDir,dbs_procData]=getProcessedData(db);
 
 getMouseAndSessionNumbers(continuingAnalysisDir,db); % assign mouse ID and session numbers based on mouse database
-getOptoThreshForExpts(continuingAnalysisDir,false,[]); % manually set optogenetic stimulation thresho
-checkForESPreaching(continuingAnalysisDir);
-checkForControl(continuingAnalysisDir);
+getOptoThreshForExpts(expt_dir,optoFromArduino,arduinoOptoForWhichMice);
+getOptoThreshForExpts(continuingAnalysisDir,false,[]); % manually set optogenetic stimulation threshold for experiments
+checkForESPreaching(continuingAnalysisDir); % manually check for preemptive reaching
+dbs_procData=checkForControl(continuingAnalysisDir,dbs_procData); % use the parsedOutput.mat file to check for missing cues, suggesting a control experiment
 if isfield(db,'behLog')
-    getReachExptType(continuingAnalysisDir,dbs_procData,db.behLog);
+    [~,dbs_procData]=getReachExptType(continuingAnalysisDir,dbs_procData,db.behLog); % use the behavior log to check for control experiments
 end
+
+% save database of processed_data folders
+save([DB_savedir 'db_processed_data.mat'],'dbs_procData');
+
+% save mouse database
+db.dbs_procData=dbs_procData;
+save([DB_savedir DB_filename 'wProcData.mat'],'db');

@@ -33,7 +33,7 @@ for i=1:length(ls)
         if check_for_human==1
             if exist([expt_dir '\' thisname '\humanchecked.txt'], 'file')==2 || exist([expt_dir '\' thisname '\humanchecked_afterResampleFix.txt'], 'file')==2
             else
-%                 disp(['Not including ' expt_dir '\' thisname]);
+                disp(['Not including ' expt_dir '\' thisname]);
                 continue
             end
         end

@@ -1,5 +1,7 @@
 function db_out=filterMouseDatabase(db,firstField,secondField,values,excludeControls)
 
+dbs=db
+
 % set up reference pointers
 indIntoDbsByVids=1;
 for i=1:length(db.db_bymouse)
@@ -47,9 +49,9 @@ switch firstField
         % filt dbs_procData
         if isfield(db,'dbs_procData')
             temp_dbsToProcData=nan(1,length(takeIndsInDbs));
-            temp_dbsToProcData(db.dbs_procData.usedWhichVids)=db.dbs_procData.usedWhichVids;
+            temp_dbsToProcData(db.dbs_procData.usedWhichVids)=1:length(db.dbs_procData.usedWhichVids);
             takeIndsInProcData=ismember(db.dbs_procData.usedWhichVids,find(takeIndsInDbs==1));
-            db_out.dbs_procData.usedWhichVids=takeIndsInProcData;
+            db_out.dbs_procData.usedWhichVids=db.dbs_procData.usedWhichVids(temp_dbsToProcData(takeIndsInDbs==1));
             f=fieldnames(db.dbs_procData);
             for j=1:length(f)
                 if strcmp(f{j},'usedWhichVids')
@@ -87,6 +89,21 @@ switch firstField
         if isfield(db,'behLog')
             db_out.behLog=db.behLog(takeRowsInBehLog,:);
         end
+        % filt dbs_procData
+        if isfield(db,'dbs_procData')
+            temp_dbsToProcData=nan(1,length(takeIndsInDbs));
+            temp_dbsToProcData(db.dbs_procData.usedWhichVids)=1:length(db.dbs_procData.usedWhichVids);
+            takeIndsInProcData=ismember(db.dbs_procData.usedWhichVids,find(takeIndsInDbs==1));
+            db_out.dbs_procData.usedWhichVids=db.dbs_procData.usedWhichVids(temp_dbsToProcData(takeIndsInDbs==1));
+            f=fieldnames(db.dbs_procData);
+            for j=1:length(f)
+                if strcmp(f{j},'usedWhichVids')
+                    continue
+                end
+                temp=db.dbs_procData.(f{j});
+                db_out.dbs_procData.(f{j})=temp(takeIndsInProcData);
+            end
+        end
     case 'behLog'
         takeIndsInBeh=ismember(filtfirst.(secondField),values);
         f=fieldnames(filtfirst.(secondField));
@@ -114,16 +131,34 @@ switch firstField
                 end
             end
         end
+        % filt dbs_procData
+        if isfield(db,'dbs_procData')
+            temp_dbsToProcData=nan(1,length(takeIndsInDbs));
+            temp_dbsToProcData(db.dbs_procData.usedWhichVids)=1:length(db.dbs_procData.usedWhichVids);
+            takeIndsInProcData=ismember(db.dbs_procData.usedWhichVids,find(takeIndsInDbs==1));
+            db_out.dbs_procData.usedWhichVids=db.dbs_procData.usedWhichVids(temp_dbsToProcData(takeIndsInDbs==1));
+            f=fieldnames(db.dbs_procData);
+            for j=1:length(f)
+                if strcmp(f{j},'usedWhichVids')
+                    continue
+                end
+                temp=db.dbs_procData.(f{j});
+                db_out.dbs_procData.(f{j})=temp(takeIndsInProcData);
+            end
+        end
     otherwise
         error('firstField is not a field of mouse database');
 end
 
-% repopulate links to processed_data folders, after filtering
-% get processed_data folders from .AVI locations
-[~,dbs_procData]=getProcessedData(db);
-
 % exclude controls?
 if excludeControls==true
-    dbs_matchDataFolders.usedWhichVids
-    
+    if isfield(db,'dbs_procData')
+        f=fieldnames(db.dbs_procData);
+        for i=1:length(f)
+            temp=db.dbs_procData.(f{j});
+            db_out.dbs_procData.(f{j})=temp(dbs_procData.areControls==true);
+        end
+    else
+        warning('Could not exclude control sessions, because db did not have field dbs_procData.areControls');
+    end
 end

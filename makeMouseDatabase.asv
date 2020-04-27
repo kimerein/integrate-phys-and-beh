@@ -321,7 +321,7 @@ for i=1:length(behLog.Mouse)
     if isempty(behLog.Mouse{i})
         continue
     end
-    indIntoID=find(strcmp(T_mouseToID.name,behLog.Mouse{i}));
+    indIntoID=find(strcmp(T_mouseToID.name,behLog.Mouse{i));
     if isempty(indIntoID)
         % did not recognize mouse name in behLog
         % check if this is a mouse to ignore
@@ -343,7 +343,7 @@ for i=1:length(behLog.Mouse)
             answer=questdlg('Do you want to completely ignore this mouse in further analysis?');
             switch answer
                 case 'Yes'
-                    namesToIgnore{length(namesToIgnore)+1}=behLog.Mouse{i};
+                    namesToIgnore{length(namesToIgnore)+1}=behLog.Mouse(i);
                 case 'No'
                     error('Please add this mouse in makeMouseDatabase.m.');
                 otherwise
