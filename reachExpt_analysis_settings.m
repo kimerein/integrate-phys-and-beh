@@ -48,7 +48,7 @@ if displ==true
         else
             % all others are numbers
             if str2num(answer{i})~=settings.(fldname{i})
-                settings.(fldname{i})=answer{i};
+                settings.(fldname{i})=str2num(answer{i});
             end
         end
     end

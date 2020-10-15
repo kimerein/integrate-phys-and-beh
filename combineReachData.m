@@ -58,6 +58,11 @@ settings=reachExpt_analysis_settings('display settings'); % modify settings in r
 
 % combine data
 [alltbt,metadata]=combineExptPieces(continuingAnalysisDir,settings.nameOfCue,settings.cueDuration,settings.doRealign,settings);
+% get rid of reaches during chewing
+alltbt=clearReachesAfterSuccess(alltbt);
+% make all_reachBatch field have only reaches NOT starting on wheel
+alltbt=clearReachesFromPawOnWheel(alltbt);
+
 % define and classify trial types
 % modify settings in trialTypeSettings.m to change trial types
 [out,alltbt]=getSweepsFromBeh(alltbt);
