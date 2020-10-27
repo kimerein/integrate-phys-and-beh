@@ -66,22 +66,15 @@ end
 
 function out=getOptoTrials(tbt,cueName,lowThresh,maxDelayUntilOpto)
 
-if isempty(maxDelayUntilOpto)
-    % Get trial durations from tbt
-    figure();
-    plot(nanmean(tbt.(cueName),1));
-    xlabel('indices');
-    ylabel('av');
-    title('average of movie cue across trials');
-    ind=input('Enter index showing minimum trial length -- note that any opto within a trial should occur before this index. ');
-    if ~isnumeric(ind)
-        error('Please enter a number.');
-    end
-else
-    cueInd=find(nanmean(alltbt.(cueName),1));
-    timeStep=mode(mode(diff(nanmean(alltbt.times,1))));
-    addInds=ceil(maxDelayUntilOpto/timeStep);
-    ind=cueInd+addInds;
+% Get trial durations from tbt
+figure();
+plot(nanmean(tbt.(cueName),1));
+xlabel('indices');
+ylabel('av');
+title('average of movie cue across trials');
+ind=input('Enter index showing minimum trial length -- note that any opto within a trial should occur before this index. ');
+if ~isnumeric(ind)
+    error('Please enter a number.');
 end
 
 % Get trials with opto

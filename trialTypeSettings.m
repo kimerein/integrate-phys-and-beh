@@ -20,6 +20,7 @@ trialStructure.durationOfWheelTurn=RTsettings.durationOfWheelTurn; % duration of
 trialStructure.wheelStopsThisManySecsBeforeCue=RTsettings.wheelStopsThisManySecsBeforeCue; % time window between pellet presenter wheel stopping and cue onset, in seconds
 trialStructure.cueDuration=RTsettings.cueDuration; % duration of cue, in seconds
 trialStructure.maxTrialDuration=RTsettings.maxTrialDuration; % maximum duration of a trial, in seconds
+trialStructure.maxDelayUntilOpto=RTsettings.maxDelayUntilOpto; % maximum time from trial onset until opto
 trialStructure.timeSlop=RTsettings.timeSlop; % max possible error in timing due to frame rate in movie and/or alignment approach, in seconds
 
 

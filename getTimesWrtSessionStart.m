@@ -1,5 +1,7 @@
 function alltbt=getTimesWrtSessionStart(alltbt,metadata)
 
+isOrchestra=1;
+
 alltbt.timesFromSessionStart=nan(size(alltbt.timesfromarduino));
 
 timeStep=mode(mode(nanmean(alltbt.times(:,2:end),1)-nanmean(alltbt.times(:,1:end-1),1)));
@@ -30,10 +32,13 @@ for i=1:size(alltbt.timesfromarduino,1)
     end
 end
 
-% Plot first 5 sessions only
-u=unique(metadata.sessid);
-for i=1:5
-    figure();
-    plot(alltbt.timesFromSessionStart(metadata.sessid==u(i),:)');
+if isOrchestra==0
+    % Plot first 5 sessions only
+    u=unique(metadata.sessid);
+    upTil=nanmin([5, length(u)]);
+    for i=1:upTil
+        figure();
+        plot(alltbt.timesFromSessionStart(metadata.sessid==u(i),:)');
+    end
 end
 

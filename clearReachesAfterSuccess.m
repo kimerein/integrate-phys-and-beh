@@ -1,4 +1,4 @@
-function alltbt=clearReachesAfterSuccess(alltbt)
+function alltbt=clearReachesAfterSuccess(alltbt,reachField,successField)
 
 % get minimum time for mouse to chew and consume full pellet
 settings=autoReachAnalysisSettings();
@@ -6,11 +6,14 @@ chewTime=settings.chew.minTimeToChewPellet;
 timeBin=mode(nanmean(alltbt.times(:,2:end),1)-nanmean(alltbt.times(:,1:end-1),1));
 chewInds=floor(chewTime/timeBin);
 
-for i=1:size(alltbt.all_reachBatch,1)
-    temp_allReaches=alltbt.all_reachBatch(i,:);
+alltbt.useReaches=alltbt.(reachField);
+alltbt.useSuccesses=alltbt.(successField);
+
+for i=1:size(alltbt.useReaches,1)
+    temp_allReaches=alltbt.useReaches(i,:);
     temp_chewing=alltbt.isChewing(i,:);
-    temp_success=alltbt.reachBatch_success_reachStarts(i,:);
-    f=find(temp_success==1);
+    temp_success=alltbt.useSuccesses(i,:);
+    f=find(temp_success>=0.05);
     temp_timesAfterSuccess=zeros(size(temp_success));
     
     % check for reaches within X secs of successful reach, while mouse chewing
@@ -21,7 +24,7 @@ for i=1:size(alltbt.all_reachBatch,1)
     chewReaches=temp_allReaches>0.05 & temp_chewing>0.05 & temp_timesAfterSuccess>0.05;
     temp_nonChewReaches=temp_allReaches;
     temp_nonChewReaches(chewReaches==1)=0;
-    alltbt.all_reachBatch(i,:)=temp_nonChewReaches;
+    alltbt.useReaches(i,:)=temp_nonChewReaches;
 end
     
-    
+alltbt.(reachField)=alltbt.useReaches; 

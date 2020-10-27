@@ -1,0 +1,7 @@
+function outDir=makeContinuingAnalysisDir_forOrchestra(continuingAnalysisDir,cutAtWord)
+
+for i=1:length(continuingAnalysisDir)
+    temp=continuingAnalysisDir{i};
+    f=regexp(temp,cutAtWord,'ONCE');
+    outDir{i}=
+

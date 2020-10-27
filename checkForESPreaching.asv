@@ -7,13 +7,8 @@ if ~iscell(expt_dir)
 else
     ls=expt_dir;
 end
-if ~iscell(expt_dir)
-    doingdir=true;
-else
-    doingdir=false;
-end
 for i=1:length(ls)
-    if doingdir==true
+    if ~iscell(expt_dir)
         thisname=ls(i).name;
         thisisdir=ls(i).isdir;
     else
@@ -21,7 +16,7 @@ for i=1:length(ls)
         temp=regexp(currdir,'\');
         thisname=currdir(temp(end)+1:end);
         thisisdir=isempty(regexp(thisname,'\.','ONCE'));
-        expt_dir=currdir(1:temp(end));
+        
     end
     if ~isempty(regexp(thisname,'processed_data','ONCE')) && thisisdir==1
         if exist([expt_dir '\' thisname '\preemptCue.mat'],'file')
