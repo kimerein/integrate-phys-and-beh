@@ -26,12 +26,15 @@ alltbt=getTimesWrtSessionStart(alltbt,metadata);
 
 % define and classify trial types
 % modify settings in trialTypeSettings.m to change trial types
-[out,alltbt]=getSweepsFromBeh(alltbt);
+[out,alltbt]=getSweepsFromBeh(alltbt,settings);
 metadata=howFarThroughSession(metadata);
 [metadata,alltbt,out]=add_dprimes_to_tbt(alltbt,out,metadata,'all_reachBatch','cueZone_onVoff',settings);
 
 % save field by field
-saveStructFieldByField(alltbt,saveDir); % save alltbt
-saveStructFieldByField(out,saveDir); % save out
-saveStructFieldByField(metadata,saveDir); % save metadata
+mkdir([saveDir '\alltbt']);
+saveStructFieldByField(alltbt,[saveDir '\alltbt']); % save alltbt
+mkdir([saveDir '\out']);
+saveStructFieldByField(out,[saveDir '\out']); % save out
+mkdir([saveDir '\metadata']);
+saveStructFieldByField(metadata,[saveDir '\metadata']); % save metadata
 save([saveDir '\reachExptAnalysis_settings.mat'],'settings'); % save reach expt analysis settings

@@ -1,8 +1,8 @@
-function [out,tbt]=getSweepsFromBeh(tbt)
+function [out,tbt]=getSweepsFromBeh(tbt,RTsettings)
 
 % Get user-defined settings from this file
 % ------------------------------------------------------------------------
-ttsettings=trialTypeSettings();
+ttsettings=trialTypeSettings(RTsettings);
 lowThresh=ttsettings.lowThresh;
 % RTanalysis_settings also important experiment-specific settings
 
@@ -16,7 +16,7 @@ if ~isfield(tbt,'isHold')
 end
 
 % Get opto
-out=getOptoTrials(tbt,ttsettings.nameOfCue,lowThresh,ttsettings.maxDelayUntilOpto);
+out=getOptoTrials(tbt,ttsettings.nameOfCue,lowThresh,ttsettings.trialStructure.maxDelayUntilOpto);
 
 
 % Classify trial types
@@ -78,8 +78,8 @@ if isempty(maxDelayUntilOpto)
         error('Please enter a number.');
     end
 else
-    cueInd=find(nanmean(alltbt.(cueName),1));
-    timeStep=mode(mode(diff(nanmean(alltbt.times,1))));
+    cueInd=find(nanmean(tbt.(cueName),1));
+    timeStep=mode(mode(diff(nanmean(tbt.times,1))));
     addInds=ceil(maxDelayUntilOpto/timeStep);
     ind=cueInd+addInds;
 end

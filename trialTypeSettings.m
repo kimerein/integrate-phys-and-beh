@@ -1,10 +1,11 @@
-function settings=trialTypeSettings()
+function settings=trialTypeSettings(RTsettings)
 
 % This function defines types of behavioral trials
 % Modify this function to change trial-type classification scheme
 
-
-RTsettings=reachExpt_analysis_settings(); % go to this file to change experiment-specific parameters
+if isempty(RTsettings)
+    RTsettings=reachExpt_analysis_settings(); % go to this file to change experiment-specific parameters
+end
 
 
 % Threshold for event detection

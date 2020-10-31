@@ -469,7 +469,8 @@ allDims.n_cond2=nansum(rt_pairs.sequenceMatchStarts2==1);
 % hold all;
 % line([fakeCueInd fakeCueInd],[0 nanmax(nanmean(alltbt.all_reachBatch,1))]);
 
-alltbt.fakeCue_for_preCueRT=zeros(size(alltbt.cue));
+f=fieldnames(alltbt);
+alltbt.fakeCue_for_preCueRT=zeros(size(alltbt.(f{1})));
 alltbt.fakeCue_for_preCueRT(:,fakeCueInd)=1;
 
 % disp('Plotting results for fake pre-cue reaction times');

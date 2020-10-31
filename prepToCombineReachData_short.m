@@ -1,9 +1,9 @@
 % script for preparing directory structure before combining data across videos and days
 
 % assign mouse and session numbers
-expt_dir='\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\Behavior Final Data Sets\Varied timing Nkx x ReaChR';
+expt_dir='\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\Behavior Final Data Sets\Batch opto light control';
 optoOnHere=1; % 1 if there was opto, else 0
-startMouseNumberingAt=0; % if want to start mouse numbers at some offset
+startMouseNumberingAt=1; % if want to start mouse numbers at some offset
 % organiziation of data in this directory must be 
 % top folder: by mouse name
 % next folder: by session
@@ -27,7 +27,7 @@ for i=1:length(ls) % iterate through mice
                 % add to list
                 continuingAnalysisDir{k}=[expt_dir '\' thisname '\' sub_thisname];
                 % set mouse id
-                mouse_id=i-2+startMouseNumberingAt;
+                mouse_id=i-2+(startMouseNumberingAt-1);
                 save([expt_dir '\' thisname '\' sub_thisname '\mouse_id.mat'],'mouse_id');
                 % set session id
                 sub_sub_ls=dir([expt_dir '\' thisname '\' sub_thisname]);

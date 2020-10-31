@@ -1,7 +1,5 @@
 function out=loadStructFieldByField(varargin)
 
-out=[];
-
 if length(varargin)==1
     datadir=varargin{1};
     fieldsToLoad=[];
@@ -15,29 +13,13 @@ doingcellarray=false;
 ls=dir(datadir);
 for i=3:length(ls)
     thisname=ls(i).name;
-    r=regexp(thisname,'.mat');
-    thisname_withoutmat=thisname(1:r-1);
     thisisdir=ls(i).isdir;
     if thisisdir==1
         continue
     end
     if ~isempty(fieldsToLoad) 
-        doesContain=false;
-        for j=1:length(fieldsToLoad)
-            if strcmp(thisname_withoutmat,fieldsToLoad{j})
-                doesContain=true;
-                indIntoFields=j;
-                break
-            end
-        end
-        if doesContain==false
-            continue
-        end
-    end
-    if ~isempty(fieldsToLoad)
-        disp(['Loading field ' fieldsToLoad{indIntoFields}]);
-        disp(['Loading field ' thisname]);
-    end
+        doesContain=false
+        for i=1:leng
     temp=regexp(thisname,'.mat','once');
     if ~isempty(regexp(thisname,'scell','once'))
         doingcellarray=true;

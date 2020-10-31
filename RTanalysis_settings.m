@@ -7,6 +7,9 @@ if ~isempty(varargin)
     if strcmp(varargin{1},'display settings');
         displ=true;
     end
+    if strcmp(varargin{2},'clear')
+        settings=[];
+    end
 end
 
 if isempty(settings)
@@ -19,18 +22,21 @@ if isempty(settings)
     settings.excludePawOnWheelDuringCue=0; % 1 if want to exclude trials where mouse reached before/during cue, else 0
     settings.longRT_ifNoReach=1; % if mouse does not reach in this trial, fill in reaction time as longer than trial length IF this is set to 1, else throw out trial
     settings.reverse_trial_order=0; % 1 if want to flip trial order (fake time goes backwards)
+    settings.longITIthresh=20; % in sec, trials lasting longer than this will be considered long ITI trials
+    settings.multipleOptoTimes=0; % if there were multiple different opto timings
 end
 
 if displ==true
     % Order in fldname must match order in prompt
-    fldname={'returnPreCueRTs','divideByBaseRate','subtractBaselineReaching','throwOutAllAfter1stBaseline','noRTlessThan','excludePawOnWheelDuringCue','longRT_ifNoReach','reverse_trial_order'};
+    fldname={'returnPreCueRTs','divideByBaseRate','subtractBaselineReaching','throwOutAllAfter1stBaseline','noRTlessThan','excludePawOnWheelDuringCue','longRT_ifNoReach','reverse_trial_order','longITIthresh','multipleOptoTimes'};
     prompt={'1 if want to return negative reaction times (before cue):','1 if want to normalize RT distribution by base reaching rate:',...
             '1 if want to subtract off baseline reaching rate:','1 if want to throw out all RTs after reach rate returns to baseline rate:',...
             'no reaction time can be less than this (sec), wrt cue onset:','1 if want to exclude trials in which mouse paw was already on wheel at cue onset:',...
-            '1 if want to fill in RT longer than trial length if mouse did not reach in trial:','1 if want to reverse trial order (for control if time goes backwards):'};
+            '1 if want to fill in RT longer than trial length if mouse did not reach in trial:','1 if want to reverse trial order (for control if time goes backwards):'...
+            'threshold separating long ITI trials from short ITI trials (sec):','1 if there were multiple different opto timings:'};
     dlgtitle='Check or modify RT analysis-specific settings';
     dims=[1 35];
-    definput={num2str(settings.(fldname{1})),num2str(settings.(fldname{2})),num2str(settings.(fldname{3})),num2str(settings.(fldname{4})),num2str(settings.(fldname{5})),num2str(settings.(fldname{6})),num2str(settings.(fldname{7})),num2str(settings.(fldname{8}))};
+    definput={num2str(settings.(fldname{1})),num2str(settings.(fldname{2})),num2str(settings.(fldname{3})),num2str(settings.(fldname{4})),num2str(settings.(fldname{5})),num2str(settings.(fldname{6})),num2str(settings.(fldname{7})),num2str(settings.(fldname{8})),num2str(settings.(fldname{9})),num2str(settings.(fldname{10}))};
     answer=inputdlg(prompt,dlgtitle,dims,definput);
     for i=1:length(answer)
         if ischar(settings.(fldname{i}))
@@ -40,7 +46,7 @@ if displ==true
         else
             % all others are numbers
             if str2num(answer{i})~=settings.(fldname{i})
-                settings.(fldname{i})=answer{i};
+                settings.(fldname{i})=str2num(answer{i});
             end
         end
     end

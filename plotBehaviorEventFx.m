@@ -5,12 +5,13 @@ function returnThis=plotBehaviorEventFx(dataset,alltbt,ref)
 
 plot_rawReaching=false;
 plot_rawReaching_cdf=false;
-plot_rt_pdf=true;
-plot_rt_cdf=false;
+plot_rt_pdf=false; % 
+plot_rt_cdf=true;
+reverse_rt_cdf=false;
 plot_delta_rt_pdf=false;
 plot_delta_rt_pdf_2D=false;
 plot_delta_rt_cdf_2D=false;
-plot_delta_rt_cdf=false;
+plot_delta_rt_cdf=false; %
 plot_delta_rt_asFunc_rt=false;
 plot_dim1_delta_asFunc_rt=false;
 plot_dim2_delta_asFunc_rt=false;
@@ -87,30 +88,38 @@ end
 
 % Plot reaction times CDF
 if plot_rt_cdf==true
+    if reverse_rt_cdf
+        offset=14;
+        multiple=-1;
+    else
+        offset=0;
+        multiple=1;
+    end
     histo_nbins=backup_histo_nbins;
     for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
-        histo_nbins=plotCDF(dataset.allTrialsSequence_RT_trial1InSeq{i},dataset.allTrialsSequence_RT_trialiInSeq{i},histo_nbins,['CDF Reaction Times all trials reference: trial 1 (black) vs ' num2str(dataset.nInSequence(i)-1) ' later (magenta)']);
+        histo_nbins=plotCDF(offset+multiple*dataset.allTrialsSequence_RT_trial1InSeq{i},offset+multiple*dataset.allTrialsSequence_RT_trialiInSeq{i},histo_nbins,['CDF Reaction Times all trials reference: trial 1 (black) vs ' num2str(dataset.nInSequence(i)-1) ' later (magenta)']);
     end
     temp=dataset.event_name;
     temp(regexp(temp,'_'))=' ';
     for i=1:length(dataset.event_RT_trial1InSeq)
-        histo_nbins=plotCDF(dataset.event_RT_trial1InSeq{i},dataset.event_RT_trialiInSeq{i},histo_nbins,['CDF Reaction Times fx of ' temp ': trial 1 (black) vs ' num2str(dataset.nInSequence(i)-1) ' later (magenta)']);
+        [histo_nbins,returnThis]=plotCDF(offset+multiple*dataset.event_RT_trial1InSeq{i},offset+multiple*dataset.event_RT_trialiInSeq{i},histo_nbins,['CDF Reaction Times fx of ' temp ': trial 1 (black) vs ' num2str(dataset.nInSequence(i)-1) ' later (magenta)']);
     end
 end
 
 % Plot change in reaction times
+% previous minus current from line 80 of getPairedReactionTimes.m
 if plot_delta_rt_pdf==true
     temp=dataset.event_name;
     temp(regexp(temp,'_'))=' ';
     histo_nbins=backup_histo_nbins;
     for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
-        histo_nbins=plotHist(dataset.alldim_rtchanges_allTrialsSequence{i},dataset.alldim_rtchanges_event{i},histo_nbins,['All dim of change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later, comparing reference vs ' temp],'Change in RT (sec)');
+        histo_nbins=plotHist(dataset.alldim_rtchanges_allTrialsSequence{i},dataset.alldim_rtchanges_event{i},histo_nbins,['All dim of change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later, comparing reference vs ' temp],'Change in RT (sec) previous minus current');
     end
     for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
-        histo_nbins=plotHist(dataset.dim1_rtchanges_allTrialsSequence{i},dataset.dim1_rtchanges_event{i},histo_nbins,['Dim 1 of change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later, comparing reference vs ' temp],'Change in RT (sec)');
+        histo_nbins=plotHist(dataset.dim1_rtchanges_allTrialsSequence{i},dataset.dim1_rtchanges_event{i},histo_nbins,['Dim 1 of change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later, comparing reference vs ' temp],'Change in RT (sec) previous minus current');
     end
     for i=1:length(dataset.event_RT_trial1InSeq)
-        [histo_nbins,returnThis_temp]=plotHist(dataset.dim2_rtchanges_allTrialsSequence{i},dataset.dim2_rtchanges_event{i},histo_nbins,['Dim 2 of change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later, comparing reference vs ' temp],'Change in RT (sec)');
+        [histo_nbins,returnThis_temp]=plotHist(dataset.dim2_rtchanges_allTrialsSequence{i},dataset.dim2_rtchanges_event{i},histo_nbins,['Dim 2 of change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later, comparing reference vs ' temp],'Change in RT (sec) previous minus current');
     end
 end
 
@@ -173,17 +182,17 @@ if plot_delta_rt_cdf==true
 %         end
 %     end
     for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
-        histo_nbins=plotCDF(dataset.alldim_rtchanges_allTrialsSequence{i},dataset.alldim_rtchanges_event{i},histo_nbins,['CDF All Dim of change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later, comparing reference vs ' temp]);
-    end
-    for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
-        histo_nbins=plotCDF(dataset.dim1_rtchanges_allTrialsSequence{i},dataset.dim1_rtchanges_event{i},histo_nbins,['CDF Dim 1 of change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later, comparing reference vs ' temp]);
-    end
-    for i=1:length(dataset.event_RT_trial1InSeq)
-        [histo_nbins,returnThis_temp]=plotCDF(dataset.dim2_rtchanges_allTrialsSequence{i},dataset.dim2_rtchanges_event{i},histo_nbins,['CDF Dim 2 of change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later, comparing reference vs ' temp]);
+        [histo_nbins,returnThis_temp]=plotCDF(dataset.alldim_rtchanges_allTrialsSequence{i},dataset.alldim_rtchanges_event{i},histo_nbins,['CDF All Dim of change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later, comparing reference vs ' temp]);
         if i==1
             returnThis=returnThis_temp;
         end
     end
+%     for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
+%         histo_nbins=plotCDF(dataset.dim1_rtchanges_allTrialsSequence{i},dataset.dim1_rtchanges_event{i},histo_nbins,['CDF Dim 1 of change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later, comparing reference vs ' temp]);
+%     end
+%     for i=1:length(dataset.event_RT_trial1InSeq)
+%         [histo_nbins]=plotCDF(dataset.dim2_rtchanges_allTrialsSequence{i},dataset.dim2_rtchanges_event{i},histo_nbins,['CDF Dim 2 of change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later, comparing reference vs ' temp]);
+%     end
 end
 
 % Plot change in RT as a function of RT
