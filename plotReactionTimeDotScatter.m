@@ -3,7 +3,7 @@ function plotReactionTimeDotScatter(alltbt,cueName,reachName,successName,dropNam
 thresh=0.05;
 % trialsToUse should be a vector of 0's and 1's -- will only plot trial
 % pairs for which trialsToUse==1
-plotReachesWithinSec=10; % plot only first reach if isempty, else plot all reaches within this many secs of first reach
+plotReachesWithinSec=[]; % plot only first reach if isempty, else plot all reaches within this many secs of first reach
 
 if (isempty(trialsToUse) && size(alltbt.(reachName),1)>200) || (~isempty(trialsToUse) && nansum(trialsToUse==1)>100)
     answer=questdlg('More than 200 trials to plot. Subsample or plot all?','Trials to plot','Subsample','Plot all','Cancel','Cancel');
@@ -93,6 +93,13 @@ misses=alltbt.(missName);
 pelletMissing=alltbt.(pelletMissingName);
 hold on;
 useTinc=1;
+if sortIntoPair1vs2==true
+    triInds=[firstInPair secondInPair(~ismember(secondInPair,firstInPair))];
+    sortOrder=[ones(size(firstInPair)) 2*ones(size(secondInPair(~ismember(secondInPair,firstInPair))))];
+    [~,si]=sort(sortOrder);
+    sortedTriInds=triInds(si);
+    plotThese=sortedTriInds;
+end
 for incr=1:length(plotThese)
     disp(incr);
     i=plotThese(incr);
@@ -123,6 +130,9 @@ for incr=1:length(plotThese)
                 startOptoOn=allStart;
                 endOptoOn=allEnd;
             end
+        end
+        if isempty(startOptoOn)
+            continue
         end
         line([startOptoOn*timeStep (startOptoOn+endOptoOn)*timeStep],[yi yi],'Color',[1 0.5 0.5],'LineWidth',1);
     end

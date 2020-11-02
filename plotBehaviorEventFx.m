@@ -1,23 +1,112 @@
-function returnThis=plotBehaviorEventFx(dataset,alltbt,ref)
+function [returnThis,returnThisRef]=plotBehaviorEventFx(varargin)
 
 % Dim 2 conversion is 0.7885 sec in dim 2 is 1 sec real
 % Dim 1 conversion is 0.611 sec in dim 1 is 1 sec real
 
-plot_rawReaching=false;
-plot_rawReaching_cdf=false;
-plot_rt_pdf=false; % 
-plot_rt_cdf=true;
-reverse_rt_cdf=false;
-plot_delta_rt_pdf=false;
-plot_delta_rt_pdf_2D=false;
-plot_delta_rt_cdf_2D=false;
-plot_delta_rt_cdf=false; %
-plot_delta_rt_asFunc_rt=false;
-plot_dim1_delta_asFunc_rt=false;
-plot_dim2_delta_asFunc_rt=false;
-plot_3D_dim1_dim2_asFunc_rt=false;
-plot_delta_rt_asFunc_rt_removeMeanRegression=false;
-plot_earth_mover_wander=false;
+if length(varargin)==3
+    dataset=varargin{1};
+    alltbt=varargin{2};
+    ref=varargin{3};
+    typeOfPlot=[];
+    suppressPlotBehPlots=[];
+elseif length(varargin)==4
+    dataset=varargin{1};
+    alltbt=varargin{2};
+    ref=varargin{3};
+    typeOfPlot=varargin{4}; % indicates the type of plot
+    suppressPlotBehPlots=[];
+elseif length(varargin)==5
+    dataset=varargin{1};
+    alltbt=varargin{2};
+    ref=varargin{3};
+    typeOfPlot=varargin{4}; % indicates the type of plot
+    suppressPlotBehPlots=varargin{5};
+end
+
+returnThis=[];
+returnThisRef=[];
+
+if isempty(suppressPlotBehPlots)
+    whetherToSuppressPlots(false);
+else
+    whetherToSuppressPlots(suppressPlotBehPlots);
+end
+
+issupp=whetherToSuppressPlots();
+if issupp==true
+    disp('Suppressing all plots in plotBehaviorEventFx.m.');
+else
+end
+
+if isempty(typeOfPlot)
+    % manually specify plot type here
+    plot_rawReaching=false;
+    plot_rawReaching_cdf=false;
+    plot_rt_pdf=false; 
+    plot_rt_cdf=true;
+    reverse_rt_cdf=false;
+    plot_delta_rt_pdf=false;
+    plot_delta_rt_pdf_2D=false;
+    plot_delta_rt_cdf_2D=false;
+    plot_delta_rt_cdf=false; 
+    plot_delta_rt_asFunc_rt=false;
+    plot_dim1_delta_asFunc_rt=false;
+    plot_dim2_delta_asFunc_rt=false;
+    plot_3D_dim1_dim2_asFunc_rt=false;
+    plot_delta_rt_asFunc_rt_removeMeanRegression=false;
+    plot_earth_mover_wander=false;
+else
+    plot_rawReaching=false;
+    plot_rawReaching_cdf=false;
+    plot_rt_pdf=false; 
+    plot_rt_cdf=false;
+    reverse_rt_cdf=false;
+    plot_delta_rt_pdf=false;
+    plot_delta_rt_pdf_2D=false;
+    plot_delta_rt_cdf_2D=false;
+    plot_delta_rt_cdf=false;
+    plot_delta_rt_asFunc_rt=false;
+    plot_dim1_delta_asFunc_rt=false;
+    plot_dim2_delta_asFunc_rt=false;
+    plot_3D_dim1_dim2_asFunc_rt=false;
+    plot_delta_rt_asFunc_rt_removeMeanRegression=false;
+    plot_earth_mover_wander=false;
+    
+    switch typeOfPlot
+        case 'plot_rawReaching'
+            plot_rawReaching=true;
+        case 'plot_rawReaching_cdf'
+            plot_rawReaching_cdf=true;
+        case 'plot_rt_pdf'
+            plot_rt_pdf=true;
+        case 'plot_rt_cdf'
+            plot_rt_cdf=true;
+        case 'reverse_rt_cdf'
+            reverse_rt_cdf=true;
+        case 'plot_delta_rt_pdf'
+            plot_delta_rt_pdf=true;
+        case 'plot_delta_rt_pdf_2D'
+            plot_delta_rt_pdf_2D=true;
+        case 'plot_delta_rt_cdf_2D'
+            plot_delta_rt_cdf_2D=true;
+        case 'plot_delta_rt_cdf'
+            plot_delta_rt_cdf=true;
+        case 'plot_delta_rt_asFunc_rt'
+            plot_delta_rt_asFunc_rt=true;
+        case 'plot_dim1_delta_asFunc_rt'
+            plot_dim1_delta_asFunc_rt=true;
+        case 'plot_dim2_delta_asFunc_rt'
+            plot_dim2_delta_asFunc_rt=true;
+        case 'plot_3D_dim1_dim2_asFunc_rt'
+            plot_3D_dim1_dim2_asFunc_rt=true;
+        case 'plot_delta_rt_asFunc_rt_removeMeanRegression'
+            plot_delta_rt_asFunc_rt_removeMeanRegression=true;
+        case 'plot_earth_mover_wander'
+            plot_earth_mover_wander=true;
+        otherwise 
+            error('Do not recognize typeOfPlot parameter value');
+    end
+end
 
 % histo_nbins=200; % number of bins for reaction time histogram
 histo_nbins=[-4*12.4245:0.2510:4*12.4245];
@@ -97,7 +186,7 @@ if plot_rt_cdf==true
     end
     histo_nbins=backup_histo_nbins;
     for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
-        histo_nbins=plotCDF(offset+multiple*dataset.allTrialsSequence_RT_trial1InSeq{i},offset+multiple*dataset.allTrialsSequence_RT_trialiInSeq{i},histo_nbins,['CDF Reaction Times all trials reference: trial 1 (black) vs ' num2str(dataset.nInSequence(i)-1) ' later (magenta)']);
+        [histo_nbins,returnThisRef]=plotCDF(offset+multiple*dataset.allTrialsSequence_RT_trial1InSeq{i},offset+multiple*dataset.allTrialsSequence_RT_trialiInSeq{i},histo_nbins,['CDF Reaction Times all trials reference: trial 1 (black) vs ' num2str(dataset.nInSequence(i)-1) ' later (magenta)']);
     end
     temp=dataset.event_name;
     temp(regexp(temp,'_'))=' ';
@@ -182,9 +271,10 @@ if plot_delta_rt_cdf==true
 %         end
 %     end
     for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
-        [histo_nbins,returnThis_temp]=plotCDF(dataset.alldim_rtchanges_allTrialsSequence{i},dataset.alldim_rtchanges_event{i},histo_nbins,['CDF All Dim of change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later, comparing reference vs ' temp]);
+        [histo_nbins,returnThis_temp,returnThisRef_temp]=plotCDF(dataset.alldim_rtchanges_allTrialsSequence{i},dataset.alldim_rtchanges_event{i},histo_nbins,['CDF All Dim of change in RT ' num2str(dataset.nInSequence(i)-1) ' trials later, comparing reference vs ' temp]);
         if i==1
             returnThis=returnThis_temp;
+            returnThisRef=returnThisRef_temp;
         end
     end
 %     for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
@@ -316,6 +406,18 @@ end
 
 end
 
+function out=whetherToSuppressPlots(varargin)
+
+persistent suppressPlots
+
+if length(varargin)==1
+    suppressPlots=varargin{1};
+end
+
+out=suppressPlots;
+
+end
+
 function [diff2Dhist,x,y]=removeMeanRegression(rts,actual_first_rts,actual_rt_changes,scatterJitter,alpha,tit,nBinsFor2Dhist)
 
 % generate a distribution from reaction time pdf
@@ -346,6 +448,8 @@ end
 
 function [diff_n,x,y,n,n2]=compareWithHeatmaps(x1,y1,x2,y2,nBinsPerDim,tit)
 
+suppPlots=whetherToSuppressPlots();
+
 % make 2D histogram
 if size(x1,2)>1
     % make column vector
@@ -366,26 +470,28 @@ n2=n2./nansum(nansum(n2,1),2);
 n=n./nansum(nansum(n,1),2);
 
 diff_n=n2-n;
-figure();
-imagesc(bin_c{1},bin_c{2},n');
-set(gca,'YDir','normal');
-title([tit ' Bootstrap histogram']);
-xlabel('Reaction time trial 1');
-ylabel('Change in reaction times');
-
-figure();
-imagesc(bin_c{1},bin_c{2},n2');
-set(gca,'YDir','normal');
-title([tit ' Real events histogram']);
-xlabel('Reaction time trial 1');
-ylabel('Change in reaction times');
-
-figure();
-imagesc(bin_c{1},bin_c{2},diff_n');
-set(gca,'YDir','normal');
-title([tit ' Difference histogram']);
-xlabel('Reaction time trial 1');
-ylabel('Change in reaction times');
+if suppPlots==false
+    figure();
+    imagesc(bin_c{1},bin_c{2},n');
+    set(gca,'YDir','normal');
+    title([tit ' Bootstrap histogram']);
+    xlabel('Reaction time trial 1');
+    ylabel('Change in reaction times');
+    
+    figure();
+    imagesc(bin_c{1},bin_c{2},n2');
+    set(gca,'YDir','normal');
+    title([tit ' Real events histogram']);
+    xlabel('Reaction time trial 1');
+    ylabel('Change in reaction times');
+    
+    figure();
+    imagesc(bin_c{1},bin_c{2},diff_n');
+    set(gca,'YDir','normal');
+    title([tit ' Difference histogram']);
+    xlabel('Reaction time trial 1');
+    ylabel('Change in reaction times');
+end
 
 x=bin_c{1};
 y=bin_c{2};
@@ -395,6 +501,8 @@ end
 
 function plotTimeseries(data1_mean,data1_se,color1,data2_mean,data2_se,color2,timeBins)
 
+suppPlots=whetherToSuppressPlots();
+
 plotAsCityscape=true;
 
 data1_mean=nanmean(data1_mean,1);
@@ -402,108 +510,128 @@ data2_mean=nanmean(data2_mean,1);
 data1_se=sqrt(nansum(data1_se.^2,1));
 data2_se=sqrt(nansum(data2_se.^2,1));
 
-figure();
+if suppPlots==false
+    figure();
+end
 %fill([timeBins fliplr(timeBins)],[data1_mean+data1_se fliplr(data1_mean-data1_se)],[0.5 0.5 0.5]);
 %hold on;
 if plotAsCityscape==true
-    [n,x]=cityscape_hist(data1_mean,timeBins);
-    plot(x,n,'Color',color1); hold on;
-    [n,x]=cityscape_hist(data1_mean+data1_se,timeBins);
-    plot(x,n,'Color',color1);
-    [n,x]=cityscape_hist(data1_mean-data1_se,timeBins);
-    plot(x,n,'Color',color1);
+    if suppPlots==false
+        [n,x]=cityscape_hist(data1_mean,timeBins);
+        plot(x,n,'Color',color1); hold on;
+        [n,x]=cityscape_hist(data1_mean+data1_se,timeBins);
+        plot(x,n,'Color',color1);
+        [n,x]=cityscape_hist(data1_mean-data1_se,timeBins);
+        plot(x,n,'Color',color1);
+    end
 else
-    plot(timeBins,data1_mean,'Color',color1); hold on;
-    plot(timeBins,data1_mean+data1_se,'Color',color1);
-    plot(timeBins,data1_mean-data1_se,'Color',color1);
+    if suppPlots==false    
+        plot(timeBins,data1_mean,'Color',color1); hold on;
+        plot(timeBins,data1_mean+data1_se,'Color',color1);
+        plot(timeBins,data1_mean-data1_se,'Color',color1);
+    end
 end
 
 %fill([timeBins fliplr(timeBins)],[data2_mean+data2_se fliplr(data2_mean-data2_se)],[0.1 0.7 0.5]);
 %hold on;
 if plotAsCityscape==true
-    [n,x]=cityscape_hist(data2_mean,timeBins);
-    plot(x,n,'Color',color2); hold on;
-    [n,x]=cityscape_hist(data2_mean+data2_se,timeBins);
-    plot(x,n,'Color',color2);
-    [n,x]=cityscape_hist(data2_mean-data2_se,timeBins);
-    plot(x,n,'Color',color2);
+    if suppPlots==false   
+        [n,x]=cityscape_hist(data2_mean,timeBins);
+        plot(x,n,'Color',color2); hold on;
+        [n,x]=cityscape_hist(data2_mean+data2_se,timeBins);
+        plot(x,n,'Color',color2);
+        [n,x]=cityscape_hist(data2_mean-data2_se,timeBins);
+        plot(x,n,'Color',color2);
+    end
 else
-    plot(timeBins,data2_mean,'Color',color2); hold on;
-    plot(timeBins,data2_mean+data2_se,'Color',color2);
-    plot(timeBins,data2_mean-data2_se,'Color',color2);
+    if suppPlots==false    
+        plot(timeBins,data2_mean,'Color',color2); hold on;
+        plot(timeBins,data2_mean+data2_se,'Color',color2);
+        plot(timeBins,data2_mean-data2_se,'Color',color2);
+    end
 end
 
 end
 
 function plotScatter(RT_pairs1_x,RT_pairs1_y,RT_pairs2_x,RT_pairs2_y,jitter1,jitter2,tit,xlab,ylab,alpha)
 
-figure();
-if length(jitter1)==1
-    useX=RT_pairs1_x+rand(size(RT_pairs1_x)).*jitter1;
-    useY=RT_pairs1_y+rand(size(RT_pairs1_y)).*jitter1;
-else
-    useX=RT_pairs1_x+jitter1;
-    useY=RT_pairs1_y+jitter1;
-end
-    
-s=scatter(useX,useY,100,'k','filled');
-set(gcf,'position',[10,10,1000,1000]);
-pause;
-m=get(s,'MarkerHandle');
-%alpha=0.01;
-m.FaceColorData=uint8(255*[0;0;0;alpha]);
-xlabel(xlab);
-ylabel(ylab);
-title(tit);
-% xlim([0 9.5]);
-% ylim([0 9.5]);
+suppPlots=whetherToSuppressPlots();
 
-hold on;
-if length(jitter2)==1
-    useX=RT_pairs2_x+rand(size(RT_pairs2_x)).*jitter2;
-    useY=RT_pairs2_y+rand(size(RT_pairs2_y)).*jitter2;
-else
-    useX=RT_pairs2_x+jitter2;
-    useY=RT_pairs2_y+jitter2;
+if suppPlots==false   
+    figure();
+
+    if length(jitter1)==1
+        useX=RT_pairs1_x+rand(size(RT_pairs1_x)).*jitter1;
+        useY=RT_pairs1_y+rand(size(RT_pairs1_y)).*jitter1;
+    else
+        useX=RT_pairs1_x+jitter1;
+        useY=RT_pairs1_y+jitter1;
+    end
+    
+    s=scatter(useX,useY,100,'k','filled');
+    set(gcf,'position',[10,10,1000,1000]);
+    pause;
+    m=get(s,'MarkerHandle');
+    %alpha=0.01;
+    m.FaceColorData=uint8(255*[0;0;0;alpha]);
+    xlabel(xlab);
+    ylabel(ylab);
+    title(tit);
+    % xlim([0 9.5]);
+    % ylim([0 9.5]);
+    
+    
+    hold on;
+    if length(jitter2)==1
+        useX=RT_pairs2_x+rand(size(RT_pairs2_x)).*jitter2;
+        useY=RT_pairs2_y+rand(size(RT_pairs2_y)).*jitter2;
+    else
+        useX=RT_pairs2_x+jitter2;
+        useY=RT_pairs2_y+jitter2;
+    end
+    s=scatter(useX,useY,100,'r','filled');
+    pause;
+    m=get(s,'MarkerHandle');
+    %alpha=0.01;
+    m.FaceColorData=uint8(255*[1;0;0;alpha]);
 end
-s=scatter(useX,useY,100,'r','filled');
-pause;
-m=get(s,'MarkerHandle');
-%alpha=0.01;
-m.FaceColorData=uint8(255*[1;0;0;alpha]);
 
 end
 
 function plotScatter3D(RT_pairs1_x,RT_pairs1_y,RT_pairs1_z,RT_pairs2_x,RT_pairs2_y,RT_pairs2_z,jitter1,tit,xlab,ylab,zlab,spotSize)
 
-figure();
-useX=RT_pairs1_x+rand(size(RT_pairs1_x)).*jitter1;
-useY=RT_pairs1_y+rand(size(RT_pairs1_y)).*jitter1;
-useZ=RT_pairs1_z+rand(size(RT_pairs1_z)).*jitter1;
+suppPlots=whetherToSuppressPlots();
+
+if suppPlots==false   
+    figure();
+    useX=RT_pairs1_x+rand(size(RT_pairs1_x)).*jitter1;
+    useY=RT_pairs1_y+rand(size(RT_pairs1_y)).*jitter1;
+    useZ=RT_pairs1_z+rand(size(RT_pairs1_z)).*jitter1;
     
-s=scatter3(useX,useY,useZ,spotSize,'k','filled');
-set(gcf,'position',[10,10,1000,1000]);
-% pause;
-% m=get(s,'MarkerHandle');
-% alpha=0.1;
-% m.FaceColorData=uint8(255*[0;0;0;alpha]);
-xlabel(xlab);
-ylabel(ylab);
-zlabel(zlab);
-title(tit);
-% xlim([0 9.5]);
-% ylim([0 9.5]);
-
-hold on;
-useX=RT_pairs2_x+rand(size(RT_pairs2_x)).*jitter1;
-useY=RT_pairs2_y+rand(size(RT_pairs2_y)).*jitter1;
-useZ=RT_pairs2_z+rand(size(RT_pairs2_z)).*jitter1;
-
-s=scatter3(useX,useY,useZ,spotSize,'r','filled');
-% pause;
-% m=get(s,'MarkerHandle');
-% alpha=0.1;
-% m.FaceColorData=uint8(255*[1;0;0;alpha]);
+    s=scatter3(useX,useY,useZ,spotSize,'k','filled');
+    set(gcf,'position',[10,10,1000,1000]);
+    % pause;
+    % m=get(s,'MarkerHandle');
+    % alpha=0.1;
+    % m.FaceColorData=uint8(255*[0;0;0;alpha]);
+    xlabel(xlab);
+    ylabel(ylab);
+    zlabel(zlab);
+    title(tit);
+    % xlim([0 9.5]);
+    % ylim([0 9.5]);
+    
+    hold on;
+    useX=RT_pairs2_x+rand(size(RT_pairs2_x)).*jitter1;
+    useY=RT_pairs2_y+rand(size(RT_pairs2_y)).*jitter1;
+    useZ=RT_pairs2_z+rand(size(RT_pairs2_z)).*jitter1;
+    
+    s=scatter3(useX,useY,useZ,spotSize,'r','filled');
+    % pause;
+    % m=get(s,'MarkerHandle');
+    % alpha=0.1;
+    % m.FaceColorData=uint8(255*[1;0;0;alpha]);
+end
 
 end
 
@@ -531,33 +659,43 @@ end
 
 end
 
-function [x_backup,returnThis]=plotCDF(data1,data2,bins,tit)
+function [x_backup,returnThis,returnThisRef]=plotCDF(data1,data2,bins,tit)
 
 returnThis=[];
 
 doKStest=true;
 
+suppPlots=whetherToSuppressPlots();
+
 [n,x]=histcounts(data1,bins);
 x_backup=x;
 x_mids=nanmean([x(1:end-1); x(2:end)],1);
 cond1_cdf=accumulateDistribution(n);
-figure();
-plot(x_mids,cond1_cdf./nanmax(cond1_cdf),'Color','k');
-xlabel('CDF');
-ylabel('Count');
-title(tit);
+if suppPlots==false
+    figure();
+    plot(x_mids,cond1_cdf./nanmax(cond1_cdf),'Color','k');
+    xlabel('CDF');
+    ylabel('Count');
+    title(tit);
+end
+returnThisRef.x=x_mids;
+returnThisRef.y=cond1_cdf./nanmax(cond1_cdf);
 
 [n,x]=histcounts(data2,x_backup);
-hold on;
 cond2_cdf=accumulateDistribution(n);
-plot(x_mids,cond2_cdf./nanmax(cond2_cdf),'Color','r');
+if suppPlots==false
+    hold on;
+    plot(x_mids,cond2_cdf./nanmax(cond2_cdf),'Color','r');
+end
 returnThis.x=x_mids;
 returnThis.y=cond2_cdf./nanmax(cond2_cdf);
 
-if doKStest==true
-    [~,p]=kstest2(data1,data2);
-    disp('kstest pval');
-    disp(p);    
+if suppPlots==false
+    if doKStest==true
+        [~,p]=kstest2(data1,data2);
+        disp('kstest pval');
+        disp(p);
+    end
 end
 
 end
@@ -568,16 +706,20 @@ function plotCDF_rawReaches(data1,data2,timesteps,cueTime,tit)
 % so simply accumulate distribution, selecting only time points after the
 % cue
 
-cond1_cdf=accumulateDistribution(data1(timesteps>cueTime));
-figure();
-plot(timesteps(timesteps>cueTime),cond1_cdf./nanmax(cond1_cdf),'Color','k');
-xlabel('CDF');
-ylabel('Count');
-title(tit);
+suppPlots=whetherToSuppressPlots();
 
-hold on;
-cond2_cdf=accumulateDistribution(data2(timesteps>cueTime));
-plot(timesteps(timesteps>cueTime),cond2_cdf./nanmax(cond2_cdf),'Color','r');
+if suppPlots==false
+    cond1_cdf=accumulateDistribution(data1(timesteps>cueTime));
+    figure();
+    plot(timesteps(timesteps>cueTime),cond1_cdf./nanmax(cond1_cdf),'Color','k');
+    xlabel('CDF');
+    ylabel('Count');
+    title(tit);
+    
+    hold on;
+    cond2_cdf=accumulateDistribution(data2(timesteps>cueTime));
+    plot(timesteps(timesteps>cueTime),cond2_cdf./nanmax(cond2_cdf),'Color','r');
+end
 
 end
 
@@ -593,30 +735,35 @@ end
 function [x_backup,returnThis]=plotHist(data1,data2,bins,tit,xlab)
 
 useLogForY=false;
+suppPlots=whetherToSuppressPlots();
 
 [n,x]=histcounts(data1,bins);
 x_backup=x;
 [n,x]=cityscape_hist(n,x);
-figure();
-if useLogForY==true
-    semilogy(x,n./nansum(n),'Color','k');
-else
-    plot(x,n./nansum(n),'Color','k');
+if suppPlots==false
+    figure();
+    if useLogForY==true
+        semilogy(x,n./nansum(n),'Color','k');
+    else
+        plot(x,n./nansum(n),'Color','k');
+    end
+    xlabel(xlab);
+    ylabel('Count');
+    title(tit);
 end
-xlabel(xlab);
-ylabel('Count');
-title(tit);
 
 [n,x]=histcounts(data2,x_backup);
 [n,x]=cityscape_hist(n,x);
-hold on;
-if useLogForY==true
-    semilogy(x,n./nansum(n),'Color','r');
-else
-    plot(x,n./nansum(n),'Color','r');
+if suppPlots==false
+    hold on;
+    if useLogForY==true
+        semilogy(x,n./nansum(n),'Color','r');
+    else
+        plot(x,n./nansum(n),'Color','r');
+    end
+    leg={'data1','data2'};
+    legend(leg);
 end
-leg={'data1','data2'};
-legend(leg);
 
 returnThis.x=x;
 returnThis.y=n./nansum(n);
@@ -626,26 +773,29 @@ end
 function [x_backup]=plotHist_2Dsmear(data1_x,data1_y,bins,tit,xlab)
 
 useLogForY=false;
+suppPlots=whetherToSuppressPlots();
 
 [n,x]=histcounts(data1_x,bins);
 x_mids=nanmean([x(1:end-1); x(2:end)],1);
 x_backup=x;
 
 [n2,x]=histcounts(data1_y,x_backup);
-
-figure();
-if useLogForY==true
-    imagesc(x_mids,x_mids,log(repmat(n,length(x)-1,1)+repmat(n2',1,length(x)-1)));
-else
-    imagesc(x_mids,x_mids,repmat(n,length(x)-1,1)+repmat(n2',1,length(x)-1));
+if suppPlots==false
+    figure();
+    if useLogForY==true
+        imagesc(x_mids,x_mids,log(repmat(n,length(x)-1,1)+repmat(n2',1,length(x)-1)));
+    else
+        imagesc(x_mids,x_mids,repmat(n,length(x)-1,1)+repmat(n2',1,length(x)-1));
+    end
+    set(gca,'YDir','normal');
 end
-set(gca,'YDir','normal');
 
 end
 
 function [x_backup]=plotCDF_2Dsmear(data1_x,data1_y,data2_x,data2_y,bins,tit,xlab)
 
 useLogForY=false;
+suppPlots=whetherToSuppressPlots();
 
 [n,x]=histcounts(data1_x,bins);
 x_mids=nanmean([x(1:end-1); x(2:end)],1);
@@ -666,19 +816,22 @@ y_cdf_cond2=y_cdf_cond2./nanmax(y_cdf_cond2);
 temp=repmat(x_cdf_cond2-x_cdf,length(x)-1,1)+repmat(y_cdf'-y_cdf_cond2',1,length(x)-1);
 temp=temp(x_mids>0,x_mids<0);
 
-figure();
-if useLogForY==true
-    imagesc(x_mids,x_mids,log(temp));
-else
-    imagesc(x_mids,x_mids,temp);
+if suppPlots==false
+    figure();
+    if useLogForY==true
+        imagesc(x_mids,x_mids,log(temp));
+    else
+        imagesc(x_mids,x_mids,temp);
+    end
+    set(gca,'YDir','normal');
 end
-set(gca,'YDir','normal');
 
 end
 
 function plot_earthmover_wander(data1_x,data1_y,data2_x,data2_y,bins)
 
 doBootstrap=true;
+suppPlots=whetherToSuppressPlots();
 
 if doBootstrap==true
     nReps=100;
@@ -693,15 +846,19 @@ if doBootstrap==true
     end
     em_dim1=prctile(earth_mover_dim1,[5 50 95]);
     em_dim2=prctile(earth_mover_dim2,[5 50 95]);
-    figure();
-    scatter(em_dim1(2),em_dim2(2));
-    hold on;
-    line([em_dim1(1) em_dim1(3)],[em_dim2(2) em_dim2(2)]);
-    line([em_dim1(2) em_dim1(2)],[em_dim2(1) em_dim2(3)]);
+    if suppPlots==false
+        figure();
+        scatter(em_dim1(2),em_dim2(2));
+        hold on;
+        line([em_dim1(1) em_dim1(3)],[em_dim2(2) em_dim2(2)]);
+        line([em_dim1(2) em_dim1(2)],[em_dim2(1) em_dim2(3)]);
+    end
 else
     [earth_mover_dim1,earth_mover_dim2]=sub_earthmover_wander(data1_x,data1_y,data2_x,data2_y,bins);
-    figure();
-    scatter(earth_mover_dim1,earth_mover_dim2);
+    if suppPlots==false
+        figure();
+        scatter(earth_mover_dim1,earth_mover_dim2);
+    end
 end
 
 end

@@ -1,8 +1,9 @@
-function plotReactionTimeDotScatter(alltbt,cueName,reachName,successName,dropName,missName,pelletMissingName,trialTypes,metadata,useOptoMode,trialsToUse,sortIntoPair1vs2)
+function plotReactionTimeDotScatter(alltbt,cueName,reachName,successName,dropName,missName,pelletMissingName,trialTypes,metadata,useOptoMode,trialsToUse,omitEmptyTrials,sortIntoPair1vs2)
 
 thresh=0.05;
 % trialsToUse should be a vector of 0's and 1's -- will only plot trial
 % pairs for which trialsToUse==1
+plotReachesWithinSec=10; % plot only first reach if isempty, else plot all reaches within this many secs of first reach
 
 if (isempty(trialsToUse) && size(alltbt.(reachName),1)>200) || (~isempty(trialsToUse) && nansum(trialsToUse==1)>100)
     answer=questdlg('More than 200 trials to plot. Subsample or plot all?','Trials to plot','Subsample','Plot all','Cancel','Cancel');
@@ -91,9 +92,28 @@ drops=alltbt.(dropName);
 misses=alltbt.(missName);
 pelletMissing=alltbt.(pelletMissingName);
 hold on;
+useTinc=1;
+if sortIntoPair1vs2==true
+    triInds=[firstInPair secondInPair];
+    sortOrder=[ones(size(firstInPair)) 2*ones(size(secondInPair))];
+    [~,si]=sort(    
+end
 for incr=1:length(plotThese)
     disp(incr);
     i=plotThese(incr);
+    if omitEmptyTrials==true
+        yi=useTinc;
+        useTinc=useTinc+1;
+    else
+        yi=i;
+    end    
+    if ~isempty(trialsToUse)
+        if ismember(i,firstInPair)
+            line([0 size(alltbt.optoOn,2)*timeStep],[yi yi],'Color',[0.8 0.8 0.8],'LineWidth',1);
+        elseif ismember(i,secondInPair)
+            line([0 size(alltbt.optoOn,2)*timeStep],[yi yi],'Color',[0.8 1 0.8],'LineWidth',1);
+        end
+    end
     if trialTypes.led(i)==1
         if useOptoMode==false
             startOptoOn=find(alltbt.optoOn(i,:)>thresh,1,'first');
@@ -109,36 +129,48 @@ for incr=1:length(plotThese)
                 endOptoOn=allEnd;
             end
         end
-        line([startOptoOn*timeStep (startOptoOn+endOptoOn)*timeStep],[i i],'Color',[1 0.5 0.5]);
+        line([startOptoOn*timeStep (startOptoOn+endOptoOn)*timeStep],[yi yi],'Color',[1 0.5 0.5],'LineWidth',1);
     end
-    scatter(cueInd*timeStep,i,[],'b','fill');
+    scatter(cueInd*timeStep,yi,[],'b','fill');
     temp=reaches(i,:);
     firstReachInd=find(temp(cueInd:end)>thresh,1,'first');
-    type=nan;
     firstReachInd=cueInd+firstReachInd-1;
-    if successes(i,firstReachInd)>thresh
-        type=1;
-    elseif drops(i,firstReachInd)>thresh
-        type=2;
-    elseif misses(i,firstReachInd)>thresh
-        type=3;
-    elseif pelletMissing(i,firstReachInd)>thresh
-        type=4;
+    if isempty(plotReachesWithinSec)
+        nextReachesInds=[];
+    else
+        if firstReachInd+floor(plotReachesWithinSec/timeStep)>size(alltbt.optoOn,2)
+            upTo=size(alltbt.optoOn,2);
+        else
+            upTo=firstReachInd+floor(plotReachesWithinSec/timeStep);
+        end
+        nextReachesInds=find(temp(firstReachInd+1:upTo)>thresh);
+        nextReachesInds=firstReachInd+1+nextReachesInds-1;
     end
-    if isnan(type)
-        continue
-    end
-    if ismember(i,firstInPair)
-    elseif ismember(i,secondInPair)
-    end
-    switch type
-        case 1
-            scatter(firstReachInd*timeStep,i,[],'g','fill');
-        case 2
-            scatter(firstReachInd*timeStep,i,[],'r','fill');
-        case 3
-            scatter(firstReachInd*timeStep,i,[],'c','fill');
-        case 4
-            scatter(firstReachInd*timeStep,i,[],[0.8 0.8 0.8]);
+    allReachesInds=[firstReachInd nextReachesInds];
+    for k=1:length(allReachesInds)
+        firstReachInd=allReachesInds(k);
+        type=nan;
+        if successes(i,firstReachInd)>thresh
+            type=1;
+        elseif drops(i,firstReachInd)>thresh
+            type=2;
+        elseif misses(i,firstReachInd)>thresh
+            type=3;
+        elseif pelletMissing(i,firstReachInd)>thresh
+            type=4;
+        end
+        if isnan(type)
+            continue
+        end
+        switch type
+            case 1
+                scatter(firstReachInd*timeStep,yi,[],'g','fill');
+            case 2
+                scatter(firstReachInd*timeStep,yi,[],'r','fill');
+            case 3
+                scatter(firstReachInd*timeStep,yi,[],'c','fill');
+            case 4
+                scatter(firstReachInd*timeStep,yi,[],[0.8 0.8 0.8]);
+        end
     end
 end

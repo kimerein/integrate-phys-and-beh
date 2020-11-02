@@ -14,6 +14,15 @@ elseif length(varargin)==6
     saveDir=varargin{5};
     testset_settings=varargin{6};
     fillInBetweenWithAnything=testset_settings.fillInBetweenWithAnything;
+elseif length(varargin)==7
+    alltbt=varargin{1};
+    trialTypes=varargin{2};
+    metadata=varargin{3};
+    fakeCueInd=varargin{4};
+    saveDir=varargin{5};
+    testset_settings=varargin{6};
+    fillInBetweenWithAnything=testset_settings.fillInBetweenWithAnything;
+    skipCorrected=varargin{7};
 end
 
 % this function constructs a data set of reaction times changes as a
@@ -100,8 +109,10 @@ dataset.realDistributions.templateSequence1_end=templateSequence1_end;
 dataset.realDistributions.templateSequence2_cond=templateSequence2_cond;
 dataset.realDistributions.templateSequence2_end=templateSequence2_end;
 
-saveDir=[saveDir '\' dataset.realDistributions.event_name];
-mkdir(saveDir);
+if ~isempty(saveDir)
+    saveDir=[saveDir '\' dataset.realDistributions.event_name];
+    mkdir(saveDir);
+end
 
 doCorrectInputDistribution=false;
 [dim1_seq_rtchanges_cond1,dim1_seq_rtchanges_cond2,dim2_seq_rtchanges_cond1,dim2_seq_rtchanges_cond2,ns,cond1_isSeq,cond2_isSeq,rr_cond1_trial1,rr_cond1_triali,rr_cond2_trial1,rr_cond2_triali,cond1_rts_trial1,cond1_rts_triali,cond2_rts_trial1,cond2_rts_triali,rr_cond1_trial1_se,rr_cond1_triali_se,rr_cond2_trial1_se,rr_cond2_triali_se,realrtpair_seq1,realrtpair_seq2,alldim_seq_rtchanges_cond1,alldim_seq_rtchanges_cond2]=getFxOfBehaviorEvent(templateSequence1_cond,templateSequence1_end,templateSequence2_cond,templateSequence2_end,nInSequence,1,doCorrectInputDistribution,alltbt,trialTypes,metadata,fakeCueInd,fillInBetweenWithAnything);
@@ -129,8 +140,15 @@ dataset.realDistributions.(['ns'])=ns;
 dataset.realDistributions.(['realrtpair_seq1'])=realrtpair_seq1;
 dataset.realDistributions.(['realrtpair_seq2'])=realrtpair_seq2;
 
-mkdir([saveDir '\real_distributions']); 
-save([saveDir '\real_distributions\pdf.mat'],'dataset');
+if ~isempty(saveDir)
+    mkdir([saveDir '\real_distributions']);
+    save([saveDir '\real_distributions\pdf.mat'],'dataset');
+end
+
+if skipCorrected==true
+    correctedDistributions=[];
+    return
+end
 
 doCorrectInputDistribution=true;
 [dim1_seq_rtchanges_cond1,dim1_seq_rtchanges_cond2,dim2_seq_rtchanges_cond1,dim2_seq_rtchanges_cond2,ns,cond1_isSeq,cond2_isSeq,rr_cond1_trial1,rr_cond1_triali,rr_cond2_trial1,rr_cond2_triali,cond1_rts_trial1,cond1_rts_triali,cond2_rts_trial1,cond2_rts_triali,rr_cond1_trial1_se,rr_cond1_triali_se,rr_cond2_trial1_se,rr_cond2_triali_se,realrtpair_seq1,realrtpair_seq2,alldim_seq_rtchanges_cond1,alldim_seq_rtchanges_cond2]=getFxOfBehaviorEvent(templateSequence1_cond,templateSequence1_end,templateSequence2_cond,templateSequence2_end,nInSequence,nRepsForBootstrap,doCorrectInputDistribution,alltbt,trialTypes,metadata,fakeCueInd,fillInBetweenWithAnything);
@@ -165,12 +183,14 @@ correctedDistributions.(['ns'])=ns;
 correctedDistributions.(['realrtpair_seq1'])=realrtpair_seq1;
 correctedDistributions.(['realrtpair_seq2'])=realrtpair_seq2;
 
-% Save 
-f=fieldnames(correctedDistributions);
-mkdir([saveDir '\corrected_distributions']); 
-for i=1:length(f)
-    temp=correctedDistributions.(f{i});
-    save([saveDir '\corrected_distributions\' f{i} '.mat'],'temp');
+if ~isempty(saveDir)
+    % Save
+    f=fieldnames(correctedDistributions);
+    mkdir([saveDir '\corrected_distributions']);
+    for i=1:length(f)
+        temp=correctedDistributions.(f{i});
+        save([saveDir '\corrected_distributions\' f{i} '.mat'],'temp');
+    end
 end
 
 end
