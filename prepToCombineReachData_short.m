@@ -1,7 +1,7 @@
 % script for preparing directory structure before combining data across videos and days
 
 % assign mouse and session numbers
-expt_dir='\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\Behavior Final Data Sets\Batch opto light control';
+expt_dir='\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\Behavior Final Data Sets\GtACR2 batch opto';
 optoOnHere=1; % 1 if there was opto, else 0
 startMouseNumberingAt=1; % if want to start mouse numbers at some offset
 % organiziation of data in this directory must be 

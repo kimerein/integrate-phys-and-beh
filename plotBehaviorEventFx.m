@@ -1,4 +1,4 @@
-function [returnThis,returnThisRef]=plotBehaviorEventFx(varargin)
+function [returnThis,returnThisRef,returnThisEventTrial1]=plotBehaviorEventFx(varargin)
 
 % Dim 2 conversion is 0.7885 sec in dim 2 is 1 sec real
 % Dim 1 conversion is 0.611 sec in dim 1 is 1 sec real
@@ -25,6 +25,7 @@ end
 
 returnThis=[];
 returnThisRef=[];
+returnThisEventTrial1=[];
 
 if isempty(suppressPlotBehPlots)
     whetherToSuppressPlots(false);
@@ -191,7 +192,7 @@ if plot_rt_cdf==true
     temp=dataset.event_name;
     temp(regexp(temp,'_'))=' ';
     for i=1:length(dataset.event_RT_trial1InSeq)
-        [histo_nbins,returnThis]=plotCDF(offset+multiple*dataset.event_RT_trial1InSeq{i},offset+multiple*dataset.event_RT_trialiInSeq{i},histo_nbins,['CDF Reaction Times fx of ' temp ': trial 1 (black) vs ' num2str(dataset.nInSequence(i)-1) ' later (magenta)']);
+        [histo_nbins,returnThis,returnThisEventTrial1]=plotCDF(offset+multiple*dataset.event_RT_trial1InSeq{i},offset+multiple*dataset.event_RT_trialiInSeq{i},histo_nbins,['CDF Reaction Times fx of ' temp ': trial 1 (black) vs ' num2str(dataset.nInSequence(i)-1) ' later (magenta)']);
     end
 end
 

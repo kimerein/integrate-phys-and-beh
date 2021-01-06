@@ -64,12 +64,12 @@ if multipleOptoTimes==true
     trialTypes.optoGroup(optoStart>=thresh2 & optoStart<thresh3)=3;
     trialTypes.led(optoStart>=thresh3)=0;
 else
-    answer=inputdlg({'Threshold (opto cannot start after this):'});
+    answer=inputdlg({'Threshold (opto cannot start after this, in sec):'});
     
     figure();
     plot(x,n,'Color','k');
     hold all;
-    thresh1=str2num(answer);
+    thresh1=str2num(answer{1});
     line([thresh1 thresh1],[0 nanmax(n)]);
     ylabel('Count');
     xlabel('sec from trial onset');

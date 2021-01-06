@@ -61,6 +61,7 @@ if useCorrected==false
 else
     [~,dataset]=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,[],test,false);
     [event_cdf,alltrials_cdf]=plotBehaviorEventFx(dataset,alltbt,[],'plot_rt_cdf',true);
+    [delta_event_cdf,delta_alltrials_cdf]=plotBehaviorEventFx(dataset,alltbt,[],'plot_delta_rt_cdf',true);
 end
 axes(ha(1));
 plot(alltrials_cdf.x,alltrials_cdf.y,'Color','k','LineWidth',1);
@@ -89,6 +90,7 @@ if useCorrected==false
 else
     [~,dataset]=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,[],test,false);
     [event_cdf,~]=plotBehaviorEventFx(dataset,alltbt,[],'plot_rt_cdf',true);
+    [deltaopto_event_cdf,~]=plotBehaviorEventFx(dataset,alltbt,[],'plot_delta_rt_cdf',true);
 end
 axes(ha(1));
 plot(event_cdf.x,event_cdf.y,'Color','r','LineWidth',1); 
@@ -121,7 +123,7 @@ if useCorrected==false
 else
     [~,dataset]=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,[],test,false);
     [event_cdf,alltrials_cdf]=plotBehaviorEventFx(dataset,alltbt,[],'plot_rt_cdf',true);
-    [delta_event_cdf,delta_alltrials_cdf]=plotBehaviorEventFx(dataset,alltbt,[],'plot_delta_rt_cdf',true);
+    % [delta_event_cdf,delta_alltrials_cdf]=plotBehaviorEventFx(dataset,alltbt,[],'plot_delta_rt_cdf',true);
 end
 axes(ha(2));
 plot(alltrials_cdf.x,alltrials_cdf.y,'Color','k','LineWidth',1);
@@ -151,7 +153,7 @@ if useCorrected==false
 else
     [~,dataset]=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,[],test,false);
     [event_cdf,~]=plotBehaviorEventFx(dataset,alltbt,[],'plot_rt_cdf',true);
-    [deltaopto_event_cdf,~]=plotBehaviorEventFx(dataset,alltbt,[],'plot_delta_rt_cdf',true);
+    % [deltaopto_event_cdf,~]=plotBehaviorEventFx(dataset,alltbt,[],'plot_delta_rt_cdf',true);
 end
 axes(ha(2));
 plot(event_cdf.x,event_cdf.y,'Color','r','LineWidth',1); 
@@ -166,7 +168,11 @@ plot(delta_alltrials_cdf.x,delta_alltrials_cdf.y,'Color','k','LineWidth',1);
 hold on;
 plot(delta_event_cdf.x,delta_event_cdf.y,'Color',[1 0.6 0.6],'LineWidth',1);
 plot(deltaopto_event_cdf.x,deltaopto_event_cdf.y,'Color','r','LineWidth',1); 
-h=legend({'All trials','Cued reach touch after cued reach touch','Cued reach touch aft cue reach touch opto'},'Location','best');
+if useCorrected==false
+    h=legend({'All trials','Cued reach touch after cued reach touch','Cued reach touch aft cue reach touch opto'},'Location','best');
+else
+    h=legend({'All trials','All trials after cued reach touch','All trials after cued reach touch opto'},'Location','best');
+end
 legend('boxoff');
 set(h,'FontSize',6); 
 xlabel('Change in RT (sec)');
@@ -194,10 +200,11 @@ if useCorrected==false
     plotReactionTimeDotScatter(alltbt,'cueZone_onVoff','all_reachBatch','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts',trialTypes,metadata,true,dataset.realDistributions.event_isSeq{1},true,true);
     title(['First trial: ' test.trial1_name]);
     ylabel(['Second trial: ' test.trial2_name]);
-    [event_cdf,alltrials_cdf]=plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rt_cdf',true);
+    [event_cdf,alltrials_cdf,eventTrial1_cdf]=plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rt_cdf',true);
 else
     [~,dataset]=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,[],test,false);
     [event_cdf,alltrials_cdf]=plotBehaviorEventFx(dataset,alltbt,[],'plot_rt_cdf',true);
+    [delta_event_cdf,delta_alltrials_cdf]=plotBehaviorEventFx(dataset,alltbt,[],'plot_delta_rt_cdf',true);
 end
 axes(ha(4));
 plot(alltrials_cdf.x,alltrials_cdf.y,'Color','k','LineWidth',1);
@@ -227,6 +234,7 @@ if useCorrected==false
 else
     [~,dataset]=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,[],test,false);
     [event_cdf,~]=plotBehaviorEventFx(dataset,alltbt,[],'plot_rt_cdf',true);
+    [deltaopto_event_cdf,~]=plotBehaviorEventFx(dataset,alltbt,[],'plot_delta_rt_cdf',true);
 end
 axes(ha(4));
 plot(event_cdf.x,event_cdf.y,'Color','r','LineWidth',1); 
@@ -259,7 +267,7 @@ if useCorrected==false
 else
     [~,dataset]=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,[],test,false);
     [event_cdf,alltrials_cdf]=plotBehaviorEventFx(dataset,alltbt,[],'plot_rt_cdf',true);
-    [delta_event_cdf,delta_alltrials_cdf]=plotBehaviorEventFx(dataset,alltbt,[],'plot_delta_rt_cdf',true);
+    % [delta_event_cdf,delta_alltrials_cdf]=plotBehaviorEventFx(dataset,alltbt,[],'plot_delta_rt_cdf',true);
 end
 axes(ha(5));
 plot(alltrials_cdf.x,alltrials_cdf.y,'Color','k','LineWidth',1);
@@ -290,11 +298,12 @@ if useCorrected==false
 else
     [~,dataset]=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,[],test,false);
     [event_cdf,~]=plotBehaviorEventFx(dataset,alltbt,[],'plot_rt_cdf',true);
-    [deltaopto_event_cdf,~]=plotBehaviorEventFx(dataset,alltbt,[],'plot_delta_rt_cdf',true);
+    % [deltaopto_event_cdf,~]=plotBehaviorEventFx(dataset,alltbt,[],'plot_delta_rt_cdf',true);
 end
 axes(ha(5));
+plot(eventTrial1_cdf.x,eventTrial1_cdf.y,'Color',[1 0.2 1],'LineWidth',1); 
 plot(event_cdf.x,event_cdf.y,'Color','r','LineWidth',1); 
-h=legend({'All trials','Touch after cue after touch after cue','Touch after cue after touch after cue opto'},'Location','best');
+h=legend({'All trials','Touch after cue after touch after cue','Touch after cue first trial','Touch after cue after touch after cue opto'},'Location','best');
 legend('boxoff');
 set(h,'FontSize',6); 
 xlabel('RT (sec)');
@@ -306,7 +315,11 @@ hold on;
 plot(delta_event_cdf.x,delta_event_cdf.y,'Color',[1 0.6 0.6],'LineWidth',1); 
 deltaCuedTouch=delta_event_cdf;
 plot(deltaopto_event_cdf.x,deltaopto_event_cdf.y,'Color','r','LineWidth',1); 
-h=legend({'All trials','Touch after cue after touch after cue','Touch after cue aft touch after cue opto'},'Location','best');
+if useCorrected==false
+    h=legend({'All trials','Touch after cue after touch after cue','Touch after cue aft touch after cue opto'},'Location','best');
+else
+    h=legend({'All trials','All after touch after cue','All after touch after cue opto'},'Location','best');
+end
 legend('boxoff');
 set(h,'FontSize',6); 
 xlabel('Change in RT (sec)');
@@ -334,15 +347,17 @@ if useCorrected==false
     plotReactionTimeDotScatter(alltbt,'cueZone_onVoff','all_reachBatch','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts',trialTypes,metadata,true,dataset.realDistributions.event_isSeq{1},true,true);
     title(['First trial: ' test.trial1_name]);
     ylabel(['Second trial: ' test.trial2_name]);
-    [event_cdf,alltrials_cdf]=plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rt_cdf',true);
+    [event_cdf,alltrials_cdf,eventTrial1_cdf]=plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rt_cdf',true);
 else
     [~,dataset]=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,[],test,false);
     [event_cdf,alltrials_cdf]=plotBehaviorEventFx(dataset,alltbt,[],'plot_rt_cdf',true);
+    [delta_event_cdf,delta_alltrials_cdf]=plotBehaviorEventFx(dataset,alltbt,[],'plot_delta_rt_cdf',true);
 end
 axes(ha(7));
 plot(alltrials_cdf.x,alltrials_cdf.y,'Color','k','LineWidth',1);
 hold on;
 plot(event_cdf.x,event_cdf.y,'Color',[0.6 1 0.6],'LineWidth',1); 
+plot(eventTrial1_cdf.x,eventTrial1_cdf.y,'Color',[0 1 0],'LineWidth',1); 
 % opto
 test.nInSequence=[2]; 
 trial1='(trialTypes.after_cue_success==1) & trialTypes.ledIsOn==1 & trialTypes.ITItoUse==1';
@@ -362,14 +377,15 @@ if useCorrected==false
     plotReactionTimeDotScatter(alltbt,'cueZone_onVoff','all_reachBatch','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts',trialTypes,metadata,true,dataset.realDistributions.event_isSeq{1},true,true);
     title(['First trial: ' test.trial1_name]);
     ylabel(['Second trial: ' test.trial2_name]);
-    [event_cdf,~]=plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rt_cdf',true);
+    [event_cdf,~,eventTrial1_cdf]=plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rt_cdf',true);
 else
     [~,dataset]=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,[],test,false);
     [event_cdf,~]=plotBehaviorEventFx(dataset,alltbt,[],'plot_rt_cdf',true);
+    [deltaopto_event_cdf,~]=plotBehaviorEventFx(dataset,alltbt,[],'plot_delta_rt_cdf',true);
 end
 axes(ha(7));
 plot(event_cdf.x,event_cdf.y,'Color','r','LineWidth',1); 
-h=legend({'All trials','All after ate after cue','All aft ate after cue opto'},'Location','best');
+h=legend({'All trials','All after ate after cue','Ate after cue trial 1','All aft ate after cue opto'},'Location','best');
 legend('boxoff');
 set(h,'FontSize',6); 
 xlabel('RT (sec)');
@@ -398,7 +414,7 @@ if useCorrected==false
 else
     [~,dataset]=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,[],test,false);
     [event_cdf,alltrials_cdf]=plotBehaviorEventFx(dataset,alltbt,[],'plot_rt_cdf',true);
-    [delta_event_cdf,delta_alltrials_cdf]=plotBehaviorEventFx(dataset,alltbt,[],'plot_delta_rt_cdf',true);
+    % [delta_event_cdf,delta_alltrials_cdf]=plotBehaviorEventFx(dataset,alltbt,[],'plot_delta_rt_cdf',true);
 end
 axes(ha(8));
 plot(alltrials_cdf.x,alltrials_cdf.y,'Color','k','LineWidth',1);
@@ -428,11 +444,12 @@ if useCorrected==false
 else
     [~,dataset]=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,[],test,false);
     [event_cdf,~]=plotBehaviorEventFx(dataset,alltbt,[],'plot_rt_cdf',true);
-    [deltaopto_event_cdf,~]=plotBehaviorEventFx(dataset,alltbt,[],'plot_delta_rt_cdf',true);
+    % [deltaopto_event_cdf,~]=plotBehaviorEventFx(dataset,alltbt,[],'plot_delta_rt_cdf',true);
 end
 axes(ha(8));
+plot(eventTrial1_cdf.x,eventTrial1_cdf.y,'Color',[0 1 0],'LineWidth',1); 
 plot(event_cdf.x,event_cdf.y,'Color','r','LineWidth',1); 
-h=legend({'All trials','Ate after cue after ate after cue','Ate after cue after ate after cue opto'},'Location','best');
+h=legend({'All trials','Ate after cue after ate after cue','Ate after cue trial 1','Ate after cue after ate after cue opto'},'Location','best');
 legend('boxoff');
 set(h,'FontSize',6); 
 xlabel('RT (sec)');
@@ -443,7 +460,11 @@ plot(delta_alltrials_cdf.x,delta_alltrials_cdf.y,'Color','k','LineWidth',1);
 hold on;
 plot(delta_event_cdf.x,delta_event_cdf.y,'Color',[0.6 1 0.6],'LineWidth',1); 
 plot(deltaopto_event_cdf.x,deltaopto_event_cdf.y,'Color','r','LineWidth',1); 
-h=legend({'All trials','Ate after cue after ate after cue','Ate after cue aft ate after cue opto'},'Location','best');
+if useCorrected==false
+    h=legend({'All trials','Ate after cue after ate after cue','Ate after cue aft ate after cue opto'},'Location','best');
+else
+    h=legend({'All trials','All after ate after cue','All after ate after cue opto'},'Location','best');
+end
 legend('boxoff');
 set(h,'FontSize',6); 
 xlabel('Change in RT (sec)');
@@ -480,6 +501,7 @@ if useCorrected==false
 else
     [~,dataset]=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,[],test,false);
     [event_cdf,~]=plotBehaviorEventFx(dataset,alltbt,[],'plot_rt_cdf',true);
+    [delta_event_cdf,delta_alltrials_cdf]=plotBehaviorEventFx(dataset,alltbt,[],'plot_delta_rt_cdf',true);
 end
 axes(ha(10));
 plot(allCuedTouch.x,allCuedTouch.y,'Color',[1 0.6 0.6],'LineWidth',1);
@@ -510,6 +532,7 @@ if useCorrected==false
 else
     [~,dataset]=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,[],test,false);
     [event_cdf,~]=plotBehaviorEventFx(dataset,alltbt,[],'plot_rt_cdf',true);
+    [deltaopto_event_cdf,~]=plotBehaviorEventFx(dataset,alltbt,[],'plot_delta_rt_cdf',true);
 end
 axes(ha(10));
 plot(event_cdf.x,event_cdf.y,'Color','r','LineWidth',1); 
@@ -537,17 +560,18 @@ if useCorrected==false
     plotReactionTimeDotScatter(alltbt,'cueZone_onVoff','all_reachBatch','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts',trialTypes,metadata,true,dataset.realDistributions.event_isSeq{1},true,true);
     title(['First trial: ' test.trial1_name]);
     ylabel(['Second trial: ' test.trial2_name]);
-    [event_cdf,alltrials_cdf]=plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rt_cdf',true);
+    [event_cdf,alltrials_cdf,eventTrial1_cdf]=plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rt_cdf',true);
     [delta_event_cdf,delta_alltrials_cdf]=plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_delta_rt_cdf',true);
 else
     [~,dataset]=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,[],test,false);
     [event_cdf,alltrials_cdf]=plotBehaviorEventFx(dataset,alltbt,[],'plot_rt_cdf',true);
-    [delta_event_cdf,delta_alltrials_cdf]=plotBehaviorEventFx(dataset,alltbt,[],'plot_delta_rt_cdf',true);
+    % [delta_event_cdf,delta_alltrials_cdf]=plotBehaviorEventFx(dataset,alltbt,[],'plot_delta_rt_cdf',true);
 end
 axes(ha(11));
 plot(matchedCuedTouch.x,matchedCuedTouch.y,'Color',[1 0.6 0.6],'LineWidth',1);
 hold on;
 plot(event_cdf.x,event_cdf.y,'Color',[0.6 0.6 1],'LineWidth',1); 
+plot(eventTrial1_cdf.x,eventTrial1_cdf.y,'Color','c','LineWidth',1); 
 % opto
 test.nInSequence=[2]; 
 trial1=['(trialTypes.after_cue_miss==1 | trialTypes.after_cue_no_pellet==1) & trialTypes.touched_pellet==0 & trialTypes.ledIsOn==1 & trialTypes.ITItoUse==1'];
@@ -572,11 +596,11 @@ if useCorrected==false
 else
     [~,dataset]=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,[],test,false);
     [event_cdf,~]=plotBehaviorEventFx(dataset,alltbt,[],'plot_rt_cdf',true);
-    [deltaopto_event_cdf,~]=plotBehaviorEventFx(dataset,alltbt,[],'plot_delta_rt_cdf',true);
+    % [deltaopto_event_cdf,~]=plotBehaviorEventFx(dataset,alltbt,[],'plot_delta_rt_cdf',true);
 end
 axes(ha(11));
 plot(event_cdf.x,event_cdf.y,'Color','r','LineWidth',1); 
-h=legend({'Reach after cue touch after reach after cue touch','Reach after cue no touch after reach after cue no touch','Reach after cue no touch after reach after cue no touch opto'},'Location','best');
+h=legend({'Reach after cue touch after reach after cue touch','Reach after cue no touch after reach after cue no touch','Reach after cue no touch first trial','Reach after cue no touch after reach after cue no touch opto'},'Location','best');
 legend('boxoff');
 set(h,'FontSize',6); 
 xlabel('RT (sec)');
@@ -587,7 +611,11 @@ plot(deltaCuedTouch.x,deltaCuedTouch.y,'Color',[1 0.6 0.6],'LineWidth',1);
 hold on;
 plot(delta_event_cdf.x,delta_event_cdf.y,'Color',[0.6 0.6 1],'LineWidth',1); 
 plot(deltaopto_event_cdf.x,deltaopto_event_cdf.y,'Color','r','LineWidth',1); 
-h=legend({'Reach after cue touch after reach after cue touch','Reach after cue no touch after reach after cue no touch','Reach after cue no touch after reach after cue no touch opto'},'Location','best');
+if useCorrected==false
+    h=legend({'Reach after cue touch after reach after cue touch','Reach after cue no touch after reach after cue no touch','Reach after cue no touch after reach after cue no touch opto'},'Location','best');
+else
+    h=legend({'All after reach after cue touch','All after reach after cue no touch','All after reach after cue no touch opto'},'Location','best');
+end
 legend('boxoff');
 set(h,'FontSize',6); 
 xlabel('Change in RT (sec)');

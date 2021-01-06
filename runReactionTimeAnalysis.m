@@ -32,6 +32,8 @@ trialTypes=getLongITIs(alltbt,trialTypes,settings);
 
 trialTypes=getTimingOfOpto(alltbt,'optoOn',trialTypes,settings.multipleOptoTimes);
 
+trialTypes.mouseid=metadata.mouseid;
+
 % Optional
 % Back-up full, unfiltered alltbt in workspace
 backup.alltbt=alltbt;
