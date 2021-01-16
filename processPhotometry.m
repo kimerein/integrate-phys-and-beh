@@ -28,6 +28,7 @@ inds(7).name='distractor';
 inds(7).num=7;
 totalAcqChannels=7; % total number of acquired analog channels
 Fs=2000; % in Hz, sampling rate of photometry
+data.Fs=Fs;
 
 % Analysis approach to extract photometry transients
 settings.keepPhase='yes'; % 'yes' or 'no'
@@ -53,7 +54,7 @@ settings.baselineWindow=30; % in secs, length of baseline window
 
 
 dd=dir(datadir);
-dd=dd(1:10);
+% dd=dd(1:50);
 k=1;
 for i=3:length(dd)
     disp(['reading ' dd(i).name]);
