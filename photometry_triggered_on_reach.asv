@@ -51,7 +51,9 @@ disp(['found ' num2str(length(cueInds)) ' cues in totalalignment']);
 % Need to resample movie and arduino data so that indices represent
 % matching times
 settings.photo_fs=data.Fs; % photometry data sampling rate in Hz
-settings.movie_fs=1/mode(totalalignment.timesfromarduino(2:end)./1000-totalalignment.timesfromarduino(1:end-1)./1000); % movie data sampling rate in Hz
+temp=totalalignment.timesfromarduino(2:end)./1000-totalalignment.timesfromarduino(1:end-1)./1000;
+temp=temp(temp~=0);
+settings.movie_fs=1/mode(temp); % movie data sampling rate in Hz
 settings.scale_factor=floor(settings.photo_fs/settings.movie_fs);
 % Choose the following two numbers based on approximate relationship between
 % sampling rate of arduino data and sampling rate of movie data.
@@ -60,14 +62,9 @@ settings.scale_factor=floor(settings.photo_fs/settings.movie_fs);
 settings.photo_dec=settings.scale_factor+2;
 settings.movie_dec=1;
 % discard this many frames from beginning
-settings.discardTimePhotoLED=0;
-settings.discardTimeMovieLED=0;
 settings.maxlagForInitialAlign=[]; % [] is don't want to constrain alignment
-settings.tryinc=0.00005; % this is the increment for trying different scalings of movie onto arduino data
-settings.try_scale1=0;
-settings.try_scale2=0; 
-settings.try_delay1=-1;
-settings.try_delay2=1;
+settings.try_delay1=-500;
+settings.try_delay2=500;
 
 % will adjust time subtly (<1%) in the behavior data to match the photometry
 % will not alter the photometry data itself
@@ -75,24 +72,58 @@ data.distractor_times=0:(1/data.Fs):(length(data.distractor)-1)*(1/data.Fs);
 data.cue_times=0:(1/data.Fs):(length(data.distractor)-1)*(1/data.Fs);
 % because there is a break between the videos, and user can throw out first
 % frames in each video, align each video separately
-[discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes]=alignDistractors(totalalignment.movie_distractor(totalalignment.from_first_video==1),data.distractor,distract_thresh_movie,distract_thresh_photometry,totalalignment.timesfromarduino(totalalignment.from_first_video==1),data.distractor_times,settings);
-alltbt1=scaleMovTimes(alltbt,scaleMovieTimes,alltbt.from_first_video(:,1));
-[tbt_data_vid1,shifted_data_vid1]=shiftPhotometryToBehavior(data,discardedPhotoFrames_time,frontShift_time,movie_LED,movie_times,totalalignment.(useCue),totalalignment,alltbt1,minTimeBetweenCues,totalalignment.from_first_video==1,alltbt.from_first_video(:,1));
+[discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes]=alignDistractors(totalalignment.movie_distractor(totalalignment.from_first_video==1),data.distractor,distract_thresh_movie,distract_thresh_photometry,totalalignment.timesfromarduino(totalalignment.from_first_video==1),data.distractor_times,settings,[],[]);
+alltbt1=scaleMovTimes(alltbt,scaleMovieTimes,addToMovieTimes,alltbt.from_first_video(:,1));
+[tbt_data_vid1,shifted_data_vid1,alltbt1]=shiftPhotometryToBehavior(data,discardedPhotoFrames_time,frontShift_time,movie_LED,movie_times,totalalignment.(useCue),totalalignment,alltbt1,minTimeBetweenCues,totalalignment.from_first_video==1,alltbt.from_first_video(:,1));
+if isfield(alltbt1,'threwOutCuesAtEnd')
+    temp=alltbt.from_first_video(:,1);
+    temp=temp(1:end-alltbt1.threwOutCuesAtEnd);
+else
+    temp=alltbt.from_first_video(:,1);
+end
+alltbt1=selectRows(alltbt1,temp);
 
-[discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes]=alignDistractors(totalalignment.movie_distractor(totalalignment.from_second_video==1),data.distractor,distract_thresh_movie,distract_thresh_photometry,totalalignment.timesfromarduino(totalalignment.from_second_video==1),data.distractor_times,settings);
-alltbt2=scaleMovTimes(alltbt,scaleMovieTimes,alltbt.from_second_video(:,1));
-[tbt_data_vid2,shifted_data_vid2]=shiftPhotometryToBehavior(data,discardedPhotoFrames_time,frontShift_time,movie_LED,movie_times,totalalignment.(useCue),totalalignment,alltbt2,minTimeBetweenCues,totalalignment.from_second_video==1,alltbt.from_second_video(:,1));
+[discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes]=alignDistractors(totalalignment.movie_distractor(totalalignment.from_second_video==1),data.distractor,distract_thresh_movie,distract_thresh_photometry,totalalignment.timesfromarduino(totalalignment.from_second_video==1),data.distractor_times,settings,[],[]);
+alltbt2=scaleMovTimes(alltbt,scaleMovieTimes,addToMovieTimes,alltbt.from_second_video(:,1));
+[tbt_data_vid2,shifted_data_vid2,alltbt2]=shiftPhotometryToBehavior(data,discardedPhotoFrames_time,frontShift_time,movie_LED,movie_times,totalalignment.(useCue),totalalignment,alltbt2,minTimeBetweenCues,totalalignment.from_second_video==1,alltbt.from_second_video(:,1));
+if isfield(alltbt2,'threwOutCuesAtEnd')
+    temp=alltbt.from_second_video(:,1);
+    temp=temp(1:end-alltbt2.threwOutCuesAtEnd);
+else
+    temp=alltbt.from_second_video(:,1);
+end
+alltbt2=selectRows(alltbt2,temp);
+
+if isfield(totalalignment,'from_third_video')
+    [discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes]=alignDistractors(totalalignment.movie_distractor(totalalignment.from_third_video==1),data.distractor,distract_thresh_movie,distract_thresh_photometry,totalalignment.timesfromarduino(totalalignment.from_third_video==1),data.distractor_times,settings,true,0.9);
+    alltbt3=scaleMovTimes(alltbt,scaleMovieTimes,addToMovieTimes,alltbt.from_third_video(:,1));
+    [tbt_data_vid3,shifted_data_vid3,alltbt3]=shiftPhotometryToBehavior(data,discardedPhotoFrames_time,frontShift_time,movie_LED,movie_times,totalalignment.(useCue),totalalignment,alltbt3,minTimeBetweenCues,totalalignment.from_third_video==1,alltbt.from_third_video(:,1));
+    if isfield(alltbt3,'threwOutCuesAtEnd')
+        temp=alltbt.from_third_video(:,1);
+        temp=temp(1:end-alltbt3.threwOutCuesAtEnd);
+    else
+        temp=alltbt.from_third_video(:,1);
+    end
+    alltbt3=selectRows(alltbt3,temp);
+end
 
 ds=100; % use this downsample factor for the fields in downsampfields
 downsampfields={'green_mod','red_mod','opto','cue','distractor','cue_times'};
 if ds~=1
     tbt_data_vid1=downSampleData(tbt_data_vid1,ds,downsampfields);
     tbt_data_vid2=downSampleData(tbt_data_vid2,ds,downsampfields);
+    if isfield(totalalignment,'from_third_video')
+        tbt_data_vid3=downSampleData(tbt_data_vid3,ds,downsampfields);
+    end
 end
 
 % concatenate tbts from two videos, should match cues in behavior tbt
 [photometry_tbt]=concatTbt(tbt_data_vid1,tbt_data_vid2);
 [behavior_tbt]=concatTbt(alltbt1,alltbt2);
+if isfield(totalalignment,'from_third_video')
+    [photometry_tbt]=concatTbt(photometry_tbt,tbt_data_vid3);
+    [behavior_tbt]=concatTbt(behavior_tbt,alltbt3);
+end
 
 end
 
@@ -104,12 +135,24 @@ end
 
 end
 
-function alltbt=scaleMovTimes(alltbt,scaleMovieTimes,takeTheseRows)
+function alltbt=selectRows(alltbt,takeTheseRows)
+
+f=fieldnames(alltbt);
+for i=1:length(f)
+    if 
+    temp=alltbt.(f{i});
+    temp=temp(takeTheseRows==1,:);
+    alltbt.(f{i})=temp;
+end
+
+end
+
+function alltbt=scaleMovTimes(alltbt,scaleMovieTimes,addToMovieTimes,takeTheseRows)
 
 fields_like_times={'timesfromarduino','times','times_wrt_trial_start'};
 for i=1:length(fields_like_times)
     temp=alltbt.(fields_like_times{i});
-    temp(takeTheseRows==1,:)=temp(takeTheseRows==1,:)*scaleMovieTimes;
+    temp(takeTheseRows==1,:)=(temp(takeTheseRows==1,:)*scaleMovieTimes)+addToMovieTimes;
     alltbt.(fields_like_times{i})=temp;
 end
 
@@ -119,6 +162,9 @@ function [alltbt]=concatTbt(tbt1,tbt2)
 
 f=fieldnames(tbt1);
 for i=1:length(f)
+    if ~isfield(tbt2,f{i})
+        continue
+    end
     if size(tbt1.(f{i}),2)>size(tbt2.(f{i}),2)
         tbt2.(f{i})=[tbt2.(f{i}) nan(size(tbt2.(f{i}),1),size(tbt1.(f{i}),2)-size(tbt2.(f{i}),2))]; % pad w nans at the end
     elseif size(tbt1.(f{i}),2)<size(tbt2.(f{i}),2)
@@ -127,10 +173,21 @@ for i=1:length(f)
     alltbt.(f{i})=[tbt1.(f{i}); tbt2.(f{i})];
 end
 
-alltbt.from_first_video=zeros(size(alltbt.(f{1})));
-alltbt.from_first_video(1:size(tbt1.(f{1}),1),:)=1;
-alltbt.from_second_video=zeros(size(alltbt.(f{1})));
-alltbt.from_second_video(size(tbt1.(f{1}),1)+1:end,:)=1;
+if ~isfield(tbt1,'from_first_video')
+    alltbt.from_first_video=zeros(size(alltbt.(f{1})));
+    alltbt.from_first_video(1:size(tbt1.(f{1}),1),:)=1;
+    alltbt.from_second_video=zeros(size(alltbt.(f{1})));
+    alltbt.from_second_video(size(tbt1.(f{1}),1)+1:end,:)=1;
+elseif ~isfield(tbt1,'from_third_video')
+    alltbt.from_first_video=zeros(size(alltbt.(f{1})));
+    alltbt.from_first_video(1:nansum(tbt1.from_first_video(:,1)),:)=tbt1.from_first_video(1:nansum(tbt1.from_first_video(:,1)),:);
+    alltbt.from_second_video=zeros(size(alltbt.(f{1})));
+    alltbt.from_second_video(nansum(tbt1.from_first_video(:,1))+1:nansum(tbt1.from_first_video(:,1))+nansum(tbt1.from_second_video(:,1)),:)=tbt1.from_second_video(nansum(tbt1.from_first_video(:,1))+1:nansum(tbt1.from_first_video(:,1))+nansum(tbt1.from_second_video(:,1)),:);
+    alltbt.from_third_video=zeros(size(alltbt.(f{1})));
+    alltbt.from_third_video(size(tbt1.(f{1}),1)+1:end,:)=1;
+else
+    error('In concatTbt: currently code can only deal with max three videos per session');
+end
 
 end
 
@@ -143,18 +200,32 @@ for i=1:length(f)
         nm=nanmin(alignment2.timesfromarduino);
         outalignment.(f{i})=[alignment1.(f{i}) alignment1.timesfromarduino(end)+timestep-nm+alignment2.(f{i})];
     else
+        if ~isfield(alignment2,f{i})
+            continue
+        end
         outalignment.(f{i})=[alignment1.(f{i}) alignment2.(f{i})];
     end
 end
 
-outalignment.from_first_video=zeros(size(outalignment.(f{1})));
-outalignment.from_first_video(1:length(alignment1.(f{1})))=1;
-outalignment.from_second_video=zeros(size(outalignment.(f{1})));
-outalignment.from_second_video(length(alignment1.(f{1}))+1:end)=1;
+if ~isfield(alignment1,'from_first_video')
+    outalignment.from_first_video=zeros(size(outalignment.(f{1})));
+    outalignment.from_first_video(1:length(alignment1.(f{1})))=1;
+    outalignment.from_second_video=zeros(size(outalignment.(f{1})));
+    outalignment.from_second_video(length(alignment1.(f{1}))+1:end)=1;
+elseif ~isfield(alignment1,'from_third_video')
+    outalignment.from_first_video=zeros(size(outalignment.(f{1})));
+    outalignment.from_first_video(1:nansum(alignment1.from_first_video))=alignment1.from_first_video(1:nansum(alignment1.from_first_video));
+    outalignment.from_second_video=zeros(size(outalignment.(f{1})));
+    outalignment.from_second_video(nansum(alignment1.from_first_video)+1:nansum(alignment1.from_first_video)+nansum(alignment1.from_second_video))=alignment1.from_second_video(nansum(alignment1.from_first_video)+1:nansum(alignment1.from_first_video)+nansum(alignment1.from_second_video));
+    outalignment.from_third_video=zeros(size(outalignment.(f{1})));
+    outalignment.from_third_video(length(alignment1.(f{1}))+1:end)=1;
+else
+    error('In concatAlignmnents: currently code can only deal with max three videos per session');
+end
 
 end
 
-function [tbt_data,shifted_data]=shiftPhotometryToBehavior(data,discardedPhotoFrames_time,frontShift_time,movie_LED,movie_times,movie_cue,totalalignment,alltbt,minTimeBetweenCues,fromCurrVid,fromCurrVid_tbt)
+function [tbt_data,shifted_data,alltbt]=shiftPhotometryToBehavior(data,discardedPhotoFrames_time,frontShift_time,movie_LED,movie_times,movie_cue,totalalignment,alltbt,minTimeBetweenCues,fromCurrVid,fromCurrVid_tbt)
 
 % note that only makes trial-by-trial (tbt) for the current video
 
@@ -168,16 +239,15 @@ fields_like_photometry={'green_ch','red_ch','green_time','raw_green_ch','red_tim
 shifted_data=data;
 % start with distractor
 % discard time at front
-discardedPhotoFrames_inds=floor(discardedPhotoFrames_time./mode(data.distractor_times(2:end)-data.distractor_times(1:end-1)));
-shiftByInds=floor(frontShift_time./mode(data.distractor_times(2:end)-data.distractor_times(1:end-1)));
+discardedPhotoFrames_inds=round(discardedPhotoFrames_time./mode(data.distractor_times(2:end)-data.distractor_times(1:end-1)));
+shiftByInds=round(frontShift_time./mode(data.distractor_times(2:end)-data.distractor_times(1:end-1)));
 shifted_data.distractor=shifted_data.distractor(discardedPhotoFrames_inds+1:end); 
 shifted_data.distractor=shifted_data.distractor(shiftByInds+1:end);
 shifted_data.distractor_times=shifted_data.distractor_times(discardedPhotoFrames_inds+1:end);
 shifted_data.distractor_times=shifted_data.distractor_times(shiftByInds+1:end);
-shifted_data.distractor_times_match_to_movie=shifted_data.distractor_times-nanmin(shifted_data.distractor_times)+nanmin(movie_times);
 
 figure(); 
-plot(shifted_data.distractor_times_match_to_movie,shifted_data.distractor./nanmax(shifted_data.distractor),'Color','b'); 
+plot(shifted_data.distractor_times,shifted_data.distractor./nanmax(shifted_data.distractor),'Color','b'); 
 hold on;
 plot(movie_times,movie_LED,'Color','r');
 title('Shifted distractors');
@@ -206,26 +276,28 @@ disp(['min photometry times in shifted data is ' num2str(nanmin(shifted_data.gre
 movie_cue=movie_cue(fromCurrVid);
 
 figure(); 
-plot(shifted_data.distractor_times_match_to_movie,shifted_data.cue./nanmax(shifted_data.cue),'Color','b'); 
+plot(shifted_data.distractor_times,shifted_data.cue./nanmax(shifted_data.cue),'Color','b'); 
 hold on;
 plot(movie_times,movie_cue,'Color','r');
 title('All shifted cues');
 xlabel('Time (sec)');
 
 figure(); 
-plot(shifted_data.distractor_times_match_to_movie,shifted_data.cue./nanmax(shifted_data.cue),'Color','b'); 
+plot(shifted_data.distractor_times,shifted_data.cue./nanmax(shifted_data.cue),'Color','b'); 
 hold on;
 plot(movie_times,movie_cue,'Color','r');
 title('Shifted cues - current video');
 xlabel('Time (sec)');
 anchor=input('Choose index for alignment anchor. ');
-minSpacingBetweenCues_sig1=floor(minTimeBetweenCues/mode(shifted_data.distractor_times_match_to_movie(2:end)-shifted_data.distractor_times_match_to_movie(1:end-1)));
-minSpacingBetweenCues_sig2=floor(minTimeBetweenCues/mode(movie_times(2:end)-movie_times(1:end-1)));
-[~,anchor_index_signal1]=nanmin(abs(shifted_data.distractor_times_match_to_movie-anchor));
+minSpacingBetweenCues_sig1=floor(minTimeBetweenCues/mode(shifted_data.distractor_times(2:end)-shifted_data.distractor_times(1:end-1)));
+temp=movie_times(2:end)-movie_times(1:end-1);
+temp=temp(temp~=0);
+minSpacingBetweenCues_sig2=floor(minTimeBetweenCues/mode(temp));
+[~,anchor_index_signal1]=nanmin(abs(shifted_data.distractor_times-anchor));
 [~,anchor_index_signal2]=nanmin(abs(movie_times-anchor));
-[mapping_signal1,mapping_signal2]=countCues(shifted_data.cue./nanmax(shifted_data.cue),shifted_data.distractor_times_match_to_movie,movie_cue,movie_times,0.5,anchor_index_signal1,anchor_index_signal2,minSpacingBetweenCues_sig1,minSpacingBetweenCues_sig2);
+[mapping_signal1,mapping_signal2]=countCues(shifted_data.cue./nanmax(shifted_data.cue),shifted_data.distractor_times,movie_cue,movie_times,0.5,anchor_index_signal1,anchor_index_signal2,minSpacingBetweenCues_sig1,minSpacingBetweenCues_sig2);
 % signal2 is movie, signal1 is data.distractor
-mapping_signal3=getPhotoCueMapping(mapping_signal1,shifted_data.distractor_times_match_to_movie,shifted_data.green_time);
+mapping_signal3=getPhotoCueMapping(mapping_signal1,shifted_data.distractor_times,shifted_data.green_time);
 % sort cues from first to last
 [~,si]=sort(mapping_signal2);
 mapping_signal2=mapping_signal2(si);
@@ -233,7 +305,7 @@ mapping_signal1=mapping_signal1(si);
 mapping_signal3=mapping_signal3(si);
 
 fields_like_distractor{length(fields_like_distractor)+1}='distractor';
-tbt_data=makeTbtData(shifted_data,alltbt,fromCurrVid_tbt,mapping_signal1,mapping_signal2,mapping_signal3,'cueZone_onVoff',fields_like_distractor,fields_like_photometry);
+[tbt_data,alltbt]=makeTbtData(shifted_data,alltbt,fromCurrVid_tbt,mapping_signal1,mapping_signal2,mapping_signal3,'cueZone_onVoff',fields_like_distractor,fields_like_photometry);
 
 end
 
@@ -278,21 +350,29 @@ end
 
 end
 
-function tbt_data=makeTbtData(data,alltbt,fromCurrVid,cue_mapping_data_distract,cue_mapping_movie_distract,cue_mapping_data_photo,useCue,fields_like_distractor,fields_like_photometry)
+function [tbt_data,alltbt]=makeTbtData(data,alltbt,fromCurrVid,cue_mapping_data_distract,cue_mapping_movie_distract,cue_mapping_data_photo,useCue,fields_like_distractor,fields_like_photometry)
 
 temp=alltbt.(useCue);
 disp([num2str(size(temp(fromCurrVid==1,:),1)) ' cues in behavior tbt for this vid']);
 disp([num2str(length(cue_mapping_data_distract)) ' cues in data tbt']);
 if size(temp(fromCurrVid==1,:),1)~=length(cue_mapping_data_distract)
-    error('Number of cues in data does not match number of cues in movie');
+    n=input('Number of cues in data does not match number of cues in movie. Could be a problem. Either throw out n distractors at end of movie (blue), or quit. n: ');
+    % throw out n distractors at end of video
+    f=fieldnames(alltbt);
+    for i=1:length(f)
+        temp=alltbt.(f{i});
+        temp=temp(1:end-n,:);
+        alltbt.(f{i})=temp;
+    end
+    alltbt.threwOutCuesAtEnd=n;
 end
 
 % get size of baseline in behavior tbt
 cueInd=find(nanmean(alltbt.(useCue),1)>0.5,1,'first');
 secBeforeCue=nanmean(alltbt.times_wrt_trial_start(:,cueInd));
-distractorIndsBeforeCue=floor(secBeforeCue/mode(data.distractor_times_match_to_movie(2:end)-data.distractor_times_match_to_movie(1:end-1)));
+distractorIndsBeforeCue=floor(secBeforeCue/mode(data.distractor_times(2:end)-data.distractor_times(1:end-1)));
 maxDistractorIndsAfterCue=nanmax(diff(cue_mapping_data_distract));
-maxTimeAfterCue=maxDistractorIndsAfterCue*mode(data.distractor_times_match_to_movie(2:end)-data.distractor_times_match_to_movie(1:end-1));
+maxTimeAfterCue=maxDistractorIndsAfterCue*mode(data.distractor_times(2:end)-data.distractor_times(1:end-1));
 photoIndsBeforeCue=floor(secBeforeCue/mode(data.green_time(2:end)-data.green_time(1:end-1)));
 maxPhotoIndsAfterCue=floor(maxTimeAfterCue/mode(data.green_time(2:end)-data.green_time(1:end-1)));
 
@@ -478,7 +558,7 @@ end
 
 end
 
-function [discardedPhotoFrames_time,frontShift_time,scaleBy,backup_movie_LED,movie_times,scaleMovieTimes]=alignDistractors(movie_distract,photo_distract,distract_thresh_movie,distract_thresh_photometry,movie_times,photo_times,settings)
+function [discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes]=alignDistractors(movie_distract,photo_distract,distract_thresh_movie,distract_thresh_photometry,movie_times,photo_times,settings,isInBackHalf,fractionThrough)
 
 % Get when LED was on in movie vs off
 movie_LED=single(movie_distract>distract_thresh_movie);
@@ -518,6 +598,12 @@ movie_LED_ITIs=diff(movie_times(locs));
 
 photo_times=photo_times(locs_arduino(1)-1:end);
 
+if isInBackHalf==true
+    backup_arduino_LED_ITIs=arduino_LED_ITIs;
+    midLength=ceil(fractionThrough*length(arduino_LED_ITIs));
+    arduino_LED_ITIs=arduino_LED_ITIs(midLength+1:end);
+end
+
 temp1=arduino_LED_ITIs./max(arduino_LED_ITIs);
 temp2=movie_LED_ITIs./max(movie_LED_ITIs);
 
@@ -529,7 +615,18 @@ else
 %     [X,Y,D]=alignsignals(photo_LED,movie_LED,settings.maxlagForInitialAlign); 
 end
 
-tryinc=settings.tryinc; % this is the increment for trying different scalings of movie onto photometry data
+if isInBackHalf==true
+    D=D-midLength;
+    arduino_LED_ITIs=backup_arduino_LED_ITIs;
+    if D>0
+        X=[zeros(1,D) arduino_LED_ITIs./max(arduino_LED_ITIs)];
+        Y=movie_LED_ITIs./max(movie_LED_ITIs);
+    elseif D<0
+        Y=[zeros(1,-D) movie_LED_ITIs./max(movie_LED_ITIs)];
+        X=arduino_LED_ITIs./max(arduino_LED_ITIs);
+    end
+end
+
 if D>0
     error('D > 0');
 else
@@ -556,7 +653,6 @@ else
     guess_best_scale=1;
 end
 
-
 figure();
 plot([photo_LED(guess_best_delay+1:end) nan(1,guess_best_delay)],'Color','b');
 hold on;
@@ -564,8 +660,12 @@ plot(movie_LED,'Color','r');
 title('Preliminary alignment of movie distractor onto photometry distractor');
 legend({'Photometry distractor','Movie distractor'});
 
- 
+if isInBackHalf==true
+    trydelays=guess_best_delay;
+end
+
 % Test signal alignment and scaling
+trydelays=trydelays(trydelays>=0);
 disp('Now refining alignment ...');
 sumdiffs=nan(1,length(trydelays));
 for i=1:length(trydelays)
@@ -581,7 +681,7 @@ for i=1:length(trydelays)
     elseif length(temp_movie)>length(temp_arduino)
         temp_movie=temp_movie(1:length(temp_arduino));
     else
-        sumdiffs(i)=nansum(abs(temp_movie-temp_arduino)./nansum(temp_arduino));
+        sumdiffs(i)=nansum(abs(temp_movie-temp_arduino))./nansum(~isnan(temp_arduino));
     end
 end
 sumdiffs(isinf(sumdiffs))=nan;
@@ -593,8 +693,8 @@ figure();
 imagesc(sumdiffs);
 title('Finding best alignment');
 xlabel('Trying different delays');
-disp('Best delay column');
-disp(mi);
+disp('Best delay');
+disp(trydelays(mi));
 guess_best_delay=trydelays(mi);
 
 frontShift=guess_best_delay;
