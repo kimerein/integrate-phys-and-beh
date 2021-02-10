@@ -37,7 +37,8 @@ settings.greenfilter_range=[1 30000]; % band pass range in Hz, green channel
 settings.redfilter_range=[1 30000]; % band pass range in Hz, red channel
 % necessary for chronux only
 % settings.chronux.movingwin=[0.05 0.01]; % dLight1.1
-settings.chronux.movingwin=[0.4 0.01]; % dLight1.1
+% settings.chronux.movingwin=[0.4 0.01]; % dLight1.1
+settings.chronux.movingwin=[0.1 0.01]; % dLight1.1
 params.tapers=[3 2]; % dLight1.1
 params.Fs=Fs;
 params.trialave=0;
@@ -50,11 +51,12 @@ settings.Zscore_or_dF_F='Zscore'; % either Zscore or dF_F
 settings.whichBaseline='percentile'; % can be 'percentile' or 'median'
 settings.prc=10; % if using 'percentile', which prctile
 settings.baselineWindow=30; % in secs, length of baseline window
+settings.firstSubtractDCbaseline=true; % first subtract off DC baseline across whole trace, then get dF_F
 
 
 
 dd=dir(datadir);
-% dd=dd(1:50);
+%dd=dd(1:50);
 k=1;
 for i=3:length(dd)
     disp(['reading ' dd(i).name]);
@@ -121,9 +123,16 @@ if useGreenCh==true
     padToLength=ceil(length(data.raw_green_ch)/binsBaseWindow)*binsBaseWindow;
     if padToLength>length(data.raw_green_ch)
         temp_data=[data.raw_green_ch data.raw_green_ch(end)*ones(1,padToLength-length(data.raw_green_ch))];
+    else
+        temp_data=data.raw_green_ch;
     end
     switch settings.Zscore_or_dF_F
         case 'dF_F'
+            if settings.firstSubtractDCbaseline==true
+                totalBase=nanmin(temp_data);
+                temp_data=temp_data-totalBase;
+                data.raw_green_ch=data.raw_green_ch-totalBase;
+            end
             switch settings.whichBaseline
                 case 'percentile'
                     temp=prctile(reshape(temp_data,binsBaseWindow,length(temp_data)/binsBaseWindow),settings.prc);
@@ -133,7 +142,7 @@ if useGreenCh==true
             temp=repmat(temp,binsBaseWindow,1);
             data.green_baseline=temp(1:end);
             data.green_baseline=data.green_baseline(1:length(data.raw_green_ch));
-            data.green_ch=data.raw_green_ch./data.green_baseline;
+            data.green_ch=(data.raw_green_ch-data.green_baseline)./data.green_baseline;
         case 'Zscore'
             Z=zscore(reshape(temp_data,binsBaseWindow,length(temp_data)/binsBaseWindow));
             data.green_ch=Z(1:end);
@@ -170,9 +179,16 @@ if useRedCh==true
     padToLength=ceil(length(data.raw_red_ch)/binsBaseWindow)*binsBaseWindow;
     if padToLength>length(data.raw_red_ch)
         temp_data=[data.raw_red_ch data.raw_red_ch(end)*ones(1,padToLength-length(data.raw_red_ch))];
+    else
+        temp_data=data.raw_red_ch;
     end
     switch settings.Zscore_or_dF_F
         case 'dF_F'
+            if settings.firstSubtractDCbaseline==true
+                totalBase=nanmin(temp_data);
+                temp_data=temp_data-totalBase;
+                data.raw_red_ch=data.raw_red_ch-totalBase;
+            end
             switch settings.whichBaseline
                 case 'percentile'
                     temp=prctile(reshape(temp_data,binsBaseWindow,length(temp_data)/binsBaseWindow),settings.prc);
@@ -182,7 +198,7 @@ if useRedCh==true
             temp=repmat(temp,binsBaseWindow,1);
             data.red_baseline=temp(1:end);
             data.red_baseline=data.red_baseline(1:length(data.raw_red_ch));
-            data.red_ch=data.raw_red_ch./data.red_baseline;
+            data.red_ch=(data.raw_red_ch-data.red_baseline)./data.red_baseline;
         case 'Zscore'
             Z=zscore(reshape(temp_data,binsBaseWindow,length(temp_data)/binsBaseWindow));
             data.red_ch=Z(1:end);
