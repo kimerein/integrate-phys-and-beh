@@ -21,7 +21,20 @@ dosmooth=true;
 lowPassCutoff=5; % in Hz
 alignPeaks=false;
 indsFromPeak=5;
+% withinRange=[-0.1 1.5];  % take reaches in this range, time is in seconds from onset of cue
+% withinRange=[1.5 16];  % take reaches in this range, time is in seconds from onset of cue
 withinRange=[-0.1 1.5];  % take reaches in this range, time is in seconds from onset of cue
+% withinRange=[-0.1 16];  % take reaches in this range, time is in seconds from onset of cue
+downSamp=false;
+ds=1;
+maxTimeForHeatmap=9;
+
+if downSamp==true
+    f=fieldnames(photometry_tbt);
+    for i=1:length(f)
+        photometry_tbt.(f{i})=downSampMatrix(photometry_tbt.(f{i}),ds);
+    end
+end
 
 thesePhotoFieldsUseTimeField1={'green_mod','red_mod','opto','cue','cue_times','distractor','from_first_video','from_second_video'};
 timeField1='cue_times';
@@ -121,7 +134,7 @@ switch alignTo
         ftostart=find(~isnan(photometry_tbt.cue_times(1,:)),1,'first');
         f_times=nanmean(photometry_tbt.cue_times-repmat(photometry_tbt.cue_times(:,ftostart),1,size(photometry_tbt.cue_times,2)),1);
         figure();
-        plotTrialsAsHeatmap(photometry_tbt.(plotPhotoField),phototimes,photometry_tbt.cue,f_times,10);
+        plotTrialsAsHeatmap(photometry_tbt.(plotPhotoField),phototimes,photometry_tbt.cue,f_times,10,maxTimeForHeatmap);
         hold on;
         plotEventsScatter(behavior_tbt,1:size(behavior_tbt.cue,1),'cueZone_onVoff','all_reachBatch','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts',[]);
         figure();
@@ -152,6 +165,10 @@ switch alignTo
         typeOfReach=true;
         useReach=alignTo;
         behavior_tbt=findPelletDislodgedAfterSuccess(behavior_tbt,'reachBatch_success_reachStarts','pelletPresent');
+    case 'reachBatch_drop_reachStarts'
+        typeOfReach=true;
+        useReach=alignTo;
+        behavior_tbt=findPelletDislodgedAfterSuccess(behavior_tbt,'reachBatch_drop_reachStarts','pelletPresent');
     case 'success batch when pellet dislodged'
         typeOfReach=true;
         useReach='combo';
@@ -166,6 +183,11 @@ switch alignTo
         typeOfReach=true;
         useReach='combo';
         behavior_tbt=findPelletDislodgedAfterSuccess(behavior_tbt,'reachBatch_drop_reachStarts','pelletPresent');
+        useCombo=behavior_tbt.pelletDislodgedAfterSuccess;
+    case 'drop batch av reach and pellet dislodged'
+        typeOfReach=true;
+        useReach='combo';
+        behavior_tbt=findPelletDislodgedAvWithSuccess(behavior_tbt,'reachBatch_drop_reachStarts','pelletPresent');
         useCombo=behavior_tbt.pelletDislodgedAfterSuccess;
     otherwise 
         typeOfReach=true;
@@ -205,10 +227,10 @@ if typeOfReach==true
     plotWStderr(allReachesAlignedData,behTimesAllReaches-(behTimesAllReaches(allReachesAlignedAt)-behTimes(bmax)),'k',[],size(allReachesAlignedData,1));
     
     figure();
-    plotTrialsAsHeatmap(alignedData,phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),behAligned,behTimes,10);
+    plotTrialsAsHeatmap(alignedData,phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),behAligned,behTimes,10,maxTimeForHeatmap);
     
     figure();
-    plotTrialsAsHeatmap(alignedData,phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),behAligned,behTimes,10);
+    plotTrialsAsHeatmap(alignedData,phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),behAligned,behTimes,10,maxTimeForHeatmap);
     hold on;
     whichFields={'cueZone_onVoff','all_reachBatch','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts','success_reachStarts_pawOnWheel'};
     if isfield(behavior_tbt,'pelletDislodgedAfterSuccess')
@@ -339,13 +361,13 @@ yi=0;
 for incr=1:length(plotThese)
     i=plotThese(incr);
     yi=yi+1;
-    if isfield(alltbt,'optoOn')
-        startOptoOn=find(alltbt.optoOn(i,:)>thresh,1,'first');
-        endOptoOn=find(alltbt.optoOn(i,startOptoOn:end)<thresh,1,'first');
-        if ~isempty(startOptoOn)
-            line([useTimes(startOptoOn) useTimes(startOptoOn+endOptoOn)],[yi yi],'Color',[1 0.5 0.5],'LineWidth',1);
-        end
-    end
+%     if isfield(alltbt,'optoOn')
+%         startOptoOn=find(alltbt.optoOn(i,:)>thresh,1,'first');
+%         endOptoOn=find(alltbt.optoOn(i,startOptoOn:end)<thresh,1,'first');
+%         if ~isempty(startOptoOn)
+%             line([useTimes(startOptoOn) useTimes(startOptoOn+endOptoOn)],[yi yi],'Color',[1 0.5 0.5],'LineWidth',1);
+%         end
+%     end
     if isfield(alltbt,'pelletDislodgedAfterSuccess')
         fdis=find(alltbt.pelletDislodgedAfterSuccess(i,:)>thresh,1,'first');
         scatter(useTimes(fdis),yi,[],[0.8 0.8 0.8],'fill');
@@ -413,14 +435,20 @@ end
 
 end
 
-function plotTrialsAsHeatmap(alignedData,times,behAligned,behTimes,ceilAbove)
+function plotTrialsAsHeatmap(alignedData,times,behAligned,behTimes,ceilAbove,maxTimeInSec)
 
 if ~isempty(ceilAbove)
     alignedData(alignedData>ceilAbove)=ceilAbove;
 end
 
 useTheseTrials=~(nansum(isnan(alignedData),2)>0.9*size(alignedData,2));
-imagesc(times,1:nansum(useTheseTrials),alignedData(useTheseTrials,:));
+ft=find(useTheseTrials);
+for i=1:length(ft)
+    alignedData(ft(i),1:end-floor(size(alignedData,2)/2))=smooth(alignedData(ft(i),1:end-floor(size(alignedData,2)/2)),60);
+    alignedData(ft(i),end-floor(size(alignedData,2)/2)-60:end)=nan;
+end
+[~,mi]=nanmin(abs(times-maxTimeInSec));
+imagesc(times(1:mi),1:nansum(useTheseTrials),alignedData(useTheseTrials,1:mi));
 f=find(useTheseTrials);
 hold on;
 for i=1:length(f)

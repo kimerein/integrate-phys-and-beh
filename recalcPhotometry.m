@@ -9,7 +9,7 @@ settings.Zscore_or_dF_F='Zscore'; % either Zscore or dF_F
 settings.whichBaseline='percentile'; % can be 'percentile' or 'median'
 settings.prc=10; % if using 'percentile', which prctile
 % currently uses full trial as source of F
-settings.chronux.movingwin=[0.4 0.01]; % what WAS used for moving window 
+% settings.chronux.movingwin=[0.1 0.01]; % what WAS used for moving window 
 
 % process photometry
 if useGreenCh==true

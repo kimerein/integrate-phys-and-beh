@@ -38,7 +38,7 @@ settings.redfilter_range=[1 30000]; % band pass range in Hz, red channel
 % necessary for chronux only
 % settings.chronux.movingwin=[0.05 0.01]; % dLight1.1
 % settings.chronux.movingwin=[0.4 0.01]; % dLight1.1
-settings.chronux.movingwin=[0.1 0.01]; % dLight1.1
+settings.chronux.movingwin=[0.1 0.01]; % dLight1.1, used this recently
 params.tapers=[3 2]; % dLight1.1
 params.Fs=Fs;
 params.trialave=0;

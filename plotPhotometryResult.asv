@@ -21,7 +21,17 @@ dosmooth=true;
 lowPassCutoff=5; % in Hz
 alignPeaks=false;
 indsFromPeak=5;
-withinRange=[-0.1 1.5];  % take reaches in this range, time is in seconds from onset of cue
+% withinRange=[-0.1 1.5];  % take reaches in this range, time is in seconds from onset of cue
+withinRange=[1.5 5];  % take reaches in this range, time is in seconds from onset of cue
+downSamp=false;
+ds=1;
+
+if downSamp==true
+    f=fieldnames(photometry_tbt);
+    for i=1:length(f)
+        photometry_tbt.(f{i})=downSampMatrix(photometry_tbt.(f{i}),ds);
+    end
+end
 
 thesePhotoFieldsUseTimeField1={'green_mod','red_mod','opto','cue','cue_times','distractor','from_first_video','from_second_video'};
 timeField1='cue_times';
@@ -166,6 +176,11 @@ switch alignTo
         typeOfReach=true;
         useReach='combo';
         behavior_tbt=findPelletDislodgedAfterSuccess(behavior_tbt,'reachBatch_drop_reachStarts','pelletPresent');
+        useCombo=behavior_tbt.pelletDislodgedAfterSuccess;
+    case 'drop batch av reach and pellet dislodged'
+        typeOfReach=true;
+        useReach='combo';
+        behavior_tbt=findPelletDislodgedAvWithSuccess(behavior_tbt,'reachBatch_drop_reachStarts','pelletPresent');
         useCombo=behavior_tbt.pelletDislodgedAfterSuccess;
     otherwise 
         typeOfReach=true;
@@ -396,18 +411,18 @@ for incr=1:length(plotThese)
         end
         switch type
             case 1
-                scatter(firstReachInd*timeStep,yi,[],'g','fill');
+                scatter(useTimes(firstReachInd),yi,[],'g','fill');
             case 2
-                scatter(firstReachInd*timeStep,yi,[],'r','fill');
+                scatter(useTimes(firstReachInd),yi,[],'r','fill');
             case 3
-                scatter(firstReachInd*timeStep,yi,[],'c','fill');
+                scatter(useTimes(firstReachInd),yi,[],'c','fill');
             case 4
-                scatter(firstReachInd*timeStep,yi,[],[0.8 0.8 0.8]);
+                scatter(useTimes(firstReachInd),yi,[],[0.8 0.8 0.8]);
         end
     end
     if ~isempty(others)
         f=find(others(i,:)>thresh);
-        scatter(f*timeStep,yi*ones(size(f)),2,'k');
+        scatter(useTimes(f),yi*ones(size(f)),2,'k');
     end
 end
 
@@ -420,6 +435,9 @@ if ~isempty(ceilAbove)
 end
 
 useTheseTrials=~(nansum(isnan(alignedData),2)>0.9*size(alignedData,2));
+for i=1:length(useTheseTrials)
+    alignedData(useTheseTrials(i),1:end-floor(size(alignedData,2)/2))=smooth(alignedData(useTheseTrials(i),1:end-floor(size(alignedData,2)/2)),1000);
+end
 imagesc(times,1:nansum(useTheseTrials),alignedData(useTheseTrials,:));
 f=find(useTheseTrials);
 hold on;
