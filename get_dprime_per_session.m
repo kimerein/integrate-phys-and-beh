@@ -45,6 +45,10 @@ FAWindow_end=settings.preCueWindow_end; % wrt trial onset
 % calculate hit rates per session
 
 % Convert time window wrt cue onset into indices into data
+if ~isfield(settings,'lowThresh')
+    tempset=reachExpt_analysis_settings();
+    settings.lowThresh=tempset.lowThresh;
+end
 cueInd=find(nanmean(tbt.(nameOfCue),1)>settings.lowThresh,1,'first');
 startInds=floor(abs(hitWindow_start)/mode(diff(nanmean(tbt.times,1))));
 if hitWindow_start<0

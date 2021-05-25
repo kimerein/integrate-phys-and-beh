@@ -1,4 +1,4 @@
-function plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,cueName)
+function plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,cueName,shuffleTrialOrder)
 
 epsilon=0.25; % in seconds
 percentOfReachesFromSess_forInitCond=20; % use this fraction of reaches from beginning of session to get initial conditions
@@ -39,9 +39,11 @@ allreaches_trial_n=dataset.realDistributions.rawReaching_event_trial1InSeq{1};
 allreaches_trial_nplus1=dataset.realDistributions.rawReaching_event_trialiInSeq{1};
 
 % get fixed windows from average RT at beginning of each session
-matchesEventCond_trial_n=dataset.realDistributions.templateSequence2_cond;
+matchesEventCond_trial_n=dataset.realDistributions.event_isSeq{1}==1;
 matchesEventCond_trial_nplus1=dataset.realDistributions.templateSequence2_end;
 nth_sessions=metadata.nth_session(matchesEventCond_trial_n);
+mouseid=metadata.mouseid(matchesEventCond_trial_n);
+nth_sessions=nth_sessions+(mouseid-1)*100;
 u=unique(nth_sessions);
 n_for_init_cond=nan(length(u),1);
 averageRT_trial_n=nan(length(u),1);
@@ -65,6 +67,11 @@ for i=1:length(u)
     n_for_init_cond(i)=ceil((percentOfReachesFromSess_forInitCond/100)*nansum(nth_sessions==u(i)));
     temp=rts_trial_n(nth_sessions==u(i));
     temp_rawReach=allreaches_trial_nplus1(nth_sessions==u(i),:);
+    if shuffleTrialOrder==true
+        p=randperm(length(temp));
+        temp=temp(p);
+        temp_rawReach=temp_rawReach(p,:);
+    end
     averageRT_trial_n(i)=nanmean(temp(1:n_for_init_cond(i)));
     if isnan(averageRT_trial_n(i)) % there were no reaches after the cue ... no opportunity to learn
         continue
@@ -96,25 +103,31 @@ for i=1:length(u)
         changein_acrossSess_window3(i,j)=getReachRate(acrossSess_window3,temp_rawReach(j,:),cueInd,timeStep);
     end
 end
-
+ 
 % Plot output
-figure(); % Approach 1
+figure(); % Approach 2
+cmap=colormap('cool');
 k=1;
-currColors={'k','r','c','b','m','y','g'};
-for i=1:length(u)
-    currColor=currColors{k};
-    k=k+1;
-    if k>length(currColors)
-        k=1;
+kstep=ceil(size(cmap,1)/nansum(~isnan(nanmean(changein_window1,1))));
+for i=1:size(changein_window1,2) % across trials
+    if nanmean(changein_window1(:,i))==0 || nanmean([changein_window2(:,i); changein_window3(:,i)])==0
+        continue
     end
-    for j=2:size(changein_fixed_window1,2)
-        quiver(changein_fixed_window2(i,j-1),changein_fixed_window1(i,j-1),changein_fixed_window2(i,j),changein_fixed_window1(i,j),currColor);
-        hold on;
+    temp_uncued=nanmean([changein_window2(:,i); changein_window3(:,i)],2);
+    temp_cued=changein_window1(:,i);
+    line([nanmean(temp_uncued)-nanstd(temp_uncued)./sqrt(nansum(~isnan(temp_uncued))) nanmean(temp_uncued)+nanstd(temp_uncued)./sqrt(nansum(~isnan(temp_uncued)))],...
+         [nanmean(temp_cued) nanmean(temp_cued)],'Color',cmap(k,:),'LineWidth',1);
+    hold on;
+    line([nanmean(temp_uncued) nanmean(temp_uncued)],...
+         [nanmean(temp_cued)-nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued))) nanmean(temp_cued)+nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued)))],'Color',cmap(k,:),'LineWidth',1);
+    k=k+kstep;
+    if k>size(cmap,1)
+        k=size(cmap,1);
     end
 end
 xlabel('Uncued reach rate (1/sec)');
 ylabel('Cued reach rate (1/sec)');
-title('Approach 1, window 2 vs window 1');
+title('Approach 2, window 2 vs window 1');
 
 end
 
