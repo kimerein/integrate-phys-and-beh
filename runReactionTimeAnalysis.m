@@ -4,7 +4,7 @@
 
 %% load in data
 
-exptDataDir='\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt24May2021194543'; % directory containing experimental data
+exptDataDir='\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt25May2021220005'; % directory containing experimental data
 
 % only load these fields of alltbt
 disp('loading alltbt');
@@ -40,8 +40,8 @@ backup.alltbt=alltbt;
 backup.trialTypes=trialTypes;
 backup.metadata=metadata;
 
-% Optional
-% Fix sessids to match nth_sessions
+%% Optional: Fix sessids to match nth_sessions
+alltbt=backup.alltbt; trialTypes=backup.trialTypes; metadata=backup.metadata;
 u=unique(metadata.mouseid);
 j=0;
 for i=1:length(u)
@@ -59,7 +59,7 @@ saveDir=['\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\RT pairs data
 
 % filter settings
 tbt_filter.sortField='mouseid';
-tbt_filter.range_values=[0.5 1.5];
+tbt_filter.range_values=[-100 100];
 tbt_filter.name=[tbt_filter.sortField num2str(tbt_filter.range_values(1)) 'to' num2str(tbt_filter.range_values(2))];
 temp=tbt_filter.name;
 temp(~ismember(temp,['A':'Z' 'a':'z' '0':'9']))=''; 
@@ -78,15 +78,21 @@ tbt_filter.clock_progress=true;
 test.nInSequence=[2]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
 % requirement for first trial in pair
 % trial1='any(alltbt.all_reachBatch>0.5,2) & trialTypes.touched_pellet==1 & trialTypes.led==0 & trialTypes.paw_during_wheel==0'; % e.g., mouse reached, touched pellet, no LED, no paw_during_wheel
-% trial1='any(alltbt.all_reachBatch(:,94:end)>0.5,2) & trialTypes.touched_pellet==0 & trialTypes.led==0 & trialTypes.consumed_pellet==0';
-% trial1='any(alltbt.all_reachBatch(:,94:end)>0.5,2) & trialTypes.touched_pellet==1 & (trialTypes.led==0) & trialTypes.isLongITI==1'; % e.g., mouse reached, touched pellet, no LED
+% trial1='any(alltbt.all_reachBatch(:,94:end)>0.5,2) & trialTypes.touched_pellet==0 & trialTypes.consumed_pellet==0';
+% trial1='any(alltbt.all_reachBatch(:,94:end)>0.5,2) & trialTypes.touched_pellet==1 & (trialTypes.led==1) & trialTypes.isLongITI==1'; % e.g., mouse reached, touched pellet, no LED
+% trial1='any(alltbt.all_reachBatch(:,94:end)>0.5,2) & trialTypes.touched_pellet==1 & (trialTypes.led==0)'; % e.g., mouse reached, touched pellet, no LED
+% trial1='any(alltbt.all_reachBatch(:,94:end)>0.5,2) & trialTypes.touched_pellet==1 & trialTypes.isLongITI==1 '; % e.g., mouse reached, touched pellet
+% trial1='trialTypes.isLongITI==1';
 trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
+% trial1='any(alltbt.all_reachBatch(:,94:end)>0.5,2) & (trialTypes.led==0)'; 
 % trial1='trialTypes.led==0';
 test.trial1=trial1;
 test.templateSequence2_cond=eval(trial1);
 % generally, second trial in pair should take all trial types
-trial2='trialTypes.led==0';
-% trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
+% trial2='trialTypes.optoGroup==3 & trialTypes.led==1';
+% trial2='trialTypes.led==0';
+trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
+% trial2='any(alltbt.all_reachBatch(:,94:end)>0.5,2)';
 % trial2='trialTypes.touch_in_cued_window==1';
 % trial2='trialTypes.led==0 & trialTypes.touched_pellet==0 & trialTypes.isLongITI==1';
 % trial2='any(alltbt.all_reachBatch(:,94:end)>0.5,2) & trialTypes.touched_pellet==1 & trialTypes.led==0';

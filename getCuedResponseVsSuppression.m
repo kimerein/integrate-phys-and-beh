@@ -11,10 +11,10 @@ preCueWindow_end1=1.5; % define end of time window from trial onset, in seconds 
 % preCueWindow_end2=5.31; % define end of time window from trial onset, in seconds -- for second window
 [~,ma]=nanmax(nanmean(alltbt.(nameOfCue),1));
 cuetimeat=mode(diff(nanmean(alltbt.times,1)))*ma;
-preCueWindow_start2=cuetimeat+3; 
-preCueWindow_end2=cuetimeat+5;
+preCueWindow_start2=cuetimeat+1.5; 
+preCueWindow_end2=cuetimeat+3;
 
-doRawReachRates=1;
+doRawReachRates=0;
 
 if doRawReachRates==0
     

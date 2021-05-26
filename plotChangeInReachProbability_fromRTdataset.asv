@@ -111,13 +111,11 @@ k=1;
 kstep=ceil(size(cmap,1)/nansum(~isnan(nanmean(changein_fixed_window1,1))));
 out.cued=nan(1,size(changein_fixed_window1,2));
 out.uncued=nan(1,size(changein_fixed_window1,2));
-out.alltrials_cued=nan(size(changein_fixed_window1));
-out.alltrials_uncued=nan(size(changein_fixed_window1));
 for i=1:size(changein_fixed_window1,2) % across trials
     if nanmean(changein_fixed_window1(:,i))==0 || nanmean([changein_fixed_window2(:,i); changein_fixed_window3(:,i)])==0
         continue
     end
-    temp_uncued=nanmean([changein_fixed_window2(:,i) changein_fixed_window3(:,i)],2);
+    temp_uncued=nanmean([changein_fixed_window2(:,i); changein_fixed_window3(:,i)],2);
     temp_cued=changein_fixed_window1(:,i);
     if i==1
         scatter(nanmean(temp_uncued),nanmean(temp_cued),[],'k');
@@ -133,8 +131,8 @@ for i=1:size(changein_fixed_window1,2) % across trials
     end
     out.cued(i)=nanmean(temp_cued);
     out.uncued(i)=nanmean(temp_uncued);
-    out.alltrials_cued(:,i)=temp_cued;
-    out.alltrials_uncued(:,i)=temp_uncued;
+    out.alltrials_cued(i)=temp_cued;
+    out.alltrials_uncued(i)
 end
 tmp=cat(3,changein_fixed_window2,changein_fixed_window3); 
 C=nansum(tmp,3);
@@ -155,7 +153,7 @@ for i=1:size(changein_window1,2) % across trials
     if nanmean(changein_window1(:,i))==0 || nanmean([changein_window2(:,i); changein_window3(:,i)])==0
         continue
     end
-    temp_uncued=nanmean([changein_window2(:,i) changein_window3(:,i)],2);
+    temp_uncued=nanmean([changein_window2(:,i); changein_window3(:,i)],2);
     temp_cued=changein_window1(:,i);
     if i==1
         scatter(nanmean(temp_uncued),nanmean(temp_cued),[],'k');
