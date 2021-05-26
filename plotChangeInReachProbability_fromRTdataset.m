@@ -7,6 +7,7 @@ minTrialLength=-2; % wrt cue, in sec
 acrossSess_window1=[0 1.5];
 acrossSess_window2=[1.5 maxTrialLength];
 acrossSess_window3=[minTrialLength -0.5];
+addSatietyLines=true;
 
 % find cue ind
 if size(alltbt.(cueName),2)~=size(dataset.realDistributions.rawReaching_event_trial1InSeq{1},2)
@@ -113,6 +114,9 @@ out.cued=nan(1,size(changein_fixed_window1,2));
 out.uncued=nan(1,size(changein_fixed_window1,2));
 out.alltrials_cued=nan(size(changein_fixed_window1));
 out.alltrials_uncued=nan(size(changein_fixed_window1));
+if addSatietyLines==true
+    out.m=nan(1,size(changein_fixed_window1,2));
+end
 for i=1:size(changein_fixed_window1,2) % across trials
     if nanmean(changein_fixed_window1(:,i))==0 || nanmean([changein_fixed_window2(:,i); changein_fixed_window3(:,i)])==0
         continue
@@ -135,6 +139,15 @@ for i=1:size(changein_fixed_window1,2) % across trials
     out.uncued(i)=nanmean(temp_uncued);
     out.alltrials_cued(:,i)=temp_cued;
     out.alltrials_uncued(:,i)=temp_uncued;
+    
+    if addSatietyLines==true
+        delta_uncued=(nanmean(temp_uncued)^2)/(nanmean(temp_uncued)+nanmean(temp_cued));
+        delta_cued=(nanmean(temp_cued)^2)/(nanmean(temp_cued)+nanmean(temp_uncued));
+        m=delta_cued/delta_uncued;
+        out.m(i)=m;
+        length_line_segment=nanmean([nanstd(temp_uncued)./sqrt(nansum(~isnan(temp_uncued))) nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued)))])/m;
+        line([nanmean(temp_uncued)-length_line_segment/2 nanmean(temp_uncued)+length_line_segment/2],[nanmean(temp_cued)-(length_line_segment*m)/2 nanmean(temp_cued)+(length_line_segment*m)/2],'Color','k','LineWidth',0.25);
+    end
 end
 tmp=cat(3,changein_fixed_window2,changein_fixed_window3); 
 C=nansum(tmp,3);

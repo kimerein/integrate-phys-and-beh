@@ -1,4 +1,4 @@
-function [isreaching_out,dprimes]=getCuedResponseVsSuppression(alltbt,metadata,out,nameOfCue,reachName,useTrials,firstSess,reachAfterCueWindow_start,reachAfterCueWindow_end,doPlot)
+function [isreaching_out,dprimes]=getCuedResponseVsSuppression(alltbt,metadata,out,nameOfCue,reachName,useTrials,firstSess,reachAfterCueWindow_start,reachAfterCueWindow_end,doPlot,doRawReachRates)
 
 % this code assumes that all sessions are from the same mouse
 if isempty(doPlot)
@@ -14,7 +14,7 @@ cuetimeat=mode(diff(nanmean(alltbt.times,1)))*ma;
 preCueWindow_start2=cuetimeat+1.5; 
 preCueWindow_end2=cuetimeat+3;
 
-doRawReachRates=0;
+% doRawReachRates=0;
 
 if doRawReachRates==0
     

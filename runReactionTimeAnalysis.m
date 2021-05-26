@@ -49,6 +49,9 @@ for i=1:length(u)
     j=j+nanmax(metadata.sessid(metadata.mouseid==u(i)));
 end
 
+%% Optional: dprimes for each mouse, each session
+[alltbt,trialTypes,metadata]=get_dprime_per_mouse(alltbt,trialTypes,metadata);
+
 %% perform any filtering on alltbt
 % for example, filter by d-prime
 
@@ -58,8 +61,8 @@ temp=temp(~isspace(temp));
 saveDir=['\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\RT pairs data sets\' temp]; % where to save details of alltbt filtering and RT pairs data set
 
 % filter settings
-tbt_filter.sortField='mouseid';
-tbt_filter.range_values=[-100 100];
+tbt_filter.sortField='dprimes';
+tbt_filter.range_values=[1.5 100];
 tbt_filter.name=[tbt_filter.sortField num2str(tbt_filter.range_values(1)) 'to' num2str(tbt_filter.range_values(2))];
 temp=tbt_filter.name;
 temp(~ismember(temp,['A':'Z' 'a':'z' '0':'9']))=''; 

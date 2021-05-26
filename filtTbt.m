@@ -1,4 +1,4 @@
-function [newtbt,newout,newmetadata]=filtTbt(alltbt,out,sortField,range_values,metadata,displayProgress)
+function [newtbt,newout,newmetadata,takeThese]=filtTbt(alltbt,out,sortField,range_values,metadata,displayProgress)
 
 fieldForSort=out.(sortField);
 
