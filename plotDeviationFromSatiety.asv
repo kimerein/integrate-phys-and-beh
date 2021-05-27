@@ -1,4 +1,4 @@
-function [m_binned,refsToMbinned,cued_binned,uncued_binned]=plotDeviationFromSatiety(reachRates,nbins)
+function plotDeviationFromSatiety(reachRates,nbins)
 
 % dim 1 of alltrials_cued is across sessions, dim 2 of alltrials_cued is
 % across trials
@@ -98,8 +98,8 @@ for i=1:length(downSamp_par_comps)
         k=size(cmap,1);
     end
 end
-downSamp_par_comps(downSamp_par_comps>nanmedian(downSamp_par_comps)+3*mad(downSamp_par_comps) | downSamp_par_comps<nanmedian(downSamp_par_comps)-3*mad(downSamp_par_comps))=nan;
-downSamp_orth_comps(downSamp_orth_comps>nanmedian(downSamp_orth_comps)+3*mad(downSamp_orth_comps) | downSamp_orth_comps<nanmedian(downSamp_orth_comps)-3*mad(downSamp_orth_comps))=nan;
+downSamp_par_comps(any(downSamp_par_comps>nanmedian(downSamp_par_comps)+3*mad(downSamp_par_comps) | downSamp_par_comps<nanmedian(downSamp_par_comps)-3*mad(downSamp_par_comps)))=nan;
+downSamp_orth_comps(any(downSamp_orth_comps>nanmedian(downSamp_orth_comps)+3*mad(downSamp_orth_comps) | downSamp_orth_comps<nanmedian(downSamp_orth_comps)-3*mad(downSamp_par_comps)))=nan;
 firstHalf=[nanmean(downSamp_par_comps(1:floor(length(downSamp_par_comps)/2))) nanmean(downSamp_orth_comps(1:floor(length(downSamp_orth_comps)/2)))];
 secondHalf=[nanmean(downSamp_par_comps(floor(length(downSamp_par_comps)/2)+1:end)) nanmean(downSamp_orth_comps(floor(length(downSamp_orth_comps)/2)+1:end))];
 if any(isnan(firstHalf)) | any(isnan(secondHalf)) | any(isinf(firstHalf)) | any(isinf(secondHalf))

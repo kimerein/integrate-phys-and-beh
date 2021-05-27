@@ -1,0 +1,12 @@
+function plotOutcomeDependentShift(firstTrial_rrs,secondTrial_rrs)
+
+figure();
+temp_uncued=nanmean(firstTrial_rrs.approach2_alltrials_uncued,2);
+temp_cued=nanmean(firstTrial_rrs.approach2_alltrials_cued,2);
+line([nanmean(temp_uncued) nanmean(temp_uncued)],[nanmean(temp_cued)-nanstd(temp_cued)./sqrt(length(temp_cued)) nanmean(temp_cued)+nanstd(temp_cued)./sqrt(length(temp_cued))]
+
+
+end
+
+
+

@@ -1,4 +1,4 @@
-function [out,sessidsperrow]=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,cueName,shuffleTrialOrder)
+function out=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,cueName,shuffleTrialOrder)
 
 epsilon=0.25; % in seconds
 percentOfReachesFromSess_forInitCond=20; % use this fraction of reaches from beginning of session to get initial conditions
@@ -43,16 +43,17 @@ allreaches_trial_nplus1=dataset.realDistributions.rawReaching_event_trialiInSeq{
 matchesEventCond_trial_n=dataset.realDistributions.event_isSeq{1}==1;
 matchesEventCond_trial_nplus1=dataset.realDistributions.templateSequence2_end;
 % check whether sessids are unique, else make them unique
+% assume that I don't have more than 1000 session for any mouse
 u=unique(metadata.mouseid);
 alreadyUsedSessIDs=[];
 sessIDsAreUnique=true;
 for i=1:length(u)
     currmouse=u(i);
-    if any(ismember(alreadyUsedSessIDs,unique(metadata.sessid(metadata.mouseid==currmouse))))
+    if any(ismember(alreadyUsedSessIDs,unique(metadata.sessids(metadata.mouseid==currmouse))))
         sessIDsAreUnique=false;
         break
     else
-        alreadyUsedSessIDs=[alreadyUsedSessIDs; unique(metadata.sessid(metadata.mouseid==currmouse))];
+        alreadyUsedSessIDs=[alreadyUsedSessIDs unique(metadata.sessids(metadata.mouseid==currmouse))];
     end
 end
 if sessIDsAreUnique==true
@@ -60,17 +61,16 @@ if sessIDsAreUnique==true
 else
     % make unique sessids
     u=unique(metadata.mouseid);
-    j=0;
-    for i=1:length(u)
-        metadata.sessid(metadata.mouseid==u(i))=metadata.nth_session(metadata.mouseid==u(i))+j;
-        j=j+nanmax(metadata.sessid(metadata.mouseid==u(i)));
-    end
+j=0;
+for i=1:length(u)
+    metadata.sessid(metadata.mouseid==u(i))=metadata.nth_session(metadata.mouseid==u(i))+j;
+    j=j+nanmax(metadata.sessid(metadata.mouseid==u(i)));
 end
-nth_sessions=metadata.sessid(matchesEventCond_trial_n);
+    
+    nth_sessions=metadata.nth_session(matchesEventCond_trial_n);
 mouseid=metadata.mouseid(matchesEventCond_trial_n);
-
+nth_sessions=nth_sessions+(mouseid-1)*1000;
 u=unique(nth_sessions);
-sessidsperrow=u;
 n_for_init_cond=nan(length(u),1);
 averageRT_trial_n=nan(length(u),1);
 init_fixed_window1=nan(length(u),2);
@@ -99,9 +99,9 @@ for i=1:length(u)
         temp_rawReach=temp_rawReach(p,:);
     end
     averageRT_trial_n(i)=nanmean(temp(1:n_for_init_cond(i)));
-%     if isnan(averageRT_trial_n(i)) % there were no reaches after the cue ... no opportunity to learn
-%         continue
-%     end
+    if isnan(averageRT_trial_n(i)) % there were no reaches after the cue ... no opportunity to learn
+        continue
+    end
 
     init_fixed_window1(i,:)=window1(0,averageRT_trial_n(i),epsilon); % this is in terms of reaction time; thus, cue time is 0
     init_fixed_window2(i,:)=window2(0,averageRT_trial_n(i),epsilon); % this is in terms of reaction time; thus, cue time is 0
