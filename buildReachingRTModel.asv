@@ -280,8 +280,8 @@ for i=1:length(nInSequence)
             else
 %                 templateSequence1{j}=templateSequence1_end;
 %                 templateSequence2{j}=templateSequence2_end;
-                templateSequence1{j}=ones(size(templateSequence1_end));
-                templateSequence2{j}=ones(size(templateSequence2_end));
+                templateSequence1{j}=onestemplateSequence1_end;
+                templateSequence2{j}=templateSequence2_end;
             end
         end
     end

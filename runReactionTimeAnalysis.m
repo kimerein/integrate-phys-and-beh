@@ -4,7 +4,7 @@
 
 %% load in data
 
-exptDataDir='\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt26May2021144114'; % directory containing experimental data
+exptDataDir='\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt27May2021170106'; % directory containing experimental data
 
 % only load these fields of alltbt
 disp('loading alltbt');
@@ -62,7 +62,7 @@ saveDir=['\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\RT pairs data
 
 % filter settings
 tbt_filter.sortField='dprimes';
-tbt_filter.range_values=[-100 1];
+tbt_filter.range_values=[-100 100];
 tbt_filter.name=[tbt_filter.sortField num2str(tbt_filter.range_values(1)) 'to' num2str(tbt_filter.range_values(2))];
 temp=tbt_filter.name;
 temp(~ismember(temp,['A':'Z' 'a':'z' '0':'9']))=''; 

@@ -1,10 +1,47 @@
 function plotOutcomeDependentShift_minusSatiety(alltbt,metadata,trialTypes)
 
-trial1Type='(trialTypes.after_cue_drop_1forward==1 | trialTypes.after_cue_success_1forward==1) & trialTypes.touched_pellet_1forward==1 & (trialTypes.led_1forward==0)';
-% trial1Type='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
-trial2Type='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
-% trial2Type='any(alltbt.all_reachBatch(:,94:end)>0.5,2) & trialTypes.touched_pellet==1 & (trialTypes.led==0)';
+trialTypes.isLongITI_1forward=[trialTypes.isLongITI(2:end); 0];
+trialTypes.isLongITI_1back=[0; trialTypes.isLongITI(1:end-1)];
+temp=trialTypes.optoGroup~=1;
+trialTypes.isNotGroup1_1forward=[temp(2:end); 0];
+trialTypes.isNotGroup1_1back=[0; temp(1:end-1)];
+trialTypes.optoGroup_1forward=[trialTypes.optoGroup(2:end); 0];
+trialTypes.optoGroup_1back=[0; trialTypes.optoGroup(1:end-1)];
+
+% Note the opto group trials appear to come in pairs
+% opto group 1 then 2 then 3
+
+% trialTypes=reachingPeaksBeforeLateOpto(alltbt,metadata,trialTypes);
+
+trial1Type='trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forward==0 & trialTypes.led==0';
+% trial1Type='(trialTypes.after_cue_drop_1forward==1 | trialTypes.after_cue_success_1forward==1) & trialTypes.touched_pellet_1forward==1 & (trialTypes.led_1forward==0) & trialTypes.led==0';
+% trial2Type='(trialTypes.after_cue_drop_1back==1 | trialTypes.after_cue_success_1back==1) & trialTypes.touched_pellet_1back==1 & (trialTypes.led_1back==0) & trialTypes.isLongITI_1back==1';
+% trial2Type='(trialTypes.after_cue_drop_1back==1 | trialTypes.after_cue_success_1back==1) & trialTypes.touched_pellet_1back==1 & (trialTypes.led_1back==0)';
+% nbins=50;
+% trial1Type='(trialTypes.after_cue_drop_1forward==1 | trialTypes.after_cue_success_1forward==1) & trialTypes.touched_pellet_1forward==1 & (trialTypes.led_1forward==1 & trialTypes.isNotGroup1_1forward==1) & trialTypes.reachingPeaksBeforeLateOpto==1';
+% trial2Type='(trialTypes.after_cue_drop_1back==1 | trialTypes.after_cue_success_1back==1) & trialTypes.touched_pellet_1back==1 & (trialTypes.led_1back==1 & trialTypes.isNotGroup1_1back==1) & trialTypes.isLongITI_1back==1 & trialTypes.reachingPeaksBeforeLateOpto==1';
+% trial1Type='trialTypes.touch_in_cued_window_1forward==1 & trialTypes.optoGroup_1forward==2 & trialTypes.reachingPeaksBeforeLateOpto==0 & trialTypes.led==0';
+% trial1Type='(trialTypes.after_cue_drop_1forward==1 | trialTypes.after_cue_success_1forward==1) & trialTypes.touched_pellet_1forward==1 & (trialTypes.led_1forward==1 & (trialTypes.optoGroup_1forward==3 | trialTypes.optoGroup_1forward==2)) & trialTypes.isLongITI_1forward==1'; % & trialTypes.reachingPeaksBeforeLateOpto==1';
+% trial2Type='(trialTypes.after_cue_drop_1back==1 | trialTypes.after_cue_success_1back==1) & trialTypes.touched_pellet_1back==1 & (trialTypes.led_1back==1)'; %& trialTypes.reachingPeaksBeforeLateOpto==1';
 nbins=50;
+
+% trial1Type='(trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1)';
+trial2Type='(trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1) & trialTypes.led==0';
+% nbins=50;
+
+% trial1Type='(trialTypes.after_cue_no_pellet_1forward==1 | trialTypes.after_cue_miss_1forward==1) & (trialTypes.led_1forward==0)';
+% trial2Type='(trialTypes.after_cue_no_pellet_1back==1 | trialTypes.after_cue_miss_1back==1) & (trialTypes.led_1back==0)';
+% nbins=50;
+% trial1Type='(trialTypes.after_cue_no_pellet_1forward==1 | trialTypes.after_cue_miss_1forward==1) & (trialTypes.led_1forward==1 & trialTypes.isNotGroup1_1forward==1)';
+% trial2Type='(trialTypes.after_cue_no_pellet_1back==1 | trialTypes.after_cue_miss_1back==1) & (trialTypes.led_1back==1 & trialTypes.isNotGroup1_1back==1)';
+% nbins=50;
+
+% trial1Type='(trialTypes.after_cue_drop_1forward==1 | trialTypes.after_cue_success_1forward==1) & trialTypes.touched_pellet_1forward==1 & (trialTypes.led_1forward==0)';
+% trial2Type='(trialTypes.after_cue_drop_1back==1 | trialTypes.after_cue_success_1back==1) & trialTypes.touched_pellet_1back==1 & (trialTypes.led_1back==0) & trialTypes.isLongITI_1back==1';
+% nbins=50;
+% trial1Type='(trialTypes.after_cue_drop_1forward==1 | trialTypes.after_cue_success_1forward==1) & trialTypes.touched_pellet_1forward==1 & (trialTypes.led_1forward==1 & trialTypes.isNotGroup1_1forward==1) ';
+% trial2Type='(trialTypes.after_cue_drop_1back==1 | trialTypes.after_cue_success_1back==1) & trialTypes.touched_pellet_1back==1 & (trialTypes.led_1back==1 & trialTypes.isNotGroup1_1back==1) & trialTypes.isLongITI_1back==1';
+% nbins=50;
 
 saveDir=['\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\RT pairs data sets\random\']; 
 

@@ -1,0 +1,17 @@
+function reachingPeaksBeforeLateOpto(alltbt,metadata,trialTypes)
+
+% assumes unique sessids for different days and mice
+
+trialTypes.reachingPeaksBeforeLateOpto=nan(size(trialTypes.led));
+u=unique(metadata.sessids);
+for i=1:length(u)
+    curr_sessid=u(i);
+    figure(); 
+    plot(nanmean(alltbt.times_wrt_trial_start,1),nanmean(alltbt.all_reachBatch(metadata.sessid==curr_sessid,:),1),'Color','k');
+    hold on;
+    [~,cueInd]=nanmax(nanmean(alltbt.cueZone_onVoff,1));
+    
+    
+end
+
+end
