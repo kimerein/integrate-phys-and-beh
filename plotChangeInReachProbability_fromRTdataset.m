@@ -10,7 +10,7 @@ minTrialLength=-2; % wrt cue, in sec
 acrossSess_window1=[0 1.5];
 acrossSess_window2=[minTrialLength -0.5];
 acrossSess_window3=[minTrialLength -0.5];
-addSatietyLines=false;
+addSatietyLines=true;
 
 % find cue ind
 if size(alltbt.(cueName),2)~=size(dataset.realDistributions.rawReaching_event_trial1InSeq{1},2)
@@ -149,14 +149,13 @@ out.alltrials_uncued=nan(size(changein_fixed_window1));
 if addSatietyLines==true
     out.m=nan(1,size(changein_fixed_window1,2));
 end
-nIndsForfirstRates=nanmean(n_for_init_cond);
+nIndsForfirstRates=nanmean(n_for_init_cond./4);
 meansForProportionality_x=nan(size(changein_fixed_window1,1),floor(nIndsForfirstRates));
 meansForProportionality_y=nan(size(changein_fixed_window1,1),floor(nIndsForfirstRates));
 for i=1:size(changein_fixed_window1,2) % across trials
     if nanmean(changein_fixed_window1(:,i))==0 || nanmean([changein_fixed_window2(:,i); changein_fixed_window3(:,i)])==0
         continue
     end
-%     temp_uncued=nanmean([changein_fixed_window2(:,i) changein_fixed_window3(:,i)],2);
 %     temp_uncued=nanmean([changein_fixed_window3(:,i)],2);
 %     temp_cued=changein_fixed_window1(:,i);
     % Use approach 3 instead
@@ -212,7 +211,7 @@ actual_y=out.cued;
 actual_x=out.uncued;
 figure();
 k=1;
-kstep=ceil(size(cmap,1)/nansum(~isnan(nanmean(changein_fixed_window1,1))));
+kstep=ceil(size(cmap,1)/length(actual_y));
 for i=1:length(actual_y)
     scatter(actual_x(i),actual_y(i)-expected_y(i),[],cmap(k,:));
     hold on;
@@ -221,6 +220,20 @@ for i=1:length(actual_y)
         k=size(cmap,1);
     end
 end
+line([0 0.5],[0 0],'Color','k');
+binned_x=downSampAv(actual_x,4);
+binned_ydiff=downSampAv(actual_y-expected_y,4);
+k=1;
+kstep=ceil(size(cmap,1)/length(binned_ydiff));
+for i=1:length(binned_ydiff)
+    scatter(binned_x(i),binned_ydiff(i),[],cmap(k,:),'filled');
+    hold on;
+    k=k+kstep;
+    if k>size(cmap,1)
+        k=size(cmap,1);
+    end
+end
+
 
 figure(); % Approach 2
 cmap=colormap('cool');

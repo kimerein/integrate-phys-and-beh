@@ -87,6 +87,7 @@ test.nInSequence=[2]; % defines trial pairs, e.g., 2 means will compare each tri
 % trial1='any(alltbt.all_reachBatch(:,94:end)>0.5,2) & trialTypes.touched_pellet==1 & (trialTypes.led==1)'; % e.g., mouse reached, touched pellet
 % trial1='trialTypes.isLongITI==1';
 trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
+% trial1='trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup~=1';
 % trial1='trialTypes.touch_in_cued_window_1forward==1';
 % trial1='any(alltbt.all_reachBatch(:,94:end)>0.5,2) & (trialTypes.led==0)'; 
 % trial1='trialTypes.led==0';
@@ -95,6 +96,7 @@ test.templateSequence2_cond=eval(trial1);
 % generally, second trial in pair should take all trial types
 % trial2='(trialTypes.optoGroup~=1) & trialTypes.led==1';
 % trial2='trialTypes.led==1';
+% trial2='trialTypes.optoGroup~=1';
 trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
 % trial2='any(alltbt.all_reachBatch(:,94:end)>0.5,2)';
 % trial2='trialTypes.touch_in_cued_window==1';
@@ -103,7 +105,7 @@ trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start
 % trial2='any(alltbt.all_reachBatch(:,94:end)>0.5,2) & trialTypes.touched_pellet==1';
 test.trial2=trial2;
 test.templateSequence2_end=eval(trial2);
-test.fillInBetweenWithAnything=false; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1
+test.fillInBetweenWithAnything=true; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1
 test.event_name=['alltrials' tbt_filter.name 'inBetweenAnything' num2str(test.fillInBetweenWithAnything)];
 
 saveDir2=[saveDir '\' test.event_name];

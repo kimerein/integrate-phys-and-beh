@@ -8,8 +8,11 @@ epsilon=0.25; % in seconds
 percentOfReachesFromSess_forInitCond=20; % use this fraction of reaches from beginning of session to get initial conditions
 maxTrialLength=9; % in sec, wrt cue
 minTrialLength=-2; % wrt cue, in sec
+% acrossSess_window1=[0 1.5];
+% acrossSess_window2=[1.5 maxTrialLength];
+% acrossSess_window3=[minTrialLength -0.5];
 acrossSess_window1=[0 1.5];
-acrossSess_window2=[1.5 maxTrialLength];
+acrossSess_window2=[minTrialLength -0.5];
 acrossSess_window3=[minTrialLength -0.5];
 addSatietyLines=false;
 
@@ -108,14 +111,17 @@ for i=1:length(u)
     % where windows are fixed across all sessions
     for j=1:size(temp_rawReach,1)
         % APPROACH 1    
-        changein_fixed_window1(i,j)=getReachRate(init_fixed_window1(i,:),temp_rawReach(j,:),cueInd,timeStep);
-        changein_fixed_window2(i,j)=getReachRate(init_fixed_window2(i,:),temp_rawReach(j,:),cueInd,timeStep);
-        changein_fixed_window3(i,j)=getReachRate(init_fixed_window3(i,:),temp_rawReach(j,:),cueInd,timeStep);
+%         changein_fixed_window1(i,j)=getReachRate(init_fixed_window1(i,:),temp_rawReach(j,:),cueInd,timeStep);
+%         changein_fixed_window2(i,j)=getReachRate(init_fixed_window2(i,:),temp_rawReach(j,:),cueInd,timeStep);
+%         changein_fixed_window3(i,j)=getReachRate(init_fixed_window3(i,:),temp_rawReach(j,:),cueInd,timeStep);
         
         % Also get reach rate of trial 1
-        trial1_fixed_window1(i,j)=getReachRate(init_fixed_window1(i,:),temp_rawReach_trial1(j,:),cueInd,timeStep);
-        trial1_fixed_window2(i,j)=getReachRate(init_fixed_window2(i,:),temp_rawReach_trial1(j,:),cueInd,timeStep);
-        trial1_fixed_window3(i,j)=getReachRate(init_fixed_window3(i,:),temp_rawReach_trial1(j,:),cueInd,timeStep);
+%         trial1_fixed_window1(i,j)=getReachRate(init_fixed_window1(i,:),temp_rawReach_trial1(j,:),cueInd,timeStep);
+%         trial1_fixed_window2(i,j)=getReachRate(init_fixed_window2(i,:),temp_rawReach_trial1(j,:),cueInd,timeStep);
+%         trial1_fixed_window3(i,j)=getReachRate(init_fixed_window3(i,:),temp_rawReach_trial1(j,:),cueInd,timeStep);
+        trial1_fixed_window1(i,j)=getReachRate(acrossSess_window1,temp_rawReach_trial1(j,:),cueInd,timeStep);
+        trial1_fixed_window2(i,j)=getReachRate(acrossSess_window2,temp_rawReach_trial1(j,:),cueInd,timeStep);
+        trial1_fixed_window3(i,j)=getReachRate(acrossSess_window3,temp_rawReach_trial1(j,:),cueInd,timeStep);
         
         % save when trial occured
         fracsThroughSess(i,j)=subfracsForUsedTrials(j);  
@@ -125,9 +131,9 @@ for i=1:length(u)
 %         changein_window2(i,j)=getReachRate(window2(0,temp(j),epsilon),temp_rawReach(j,:),cueInd,timeStep);
 %         changein_window3(i,j)=getReachRate(window3(0,temp(j),epsilon),temp_rawReach(j,:),cueInd,timeStep);
 %         % APPROACH 3
-%         changein_acrossSess_window1(i,j)=getReachRate(acrossSess_window1,temp_rawReach(j,:),cueInd,timeStep);
-%         changein_acrossSess_window2(i,j)=getReachRate(acrossSess_window2,temp_rawReach(j,:),cueInd,timeStep);
-%         changein_acrossSess_window3(i,j)=getReachRate(acrossSess_window3,temp_rawReach(j,:),cueInd,timeStep);
+        changein_acrossSess_window1(i,j)=getReachRate(acrossSess_window1,temp_rawReach(j,:),cueInd,timeStep);
+        changein_acrossSess_window2(i,j)=getReachRate(acrossSess_window2,temp_rawReach(j,:),cueInd,timeStep);
+        changein_acrossSess_window3(i,j)=getReachRate(acrossSess_window3,temp_rawReach(j,:),cueInd,timeStep);
     end
 end
 out.init_fixed_window1=init_fixed_window1;
@@ -155,9 +161,9 @@ for i=1:size(changein_fixed_window1,2) % across trials
     if nanmean(changein_fixed_window1(:,i))==0 || nanmean([changein_fixed_window2(:,i); changein_fixed_window3(:,i)])==0
         continue
     end
-    temp_uncued=nanmean([changein_fixed_window2(:,i) changein_fixed_window3(:,i)],2);
-    temp_cued=changein_fixed_window1(:,i);
-    temp_trial1_uncued=nanmean([trial1_fixed_window2(:,i) changein_fixed_window3(:,i)],2);
+    temp_uncued=nanmean([changein_acrossSess_window2(:,i) changein_acrossSess_window3(:,i)],2);
+    temp_cued=changein_acrossSess_window1(:,i);
+    temp_trial1_uncued=nanmean([trial1_fixed_window2(:,i) trial1_fixed_window3(:,i)],2);
     temp_trial1_cued=trial1_fixed_window1(:,i);
     if i==1
         scatter(nanmean(temp_uncued),nanmean(temp_cued),[],'k');

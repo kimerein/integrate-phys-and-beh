@@ -78,16 +78,46 @@ for i=1:length(fracsThroughSess) % for each trial to trial change from each sess
     % Get m orthogonal to this
     vec2=[-V_par(2)/V_par(1) 1];
     V_orth=vec2./norm(vec2);
+    
+    
     % Current trial-to-trial change
     vec1=[trialn_reachRates_uncued(i)-trial1_reachRates_uncued(i) trialn_reachRates_cued(i)-trial1_reachRates_cued(i)];
-    line([0 vec1(1)+rand(1)/50],[0 vec1(2)],'Color','k');
-    hold all;
     vec1_trial1=[trial1_reachRates_uncued(i) trial1_reachRates_cued(i)];
     vec1_trialn=[trialn_reachRates_uncued(i) trialn_reachRates_cued(i)];
+    
+    % Get cued change minus expected cued change for this uncued change
+    currusem=(vec1_trial1(2)/vec1_trial1(1));
+    curr_m=currusem;
+    actual_y_change=vec1(2);
+%     expected_y_change=(vec1_trial1(2)/vec1_trial1(1))*vec1(1);
+    expected_y_change=curr_m*vec1(1);
+    actual_x_change=vec1(1);
+    
+    if isnan(curr_m) | isinf(curr_m) | curr_m==0
+        expected_x_change=0;
+    else
+        expected_x_change=actual_y_change/(curr_m);
+    end
+    
+    line([0 vec1(1)+rand(1)/50],[0 vec1(2)],'Color','k');
+    hold all;
+    
     all_angles(i)=angle(complex(vec1(1),vec1(2)));
     all_mags(i)=abs(complex(vec1(1),vec1(2)));
-    orth_comps_change(i)=vec1(1)*V_orth(1)+vec1(2)*V_orth(2);
-    par_comps_change(i)=vec1(1)*V_par(1)+vec1(2)*V_par(2);
+%     orth_comps_change(i)=vec1(1)*V_orth(1)+vec1(2)*V_orth(2);
+%     par_comps_change(i)=vec1(1)*V_par(1)+vec1(2)*V_par(2);
+    orth_comps_change(i)=actual_y_change-expected_y_change;
+    par_comps_change(i)=actual_x_change-expected_x_change;
+
+    veep=[-1 1];
+    Veepers_orth=veep./norm(veep);
+    Veepers_par=[-Veepers_orth(2)/Veepers_orth(1) 1];
+    Veepers_par=Veepers_par./norm(Veepers_par);
+    tempers1=par_comps_change(i)*Veepers_orth(1)+orth_comps_change(i)*Veepers_orth(2);
+    tempers2=par_comps_change(i)*Veepers_par(1)+orth_comps_change(i)*Veepers_par(2);
+    orth_comps_change(i)=tempers1;
+    par_comps_change(i)=tempers2;
+    
     orth_comps_trial1(i)=vec1_trial1(1)*V_orth(1)+vec1_trial1(2)*V_orth(2);
     par_comps_trial1(i)=vec1_trial1(1)*V_par(1)+vec1_trial1(2)*V_par(2);
     orth_comps_trialn(i)=vec1_trialn(1)*V_orth(1)+vec1_trialn(2)*V_orth(2);
@@ -95,6 +125,47 @@ for i=1:length(fracsThroughSess) % for each trial to trial change from each sess
     all_angles_minusSatiety(i)=angle(complex(par_comps_change(i),orth_comps_change(i)));
     all_mags_minusSatiety(i)=abs(complex(par_comps_change(i),orth_comps_change(i)));
 end
+
+figure();
+for i=1:length(par_comps_change)
+if isnan(fracsThroughSess(i)) | abs(orth_comps_change(i))>100
+continue
+end
+temp=ceil(fracsThroughSess(i)*100);
+if temp>size(cmap,1)
+temp=size(cmap,1);
+end
+scatter(par_comps_change(i)+(-1 + (1+1) .* rand(1,1))*0.3,orth_comps_change(i)+(-1 + (1+1) .* rand(1,1))*0.3,[],'k');
+hold on;
+end
+line([0 0],[-5 5],'Color','k');
+line([-5 5],[0 0],'Color','k');
+throwout=isinf(par_comps_change) | isinf(orth_comps_change);
+par_comps_change=par_comps_change(throwout==false);
+orth_comps_change=orth_comps_change(throwout==false);
+outies=(par_comps_change>nanmean(par_comps_change)+3*mad(par_comps_change) | par_comps_change<nanmean(par_comps_change)-3*mad(par_comps_change)) | ...
+       (orth_comps_change>nanmean(orth_comps_change)+3*mad(orth_comps_change) | orth_comps_change<nanmean(orth_comps_change)-3*mad(orth_comps_change));
+par_comps_change=par_comps_change(outies==false);
+orth_comps_change=orth_comps_change(outies==false);
+line([0 nanmean(par_comps_change)],[0 nanmean(orth_comps_change)],'Color','m');
+
+
+figure();
+for i=1:length(par_comps_change)
+if isnan(fracsThroughSess(i))
+continue
+end
+temp=ceil(fracsThroughSess(i)*100);
+if temp>size(cmap,1)
+temp=size(cmap,1);
+end
+vec1=[trialn_reachRates_uncued(i)-trial1_reachRates_uncued(i) trialn_reachRates_cued(i)-trial1_reachRates_cued(i)];
+scatter(vec1(1)+(-1 + (1+1) .* rand(1,1))*1,vec1(2)+(-1 + (1+1) .* rand(1,1))*1,[],'k');
+hold on;
+end
+line([0 0],[-5 5],'Color','k');
+line([-5 5],[0 0],'Color','k');
+
 angs=all_angles(~isnan(all_angles))';
 mags=all_mags(~isnan(all_angles))';
 angs(mags>nanmean(mags)+3*mad(mags) | mags<nanmean(mags)-3*mad(mags))=nan;
@@ -121,8 +192,9 @@ disp(['se magnitude: ' num2str(nanstd(mags,[],1)./sqrt(length(mags)))]);
 angs=all_angles_minusSatiety(~isnan(all_angles_minusSatiety))';
 mags=all_mags_minusSatiety(~isnan(all_angles_minusSatiety))';
 angs(mags>nanmean(mags)+3*mad(mags) | mags<nanmean(mags)-3*mad(mags))=nan;
-mags=mags(~isnan(angs));
-angs=angs(~isnan(angs));
+dontuse=isnan(angs) | isinf(mags);
+mags=mags(~dontuse);
+angs=angs(~dontuse);
 [mu,ul,ll]=circ_mean(angs,(mags/0.33)*10,1); % mean mag is about 0.3
 % edges=0:10:360;
 % edges=deg2rad(edges);

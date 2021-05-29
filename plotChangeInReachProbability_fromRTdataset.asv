@@ -206,6 +206,35 @@ xlabel('Uncued reach rate (1/sec)');
 ylabel('Cued reach rate (1/sec)');
 title('Approach 1, window 2 vs window 1');
 
+m=tempcued/tempuncued;
+expected_y=m*out.uncued;
+actual_y=out.cued;
+actual_x=out.uncued;
+figure();
+k=1;
+kstep=ceil(size(cmap,1)/length(actual_y));
+for i=1:length(actual_y)
+    scatter(actual_x(i),actual_y(i)-expected_y(i),[],cmap(k,:));
+    hold on;
+    k=k+kstep;
+    if k>size(cmap,1)
+        k=size(cmap,1);
+    end
+end
+line([0 0.5],[0 0],'Color','k');
+binned_x=downSampAv(actual_x,4);
+binned_ydiff=downSampAv(actual_y-expected_y,4);
+k=1;
+kstep=ceil(size(cmap,1)/length(binned_ydiff));
+for i=1:length(binned_ydiff)
+    scatter(binned_x(i),actual_y(i)-expected_y(i),[],cmap(k,:),'filled');
+    hold on;
+    k=k+kstep;
+    if k>size(cmap,1)
+        k=size(cmap,1);
+    end
+end
+line([0 0.5],[0 0],'Color','k');
 
 
 figure(); % Approach 2
