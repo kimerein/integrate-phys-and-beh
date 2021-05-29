@@ -156,10 +156,10 @@ for i=1:size(changein_fixed_window1,2) % across trials
     if nanmean(changein_fixed_window1(:,i))==0 || nanmean([changein_fixed_window2(:,i); changein_fixed_window3(:,i)])==0
         continue
     end
-%     temp_uncued=nanmean([changein_fixed_window3(:,i)],2);
-%     temp_cued=changein_fixed_window1(:,i);
+    temp_uncued=nanmean([changein_fixed_window3(:,i)],2);
+    temp_cued=changein_fixed_window1(:,i);
     % Use approach 3 instead
-    temp_uncued=nanmean([changein_acrossSess_window2(:,i) changein_acrossSess_window3(:,i)],2);
+%     temp_uncued=nanmean([changein_acrossSess_window2(:,i) changein_acrossSess_window3(:,i)],2);
     temp_cued=changein_acrossSess_window1(:,i);
     if i==1
         scatter(nanmean(temp_uncued),nanmean(temp_cued),[],'k');

@@ -62,7 +62,7 @@ saveDir=['\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\RT pairs data
 
 % filter settings
 tbt_filter.sortField='dprimes';
-tbt_filter.range_values=[0.5 1];
+tbt_filter.range_values=[-100 1];
 tbt_filter.name=[tbt_filter.sortField num2str(tbt_filter.range_values(1)) 'to' num2str(tbt_filter.range_values(2))];
 temp=tbt_filter.name;
 temp(~ismember(temp,['A':'Z' 'a':'z' '0':'9']))=''; 

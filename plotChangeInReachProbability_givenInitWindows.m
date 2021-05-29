@@ -116,12 +116,12 @@ for i=1:length(u)
 %         changein_fixed_window3(i,j)=getReachRate(init_fixed_window3(i,:),temp_rawReach(j,:),cueInd,timeStep);
         
         % Also get reach rate of trial 1
-%         trial1_fixed_window1(i,j)=getReachRate(init_fixed_window1(i,:),temp_rawReach_trial1(j,:),cueInd,timeStep);
-%         trial1_fixed_window2(i,j)=getReachRate(init_fixed_window2(i,:),temp_rawReach_trial1(j,:),cueInd,timeStep);
-%         trial1_fixed_window3(i,j)=getReachRate(init_fixed_window3(i,:),temp_rawReach_trial1(j,:),cueInd,timeStep);
-        trial1_fixed_window1(i,j)=getReachRate(acrossSess_window1,temp_rawReach_trial1(j,:),cueInd,timeStep);
-        trial1_fixed_window2(i,j)=getReachRate(acrossSess_window2,temp_rawReach_trial1(j,:),cueInd,timeStep);
-        trial1_fixed_window3(i,j)=getReachRate(acrossSess_window3,temp_rawReach_trial1(j,:),cueInd,timeStep);
+        trial1_fixed_window1(i,j)=getReachRate(init_fixed_window1(i,:),temp_rawReach_trial1(j,:),cueInd,timeStep);
+        trial1_fixed_window2(i,j)=getReachRate(init_fixed_window2(i,:),temp_rawReach_trial1(j,:),cueInd,timeStep);
+        trial1_fixed_window3(i,j)=getReachRate(init_fixed_window3(i,:),temp_rawReach_trial1(j,:),cueInd,timeStep);
+%         trial1_fixed_window1(i,j)=getReachRate(acrossSess_window1,temp_rawReach_trial1(j,:),cueInd,timeStep);
+%         trial1_fixed_window2(i,j)=getReachRate(acrossSess_window2,temp_rawReach_trial1(j,:),cueInd,timeStep);
+%         trial1_fixed_window3(i,j)=getReachRate(acrossSess_window3,temp_rawReach_trial1(j,:),cueInd,timeStep);
         
         % save when trial occured
         fracsThroughSess(i,j)=subfracsForUsedTrials(j);  
@@ -131,9 +131,9 @@ for i=1:length(u)
 %         changein_window2(i,j)=getReachRate(window2(0,temp(j),epsilon),temp_rawReach(j,:),cueInd,timeStep);
 %         changein_window3(i,j)=getReachRate(window3(0,temp(j),epsilon),temp_rawReach(j,:),cueInd,timeStep);
 %         % APPROACH 3
-        changein_acrossSess_window1(i,j)=getReachRate(acrossSess_window1,temp_rawReach(j,:),cueInd,timeStep);
-        changein_acrossSess_window2(i,j)=getReachRate(acrossSess_window2,temp_rawReach(j,:),cueInd,timeStep);
-        changein_acrossSess_window3(i,j)=getReachRate(acrossSess_window3,temp_rawReach(j,:),cueInd,timeStep);
+        changein_acrossSess_window1(i,j)=getReachRate(init_fixed_window1(i,:),temp_rawReach(j,:),cueInd,timeStep);
+        changein_acrossSess_window2(i,j)=getReachRate(init_fixed_window2(i,:),temp_rawReach(j,:),cueInd,timeStep);
+        changein_acrossSess_window3(i,j)=getReachRate(init_fixed_window3(i,:),temp_rawReach(j,:),cueInd,timeStep);
     end
 end
 out.init_fixed_window1=init_fixed_window1;
