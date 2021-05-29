@@ -150,7 +150,7 @@ orth_comps_change=orth_comps_change(outies==false);
 line([0 nanmean(par_comps_change)],[0 nanmean(orth_comps_change)],'Color','m');
 
 
-figure();
+ figure();
 for i=1:length(par_comps_change)
 if isnan(fracsThroughSess(i))
 continue
