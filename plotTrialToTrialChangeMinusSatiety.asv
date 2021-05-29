@@ -98,20 +98,43 @@ mags=all_mags(~isnan(all_angles))';
 angs(mags>nanmean(mags)+3*mad(mags) | mags<nanmean(mags)-3*mad(mags))=nan;
 mags=mags(~isnan(angs));
 angs=angs(~isnan(angs));
-[mu,ul,ll]=circ_mean(angs,mags);
+% Bin angles
+edges=0:10:360;
+edges=deg2rad(edges);
+countsperbin=nan(1,length(edges)-1);
+for i=1:length(edges)-1
+    countsperbin(i)=nansum(angs>=edges(i) & angs<edges(i+1))*(nansum(mags(angs>=edges(i) & angs<edges(i+1)))/0.33);
+end
+[mu,ul,ll]=circ_mean((edges(1:end-1)+edges(2:end))/2,countsperbin');
+% edges=0:10:360;
+% n=histcounts(angs,deg2rad(edges));
+% % [mu,ul,ll]=circ_mean(angs,mags*100);
+% [mu,ul,ll]=circ_mean(deg2rad((edges(1:end-1)+edges(2:end))/2)',n');
 disp(['mean angle: ' num2str(rad2deg(mu))]);
 disp(['mean angle lower confidence bound: ' num2str(rad2deg(ul))]);
 disp(['mean angle upper confidence bound: ' num2str(rad2deg(ll))]);
+disp(['mean magnitude: ' num2str(nanmean(mags))]);
+disp(['se magnitude: ' num2str(nanstd(mags,[],1)./sqrt(length(mags)))]);
 
 angs=all_angles_minusSatiety(~isnan(all_angles_minusSatiety))';
 mags=all_mags_minusSatiety(~isnan(all_angles_minusSatiety))';
 angs(mags>nanmean(mags)+3*mad(mags) | mags<nanmean(mags)-3*mad(mags))=nan;
 mags=mags(~isnan(angs));
 angs=angs(~isnan(angs));
-[mu,ul,ll]=circ_mean(angs,mags,1);
+% [mu,ul,ll]=circ_mean(angs,(mags/0.33),1); % mean mag is about 0.3
+edges=0:10:360;
+edges=deg2rad(edges);
+countsperbin=nan(1,length(edges)-1);
+for i=1:length(edges)-1
+    countsperbin(i)=nansum(angs(angs>=edges(i) & angs<edges(i+1)))*nansum(mags(angs>=edges(i) & angs<edges(i+1))/0.33);
+end
+[mu,ul,ll]=circ_mean((edges(1:end-1)+edges(2:end))/2',countsperbin');
+% n=histcounts(angs,deg2rad(edges));
+% [mu,ul,ll]=circ_mean(deg2rad((edges(1:end-1)+edges(2:end))/2)',n');
 disp(['mean angle MINUS SATIETY: ' num2str(rad2deg(mu))]);
 disp(['mean angle lower confidence bound MINUS SATIETY: ' num2str(rad2deg(ul))]);
 disp(['mean angle upper confidence bound MINUS SATIETY: ' num2str(rad2deg(ll))]);
+disp(['mean magnitude: ' num2str(nanmean(mags))]);
 
 % Average across each session, then plot the average shift session by
 % session
@@ -144,67 +167,21 @@ outlie=par_trial1>nanmean(par_trial1)+3*mad(par_trial1) | par_trial1<nanmean(par
        orth_trialn>nanmean(orth_trialn)+3*mad(orth_trialn) | orth_trialn<nanmean(orth_trialn)-3*mad(orth_trialn);
 changesAcrossSess_x(outlie==1)=nan;
 changesAcrossSess_y(outlie==1)=nan;
+figure(); 
+for i=1:length(changesAcrossSess_x)
+    if any(isnan([changesAcrossSess_x(i) changesAcrossSess_y(i)]))
+    else
+        quiver(0,0,changesAcrossSess_x(i),changesAcrossSess_y(i),'Color','k');
+        hold on;
+    end
+end
 figure();
-quiver(0,0,nanmean(changesAcrossSess_x),nanmean(changesAcrossSess_y));
+if isnan(nanmean(changesAcrossSess_x)) | isnan(nanmean(changesAcrossSess_y))
+else
+    quiver(0,0,nanmean(changesAcrossSess_x),nanmean(changesAcrossSess_y));
+    disp(['Magnitude of vector: ' num2str(sqrt(nanmean(changesAcrossSess_x)^2+nanmean(changesAcrossSess_y)^2))]);
+end
 
 return
-% Take components orthogonal to m's capturing satiety
-orth_comps=nan(1,length(reachRates.uncued));
-par_comps=nan(1,length(reachRates.uncued));
-orth_se=nan(1,length(reachRates.uncued));
-par_se=nan(1,length(reachRates.uncued));
-for i=1:length(reachRates.uncued)
-    % Get closest m
-    curr_m=m_binned(refsToMbinned(i));
-    vec3=[1 curr_m];
-    V_par=vec3./norm(vec3);
-    % Get m orthogonal to this
-    vec2=[-V_par(2)/V_par(1) 1];
-    V_orth=vec2./norm(vec2);
-    % Project current point onto this orthogonal_m
-    vec1=[reachRates.uncued(i) reachRates.cued(i)];
-    orth_comps(i)=vec1(1)*V_orth(1)+vec1(2)*V_orth(2);
-    par_comps(i)=vec1(1)*V_par(1)+vec1(2)*V_par(2);
-    % Project se
-    temp_uncued=reachRates.alltrials_uncued(:,i);
-    uncued_se=nanstd(temp_uncued)./sqrt(nansum(~isnan(temp_uncued)));
-    temp_cued=reachRates.alltrials_cued(:,i);
-    cued_se=nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued)));
-    se_vec=[uncued_se cued_se];
-    orth_se(i)=se_vec(1)*V_orth(1)+se_vec(2)*V_orth(2);
-    par_se(i)=se_vec(1)*V_par(1)+se_vec(2)*V_par(2);
-end
-% Plot how components evolve over trials
-figure();
-k=1;
-kstep=ceil(size(cmap,1)/length(reachRates.uncued));
-for i=1:length(orth_comps)
-    line([par_comps(i)-par_se(i) par_comps(i)+par_se(i)],[orth_comps(i) orth_comps(i)],'Color',cmap(k,:));
-    hold on; 
-    line([par_comps(i) par_comps(i)],[orth_comps(i)-orth_se(i) orth_comps(i)+orth_se(i)],'Color',cmap(k,:));
-    k=k+kstep;
-    if k>size(cmap,1)
-        k=size(cmap,1);
-    end
-end
-downSamp_par_comps=downSampAv(par_comps,ceil(length(reachRates.m)/nbins));
-downSamp_orth_comps=downSampAv(orth_comps,ceil(length(reachRates.m)/nbins));
-k=1;
-kstep=ceil(size(cmap,1)/length(downSamp_orth_comps));
-for i=1:length(downSamp_par_comps)
-    scatter(downSamp_par_comps(i),downSamp_orth_comps(i),[],cmap(k,:),'filled');
-    k=k+kstep;
-    if k>size(cmap,1)
-        k=size(cmap,1);
-    end
-end
-downSamp_par_comps(downSamp_par_comps>nanmedian(downSamp_par_comps)+3*mad(downSamp_par_comps) | downSamp_par_comps<nanmedian(downSamp_par_comps)-3*mad(downSamp_par_comps))=nan;
-downSamp_orth_comps(downSamp_orth_comps>nanmedian(downSamp_orth_comps)+3*mad(downSamp_orth_comps) | downSamp_orth_comps<nanmedian(downSamp_orth_comps)-3*mad(downSamp_orth_comps))=nan;
-firstHalf=[nanmean(downSamp_par_comps(1:floor(length(downSamp_par_comps)/2))) nanmean(downSamp_orth_comps(1:floor(length(downSamp_orth_comps)/2)))];
-secondHalf=[nanmean(downSamp_par_comps(floor(length(downSamp_par_comps)/2)+1:end)) nanmean(downSamp_orth_comps(floor(length(downSamp_orth_comps)/2)+1:end))];
-if any(isnan(firstHalf)) | any(isnan(secondHalf)) | any(isinf(firstHalf)) | any(isinf(secondHalf))
-else
-    quiver(firstHalf(1),firstHalf(2),secondHalf(1)-firstHalf(1),secondHalf(2)-firstHalf(2),'Color','k');
-end
 
 end

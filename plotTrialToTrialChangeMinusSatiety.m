@@ -53,6 +53,7 @@ all_angles=nan(1,length(fracsThroughSess));
 all_mags=nan(1,length(fracsThroughSess));
 all_angles_minusSatiety=nan(1,length(fracsThroughSess));
 all_mags_minusSatiety=nan(1,length(fracsThroughSess));
+figure();
 for i=1:length(fracsThroughSess) % for each trial to trial change from each session from each mouse
     if isnan(trial1_reachRates_uncued(i)) || isnan(trialn_reachRates_uncued(i))
         continue
@@ -79,11 +80,12 @@ for i=1:length(fracsThroughSess) % for each trial to trial change from each sess
     V_orth=vec2./norm(vec2);
     % Current trial-to-trial change
     vec1=[trialn_reachRates_uncued(i)-trial1_reachRates_uncued(i) trialn_reachRates_cued(i)-trial1_reachRates_cued(i)];
+    line([0 vec1(1)+rand(1)/50],[0 vec1(2)],'Color','k');
+    hold all;
     vec1_trial1=[trial1_reachRates_uncued(i) trial1_reachRates_cued(i)];
     vec1_trialn=[trialn_reachRates_uncued(i) trialn_reachRates_cued(i)];
     all_angles(i)=angle(complex(vec1(1),vec1(2)));
     all_mags(i)=abs(complex(vec1(1),vec1(2)));
-    hold on;
     orth_comps_change(i)=vec1(1)*V_orth(1)+vec1(2)*V_orth(2);
     par_comps_change(i)=vec1(1)*V_par(1)+vec1(2)*V_par(2);
     orth_comps_trial1(i)=vec1_trial1(1)*V_orth(1)+vec1_trial1(2)*V_orth(2);
@@ -98,7 +100,18 @@ mags=all_mags(~isnan(all_angles))';
 angs(mags>nanmean(mags)+3*mad(mags) | mags<nanmean(mags)-3*mad(mags))=nan;
 mags=mags(~isnan(angs));
 angs=angs(~isnan(angs));
-[mu,ul,ll]=circ_mean(angs,mags*100);
+% Bin angles
+% edges=0:10:360;
+% edges=deg2rad(edges);
+% countsperbin=nan(1,length(edges)-1);
+% for i=1:length(edges)-1
+%     countsperbin(i)=nansum(angs>=edges(i) & angs<edges(i+1))*(nansum(mags(angs>=edges(i) & angs<edges(i+1)))/0.33);
+% end
+% [mu,ul,ll]=circ_mean(((edges(1:end-1)+edges(2:end))/2)',countsperbin');
+% edges=0:10:360;
+% n=histcounts(angs,deg2rad(edges));
+[mu,ul,ll]=circ_mean(angs,(mags/0.33)*10,1);
+% [mu,ul,ll]=circ_mean(deg2rad((edges(1:end-1)+edges(2:end))/2)',n');
 disp(['mean angle: ' num2str(rad2deg(mu))]);
 disp(['mean angle lower confidence bound: ' num2str(rad2deg(ul))]);
 disp(['mean angle upper confidence bound: ' num2str(rad2deg(ll))]);
@@ -110,7 +123,16 @@ mags=all_mags_minusSatiety(~isnan(all_angles_minusSatiety))';
 angs(mags>nanmean(mags)+3*mad(mags) | mags<nanmean(mags)-3*mad(mags))=nan;
 mags=mags(~isnan(angs));
 angs=angs(~isnan(angs));
-[mu,ul,ll]=circ_mean(angs,mags*100,1);
+[mu,ul,ll]=circ_mean(angs,(mags/0.33)*10,1); % mean mag is about 0.3
+% edges=0:10:360;
+% edges=deg2rad(edges);
+% countsperbin=nan(1,length(edges)-1);
+% for i=1:length(edges)-1
+%     countsperbin(i)=nansum(angs>=edges(i) & angs<edges(i+1))*(nansum(mags(angs>=edges(i) & angs<edges(i+1)))/0.33);
+% end
+% [mu,ul,ll]=circ_mean(((edges(1:end-1)+edges(2:end))/2)',countsperbin');
+% n=histcounts(angs,deg2rad(edges));
+% [mu,ul,ll]=circ_mean(deg2rad((edges(1:end-1)+edges(2:end))/2)',n');
 disp(['mean angle MINUS SATIETY: ' num2str(rad2deg(mu))]);
 disp(['mean angle lower confidence bound MINUS SATIETY: ' num2str(rad2deg(ul))]);
 disp(['mean angle upper confidence bound MINUS SATIETY: ' num2str(rad2deg(ll))]);

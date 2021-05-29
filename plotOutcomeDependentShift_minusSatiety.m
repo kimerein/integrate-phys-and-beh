@@ -13,7 +13,8 @@ trialTypes.optoGroup_1back=[0; trialTypes.optoGroup(1:end-1)];
 
 % trialTypes=reachingPeaksBeforeLateOpto(alltbt,metadata,trialTypes);
 
-trial1Type='trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forward==0 & trialTypes.led==0';
+% trial1Type='trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup~=1';
+trial1Type='trialTypes.touch_in_cued_window_1forward==1 & trialTypes.optoGroup_1forward==3 & trialTypes.optoGroup~=1 & trialTypes.reachingPeaksBeforeLateOpto==1';
 % trial1Type='(trialTypes.after_cue_drop_1forward==1 | trialTypes.after_cue_success_1forward==1) & trialTypes.touched_pellet_1forward==1 & (trialTypes.led_1forward==0) & trialTypes.led==0';
 % trial2Type='(trialTypes.after_cue_drop_1back==1 | trialTypes.after_cue_success_1back==1) & trialTypes.touched_pellet_1back==1 & (trialTypes.led_1back==0) & trialTypes.isLongITI_1back==1';
 % trial2Type='(trialTypes.after_cue_drop_1back==1 | trialTypes.after_cue_success_1back==1) & trialTypes.touched_pellet_1back==1 & (trialTypes.led_1back==0)';
@@ -26,13 +27,13 @@ trial1Type='trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forwar
 nbins=50;
 
 % trial1Type='(trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1)';
-trial2Type='(trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1) & trialTypes.led==0';
+trial2Type='(trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1) & trialTypes.optoGroup~=1';
 % nbins=50;
 
 % trial1Type='(trialTypes.after_cue_no_pellet_1forward==1 | trialTypes.after_cue_miss_1forward==1) & (trialTypes.led_1forward==0)';
 % trial2Type='(trialTypes.after_cue_no_pellet_1back==1 | trialTypes.after_cue_miss_1back==1) & (trialTypes.led_1back==0)';
 % nbins=50;
-% trial1Type='(trialTypes.after_cue_no_pellet_1forward==1 | trialTypes.after_cue_miss_1forward==1) & (trialTypes.led_1forward==1 & trialTypes.isNotGroup1_1forward==1)';
+% trial1Type='(trialTypes.after_cue_no_pellet_1forward==1 | trialTypes.after_cue_miss_1forward==1) & trialTypes.touch_in_cued_window_1forward==0 & trialTypes.led==0';
 % trial2Type='(trialTypes.after_cue_no_pellet_1back==1 | trialTypes.after_cue_miss_1back==1) & (trialTypes.led_1back==1 & trialTypes.isNotGroup1_1back==1)';
 % nbins=50;
 

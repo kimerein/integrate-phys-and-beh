@@ -4,10 +4,13 @@ epsilon=0.25; % in seconds
 percentOfReachesFromSess_forInitCond=20; % use this fraction of reaches from beginning of session to get initial conditions
 maxTrialLength=9; % in sec, wrt cue
 minTrialLength=-2; % wrt cue, in sec
+% acrossSess_window1=[0 1.5];
+% acrossSess_window2=[1.5 maxTrialLength];
+% acrossSess_window3=[minTrialLength -0.5];
 acrossSess_window1=[0 1.5];
-acrossSess_window2=[1.5 maxTrialLength];
+acrossSess_window2=[minTrialLength -0.5];
 acrossSess_window3=[minTrialLength -0.5];
-addSatietyLines=true;
+addSatietyLines=false;
 
 % find cue ind
 if size(alltbt.(cueName),2)~=size(dataset.realDistributions.rawReaching_event_trial1InSeq{1},2)
@@ -146,12 +149,19 @@ out.alltrials_uncued=nan(size(changein_fixed_window1));
 if addSatietyLines==true
     out.m=nan(1,size(changein_fixed_window1,2));
 end
+nIndsForfirstRates=nanmean(n_for_init_cond);
+meansForProportionality_x=nan(size(changein_fixed_window1,1),floor(nIndsForfirstRates));
+meansForProportionality_y=nan(size(changein_fixed_window1,1),floor(nIndsForfirstRates));
 for i=1:size(changein_fixed_window1,2) % across trials
     if nanmean(changein_fixed_window1(:,i))==0 || nanmean([changein_fixed_window2(:,i); changein_fixed_window3(:,i)])==0
         continue
     end
-    temp_uncued=nanmean([changein_fixed_window2(:,i) changein_fixed_window3(:,i)],2);
-    temp_cued=changein_fixed_window1(:,i);
+%     temp_uncued=nanmean([changein_fixed_window2(:,i) changein_fixed_window3(:,i)],2);
+%     temp_uncued=nanmean([changein_fixed_window3(:,i)],2);
+%     temp_cued=changein_fixed_window1(:,i);
+    % Use approach 3 instead
+    temp_uncued=nanmean([changein_acrossSess_window2(:,i) changein_acrossSess_window3(:,i)],2);
+    temp_cued=changein_acrossSess_window1(:,i);
     if i==1
         scatter(nanmean(temp_uncued),nanmean(temp_cued),[],'k');
     end
@@ -168,26 +178,49 @@ for i=1:size(changein_fixed_window1,2) % across trials
     out.uncued(i)=nanmean(temp_uncued);
     out.alltrials_cued(:,i)=temp_cued;
     out.alltrials_uncued(:,i)=temp_uncued;
-    
+    if i<=nIndsForfirstRates
+        meansForProportionality_x(:,i)=temp_uncued;
+        meansForProportionality_y(:,i)=temp_cued;
+    end
     if addSatietyLines==true
-        delta_uncued=(nanmean(temp_uncued)^2)/(nanmean(temp_uncued)+nanmean(temp_cued));
-        delta_cued=(nanmean(temp_cued)^2)/(nanmean(temp_cued)+nanmean(temp_uncued));
+%         delta_uncued=(nanmean(temp_uncued)^2)/(nanmean(temp_uncued)+nanmean(temp_cued));
+%         delta_cued=(nanmean(temp_cued)^2)/(nanmean(temp_cued)+nanmean(temp_uncued));
+        delta_uncued=(nanmean(temp_uncued))/(nanmean(temp_uncued)+nanmean(temp_cued));
+        delta_cued=(nanmean(temp_cued))/(nanmean(temp_cued)+nanmean(temp_uncued));
         m=delta_cued/delta_uncued;
         out.m(i)=m;
         length_line_segment=nanmean([nanstd(temp_uncued)./sqrt(nansum(~isnan(temp_uncued))) nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued)))])/m;
         line([nanmean(temp_uncued)-length_line_segment/2 nanmean(temp_uncued)+length_line_segment/2],[nanmean(temp_cued)-(length_line_segment*m)/2 nanmean(temp_cued)+(length_line_segment*m)/2],'Color','k','LineWidth',0.25);
     end
 end
-tmp=cat(3,changein_fixed_window2,changein_fixed_window3); 
-C=nansum(tmp,3);
-tempuncued=nanmean(nanmean(C/2,1),2);
+% tmp=cat(3,changein_fixed_window2,changein_fixed_window3); 
+% C=nansum(tmp,3);
+% tempuncued=nanmean(nanmean(C/2,1),2);
+tempuncued=nanmean(nanmean(meansForProportionality_x,2),1);
+tempcued=nanmean(nanmean(meansForProportionality_y,2),1);
 tempuncued(isnan(tempuncued) | isinf(tempuncued))=0;
-tempcued=nanmean(nanmean(changein_fixed_window1,1),2);
+% tempcued=nanmean(nanmean(changein_fixed_window1,1),2);
 tempcued(isnan(tempcued) | isinf(tempcued))=0;
 quiver(0,0,tempuncued,tempcued,'Color','k');
 xlabel('Uncued reach rate (1/sec)');
 ylabel('Cued reach rate (1/sec)');
 title('Approach 1, window 2 vs window 1');
+
+m=tempcued/tempuncued;
+expected_y=m*out.uncued;
+actual_y=out.cued;
+actual_x=out.uncued;
+figure();
+k=1;
+kstep=ceil(size(cmap,1)/nansum(~isnan(nanmean(changein_fixed_window1,1))));
+for i=1:length(actual_y)
+    scatter(actual_x(i),actual_y(i)-expected_y(i),[],cmap(k,:));
+    hold on;
+    k=k+kstep;
+    if k>size(cmap,1)
+        k=size(cmap,1);
+    end
+end
 
 figure(); % Approach 2
 cmap=colormap('cool');
