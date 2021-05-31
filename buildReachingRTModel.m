@@ -81,27 +81,11 @@ templateSequence1_end=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_
 
 % Test data set
 % Get effects of, e.g., "Mouse touches pellet" on RT
-% nInSequence=[2 3 4 7 11];
-% nInSequence=[2];
 nInSequence=testset_settings.nInSequence;
 nRepsForBootstrap=20;
-% templateSequence2_cond=any(alltbt.all_reachBatch>0.5,2) & trialTypes.touched_pellet==0 & trialTypes.led==0 & trialTypes.paw_during_wheel==0;
-% templateSequence2_cond=any(alltbt.all_reachBatch>0.5,2) & trialTypes.touched_pellet==1 & trialTypes.led==0 & trialTypes.consumed_pellet==0;
-% templateSequence2_cond=trialTypes.touched_pellet==1 & trialTypes.led==1 & trialTypes.consumed_pellet==0;
-% templateSequence2_cond=any(alltbt.all_reachBatch(:,94:end)>0.5,2) & trialTypes.touched_pellet==0 & trialTypes.led==1 & trialTypes.consumed_pellet==0;
-% templateSequence2_cond=trialTypes.touched_pellet==0 & trialTypes.led==1;
 templateSequence2_cond=testset_settings.templateSequence2_cond;
-% templateSequence2_cond=any(alltbt.all_reachBatch>0.5,2) & trialTypes.touched_pellet==0 & trialTypes.led==0;
-% templateSequence2_end=trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1;
 templateSequence2_end=testset_settings.templateSequence2_end;
-% templateSequence2_end=trialTypes.chewing_at_trial_start==1;
-% Get raw reaching (all reaches)
-% Get reaction times
-% Get change in reaction times (non-corrected input distributions)
-% Get change in reaction times (corrected input distributions)
-% dataset.realDistributions.event_name='mouse_does_not_touch_pellet_led_on_dprime_1to3';
 dataset.realDistributions.event_name=testset_settings.event_name;
-% dataset.realDistributions.event_name='mouse_touches_pellet_dprime_1to3';
 dataset.realDistributions.nInSequence=nInSequence;
 dataset.realDistributions.nRepsForBootstrap=nRepsForBootstrap;
 dataset.realDistributions.templateSequence1_cond=templateSequence1_cond;
@@ -278,8 +262,6 @@ for i=1:length(nInSequence)
                 templateSequence1{j}=templateSequence1_end;
                 templateSequence2{j}=templateSequence2_end;
             else
-%                 templateSequence1{j}=templateSequence1_end;
-%                 templateSequence2{j}=templateSequence2_end;
                 templateSequence1{j}=ones(size(templateSequence1_end));
                 templateSequence2{j}=ones(size(templateSequence2_end));
             end

@@ -1,0 +1,167 @@
+% runReactionTimeAnalysis.m
+
+% script for running a frequently used subset of analyses
+
+%% load in data
+
+exptDataDir='/Volumes/Neurobio/MICROSCOPE/Kim/for_orchestra/combineReachData/O2 output/alltbt25May2021220005/'; % directory containing experimental data
+
+if ismac==true
+    sprtr='/';
+else
+    sprtr='\';
+end
+
+% only load these fields of alltbt
+disp('loading alltbt');
+whichFieldsToLoad={'cue','all_reachBatch','cueZone_onVoff','dprimes','isChewing','isHold','optoOn','optoZone','pawOnWheel','pelletPresent','reachBatch_all_pawOnWheel','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','reachBatch_success_reachStarts','reachStarts','pelletmissingreach_reachStarts','reachStarts_pelletPresent','times','times_wrt_trial_start','timesFromSessionStart'};
+alltbt=loadStructFieldByField([exptDataDir sprtr 'alltbt'],whichFieldsToLoad); % load alltbt
+disp('loading out');
+trialTypes=loadStructFieldByField([exptDataDir sprtr 'out']); % load out
+disp('loading metadata');
+metadata=loadStructFieldByField([exptDataDir sprtr 'metadata']); % load metadata
+a=load([exptDataDir sprtr 'reachExptAnalysis_settings.mat']); % load reach expt analysis settings 
+reachExptSettings=a.settings;
+
+% Optional
+% Back-up full, unfiltered alltbt in workspace
+backup.alltbt=alltbt;
+backup.trialTypes=trialTypes;
+backup.metadata=metadata;
+
+%% choose additional settings for reaction time analysis
+
+settings=RTanalysis_settings('display settings','clear');
+
+% find trials with long ITIs
+trialTypes=getLongITIs(alltbt,trialTypes,settings);
+
+trialTypes=getTimingOfOpto(alltbt,'optoOn',trialTypes,settings.multipleOptoTimes);
+
+trialTypes.mouseid=metadata.mouseid;
+
+% Optional: Fix sessids to match nth_sessions
+u=unique(metadata.mouseid);
+j=0;
+for i=1:length(u)
+    metadata.sessid(metadata.mouseid==u(i))=metadata.nth_session(metadata.mouseid==u(i))+j;
+    j=j+nanmax(metadata.sessid(metadata.mouseid==u(i)));
+end
+
+% Optional: dprimes for each mouse, each session
+[alltbt,trialTypes,metadata]=get_dprime_per_mouse(alltbt,trialTypes,metadata);
+
+% Optional
+% Back-up full, unfiltered alltbt in workspace
+backup.alltbt=alltbt;
+backup.trialTypes=trialTypes;
+backup.metadata=metadata;
+
+%% perform any filtering on alltbt
+% for example, filter by d-prime
+
+temp=datestr(datetime('now'));
+temp(~ismember(temp,['A':'Z' 'a':'z' '0':'9']))=''; 
+temp=temp(~isspace(temp));
+saveDir=['/Volumes/Neurobio/MICROSCOPE/Kim/RT pairs data sets/' temp]; % where to save details of alltbt filtering and RT pairs data set
+
+% filter settings
+tbt_filter.sortField='dprimes';
+tbt_filter.range_values=[0.5 1];
+tbt_filter.name=[tbt_filter.sortField num2str(tbt_filter.range_values(1)) 'to' num2str(tbt_filter.range_values(2))];
+temp=tbt_filter.name;
+temp(~ismember(temp,['A':'Z' 'a':'z' '0':'9']))=''; 
+temp=temp(~isspace(temp));
+tbt_filter.name=temp;
+tbt_filter.clock_progress=true;
+
+% filter alltbt
+[alltbt,trialTypes,metadata]=filtTbt(alltbt,trialTypes,tbt_filter.sortField,tbt_filter.range_values,metadata,tbt_filter.clock_progress);
+
+%% build relevant data sets
+
+% settings for paired RT data set
+test.nInSequence=[3]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
+% requirement for first trial in pair
+% trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
+trialTypes.isLongITI_1forward=[trialTypes.isLongITI(2:end); 0];
+trialTypes.optoGroup_1forward=[trialTypes.optoGroup(2:end); 0];
+% trial1='trialTypes.optoGroup~=1';
+trial1='trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
+% trial1='trialTypes.cued_reach_1forward==1  & trialTypes.touched_pellet_1forward==0 & (trialTypes.led_1forward==1) & trialTypes.optoGroup~=1';
+% trial1='trialTypes.cued_reach_1forward==0  & trialTypes.touched_pellet_1forward==1 & (trialTypes.led_1forward==0) & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
+test.trial1=trial1;
+test.templateSequence2_cond=eval(trial1);
+% trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
+trial2='trialTypes.optoGroup~=1';
+test.trial2=trial2;
+test.templateSequence2_end=eval(trial2);
+test.fillInBetweenWithAnything=true; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1
+test.event_name=['alltrials' tbt_filter.name 'inBetweenAnything' num2str(test.fillInBetweenWithAnything)];
+
+saveDir2=[saveDir '\' test.event_name];
+mkdir(saveDir2);
+
+% save settings for paired RT data set
+save([saveDir2 '\test_settings.mat'],'test');
+
+% build paired RT data set
+fakeCueInd=50; % in indices, this is not relevant if not using PCA-based RT model
+skipCorrected=true;
+% this function builds the dataset using the trial type sequences specified above
+[dataset,correctedDistributions]=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
+
+%% plot features in data set
+
+% last argument chooses type of plot
+% see function plotBehaviorEventFx.m for options
+plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching');
+
+%% measure how reach rate changes over course of session
+
+shuffleTrialOrder=false; % if want to randomly permute trial order to test for ordering effects
+
+reachratesettings.epsilon_cue=0; % in seconds
+reachratesettings.epsilon_uncue=2; % in seconds
+reachratesettings.epsilon_beforecue=1; % in seconds
+reachratesettings.percentOfReachesFromSess_forInitCond=20; % use this fraction of trials from beginning of session to get initial windows
+reachratesettings.percentOfReachesFromSess_forInitRate=20; % use this fraction of trials from beginning of session to get initial reach rates
+reachratesettings.maxTrialLength=9.5; % in sec, wrt cue
+reachratesettings.minTrialLength=-2; % wrt cue, in sec
+ % sec wrt cue onset
+reachratesettings.acrossSess_window1=[0.05 1]; % cued window [0.05 1]
+% reachratesettings.acrossSess_window1=[4 7];
+% note that after mouse gets a pellet, reaching is suppressed
+reachratesettings.acrossSess_window2=[7 reachratesettings.maxTrialLength]; % beware reach suppression after a success
+reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength -1]; 
+reachratesettings.scatterPointSize=50; % size for points in scatter plot
+reachratesettings.addSatietyLines=false; % whether to add proportionality lines to figure
+reachratesettings.useWindowsForUncued=[2 3]; % to use window2 or window3 or both for the uncued reach rate
+reachratesettings.useRateMethod=3; % 1, 2 or 3 (see explanation below)
+% There are 3 approaches available for determing reach rates
+% Code will calculate all three but only return useRateMethod
+%
+% Approach 1: get reach rate in each window over course of session, where windows are specified
+% wrt animal's behavior at the beginning of the session (fixed windows)
+% i.e., take the average reaction time over the first X% of trials, where X
+% is percentOfReachesFromSess_forInitCond, then windows are wrt this av
+% reaction time, such that the following eqs hold given that t_n is this
+% average reaction time
+% window1 = @(t_cue,t_n,epsilon_cue) [t_cue nanmin([t_n+epsilon_cue maxTrialLength])];                % cued window 
+% window2 = @(t_cue,t_n,epsilon_uncue) [nanmin([t_n+epsilon_uncue maxTrialLength]) maxTrialLength];   % after cued window
+% window3 = @(t_cue,t_n,epsilon_beforecue) [minTrialLength t_cue-epsilon_beforecue];                  % before cue window     
+%
+% Approach 2: get reach rate in each window over course of session, where
+% windows change with changing behavior over the course of session
+% (non-fixed windows)
+% i.e., using eqs for window1, window2, window3 above, calculate window
+% using the reaction time on the nth trial, then apply this window for
+% calculating the reach rate on the n+1th trial
+%
+% Approach 3: get reach rate in each window over course of session,
+% where windows are fixed across all sessions
+% i.e., use windows specified above as acrossSess_window1, acrossSess_window2, acrossSess_window3 
+
+reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
+
+%%

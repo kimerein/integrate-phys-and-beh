@@ -34,14 +34,7 @@ trialTypes=getTimingOfOpto(alltbt,'optoOn',trialTypes,settings.multipleOptoTimes
 
 trialTypes.mouseid=metadata.mouseid;
 
-% Optional
-% Back-up full, unfiltered alltbt in workspace
-backup.alltbt=alltbt;
-backup.trialTypes=trialTypes;
-backup.metadata=metadata;
-
-%% Optional: Fix sessids to match nth_sessions
-alltbt=backup.alltbt; trialTypes=backup.trialTypes; metadata=backup.metadata;
+% Optional: Fix sessids to match nth_sessions
 u=unique(metadata.mouseid);
 j=0;
 for i=1:length(u)
@@ -49,8 +42,14 @@ for i=1:length(u)
     j=j+nanmax(metadata.sessid(metadata.mouseid==u(i)));
 end
 
-%% Optional: dprimes for each mouse, each session
+% Optional: dprimes for each mouse, each session
 [alltbt,trialTypes,metadata]=get_dprime_per_mouse(alltbt,trialTypes,metadata);
+
+% Optional
+% Back-up full, unfiltered alltbt in workspace
+backup.alltbt=alltbt;
+backup.trialTypes=trialTypes;
+backup.metadata=metadata;
 
 %% perform any filtering on alltbt
 % for example, filter by d-prime
@@ -62,7 +61,7 @@ saveDir=['\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\RT pairs data
 
 % filter settings
 tbt_filter.sortField='dprimes';
-tbt_filter.range_values=[-100 1];
+tbt_filter.range_values=[-100 100];
 tbt_filter.name=[tbt_filter.sortField num2str(tbt_filter.range_values(1)) 'to' num2str(tbt_filter.range_values(2))];
 temp=tbt_filter.name;
 temp(~ismember(temp,['A':'Z' 'a':'z' '0':'9']))=''; 

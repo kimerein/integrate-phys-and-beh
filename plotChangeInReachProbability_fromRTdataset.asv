@@ -157,7 +157,11 @@ if useRateMethod==1 || useRateMethod==3
     approach_uncued=nan(1,size(changein_fixed_window1,2));
     approach_alltrials_cued=nan(size(changein_fixed_window1));
     approach_alltrials_uncued=nan(size(changein_fixed_window1));
-    approach_m=nan(1,size(changein_fixed_window1,2));
+    if addSatietyLines==true
+        approach_m=nan(1,size(changein_fixed_window1,2));
+    else
+        approach_m=nan;
+    end
     nIndsForfirstRates=nanmean(n_for_init_rate);
     meansForProportionality_x=nan(size(changein_fixed_window1,1),floor(nIndsForfirstRates));
     meansForProportionality_y=nan(size(changein_fixed_window1,1),floor(nIndsForfirstRates));
@@ -205,11 +209,11 @@ if useRateMethod==1 || useRateMethod==3
             meansForProportionality_x(:,i)=temp_uncued;
             meansForProportionality_y(:,i)=temp_cued;
         end
-        delta_uncued=(nanmean(temp_uncued))/(nanmean(temp_uncued)+nanmean(temp_cued));
-        delta_cued=(nanmean(temp_cued))/(nanmean(temp_cued)+nanmean(temp_uncued));
-        m=delta_cued/delta_uncued;
-        approach_m(i)=m;
-        if addSatietyLines==true
+        
+            delta_uncued=(nanmean(temp_uncued))/(nanmean(temp_uncued)+nanmean(temp_cued));
+            delta_cued=(nanmean(temp_cued))/(nanmean(temp_cued)+nanmean(temp_uncued));
+            m=delta_cued/delta_uncued;
+            approach_m(i)=m;
             length_line_segment=nanmean([nanstd(temp_uncued)./sqrt(nansum(~isnan(temp_uncued))) nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued)))])/m;
             line([nanmean(temp_uncued)-length_line_segment/2 nanmean(temp_uncued)+length_line_segment/2],[nanmean(temp_cued)-(length_line_segment*m)/2 nanmean(temp_cued)+(length_line_segment*m)/2],'Color','k','LineWidth',0.25);
         end
