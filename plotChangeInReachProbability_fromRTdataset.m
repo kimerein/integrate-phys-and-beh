@@ -106,6 +106,7 @@ changein_acrossSess_window3=nan(length(u),nanmax(totalTrialsPerSess));
 trial1_window1=nan(length(u),nanmax(totalTrialsPerSess));
 trial1_window2=nan(length(u),nanmax(totalTrialsPerSess));
 trial1_window3=nan(length(u),nanmax(totalTrialsPerSess));
+fracsThroughSess=nan(length(u),nanmax(totalTrialsPerSess));
 for i=1:length(u) % for each session
     n_for_init_cond(i)=ceil((percentOfReachesFromSess_forInitCond/100)*nansum(nth_sessions==u(i)));
     n_for_init_rate(i)=ceil((percentOfReachesFromSess_forInitRate/100)*nansum(nth_sessions==u(i)));
@@ -210,11 +211,6 @@ if useRateMethod==1 || useRateMethod==3
             changeinwindow2=changein_acrossSess_window2;
             changeinwindow3=changein_acrossSess_window3;
         end
-        if nanmean(changeinwindow1(:,i))==0 || nanmean([changeinwindow2(:,i); changeinwindow3(:,i)])==0
-            % average across sessions gave no data for this trial number, so
-            % skip -- not useful
-            continue
-        end
         if all(ismember([2 3],useWindowsForUncued))
             % average uncued reaching in these two windows
             temp_uncued=nanmean([changeinwindow2(:,i) changeinwindow3(:,i)],2);
@@ -301,9 +297,6 @@ if useRateMethod==2
     approach2_alltrials_cued=nan(size(changein_fixed_window1));
     approach2_alltrials_uncued=nan(size(changein_fixed_window1));
     for i=1:size(changein_window1,2) % across trials
-        if nanmean(changein_window1(:,i))==0 || nanmean([changein_window2(:,i); changein_window3(:,i)])==0
-            continue
-        end
         if all(ismember([2 3],useWindowsForUncued))
             % average uncued reaching in these two windows
             temp_uncued=nanmean([changein_window2(:,i) changein_window3(:,i)],2);
