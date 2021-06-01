@@ -87,8 +87,8 @@ test.nInSequence=[3]; % defines trial pairs, e.g., 2 means will compare each tri
 trialTypes.isLongITI_1forward=[trialTypes.isLongITI(2:end); 0];
 trialTypes.optoGroup_1forward=[trialTypes.optoGroup(2:end); 0];
 % trial1='trialTypes.optoGroup~=1';
-trial1='trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
-% trial1='trialTypes.cued_reach_1forward==1  & trialTypes.touched_pellet_1forward==0 & (trialTypes.led_1forward==1) & trialTypes.optoGroup~=1';
+% trial1='trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
+trial1='trialTypes.cued_reach_1forward==1  & trialTypes.touched_pellet_1forward==0 & (trialTypes.led_1forward==1) & trialTypes.optoGroup~=1';
 % trial1='trialTypes.cued_reach_1forward==0  & trialTypes.touched_pellet_1forward==1 & (trialTypes.led_1forward==0) & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
 test.trial1=trial1;
 test.templateSequence2_cond=eval(trial1);
@@ -128,6 +128,7 @@ reachratesettings.percentOfReachesFromSess_forInitCond=20; % use this fraction o
 reachratesettings.percentOfReachesFromSess_forInitRate=20; % use this fraction of trials from beginning of session to get initial reach rates
 reachratesettings.maxTrialLength=9.5; % in sec, wrt cue
 reachratesettings.minTrialLength=-2; % wrt cue, in sec
+reachratesettings.suppressPlots=false;
  % sec wrt cue onset
 reachratesettings.acrossSess_window1=[0.05 1]; % cued window [0.05 1]
 % reachratesettings.acrossSess_window1=[4 7];
@@ -137,7 +138,8 @@ reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength -1];
 reachratesettings.scatterPointSize=50; % size for points in scatter plot
 reachratesettings.addSatietyLines=false; % whether to add proportionality lines to figure
 reachratesettings.useWindowsForUncued=[2 3]; % to use window2 or window3 or both for the uncued reach rate
-reachratesettings.useRateMethod=3; % 1, 2 or 3 (see explanation below)
+reachratesettings.initWindows=[]; % empty if want to calculate from dataset
+reachratesettings.useRateMethod=1; % 1, 2 or 3 (see explanation below)
 % There are 3 approaches available for determing reach rates
 % Code will calculate all three but only return useRateMethod
 %
@@ -164,4 +166,34 @@ reachratesettings.useRateMethod=3; % 1, 2 or 3 (see explanation below)
 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 
-%%
+%% shift in reach rate between trial pair
+
+backup_test=test;
+
+% get initial reach rates within each session using all trials
+test.nInSequence=[2]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
+trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
+trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
+test.trial1=trial1;
+test.templateSequence2_cond=eval(trial1);
+test.trial2=trial2;
+test.templateSequence2_end=eval(trial2);
+test.fillInBetweenWithAnything=true; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1
+test.event_name=['alltrials' tbt_filter.name 'inBetweenAnything' num2str(test.fillInBetweenWithAnything)];
+saveDir2=[saveDir '\' test.event_name];
+mkdir(saveDir2);
+save([saveDir2 '\test_settings.mat'],'test');
+skipCorrected=true;
+dataset=buildReachingRTModel(alltbt,trialTypes,metadata,50,saveDir,test,skipCorrected); 
+reachratesettings.initWindows=[]; 
+reachratesettings.suppressPlots=true;
+reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
+initWindows{1}=reachrates.init_fixed_window1;
+initWindows{2}=reachrates.init_fixed_window2;
+initWindows{3}=reachrates.init_fixed_window3;
+reachratesettings.initWindows=initWindows; 
+% then run trial pairs
+test=backup_test;
+dataset=buildReachingRTModel(alltbt,trialTypes,metadata,50,saveDir,test,skipCorrected); 
+reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
+plotPairedChangeMinusSatiety(reachrates);
