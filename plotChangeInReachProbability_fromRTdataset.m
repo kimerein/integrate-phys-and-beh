@@ -1,16 +1,20 @@
-function [out,sessidsperrow]=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,cueName,shuffleTrialOrder)
+function [out,sessidsperrow]=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,cueName,shuffleTrialOrder,settings)
 
-epsilon=0.25; % in seconds
-percentOfReachesFromSess_forInitCond=20; % use this fraction of reaches from beginning of session to get initial conditions
-maxTrialLength=9; % in sec, wrt cue
-minTrialLength=-2; % wrt cue, in sec
-% acrossSess_window1=[0 1.5];
-% acrossSess_window2=[1.5 maxTrialLength];
-% acrossSess_window3=[minTrialLength -0.5];
-acrossSess_window1=[0 1.5];
-acrossSess_window2=[minTrialLength -0.5];
-acrossSess_window3=[minTrialLength -0.5];
-addSatietyLines=true;
+epsilon_cue=settings.epsilon_cue; % in seconds
+epsilon_uncue=settings.epsilon_uncue; % in seconds
+epsilon_beforecue=settings.epsilon_beforecue; % in seconds
+percentOfReachesFromSess_forInitCond=settings.percentOfReachesFromSess_forInitCond; % use this fraction of reaches from beginning of session to get initial conditions
+percentOfReachesFromSess_forInitRate=settings.percentOfReachesFromSess_forInitRate; % ... for initial rates
+maxTrialLength=settings.maxTrialLength; % in sec, wrt cue
+minTrialLength=settings.minTrialLength; % wrt cue, in sec
+acrossSess_window1=settings.acrossSess_window1;
+acrossSess_window2=settings.acrossSess_window2;
+acrossSess_window3=settings.acrossSess_window3;
+initWindows=settings.initWindows;
+addSatietyLines=settings.addSatietyLines;
+useRateMethod=settings.useRateMethod; % Approach 1, 2 or 3 to plot and return
+useWindowsForUncued=settings.useWindowsForUncued; % which windows to use to calculate uncued reaching, can be 2 or 3 or both
+scatterPointSize=settings.scatterPointSize;
 
 % find cue ind
 if size(alltbt.(cueName),2)~=size(dataset.realDistributions.rawReaching_event_trial1InSeq{1},2)
@@ -26,16 +30,14 @@ timeStep=mode(diff(nanmean(alltbt.times)));
 % epsilon is size of time window including cue
 % then these windows apply to reach time on trial n+1
 % if t_n > t_cue -- if using reaction times for t_n, this must be true
-% window1 = @(t_cue,t_n,epsilon) [t_cue t_n+epsilon];                                 % cued window 
-% window2 = @(t_cue,t_n,epsilon) [t_n+epsilon ((t_n+epsilon)-t_cue)+t_n+epsilon];     % after cued window
-% window3 = @(t_cue,t_n,epsilon) [t_cue-((t_n+epsilon)-t_cue) t_cue];                 % before cue window     
 window1 = @(t_cue,t_n,epsilon) [t_cue nanmin([t_n+epsilon maxTrialLength])];                             % cued window 
 window2 = @(t_cue,t_n,epsilon) [nanmin([t_n+epsilon maxTrialLength]) maxTrialLength];                    % after cued window
 window3 = @(t_cue,t_n,epsilon) [minTrialLength t_cue-epsilon];                  % before cue window     
 % then need to divide number of reaches in window by duration of window to
 % get rate
 
-% if RT is nan, might have reached before cue -- will need to check this
+% if RT is nan, might have reached before cue, and Approaches 1 and 2 will
+% give nan, but Approach 3 will give 0 as the cued reach rate
 % count up number of reaches in each window
 rts_trial_n=dataset.realDistributions.event_RT_trial1InSeq{1};
 rts_trial_nplus1=dataset.realDistributions.event_RT_trialiInSeq{1};
@@ -71,14 +73,23 @@ else
 end
 nth_sessions=metadata.sessid(matchesEventCond_trial_n);
 mouseid=metadata.mouseid(matchesEventCond_trial_n);
+[metadata,fractionThroughSess]=howFarThroughSession(metadata);
+fractionThroughSess=fractionThroughSess(matchesEventCond_trial_n);
 
 u=unique(nth_sessions);
 sessidsperrow=u;
 n_for_init_cond=nan(length(u),1);
+n_for_init_rate=nan(length(u),1);
 averageRT_trial_n=nan(length(u),1);
-init_fixed_window1=nan(length(u),2);
-init_fixed_window2=nan(length(u),2);
-init_fixed_window3=nan(length(u),2);
+if isempty(initWindows)
+    init_fixed_window1=nan(length(u),2);
+    init_fixed_window2=nan(length(u),2);
+    init_fixed_window3=nan(length(u),2);
+else
+    init_fixed_window1=initWindows{1};
+    init_fixed_window2=initWindows{2};
+    init_fixed_window3=initWindows{3};
+end
 totalTrialsPerSess=nan(length(u),1);
 for i=1:length(u)
     totalTrialsPerSess(i)=nansum(nth_sessions==u(i));
@@ -92,25 +103,31 @@ changein_window3=nan(length(u),nanmax(totalTrialsPerSess));
 changein_acrossSess_window1=nan(length(u),nanmax(totalTrialsPerSess)); % Approach 3
 changein_acrossSess_window2=nan(length(u),nanmax(totalTrialsPerSess));
 changein_acrossSess_window3=nan(length(u),nanmax(totalTrialsPerSess));
-for i=1:length(u)
+trial1_window1=nan(length(u),nanmax(totalTrialsPerSess));
+trial1_window2=nan(length(u),nanmax(totalTrialsPerSess));
+trial1_window3=nan(length(u),nanmax(totalTrialsPerSess));
+fracsThroughSess=nan(length(u),nanmax(totalTrialsPerSess));
+for i=1:length(u) % for each session
     n_for_init_cond(i)=ceil((percentOfReachesFromSess_forInitCond/100)*nansum(nth_sessions==u(i)));
+    n_for_init_rate(i)=ceil((percentOfReachesFromSess_forInitRate/100)*nansum(nth_sessions==u(i)));
     temp=rts_trial_n(nth_sessions==u(i));
     temp_rawReach=allreaches_trial_nplus1(nth_sessions==u(i),:);
+    temp_rawReach_trial1=allreaches_trial_n(nth_sessions==u(i),:);
+    subfracsForUsedTrials=fractionThroughSess(nth_sessions==u(i));
     if shuffleTrialOrder==true
         p=randperm(length(temp));
         temp=temp(p);
         temp_rawReach=temp_rawReach(p,:);
     end
     averageRT_trial_n(i)=nanmean(temp(1:n_for_init_cond(i)));
-%     if isnan(averageRT_trial_n(i)) % there were no reaches after the cue ... no opportunity to learn
-%         continue
-%     end
 
-    init_fixed_window1(i,:)=window1(0,averageRT_trial_n(i),epsilon); % this is in terms of reaction time; thus, cue time is 0
-    init_fixed_window2(i,:)=window2(0,averageRT_trial_n(i),epsilon); % this is in terms of reaction time; thus, cue time is 0
-    init_fixed_window3(i,:)=window3(0,averageRT_trial_n(i),epsilon); % this is in terms of reaction time; thus, cue time is 0
-    
-    % two approaches
+    if isempty(initWindows)
+        init_fixed_window1(i,:)=window1(0,averageRT_trial_n(i),epsilon_cue); % this is in terms of reaction time; thus, cue time is 0
+        init_fixed_window2(i,:)=window2(0,averageRT_trial_n(i),epsilon_uncue); % this is in terms of reaction time; thus, cue time is 0
+        init_fixed_window3(i,:)=window3(0,averageRT_trial_n(i),epsilon_beforecue); % this is in terms of reaction time; thus, cue time is 0
+    end
+        
+    % 3 approaches
     % Approach 1: get reach rate in each window over course of session, where windows are specified
     % wrt animal's behavior at the beginning of the session (fixed windows)
     % Approach 2: get reach rate in each window over course of session, where
@@ -124,152 +141,276 @@ for i=1:length(u)
         changein_fixed_window2(i,j)=getReachRate(init_fixed_window2(i,:),temp_rawReach(j,:),cueInd,timeStep);
         changein_fixed_window3(i,j)=getReachRate(init_fixed_window3(i,:),temp_rawReach(j,:),cueInd,timeStep);
         % APPROACH 2
-        changein_window1(i,j)=getReachRate(window1(0,temp(j),epsilon),temp_rawReach(j,:),cueInd,timeStep);
-        changein_window2(i,j)=getReachRate(window2(0,temp(j),epsilon),temp_rawReach(j,:),cueInd,timeStep);
-        changein_window3(i,j)=getReachRate(window3(0,temp(j),epsilon),temp_rawReach(j,:),cueInd,timeStep);
+        if isnan(temp(j))
+            % didn't reach at all after the cue on trial n, so any reach on
+            % trial n+1 is a change
+            changein_window1(i,j)=getReachRate(window1(0,maxTrialLength,epsilon_cue),temp_rawReach(j,:),cueInd,timeStep);
+            changein_window2(i,j)=getReachRate([maxTrialLength maxTrialLength],temp_rawReach(j,:),cueInd,timeStep);
+            changein_window3(i,j)=getReachRate(window3(0,[],epsilon_beforecue),temp_rawReach(j,:),cueInd,timeStep);
+        else
+            changein_window1(i,j)=getReachRate(window1(0,temp(j),epsilon_cue),temp_rawReach(j,:),cueInd,timeStep);
+            changein_window2(i,j)=getReachRate(window2(0,temp(j),epsilon_uncue),temp_rawReach(j,:),cueInd,timeStep);
+            changein_window3(i,j)=getReachRate(window3(0,temp(j),epsilon_beforecue),temp_rawReach(j,:),cueInd,timeStep);
+        end
         % APPROACH 3
         changein_acrossSess_window1(i,j)=getReachRate(acrossSess_window1,temp_rawReach(j,:),cueInd,timeStep);
         changein_acrossSess_window2(i,j)=getReachRate(acrossSess_window2,temp_rawReach(j,:),cueInd,timeStep);
         changein_acrossSess_window3(i,j)=getReachRate(acrossSess_window3,temp_rawReach(j,:),cueInd,timeStep);
+        
+        
+        % Also get reach rate of trial 1
+        if useRateMethod==1
+            trial1_window1(i,j)=getReachRate(init_fixed_window1(i,:),temp_rawReach_trial1(j,:),cueInd,timeStep);
+            trial1_window2(i,j)=getReachRate(init_fixed_window2(i,:),temp_rawReach_trial1(j,:),cueInd,timeStep);
+            trial1_window3(i,j)=getReachRate(init_fixed_window3(i,:),temp_rawReach_trial1(j,:),cueInd,timeStep);
+        elseif useRateMethod==2
+            % not a meaningful thing to do
+        elseif useRateMethod==3
+            trial1_window1(i,j)=getReachRate(acrossSess_window1,temp_rawReach_trial1(j,:),cueInd,timeStep);
+            trial1_window2(i,j)=getReachRate(acrossSess_window2,temp_rawReach_trial1(j,:),cueInd,timeStep);
+            trial1_window3(i,j)=getReachRate(acrossSess_window3,temp_rawReach_trial1(j,:),cueInd,timeStep);
+        end
+        
+        
+        % save when trial occured
+        fracsThroughSess(i,j)=subfracsForUsedTrials(j);  
     end
 end
 out.init_fixed_window1=init_fixed_window1;
 out.init_fixed_window2=init_fixed_window2;
 out.init_fixed_window3=init_fixed_window3;
- 
+out.fracsThroughSess=fracsThroughSess;
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Plot output
-figure(); % Approach 1
-cmap=colormap('cool');
-k=1;
-kstep=ceil(size(cmap,1)/nansum(~isnan(nanmean(changein_fixed_window1,1))));
-out.cued=nan(1,size(changein_fixed_window1,2));
-out.uncued=nan(1,size(changein_fixed_window1,2));
-out.alltrials_cued=nan(size(changein_fixed_window1));
-out.alltrials_uncued=nan(size(changein_fixed_window1));
-if addSatietyLines==true
-    out.m=nan(1,size(changein_fixed_window1,2));
-end
-nIndsForfirstRates=nanmean(n_for_init_cond./4);
-meansForProportionality_x=nan(size(changein_fixed_window1,1),floor(nIndsForfirstRates));
-meansForProportionality_y=nan(size(changein_fixed_window1,1),floor(nIndsForfirstRates));
-for i=1:size(changein_fixed_window1,2) % across trials
-    if nanmean(changein_fixed_window1(:,i))==0 || nanmean([changein_fixed_window2(:,i); changein_fixed_window3(:,i)])==0
-        continue
+if useRateMethod==1 || useRateMethod==3
+    if settings.suppressPlots==false
+        figure(); % Approach 1
     end
-    temp_uncued=nanmean([changein_fixed_window3(:,i)],2);
-    temp_cued=changein_fixed_window1(:,i);
-    % Use approach 3 instead
-%     temp_uncued=nanmean([changein_acrossSess_window2(:,i) changein_acrossSess_window3(:,i)],2);
-    temp_cued=changein_acrossSess_window1(:,i);
-    if i==1
-        scatter(nanmean(temp_uncued),nanmean(temp_cued),[],'k');
-    end
-    line([nanmean(temp_uncued)-nanstd(temp_uncued)./sqrt(nansum(~isnan(temp_uncued))) nanmean(temp_uncued)+nanstd(temp_uncued)./sqrt(nansum(~isnan(temp_uncued)))],...
-         [nanmean(temp_cued) nanmean(temp_cued)],'Color',cmap(k,:),'LineWidth',1);
-    hold on;
-    line([nanmean(temp_uncued) nanmean(temp_uncued)],...
-         [nanmean(temp_cued)-nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued))) nanmean(temp_cued)+nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued)))],'Color',cmap(k,:),'LineWidth',1);
-    k=k+kstep;
-    if k>size(cmap,1)
-        k=size(cmap,1);
-    end
-    out.cued(i)=nanmean(temp_cued);
-    out.uncued(i)=nanmean(temp_uncued);
-    out.alltrials_cued(:,i)=temp_cued;
-    out.alltrials_uncued(:,i)=temp_uncued;
-    if i<=nIndsForfirstRates
-        meansForProportionality_x(:,i)=temp_uncued;
-        meansForProportionality_y(:,i)=temp_cued;
-    end
-    if addSatietyLines==true
-%         delta_uncued=(nanmean(temp_uncued)^2)/(nanmean(temp_uncued)+nanmean(temp_cued));
-%         delta_cued=(nanmean(temp_cued)^2)/(nanmean(temp_cued)+nanmean(temp_uncued));
+    cmap=colormap('cool');
+    k=1;
+    kstep=ceil(size(cmap,1)/nansum(~isnan(nanmean(changein_fixed_window1,1))));
+    approach_cued=nan(1,size(changein_fixed_window1,2));
+    approach_uncued=nan(1,size(changein_fixed_window1,2));
+    approach_alltrials_cued=nan(size(changein_fixed_window1));
+    approach_alltrials_uncued=nan(size(changein_fixed_window1));
+    approach_trial1_cued=nan(size(changein_fixed_window1));
+    approach_trial1_uncued=nan(size(changein_fixed_window1));
+    approach_m=nan(1,size(changein_fixed_window1,2));
+    nIndsForfirstRates=nanmean(n_for_init_rate);
+    meansForProportionality_x=nan(size(changein_fixed_window1,1),floor(nIndsForfirstRates));
+    meansForProportionality_y=nan(size(changein_fixed_window1,1),floor(nIndsForfirstRates));
+    for i=1:size(changein_fixed_window1,2) % across trials
+        if useRateMethod==1
+            changeinwindow1=changein_fixed_window1;
+            changeinwindow2=changein_fixed_window2;
+            changeinwindow3=changein_fixed_window3;
+        elseif useRateMethod==3
+            changeinwindow1=changein_acrossSess_window1;
+            changeinwindow2=changein_acrossSess_window2;
+            changeinwindow3=changein_acrossSess_window3;
+        end
+        if all(ismember([2 3],useWindowsForUncued))
+            % average uncued reaching in these two windows
+            temp_uncued=nanmean([changeinwindow2(:,i) changeinwindow3(:,i)],2);
+            temp_uncued_trial1=nanmean([trial1_window2(:,i) trial1_window3(:,i)],2);
+        elseif ismember(2,useWindowsForUncued)
+            temp_uncued=nanmean([changeinwindow2(:,i)],2);
+            temp_uncued_trial1=nanmean([trial1_window2(:,i)],2);
+        elseif ismember(3,useWindowsForUncued)
+            temp_uncued=nanmean([changeinwindow3(:,i)],2);
+            temp_uncued_trial1=nanmean([trial1_window3(:,i)],2);
+        end
+        temp_cued=changeinwindow1(:,i);
+        temp_cued_trial1=trial1_window1(:,i);
+        if i==1 && settings.suppressPlots==false
+            scatter(nanmean(temp_uncued),nanmean(temp_cued),[],'k');
+        end
+        if settings.suppressPlots==false
+            line([nanmean(temp_uncued)-nanstd(temp_uncued)./sqrt(nansum(~isnan(temp_uncued))) nanmean(temp_uncued)+nanstd(temp_uncued)./sqrt(nansum(~isnan(temp_uncued)))],...
+                [nanmean(temp_cued) nanmean(temp_cued)],'Color',cmap(k,:),'LineWidth',1);
+            hold on;
+            line([nanmean(temp_uncued) nanmean(temp_uncued)],...
+                [nanmean(temp_cued)-nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued))) nanmean(temp_cued)+nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued)))],'Color',cmap(k,:),'LineWidth',1);
+        end
+        k=k+kstep;
+        if k>size(cmap,1)
+            k=size(cmap,1);
+        end
+        approach_cued(i)=nanmean(temp_cued);
+        approach_uncued(i)=nanmean(temp_uncued);
+        approach_alltrials_cued(:,i)=temp_cued;
+        approach_alltrials_uncued(:,i)=temp_uncued;
+        approach_trial1_cued(:,i)=temp_cued_trial1;
+        approach_trial1_uncued(:,i)=temp_uncued_trial1;
+        if i<=nIndsForfirstRates
+            meansForProportionality_x(:,i)=temp_uncued;
+            meansForProportionality_y(:,i)=temp_cued;
+        end
         delta_uncued=(nanmean(temp_uncued))/(nanmean(temp_uncued)+nanmean(temp_cued));
         delta_cued=(nanmean(temp_cued))/(nanmean(temp_cued)+nanmean(temp_uncued));
         m=delta_cued/delta_uncued;
-        out.m(i)=m;
-        length_line_segment=nanmean([nanstd(temp_uncued)./sqrt(nansum(~isnan(temp_uncued))) nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued)))])/m;
-        line([nanmean(temp_uncued)-length_line_segment/2 nanmean(temp_uncued)+length_line_segment/2],[nanmean(temp_cued)-(length_line_segment*m)/2 nanmean(temp_cued)+(length_line_segment*m)/2],'Color','k','LineWidth',0.25);
+        approach_m(i)=m;
+        if addSatietyLines==true && settings.suppressPlots==false
+            length_line_segment=nanmean([nanstd(temp_uncued)./sqrt(nansum(~isnan(temp_uncued))) nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued)))])/m;
+            line([nanmean(temp_uncued)-length_line_segment/2 nanmean(temp_uncued)+length_line_segment/2],[nanmean(temp_cued)-(length_line_segment*m)/2 nanmean(temp_cued)+(length_line_segment*m)/2],'Color','k','LineWidth',0.25);
+        end
     end
-end
-% tmp=cat(3,changein_fixed_window2,changein_fixed_window3); 
-% C=nansum(tmp,3);
-% tempuncued=nanmean(nanmean(C/2,1),2);
-tempuncued=nanmean(nanmean(meansForProportionality_x,2),1);
-tempcued=nanmean(nanmean(meansForProportionality_y,2),1);
-tempuncued(isnan(tempuncued) | isinf(tempuncued))=0;
-% tempcued=nanmean(nanmean(changein_fixed_window1,1),2);
-tempcued(isnan(tempcued) | isinf(tempcued))=0;
-quiver(0,0,tempuncued,tempcued,'Color','k');
-xlabel('Uncued reach rate (1/sec)');
-ylabel('Cued reach rate (1/sec)');
-title('Approach 1, window 2 vs window 1');
-
-m=tempcued/tempuncued;
-expected_y=m*out.uncued;
-actual_y=out.cued;
-actual_x=out.uncued;
-figure();
-k=1;
-kstep=ceil(size(cmap,1)/length(actual_y));
-for i=1:length(actual_y)
-    scatter(actual_x(i),actual_y(i)-expected_y(i),[],cmap(k,:));
-    hold on;
-    k=k+kstep;
-    if k>size(cmap,1)
-        k=size(cmap,1);
+    % tmp=cat(3,changein_fixed_window2,changein_fixed_window3);
+    % C=nansum(tmp,3);
+    % tempuncued=nanmean(nanmean(C/2,1),2);
+    % tempcued=nanmean(nanmean(changein_fixed_window1,1),2);
+    tempuncued=nanmean(nanmean(meansForProportionality_x,1),2);
+    tempcued=nanmean(nanmean(meansForProportionality_y,1),2);
+    tempuncued(isnan(tempuncued) | isinf(tempuncued))=0;
+    tempcued(isnan(tempcued) | isinf(tempcued))=0;
+    % quiver(0,0,tempuncued,tempcued,'Color','k');
+    if settings.suppressPlots==false
+        line([0 approach_uncued(1)],[0 (tempcued/tempuncued)*approach_uncued(1)],'Color','k','LineWidth',1.5);
+        xlabel('Uncued reach rate (1/sec)');
+        ylabel('Cued reach rate (1/sec)');
+        if useRateMethod==1
+            title('Approach 1, window 2/3 vs window 1');
+        elseif useRateMethod==3
+            title('Approach 3, window 2/3 vs window 1');
+        end
     end
-end
-line([0 0.5],[0 0],'Color','k');
-binned_x=downSampAv(actual_x,4);
-binned_ydiff=downSampAv(actual_y-expected_y,4);
-k=1;
-kstep=ceil(size(cmap,1)/length(binned_ydiff));
-for i=1:length(binned_ydiff)
-    scatter(binned_x(i),binned_ydiff(i),[],cmap(k,:),'filled');
-    hold on;
-    k=k+kstep;
-    if k>size(cmap,1)
-        k=size(cmap,1);
-    end
+    out.cued=approach_cued;
+    out.uncued=approach_uncued;
+    out.alltrials_cued=approach_alltrials_cued;
+    out.alltrials_uncued=approach_alltrials_uncued;
+    out.m=approach_m;
+    out.trial1_alltrials_uncued=approach_trial1_uncued;
+    out.trial1_alltrials_cued=approach_trial1_cued;
 end
 
 
-figure(); % Approach 2
-cmap=colormap('cool');
-k=1;
-kstep=ceil(size(cmap,1)/nansum(~isnan(nanmean(changein_window1,1))));
-for i=1:size(changein_window1,2) % across trials
-    if nanmean(changein_window1(:,i))==0 || nanmean([changein_window2(:,i); changein_window3(:,i)])==0
-        continue
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if useRateMethod==2
+    figure(); % Approach 2, proportionality lines won't make sense
+    cmap=colormap('cool');
+    k=1;
+    kstep=ceil(size(cmap,1)/nansum(~isnan(nanmean(changein_window1,1))));
+    approach2_cued=nan(1,size(changein_fixed_window1,2));
+    approach2_uncued=nan(1,size(changein_fixed_window1,2));
+    approach2_alltrials_cued=nan(size(changein_fixed_window1));
+    approach2_alltrials_uncued=nan(size(changein_fixed_window1));
+    for i=1:size(changein_window1,2) % across trials
+        if all(ismember([2 3],useWindowsForUncued))
+            % average uncued reaching in these two windows
+            temp_uncued=nanmean([changein_window2(:,i) changein_window3(:,i)],2);
+        elseif ismember(2,useWindowsForUncued)
+            temp_uncued=nanmean([changein_window2(:,i)],2);
+        elseif ismember(3,useWindowsForUncued)
+            temp_uncued=nanmean([changein_window3(:,i)],2);
+        end
+        temp_cued=changein_window1(:,i);
+        if i==1
+            scatter(nanmean(temp_uncued),nanmean(temp_cued),[],'k');
+        end
+        line([nanmean(temp_uncued)-nanstd(temp_uncued)./sqrt(nansum(~isnan(temp_uncued))) nanmean(temp_uncued)+nanstd(temp_uncued)./sqrt(nansum(~isnan(temp_uncued)))],...
+            [nanmean(temp_cued) nanmean(temp_cued)],'Color',cmap(k,:),'LineWidth',1);
+        hold on;
+        line([nanmean(temp_uncued) nanmean(temp_uncued)],...
+            [nanmean(temp_cued)-nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued))) nanmean(temp_cued)+nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued)))],'Color',cmap(k,:),'LineWidth',1);
+        approach2_cued(i)=nanmean(temp_cued);
+        approach2_uncued(i)=nanmean(temp_uncued);
+        approach2_alltrials_cued(:,i)=temp_cued;
+        approach2_alltrials_uncued(:,i)=temp_uncued;
+        k=k+kstep;
+        if k>size(cmap,1)
+            k=size(cmap,1);
+        end
     end
-    temp_uncued=nanmean([changein_window2(:,i) changein_window3(:,i)],2);
-    temp_cued=changein_window1(:,i);
-    if i==1
-        scatter(nanmean(temp_uncued),nanmean(temp_cued),[],'k');
-    end
-    line([nanmean(temp_uncued)-nanstd(temp_uncued)./sqrt(nansum(~isnan(temp_uncued))) nanmean(temp_uncued)+nanstd(temp_uncued)./sqrt(nansum(~isnan(temp_uncued)))],...
-         [nanmean(temp_cued) nanmean(temp_cued)],'Color',cmap(k,:),'LineWidth',1);
-    hold on;
-    line([nanmean(temp_uncued) nanmean(temp_uncued)],...
-         [nanmean(temp_cued)-nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued))) nanmean(temp_cued)+nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued)))],'Color',cmap(k,:),'LineWidth',1);
-    k=k+kstep;
-    if k>size(cmap,1)
-        k=size(cmap,1);
-    end
-    out.approach2_alltrials_cued(:,i)=temp_cued;
-    out.approach2_alltrials_uncued(:,i)=temp_uncued;
+%     tmp=cat(3,changein_window2,changein_window3);
+%     C=nansum(tmp,3);
+%     tempuncued=nanmean(nanmean(C/2,1),2);
+%     tempuncued(isnan(tempuncued) | isinf(tempuncued))=0;
+%     tempcued=nanmean(nanmean(changein_window1,1),2);
+%     tempcued(isnan(tempcued) | isinf(tempcued))=0;
+%     quiver(0,0,tempuncued,tempcued,'Color','k');
+    xlabel('Uncued reach rate (1/sec)');
+    ylabel('Cued reach rate (1/sec)');
+    title('Approach 2, window 2 vs window 1');
+    out.cued=approach2_cued;
+    out.uncued=approach2_uncued;
+    out.alltrials_cued=approach2_alltrials_cued;
+    out.alltrials_uncued=approach2_alltrials_uncued;
+    out.m=nan; % doesn't really make sense to return slopes for this approach
+    
+    % Plot average and s.e. cued vs. uncued for all trials, all sessions
+    temp_cued=approach2_cued(1:end);
+    temp_uncued=approach2_uncued(1:end);
+    [~,isout]=rmoutliers(temp_cued,'percentiles',[5 95]);
+    [~,isout2]=rmoutliers(temp_uncued,'percentiles',[5 95]);
+    isout=isout | isout2;
+%     isout=zeros(size(temp_cued));
+    temp_cued=temp_cued(~isout);
+    temp_uncued=temp_uncued(~isout);
+    line([mean(temp_uncued,'omitnan') mean(temp_uncued,'omitnan')],[mean(temp_cued,'omitnan')-std(temp_cued,[],2,'omitnan')./sqrt(sum(~isnan(temp_cued))) ...
+                                                                        mean(temp_cued,'omitnan')+std(temp_cued,[],2,'omitnan')./sqrt(sum(~isnan(temp_cued)))],'Color','k','LineWidth',2);
+    line([mean(temp_uncued,'omitnan')-std(temp_uncued,[],2,'omitnan')./sqrt(sum(~isnan(temp_uncued))) ...
+          mean(temp_uncued,'omitnan')+std(temp_uncued,[],2,'omitnan')./sqrt(sum(~isnan(temp_uncued)))],[mean(temp_cued,'omitnan') mean(temp_cued,'omitnan')],'Color','k','LineWidth',2);                                                           
 end
-tmp=cat(3,changein_window2,changein_window3); 
-C=nansum(tmp,3);
-tempuncued=nanmean(nanmean(C/2,1),2);
-tempuncued(isnan(tempuncued) | isinf(tempuncued))=0;
-tempcued=nanmean(nanmean(changein_window1,1),2);
-tempcued(isnan(tempcued) | isinf(tempcued))=0;
-quiver(0,0,tempuncued,tempcued,'Color','k');
-xlabel('Uncued reach rate (1/sec)');
-ylabel('Cued reach rate (1/sec)');
-title('Approach 2, window 2 vs window 1');
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Plot Y distance from proportionality line -- only reasonable for Approach
+% 1 or 3
+if (useRateMethod==1 || useRateMethod==3) && settings.suppressPlots==false
+    tempuncued=nanmean(nanmean(meansForProportionality_x,2),1);
+    tempcued=nanmean(nanmean(meansForProportionality_y,2),1);
+    m=tempcued/tempuncued;
+    expected_y=m*out.uncued;
+    actual_y=out.cued;
+    actual_x=out.uncued;
+    figure();
+    k=1;
+    kstep=ceil(size(cmap,1)/length(actual_y));
+    for i=1:length(actual_y)
+        scatter(actual_x(i),actual_y(i)-expected_y(i),scatterPointSize,cmap(k,:),'LineWidth',0.8);
+        hold on;
+        k=k+kstep;
+        if k>size(cmap,1)
+            k=size(cmap,1);
+        end
+    end
+    line([0 nanmax(out.uncued)],[0 -m*nanmax(out.uncued)],'Color',[0.5 0.5 0.5]);
+    binned_x=downSampAv(actual_x,4);
+    ydiff=actual_y-expected_y;
+    binned_ydiff=downSampAv(ydiff,4);
+    k=1;
+    kstep=ceil(size(cmap,1)/length(binned_ydiff));
+    for i=1:length(binned_ydiff)
+        scatter(binned_x(i),binned_ydiff(i),scatterPointSize,cmap(k,:),'filled','LineWidth',1);
+        hold on;
+        k=k+kstep;
+        if k>size(cmap,1)
+            k=size(cmap,1);
+        end
+    end
+    % rmoutliers only for plotting
+    [~,isout]=rmoutliers(actual_x);
+    [~,isout2]=rmoutliers(ydiff);
+    isout=isout | isout2;
+    lims=[min([actual_x(~isout) ydiff(~isout)],[],'omitnan') max([actual_x(~isout) ydiff(~isout)],[],'omitnan')];
+    xlim([0 lims(2)]);
+    ylim([lims(1) lims(2)]);
+    tempx=actual_x(~isout);
+    tempy=ydiff(~isout);
+    firstPart=[mean(tempx(1:floor(nIndsForfirstRates)),'omitnan') mean(tempy(1:floor(nIndsForfirstRates)),'omitnan')];
+    secondPart=[mean(tempx(end-floor(nIndsForfirstRates):end),'omitnan') mean(tempy(end-floor(nIndsForfirstRates):end),'omitnan')];
+    if all(~isnan([firstPart secondPart])) && all(~isinf([firstPart secondPart]))
+        quiver(firstPart(1),firstPart(2),secondPart(1)-firstPart(1),secondPart(2)-firstPart(2),'Color','k','LineWidth',2);
+    end
+    daspect([1 1 1]);
+    ylabel('Cued reach rate distance from proportionality line');
+    xlabel('Real uncued reach rate');
+    disp('Slope of quiver');
+    disp((secondPart(2)-firstPart(2))/(secondPart(1)-firstPart(1)));
+end
 
 end
 
