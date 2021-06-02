@@ -342,15 +342,16 @@ if useRateMethod==2
     % Plot average and s.e. cued vs. uncued for all trials, all sessions
     temp_cued=approach2_cued(1:end);
     temp_uncued=approach2_uncued(1:end);
-    [~,isout]=rmoutliers(temp_cued);
-    [~,isout2]=rmoutliers(temp_uncued);
+    [~,isout]=rmoutliers(temp_cued,'percentiles',[5 95]);
+    [~,isout2]=rmoutliers(temp_uncued,'percentiles',[5 95]);
     isout=isout | isout2;
+%     isout=zeros(size(temp_cued));
     temp_cued=temp_cued(~isout);
     temp_uncued=temp_uncued(~isout);
-    line([median(temp_uncued,'omitnan') median(temp_uncued,'omitnan')],[median(temp_cued,'omitnan')-std(temp_cued,[],2,'omitnan')./sqrt(sum(~isnan(temp_cued))) ...
-                                                                        median(temp_cued,'omitnan')+std(temp_cued,[],2,'omitnan')./sqrt(sum(~isnan(temp_cued)))],'Color','k','LineWidth',2);
-    line([median(temp_uncued,'omitnan')-std(temp_uncued,[],2,'omitnan')./sqrt(sum(~isnan(temp_uncued))) ...
-          median(temp_uncued,'omitnan')+std(temp_uncued,[],2,'omitnan')./sqrt(sum(~isnan(temp_uncued)))],[median(temp_cued,'omitnan') median(temp_cued,'omitnan')],'Color','k','LineWidth',2);                                                           
+    line([mean(temp_uncued,'omitnan') mean(temp_uncued,'omitnan')],[mean(temp_cued,'omitnan')-std(temp_cued,[],2,'omitnan')./sqrt(sum(~isnan(temp_cued))) ...
+                                                                        mean(temp_cued,'omitnan')+std(temp_cued,[],2,'omitnan')./sqrt(sum(~isnan(temp_cued)))],'Color','k','LineWidth',2);
+    line([mean(temp_uncued,'omitnan')-std(temp_uncued,[],2,'omitnan')./sqrt(sum(~isnan(temp_uncued))) ...
+          mean(temp_uncued,'omitnan')+std(temp_uncued,[],2,'omitnan')./sqrt(sum(~isnan(temp_uncued)))],[mean(temp_cued,'omitnan') mean(temp_cued,'omitnan')],'Color','k','LineWidth',2);                                                           
 end
 
 

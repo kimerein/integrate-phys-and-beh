@@ -43,7 +43,7 @@ y_comps_change(isinf(y_comps_change))=nan;
 % Deviation from expected
 xlab='UNCUED actual rate change minus expected rate change (1/sec)';
 ylab='CUED actual rate change minus expected rate change (1/sec)';
-plotVersus(fracsThroughSess,x_comps_change,y_comps_change,xlab,ylab,0.01);
+plotVersus(fracsThroughSess,x_comps_change,y_comps_change,xlab,ylab,0.25);
 daspect([1 1 1]);
 tempx=x_comps_change(y_comps_change>0 & ~isnan(y_comps_change) & ~isnan(x_comps_change));
 tempy=y_comps_change(y_comps_change>0 & ~isnan(y_comps_change) & ~isnan(x_comps_change));
