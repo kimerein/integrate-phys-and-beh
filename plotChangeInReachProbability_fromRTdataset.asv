@@ -323,12 +323,7 @@ if useRateMethod==2
             k=size(cmap,1);
         end
     end
-    altogether_prob_cued=approach2_alltrials_cued(1:end);
-    altogether_prob_uncued=approach2_alltrials_uncued(1:end);
-    takeTrials=~isnan(altogether_prob_cued) & ~isnan(altogether_prob_uncued);
-    altogether_prob_cued=altogether_prob_cued(takeTrials==1);
-    altogether_prob_uncued=altogether_prob_uncued(takeTrials==1);
-    scatter(nanmean(altogether_prob_uncued),nanmean(altogether_prob_cued),100,'k','filled');
+    altogether_prob_cue=
 %     tmp=cat(3,changein_window2,changein_window3);
 %     C=nansum(tmp,3);
 %     tempuncued=nanmean(nanmean(C/2,1),2);
@@ -337,7 +332,6 @@ if useRateMethod==2
 %     tempcued(isnan(tempcued) | isinf(tempcued))=0;
 %     quiver(0,0,tempuncued,tempcued,'Color','k');
     xlabel('Uncued reach rate (1/sec)');
-%     xlabel('Probability that he reached in uncued window (-2 to -1 sec before cue)');
     % ylabel('Cued reach rate (1/sec)');
     ylabel('Probability that reached faster after cue on second trial');
     title('Approach 2, window 2 vs window 1');

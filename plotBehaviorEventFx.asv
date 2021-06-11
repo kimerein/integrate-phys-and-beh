@@ -171,9 +171,9 @@ if plot_rawReaching_cdf==true
     end
     if startAtCue==false
         line([timeBinsForReaching(f) timeBinsForReaching(f)],[0 1],'Color','b');
-        c=polyfit(timeBinsForReaching(timeBinsForReaching>=preCueWindow(1) & timeBinsForReaching<=preCueWindow(2)),d1(timeBinsForReaching>=preCueWindow(1) & timeBinsForReaching<=preCueWindow(2)),1);
-        yest=polyval(c,timeBinsForReaching);
-        plot(timeBinsForReaching,yest,'Color','g'); 
+        c=polyfit(timesteps(timesteps<=timeBinsForReaching(f)),d1(timesteps<=timeBinsForReaching(f)),1);
+        yest=polyval(c,timesteps);
+        plot(timesteps,yest,'Color','g');
     end
     temp=dataset.event_name;
     temp(regexp(temp,'_'))=' ';
@@ -733,8 +733,6 @@ function [out1,out2]=plotCDF_rawReaches(data1,data2,timesteps,cueTime,tit,subtra
 % then simply accumulate distribution, selecting only time points after the
 % cue
 
-maxTrialLength=9.5; % in sec, or empty if want to include all reaches
-
 data1=sum(data1,1,'omitnan');
 data2=sum(data2,1,'omitnan');
 
@@ -743,10 +741,6 @@ if subtractPreCue==true
     data2=data2-mean(data2(timesteps>=preCueWindow(1) & timesteps<=preCueWindow(2)),2,'omitnan');
     data1(data1<0)=0;
     data2(data2<0)=0;
-end
-if ~isempty(maxTrialLength)
-    data1(timesteps>maxTrialLength)=0;
-    data2(timesteps>maxTrialLength)=0;
 end
 
 suppPlots=whetherToSuppressPlots();

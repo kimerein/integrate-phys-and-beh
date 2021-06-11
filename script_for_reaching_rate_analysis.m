@@ -59,6 +59,11 @@ end
 % Optional: dprimes for each mouse, each session
 [alltbt,trialTypes,metadata]=get_dprime_per_mouse(alltbt,trialTypes,metadata);
 
+% Optional: how far through session is each trial
+[metadata,fractionThroughSess]=howFarThroughSession(metadata,true,trialTypes);
+alltbt.fractionThroughSess=metadata.fractionThroughSess;
+trialTypes.fractionThroughSess=metadata.fractionThroughSess;
+
 % Optional
 % Back-up full, unfiltered alltbt in workspace
 backup.alltbt=alltbt;
@@ -75,7 +80,7 @@ saveDir=['/Volumes/Neurobio/MICROSCOPE/Kim/RT pairs data sets/' temp]; % where t
 
 % filter settings
 tbt_filter.sortField='dprimes';
-tbt_filter.range_values=[-100 100];
+tbt_filter.range_values=[1 2];
 tbt_filter.name=[tbt_filter.sortField num2str(tbt_filter.range_values(1)) 'to' num2str(tbt_filter.range_values(2))];
 temp=tbt_filter.name;
 temp(~ismember(temp,['A':'Z' 'a':'z' '0':'9']))=''; 
@@ -95,8 +100,8 @@ test.nInSequence=[3]; % defines trial pairs, e.g., 2 means will compare each tri
 trialTypes.isLongITI_1forward=[trialTypes.isLongITI(2:end); 0];
 trialTypes.optoGroup_1forward=[trialTypes.optoGroup(2:end); 0];
 % trial1='trialTypes.optoGroup~=1';
-trial1='trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
-% trial1='trialTypes.cued_reach_1forward==1  & trialTypes.touched_pellet_1forward==0 & (trialTypes.led_1forward==0) & trialTypes.optoGroup~=1';
+% trial1='trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
+trial1='trialTypes.cued_reach_1forward==1  & trialTypes.touched_pellet_1forward==0 & (trialTypes.led_1forward==0) & trialTypes.optoGroup~=1';
 % trial1='trialTypes.cued_reach_1forward==0  & trialTypes.touched_pellet_1forward==1 & (trialTypes.led_1forward==0) & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
 test.trial1=trial1;
 test.templateSequence2_cond=eval(trial1);
@@ -123,7 +128,8 @@ skipCorrected=true;
 
 % last argument chooses type of plot
 % see function plotBehaviorEventFx.m for options
-plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching');
+% plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching');
+plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching_cdf');
 
 %% measure how reach rate changes over course of session
 
