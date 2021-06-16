@@ -174,11 +174,24 @@ if plot_rawReaching_cdf==true
         c=polyfit(timeBinsForReaching(timeBinsForReaching>=preCueWindow(1) & timeBinsForReaching<=preCueWindow(2)),d1(timeBinsForReaching>=preCueWindow(1) & timeBinsForReaching<=preCueWindow(2)),1);
         yest=polyval(c,timeBinsForReaching);
         plot(timeBinsForReaching,yest,'Color','g'); 
+        ylim([0 1]);
     end
     temp=dataset.event_name;
     temp(regexp(temp,'_'))=' ';
     for i=1:length(dataset.event_RT_trial1InSeq)
-        plotCDF_rawReaches(dataset.rawReaching_event_trial1InSeq{i},dataset.rawReaching_event_trialiInSeq{i},timeBinsForReaching,cueTime,['CDF Raw Reaches fx of ' temp ': trial 1 (black) vs ' num2str(dataset.nInSequence(i)-1) ' later (red)'],subtractPreCue,preCueWindow);
+        [d1,d2]=plotCDF_rawReaches(dataset.rawReaching_event_trial1InSeq{i},dataset.rawReaching_event_trialiInSeq{i},timeBinsForReaching,cueTime,['CDF Raw Reaches fx of ' temp ': trial 1 (black) vs ' num2str(dataset.nInSequence(i)-1) ' later (red)'],subtractPreCue,preCueWindow);
+    end
+    if startAtCue==false
+        line([timeBinsForReaching(f) timeBinsForReaching(f)],[0 1],'Color','b');
+        c=polyfit(timeBinsForReaching(timeBinsForReaching>=preCueWindow(1) & timeBinsForReaching<=preCueWindow(2)),d2(timeBinsForReaching>=preCueWindow(1) & timeBinsForReaching<=preCueWindow(2)),1);
+        yest=polyval(c,timeBinsForReaching);
+        plot(timeBinsForReaching,yest,'Color','g'); 
+        ylim([0 1]);
+        returnThis.uncued_fit=c;
+        returnThis.timeBins=timeBinsForReaching;
+        returnThis.cueTime=timeBinsForReaching(f);
+        returnThis.cdf_trial1=d1;
+        returnThis.cdf_trial2=d2;
     end
 end
 
@@ -733,7 +746,7 @@ function [out1,out2]=plotCDF_rawReaches(data1,data2,timesteps,cueTime,tit,subtra
 % then simply accumulate distribution, selecting only time points after the
 % cue
 
-maxTrialLength=9.5; % in sec, or empty if want to include all reaches
+maxTrialLength=[]; %9.5; % in sec, or empty if want to include all reaches
 
 data1=sum(data1,1,'omitnan');
 data2=sum(data2,1,'omitnan');

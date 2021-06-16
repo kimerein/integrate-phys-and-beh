@@ -328,7 +328,22 @@ if useRateMethod==2
     takeTrials=~isnan(altogether_prob_cued) & ~isnan(altogether_prob_uncued);
     altogether_prob_cued=altogether_prob_cued(takeTrials==1);
     altogether_prob_uncued=altogether_prob_uncued(takeTrials==1);
-    scatter(nanmean(altogether_prob_uncued),nanmean(altogether_prob_cued),100,'k','filled');
+    % Show bootstrapped 95% CI
+    takeFracForBootstrap=0.66;
+    takeIndsForBootstrap=ceil(takeFracForBootstrap*length(altogether_prob_cued));
+    nRuns=100;
+    bootMeans=nan(2,nRuns);
+    for i=1:nRuns
+        takeTheseForBoot=randi(length(altogether_prob_cued),1,takeIndsForBootstrap); % with replacement
+        sub_prob_cued=altogether_prob_cued(takeTheseForBoot);
+        sub_prob_uncued=altogether_prob_uncued(takeTheseForBoot);
+        bootMeans(1,i)=nanmean(sub_prob_uncued);
+        bootMeans(2,i)=nanmean(sub_prob_cued);
+    end
+    s=scatter(bootMeans(1,:),bootMeans(2,:),20,'k','filled');
+    s.AlphaData = 0.5*ones(1,size(bootMeans,2));
+    s.MarkerFaceAlpha = 'flat';
+    scatter(nanmean(altogether_prob_uncued),nanmean(altogether_prob_cued),50,'k','filled');
 %     tmp=cat(3,changein_window2,changein_window3);
 %     C=nansum(tmp,3);
 %     tempuncued=nanmean(nanmean(C/2,1),2);
@@ -368,6 +383,30 @@ end
 % Plot Y distance from proportionality line -- only reasonable for Approach
 % 1 or 3
 if (useRateMethod==1 || useRateMethod==3) && settings.suppressPlots==false
+    % Bootstrap means
+    %altogether_prob_cued=approach_alltrials_cued(1:end);
+    altogether_prob_cued=approach_alltrials_cued(1:end)-approach_alltrials_uncued(1:end);
+    altogether_prob_uncued=approach_alltrials_uncued(1:end);
+    takeTrials=~isnan(altogether_prob_cued) & ~isnan(altogether_prob_uncued);
+    altogether_prob_cued=altogether_prob_cued(takeTrials==1);
+    altogether_prob_uncued=altogether_prob_uncued(takeTrials==1);
+    % Show bootstrapped 95% CI
+    takeFracForBootstrap=0.66;
+    takeIndsForBootstrap=ceil(takeFracForBootstrap*length(altogether_prob_cued));
+    nRuns=100;
+    bootMeans=nan(2,nRuns);
+    for i=1:nRuns
+        takeTheseForBoot=randi(length(altogether_prob_cued),1,takeIndsForBootstrap); % with replacement
+        sub_prob_cued=altogether_prob_cued(takeTheseForBoot);
+        sub_prob_uncued=altogether_prob_uncued(takeTheseForBoot);
+        bootMeans(1,i)=nanmean(sub_prob_uncued);
+        bootMeans(2,i)=nanmean(sub_prob_cued);
+    end
+    s=scatter(bootMeans(1,:),bootMeans(2,:),20,'k','filled');
+    s.AlphaData = 0.5*ones(1,size(bootMeans,2));
+    s.MarkerFaceAlpha = 'flat';
+    scatter(nanmean(altogether_prob_uncued),nanmean(altogether_prob_cued),50,'k','filled');
+    
     tempuncued=nanmean(nanmean(meansForProportionality_x,2),1);
     tempcued=nanmean(nanmean(meansForProportionality_y,2),1);
     m=tempcued/tempuncued;
@@ -404,6 +443,10 @@ if (useRateMethod==1 || useRateMethod==3) && settings.suppressPlots==false
     [~,isout2]=rmoutliers(ydiff);
     isout=isout | isout2;
     lims=[min([actual_x(~isout) ydiff(~isout)],[],'omitnan') max([actual_x(~isout) ydiff(~isout)],[],'omitnan')];
+    if lims(2)==0
+        isout=zeros(size(actual_x));
+        lims=[min([actual_x(~isout) ydiff(~isout)],[],'omitnan') max([actual_x(~isout) ydiff(~isout)],[],'omitnan')];
+    end
     xlim([0 lims(2)]);
     ylim([lims(1) lims(2)]);
     tempx=actual_x(~isout);

@@ -323,7 +323,27 @@ if useRateMethod==2
             k=size(cmap,1);
         end
     end
-    altogether_prob_cue=
+    altogether_prob_cued=approach2_alltrials_cued(1:end);
+    altogether_prob_uncued=approach2_alltrials_uncued(1:end);
+    takeTrials=~isnan(altogether_prob_cued) & ~isnan(altogether_prob_uncued);
+    altogether_prob_cued=altogether_prob_cued(takeTrials==1);
+    altogether_prob_uncued=altogether_prob_uncued(takeTrials==1);
+    % Show bootstrapped 95% CI
+    takeFracForBootstrap=0.66;
+    takeIndsForBootstrap=ceil(takeFracForBootstrap*length(altogether_prob_cued));
+    nRuns=100;
+    bootMeans=nan(2,nRuns);
+    for i=1:nRuns
+        takeTheseForBoot=randi(length(altogether_prob_cued),1,takeIndsForBootstrap); % with replacement
+        sub_prob_cued=altogether_prob_cued(takeTheseForBoot);
+        sub_prob_uncued=altogether_prob_uncued(takeTheseForBoot);
+        bootMeans(1,i)=nanmean(sub_prob_uncued);
+        bootMeans(2,i)=nanmean(sub_prob_cued);
+    end
+    s=scatter(bootMeans(1,:),bootMeans(2,:),20,'k','filled');
+    s.AlphaData = 0.5*ones(1,size(bootMeans,2));
+    s.MarkerFaceAlpha = 'flat';
+    scatter(nanmean(altogether_prob_uncued),nanmean(altogether_prob_cued),50,'k','filled');
 %     tmp=cat(3,changein_window2,changein_window3);
 %     C=nansum(tmp,3);
 %     tempuncued=nanmean(nanmean(C/2,1),2);
@@ -332,6 +352,7 @@ if useRateMethod==2
 %     tempcued(isnan(tempcued) | isinf(tempcued))=0;
 %     quiver(0,0,tempuncued,tempcued,'Color','k');
     xlabel('Uncued reach rate (1/sec)');
+%     xlabel('Probability that he reached in uncued window (-2 to -1 sec before cue)');
     % ylabel('Cued reach rate (1/sec)');
     ylabel('Probability that reached faster after cue on second trial');
     title('Approach 2, window 2 vs window 1');
@@ -398,6 +419,10 @@ if (useRateMethod==1 || useRateMethod==3) && settings.suppressPlots==false
     [~,isout2]=rmoutliers(ydiff);
     isout=isout | isout2;
     lims=[min([actual_x(~isout) ydiff(~isout)],[],'omitnan') max([actual_x(~isout) ydiff(~isout)],[],'omitnan')];
+    if lims(2)==0
+        isout=zeros(size(actual_x));
+        lims=[min([actual_x(~isout) ydiff(~isout)],[],'omitnan') max([actual_x(~isout) ydiff(~isout)],[],'omitnan')];
+    end
     xlim([0 lims(2)]);
     ylim([lims(1) lims(2)]);
     tempx=actual_x(~isout);
