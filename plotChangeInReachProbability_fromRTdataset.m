@@ -384,8 +384,8 @@ end
 % 1 or 3
 if (useRateMethod==1 || useRateMethod==3) && settings.suppressPlots==false
     % Bootstrap means
-    %altogether_prob_cued=approach_alltrials_cued(1:end);
-    altogether_prob_cued=approach_alltrials_cued(1:end)-approach_alltrials_uncued(1:end);
+    altogether_prob_cued=approach_alltrials_cued(1:end);
+    %altogether_prob_cued=approach_alltrials_cued(1:end)-approach_alltrials_uncued(1:end);
     altogether_prob_uncued=approach_alltrials_uncued(1:end);
     takeTrials=~isnan(altogether_prob_cued) & ~isnan(altogether_prob_uncued);
     altogether_prob_cued=altogether_prob_cued(takeTrials==1);
@@ -406,6 +406,34 @@ if (useRateMethod==1 || useRateMethod==3) && settings.suppressPlots==false
     s.AlphaData = 0.5*ones(1,size(bootMeans,2));
     s.MarkerFaceAlpha = 'flat';
     scatter(nanmean(altogether_prob_uncued),nanmean(altogether_prob_cued),50,'k','filled');
+    out.boot_trialn_realmean_x=nanmean(altogether_prob_uncued);
+    out.boot_trialn_realmean_y=nanmean(altogether_prob_cued);
+    out.boot_trialn=bootMeans;
+    % Bootstrap trial 1
+    altogether_prob_cued=approach_trial1_cued(1:end);
+    altogether_prob_uncued=approach_trial1_uncued(1:end);
+    takeTrials=~isnan(altogether_prob_cued) & ~isnan(altogether_prob_uncued);
+    altogether_prob_cued=altogether_prob_cued(takeTrials==1);
+    altogether_prob_uncued=altogether_prob_uncued(takeTrials==1);
+    % Show bootstrapped 95% CI
+    takeFracForBootstrap=0.66;
+    takeIndsForBootstrap=ceil(takeFracForBootstrap*length(altogether_prob_cued));
+    nRuns=100;
+    bootMeans=nan(2,nRuns);
+    for i=1:nRuns
+        takeTheseForBoot=randi(length(altogether_prob_cued),1,takeIndsForBootstrap); % with replacement
+        sub_prob_cued=altogether_prob_cued(takeTheseForBoot);
+        sub_prob_uncued=altogether_prob_uncued(takeTheseForBoot);
+        bootMeans(1,i)=nanmean(sub_prob_uncued);
+        bootMeans(2,i)=nanmean(sub_prob_cued);
+    end
+    s=scatter(bootMeans(1,:),bootMeans(2,:),20,'c','filled');
+    s.AlphaData = 0.5*ones(1,size(bootMeans,2));
+    s.MarkerFaceAlpha = 'flat';
+    scatter(nanmean(altogether_prob_uncued),nanmean(altogether_prob_cued),50,'c','filled');
+    out.boot_trial1_realmean_x=nanmean(altogether_prob_uncued);
+    out.boot_trial1_realmean_y=nanmean(altogether_prob_cued);
+    out.boot_trial1=bootMeans;
     
     tempuncued=nanmean(nanmean(meansForProportionality_x,2),1);
     tempcued=nanmean(nanmean(meansForProportionality_y,2),1);

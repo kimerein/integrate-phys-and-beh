@@ -80,7 +80,7 @@ saveDir=['/Volumes/Neurobio/MICROSCOPE/Kim/RT pairs data sets/' temp]; % where t
 
 % filter settings
 tbt_filter.sortField='dprimes';
-tbt_filter.range_values=[0.5 1.25];
+tbt_filter.range_values=[1 2];
 tbt_filter.name=[tbt_filter.sortField num2str(tbt_filter.range_values(1)) 'to' num2str(tbt_filter.range_values(2))];
 temp=tbt_filter.name;
 temp(~ismember(temp,['A':'Z' 'a':'z' '0':'9']))=''; 
@@ -100,7 +100,7 @@ test.nInSequence=[3]; % defines trial pairs, e.g., 2 means will compare each tri
 trialTypes.isLongITI_1forward=[trialTypes.isLongITI(2:end); 0];
 trialTypes.optoGroup_1forward=[trialTypes.optoGroup(2:end); 0];
 % trial1='trialTypes.optoGroup~=1';
-% trial1='trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led==0 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
+% trial1='trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
 trial1='trialTypes.cued_reach_1forward==1 & trialTypes.touched_pellet_1forward==0 & (trialTypes.led_1forward==0) & trialTypes.optoGroup~=1  & trialTypes.optoGroup_1forward~=1';
 % trial1='trialTypes.cued_reach_1forward==0  & trialTypes.touched_pellet_1forward==1 & (trialTypes.led_1forward==0) & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
 test.trial1=trial1;
@@ -157,7 +157,7 @@ reachratesettings.scatterPointSize=50; % size for points in scatter plot
 reachratesettings.addSatietyLines=false; % whether to add proportionality lines to figure
 reachratesettings.useWindowsForUncued=[3]; % to use window2 or window3 or both for the uncued reach rate
 reachratesettings.initWindows=[]; % empty if want to calculate from dataset
-reachratesettings.useRateMethod=2; % 1, 2 or 3 (see explanation below)
+reachratesettings.useRateMethod=1; % 1, 2 or 3 (see explanation below)
 % There are 3 approaches available for determing reach rates
 % Code will calculate all three but only return useRateMethod
 %

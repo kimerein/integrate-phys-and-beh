@@ -21,6 +21,7 @@ c=polyfit(timeBinsForReaching(timeBinsForReaching>=preCueWindow(1) & timeBinsFor
 yest=polyval(c,timeBinsForReaching);
 plot(timeBinsForReaching,yest,'Color','g');
 ylim([0 1]);
+xlim([0 maxTrialLength]);
 
 temp=dataset.event_name;
 temp(regexp(temp,'_'))=' ';
@@ -64,6 +65,7 @@ c1=polyfit(timeBinsForReaching(timeBinsForReaching>=preCueWindow(1) & timeBinsFo
 yest=polyval(c1,timeBinsForReaching);
 plot(timeBinsForReaching,yest,'Color','y');
 ylim([0 1]);
+xlim([0 maxTrialLength]);
 
 end
 
