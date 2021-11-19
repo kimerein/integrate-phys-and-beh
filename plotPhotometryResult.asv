@@ -364,8 +364,13 @@ end
 
 xlabel('Time (sec)');
 
-if length(plotThese)==size(alltbt.(cueName),1)
-    plotThese=1:length(plotThese);
+if isfield(alltbt,'subsampledTbt')
+    if alltbt.subsampledTbt==true
+        if length(plotThese)~=size(alltbt.(cueName),1)
+            error('Mismatch in size between trials to plot and realigned newBehavior_tbt');
+        end
+        plotThese=1:length(plotThese);
+    end
 end
 
 yi=0;

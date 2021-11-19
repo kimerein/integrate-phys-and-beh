@@ -1,4 +1,4 @@
-function [photometry_tbt,behavior_tbt,data]=photometry_triggered_on_reach(datadir_forPhotometry,datadir_forBehavior,photometry,savename_photometry)
+function [physiology_tbt,behavior_tbt,data]=physiology_triggered_on_reach(datadir_forBehavior,auxData)
 
 % rig-specific settings
 % distractor threshold
@@ -12,15 +12,10 @@ rmpath(chronuxPathWFindpeaks);
 % other settings
 distract_thresh_movie=0.5; % from alignment
 
-if isempty(photometry)
-    % load and process photometry data
-    data=processPhotometry(datadir_forPhotometry);
-
-    % save photometry
-    save(savename_photometry,'data');
-else
-    data=photometry;
-end
+data.Fs=auxData.distractorData.ADFreq;
+data.distractor=auxData.distractorData.Values';
+data.cue=auxData.cueData.Values';
+data.opto=auxData.optoData.Values';
 
 % load already processed behavior data
 if iscell(datadir_forBehavior)
@@ -66,11 +61,7 @@ temp=totalalignment.timesfromarduino(2:end)./1000-totalalignment.timesfromarduin
 temp=temp(temp~=0);
 settings.movie_fs=1/mode(temp); % movie data sampling rate in Hz
 settings.scale_factor=floor(settings.photo_fs/settings.movie_fs);
-% Choose the following two numbers based on approximate relationship between
-% sampling rate of arduino data and sampling rate of movie data.
-% For example, if movie rate is 30 frames per second and photometry data is
-% timed in ms, 1000 ms/30 ms = 33 ... scale factor is 33.
-settings.photo_dec=settings.scale_factor+2;
+settings.photo_dec=settings.scale_factor-15;
 settings.movie_dec=1;
 % discard this many frames from beginning
 settings.maxlagForInitialAlign=[]; % [] is don't want to constrain alignment
@@ -123,17 +114,17 @@ if length(a)>1
     end
 end
 
-ds=100; % use this downsample factor for the fields in downsampfields
-downsampfields={'green_mod','red_mod','opto','cue','distractor','cue_times'};
-if ds~=1
-    tbt_data_vid1=downSampleData(tbt_data_vid1,ds,downsampfields);
-    if length(a)>1
-        tbt_data_vid2=downSampleData(tbt_data_vid2,ds,downsampfields);
-        if isfield(totalalignment,'from_third_video')
-            tbt_data_vid3=downSampleData(tbt_data_vid3,ds,downsampfields);
-        end
-    end
-end
+% ds=100; % use this downsample factor for the fields in downsampfields
+% downsampfields={'green_mod','red_mod','opto','cue','distractor','cue_times'};
+% if ds~=1
+%     tbt_data_vid1=downSampleData(tbt_data_vid1,ds,downsampfields);
+%     if length(a)>1
+%         tbt_data_vid2=downSampleData(tbt_data_vid2,ds,downsampfields);
+%         if isfield(totalalignment,'from_third_video')
+%             tbt_data_vid3=downSampleData(tbt_data_vid3,ds,downsampfields);
+%         end
+%     end
+% end
 
 % concatenate tbts from two videos, should match cues in behavior tbt
 if length(a)>1

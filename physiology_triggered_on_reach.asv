@@ -1,4 +1,4 @@
-function [photometry_tbt,behavior_tbt,data]=photometry_triggered_on_reach(datadir_forPhotometry,datadir_forBehavior,photometry,savename_photometry)
+function [physiology_tbt,behavior_tbt,data]=physiology_triggered_on_reach(datadir_forBehavior,auxData)
 
 % rig-specific settings
 % distractor threshold
@@ -12,15 +12,11 @@ rmpath(chronuxPathWFindpeaks);
 % other settings
 distract_thresh_movie=0.5; % from alignment
 
-if isempty(photometry)
-    % load and process photometry data
-    data=processPhotometry(datadir_forPhotometry);
-
-    % save photometry
-    save(savename_photometry,'data');
-else
-    data=photometry;
-end
+data.Fs=auxData.distractorData.ADFreq;
+d
+% auxData.cueData=cueData;
+% auxData.distractorData=distractorData;
+% auxData.optoData=optoData;
 
 % load already processed behavior data
 if iscell(datadir_forBehavior)

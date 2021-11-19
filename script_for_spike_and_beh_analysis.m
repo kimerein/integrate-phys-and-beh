@@ -12,7 +12,7 @@ matchLEDs=1; % if 1, will take consensus led from behavior and spikes
 [spikes,cuetimes,optotimes]=process_spikes_to_plot(filename,spikes);
 
 % classify behavior sweeps
-beh_sweeps=getSweepsFromBeh(tbt,'cueZone_onVoff');
+beh_sweeps=getSweepsFromBeh(tbt,[]);
 
 % align behavior sweeps to spikes sweeps
 D=alignBehToSweeps(beh_sweeps,spikes.sweeps);

@@ -1,8 +1,8 @@
 % script for preparing directory structure before combining data across videos and days
 
 % assign mouse and session numbers
-expt_dir='\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\Behavior Final Data Sets\Learning curves w interleaved silencing';
-optoOnHere=1; % 1 if there was opto, else 0
+expt_dir='Z:\Kim\WHISPER recs\dLight1\20210421\processed beh';
+optoOnHere=0; % 1 if there was opto, else 0
 startMouseNumberingAt=1; % if want to start mouse numbers at some offset
 % organiziation of data in this directory must be 
 % top folder: by mouse name
