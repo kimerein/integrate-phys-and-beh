@@ -88,12 +88,12 @@ alltbt1=scaleMovTimes(alltbt,scaleMovieTimes,addToMovieTimes,alltbt.from_first_v
 [tbt_data_vid1,shifted_data_vid1,alltbt1]=shiftPhotometryToBehavior(data,discardedPhotoFrames_time,frontShift_time,movie_LED,movie_times,totalalignment.(useCue),totalalignment,alltbt1,minTimeBetweenCues,totalalignment.from_first_video==1,alltbt.from_first_video(:,1),padPhotoTimesAtFront);
 fromvid=alltbt.from_first_video(:,1);
 if isfield(alltbt1,'threwOutCuesAtEnd')
-    fromvid=fromvid(1:end-alltbt1.threwOutCuesAtEnd);
+    fromvid(end-alltbt1.threwOutCuesAtEnd+1:end)=0;
 end
 if isfield(alltbt1,'threwOutCuesAtFront')
-    fromvid=fromvid(alltbt1.threwOutCuesAtFront+1:end);
+    fromvid(find(fromvid==1,1,'first'):find(fromvid==1,1,'first')+(alltbt1.threwOutCuesAtFront-1))=0;
 end
-alltbt1=selectRows(alltbt1,fromvid);
+alltbt1=selectRows(alltbt,fromvid);
 
 if length(a)>1
     [discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes,padPhotoTimesAtFront]=alignDistractors(totalalignment.movie_distractor(totalalignment.from_second_video==1),data.distractor,distract_thresh_movie,distract_thresh_photometry,totalalignment.timesfromarduino(totalalignment.from_second_video==1),data.distractor_times,settings,[],[]);
@@ -101,12 +101,12 @@ if length(a)>1
     [tbt_data_vid2,shifted_data_vid2,alltbt2]=shiftPhotometryToBehavior(data,discardedPhotoFrames_time,frontShift_time,movie_LED,movie_times,totalalignment.(useCue),totalalignment,alltbt2,minTimeBetweenCues,totalalignment.from_second_video==1,alltbt.from_second_video(:,1),padPhotoTimesAtFront);
     fromvid=alltbt.from_second_video(:,1);
     if isfield(alltbt2,'threwOutCuesAtEnd')
-        fromvid=fromvid(1:end-alltbt2.threwOutCuesAtEnd);
+        fromvid(end-alltbt2.threwOutCuesAtEnd+1:end)=0;
     end
     if isfield(alltbt2,'threwOutCuesAtFront')
-        fromvid=fromvid(alltbt2.threwOutCuesAtFront+1:end);
+        fromvid(find(fromvid==1,1,'first'):find(fromvid==1,1,'first')+(alltbt2.threwOutCuesAtFront-1))=0;
     end
-    alltbt2=selectRows(alltbt2,fromvid);
+    alltbt2=selectRows(alltbt,fromvid);
     
     if isfield(totalalignment,'from_third_video')
         [discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes,padPhotoTimesAtFront]=alignDistractors(totalalignment.movie_distractor(totalalignment.from_third_video==1),data.distractor,distract_thresh_movie,distract_thresh_photometry,totalalignment.timesfromarduino(totalalignment.from_third_video==1),data.distractor_times,settings,true,0.9);
@@ -114,12 +114,12 @@ if length(a)>1
         [tbt_data_vid3,shifted_data_vid3,alltbt3]=shiftPhotometryToBehavior(data,discardedPhotoFrames_time,frontShift_time,movie_LED,movie_times,totalalignment.(useCue),totalalignment,alltbt3,minTimeBetweenCues,totalalignment.from_third_video==1,alltbt.from_third_video(:,1),padPhotoTimesAtFront);
         fromvid=alltbt.from_third_video(:,1);
         if isfield(alltbt3,'threwOutCuesAtEnd')
-            fromvid=fromvid(1:end-alltbt3.threwOutCuesAtEnd);
+            fromvid(end-alltbt3.threwOutCuesAtEnd+1:end)=0;
         end
         if isfield(alltbt3,'threwOutCuesAtFront')
-            fromvid=fromvid(alltbt3.threwOutCuesAtFront+1:end);
+            fromvid(find(fromvid==1,1,'first'):find(fromvid==1,1,'first')+(alltbt3.threwOutCuesAtFront-1))=0;
         end
-        alltbt3=selectRows(alltbt3,fromvid);
+        alltbt3=selectRows(alltbt,fromvid);
     end
 end
 
@@ -391,29 +391,43 @@ function [tbt_data,alltbt]=makeTbtData(data,alltbt,fromCurrVid,cue_mapping_data_
 temp=alltbt.(useCue);
 disp([num2str(size(temp(fromCurrVid==1,:),1)) ' cues in behavior tbt for this vid']);
 disp([num2str(length(cue_mapping_data_distract)) ' cues in data tbt']);
+alltbt.threwOutCuesAtFront=0;
+alltbt.threwOutCuesAtEnd=0;
 if size(temp(fromCurrVid==1,:),1)~=length(cue_mapping_data_distract)
-    n=input('Number of cues in data does not match number of cues in movie. Could be a problem. To throw out n cues at end of movie (blue), enter positive number (negative number for front of movie). Or quit. n: ');
-    if n>0
+    n=input('Number of cues in data does not match number of cues in movie. Could be a problem. To throw out n cues at end of movie (blue), enter positive number (negative number for front of movie). Or [neg (front) pos (end)]. Or quit. n: ');
+    if length(n)==1
+        if n>0
+            n=[0 n];
+        elseif n<0
+            n=[n 0];
+        end
+    end
+    if n(2)>0
         % throw out n cues at end of video
         f=fieldnames(alltbt);
         for i=1:length(f)
+            if strcmp(f{i},'threwOutCuesAtEnd') || strcmp(f{i},'threwOutCuesAtFront')
+                continue
+            end
             temp=alltbt.(f{i});
-            temp=temp(1:end-n,:);
+            temp=temp(1:end-n(2),:);
             alltbt.(f{i})=temp;
         end
-        alltbt.threwOutCuesAtEnd=n;
-        alltbt.threwOutCuesAtFront=0;
-    elseif n<0
-        n=abs(n);
+        alltbt.threwOutCuesAtEnd=n(2);
+    end
+    if n(1)<0
+        n(1)=abs(n(1));
         % throw out n cues at beginning of video
         f=fieldnames(alltbt);
         for i=1:length(f)
+            if strcmp(f{i},'threwOutCuesAtEnd') || strcmp(f{i},'threwOutCuesAtFront')
+                continue
+            end
             temp=alltbt.(f{i});
-            temp=temp(n+1:end,:);
+            temp=temp(n(1)+1:end,:);
             alltbt.(f{i})=temp;
         end
-        alltbt.threwOutCuesAtEnd=0;
-        alltbt.threwOutCuesAtFront=n;
+        alltbt.threwOutCuesAtFront=n(1);
     end
 end
 

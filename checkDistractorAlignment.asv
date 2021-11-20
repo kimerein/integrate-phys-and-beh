@@ -1,0 +1,8 @@
+function checkDistractorAlignment(data1,whichField1,data2)
+
+figure();
+offset=0;
+for i=1:size(data1.times_wrt_trial_start,1)
+    plot(data1.times_wrt_trial_start(i,:),data1.distractor,'Color','k');
+    hold on;
+    plot(data2.times_wrt_trial_start(i,:),data1.distractor,'Color','k');
