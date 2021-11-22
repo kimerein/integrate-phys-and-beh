@@ -8,8 +8,16 @@ function [data1,data2]=useDistractorAlignment(data1,whichTime1,whichField1,data2
 % whichTime2 is time matched to distractor
 % whichField2 is distractor
 
-settings.try_delay1=-150;
-settings.try_delay2=150;
+% for photometry
+% settings.try_delay1=-150;
+% settings.try_delay2=150;
+% settings.tryinc=0.0005; 
+% settings.try_scale1=0.8;
+% settings.try_scale2=1.2;  
+% for physiology
+settings.try_delay1=-50;
+settings.delaysteps=1;
+settings.try_delay2=50;
 settings.tryinc=0.0005; 
 settings.try_scale1=0.8;
 settings.try_scale2=1.2;  
@@ -51,7 +59,7 @@ end
 disp('Now refining alignment ...');
 tryinc=settings.tryinc;
 guess_best_delay=0;
-trydelays=guess_best_delay+settings.try_delay1:guess_best_delay+settings.try_delay2;
+trydelays=guess_best_delay+settings.try_delay1:settings.delaysteps:guess_best_delay+settings.try_delay2;
 tryscales=settings.try_scale1:tryinc:settings.try_scale2;
 sumdiffs=nan(length(tryscales),length(trydelays));
 
