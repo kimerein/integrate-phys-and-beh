@@ -21,12 +21,7 @@ for i=1:length(ls) % iterate through mice
     disp(thisname);
     if thisisdir==1 % must be the name of a mouse
         sub_ls=dir([expt_dir '\' thisname]);
-        if ~any(strcmp(mouse_database.names,thisname))
-            % add this mouse to database
-            currmousenameind=length(mouse_database.names)+1;
-            mouse_database.names{currmousenameind}=thisname;
-            notyetsavedmouseid=true;
-        end
+        mouse_database.names{length(mouse_database.names)
         for j=1:length(sub_ls) % iterate through sessions
             sub_thisname=sub_ls(j).name;
             sub_thisisdir=sub_ls(j).isdir;
@@ -36,10 +31,6 @@ for i=1:length(ls) % iterate through mice
                 % set mouse id
                 mouse_id=i-2+(startMouseNumberingAt-1);
                 save([expt_dir '\' thisname '\' sub_thisname '\mouse_id.mat'],'mouse_id');
-                if notyetsavedmouseid==true
-                    mouse_database.mouse_id(currmousenameind)=mouse_id;
-                    notyetsavedmouseid=false;
-                end
                 % set session id
                 sub_sub_ls=dir([expt_dir '\' thisname '\' sub_thisname]);
                 for l=1:length(sub_sub_ls)
