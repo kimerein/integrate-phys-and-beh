@@ -1,15 +1,10 @@
-function commonReference_usingDistractor(beh1_tbt,beh2_tbt,fieldtoalign,referencefield)
+function [beh1_tbt,beh2_tbt]=commonReference_usingDistractor(beh1_tbt,beh2_tbt,fieldtoalign)
 
 % Note that I selected a subset of trials for each of beh1_tbt and
 % beh2_tbt, depending on which trials were present in physiology and
 % photometry
-% Also, further alignment of distractors has subtly shifted
-% times_wrt_trial_start
-% And these times_wrt_trial_start match the times in physiology or
-% photometry structures
 % HOWEVER, movie_distractor should be the same in both behavior_tbt's
-% Thus, need to align trial indices, then save referents for how
-% times_wrt_trial_start lines up in two beh_tbt's
+% Thus, need to align trial indices
 
 maxTrialsLag=20; % should not be more than this many trials missing in the middle
 R_thresh=0.95; % threshold for correlation coefficient, if this is the right trial alignment
@@ -106,6 +101,34 @@ for i=1:size(backup_data1,1)
     end
 end
 checkAlignment(backup_data1*1.5,backup_data2); title('After trial-by-trial alignment');
+
+beh1_tbt.reference_into_beh2trialinds=nan(size(beh1_tbt.(fieldtoalign)));
+beh1_tbt.this_is_which_beh=1;
+data1ti=mode(backup_data1_trialinds,2);
+data2ti=mode(correct_backup_data2_trialinds,2);
+for i=1:size(beh1_tbt.reference_into_beh2trialinds,1)
+    f=find(data1ti==i);
+    if isempty(f)
+        continue
+    end
+    if f>length(data2ti) 
+        continue
+    end
+    beh1_tbt.reference_into_beh2trialinds(i,:)=ones(size(beh1_tbt.reference_into_beh2trialinds(i,:)))*data2ti(f);
+end
+beh2_tbt.reference_into_beh1trialinds=nan(size(beh2_tbt.(fieldtoalign)));
+beh2_tbt.this_is_which_beh=2;
+for i=1:size(beh2_tbt.reference_into_beh1trialinds,1)
+    f=find(data2ti==i);
+    if isempty(f)
+        continue
+    end
+    if f>length(data1ti)
+        continue
+    end
+    beh2_tbt.reference_into_beh1trialinds(i,:)=ones(size(beh2_tbt.reference_into_beh1trialinds(i,:)))*data1ti(f);
+end
+% figure(); plot(1.1*behavior_tbt.movie_distractor(10,:),'Color','k'); hold on; plot(beh2_tbt.movie_distractor(beh2_tbt.reference_into_beh1trialinds(10,1),:),'Color','r');
 
 end
 
