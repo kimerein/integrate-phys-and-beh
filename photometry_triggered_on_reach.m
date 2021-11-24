@@ -331,6 +331,7 @@ temp=temp(temp~=0);
 minSpacingBetweenCues_sig2=floor(minTimeBetweenCues/mode(temp));
 [~,anchor_index_signal1]=nanmin(abs(shifted_data.distractor_times-anchor));
 [~,anchor_index_signal2]=nanmin(abs(movie_times-anchor));
+% shifted_data.cue=zeroOutPartOfOne(shifted_data.cue,shifted_data.distractor_times,[890 894]); disp('zeroing out');
 [mapping_signal1,mapping_signal2]=countCues(shifted_data.cue./nanmax(shifted_data.cue),shifted_data.distractor_times,movie_cue,movie_times,0.5,anchor_index_signal1,anchor_index_signal2,minSpacingBetweenCues_sig1,minSpacingBetweenCues_sig2);
 % signal2 is movie, signal1 is data.distractor
 mapping_signal3=getPhotoCueMapping(mapping_signal1,shifted_data.distractor_times,shifted_data.green_time);
@@ -342,6 +343,12 @@ mapping_signal3=mapping_signal3(si);
 
 fields_like_distractor{length(fields_like_distractor)+1}='distractor';
 [tbt_data,alltbt]=makeTbtData(shifted_data,alltbt,fromCurrVid_tbt,mapping_signal1,mapping_signal2,mapping_signal3,'cueZone_onVoff',fields_like_distractor,fields_like_photometry);
+
+end
+
+function data=zeroOutPartOfOne(data,datatimes,zeroOutTime)
+
+data(datatimes>zeroOutTime(1) & datatimes<zeroOutTime(2))=0;
 
 end
 

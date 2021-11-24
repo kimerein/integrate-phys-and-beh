@@ -1,4 +1,4 @@
-function plotPhotometryResult(photometry_tbt,behavior_tbt,outdata,alignTo,plotPhotoField,plotBehField,firstInTrialOrLast)
+function plotPhotometryResult(photometry_tbt,behavior_tbt,outdata,alignTo,plotPhotoField,plotBehField,firstInTrialOrLast,withinRange)
 
 % alignTo can be 'cue','success_reachStarts'
 
@@ -30,7 +30,7 @@ alignPeaks=false;
 indsFromPeak=5;
 % withinRange=[-0.1 1.5];  % take reaches in this range, time is in seconds from onset of cue
 % withinRange=[1.5 16];  % take reaches in this range, time is in seconds from onset of cue
-withinRange=[-0.1 1.5];  % take reaches in this range, time is in seconds from onset of cue
+% withinRange=[-0.1 1.5];  % take reaches in this range, time is in seconds from onset of cue
 % withinRange=[-0.1 16];  % take reaches in this range, time is in seconds from onset of cue
 downSamp=false;
 ds=1;
@@ -151,23 +151,19 @@ switch alignTo
     case 'success_fromPerchOrWheel'
         typeOfReach=true;
         useReach='combo';
-        useCombo=behavior_tbt.success_reachStarts+behavior_tbt.success_reachStarts_pawOnWheel;
+        useCombo=behavior_tbt.reachBatch_success_reachStarts+behavior_tbt.reachBatch_success_reachStarts_pawOnWheel;
     case 'drop_fromPerchOrWheel'
         typeOfReach=true;
         useReach='combo';
-        useCombo=behavior_tbt.drop_reachStarts+behavior_tbt.drop_reachStarts_pawOnWheel;
+        useCombo=behavior_tbt.reachBatch_drop_reachStarts+behavior_tbt.reachBatch_drop_reachStarts_pawOnWheel;
     case 'miss_fromPerchOrWheel'
         typeOfReach=true;
         useReach='combo';
-        useCombo=behavior_tbt.miss_reachStarts+behavior_tbt.miss_reachStarts_pawOnWheel;
+        useCombo=behavior_tbt.reachBatch_miss_reachStarts+behavior_tbt.reachBatch_miss_reachStarts_pawOnWheel;
     case 'misses_and_pelletMissing'
         typeOfReach=true;
         useReach='combo';
-        useCombo=behavior_tbt.miss_reachStarts+behavior_tbt.miss_reachStarts_pawOnWheel+behavior_tbt.pelletmissingreach_reachStarts;
-    case 'miss batch_and_pelletMissing'
-        typeOfReach=true;
-        useReach='combo';
-        useCombo=behavior_tbt.reachBatch_miss_reachStarts+behavior_tbt.pelletmissingreach_reachStarts;
+        useCombo=behavior_tbt.reachBatch_miss_reachStarts+behavior_tbt.reachBatch_miss_reachStarts_pawOnWheel+behavior_tbt.pelletmissingreach_reachStarts;
     case 'reachBatch_success_reachStarts'
         typeOfReach=true;
         useReach=alignTo;
@@ -364,13 +360,8 @@ end
 
 xlabel('Time (sec)');
 
-if isfield(alltbt,'subsampledTbt')
-    if alltbt.subsampledTbt==true
-        if length(plotThese)~=size(alltbt.(cueName),1)
-            error('Mismatch in size between trials to plot and realigned newBehavior_tbt');
-        end
-        plotThese=1:length(plotThese);
-    end
+if length(plotThese)==size(alltbt.(cueName),1)
+    plotThese=1:length(plotThese);
 end
 
 yi=0;
