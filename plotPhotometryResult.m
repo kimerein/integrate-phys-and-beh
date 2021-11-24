@@ -314,12 +314,26 @@ function data=smoothPhotometry(data,Fs,lowPassCutoff)
     for i=1:length(smoothFields)
         currField=smoothFields{i};
         temp=data.(currField);
+        % truncate after nans begin AFTER real signal ends
+        for j=1:size(temp,1)
+            frealsig=find(~isnan(temp(j,:)) & temp(j,:)~=0,1,'last');
+            fna=find(isnan(temp(j,frealsig+1:end)),1,'first');
+            if ~isempty(fna)
+                fna=frealsig+fna;
+                temp(j,fna:end)=nan;
+            end
+        end
+        data.(currField)=temp;
+        
         disp(['Smoothing field named ' currField]);
         % can't put in nans, pad with a low value
         padval=prctile(temp(1:end),10);
         temp(isnan(temp))=padval;
         newtemp=fftFilter(temp',Fs,lowPassCutoff,1);
-        data.(currField)=real(newtemp');
+        beforenans=real(newtemp');
+        % put nans back in
+        beforenans(isnan(data.(currField)))=nan;
+        data.(currField)=beforenans;
     end
 end
 
@@ -451,16 +465,27 @@ end
 useTheseTrials=~(nansum(isnan(alignedData),2)>0.9*size(alignedData,2));
 ft=find(useTheseTrials);
 for i=1:length(ft)
-    alignedData(ft(i),1:end-floor(size(alignedData,2)/2))=smooth(alignedData(ft(i),1:end-floor(size(alignedData,2)/2)),60);
-    alignedData(ft(i),end-floor(size(alignedData,2)/2)-60:end)=nan;
+    temp=alignedData(ft(i),1:end-floor(size(alignedData,2)/2));
+    if any(isnan(temp))
+        temp=temp(~isnan(temp));
+    end
+    alignedData(ft(i),1:length(temp))=smooth(temp,60);
+    alignedData(ft(i),length(temp)+1:end)=nan;
+%     alignedData(ft(i),1:end-floor(size(alignedData,2)/2))=smooth(temp,60);
+%     alignedData(ft(i),end-floor(size(alignedData,2)/2)-60:end)=nan;
 end
 [~,mi]=nanmin(abs(times-maxTimeInSec));
+
 imagesc(times(1:mi),1:nansum(useTheseTrials),alignedData(useTheseTrials,1:mi));
 f=find(useTheseTrials);
 hold on;
 for i=1:length(f)
     [~,fp]=nanmax(behAligned(i,:));
-    line([behTimes(fp) behTimes(fp)],[i-0.5 i+0.5],'Color','w');
+    line([behTimes(fp) behTimes(fp)],[i-0.5 i+0.5],'Color','w','LineWidth',2);
+    fp=find(behAligned(i,:)>0.5);
+    for j=1:length(fp)
+        line([behTimes(fp(j)) behTimes(fp(j))],[i-0.5 i+0.5],'Color','w');
+    end
 end
 
 end
