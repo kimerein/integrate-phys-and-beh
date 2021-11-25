@@ -1,18 +1,76 @@
-function physiology_tbt=addGoodUnitsAsFields(physiology_tbt,spikes,goodUnitLabel,binsize)
+function physiology_tbt=addGoodUnitsAsFields(physiology_tbt,spikes,goodUnitLabel,binsize,bsmooth)
 
 % binsize in ms
 
-temp=spikes.labels(:,1); 
-useAssigns=unique(temp(ismember(spikes.labels(:,2),2)));
+rmExistingUnitFields=true;
 
-for i=1:length(useAssigns)
-    strunit=['unit' num2str(useAssigns(i))];
-    [n,c,edges,xpoints,ypoints]=psth_wStd_trialByTrial(filtspikes(spikes,0,'assigns',useAssigns(i)),binsize,0,14,[],[]);
-    physiology_tbt.(strunit)=
-    
+maxTrialDuration=nanmax(physiology_tbt.cuetimes_wrt_trial_start(1:end));
+
+temp=spikes.labels(:,1); 
+useAssigns=unique(temp(ismember(spikes.labels(:,2),goodUnitLabel)));
+
+strunits={};
+if rmExistingUnitFields==true
+    f=fieldnames(physiology_tbt);
+    for i=1:length(f)
+        if ~isempty(regexp(f{i},'unit'))
+            physiology_tbt=rmfield(physiology_tbt,f{i});
+        end
+    end
+else
+    % deconflict any unit assigns
+    f=fieldnames(physiology_tbt);
+    for i=1:length(f)
+        fi=f{i};
+        fexp=regexp(fi,'unit');
+        if ~isempty(fexp)
+            % check whether spikes have same unit assigns
+            funderscore=regexp(fi,'_');
+            if ~isempty(funderscore)
+                existingAssign=str2num(fi(fexp+4:funderscore-1));
+                existingInd=str2num(fi(funderscore+1:end));
+            else
+                existingAssign=str2num(fi(fexp+4:end));
+                existingInd=0;
+            end
+            if any(ismember(useAssigns,existingAssign))
+                % this assigns already exists in physiology_tbt
+                whichind=find(useAssigns==existingAssign);
+                strunits{whichind}=['unit' num2str(useAssigns(i)) '_' num2str(existingInd+1)];
+            end
+        end
+    end
 end
 
+figure();
+for i=1:length(useAssigns)
+    if isempty(strunits)
+        strunit=['unit' num2str(useAssigns(i))];
+    else
+        if isempty(strunit{i})
+            strunit=['unit' num2str(useAssigns(i))];
+        else
+            strunit=strunits{i};
+        end
+    end
+    [n,c,edges,x,y,ns]=psth_wStd_trialByTrial(filtspikes(spikes,0,'assigns',useAssigns(i)),binsize,bsmooth,maxTrialDuration,[],[]); % y is smoothed if 3rd arg is true
+    % nan out everything after trial ends
+    for j=1:size(ns,1)-1
+        triallength=physiology_tbt.phys_timepoints(j+1,1)-physiology_tbt.phys_timepoints(j,1);
+        ns(j,c>triallength)=nan;
+    end
+    physiology_tbt.(strunit)=ns;
+    if i==1
+        sumacrossunits=zeros(size(ns));
+    end
+    sumacrossunits=sumacrossunits+ns;
+    plot(x,y);
+    hold all;
+end
+physiology_tbt.unitTimes=repmat(c,size(ns,1),1);
+plot(nanmean(physiology_tbt.cuetimes_wrt_trial_start,1),nanmean(physiology_tbt.cue,1)*10,'Color','b');
 
-[n,c]=psth_wStd_trialByTrial(filtspikes(post_spikes,0,'assigns',useAssigns),10,0,14,[],[]);
-figure(); plot(c,n);
-hold on; plot(nanmean(physiology_tbt.cuetimes_wrt_trial_start,1),nanmean(physiology_tbt.cue,1)*150,'Color','b');
+% make psth that is sum across units
+physiology_tbt.unitsum=sumacrossunits;
+
+end

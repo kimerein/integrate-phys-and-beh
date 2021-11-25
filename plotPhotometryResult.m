@@ -163,7 +163,23 @@ switch alignTo
     case 'misses_and_pelletMissing'
         typeOfReach=true;
         useReach='combo';
+        excludeAfterSuccess=true;
+        excludeWithinTimeWindow=6; % in sec
+        excludeWithinInds=floor(excludeWithinTimeWindow/mode(diff(nanmean(behavior_tbt.times,1))));
         useCombo=behavior_tbt.reachBatch_miss_reachStarts+behavior_tbt.reachBatch_miss_reachStarts_pawOnWheel+behavior_tbt.pelletmissingreach_reachStarts;
+        if excludeAfterSuccess==true
+            for i=1:size(useCombo,1)
+                f=find(useCombo(i,:)>0.5,1,'first');
+                starter=f-excludeWithinInds;
+                if starter<1
+                    starter=1;
+                end
+                if any(behavior_tbt.success_reachStarts(i,starter:f)>0.5)
+                    % success before this, exclude
+                    useCombo(i,~isnan(useCombo(i,:)))=0;
+                end
+            end
+        end
     case 'reachBatch_success_reachStarts'
         typeOfReach=true;
         useReach=alignTo;
@@ -303,7 +319,11 @@ for i=1:size(successes,1)
         pelletGoneInds(j)=temp;
     end
     behavior_tbt.pelletDislodgedAfterSuccess(i,:)=zeros(size(behavior_tbt.pelletDislodgedAfterSuccess(i,:)));
-    behavior_tbt.pelletDislodgedAfterSuccess(i,pelletGoneInds)=1;
+    if isnan(pelletGoneInds)
+        behavior_tbt.pelletDislodgedAfterSuccess(i,end)=1;
+    else
+        behavior_tbt.pelletDislodgedAfterSuccess(i,pelletGoneInds)=1;
+    end
 end
 
 end
