@@ -1,0 +1,18 @@
+function physiology_tbt=addGoodUnitsAsFields(physiology_tbt,spikes,goodUnitLabel,binsize)
+
+% binsize in ms
+
+temp=spikes.labels(:,1); 
+useAssigns=unique(temp(ismember(spikes.labels(:,2),2)));
+
+for i=1:length(useAssigns)
+    strunit=['unit' num2str(useAssigns(i))];
+    [n,c,edges,xpoints,ypoints]=psth_wStd_trialByTrial(filtspikes(spikes,0,'assigns',useAssigns(i)),binsize,0,14,[],[]);
+    physiology_tbt.(strunit)=
+    
+end
+
+
+[n,c]=psth_wStd_trialByTrial(filtspikes(post_spikes,0,'assigns',useAssigns),10,0,14,[],[]);
+figure(); plot(c,n);
+hold on; plot(nanmean(physiology_tbt.cuetimes_wrt_trial_start,1),nanmean(physiology_tbt.cue,1)*150,'Color','b');

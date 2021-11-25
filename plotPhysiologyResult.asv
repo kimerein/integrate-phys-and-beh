@@ -1,4 +1,4 @@
-function plotPhotometryResult(photometry_tbt,behavior_tbt,outdata,alignTo,plotPhotoField,plotBehField,firstInTrialOrLast,withinRange)
+function plotPhysiologyResult(photometry_tbt,behavior_tbt,outdata,alignTo,plotPhotoField,plotBehField,firstInTrialOrLast,withinRange)
 
 % alignTo can be 'cue','success_reachStarts'
 
@@ -32,21 +32,38 @@ indsFromPeak=5;
 % withinRange=[1.5 16];  % take reaches in this range, time is in seconds from onset of cue
 % withinRange=[-0.1 1.5];  % take reaches in this range, time is in seconds from onset of cue
 % withinRange=[-0.1 16];  % take reaches in this range, time is in seconds from onset of cue
-downSamp=false;
-ds=1;
+downSamp=true;
+ds=100;
 maxTimeForHeatmap=9;
 
 if downSamp==true
+    downSampWhichFields={'cue','opto','cue_times','distractor','cuetimes_wrt_trial_start'};
+    discardWhichFields={'phys_timepoints','phys_inds','from_first_video','from_second_video','from_third_video'};
     f=fieldnames(photometry_tbt);
     for i=1:length(f)
-        photometry_tbt.(f{i})=downSampMatrix(photometry_tbt.(f{i}),ds);
+        if ismember(f{i},discardWhichFields)
+            rmfield(photometry_tbt,f{i});
+            continue
+        end
+        if ismember(f{i},downSampWhichFields)
+            photometry_tbt.(f{i})=downSampMatrix(photometry_tbt.(f{i}),ds);
+        end
     end
 end
 
-thesePhotoFieldsUseTimeField1={'green_mod','red_mod','opto','cue','cue_times','distractor','from_first_video','from_second_video'};
+thesePhotoFieldsUseTimeField1={'cue'};
 timeField1='cue_times';
-thesePhotoFieldsUseTimeField2={'green_ch','red_ch','nan_out_red_ch','green_time','raw_green_ch','red_time','raw_red_ch','recalc_green_ch','recalc_red_ch'};
-timeField2='red_time';
+f=fieldnames(photometry_tbt);
+thesePhotoFieldsUseTimeField2={};
+for i=1:length(f)
+    if ~isempty(regexp(f{i},'unit'))
+        if strcmp(f{i},'unitTimes')
+            continue
+        end
+        thesePhotoFieldsUseTimeField2{length(thesePhotoFieldsUseTimeField2)+1}=f{i};
+    end
+end
+timeField2='unitTimes';
 
 temp=photometry_tbt.(timeField1);
 photometry_tbt.([timeField1 '_wrt_trial_start'])=temp-repmat(temp(:,1),1,size(temp,2));
@@ -104,7 +121,8 @@ if cutBeforeNextCue==true
     ftostart_photo=find(~isnan(temp(1,:)),1,'first');
     
     f_times=nanmean(photometry_tbt.cue_times(:,f)-photometry_tbt.cue_times(:,ftostart),1);
-    [~,f_photometry_ind]=nanmin(abs(nanmean(photometry_tbt.green_time-repmat(photometry_tbt.green_time(:,ftostart_photo),1,size(photometry_tbt.green_time,2)),1)-f_times));
+    thisTimeField=photometry_tbt.(timeField2);
+    [~,f_photometry_ind]=nanmin(abs(nanmean(thisTimeField-repmat(thisTimeField(:,ftostart_photo),1,size(thisTimeField,2)),1)-f_times));
     if ismember(plotPhotoField,thesePhotoFieldsUseTimeField1)
         plotUntilInd=f;
     elseif ismember(plotPhotoField,thesePhotoFieldsUseTimeField2)
@@ -308,16 +326,20 @@ end
 
 end
 
-function data=smoothPhotometry(data,Fs,lowPassCutoff)
+function data=smoothPhotometry(data,Fs,lowPassCutoff,currField)
     smoothFields={'green_ch','red_ch'};
-    disp('Smoothing photometry fields');
+    disp('Smoothing fields');
     for i=1:length(smoothFields)
         currField=smoothFields{i};
         temp=data.(currField);
-        % truncate after nans begin
+        % truncate after nans begin AFTER real signal ends
         for j=1:size(temp,1)
-            fna=find(isnan(temp(j,:)),1,'first');
-            temp(j,fna:end)=nan;
+            frealsig=find(~isnan(temp(j,:)) & temp(j,:)~=0,1,'last');
+            fna=find(isnan(temp(j,frealsig+1:end)),1,'first');
+            if ~isempty(fna)
+                fna=frealsig+fna;
+                temp(j,fna:end)=nan;
+            end
         end
         data.(currField)=temp;
         
@@ -478,7 +500,10 @@ hold on;
 for i=1:length(f)
     [~,fp]=nanmax(behAligned(i,:));
     line([behTimes(fp) behTimes(fp)],[i-0.5 i+0.5],'Color','w','LineWidth',2);
-    fp=find(behAligned(i,:)>
+    fp=find(behAligned(i,:)>0.5);
+    for j=1:length(fp)
+        line([behTimes(fp(j)) behTimes(fp(j))],[i-0.5 i+0.5],'Color','w');
+    end
 end
 
 end
