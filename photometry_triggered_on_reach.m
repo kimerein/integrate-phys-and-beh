@@ -205,12 +205,12 @@ for i=1:length(f)
     alltbt.(f{i})=[tbt1.(f{i}); tbt2.(f{i})];
 end
 
-if ~isfield(tbt1,'from_first_video')
+if ~isfield(tbt1,'from_second_video') 
     alltbt.from_first_video=zeros(size(alltbt.(f{1})));
     alltbt.from_first_video(1:size(tbt1.(f{1}),1),:)=1;
     alltbt.from_second_video=zeros(size(alltbt.(f{1})));
     alltbt.from_second_video(size(tbt1.(f{1}),1)+1:end,:)=1;
-elseif ~isfield(tbt1,'from_third_video')
+elseif ~isfield(tbt1,'from_third_video') && isfield(tbt1,'from_second_video')
     alltbt.from_first_video=zeros(size(alltbt.(f{1})));
     alltbt.from_first_video(1:nansum(tbt1.from_first_video(:,1)),:)=tbt1.from_first_video(1:nansum(tbt1.from_first_video(:,1)),:);
     alltbt.from_second_video=zeros(size(alltbt.(f{1})));
