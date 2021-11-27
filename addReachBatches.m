@@ -3,7 +3,7 @@ function alltbt=addReachBatches(alltbt)
 lowThresh=0.05;
 
 % Find and convert reach batches
-alltbt=findReachBatches(alltbt,lowThresh,0); % last argument is 1 if plot, else 0
+alltbt=findReachBatches(alltbt,lowThresh,1); % last argument is 1 if plot, else 0
 temp=(alltbt.pelletmissingreach_reachStarts+alltbt.reachBatch_miss_reachStarts+alltbt.reachBatch_success_reachStarts_pawOnWheel+alltbt.reachBatch_drop_reachStarts_pawOnWheel+alltbt.reachBatch_miss_reachStarts_pawOnWheel+alltbt.reachBatch_success_reachStarts+alltbt.reachBatch_drop_reachStarts)>0;
 alltbt.all_reachBatch=zeros(size(alltbt.reachBatch_miss_reachStarts));
 alltbt.all_reachBatch(temp)=1;
@@ -204,10 +204,18 @@ end
 
 % Plot changes to ensure proper functioning
 if showExampleChanges==1
-    plotEventScatter(tbt,showRows,0);
-    title('BEFORE fixing reach batches');
-    plotEventScatter(tbt,showRows,1);
-    title('AFTER fixing reach batches');
+    showAllTrials=true;
+    if showAllTrials==true
+        plotEventScatter(tbt,1:size(tbt.times,1),0);
+        title('BEFORE fixing reach batches');
+        plotEventScatter(tbt,1:size(tbt.times,1),1);
+        title('AFTER fixing reach batches');
+    else
+        plotEventScatter(tbt,showRows,0);
+        title('BEFORE fixing reach batches');
+        plotEventScatter(tbt,showRows,1);
+        title('AFTER fixing reach batches');
+    end
 end
 
 end
