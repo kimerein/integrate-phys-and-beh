@@ -1,8 +1,8 @@
-function physiology_tbt=addGoodUnitsAsFields(physiology_tbt,spikes,goodUnitLabel,binsize,bsmooth)
+function [physiology_tbt,tbt_unit_phys,strunits]=addGoodUnitsAsFields(physiology_tbt,spikes,goodUnitLabel,binsize,bsmooth,rmExistingUnitFields)
 
 % binsize in ms
 
-rmExistingUnitFields=false;
+% rmExistingUnitFields=false;
 
 maxTrialDuration=nanmax(physiology_tbt.cuetimes_wrt_trial_start(1:end));
 
@@ -42,12 +42,14 @@ else
 end
 
 figure();
+tbt_unit_phys=cell(1,length(useAssigns));
 for i=1:length(useAssigns)
     if isempty(strunits)
         strunit=['unit' num2str(useAssigns(i))];
     else
         if isempty(strunit{i})
             strunit=['unit' num2str(useAssigns(i))];
+            strunits{i}=strunit;
         else
             strunit=strunits{i};
         end
@@ -59,6 +61,7 @@ for i=1:length(useAssigns)
         ns(j,c>triallength)=nan;
     end
     physiology_tbt.(strunit)=ns;
+    tbt_unit_phys{i}=ns;
     if i==1
         if isfield(physiology_tbt,'unitsum')
             sumacrossunits=physiology_tbt.unitsum;
@@ -72,6 +75,13 @@ for i=1:length(useAssigns)
 end
 physiology_tbt.unitTimes=repmat(c,size(ns,1),1);
 plot(nanmean(physiology_tbt.cuetimes_wrt_trial_start,1),nanmean(physiology_tbt.cue,1)*10,'Color','b');
+
+
+if isempty(strunits) % didn't reassign any unit names
+    for i=1:length(useAssigns)
+        strunits{i}=['unit' num2str(useAssigns(i))];
+    end
+end
 
 % make psth that is sum across units
 physiology_tbt.unitsum=sumacrossunits;

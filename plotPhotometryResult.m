@@ -1,6 +1,12 @@
-function plotPhotometryResult(photometry_tbt,behavior_tbt,outdata,alignTo,plotPhotoField,plotBehField,firstInTrialOrLast,withinRange)
+function [fout,dataout,n_events_in_av,alignmentCompanion,f_heatmap,plotBehFieldOut]=plotPhotometryResult(photometry_tbt,behavior_tbt,outdata,alignTo,plotPhotoField,plotBehField,firstInTrialOrLast,withinRange,hax)
 
-% alignTo can be 'cue','success_reachStarts'
+% alignTo can be 'cue','success_reachStarts', etc.
+fout=[];
+dataout=[];
+n_events_in_av=[];
+alignmentCompanion=[];
+f_heatmap=[];
+plotBehFieldOut=[];
 
 if strcmp(firstInTrialOrLast,'first')
     firstInTrial=true;
@@ -140,14 +146,41 @@ switch alignTo
     case 'cue'
         ftostart=find(~isnan(photometry_tbt.cue_times(1,:)),1,'first');
         f_times=nanmean(photometry_tbt.cue_times-repmat(photometry_tbt.cue_times(:,ftostart),1,size(photometry_tbt.cue_times,2)),1);
-        figure();
+        if ~isempty(hax)
+            if ~isnumeric(hax{1})
+                axes(hax{1});
+                f_heatmap=nan;
+            else
+                f_heatmap=figure();
+            end
+        else
+            f_heatmap=figure();
+        end
         plotTrialsAsHeatmap(photometry_tbt.(plotPhotoField),phototimes,photometry_tbt.cue,f_times,10,maxTimeForHeatmap);
         hold on;
         plotEventsScatter(behavior_tbt,1:size(behavior_tbt.cue,1),'cueZone_onVoff','all_reachBatch','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts',[]);
-        figure();
+        if ~isempty(hax)
+            if ~isnumeric(hax{2})
+                axes(hax{2});
+                fout=nan;
+            else
+                fout=figure();
+            end
+        else
+            fout=figure();
+        end
         plotWStderr(photometry_tbt.(plotPhotoField),phototimes,'k',plotUntilInd,size(photometry_tbt.cue,1));
+        dataout.x=phototimes;
+        dataout.y=photometry_tbt.(plotPhotoField);
         hold on;
         plotWStderr(nanmean(photometry_tbt.cue,1),f_times,'b',f,size(photometry_tbt.cue,1));
+        n_events_in_av=size(photometry_tbt.(plotPhotoField),1);
+        alignmentCompanion.x=f_times;
+        alignmentCompanion.y=nanmean(photometry_tbt.cue,1)*nanmax(nanmean(photometry_tbt.(plotPhotoField),1));
+        if ~isempty(plotBehField)
+            plotBehFieldOut.x=nanmean(behavior_tbt.times_wrt_trial_start,1);
+            plotBehFieldOut.y=behavior_tbt.(plotBehField);
+        end
     case 'success_fromPerchOrWheel'
         typeOfReach=true;
         useReach='combo';
@@ -245,13 +278,37 @@ if typeOfReach==true
     hold on;
     plotWStderr(allReachesAlignedData,behTimesAllReaches-(behTimesAllReaches(allReachesAlignedAt)-behTimes(bmax)),'k',[],size(allReachesAlignedData,1));
     
-    figure();
-    plotTrialsAsHeatmap(alignedData,phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),behAligned,behTimes,10,maxTimeForHeatmap);
+    if ~isempty(plotBehField)
+        % plot another behavior event aligned in same way 
+        [allReachesAlignedData,allReachesAlignedAt]=alignRowsToInds(behavior_tbt.(plotBehField),alignInds,300,fromInputRow,false,indsFromPeak);
+        figure();
+        plotWStderr(behAligned,behTimes,'g',[],size(behAligned,1));
+        hold on;
+        plotWStderr(allReachesAlignedData,behTimesAllReaches-(behTimesAllReaches(allReachesAlignedAt)-behTimes(bmax)),'k',[],size(allReachesAlignedData,1));
+        title([plotBehField ' (black) aligned in same way']);
+        plotBehFieldOut.x=behTimesAllReaches-(behTimesAllReaches(allReachesAlignedAt)-behTimes(bmax));
+        plotBehFieldOut.y=allReachesAlignedData;
+    end
     
     figure();
     plotTrialsAsHeatmap(alignedData,phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),behAligned,behTimes,10,maxTimeForHeatmap);
+    
+    if ~isempty(hax)
+        if ~isnumeric(hax{1})
+            axes(hax{1});
+            f_heatmap=nan;
+        else
+            f_heatmap=figure();
+        end
+    else
+        f_heatmap=figure();
+    end
+    plotTrialsAsHeatmap(alignedData,phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),behAligned,behTimes,10,maxTimeForHeatmap);
     hold on;
     whichFields={'cueZone_onVoff','all_reachBatch','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts','success_reachStarts_pawOnWheel'};
+    if ~isempty(plotBehField)
+        whichFields{length(whichFields)+1}=plotBehField;
+    end
     if isfield(behavior_tbt,'pelletDislodgedAfterSuccess')
         whichFields{length(whichFields)+1}='pelletDislodgedAfterSuccess';
     end
@@ -259,21 +316,45 @@ if typeOfReach==true
     newBehavior_tbt.times=behTimesAllReaches-(behTimesAllReaches(allbalignedAt)-behTimes(bmax));
     plotEventsScatter(newBehavior_tbt,fromInputRow(~isnan(fromInputRow)),'cueZone_onVoff','all_reachBatch','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts','success_reachStarts_pawOnWheel');
     
+    if ~isempty(plotBehField)
+        figure();
+        plotTrialsAsHeatmap(alignedData,phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),behAligned,behTimes,10,maxTimeForHeatmap,true);
+        hold on;
+        plotEventsScatter(newBehavior_tbt,fromInputRow(~isnan(fromInputRow)),'cueZone_onVoff','all_reachBatch','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts',plotBehField);
+        title(['Black dots are ' plotBehField]);
+    end
+    
     figure();
     hold on;
     plotEventsScatter(behavior_tbt,fromInputRow(~isnan(fromInputRow)),'cueZone_onVoff','all_reachBatch','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts','success_reachStarts_pawOnWheel');
-    figure();
+    if ~isempty(hax)
+        if ~isnumeric(hax{2})
+            axes(hax{2});
+            fout=nan;
+        else
+            fout=figure();
+        end
+    else
+        fout=figure();
+    end
     plotWStderr(alignedData,phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),'k',[],size(behAligned,1));
+    dataout.x=phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax));
+    dataout.y=alignedData;
     hold on;
     te=nanmean(alignedData,1);
     te=te(~isnan(te));
     if nansum(te<=0)<length(te)*0.9
         % scale behavior
         plotWStderr((behAligned./nanmax(nanmean(behAligned,1))).*range(te(te>0))+nanmin(te(te>0)),behTimes,'g',[],size(behAligned,1));
+        alignmentCompanion.x=behTimes;
+        alignmentCompanion.y=(behAligned./nanmax(nanmean(behAligned,1))).*range(te(te>0))+nanmin(te(te>0));
     else
         plotWStderr(behAligned,behTimes,'g',[],size(behAligned,1));
+        alignmentCompanion.x=behTimes;
+        alignmentCompanion.y=behAligned;
     end
     disp([num2str(size(behAligned,1)) ' events averaged']);
+    n_events_in_av=size(behAligned,1);
 end
 
 end
