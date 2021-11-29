@@ -112,7 +112,12 @@ for i=1:Nw
                 if isPhysField(j)==1
                     if k==1
                         [fout,dataout,n_events_in_av,alignmentCompanion,f_heatmap,plotBehFieldOut,su]=plotPhysiologyResult(physiology_tbt,phys_beh_tbt,[],alignments{i},physthenphoto_fields{j},beh_fields{k},withintimewindow{i},timewindows{i},{nan ha(indintoha)});
-                        ylabel([physthenphoto_fields{j} ' aligned to ' alignments{i}]);
+                        plottedIntoWhichAxes=indintoha;
+                        if ~strcmp()
+                        strtoplot=[physthenphoto_fields{j} ' aligned to ' alignments{i}];
+                        f_=regexp(strtoplot,'_');
+                        strtoplot(f_)=' ';
+                        text(nanmin(dataout.x),nanmax(nanmean(dataout.y,1)),strtoplot);
                         indintoha=indintoha+1;
                         closeAllBut(mainfig1);
                     else
@@ -125,11 +130,14 @@ for i=1:Nw
                     hold on;
                     rescale=nanmax(nanmean(plotBehFieldOut.y,1))/nanmax(nanmean(alignmentCompanion.y,1));
                     plotWStderr(alignmentCompanion.y.*rescale,alignmentCompanion.x,'g',[],size(alignmentCompanion.y,1));
-                    ylabel([beh_fields{k} ' aligned to ' alignments{i}]);
+                    strtoplot=[beh_fields{k} ' aligned to ' alignments{i}];
+                    f_=regexp(strtoplot,'_');
+                    strtoplot(f_)=' ';
+                    text(nanmin(plotBehFieldOut.x),nanmax(nanmean(plotBehFieldOut.y,1)),strtoplot);
                 else
                     if k==1
                         [fout,dataout,n_events_in_av,alignmentCompanion,f_heatmap,plotBehFieldOut]=plotPhotometryResult(photometry_tbt,photo_beh_tbt,[],alignments{i},physthenphoto_fields{j},beh_fields{k},withintimewindow{i},timewindows{i},{ha(indintoha) ha(indintoha+1)});
-                        ylabel([physthenphoto_fields{j} ' aligned to ' alignments{i}]);
+                        text(nanmin(dataout.x),nanmax(dataout.y),[physthenphoto_fields{j} ' aligned to ' alignments{i}]);
                         indintoha=indintoha+2;
                         closeAllBut(mainfig1);
                     else
@@ -142,13 +150,20 @@ for i=1:Nw
                     hold on;
                     rescale=nanmax(nanmean(plotBehFieldOut.y,1))/nanmax(nanmean(alignmentCompanion.y,1));
                     plotWStderr(alignmentCompanion.y.*rescale,alignmentCompanion.x,'g',[],size(alignmentCompanion.y,1));
-                    ylabel([beh_fields{k} ' aligned to ' alignments{i}]);
+                    strtoplot=[beh_fields{k} ' aligned to ' alignments{i}];
+                    f_=regexp(strtoplot,'_');
+                    strtoplot(f_)=' ';
+                    text(nanmin(plotBehFieldOut.x),nanmax(nanmean(plotBehFieldOut.y,1)),strtoplot);
                 end
             else
                 if isPhysField(j)==1
                     if k==1
                         [fout,dataout,n_events_in_av,alignmentCompanion,f_heatmap,plotBehFieldOut,su]=plotPhysiologyResult(physiology_tbt,phys_beh_tbt,[],alignments{i},physthenphoto_fields{j},[],withintimewindow{i},timewindows{i},{nan ha(indintoha)});
-                        ylabel([physthenphoto_fields{j} ' aligned to ' alignments{i}]);
+                        plottedIntoWhichAxes=indintoha;
+                        strtoplot=[physthenphoto_fields{j} ' aligned to ' alignments{i}];
+                        f_=regexp(strtoplot,'_');
+                        strtoplot(f_)=' ';
+                        text(nanmin(dataout.x),nanmax(nanmean(dataout.y,1)),strtoplot);
                         indintoha=indintoha+1;
                         closeAllBut(mainfig1);
                     else
@@ -157,7 +172,10 @@ for i=1:Nw
                 else
                     if k==1
                         [fout,dataout,n_events_in_av,alignmentCompanion,f_heatmap,plotBehFieldOut]=plotPhotometryResult(photometry_tbt,photo_beh_tbt,[],alignments{i},physthenphoto_fields{j},[],withintimewindow{i},timewindows{i},{ha(indintoha) ha(indintoha+1)});
-                        ylabel([physthenphoto_fields{j} ' aligned to ' alignments{i}]);
+                        strtoplot=[physthenphoto_fields{j} ' aligned to ' alignments{i}];
+                        f_=regexp(strtoplot,'_');
+                        strtoplot(f_)=' ';
+                        text(nanmin(dataout.x),nanmax(nanmean(dataout.y,1)),strtoplot);
                         indintoha=indintoha+2;
                         closeAllBut(mainfig1);
                     else
@@ -167,11 +185,14 @@ for i=1:Nw
             end
             if strcmp(physthenphoto_fields{j},'unit_by_unit') && k==1
                 % replace with unit by unit plot
-                axes(ha(indintoha));
-                indintoha=indintoha+1;
+                axes(ha(plottedIntoWhichAxes));
                 plotWStderr(alignmentCompanion.y,alignmentCompanion.x,'g',[],size(alignmentCompanion.y,1));
                 hold on;
                 unitByUnitPlot(su,alignmentCompanion.x,maxTrialLength);
+                strtoplot=[physthenphoto_fields{j} ' aligned to ' alignments{i}];
+                f_=regexp(strtoplot,'_');
+                strtoplot(f_)=' ';
+                text(nanmin(alignmentCompanion.x),nanmax(nanmean(alignmentCompanion.y,1)),strtoplot);
             end
         end
     end
@@ -199,13 +220,14 @@ isPhysField=[ones(size(1:length(phys_fields))) zeros(size(1:length(photo_fields)
 
 end
 
-function unitByUnitPlot(su,su_times)
+function unitByUnitPlot(su,su_times,maxTrialLength)
 
 ds=1;
 offset=0;
+endPlotAtInd=find(downSampAv(su_times,ds)>maxTrialLength,1,'first')-1;
 for i=1:length(su)
     temp=downSampMatrix(su(i).alignedData,ds);
-    thisismax=plotWStderr(temp+offset,downSampAv(su_times,ds),'k',[],size(temp,1));
+    thisismax=plotWStderr(temp+offset,downSampAv(su_times,ds),'k',endPlotAtInd,size(temp,1));
     hold on;
     offset=thisismax;
 end
