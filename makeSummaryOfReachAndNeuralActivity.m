@@ -7,18 +7,6 @@ bsmooth=1;
 maxTrialLength=9; % in seconds
 normalizeSU=true;
 
-% figure 1
-alignments={'cue','all_reachBatch'};
-timewindows={[-1 16],[-1 16]};
-withintimewindow={[],[]};
-beh_fields={'all_reachBatch','fidgetData'};
-photo_fields={'green_ch'};
-phys_fields={'unit_by_unit','sum_over_singleunit'}; % each field must contain "unit"
-xranges={[0 maxTrialLength],[0 maxTrialLength]};
-physthenphoto_fields(1:length(phys_fields))=phys_fields;
-physthenphoto_fields(length(phys_fields)+1:length(phys_fields)+length(photo_fields))=photo_fields;
-isPhysField=[ones(size(1:length(phys_fields))) zeros(size(1:length(photo_fields)))];
-
 % load spikes from directory
 spike_d=dir(spikesDir);
 all_wvfms=[];
@@ -88,6 +76,64 @@ else
         whichTrode=[whichTrode ones(size(unit_depths(spikes.labels(:,2)==goodUnitLabel)))*currtrode];
     end
 end
+
+% figure 1
+% alignments={'cue','all_reachBatch'};
+% timewindows={[-1 16],[-1 16]};
+% withintimewindow={[],[]};
+% beh_fields={'all_reachBatch','fidgetData'};
+% photo_fields={'green_ch'};
+% phys_fields={'unit_by_unit','sum_over_singleunit'}; % each field must contain "unit"
+% xranges={[0 maxTrialLength],[0 maxTrialLength]};
+% physthenphoto_fields(1:length(phys_fields))=phys_fields;
+% physthenphoto_fields(length(phys_fields)+1:length(phys_fields)+length(photo_fields))=photo_fields;
+% isPhysField=[ones(size(1:length(phys_fields))) zeros(size(1:length(photo_fields)))];
+% makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength);
+
+% figure 2
+% alignments={'success_fromPerchOrWheel','success batch when pellet dislodged','drop_fromPerchOrWheel','misses_and_pelletMissing'};
+% xranges={[0 maxTrialLength],[0 maxTrialLength],[0 maxTrialLength],[0 maxTrialLength]};
+% timewindows={[-1 16],[-1 16],[-1 16],[-1 16]};
+% withintimewindow={'first','first','first','first'};
+% beh_fields={'all_reachBatch','fidgetData'};
+% photo_fields={'green_ch'};
+% phys_fields={'unit_by_unit','sum_over_singleunit'};
+% physthenphoto_fields(1:length(phys_fields))=phys_fields;
+% physthenphoto_fields(length(phys_fields)+1:length(phys_fields)+length(photo_fields))=photo_fields;
+% isPhysField=[ones(size(1:length(phys_fields))) zeros(size(1:length(photo_fields)))];
+% makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength);
+
+% figure 3
+alignments={'success_fromPerchOrWheel','drop_fromPerchOrWheel','misses_and_pelletMissing'};
+xranges={[0 maxTrialLength],[0 maxTrialLength],[0 maxTrialLength],[0 maxTrialLength]};
+timewindows={[0 5],[0 5],[0 5],[0 5]};
+withintimewindow={'first','first','first','first'};
+beh_fields={'all_reachBatch','fidgetData'};
+photo_fields={'green_ch'};
+phys_fields={'unit_by_unit','sum_over_singleunit'};
+physthenphoto_fields(1:length(phys_fields))=phys_fields;
+physthenphoto_fields(length(phys_fields)+1:length(phys_fields)+length(photo_fields))=photo_fields;
+isPhysField=[ones(size(1:length(phys_fields))) zeros(size(1:length(photo_fields)))];
+makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength);
+
+% figure 4
+% alignments={'success_fromPerchOrWheel','drop_fromPerchOrWheel','misses_and_pelletMissing'};
+% xranges={[0 maxTrialLength],[0 maxTrialLength],[0 maxTrialLength],[0 maxTrialLength]};
+% timewindows={[5 16],[5 16],[5 16],[5 16]};
+% withintimewindow={'first','first','first','first'};
+% beh_fields={'all_reachBatch','fidgetData'};
+% photo_fields={'green_ch'};
+% phys_fields={'unit_by_unit','sum_over_singleunit'};
+% physthenphoto_fields(1:length(phys_fields))=phys_fields;
+% physthenphoto_fields(length(phys_fields)+1:length(phys_fields)+length(photo_fields))=photo_fields;
+% isPhysField=[ones(size(1:length(phys_fields))) zeros(size(1:length(photo_fields)))];
+% makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength);
+
+% figure 5
+
+end
+
+function makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength)
 
 % make figures
 % Set up figure layout 1
@@ -221,26 +267,6 @@ for i=1:Nw
     end
 end
 
-return
-
-% figure 2
-alignments={'success_fromPerchOrWheel','success batch when pellet dislodged','drop_fromPerchOrWheel','misses_and_pelletMissing'};
-timewindows={[-1 16],[-1 16],[-1 16],[-1 16]};
-withintimewindow={'first','first','first'};
-beh_fields={'all_reachBatch','fidgetData'};
-photo_fields={'green_ch'};
-phys_fields={'unit_by_unit','sum_across_SU','MU'};
-isPhysField=[ones(size(1:length(phys_fields))) zeros(size(1:length(photo_fields)))];
-% figure 3
-alignments={'success_fromPerchOrWheel','drop_fromPerchOrWheel','misses_and_pelletMissing'};
-timewindows={[0 5],[0 5],[0 5],[0 5]};
-withintimewindow={'first','first','first'};
-beh_fields={'all_reachBatch','fidgetData'};
-photo_fields={'green_ch'};
-phys_fields={'unit_by_unit','sum_across_SU','MU'};
-isPhysField=[ones(size(1:length(phys_fields))) zeros(size(1:length(photo_fields)))];
-% figure 4
-
 end
 
 function unitByUnitPlot(su,su_times,maxTrialLength,normalizeSU)
@@ -260,7 +286,11 @@ for i=1:length(su)
     end
     thisismax=plotWStderr(temp,downSampAv(su_times,ds),'k',endPlotAtInd,size(temp,1),offset);
     hold on;
-    offset=thisismax+spaceBetween;
+    if isnan(thisismax)
+        continue
+    else
+        offset=thisismax+spaceBetween;
+    end
 end
 ylim([0 offset]);
 
