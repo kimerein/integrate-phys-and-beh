@@ -1,4 +1,4 @@
-function makeSummaryOfReachAndNeuralActivity(physiology_tbt,phys_beh_tbt,photometry_tbt,photo_beh_tbt,spikesDir,spikes)
+function spikes=makeSummaryOfReachAndNeuralActivity(physiology_tbt,phys_beh_tbt,photometry_tbt,photo_beh_tbt,spikesDir,spikes)
 
 spikeName='spikes';
 binsize=10; % in ms, for PSTHs
@@ -17,7 +17,9 @@ unitnames={};
 whichTrode=[];
 firstloadedspikes=true;
 if ~isempty(spikes)
-    [~,spikes]=organizeSpikesToMatch_physiology_tbt(spikes,physiology_tbt);
+    if ~isfield(spikes,'sweeps')
+        [~,spikes]=organizeSpikesToMatch_physiology_tbt(spikes,physiology_tbt);
+    end
     % get PSTH for each unit
     if firstloadedspikes==true
         [physiology_tbt,~,unit_fieldnames]=addGoodUnitsAsFields(physiology_tbt,spikes,goodUnitLabel,binsize,bsmooth,true);
@@ -68,12 +70,18 @@ else
         physiology_tbt.sum_over_singleunit=physiology_tbt.sum_over_singleunit+physiology_tbt.unitsum;
         unitnames(length(unitnames)+1:length(unitnames)+length(unit_fieldnames))=unit_fieldnames;
         % get info to classify units
+        % if spikes has fewer than 4 ev channels, fix this
+        if size(spikes.waveforms,3)<4
+            for j=size(spikes.waveforms,3)+1:4
+                spikes.waveforms(:,:,j)=zeros(size(spikes.waveforms(:,:,1)));
+            end
+        end
         [unit_wvfms,unit_halfWidths,unit_depths,useAssigns]=getUnitWaveformAndDepth(spikes);
         all_wvfms=[all_wvfms; unit_wvfms(spikes.labels(:,2)==goodUnitLabel,:)];
         all_assigns=[all_assigns useAssigns(spikes.labels(:,2)==goodUnitLabel)];
-        all_halfWidths=[all_halfWidths unit_halfWidths(spikes.labels(:,2)==goodUnitLabel)];
-        all_depths=[all_depths unit_depths(spikes.labels(:,2)==goodUnitLabel)];
-        whichTrode=[whichTrode ones(size(unit_depths(spikes.labels(:,2)==goodUnitLabel)))*currtrode];
+        all_halfWidths=[all_halfWidths; unit_halfWidths(spikes.labels(:,2)==goodUnitLabel)];
+        all_depths=[all_depths; unit_depths(spikes.labels(:,2)==goodUnitLabel)];
+        whichTrode=[whichTrode; ones(size(unit_depths(spikes.labels(:,2)==goodUnitLabel)))*currtrode];
     end
 end
 
@@ -144,16 +152,18 @@ for i=1:length(unitnames)
     fr(i)=nanmean(nanmean(physiology_tbt.(unitnames{i})));
 end
 
-figure();
-scatter(all_halfWidths,fr);
-
 cmap=colormap(whichcolormap);
 steps=floor(size(cmap,1)/length(all_assigns));
 indIntoCmap=1:steps:size(cmap,1);
 indIntoCmap=indIntoCmap(1:length(unitnames));
 figure();
 for i=1:length(unitnames)
-    plot(all_wvfms(i,:),'Color',cmap(
+    plot(all_wvfms(i,:),'Color',cmap(indIntoCmap(i),:));
+    hold on;
+end
+
+figure();
+scatter(all_halfWidths,fr,[],cmap(indIntoCmap,:));
 
 end
 

@@ -8,11 +8,6 @@ maxTrialDuration=nanmax(physiology_tbt.cuetimes_wrt_trial_start(1:end));
 
 temp=spikes.labels(:,1); 
 useAssigns=unique(temp(ismember(spikes.labels(:,2),goodUnitLabel)));
-if isempty(useAssigns)
-    tbt_unit_phys=[];
-    strunits={};
-    return
-end
 
 strunits=cell(1,length(useAssigns));
 if rmExistingUnitFields==true
@@ -52,7 +47,7 @@ for i=1:length(useAssigns)
     if isempty(strunits)
         strunit=['unit' num2str(useAssigns(i))];
     else
-        if isempty(strunits{i})
+        if isempty(strunit{i})
             strunit=['unit' num2str(useAssigns(i))];
             strunits{i}=strunit;
         else
