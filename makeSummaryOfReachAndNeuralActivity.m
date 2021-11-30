@@ -1,4 +1,6 @@
-function spikes=makeSummaryOfReachAndNeuralActivity(physiology_tbt,phys_beh_tbt,photometry_tbt,photo_beh_tbt,spikesDir,spikes)
+function physiology_tbt=makeSummaryOfReachAndNeuralActivity(physiology_tbt,phys_beh_tbt,photometry_tbt,photo_beh_tbt,spikesDir,spikes,skipSpikes)
+
+% skipSpikes is true if physiology_tbt already has unit fields
 
 spikeName='spikes';
 binsize=10; % in ms, for PSTHs
@@ -16,29 +18,43 @@ all_assigns=[];
 unitnames={};
 whichTrode=[];
 firstloadedspikes=true;
-if ~isempty(spikes)
-    if ~isfield(spikes,'sweeps')
-        [~,spikes]=organizeSpikesToMatch_physiology_tbt(spikes,physiology_tbt);
-    end
-    % get PSTH for each unit
-    if firstloadedspikes==true
-        [physiology_tbt,~,unit_fieldnames]=addGoodUnitsAsFields(physiology_tbt,spikes,goodUnitLabel,binsize,bsmooth,true);
-        firstloadedspikes=false;
+if ~isempty(spikes) || skipSpikes==true
+    if skipSpikes==true && isfield(physiology_tbt,'sum_over_singleunit')
+        % physiology_tbt already has unit fields
+        unitnames=physiology_tbt.details.unitnames;
+        all_wvfms=physiology_tbt.details.wvfms;
+        all_halfWidths=physiology_tbt.details.halfWidths;
+        all_depths=physiology_tbt.details.depths;
+        whichTrode=physiology_tbt.details.trodes;
     else
-        [physiology_tbt,~,unit_fieldnames]=addGoodUnitsAsFields(physiology_tbt,spikes,goodUnitLabel,binsize,bsmooth,false);
+        if ~isfield(spikes,'sweeps')
+            [~,spikes]=organizeSpikesToMatch_physiology_tbt(spikes,physiology_tbt);
+        end
+        % get PSTH for each unit
+        if firstloadedspikes==true
+            [physiology_tbt,~,unit_fieldnames]=addGoodUnitsAsFields(physiology_tbt,spikes,goodUnitLabel,binsize,bsmooth,true);
+            firstloadedspikes=false;
+        else
+            [physiology_tbt,~,unit_fieldnames]=addGoodUnitsAsFields(physiology_tbt,spikes,goodUnitLabel,binsize,bsmooth,false);
+        end
+        if ~isfield(physiology_tbt,'sum_over_singleunit')
+            physiology_tbt.sum_over_singleunit=zeros(size(physiology_tbt.unitsum));
+        end
+        physiology_tbt.sum_over_singleunit=physiology_tbt.sum_over_singleunit+physiology_tbt.unitsum;
+        unitnames(length(unitnames)+1:length(unitnames)+length(unit_fieldnames))=unit_fieldnames;
+        % get info to classify units
+        [unit_wvfms,unit_halfWidths,unit_depths,useAssigns]=getUnitWaveformAndDepth(spikes);
+        all_wvfms=[all_wvfms; unit_wvfms(spikes.labels(:,2)==goodUnitLabel,:)];
+        all_assigns=[all_assigns useAssigns(spikes.labels(:,2)==goodUnitLabel)];
+        all_halfWidths=[all_halfWidths unit_halfWidths(spikes.labels(:,2)==goodUnitLabel)];
+        all_depths=[all_depths unit_depths(spikes.labels(:,2)==goodUnitLabel)];
+        whichTrode=[whichTrode ones(size(unit_depths(spikes.labels(:,2)==goodUnitLabel)))*1];
+        physiology_tbt.details.wvfms=all_wvfms;
+        physiology_tbt.details.halfWidths=all_halfWidths;
+        physiology_tbt.details.depths=all_depths;
+        physiology_tbt.details.trodes=whichTrode;
+        physiology_tbt.details.unitnames=unitnames;
     end
-    if ~isfield(physiology_tbt,'sum_over_singleunit')
-        physiology_tbt.sum_over_singleunit=zeros(size(physiology_tbt.unitsum));
-    end
-    physiology_tbt.sum_over_singleunit=physiology_tbt.sum_over_singleunit+physiology_tbt.unitsum;
-    unitnames(length(unitnames)+1:length(unitnames)+length(unit_fieldnames))=unit_fieldnames;
-    % get info to classify units
-    [unit_wvfms,unit_halfWidths,unit_depths,useAssigns]=getUnitWaveformAndDepth(spikes);
-    all_wvfms=[all_wvfms; unit_wvfms(spikes.labels(:,2)==goodUnitLabel,:)];
-    all_assigns=[all_assigns useAssigns(spikes.labels(:,2)==goodUnitLabel)];
-    all_halfWidths=[all_halfWidths unit_halfWidths(spikes.labels(:,2)==goodUnitLabel)];
-    all_depths=[all_depths unit_depths(spikes.labels(:,2)==goodUnitLabel)];
-    whichTrode=[whichTrode ones(size(unit_depths(spikes.labels(:,2)==goodUnitLabel)))*1];
 else
     for i=1:length(spike_d)
         spind=regexp(spike_d(i).name,spikeName);
@@ -83,22 +99,25 @@ else
         all_depths=[all_depths; unit_depths(spikes.labels(:,2)==goodUnitLabel)];
         whichTrode=[whichTrode; ones(size(unit_depths(spikes.labels(:,2)==goodUnitLabel)))*currtrode];
     end
+    physiology_tbt.details.wvfms=all_wvfms;
+    physiology_tbt.details.halfWidths=all_halfWidths;
+    physiology_tbt.details.depths=all_depths;
+    physiology_tbt.details.trodes=whichTrode;
+    physiology_tbt.details.unitnames=unitnames;
 end
 
-plotSpikeWvfmsByFR(all_wvfms,all_assigns,all_halfWidths,unitnames,physiology_tbt);
-
 % figure 1
-% alignments={'cue','all_reachBatch'};
-% timewindows={[-1 16],[-1 16]};
-% withintimewindow={[],[]};
-% beh_fields={'all_reachBatch','fidgetData'};
-% photo_fields={'green_ch'};
-% phys_fields={'unit_by_unit','sum_over_singleunit'}; % each field must contain "unit"
-% xranges={[0 maxTrialLength],[0 maxTrialLength]};
-% physthenphoto_fields(1:length(phys_fields))=phys_fields;
-% physthenphoto_fields(length(phys_fields)+1:length(phys_fields)+length(photo_fields))=photo_fields;
-% isPhysField=[ones(size(1:length(phys_fields))) zeros(size(1:length(photo_fields)))];
-% makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength);
+alignments={'cue','all_reachBatch'};
+timewindows={[-1 16],[-1 16]};
+withintimewindow={[],[]};
+beh_fields={'all_reachBatch','fidgetData'};
+photo_fields={'green_ch'};
+phys_fields={'unit_by_unit','sum_over_singleunit'}; % each field must contain "unit"
+xranges={[0 maxTrialLength],[0 maxTrialLength]};
+physthenphoto_fields(1:length(phys_fields))=phys_fields;
+physthenphoto_fields(length(phys_fields)+1:length(phys_fields)+length(photo_fields))=photo_fields;
+isPhysField=[ones(size(1:length(phys_fields))) zeros(size(1:length(photo_fields)))];
+makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength);
 
 % figure 2
 % alignments={'success_fromPerchOrWheel','success batch when pellet dislodged','drop_fromPerchOrWheel','misses_and_pelletMissing'};
@@ -114,17 +133,17 @@ plotSpikeWvfmsByFR(all_wvfms,all_assigns,all_halfWidths,unitnames,physiology_tbt
 % makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength);
 
 % figure 3
-alignments={'success_fromPerchOrWheel','drop_fromPerchOrWheel','misses_and_pelletMissing'};
-xranges={[0 maxTrialLength],[0 maxTrialLength],[0 maxTrialLength],[0 maxTrialLength]};
-timewindows={[0 5],[0 5],[0 5],[0 5]};
-withintimewindow={'first','first','first','first'};
-beh_fields={'all_reachBatch','fidgetData'};
-photo_fields={'green_ch'};
-phys_fields={'unit_by_unit','sum_over_singleunit'};
-physthenphoto_fields(1:length(phys_fields))=phys_fields;
-physthenphoto_fields(length(phys_fields)+1:length(phys_fields)+length(photo_fields))=photo_fields;
-isPhysField=[ones(size(1:length(phys_fields))) zeros(size(1:length(photo_fields)))];
-makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength);
+% alignments={'success_fromPerchOrWheel','drop_fromPerchOrWheel','misses_and_pelletMissing'};
+% xranges={[0 maxTrialLength],[0 maxTrialLength],[0 maxTrialLength],[0 maxTrialLength]};
+% timewindows={[0 5],[0 5],[0 5],[0 5]};
+% withintimewindow={'first','first','first','first'};
+% beh_fields={'all_reachBatch','fidgetData'};
+% photo_fields={'green_ch'};
+% phys_fields={'unit_by_unit','sum_over_singleunit'};
+% physthenphoto_fields(1:length(phys_fields))=phys_fields;
+% physthenphoto_fields(length(phys_fields)+1:length(phys_fields)+length(photo_fields))=photo_fields;
+% isPhysField=[ones(size(1:length(phys_fields))) zeros(size(1:length(photo_fields)))];
+% makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength);
 
 % figure 4
 % alignments={'success_fromPerchOrWheel','drop_fromPerchOrWheel','misses_and_pelletMissing'};
@@ -141,9 +160,11 @@ makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fiel
 
 % figure 5
 
+plotSpikeWvfmsByFR(all_wvfms,all_halfWidths,unitnames,physiology_tbt);
+
 end
 
-function plotSpikeWvfmsByFR(all_wvfms,all_assigns,all_halfWidths,unitnames,physiology_tbt)
+function plotSpikeWvfmsByFR(all_wvfms,all_halfWidths,unitnames,physiology_tbt)
 
 whichcolormap='jet';
 
@@ -153,7 +174,7 @@ for i=1:length(unitnames)
 end
 
 cmap=colormap(whichcolormap);
-steps=floor(size(cmap,1)/length(all_assigns));
+steps=floor(size(cmap,1)/length(unitnames));
 indIntoCmap=1:steps:size(cmap,1);
 indIntoCmap=indIntoCmap(1:length(unitnames));
 figure();
@@ -163,7 +184,26 @@ for i=1:length(unitnames)
 end
 
 figure();
+xoffset=0;
+for i=1:length(unitnames)
+    plot([1:size(all_wvfms,2)]++xoffset,all_wvfms(i,:),'Color',cmap(indIntoCmap(i),:));
+    strtoplot=unitnames{i};
+    f_=regexp(strtoplot,'_');
+    strtoplot(f_)=' ';
+    text(xoffset,0,strtoplot); 
+    xoffset=xoffset+size(all_wvfms,2);
+    hold on;
+end
+
+figure();
 scatter(all_halfWidths,fr,[],cmap(indIntoCmap,:));
+set(gca, 'YScale', 'log');
+for i=1:length(all_halfWidths)
+    strtoplot=unitnames{i};
+    f_=regexp(strtoplot,'_');
+    strtoplot(f_)=' ';
+    text(all_halfWidths(i),fr(i),strtoplot); 
+end
 
 end
 
