@@ -77,6 +77,8 @@ else
     end
 end
 
+plotSpikeWvfmsByFR(all_wvfms,all_assigns,all_halfWidths,unitnames,physiology_tbt);
+
 % figure 1
 % alignments={'cue','all_reachBatch'};
 % timewindows={[-1 16],[-1 16]};
@@ -130,6 +132,30 @@ makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fiel
 % makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength);
 
 % figure 5
+
+end
+
+function plotSpikeWvfmsByFR(all_wvfms,all_assigns,all_halfWidths,unitnames,physiology_tbt)
+
+whichcolormap='jet';
+
+fr=nan(1,length(unitnames));
+for i=1:length(unitnames)
+    fr(i)=nanmean(nanmean(physiology_tbt.(unitnames{i})));
+end
+
+cmap=colormap(whichcolormap);
+steps=floor(size(cmap,1)/length(all_assigns));
+indIntoCmap=1:steps:size(cmap,1);
+indIntoCmap=indIntoCmap(1:length(unitnames));
+figure();
+for i=1:length(unitnames)
+    plot(all_wvfms(i,:),'Color',cmap(indIntoCmap(i),:));
+    hold on;
+end
+
+figure();
+scatter(all_halfWidths,fr,[],cmap(indIntoCmap,:));
 
 end
 
