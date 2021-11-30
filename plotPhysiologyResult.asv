@@ -204,8 +204,7 @@ switch alignTo
         dataout.x=phototimes;
         dataout.y=photometry_tbt.(plotPhotoField);
         hold on;
-        temp=photometry_tbt.(plotPhotoField);
-        plotWStderr(nanmean(photometry_tbt.cue,1)*(nanmax(nanmean(temp(:,1:plotUntilInd),1))/nanmax(nanmean(photometry_tbt.cue,1))),f_times,'b',f,size(photometry_tbt.cue,1));
+        plotWStderr(nanmean(photometry_tbt.cue,1)*(nanmax(nanmean(photometry_tbt.(plotPhotoField),1))/nanmax(photometry_tbt.cue,1),f_times,'b',f,size(photometry_tbt.cue,1));
         n_events_in_av=size(photometry_tbt.(plotPhotoField),1);
         alignmentCompanion.x=f_times;
         alignmentCompanion.y=photometry_tbt.cue.*nanmax(nanmean(photometry_tbt.(plotPhotoField),1));

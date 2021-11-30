@@ -173,7 +173,8 @@ switch alignTo
         dataout.x=phototimes;
         dataout.y=photometry_tbt.(plotPhotoField);
         hold on;
-        plotWStderr(nanmean(photometry_tbt.cue,1),f_times,'b',f,size(photometry_tbt.cue,1));
+        temp=photometry_tbt.(plotPhotoField);
+        plotWStderr(nanmean(photometry_tbt.cue,1)*(nanmax(nanmean(temp(:,1:plotUntilInd),1))/nanmax(nanmean(photometry_tbt.cue,1))),f_times,'b',f,size(photometry_tbt.cue,1));
         n_events_in_av=size(photometry_tbt.(plotPhotoField),1);
         alignmentCompanion.x=f_times;
         alignmentCompanion.y=nanmean(photometry_tbt.cue,1)*nanmax(nanmean(photometry_tbt.(plotPhotoField),1));
@@ -290,9 +291,6 @@ if typeOfReach==true
         plotBehFieldOut.y=allReachesAlignedData;
     end
     
-    figure();
-    plotTrialsAsHeatmap(alignedData,phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),behAligned,behTimes,10,maxTimeForHeatmap);
-    
     if ~isempty(hax)
         if ~isnumeric(hax{1})
             axes(hax{1});
@@ -303,6 +301,9 @@ if typeOfReach==true
     else
         f_heatmap=figure();
     end
+    plotTrialsAsHeatmap(alignedData,phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),behAligned,behTimes,10,maxTimeForHeatmap);
+    
+    figure();
     plotTrialsAsHeatmap(alignedData,phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),behAligned,behTimes,10,maxTimeForHeatmap);
     hold on;
     whichFields={'cueZone_onVoff','all_reachBatch','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts','success_reachStarts_pawOnWheel'};
@@ -318,7 +319,7 @@ if typeOfReach==true
     
     if ~isempty(plotBehField)
         figure();
-        plotTrialsAsHeatmap(alignedData,phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),behAligned,behTimes,10,maxTimeForHeatmap,true);
+        plotTrialsAsHeatmap(alignedData,phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),behAligned,behTimes,10,maxTimeForHeatmap);
         hold on;
         plotEventsScatter(newBehavior_tbt,fromInputRow(~isnan(fromInputRow)),'cueZone_onVoff','all_reachBatch','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts',plotBehField);
         title(['Black dots are ' plotBehField]);

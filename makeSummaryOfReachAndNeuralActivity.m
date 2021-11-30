@@ -5,6 +5,7 @@ binsize=10; % in ms, for PSTHs
 goodUnitLabel=2; 
 bsmooth=1;
 maxTrialLength=9; % in seconds
+normalizeSU=true;
 
 % figure 1
 alignments={'cue','all_reachBatch'};
@@ -13,6 +14,7 @@ withintimewindow={[],[]};
 beh_fields={'all_reachBatch','fidgetData'};
 photo_fields={'green_ch'};
 phys_fields={'unit_by_unit','sum_over_singleunit'}; % each field must contain "unit"
+xranges={[0 maxTrialLength],[0 maxTrialLength]};
 physthenphoto_fields(1:length(phys_fields))=phys_fields;
 physthenphoto_fields(length(phys_fields)+1:length(phys_fields)+length(photo_fields))=photo_fields;
 isPhysField=[ones(size(1:length(phys_fields))) zeros(size(1:length(photo_fields)))];
@@ -94,7 +96,7 @@ Nh=length(beh_fields)+length(photo_fields)*2+length(phys_fields); % number of ro
 Nw=length(alignments); % number of columns
 gap=[.01 .03]; % between plots
 marg_h=[.1 .01]; % margin
-marg_w=[.01 .01]; % margin
+marg_w=[.1 .01];% marg_w=[.01 .01]; % margin
 [ha,pos]=tight_subplot(Nh,Nw,gap,marg_h,marg_w);
 % reorder ha so populates down rows within column first
 reorder=[];
@@ -117,7 +119,7 @@ for i=1:Nw
                             strtoplot=[physthenphoto_fields{j} ' aligned to ' alignments{i}];
                             f_=regexp(strtoplot,'_');
                             strtoplot(f_)=' ';
-                            text(nanmin(dataout.x),nanmax(nanmean(dataout.y,1)),strtoplot);
+                            text(nanmin(xranges{i}),nanmax(nanmean(dataout.y,1)),strtoplot);
                         end
                         indintoha=indintoha+1;
                         closeAllBut(mainfig1);
@@ -134,11 +136,11 @@ for i=1:Nw
                     strtoplot=[beh_fields{k} ' aligned to ' alignments{i}];
                     f_=regexp(strtoplot,'_');
                     strtoplot(f_)=' ';
-                    text(nanmin(plotBehFieldOut.x),nanmax(nanmean(plotBehFieldOut.y,1)),strtoplot);
+                    text(nanmin(xranges{i}),nanmax(nanmean(plotBehFieldOut.y,1)),strtoplot);
                 else
                     if k==1
                         [fout,dataout,n_events_in_av,alignmentCompanion,f_heatmap,plotBehFieldOut]=plotPhotometryResult(photometry_tbt,photo_beh_tbt,[],alignments{i},physthenphoto_fields{j},beh_fields{k},withintimewindow{i},timewindows{i},{ha(indintoha) ha(indintoha+1)});
-                        text(nanmin(dataout.x),nanmax(dataout.y),[physthenphoto_fields{j} ' aligned to ' alignments{i}]);
+                        text(nanmin(xranges{i}),nanmax(dataout.y),[physthenphoto_fields{j} ' aligned to ' alignments{i}]);
                         indintoha=indintoha+2;
                         closeAllBut(mainfig1);
                     else
@@ -154,7 +156,7 @@ for i=1:Nw
                     strtoplot=[beh_fields{k} ' aligned to ' alignments{i}];
                     f_=regexp(strtoplot,'_');
                     strtoplot(f_)=' ';
-                    text(nanmin(plotBehFieldOut.x),nanmax(nanmean(plotBehFieldOut.y,1)),strtoplot);
+                    text(nanmin(xranges{i}),nanmax(nanmean(plotBehFieldOut.y,1)),strtoplot);
                 end
             else
                 if isPhysField(j)==1
@@ -165,7 +167,7 @@ for i=1:Nw
                             strtoplot=[physthenphoto_fields{j} ' aligned to ' alignments{i}];
                             f_=regexp(strtoplot,'_');
                             strtoplot(f_)=' ';
-                            text(nanmin(dataout.x),nanmax(nanmean(dataout.y,1)),strtoplot);
+                            text(nanmin(xranges{i}),nanmax(nanmean(dataout.y,1)),strtoplot);
                         end
                         indintoha=indintoha+1;
                         closeAllBut(mainfig1);
@@ -178,7 +180,7 @@ for i=1:Nw
                         strtoplot=[physthenphoto_fields{j} ' aligned to ' alignments{i}];
                         f_=regexp(strtoplot,'_');
                         strtoplot(f_)=' ';
-                        text(nanmin(dataout.x),nanmax(nanmean(dataout.y,1)),strtoplot);
+                        text(nanmin(xranges{i}),nanmax(nanmean(dataout.y,1)),strtoplot);
                         indintoha=indintoha+2;
                         closeAllBut(mainfig1);
                     else
@@ -189,15 +191,33 @@ for i=1:Nw
             if strcmp(physthenphoto_fields{j},'unit_by_unit') && k==1
                 % replace with unit by unit plot
                 axes(ha(plottedIntoWhichAxes));
+                cla(ha(plottedIntoWhichAxes));
+                if normalizeSU==true
+                    alignmentCompanion.y=alignmentCompanion.y-nanmin(nanmean(alignmentCompanion.y,1));
+                    alignmentCompanion.y=length(su).*alignmentCompanion.y./nanmax(nanmean(alignmentCompanion.y,1));
+                end
                 plotWStderr(alignmentCompanion.y,alignmentCompanion.x,'g',[],size(alignmentCompanion.y,1));
                 hold on;
-                unitByUnitPlot(su,alignmentCompanion.x,maxTrialLength);
+                unitByUnitPlot(su,dataout.x,maxTrialLength,normalizeSU);
                 strtoplot=[physthenphoto_fields{j} ' aligned to ' alignments{i}];
                 f_=regexp(strtoplot,'_');
                 strtoplot(f_)=' ';
-                text(nanmin(alignmentCompanion.x),nanmax(nanmean(alignmentCompanion.y,1)),strtoplot);
+                text(nanmin(xranges{i}),nanmax(nanmean(alignmentCompanion.y,1)),strtoplot);
             end
         end
+    end
+end
+
+k=1;
+for i=1:Nw
+    % each alignment
+    for j=1:Nh
+        set(ha(k),'XLim',xranges{i});
+        % spawn individual figures
+        f=figure();
+        newax=copyobj(ha(k),f);
+        set(newax,'Position',[0.1 0.1 0.85 0.85]);
+        k=k+1;
     end
 end
 
@@ -223,21 +243,41 @@ isPhysField=[ones(size(1:length(phys_fields))) zeros(size(1:length(photo_fields)
 
 end
 
-function unitByUnitPlot(su,su_times,maxTrialLength)
+function unitByUnitPlot(su,su_times,maxTrialLength,normalizeSU)
 
-ds=1;
+ds=5;
+spaceBetween=0;
 offset=0;
 endPlotAtInd=find(downSampAv(su_times,ds)>maxTrialLength,1,'first')-1;
 for i=1:length(su)
     temp=downSampMatrix(su(i).alignedData,ds);
-    thisismax=plotWStderr(temp+offset,downSampAv(su_times,ds),'k',endPlotAtInd,size(temp,1));
+    if normalizeSU==true
+        % normalize to y range 0 to 1
+        sumin=nanmin(nanmean(temp(:,1:endPlotAtInd),1));
+        temp=temp-sumin;
+        sumax=nanmax(nanmean(temp(:,1:endPlotAtInd),1));
+        temp=temp./sumax;
+    end
+    thisismax=plotWStderr(temp,downSampAv(su_times,ds),'k',endPlotAtInd,size(temp,1),offset);
     hold on;
-    offset=thisismax;
+    offset=thisismax+spaceBetween;
 end
+ylim([0 offset]);
 
 end
 
-function thisismax=plotWStderr(dataMatrix,times,c,plotUntilInd,nEvents)
+function thisismax=plotWStderr(varargin)
+
+dataMatrix=varargin{1};
+times=varargin{2};
+c=varargin{3};
+plotUntilInd=varargin{4};
+nEvents=varargin{5};
+if length(varargin)>5
+    offset=varargin{6};
+else
+    offset=0;
+end
 
 showStdevInstead=false;
 
@@ -245,16 +285,16 @@ if isempty(plotUntilInd)
     plotUntilInd=size(dataMatrix,2);
 end
 
-plot(times(1:plotUntilInd),nanmean(dataMatrix(:,1:plotUntilInd),1),'Color',c,'LineWidth',1);
+plot(times(1:plotUntilInd),offset+nanmean(dataMatrix(:,1:plotUntilInd),1),'Color',c,'LineWidth',1);
 hold on;
 if showStdevInstead==true
-    plot(times(1:plotUntilInd),nanmean(dataMatrix(:,1:plotUntilInd),1)-nanstd(dataMatrix(:,1:plotUntilInd),[],1),'Color',c,'LineWidth',0.5);
-    plot(times(1:plotUntilInd),nanmean(dataMatrix(:,1:plotUntilInd),1)+nanstd(dataMatrix(:,1:plotUntilInd),[],1),'Color',c,'LineWidth',0.5);
-    thisismax=nanmax(nanmean(dataMatrix(:,1:plotUntilInd),1)+nanstd(dataMatrix(:,1:plotUntilInd),[],1));
+    plot(times(1:plotUntilInd),offset+nanmean(dataMatrix(:,1:plotUntilInd),1)-nanstd(dataMatrix(:,1:plotUntilInd),[],1),'Color',c,'LineWidth',0.5);
+    plot(times(1:plotUntilInd),offset+nanmean(dataMatrix(:,1:plotUntilInd),1)+nanstd(dataMatrix(:,1:plotUntilInd),[],1),'Color',c,'LineWidth',0.5);
+    thisismax=offset+nanmax(nanmean(dataMatrix(:,1:plotUntilInd),1)+nanstd(dataMatrix(:,1:plotUntilInd),[],1));
 else
-    plot(times(1:plotUntilInd),nanmean(dataMatrix(:,1:plotUntilInd),1)-nanstd(dataMatrix(:,1:plotUntilInd),[],1)./sqrt(nEvents),'Color',c,'LineWidth',0.5);
-    plot(times(1:plotUntilInd),nanmean(dataMatrix(:,1:plotUntilInd),1)+nanstd(dataMatrix(:,1:plotUntilInd),[],1)./sqrt(nEvents),'Color',c,'LineWidth',0.5);
-    thisismax=nanmax(nanmean(dataMatrix(:,1:plotUntilInd),1)+nanstd(dataMatrix(:,1:plotUntilInd),[],1)./sqrt(nEvents));
+    plot(times(1:plotUntilInd),offset+nanmean(dataMatrix(:,1:plotUntilInd),1)-nanstd(dataMatrix(:,1:plotUntilInd),[],1)./sqrt(nEvents),'Color',c,'LineWidth',0.5);
+    plot(times(1:plotUntilInd),offset+nanmean(dataMatrix(:,1:plotUntilInd),1)+nanstd(dataMatrix(:,1:plotUntilInd),[],1)./sqrt(nEvents),'Color',c,'LineWidth',0.5);
+    thisismax=offset+nanmax(nanmean(dataMatrix(:,1:plotUntilInd),1)+nanstd(dataMatrix(:,1:plotUntilInd),[],1)./sqrt(nEvents));
 end
     
 end
