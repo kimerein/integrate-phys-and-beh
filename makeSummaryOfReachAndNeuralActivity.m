@@ -190,15 +190,42 @@ makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fiel
 % physthenphoto_fields(1:length(phys_fields))=phys_fields;
 % physthenphoto_fields(length(phys_fields)+1:length(phys_fields)+length(photo_fields))=photo_fields;
 % isPhysField=[ones(size(1:length(phys_fields))) zeros(size(1:length(photo_fields)))];
-% makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength);
+% outSU=makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength);
 
 plotSpikeWvfmsByFR(all_wvfms,all_halfWidths,unitnames,physiology_tbt);
 
 end
 
-function classifyUnitsAsDAincreaseOrDecrease()
+function classifyUnitsAsDAincreaseOrDecrease(outSU)
 
+% outSU.su
+% outSU.times
+% outSU.alignmentCompanion.y
+% outSU.alignmentCompanion.x
 
+% find time of DA event
+outSU.alignmentCompanion.x=nanmean(outSU.alignmentCompanion.x,1);
+[~,fDA]=nanmax(nanmean(outSU.alignmentCompanion.y,1));
+fDA_time=outSU.alignmentCompanion.x(fDA);
+[~,fInSuTimes]=nanmin(abs(fDA_time-outSU.times));
+
+% get change after DA event
+changeWindow1=[0 0.25];
+changeWindow2=[0 1];
+temp=diff(outSU.times);
+temp=temp(~isnan(temp));
+timestep=mode(temp);
+changeWindow1_inds=[ceil(changeWindow1(1)/timestep) ceil(changeWindow1(2)/timestep)];
+changeWindow2_inds=[ceil(changeWindow2(1)/timestep) ceil(changeWindow2(2)/timestep)];
+changeIn1=nan(1,length(outSU.su));
+changeIn2=nan(1,length(outSU.su));
+for i=1:length(outSU.su)
+    temp=outSU.su(i).alignedData;
+    changeIn1(i)=nanmean(nanmean(temp(:,fInSuTimes+changeWindow1_inds(1)-1:fInSuTimes+changeWindow1_inds(2)-1),1),2);
+    changeIn2(i)=nanmean(nanmean(temp(:,fInSuTimes+changeWindow2_inds(1)-1:fInSuTimes+changeWindow2_inds(2)-1),1),2);
+end
+
+% plot scatter
 
 end
 
@@ -371,7 +398,9 @@ end
 
 end
 
-function makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength)
+function outSU=makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength)
+
+outSU=[];
 
 % make figures
 % Set up figure layout 1
@@ -487,6 +516,12 @@ for i=1:Nw
                 f_=regexp(strtoplot,'_');
                 strtoplot(f_)=' ';
                 text(nanmin(xranges{i}),nanmax(nanmean(alignmentCompanion.y,1)),strtoplot);
+                if strcmp(alignments{i},'isPhotoEvent')
+                    outSU.su=su;
+                    outSU.times=dataout.x;
+                    outSU.alignmentCompanion.y=alignmentCompanion.y;
+                    outSU.alignmentCompanion.x=alignmentCompanion.x;
+                end
             end
         end
     end

@@ -155,12 +155,12 @@ makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fiel
 
 % figure 4
 % alignments={'success_fromPerchOrWheel','drop_fromPerchOrWheel','misses_and_pelletMissing'};
-% xranges={[0 maxTrialLength],[0 maxTrialLength],[0 maxTrialLength],[0 maxTrialLength]};
-% timewindows={[5 16],[5 16],[5 16],[5 16]};
-% withintimewindow={'first','first','first','first'};
+% xranges={[0 maxTrialLength],[0 maxTrialLength],[0 maxTrialLength]};
+% timewindows={[5 16],[5 16],[5 16]};
+% withintimewindow={'first','first','first'};
 % beh_fields={'all_reachBatch','fidgetData'};
 % photo_fields={'green_ch'};
-% phys_fields={'unit_by_unit','av_over_singleunit'};
+% phys_fields={'unit_by_unit','av_over_singleunit','grp1_unitav','grp2_unitav','grp3_unitav'};
 % physthenphoto_fields(1:length(phys_fields))=phys_fields;
 % physthenphoto_fields(length(phys_fields)+1:length(phys_fields)+length(photo_fields))=photo_fields;
 % isPhysField=[ones(size(1:length(phys_fields))) zeros(size(1:length(photo_fields)))];
@@ -190,9 +190,22 @@ makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fiel
 % physthenphoto_fields(1:length(phys_fields))=phys_fields;
 % physthenphoto_fields(length(phys_fields)+1:length(phys_fields)+length(photo_fields))=photo_fields;
 % isPhysField=[ones(size(1:length(phys_fields))) zeros(size(1:length(photo_fields)))];
-% makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength);
+% outSU=makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength);
 
 plotSpikeWvfmsByFR(all_wvfms,all_halfWidths,unitnames,physiology_tbt);
+
+end
+
+function classifyUnitsAsDAincreaseOrDecrease(outSU)
+
+% outSU.su
+% outSU.times
+% outSU.alignmentCompanion.y
+% outSU.alignmentCompanion.x
+
+% find time of DA event
+[~,fDA]=nanmax(nanmean(outSU.alignmentCompanion
+
 
 end
 
@@ -365,7 +378,9 @@ end
 
 end
 
-function makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength)
+function outSU=makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength)
+
+outSU=[];
 
 % make figures
 % Set up figure layout 1
@@ -481,6 +496,12 @@ for i=1:Nw
                 f_=regexp(strtoplot,'_');
                 strtoplot(f_)=' ';
                 text(nanmin(xranges{i}),nanmax(nanmean(alignmentCompanion.y,1)),strtoplot);
+                if strcmp(alignments{i},'isPhotoEvent')
+                    outSU.su=su;
+                    outSU.times=dataout.x;
+                    outSU.alignmentCompanion.y=alignmentCompanion.y;
+                    outSU.alignmentCompanion.x=alignmentCompanion.x;
+                end
             end
         end
     end
