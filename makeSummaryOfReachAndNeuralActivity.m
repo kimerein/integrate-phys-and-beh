@@ -196,6 +196,12 @@ plotSpikeWvfmsByFR(all_wvfms,all_halfWidths,unitnames,physiology_tbt);
 
 end
 
+function classifyUnitsAsDAincreaseOrDecrease()
+
+
+
+end
+
 function phys_beh_tbt=putPhotoBehFieldIntoPhysBeh(photo_beh_tbt,phys_beh_tbt,putInField)
 
 if photo_beh_tbt.this_is_which_beh==1
