@@ -11,7 +11,7 @@ su=[];
 
 if strcmp(plotPhotoField,'unit_by_unit')
     doingMultipleUnits=true;
-    nonUnitFields={'unitTimes','unitsum','multiunit','sum_over_singleunit','unitTimes_wrt_trial_start'}; % every other field that contains 'unit' is assumed to be one single unit
+    nonUnitFields={'unitTimes','unitsum','multiunit','sum_over_singleunit','av_over_singleunit','unitTimes_wrt_trial_start','grp1_unitav','grp2_unitav','grp3_unitav'}; % every other field that contains 'unit' is assumed to be one single unit
     plotPhotoField='unitsum';
 else
     doingMultipleUnits=false;
@@ -223,8 +223,10 @@ switch alignTo
                     j=j+1;
                 end
             end
+            disp('will plot units in this order:');
             for i=1:length(SUfields)
                 su(i).alignedData=photometry_tbt.(SUfields{i});
+                disp(SUfields{i});
             end
         end
     case 'success_fromPerchOrWheel'
@@ -359,8 +361,10 @@ if typeOfReach==true
                 j=j+1;
             end
         end
+        disp('will plot units in this order:');
         for i=1:length(SUfields)
             [su(i).alignedData,~]=alignRowsToInds(photometry_tbt.(SUfields{i}),indsIntoPhoto,nanmin(indsIntoPhoto),fromInputRow,alignPeaks,indsFromPeak);
+            disp(SUfields{i});
         end
     end
     

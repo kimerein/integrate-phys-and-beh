@@ -74,7 +74,8 @@ for i=1:length(useAssigns)
             sumacrossunits=zeros(size(ns));
         end
     end
-    sumacrossunits=sumacrossunits+ns;
+    tmp=cat(3,sumacrossunits,ns); 
+    sumacrossunits=nansum(tmp,3);
     plot(x,y);
     hold all;
 end
