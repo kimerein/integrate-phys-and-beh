@@ -141,17 +141,17 @@ physiology_tbt=makeUnitSubgroups(physiology_tbt,downSamp);
 % makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength);
 
 % figure 3
-alignments={'success_fromPerchOrWheel','drop_fromPerchOrWheel','misses_and_pelletMissing'};
-xranges={[0 maxTrialLength],[0 maxTrialLength],[0 maxTrialLength]};
-timewindows={[0 3],[0 3],[0 3]};
-withintimewindow={'first','first','first'};
-beh_fields={'all_reachBatch','fidgetData'};
-photo_fields={'green_ch'};
-phys_fields={'unit_by_unit','av_over_singleunit','grp1_unitav','grp2_unitav','grp3_unitav'};
-physthenphoto_fields(1:length(phys_fields))=phys_fields;
-physthenphoto_fields(length(phys_fields)+1:length(phys_fields)+length(photo_fields))=photo_fields;
-isPhysField=[ones(size(1:length(phys_fields))) zeros(size(1:length(photo_fields)))];
-makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength);
+% alignments={'success_fromPerchOrWheel','drop_fromPerchOrWheel','misses_and_pelletMissing'};
+% xranges={[0 maxTrialLength],[0 maxTrialLength],[0 maxTrialLength]};
+% timewindows={[0 3],[0 3],[0 3]};
+% withintimewindow={'first','first','first'};
+% beh_fields={'all_reachBatch','fidgetData'};
+% photo_fields={'green_ch'};
+% phys_fields={'unit_by_unit','av_over_singleunit','grp1_unitav','grp2_unitav','grp3_unitav'};
+% physthenphoto_fields(1:length(phys_fields))=phys_fields;
+% physthenphoto_fields(length(phys_fields)+1:length(phys_fields)+length(photo_fields))=photo_fields;
+% isPhysField=[ones(size(1:length(phys_fields))) zeros(size(1:length(photo_fields)))];
+% makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength);
 
 % figure 4
 % alignments={'success_fromPerchOrWheel','drop_fromPerchOrWheel','misses_and_pelletMissing'};
@@ -167,30 +167,31 @@ makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fiel
 % makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength);
 
 % figure 5
-% photothresh=0.75;
-% lowPassCutoff=5; % in Hz
-% dosmooth=true;
-% smoothFields={'green_ch'};
-% triggerOnField=smoothFields{1};
-% if dosmooth==true
-%     phototimes=nanmean(photometry_tbt.times_wrt_trial_start,1);
-%     photometry_tbt=smoothPhotometry(photometry_tbt,1/mode(diff(phototimes)),lowPassCutoff,smoothFields);
-%     disp(['using photometry Fs ' num2str(1/mode(diff(phototimes)))]);
-% end
-% photometry_tbt.isPhotoEvent=double(photometry_tbt.(triggerOnField)>photothresh);
-% photo_beh_tbt=makeSameFieldInBeh(photometry_tbt,photo_beh_tbt,'isPhotoEvent',photometry_tbt.times_wrt_trial_start,photo_beh_tbt.times_wrt_trial_start);
-% phys_beh_tbt=putPhotoBehFieldIntoPhysBeh(photo_beh_tbt,phys_beh_tbt,'isPhotoEvent');
-% alignments={'isPhotoEvent'};
-% xranges={[0 maxTrialLength]};
-% timewindows={[-0.25 16]};
-% withintimewindow={'last'};
-% beh_fields={'all_reachBatch','fidgetData'};
-% photo_fields={'green_ch'};
-% phys_fields={'unit_by_unit','av_over_singleunit','grp1_unitav','grp2_unitav','grp3_unitav'};
-% physthenphoto_fields(1:length(phys_fields))=phys_fields;
-% physthenphoto_fields(length(phys_fields)+1:length(phys_fields)+length(photo_fields))=photo_fields;
-% isPhysField=[ones(size(1:length(phys_fields))) zeros(size(1:length(photo_fields)))];
-% outSU=makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength);
+% photothresh=0.75; % for dLight4
+photothresh=2; % for dLight2
+lowPassCutoff=5; % in Hz
+dosmooth=true;
+smoothFields={'green_ch'};
+triggerOnField=smoothFields{1};
+if dosmooth==true
+    phototimes=nanmean(photometry_tbt.times_wrt_trial_start,1);
+    photometry_tbt=smoothPhotometry(photometry_tbt,1/mode(diff(phototimes)),lowPassCutoff,smoothFields);
+    disp(['using photometry Fs ' num2str(1/mode(diff(phototimes)))]);
+end
+photometry_tbt.isPhotoEvent=double(photometry_tbt.(triggerOnField)>photothresh);
+photo_beh_tbt=makeSameFieldInBeh(photometry_tbt,photo_beh_tbt,'isPhotoEvent',photometry_tbt.times_wrt_trial_start,photo_beh_tbt.times_wrt_trial_start);
+phys_beh_tbt=putPhotoBehFieldIntoPhysBeh(photo_beh_tbt,phys_beh_tbt,'isPhotoEvent');
+alignments={'isPhotoEvent'};
+xranges={[0 maxTrialLength]};
+timewindows={[-0.25 16]};
+withintimewindow={'first'};
+beh_fields={'all_reachBatch','fidgetData'};
+photo_fields={'green_ch'};
+phys_fields={'unit_by_unit','av_over_singleunit','grp1_unitav','grp2_unitav','grp3_unitav'};
+physthenphoto_fields(1:length(phys_fields))=phys_fields;
+physthenphoto_fields(length(phys_fields)+1:length(phys_fields)+length(photo_fields))=photo_fields;
+isPhysField=[ones(size(1:length(phys_fields))) zeros(size(1:length(photo_fields)))];
+outSU=makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength);
 
 plotSpikeWvfmsByFR(all_wvfms,all_halfWidths,unitnames,physiology_tbt);
 
@@ -226,6 +227,8 @@ for i=1:length(outSU.su)
 end
 
 % plot scatter
+figure(); 
+scatter(changeIn1,changeIn2);
 
 end
 

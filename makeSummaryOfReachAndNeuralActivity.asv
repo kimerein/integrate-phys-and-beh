@@ -204,7 +204,28 @@ function classifyUnitsAsDAincreaseOrDecrease(outSU)
 % outSU.alignmentCompanion.x
 
 % find time of DA event
-[~,fDA]=nanmax(nanmean(outSU.alignmentCompanion
+outSU.alignmentCompanion.x=nanmean(outSU.alignmentCompanion.x,1);
+[~,fDA]=nanmax(nanmean(outSU.alignmentCompanion.y,1));
+fDA_time=outSU.alignmentCompanion.x(fDA);
+[~,fInSuTimes]=nanmin(abs(fDA_time-outSU.times));
+
+% get change after DA event
+changeWindow1=[0 0.25];
+changeWindow2=[0 1];
+temp=diff(outSU.times);
+temp=temp(~isnan(temp));
+timestep=mode(temp);
+changeWindow1_inds=[ceil(changeWindow1(1)/timestep) ceil(changeWindow1(2)/timestep)];
+changeWindow2_inds=[ceil(changeWindow2(1)/timestep) ceil(changeWindow2(2)/timestep)];
+changeIn1=nan(1,length(outSU.su));
+changeIn2=nan(1,length(outSU.su));
+for i=1:length(outSU.su)
+    temp=outSU.su(i).alignedData;
+    changeIn1(i)=nanmean(nanmean(temp(:,fInSuTimes+changeWindow1_inds(1)-1:fInSuTimes+changeWindow1_inds(2)-1),1),2);
+    changeIn2(i)=nanmean(nanmean(temp(:,fInSuTimes+changeWindow2_inds(1)-1:fInSuTimes+changeWindow2_inds(2)-1),1),2);
+end
+
+% plot scatter
 
 
 end

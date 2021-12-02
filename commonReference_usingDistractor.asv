@@ -126,13 +126,7 @@ for i=1:size(beh2_tbt.reference_into_beh1trialinds,1)
     if f>length(data1ti)
         continue
     end
-    if length(f)>1
-        figure(); 
-        plot(data2ti);
-        disp(f);
-        disambig=input(['Found two matches for row ' num2str(i) '. Which to use? ']);
-        f=disambig;
-    end
+    if 
     beh2_tbt.reference_into_beh1trialinds(i,:)=ones(size(beh2_tbt.reference_into_beh1trialinds(i,:)))*data1ti(f);
 end
 % figure(); plot(1.1*behavior_tbt.movie_distractor(10,:),'Color','k'); hold on; plot(beh2_tbt.movie_distractor(beh2_tbt.reference_into_beh1trialinds(10,1),:),'Color','r');
