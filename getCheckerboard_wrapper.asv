@@ -1,0 +1,56 @@
+function getCheckerboard_wrapper(varargin)
+
+global continueAnalysis
+continueAnalysis=0;
+
+framesPerChunk=1000;
+
+% Get file name of video with reaches
+filename=varargin{1};
+
+% Read beginning of movie and discard unused frames
+videoFReader = vision.VideoFileReader(filename,'PlayCount',1);
+
+n=framesPerChunk;
+for i=1:settings.framesPerChunk % How many frames to read initially
+    [frame,EOF]=step(videoFReader);
+    if EOF==true
+        allframes=allframes(:,:,:,i-1);
+        break
+    end
+    if i==1
+        allframes=nan([size(frame,1) size(frame,2) size(frame,3) n]);
+    end
+    allframes(:,:,:,i)=frame;
+end
+
+% Play movie until at good frame for zone definitions
+fig=implay(allframes,30);
+fig.Parent.Position=[100 100 800 800];
+pause;
+if ~isempty(regexp(version,'2017b','once')) || ~isempty(regexp(version,'2018b','once')) ||  ~isempty(regexp(version,'2020b','once')) || ~isempty(regexp(version,'2021a','once'))
+    currentFrameNumber=fig.DataSource.Controls.CurrentFrame;
+else
+    currentFrameNumber=fig.data.Controls.CurrentFrame;
+end
+
+end
+
+function vs=getVertices(frame)
+
+global vertexViews
+global continueAnalysis
+
+zoneFig=makeCheckerboardOnVid(frame,'for checkerboard');
+disp('Click side-view then under-view then top-view.');
+pause;
+vs=vertexViews;
+
+if continueAnalysis==1
+    disp('Succesfully defined');
+else
+    disp('Failed to define');
+end
+
+close(zoneFig);
+end
