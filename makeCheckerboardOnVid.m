@@ -58,6 +58,8 @@ handles.firstVertex=[];
 handles.secondVertex=[];
 handles.thirdVertex=[];
 handles.fourthVertex=[];
+handles.fifthVertex=[];
+handles.sixthVertex=[];
 
 slice=varargin{1};
 guititle=varargin{2};
@@ -102,6 +104,41 @@ function figure1_WindowButtonDownFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 switch handles.whichInput
+    case 'paw length'
+        targetSize=5;
+        if ~isfield(handles,'isFirstPress')
+            handles.isFirstPress=true;
+            [currVertex_x,currVertex_y]=ginput(1);
+            handles.firstVertex=[currVertex_x,currVertex_y];
+            line([nanmax([currVertex_x-targetSize 0]) currVertex_x+targetSize],[currVertex_y currVertex_y],'Color','m');
+            line([currVertex_x currVertex_x],[nanmax([currVertex_y-targetSize 0]) currVertex_y+targetSize],'Color','m');
+        elseif ~isfield(handles,'isSecondPress')
+            handles.isFirstPress=false;
+            handles.isSecondPress=true;
+            [currVertex_x,currVertex_y]=ginput(1);
+            handles.secondVertex=[currVertex_x,currVertex_y];
+            line([nanmax([currVertex_x-targetSize 0]) currVertex_x+targetSize],[currVertex_y currVertex_y],'Color','c');
+            line([currVertex_x currVertex_x],[nanmax([currVertex_y-targetSize 0]) currVertex_y+targetSize],'Color','c');
+            line([handles.firstVertex(1) handles.secondVertex(1)],[handles.firstVertex(2) handles.secondVertex(2)],'Color','y');
+        elseif ~isfield(handles,'isThirdPress')
+            handles.isFirstPress=false;
+            handles.isSecondPress=false;
+            handles.isThirdPress=true;
+            [currVertex_x,currVertex_y]=ginput(1);
+            handles.thirdVertex=[currVertex_x,currVertex_y];
+            line([nanmax([currVertex_x-targetSize 0]) currVertex_x+targetSize],[currVertex_y currVertex_y],'Color','g');
+            line([currVertex_x currVertex_x],[nanmax([currVertex_y-targetSize 0]) currVertex_y+targetSize],'Color','g');
+        elseif ~isfield(handles,'isFourthPress')
+            handles.isFirstPress=false;
+            handles.isSecondPress=false;
+            handles.isThirdPress=false;
+            handles.isFourthPress=true;
+            [currVertex_x,currVertex_y]=ginput(1);
+            handles.fourthVertex=[currVertex_x,currVertex_y];
+            line([nanmax([currVertex_x-targetSize 0]) currVertex_x+targetSize],[currVertex_y currVertex_y],'Color','r');
+            line([currVertex_x currVertex_x],[nanmax([currVertex_y-targetSize 0]) currVertex_y+targetSize],'Color','r');
+            line([handles.thirdVertex(1) handles.fourthVertex(1)],[handles.thirdVertex(2) handles.fourthVertex(2)],'Color','y');
+        end
     case 'paw pos'
         targetSize=20;
         if ~isfield(handles,'isFirstPress')
@@ -161,6 +198,115 @@ switch handles.whichInput
             line([currVertex_x currVertex_x],[nanmax([currVertex_y-targetSize 0]) currVertex_y+targetSize],'Color','r');
             line([handles.thirdVertex(1) handles.fourthVertex(1)],[handles.thirdVertex(2) handles.fourthVertex(2)],'Color','y');
         end
+    case 'cutout front edge'
+        targetSize=5;
+        if ~isfield(handles,'isFirstPress')
+            handles.isFirstPress=true;
+            [currVertex_x,currVertex_y]=ginput(1);
+            handles.firstVertex=[currVertex_x,currVertex_y];
+            line([nanmax([currVertex_x-targetSize 0]) currVertex_x+targetSize],[currVertex_y currVertex_y],'Color','m');
+            line([currVertex_x currVertex_x],[nanmax([currVertex_y-targetSize 0]) currVertex_y+targetSize],'Color','m');
+        elseif ~isfield(handles,'isSecondPress')
+            handles.isFirstPress=false;
+            handles.isSecondPress=true;
+            [currVertex_x,currVertex_y]=ginput(1);
+            handles.secondVertex=[currVertex_x,currVertex_y];
+            line([nanmax([currVertex_x-targetSize 0]) currVertex_x+targetSize],[currVertex_y currVertex_y],'Color','c');
+            line([currVertex_x currVertex_x],[nanmax([currVertex_y-targetSize 0]) currVertex_y+targetSize],'Color','c');
+            line([handles.firstVertex(1) handles.secondVertex(1)],[handles.firstVertex(2) handles.secondVertex(2)],'Color','y');
+        elseif ~isfield(handles,'isThirdPress')
+            handles.isFirstPress=false;
+            handles.isSecondPress=false;
+            handles.isThirdPress=true;
+            [currVertex_x,currVertex_y]=ginput(1);
+            handles.thirdVertex=[currVertex_x,currVertex_y];
+            line([nanmax([currVertex_x-targetSize 0]) currVertex_x+targetSize],[currVertex_y currVertex_y],'Color','g');
+            line([currVertex_x currVertex_x],[nanmax([currVertex_y-targetSize 0]) currVertex_y+targetSize],'Color','g');
+        elseif ~isfield(handles,'isFourthPress')
+            handles.isFirstPress=false;
+            handles.isSecondPress=false;
+            handles.isThirdPress=false;
+            handles.isFourthPress=true;
+            [currVertex_x,currVertex_y]=ginput(1);
+            handles.fourthVertex=[currVertex_x,currVertex_y];
+            line([nanmax([currVertex_x-targetSize 0]) currVertex_x+targetSize],[currVertex_y currVertex_y],'Color','r');
+            line([currVertex_x currVertex_x],[nanmax([currVertex_y-targetSize 0]) currVertex_y+targetSize],'Color','r');
+            line([handles.thirdVertex(1) handles.fourthVertex(1)],[handles.thirdVertex(2) handles.fourthVertex(2)],'Color','y');
+        end
+    case 'wheel cutout'
+        targetSize=5;
+        if ~isfield(handles,'isFirstPress')
+            handles.isFirstPress=true;
+            [currVertex_x,currVertex_y]=ginput(1);
+            handles.firstVertex=[currVertex_x,currVertex_y];
+            line([nanmax([currVertex_x-targetSize 0]) currVertex_x+targetSize],[currVertex_y currVertex_y],'Color','m');
+            line([currVertex_x currVertex_x],[nanmax([currVertex_y-targetSize 0]) currVertex_y+targetSize],'Color','m');
+        elseif ~isfield(handles,'isSecondPress')
+            handles.isFirstPress=false;
+            handles.isSecondPress=true;
+            [currVertex_x,currVertex_y]=ginput(1);
+            handles.secondVertex=[currVertex_x,currVertex_y];
+            line([nanmax([currVertex_x-targetSize 0]) currVertex_x+targetSize],[currVertex_y currVertex_y],'Color','c');
+            line([currVertex_x currVertex_x],[nanmax([currVertex_y-targetSize 0]) currVertex_y+targetSize],'Color','c');
+            line([handles.firstVertex(1) handles.secondVertex(1)],[handles.firstVertex(2) handles.secondVertex(2)],'Color','y');
+        elseif ~isfield(handles,'isThirdPress')
+            handles.isFirstPress=false;
+            handles.isSecondPress=false;
+            handles.isThirdPress=true;
+            [currVertex_x,currVertex_y]=ginput(1);
+            handles.thirdVertex=[currVertex_x,currVertex_y];
+            line([nanmax([currVertex_x-targetSize 0]) currVertex_x+targetSize],[currVertex_y currVertex_y],'Color','g');
+            line([currVertex_x currVertex_x],[nanmax([currVertex_y-targetSize 0]) currVertex_y+targetSize],'Color','g');
+            line([handles.secondVertex(1) handles.thirdVertex(1)],[handles.secondVertex(2) handles.thirdVertex(2)],'Color','y');
+        elseif ~isfield(handles,'isFourthPress')
+            handles.isFirstPress=false;
+            handles.isSecondPress=false;
+            handles.isThirdPress=false;
+            handles.isFourthPress=true;
+            [currVertex_x,currVertex_y]=ginput(1);
+            handles.fourthVertex=[currVertex_x,currVertex_y];
+            line([nanmax([currVertex_x-targetSize 0]) currVertex_x+targetSize],[currVertex_y currVertex_y],'Color','m');
+            line([currVertex_x currVertex_x],[nanmax([currVertex_y-targetSize 0]) currVertex_y+targetSize],'Color','m');
+        elseif ~isfield(handles,'isFifthPress')
+            handles.isFirstPress=false;
+            handles.isSecondPress=false;
+            handles.isThirdPress=false;
+            handles.isFourthPress=false;
+            handles.isFifthPress=true;
+            [currVertex_x,currVertex_y]=ginput(1);
+            handles.fifthVertex=[currVertex_x,currVertex_y];
+            line([nanmax([currVertex_x-targetSize 0]) currVertex_x+targetSize],[currVertex_y currVertex_y],'Color','c');
+            line([currVertex_x currVertex_x],[nanmax([currVertex_y-targetSize 0]) currVertex_y+targetSize],'Color','c');
+            line([handles.fourthVertex(1) handles.fifthVertex(1)],[handles.fourthVertex(2) handles.fifthVertex(2)],'Color','y');
+        elseif ~isfield(handles,'isSixthPress')
+            handles.isFirstPress=false;
+            handles.isSecondPress=false;
+            handles.isThirdPress=false;
+            handles.isFourthPress=false;
+            handles.isFifthPress=false;
+            handles.isSixthPress=true;
+            [currVertex_x,currVertex_y]=ginput(1);
+            handles.sixthVertex=[currVertex_x,currVertex_y];
+            line([nanmax([currVertex_x-targetSize 0]) currVertex_x+targetSize],[currVertex_y currVertex_y],'Color','g');
+            line([currVertex_x currVertex_x],[nanmax([currVertex_y-targetSize 0]) currVertex_y+targetSize],'Color','g');
+            line([handles.fifthVertex(1) handles.sixthVertex(1)],[handles.fifthVertex(2) handles.sixthVertex(2)],'Color','y');
+        end
+    case 'stopped pellet'
+        targetSize=20;
+        if ~isfield(handles,'isFirstPress')
+            handles.isFirstPress=true;
+            [currVertex_x,currVertex_y]=ginput(1);
+            handles.firstVertex=[currVertex_x,currVertex_y];
+            line([nanmax([currVertex_x-targetSize 0]) currVertex_x+targetSize],[currVertex_y currVertex_y],'Color','m');
+            line([currVertex_x currVertex_x],[nanmax([currVertex_y-targetSize 0]) currVertex_y+targetSize],'Color','m');
+        elseif ~isfield(handles,'isSecondPress')
+            handles.isFirstPress=false;
+            handles.isSecondPress=true;
+            [currVertex_x,currVertex_y]=ginput(1);
+            handles.secondVertex=[currVertex_x,currVertex_y];
+            line([nanmax([currVertex_x-targetSize 0]) currVertex_x+targetSize],[currVertex_y currVertex_y],'Color','c');
+            line([currVertex_x currVertex_x],[nanmax([currVertex_y-targetSize 0]) currVertex_y+targetSize],'Color','c');
+        end
 end
 
 % Update handles structure
@@ -192,10 +338,18 @@ global continueAnalysis vertexViews
 continueAnalysis=1;
 vertexViews=[];
 switch handles.whichInput
+    case 'paw length'
+        vertexViews=[handles.firstVertex; handles.secondVertex; handles.thirdVertex; handles.fourthVertex];
     case 'paw pos'
         vertexViews=[handles.firstVertex; handles.secondVertex; handles.thirdVertex];
     case 'perch line'
         vertexViews=[handles.firstVertex; handles.secondVertex; handles.thirdVertex; handles.fourthVertex];
+    case 'cutout front edge'
+        vertexViews=[handles.firstVertex; handles.secondVertex; handles.thirdVertex; handles.fourthVertex];
+    case 'wheel cutout'
+        vertexViews=[handles.firstVertex; handles.secondVertex; handles.thirdVertex; handles.fourthVertex; handles.fifthVertex; handles.sixthVertex];
+    case 'stopped pellet'
+        vertexViews=[handles.firstVertex; handles.secondVertex];
 end
 delete(hObject);
 
