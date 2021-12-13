@@ -101,15 +101,16 @@ disp('Click side-view then under-view stopped pellet.');
 wheel_vs=getVertices(frame,'stopped pellet','stopped pellet');
 % Defines X,Y origin
 under_X_b=wheel_vs(4)-under_X_m*wheel_vs(3);
-[under_origin_x,under_origin_y]=intersectPoints(under_Y_m,under_X_m,under_Y_b,under_X_b);
-
+%[under_perchorigin_x,under_perchorigin_y]=intersectPoints(under_Y_m,under_X_m,under_Y_b,under_X_b);
+under
 showReferencesOnImage(frame,under_origin_x,under_origin_y,under_X_m,under_Y_m,under_X_b,under_Y_b);
 
 % Get line in front of wheel cutout
 disp('Click side-view then under-view cutout front edge for Z.');
 cutoutZ_vs=getVertices(frame,'cutout front edge','cutout front edge');
 % Defines Z axis and origin
-side_Z_m=
+side_Z_m=(cutoutZ_vs(4)-cutoutZ_vs(2))/(cutoutZ_vs(3)-cutoutZ_vs(1));
+side_Z_b=
 
 % Get paw length when max outstretched
 disp('Click side-view then under-view outstretched paw length.');
