@@ -103,6 +103,8 @@ function figure1_WindowButtonDownFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+skipTopDownView=true;
+
 switch handles.whichInput
     case 'paw length'
         targetSize=5;
@@ -154,14 +156,21 @@ switch handles.whichInput
             handles.secondVertex=[currVertex_x,currVertex_y];
             line([nanmax([currVertex_x-targetSize 0]) currVertex_x+targetSize],[currVertex_y currVertex_y],'Color','c');
             line([currVertex_x currVertex_x],[nanmax([currVertex_y-targetSize 0]) currVertex_y+targetSize],'Color','c');
+            if skipTopDownView==true
+                handles.thirdVertex=[nan nan];
+            end
         elseif ~isfield(handles,'isThirdPress')
-            handles.isFirstPress=false;
-            handles.isSecondPress=false;
-            handles.isThirdPress=true;
-            [currVertex_x,currVertex_y]=ginput(1);
-            handles.thirdVertex=[currVertex_x,currVertex_y];
-            line([nanmax([currVertex_x-targetSize 0]) currVertex_x+targetSize],[currVertex_y currVertex_y],'Color','y');
-            line([currVertex_x currVertex_x],[nanmax([currVertex_y-targetSize 0]) currVertex_y+targetSize],'Color','y');
+            if skipTopDownView==true
+                handles.thirdVertex=[nan nan];
+            else
+                handles.isFirstPress=false;
+                handles.isSecondPress=false;
+                handles.isThirdPress=true;
+                [currVertex_x,currVertex_y]=ginput(1);
+                handles.thirdVertex=[currVertex_x,currVertex_y];
+                line([nanmax([currVertex_x-targetSize 0]) currVertex_x+targetSize],[currVertex_y currVertex_y],'Color','y');
+                line([currVertex_x currVertex_x],[nanmax([currVertex_y-targetSize 0]) currVertex_y+targetSize],'Color','y');
+            end
         end
     case 'perch line'
         targetSize=10;
