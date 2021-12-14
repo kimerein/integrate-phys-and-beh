@@ -94,13 +94,14 @@ under_X_m=tand(under_Xangle);
 % flip slope signs, because Y axis is inverted by imagesc
 under_X_m=-under_X_m;
 under_Y_m=-under_Y_m;
-under_Y_b=perch_vs(6)-under_Y_m*perch_vs(5);
+side_Y_m=-side_Y_m;
 
 % Get position of stopped pellet
 disp('Click side-view then under-view stopped pellet.');
 wheel_vs=getVertices(frame,'stopped pellet','stopped pellet');
 % Defines X,Y origin
 under_X_b=wheel_vs(4)-under_X_m*wheel_vs(3);
+under_Y_b=wheel_vs(4)-under_Y_m*wheel_vs(3);
 %[under_perchorigin_x,under_perchorigin_y]=intersectPoints(under_Y_m,under_X_m,under_Y_b,under_X_b);
 under_origin_x=wheel_vs(3);
 under_origin_y=wheel_vs(4);
@@ -114,6 +115,7 @@ cutoutZ_vs=getVertices(frame,'cutout front edge','cutout front edge');
 % Defines Z axis and origin
 side_Z_m=(cutoutZ_vs(4)-cutoutZ_vs(2))/(cutoutZ_vs(3)-cutoutZ_vs(1));
 side_Z_b=side_origin_y-side_Z_m*side_origin_x;
+side_Y_b=side_origin_y-side_Y_m*side_origin_x;
 showReferencesOnImage([],side_origin_x,side_origin_y,side_Y_m,side_Z_m,side_Y_b,side_Z_b);
 
 % Get paw length when max outstretched
