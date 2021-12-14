@@ -57,6 +57,10 @@ frame=allframes(:,:,:,currentFrameNumber);
 % Y is down the frame vertically
 % X and Y zeros are in upper left corner
 
+% Get "camera" (actually mirror) centers
+disp('Click side-view mirror center then under-view mirror center.');
+mirror_vs=getVertices(frame,'mirror centers','mirror centers');
+
 % Draw perch line onto both views
 disp('Click side-view then under-view perch line.');
 perch_vs=getVertices(frame,'perch line','perch line');
@@ -216,14 +220,14 @@ function objPoint=convertImagePointToObjectPoint(side_x,side_y,under_x,under_y,r
 % get position in X-Y plane from bottom view
 % project vector from origin to [under_x,under_y] onto X axis, then Y axis,
 % get magnitudes
-x_pos=reference.under_scaleTomm*norm(vecProject([under_x-reference.under_origin_x,under_y-reference.under_origin_y],reference.under_X_vec,true));
-y_pos=reference.under_scaleTomm*norm(vecProject([under_x-reference.under_origin_x,under_y-reference.under_origin_y],reference.under_Y_vec,true));
+x_pos=reference.under_scaleTomm*normKeepSign(vecProject([under_x-reference.under_origin_x,under_y-reference.under_origin_y],reference.under_X_vec,true),1);
+y_pos=reference.under_scaleTomm*normKeepSign(vecProject([under_x-reference.under_origin_x,under_y-reference.under_origin_y],reference.under_Y_vec,true),2);
 
 % get position in X-Z plane from side view
 % project vector from origin to [side_x,side_y] onto X axis, then Z axis,
 % get magnitudes
-x_pos2=reference.side_scaleTomm*norm(vecProject([side_x-reference.side_origin_x,side_y-reference.side_origin_y],reference.side_X_vec,true));
-z_pos=reference.side_scaleTomm*norm(vecProject([side_x-reference.side_origin_x,side_y-reference.side_origin_y],reference.side_Z_vec,true));
+x_pos2=reference.side_scaleTomm*normKeepSign(vecProject([side_x-reference.side_origin_x,side_y-reference.side_origin_y],reference.side_X_vec,true),1);
+z_pos=reference.side_scaleTomm*normKeepSign(vecProject([side_x-reference.side_origin_x,side_y-reference.side_origin_y],reference.side_Z_vec,true),2);
 % after conversion into real space, x_pos and x_pos2 should be approximately the same
 disp([x_pos x_pos2]);
 
@@ -231,12 +235,20 @@ objPoint=[x_pos,y_pos,z_pos];
 
 end
 
-function normKeepSign(vec,signFromInd)
+function vecnorm=normKeepSign(vec,signFromInd)
 
 if signFromInd==1
-    
+    if vec(1)<0
+        vecnorm=-norm(vec);
+    else
+        vecnorm=norm(vec);
+    end
 elseif signFromInd==2
-
+    if vec(2)<0
+        vecnorm=-norm(vec);
+    else
+        vecnorm=norm(vec);
+    end
 else
     error('normKeepSign assumes a 2D vector');
 end
@@ -270,7 +282,8 @@ scatter(under_image_points(:,1),under_image_points(:,2),[],cmap(indsIntoCmap,:))
 
 figure();
 % need to flip Z axis for this display
-scatter3(object_points(:,1),object_points(:,2),object_points(:,3),[],cmap(indsIntoCmap,:),'filled');
+scatter3(object_points(:,1),-object_points(:,2),-object_points(:,3),[],cmap(indsIntoCmap,:),'filled');
+daspect([1 1 1]);
 
 end
 

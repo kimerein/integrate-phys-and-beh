@@ -63,7 +63,7 @@ handles.sixthVertex=[];
 
 slice=varargin{1};
 guititle=varargin{2};
-whichInput=varargin{3}; % 'perch line','wheel cutout','stopped pellet','cutout front edge','paw pos','paw length'
+whichInput=varargin{3}; % 'perch line','wheel cutout','stopped pellet','cutout front edge','paw pos','paw length','mirror centers'
 h=imagesc(slice);
 colormap gray
 set(h.Parent.Parent,'Position',[0 0 560 350]);
@@ -316,6 +316,22 @@ switch handles.whichInput
             line([nanmax([currVertex_x-targetSize 0]) currVertex_x+targetSize],[currVertex_y currVertex_y],'Color','c');
             line([currVertex_x currVertex_x],[nanmax([currVertex_y-targetSize 0]) currVertex_y+targetSize],'Color','c');
         end
+    case 'mirror centers'
+        targetSize=20;
+        if ~isfield(handles,'isFirstPress')
+            handles.isFirstPress=true;
+            [currVertex_x,currVertex_y]=ginput(1);
+            handles.firstVertex=[currVertex_x,currVertex_y];
+            line([nanmax([currVertex_x-targetSize 0]) currVertex_x+targetSize],[currVertex_y currVertex_y],'Color','m');
+            line([currVertex_x currVertex_x],[nanmax([currVertex_y-targetSize 0]) currVertex_y+targetSize],'Color','m');
+        elseif ~isfield(handles,'isSecondPress')
+            handles.isFirstPress=false;
+            handles.isSecondPress=true;
+            [currVertex_x,currVertex_y]=ginput(1);
+            handles.secondVertex=[currVertex_x,currVertex_y];
+            line([nanmax([currVertex_x-targetSize 0]) currVertex_x+targetSize],[currVertex_y currVertex_y],'Color','c');
+            line([currVertex_x currVertex_x],[nanmax([currVertex_y-targetSize 0]) currVertex_y+targetSize],'Color','c');
+        end
 end
 
 % Update handles structure
@@ -358,6 +374,8 @@ switch handles.whichInput
     case 'wheel cutout'
         vertexViews=[handles.firstVertex; handles.secondVertex; handles.thirdVertex; handles.fourthVertex; handles.fifthVertex; handles.sixthVertex];
     case 'stopped pellet'
+        vertexViews=[handles.firstVertex; handles.secondVertex];
+    case 'mirror centers'
         vertexViews=[handles.firstVertex; handles.secondVertex];
 end
 delete(hObject);

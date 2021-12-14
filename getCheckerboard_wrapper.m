@@ -57,6 +57,10 @@ frame=allframes(:,:,:,currentFrameNumber);
 % Y is down the frame vertically
 % X and Y zeros are in upper left corner
 
+% Get "camera" (actually mirror) centers
+disp('Click side-view mirror center then under-view mirror center.');
+mirror_vs=getVertices(frame,'mirror centers','mirror centers');
+
 % Draw perch line onto both views
 disp('Click side-view then under-view perch line.');
 perch_vs=getVertices(frame,'perch line','perch line');
