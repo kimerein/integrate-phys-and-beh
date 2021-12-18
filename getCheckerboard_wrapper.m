@@ -1,4 +1,4 @@
-function [object_points,side_image_points,under_image_points]=getCheckerboard_wrapper(varargin)
+function [object_points,side_image_points,under_image_points,mirror_vs]=getCheckerboard_wrapper(varargin)
 
 framesPerChunk=1500;
 ds=10;
@@ -212,6 +212,13 @@ for i=1:size(all_vs,1)
     under_image_points=[under_image_points; [all_vs(i,3), all_vs(i,4)]];
 end
 showPointsOnImage([],side_image_points,under_image_points,object_points);
+
+% Change mirrors to "virtual cameras"
+% Need to flip both mirror points horizontally
+side_image_points=flipImagePoints(side_image_points,size(frame,1),size(frame,2),'horizontal');
+under_image_points=flipImagePoints(under_image_points,size(frame,1),size(frame,2),'horizontal');
+mirror_vs(1:2)=flipImagePoints(mirror_vs(1:2),size(frame,1),size(frame,2),'horizontal');
+mirror_vs(3:4)=flipImagePoints(mirror_vs(3:4),size(frame,1),size(frame,2),'horizontal');
 
 end
 
