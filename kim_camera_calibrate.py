@@ -11,27 +11,22 @@ Script stereo calibrates a pair of mirrors (or views) imaged by a single camera,
     Fixed camera focal length around 13-16 mm, imaged fov around 4x4x4 cm, and/or changing camera focal length creates minimal distortion (small enough fov)
     Known relationship between real paw length in world and number of pixels in camera image
     Known approximate prinicipal points for the two mirror views
-    Essentially, these assumptions are required to construct the camera matrix and distortion coefficients for each view
+    Essentially, these assumptions are required to construct the camera matrix, distortion coefficients and principal points for each view
 """
 
-import glob
 import os
 import pickle
-from pathlib import Path
 
 import cv2
 import scipy
-import matplotlib.colors as mcolors
-import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.axes._axes import _log as matplotlib_axes_logger
 
 from deeplabcut.utils import auxiliaryfunctions
 from deeplabcut.utils import auxiliaryfunctions_3d
 
-matplotlib_axes_logger.setLevel("ERROR")
 
 config=r'C:\Users\sabatini\Documents\DLC_3D\Test2022-Kim-2022-01-04-3d\config.yaml'
+testimg=r'C:\Users\sabatini\Documents\vid_2021-02-10-165418-0067-1.jpg'
 
 # this code is only for one camera/mirror/view pair, called for example 'sidecam' and 'undercam'
 # can rerun this calibration for a different camera pair
@@ -40,8 +35,8 @@ camera_names=[views[0]+'cam', views[1]+'cam']
 
 # define files to import from Matlab
 objectpointsfile=r'C:\Users\sabatini\Documents\objpoints.mat'
-sideimgpointsfile=os.path.join(r'C:\User\sabatini\Documents', ''.join([views[0], 'points.mat']))
-underimgpointsfile=os.path.join(r'C:\User\sabatini\Documents', ''.join([views[1], 'points.mat']))
+sideimgpointsfile=os.path.join(r'C:\Users\sabatini\Documents', ''.join([views[0], 'points.mat']))
+underimgpointsfile=os.path.join(r'C:\Users\sabatini\Documents', ''.join([views[1], 'points.mat']))
 mirrorcentersfile=r'C:\Users\sabatini\Documents\mirrorcenters.mat'
 imgsizefile=r'C:\Users\sabatini\Documents\imgsize.mat'
 
@@ -75,6 +70,8 @@ objpoints={}
 imgpoints={}
 mirrorcenters={}
 dist_pickle={}
+stereo_from_uncalib={}
+stereo_params={}
 for cam in camera_names:
     objpoints.setdefault(cam,[])
     imgpoints.setdefault(cam,[])
@@ -90,27 +87,27 @@ for i in range(0,len(temp)):
     temp2=a
     objp[i]=temp2
 for cam in camera_names:
-    objpoints[cam]=objp
+    objpoints[cam].append(objp)
 
 # image points view 1
 mat_imgpoints=scipy.io.loadmat(sideimgpointsfile)
-objp=np.zeros((len(mat_imgpoints[views[0]+'points']),3),np.float32)
+objp=np.zeros((len(mat_imgpoints[views[0]+'points']),2),np.float32)
 temp=mat_imgpoints[views[0]+'points']
 for i in range(0,len(temp)):
     a=temp[i]
     temp2=a
     objp[i]=temp2
-imgpoints[camera_names[0]]=objp
+imgpoints[camera_names[0]].append(objp)
 
 # image points view 2
 mat_imgpoints=scipy.io.loadmat(underimgpointsfile)
-objp=np.zeros((len(mat_imgpoints[views[1]+'points']),3),np.float32)
+objp=np.zeros((len(mat_imgpoints[views[1]+'points']),2),np.float32)
 temp=mat_imgpoints[views[1]+'points']
 for i in range(0,len(temp)):
     a=temp[i]
     temp2=a
     objp[i]=temp2
-imgpoints[camera_names[1]]=objp
+imgpoints[camera_names[1]].append(objp)
 
 # mirror centers are the prinicipal points
 mat_mirrorcenters=scipy.io.loadmat(mirrorcentersfile)
@@ -152,4 +149,139 @@ for cam in camera_names:
     )
 
 # get the reprojected points consistent with a single self-consistent homography 
+for cam in camera_names:
+    testimgpoints, jcb = cv2.projectPoints(objpoints[cam][0],dist_pickle[cam]["rvecs"][0],dist_pickle[cam]["tvecs"][0],dist_pickle[cam]["mtx"],dist_pickle[cam]["dist"])
+    dist_pickle[cam].update({"reproj_points": testimgpoints})
+    
+# get the fundamental matrix for stereo calibration
+F, mask = cv2.findFundamentalMat(dist_pickle[camera_names[0]]["reproj_points"], dist_pickle[camera_names[1]]["reproj_points"], cv2.FM_8POINT) # use nearly all the points
+stereo_from_uncalib["F"] = F
+# get and save homography for reference although don't use it
+H = cv2.stereoRectifyUncalibrated(dist_pickle[camera_names[0]]["reproj_points"],dist_pickle[camera_names[1]]["reproj_points"],stereo_from_uncalib["F"],(imagesize['dim1'], imagesize['dim2']),0)
+stereo_from_uncalib["H1"] = H[1]
+stereo_from_uncalib["H2"] = H[2]
+# to 3D deeplabcut
+pickle.dump(
+    stereo_from_uncalib,
+    open(
+        os.path.join(path_camera_matrix, "stereo_from_uncalib.pickle"),
+        "wb",
+    ),
+)
+print(
+    "Saving fundamental matrix and homographies for stereo calibration"
+)
 
+# get essential matrix
+focal_length=f_x
+E = np.matmul(np.matmul(np.matrix.transpose(dist_pickle[camera_names[1]]["mtx"]),stereo_from_uncalib["F"]*focal_length),dist_pickle[camera_names[0]]["mtx"])
+trydecomp=cv2.decomposeEssentialMat(E)
+try1_R=trydecomp[0]
+try2_R=trydecomp[1]
+t=trydecomp[2]
+# produces four possible poses: [try1_R,t], [try1_R,-t], [try2_R,t], [try2_R,-t]
+
+img1=cv2.imread(testimg)
+pair = [camera_names[0], camera_names[1]]
+print(
+    "Saving the stereo parameters for pair of cameras as a pickle file in %s"
+    % str(os.path.join(path_camera_matrix))
+)
+for i in range(4):
+    # stereorectify
+    if i==0:
+        tryrot=try1_R
+        tryt=t
+    if i==1:
+        tryrot=try1_R
+        tryt=-t
+    if i==2:
+        tryrot=try2_R
+        tryt=t
+    if i==3:
+        tryrot=try2_R
+        tryt=-t
+    R1, R2, P1, P2, Q, roi1, roi2 = cv2.stereoRectify(dist_pickle[camera_names[0]]["mtx"], 
+                                                      dist_pickle[camera_names[0]]["dist"], 
+                                                      dist_pickle[camera_names[1]]["mtx"], 
+                                                      dist_pickle[camera_names[1]]["dist"], 
+                                                      (imagesize['dim1'], imagesize['dim2']), 
+                                                      tryrot, tryt, alpha=0.9)
+    map1_x, map1_y = cv2.initUndistortRectifyMap(dist_pickle[camera_names[0]]["mtx"],
+                                                 dist_pickle[camera_names[0]]["dist"],
+                                                 R1,
+                                                 P1,
+                                                 (imagesize['dim1'], imagesize['dim2']),
+                                                 cv2.CV_16SC2)
+    map2_x, map2_y = cv2.initUndistortRectifyMap(dist_pickle[camera_names[1]]["mtx"],
+                                                 dist_pickle[camera_names[1]]["dist"],
+                                                 R2,
+                                                 P2,
+                                                 (imagesize['dim1'], imagesize['dim2']),
+                                                 cv2.CV_16SC2)
+    im_remapped = cv2.remap(img1, map1_x, map1_y, cv2.INTER_LINEAR, cv2.BORDER_TRANSPARENT)
+    cv2.imwrite(os.path.join(path_camera_matrix, 'test_undistort_pose' + str(i) + 'A.jpg'),im_remapped)
+    im_remapped = cv2.remap(img1, map2_x, map2_y, cv2.INTER_LINEAR, cv2.BORDER_TRANSPARENT)
+    cv2.imwrite(os.path.join(path_camera_matrix, 'test_undistort_pose' + str(i) + 'B.jpg'),im_remapped)
+    
+    # save for pickle
+    stereo_params[pair[0] + "-" + pair[1]] = {"cameraMatrix1": dist_pickle[camera_names[0]]["mtx"],
+                                              "cameraMatrix2": dist_pickle[camera_names[1]]["mtx"],
+                                              "distCoeffs1": dist_pickle[camera_names[0]]["dist"],
+                                              "distCoeffs2": dist_pickle[camera_names[1]]["dist"],
+                                              "R": tryrot,
+                                              "T": tryt,
+                                              "E": E,
+                                              "F": stereo_from_uncalib["F"],
+                                              "R1": R1,
+                                              "R2": R2,
+                                              "P1": P1,
+                                              "P2": P2,
+                                              "roi1": roi1,
+                                              "roi2": roi2,
+                                              "Q": Q,
+                                              "image_shape":[(imagesize['dim1'], imagesize['dim2']), (imagesize['dim1'], imagesize['dim2'])]}
+    # write stereo params for all possible poses
+    # user selects the correct pose and changes one of these files to stereo_params.pickle for 3d deeplabcut
+    auxiliaryfunctions.write_pickle(
+        os.path.join(path_camera_matrix, "stereo_params" + str(i) + ".pickle"), stereo_params
+    )
+
+    # get error of this stereo calibration
+    # convert all to world coordinate points in view 1's rectified world coordinate reference frame
+
+    # triangulate
+    # note that output will be in view 1's rectified world coordinates, since P1, R1, P2, R2 are from stereorectify
+    points1=dist_pickle[camera_names[0]]['reproj_points']
+    points2=dist_pickle[camera_names[1]]['reproj_points']
+    testpoints1 = cv2.undistortPoints(src=points1.astype(np.float32),cameraMatrix=dist_pickle[camera_names[0]]["mtx"], distCoeffs=dist_pickle[camera_names[0]]["dist"],P=stereo_params[pair[0] + "-" + pair[1]]["P1"],R=stereo_params[pair[0] + "-" + pair[1]]["R1"])
+    testpoints2 = cv2.undistortPoints(src=points2.astype(np.float32),cameraMatrix=dist_pickle[camera_names[1]]["mtx"], distCoeffs=dist_pickle[camera_names[1]]["dist"],P=stereo_params[pair[0] + "-" + pair[1]]["P2"],R=stereo_params[pair[0] + "-" + pair[1]]["R2"])
+    X = cv2.triangulatePoints(stereo_params[pair[0] + "-" + pair[1]]["P1"][:3],stereo_params[pair[0] + "-" + pair[1]]["P2"][:3], testpoints1, testpoints2)
+    X = X / X[3]
+    # rotate X
+    # this step specific to exact rig orientation of mirrors and cameras
+    rotateX=np.matmul([[1, 0, 0],[0, -1, 0],[0, 0, 1]], np.matmul([[1, 0, 0],[0, 1, 0],[0, 0, 1]],X[:3]))
+    savedata={}
+    savedata["triangulationOutput"]=rotateX
+    
+    # use Rodrigues to get rotations from the world coordinates to each camera's rectified world coordinates
+    outOfRod = cv2.Rodrigues(dist_pickle[camera_names[0]]["rvecs"][0])
+    Rotate = outOfRod[0]
+    outOfRod = cv2.Rodrigues(dist_pickle[camera_names[1]]["rvecs"][0])
+    Rotate2 = outOfRod[0]
+
+    # input from view 2 to view 1's rectified world coordinates
+    # plus a final rotation specific to exact rig orientation of mirrors and cameras
+    view2to1rect=np.matmul([[1, 0, 0],[0, -1, 0],[0, 0, 1]], 
+              np.matmul(stereo_params[pair[0] + "-" + pair[1]]["R1"], 
+                        np.matmul(np.linalg.inv(stereo_params[pair[0] + "-" + pair[1]]["R"]), 
+                                  np.matmul(Rotate2,
+                                            np.matrix.transpose(dist_pickle[camera_names[1]]['objpoints'][0])))))
+    savedata["view2to1rect"]=view2to1rect
+    
+    # input from view 1 to view 1's rectified world coordinates 
+    # plus a final rotation specific to exact rig orientation of mirrors and cameras
+    view1to1rect=np.matmul(stereo_params[pair[0] + "-" + pair[1]]["R1"],
+              np.matmul(Rotate,np.matrix.transpose(dist_pickle[camera_names[0]]['objpoints'][0])))
+    savedata["view1to1rect"]=view1to1rect
+    scipy.io.savemat(os.path.join(path_camera_matrix, 'compareStereos' + str(i) + '.mat'),savedata)
