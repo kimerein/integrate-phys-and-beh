@@ -86,6 +86,8 @@ for i in range(0,len(temp)):
     a=temp[i]
     temp2=a
     objp[i]=temp2
+objp=objp-np.min(objp)
+print(objp)
 for cam in camera_names:
     objpoints[cam].append(objp)
 
@@ -125,7 +127,24 @@ for cam in camera_names:
     camera_matrix=[[f_x, 0, mirrorcenters[cam]['p_x']],[0, f_y, mirrorcenters[cam]['p_y']],[0, 0, 1]];
     camera_matrix=np.array(camera_matrix)
     distCoeffs=np.array([0,0,0,0,0]) # assume zero distortion
-    ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints[cam],imgpoints[cam],[imagesize['dim1'],imagesize['dim2']],camera_matrix,distCoeffs,None,None,flags=cv2.CALIB_USE_INTRINSIC_GUESS)
+    ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints[cam],
+                                                       imgpoints[cam],
+                                                       [imagesize['dim1'],imagesize['dim2']],
+                                                       camera_matrix,distCoeffs,
+                                                       None,
+                                                       None,
+                                                       flags=cv2.CALIB_USE_INTRINSIC_GUESS+
+                                                       cv2.CALIB_FIX_PRINCIPAL_POINT+
+                                                       cv2.CALIB_ZERO_TANGENT_DIST+
+                                                       cv2.CALIB_FIX_FOCAL_LENGTH+
+                                                       cv2.CALIB_FIX_K1+
+                                                       cv2.CALIB_FIX_K2+
+                                                       cv2.CALIB_FIX_K3+
+                                                       cv2.CALIB_FIX_K4+
+                                                       cv2.CALIB_FIX_K5+
+                                                       cv2.CALIB_FIX_K6)
+    print("camera matrix for" + cam)
+    print(mtx)
     # save for pickle 
     dist_pickle[cam] = {
                 "mtx": mtx,
