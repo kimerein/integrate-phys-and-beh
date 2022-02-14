@@ -8,12 +8,8 @@ Created on Mon Jan 24 10:48:54 2022
 import os
 import numpy as np
 import cv2
-import matplotlib.pyplot as plt
-from PIL import Image
 from tqdm import tqdm
 from scipy.io import savemat
-from skimage.util import img_as_ubyte
-from deeplabcut.utils.auxfun_videos import imread
 from deeplabcut.utils import auxiliaryfunctions
 from pathlib import Path
 
@@ -30,9 +26,13 @@ def getRigEvents(
     
     # codedir = r'C:\Users\sabatini\Documents\GitHub\integrate-phys-and-beh'
     codedir = os.getcwd()
-    videos = [r'Z:\Kim\for_orchestra\deeplabcut test vids\for_extract_rig_events']
+    videos = [r'Z:\Kim\for_orchestra\deeplabcut test vids\dLight2_2021-02-10']
     # videos: list
     #    A list of strings containing the full paths to videos for analysis or a path to the directory, where all the videos with same extension are stored.
+    getDifferenceEventsBeforeSaving = True
+    cueThresh = 100
+    rawThresh = 1
+    distractorThresh = 100
     
     videotype = ".avi"
     wheelZone = [139, 223, 1, 91] # [x_start, x_end, y_start, y_end]
@@ -124,8 +124,24 @@ def getRigEvents(
                     break
                 counter += 1
             pbar.close()
-    # save results
-    outp = {"rawDiffs": rawDiffs, "cueDiffs": cueDiffs, "distractorDiffs": distractorDiffs, "wheelDiffs": wheelDiffs}
+    # once have tested a video so know the right thresholds, can set getDifferenceEventsBeforeSaving to True
+    # in order to save smaller files for Matlab
+    if getDifferenceEventsBeforeSaving:
+        def condition(x, thresh): return x > thresh
+        def condminus(x, thresh): return x < -thresh
+        rawDiffEvs_plus = [idx for idx, element in enumerate(rawDiffs) if condition(element, rawThresh)]
+        cueDiffEvs_plus = [idx for idx, element in enumerate(cueDiffs) if condition(element, cueThresh)]
+        distractorDiffEvs_plus = [idx for idx, element in enumerate(distractorDiffs) if condition(element, distractorThresh)]
+        rawDiffEvs_minus = [idx for idx, element in enumerate(rawDiffs) if condminus(element, rawThresh)]
+        cueDiffEvs_minus = [idx for idx, element in enumerate(cueDiffs) if condminus(element, cueThresh)]
+        distractorDiffEvs_minus = [idx for idx, element in enumerate(distractorDiffs) if condminus(element, distractorThresh)]
+        howmanyframes = len(cueDiffs)
+        # save event indices
+        outp = {"rawDiffEvs_plus": rawDiffEvs_plus, "cueDiffEvs_plus": cueDiffEvs_plus, "distractorDiffEvs_plus": distractorDiffEvs_plus,
+                "rawDiffEvs_minus": rawDiffEvs_minus, "cueDiffEvs_minus": cueDiffEvs_minus, "distractorDiffEvs_minus": distractorDiffEvs_minus, "howmanyframes": howmanyframes}
+    else:
+        # save results
+        outp = {"rawDiffs": rawDiffs, "cueDiffs": cueDiffs, "distractorDiffs": distractorDiffs, "wheelDiffs": wheelDiffs}
     savemat("rig_events.mat", outp)
     os.chdir(codedir)
     return nframes, rawDiffs, cueDiffs, distractorDiffs, wheelDiffs

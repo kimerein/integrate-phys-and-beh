@@ -1,9 +1,6 @@
 function outSettings=reachExpt_analysis_settings(varargin)
-% first argument is whether to display settings, second argument overwrites
-% any default settings
 
-% persistent settings
-settings=[];
+persistent settings
 
 displ=false;
 if ~isempty(varargin)
@@ -34,15 +31,13 @@ if isempty(settings)
     settings.tryForFiles={'optoOnHere','nth_session','optoThresh','preemptCue'}; % look for these files in each directory
 end
 
-if ~isempty(varargin) && length(varargin)>1
+if ~isempty(varargin) & length(varargin)>1
     if isstruct(varargin{2})
         set=varargin{2};
         % passing in some settings
         f=fieldnames(set);
         for i=1:length(f)
-            settings.(f{i})=set.(f{i});
-            disp([f{i} ' is ' ]);
-            disp(settings.(f{i}));
+            settings.
         end
     end
 end
