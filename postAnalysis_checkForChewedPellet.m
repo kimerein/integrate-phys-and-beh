@@ -1,11 +1,10 @@
 function tbt=postAnalysis_checkForChewedPellet(tbt,finaldata)
-% function finaldata=checkForChewedPellet(finaldata)
 
 settings=autoReachAnalysisSettings();
-disp(['priorToReach_chewWindow is ' num2str(settings.priorToReach_chewWindow)]);
-disp(['minTimeToChew_afterReach is ' num2str(settings.minTimeToChew_afterReach)]);
-disp(['withinXSeconds is ' num2str(settings.withinXSeconds)]);
-disp(['minTimeToChewPellet is ' num2str(settings.minTimeToChewPellet)]);
+disp(['priorToReach_chewWindow is ' num2str(settings.chew.priorToReach_chewWindow)]);
+disp(['minTimeToChew_afterReach is ' num2str(settings.chew.minTimeToChew_afterReach)]);
+disp(['withinXSeconds is ' num2str(settings.chew.withinXSeconds)]);
+disp(['minTimeToChewPellet is ' num2str(settings.chew.minTimeToChewPellet)]);
 
 minTimePelletChew=settings.chew.minTimeToChewPellet;
 withinXSeconds=settings.chew.withinXSeconds;
@@ -24,7 +23,7 @@ minIndMoreStringent=floor(minTimeMoreStringent/(1/fps));
 
 % Take backups
 finaldata.flippedThese=finaldata.success_reachStarts~=finaldata.success_reachStarts_backup;
-finaldata.flippedThese_pawOnWheel=finaldata.success_reachStarts_pawOnWheel~=finaldata.success_reachStarts_backup_pawOnWheel;
+finaldata.flippedThese_pawOnWheel=finaldata.success_reachStarts_pawOnWheel~=finaldata.success_reachStarts_pawOnWheel_backup;
 finaldata.success_reachStarts=finaldata.success_reachStarts_backup;
 finaldata.drop_reachStarts=finaldata.drop_reachStarts_backup;
 finaldata.success_reachStarts_pawOnWheel=finaldata.success_reachStarts_pawOnWheel_backup;
@@ -32,38 +31,61 @@ finaldata.drop_reachStarts_pawOnWheel=finaldata.drop_reachStarts_pawOnWheel_back
 
 % First for reaches where paw does not start on wheel
 finaldata.success_reachStarts_backup=finaldata.success_reachStarts;
-[finaldata.success_reachStarts,newDrops]=checkForSufficientChewing(finaldata.success_reachStarts,finaldata.isChewing,minIndToPelletChew,withinXInds,dropIfChewingBefore,priorXInds,minIndMoreStringent,finaldata,tbt,finaldata.flippedThese);
+[finaldata.success_reachStarts,newDrops,tbt]=checkForSufficientChewing(finaldata.success_reachStarts,finaldata.isChewing,minIndToPelletChew,withinXInds,dropIfChewingBefore,priorXInds,minIndMoreStringent,finaldata,tbt,finaldata.flippedThese,false);
 finaldata.drop_reachStarts_backup=finaldata.drop_reachStarts;
 finaldata.drop_reachStarts(newDrops==1)=1;
 
 % For reaches where paw does start on wheel
 finaldata.success_reachStarts_pawOnWheel_backup=finaldata.success_reachStarts_pawOnWheel;
-[finaldata.success_reachStarts_pawOnWheel,newDrops]=checkForSufficientChewing(finaldata.success_reachStarts_pawOnWheel,finaldata.isChewing,minIndToPelletChew,withinXInds,dropIfChewingBefore,priorXInds,minIndMoreStringent,finaldata,tbt,finaldata.flippedThese_pawOnWheel);
+[finaldata.success_reachStarts_pawOnWheel,newDrops,tbt]=checkForSufficientChewing(finaldata.success_reachStarts_pawOnWheel,finaldata.isChewing,minIndToPelletChew,withinXInds,dropIfChewingBefore,priorXInds,minIndMoreStringent,finaldata,tbt,finaldata.flippedThese_pawOnWheel,true);
 finaldata.drop_reachStarts_pawOnWheel_backup=finaldata.drop_reachStarts_pawOnWheel;
 finaldata.drop_reachStarts_pawOnWheel(newDrops==1)=1;
 
 end
 
-function adjustTbtAccordingly(currReachInd,finaldata,tbt)
+function tbt=adjustTbtAccordingly(currReachInd,finaldata,tbt,flipped,currFlip,isPawOnWheel)
 
 movieframe=finaldata.movieframeinds(currReachInd);
 temp=tbt.movieframeinds;
-[a,b]=find(temp==movieframe);
+[~,mi]=min(abs(temp-movieframe),[],'all','omitnan','linear');
+[a,b]=ind2sub(size(temp),mi);
 if isempty(a) || isempty(b)
     error('Could not find matching movie frame in tbt IN postAnalysis_checkForChewedPellet.m');
 end
 
+if currFlip==true && flipped(currReachInd)==true
+    % should flip tbt from success to drop
+    % but tbt should already be flipped
+elseif currFlip==true && flipped(currReachInd)==false
+    % flip now although didn't flip before
+    if isPawOnWheel==true
+        tbt.drop_reachStarts_pawOnWheel(a,b)=1;
+        tbt.success_reachStarts_pawOnWheel(a,b)=0;
+    else
+        tbt.drop_reachStarts(a,b)=1;
+        tbt.success_reachStarts(a,b)=0;
+    end
+elseif currFlip==false && flipped(currReachInd)==false
+    % don't flip
+elseif currFlip==false && flipped(currReachInd)==true
+    % previously flipped success to drop, but now flip back
+    if isPawOnWheel==true
+        tbt.drop_reachStarts_pawOnWheel(a,b)=0;
+        tbt.success_reachStarts_pawOnWheel(a,b)=1;
+    else
+        tbt.drop_reachStarts(a,b)=0;
+        tbt.success_reachStarts(a,b)=1;
+    end
 end
 
-function [reaches,newDrops]=checkForSufficientChewing(reaches,chewing,minIndToPelletChew,withinXInds,dropIfChewingBefore,priorXInds,minIndMoreStringent,finaldata,tbt,flipped)
+end
+
+function [reaches,newDrops,tbt]=checkForSufficientChewing(reaches,chewing,minIndToPelletChew,withinXInds,dropIfChewingBefore,priorXInds,minIndMoreStringent,finaldata,tbt,flipped,isPawOnWheel)
 
 fi=find(reaches==1);
 newDrops=zeros(size(reaches));
-flippedBack=0;
-newFlip=0;
-stillFlip=0;
-currFlip=false;
 for i=1:length(fi)
+    currFlip=false;
     currReachInd=fi(i);
     % is there enough chewing within X seconds of this reach
     if currReachInd+withinXInds>length(chewing)
@@ -74,7 +96,6 @@ for i=1:length(fi)
     if chewInds<minIndToPelletChew % not enough chewing to be consistent with eating pellet
         reaches(currReachInd)=0; % not a successful reach
         newDrops(currReachInd)=1; % actually a drop
-        adjustTbtAccordingly(currReachInd,finaldata,tbt);
         currFlip=true;
     end
     if dropIfChewingBefore==1 && newDrops(currReachInd)==0
@@ -91,26 +112,11 @@ for i=1:length(fi)
             if chewInds<minIndMoreStringent % not enough chewing to be consistent with eating pellet
                 reaches(currReachInd)=0; % not a successful reach
                 newDrops(currReachInd)=1; % actually a drop
-                adjustTbtAccordingly(currReachInd,finaldata,tbt);
                 currFlip=true;
             end
         end
     end
-    % did analysis code originally flip this from success to drop
-    if flipped(currReachInd)==1 && currFlip==true
-        stillFlip=stillFlip+1;
-    elseif flipped(currReachInd)==1 && currFlip==false
-        flippedBack=flippedBack+1;
-    elseif flipped(currReachInd)==0 && currFlip==true
-        newFlip=newFlip+1;
-    end
+    tbt=adjustTbtAccordingly(currReachInd,finaldata,tbt,flipped,currFlip,isPawOnWheel);
 end
-
-disp('Flipped this many back ');
-disp(flippedBack);
-disp('Still flip this many ');
-disp(stillFlip);
-disp('This many new flips ');
-disp(newFlip);
 
 end
