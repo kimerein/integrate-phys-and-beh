@@ -50,14 +50,15 @@ s1=eval(out1.threshold);
 chewingPower=out2.chewingPower;
 chewingDuration=out2.chewingDuration;
 s2=eval(out2.threshold);
-figure();
-polyg_x=[10 0 0 nanmax(out1.chewingPower)+1 nanmax(out1.chewingPower)+1 nanmax(out1.chewingPower)+1];
-polyg_y=[110 160 nanmax(out2.chewingDuration)+1 nanmax(out2.chewingDuration)+1 nanmax(out2.chewingDuration)+1 110];
-in=inpolygon(out1.chewingPower,out2.chewingDuration,polyg_x,polyg_y);
-scatter(out1.chewingPower(in),out2.chewingDuration(in),'r+'); hold on;
-plot(polyg_x,polyg_y);
-scatter(out1.chewingPower(~in),out2.chewingDuration(~in),'bo');
-theseAreSuccess=s1 & s2 & in;
+theseAreSuccess=s1 & s2;
+% figure();
+% polyg_x=[10 0 0 nanmax(out1.chewingPower)+1 nanmax(out1.chewingPower)+1 nanmax(out1.chewingPower)+1];
+% polyg_y=[110 160 nanmax(out2.chewingDuration)+1 nanmax(out2.chewingDuration)+1 nanmax(out2.chewingDuration)+1 110];
+% in=inpolygon(out1.chewingPower,out2.chewingDuration,polyg_x,polyg_y);
+% scatter(out1.chewingPower(in),out2.chewingDuration(in),'r+'); hold on;
+% plot(polyg_x,polyg_y);
+% scatter(out1.chewingPower(~in),out2.chewingDuration(~in),'bo');
+% theseAreSuccess=s1 & s2 & in;
 disp([out1.movieFrameInds' out2.movieFrameInds'])
 tbt=adjustTbtUsingThresh(out1.movieFrameInds,tbt,theseAreSuccess,false,finaldata);
 
@@ -68,14 +69,15 @@ s1=eval(out1.threshold);
 chewingPower=out2.chewingPower;
 chewingDuration=out2.chewingDuration;
 s2=eval(out2.threshold);
-figure();
-polyg_x=[10 0 0 nanmax(out1.chewingPower)+1 nanmax(out1.chewingPower)+1 nanmax(out1.chewingPower)+1];
-polyg_y=[110 160 nanmax(out2.chewingDuration)+1 nanmax(out2.chewingDuration)+1 nanmax(out2.chewingDuration)+1 110];
-in=inpolygon(out1.chewingPower,out2.chewingDuration,polyg_x,polyg_y);
-scatter(out1.chewingPower(in),out2.chewingDuration(in),'r+'); hold on;
-plot(polyg_x,polyg_y);
-scatter(out1.chewingPower(~in),out2.chewingDuration(~in),'bo');
-theseAreSuccess=s1 & s2 & in;
+theseAreSuccess=s1 & s2;
+% figure();
+% polyg_x=[10 0 0 nanmax(out1.chewingPower)+1 nanmax(out1.chewingPower)+1 nanmax(out1.chewingPower)+1];
+% polyg_y=[110 160 nanmax(out2.chewingDuration)+1 nanmax(out2.chewingDuration)+1 nanmax(out2.chewingDuration)+1 110];
+% in=inpolygon(out1.chewingPower,out2.chewingDuration,polyg_x,polyg_y);
+% scatter(out1.chewingPower(in),out2.chewingDuration(in),'r+'); hold on;
+% plot(polyg_x,polyg_y);
+% scatter(out1.chewingPower(~in),out2.chewingDuration(~in),'bo');
+% theseAreSuccess=s1 & s2 & in;
 disp([out1.movieFrameInds' out2.movieFrameInds'])
 tbt=adjustTbtUsingThresh(out1.movieFrameInds,tbt,theseAreSuccess,true,finaldata);
 

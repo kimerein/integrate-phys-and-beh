@@ -11,8 +11,11 @@ tempie=tempie(savehandles.discardFirstNFrames+1:end);
 frameTimes=0:(1/settings.movie_fps):(length(movieframesEarlyChews(~isnan(movieframesEarlyChews)))-1)*(1/settings.movie_fps);
 
 ninds_subsequent=50;
-out1=getPowerDurationInWindow(tbt,successReachName,dropReachName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,3,[]);
-out1.threshold='chewingPower>3';
+out1=getPowerDurationInWindow(tbt,successReachName,dropReachName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,[],[]);
+ma=nanmax(out1.chewingDuration);
+mi=nanmin(out1.chewingPower(out1.chewingDuration>ma-5));
+line([mi mi],[nanmin(out1.chewingDuration) nanmax(out1.chewingDuration)],'Color','k');
+out1.threshold=['chewingPower>' num2str(mi)];
 
 ninds_subsequent=180;
 out2=getPowerDurationInWindow(tbt,successReachName,dropReachName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,[],(6/20)*ninds_subsequent);

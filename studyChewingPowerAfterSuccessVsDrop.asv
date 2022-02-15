@@ -1,4 +1,4 @@
-function studyChewingPowerAfterSuccessVsDrop(tbt,savehandles,zoneVals,eat)
+function [out1,out2]=studyChewingPowerAfterSuccessVsDrop(tbt,savehandles,zoneVals,eat,successReachName,dropReachName)
 
 movieframesEarlyChews=savehandles.discardFirstNFrames+[1:length(eat.isChewing)];
 settings=autoReachAnalysisSettings;
@@ -11,16 +11,20 @@ tempie=tempie(savehandles.discardFirstNFrames+1:end);
 frameTimes=0:(1/settings.movie_fps):(length(movieframesEarlyChews(~isnan(movieframesEarlyChews)))-1)*(1/settings.movie_fps);
 
 ninds_subsequent=50;
-out1=getPowerDurationInWindow(tbt,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,3,[]);
+out1=getPowerDurationInWindow(tbt,successReachName,dropReachName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,3,[]);
+ma=nanmax(out1.chewingDuration);
+mi=nanmin9
 out1.threshold='chewingPower>3';
 
 ninds_subsequent=180;
-out2=getPowerDurationInWindow(tbt,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,[],(6/20)*ninds_subsequent);
+out2=getPowerDurationInWindow(tbt,successReachName,dropReachName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,[],(6/20)*ninds_subsequent);
+out2.threshold=['chewingDuration>' num2str((6/20)*ninds_subsequent)];
 
 
-function out=getPowerDurationInWindow(tbt,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,x_thresh,y_thresh)
+function out=getPowerDurationInWindow(tbt,successReachName,dropReachName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,x_thresh,y_thresh)
 
-temp=tbt.success_reachStarts(1:end);
+temp=tbt.(successReachName);
+temp=temp(1:end);
 temp=temp';
 fi=find(temp>0.5);
 temp=tbt.movieframeinds(1:end);
@@ -36,16 +40,15 @@ for i=1:length(fi)
     [~,mi]=nanmin(abs(movieframesEarlyChews-currmovieind));
     [~,closest_t]=nanmin(abs(t-frameTimes(mi)));
     if closest_t+ninds_subsequent>length(eat.chewingpower)
-        continue
+        subsequent_chewingPower(i)=nanmean(eat.chewingpower(closest_t:end));
+    else
+        subsequent_chewingPower(i)=nanmean(eat.chewingpower(closest_t:closest_t+ninds_subsequent));
     end
-%     if currmovieind>15640-5 && currmovieind<15640+5   
-%         disp('chewing power');
-%         disp(nanmean(eat.chewingpower(closest_t:closest_t+ninds_subsequent)));
-%         disp('chewing duration');
-%         disp(nansum(eat.isChewing(mi:mi+ninds_subsequent)));
-%     end
-    subsequent_chewingPower(i)=nanmean(eat.chewingpower(closest_t:closest_t+ninds_subsequent));
-    subsequent_chewingDuration(i)=nansum(eat.isChewing(mi:mi+ninds_subsequent));
+    if mi+ninds_subsequent>length(eat.isChewing)
+        subsequent_chewingDuration(i)=nansum(eat.isChewing(mi:end))*(ninds_subsequent/length(eat.isChewing(mi:end)));
+    else
+        subsequent_chewingDuration(i)=nansum(eat.isChewing(mi:mi+ninds_subsequent));
+    end
     out.chewingPower(i)=subsequent_chewingPower(i);
     out.chewingDuration(i)=subsequent_chewingDuration(i);
     out.movieFrameInds(i)=currmovieind;
@@ -61,7 +64,8 @@ elseif ~isempty(y_thresh)
 end
 hold on;
 
-temp=tbt.drop_reachStarts(1:end);
+temp=tbt.(dropReachName);
+temp=temp(1:end);
 temp=temp';
 fi=find(temp>0.5);
 subsequent_chewingPower=nan(1,length(fi));
@@ -71,10 +75,15 @@ for i=1:length(fi)
     [~,mi]=nanmin(abs(movieframesEarlyChews-currmovieind));
     [~,closest_t]=nanmin(abs(t-frameTimes(mi)));
     if closest_t+ninds_subsequent>length(eat.chewingpower)
-        continue
+        subsequent_chewingPower(i)=nanmean(eat.chewingpower(closest_t:end));
+    else
+        subsequent_chewingPower(i)=nanmean(eat.chewingpower(closest_t:closest_t+ninds_subsequent));
     end
-    subsequent_chewingPower(i)=nanmean(eat.chewingpower(closest_t:closest_t+ninds_subsequent));
-    subsequent_chewingDuration(i)=nansum(eat.isChewing(mi:mi+ninds_subsequent));
+    if mi+ninds_subsequent>length(eat.isChewing)
+        subsequent_chewingDuration(i)=nansum(eat.isChewing(mi:end))*(ninds_subsequent/length(eat.isChewing(mi:end)));
+    else
+        subsequent_chewingDuration(i)=nansum(eat.isChewing(mi:mi+ninds_subsequent));
+    end
 end
 scatter(subsequent_chewingPower,subsequent_chewingDuration,[],'r');
 xlabel('Chewing power');
