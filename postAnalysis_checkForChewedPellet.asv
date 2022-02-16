@@ -43,6 +43,13 @@ finaldata.drop_reachStarts_pawOnWheel(newDrops==1)=1;
 
 % Chewing power and duration thresholds
 disp('Plotting which duration and power thresholds distinguish drop vs success');
+if isfield(tbt,'all_reachBatch')
+    tbt.currentstudysuccess=(tbt.('success_reachStarts') + tbt.('reachBatch_success_reachStarts'))>0.5;
+    tbt.currentstudydrop=(tbt.('drop_reachStarts') + tbt.('reachBatch_drop_reachStarts'))>0.5;
+else
+    tbt.currentstudysuccess=tbt.('success_reachStarts');
+    tbt.currentstudydrop=tbt.('drop_reachStarts');
+end
 [out1,out2]=studyChewingPowerAfterSuccessVsDrop(tbt,savehandles,zoneVals,eat,'success_reachStarts','drop_reachStarts');
 chewingPower=out1.chewingPower;
 chewingDuration=out1.chewingDuration;
@@ -51,18 +58,6 @@ chewingPower=out2.chewingPower;
 chewingDuration=out2.chewingDuration;
 s2=eval(out2.threshold);
 theseAreSuccess=s1 & s2;
-figure();
-
-scatter(out1.chewingPower,out2.chewingDuration);
-
-
-plot(xv,yv) % polygon
-axis equal
-
-hold on
-plot(xq(in),yq(in),'r+') % points inside
-plot(xq(~in),yq(~in),'bo') % points outside
-
 disp([out1.movieFrameInds' out2.movieFrameInds'])
 tbt=adjustTbtUsingThresh(out1.movieFrameInds,tbt,theseAreSuccess,false,finaldata);
 

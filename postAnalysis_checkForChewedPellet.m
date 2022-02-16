@@ -1,5 +1,8 @@
 function [tbt,finaldata]=postAnalysis_checkForChewedPellet(tbt,finaldata,savehandles,zoneVals,eat)
 
+overweightFP=6.5; % will overweight false positives if not equal to 1, FP are real drops called a success
+% false positives will count overweightFP times more than true positives
+
 settings=autoReachAnalysisSettings();
 disp(['priorToReach_chewWindow is ' num2str(settings.chew.priorToReach_chewWindow)]);
 disp(['minTimeToChew_afterReach is ' num2str(settings.chew.minTimeToChew_afterReach)]);
@@ -43,41 +46,41 @@ finaldata.drop_reachStarts_pawOnWheel(newDrops==1)=1;
 
 % Chewing power and duration thresholds
 disp('Plotting which duration and power thresholds distinguish drop vs success');
-[out1,out2]=studyChewingPowerAfterSuccessVsDrop(tbt,savehandles,zoneVals,eat,'success_reachStarts','drop_reachStarts');
+if isfield(tbt,'all_reachBatch')
+    tbt.currentstudysuccess=(tbt.('success_reachStarts') + tbt.('reachBatch_success_reachStarts'))>0.5;
+    tbt.currentstudydrop=(tbt.('drop_reachStarts') + tbt.('reachBatch_drop_reachStarts'))>0.5;
+else
+    tbt.currentstudysuccess=tbt.('success_reachStarts');
+    tbt.currentstudydrop=tbt.('drop_reachStarts');
+end
+[out1,out2]=studyChewingPowerAfterSuccessVsDrop(tbt,savehandles,zoneVals,eat,'currentstudysuccess','currentstudydrop',overweightFP);
 chewingPower=out1.chewingPower;
 chewingDuration=out1.chewingDuration;
+rawIntensity=out1.rawIntensity;
 s1=eval(out1.threshold);
 chewingPower=out2.chewingPower;
 chewingDuration=out2.chewingDuration;
 s2=eval(out2.threshold);
 theseAreSuccess=s1 & s2;
-% figure();
-% polyg_x=[10 0 0 nanmax(out1.chewingPower)+1 nanmax(out1.chewingPower)+1 nanmax(out1.chewingPower)+1];
-% polyg_y=[110 160 nanmax(out2.chewingDuration)+1 nanmax(out2.chewingDuration)+1 nanmax(out2.chewingDuration)+1 110];
-% in=inpolygon(out1.chewingPower,out2.chewingDuration,polyg_x,polyg_y);
-% scatter(out1.chewingPower(in),out2.chewingDuration(in),'r+'); hold on;
-% plot(polyg_x,polyg_y);
-% scatter(out1.chewingPower(~in),out2.chewingDuration(~in),'bo');
-% theseAreSuccess=s1 & s2 & in;
 disp([out1.movieFrameInds' out2.movieFrameInds'])
 tbt=adjustTbtUsingThresh(out1.movieFrameInds,tbt,theseAreSuccess,false,finaldata);
 
-[out1,out2]=studyChewingPowerAfterSuccessVsDrop(tbt,savehandles,zoneVals,eat,'success_reachStarts_pawOnWheel','drop_reachStarts_pawOnWheel');
+if isfield(tbt,'all_reachBatch')
+    tbt.currentstudysuccess=(tbt.('success_reachStarts_pawOnWheel') + tbt.('reachBatch_success_reachStarts_pawOnWheel'))>0.5;
+    tbt.currentstudydrop=(tbt.('drop_reachStarts_pawOnWheel') + tbt.('reachBatch_drop_reachStarts_pawOnWheel'))>0.5;
+else
+    tbt.currentstudysuccess=tbt.('success_reachStarts_pawOnWheel');
+    tbt.currentstudydrop=tbt.('drop_reachStarts_pawOnWheel');
+end
+[out1,out2]=studyChewingPowerAfterSuccessVsDrop(tbt,savehandles,zoneVals,eat,'currentstudysuccess','currentstudydrop',overweightFP);
 chewingPower=out1.chewingPower;
 chewingDuration=out1.chewingDuration;
+rawIntensity=out1.rawIntensity;
 s1=eval(out1.threshold);
 chewingPower=out2.chewingPower;
 chewingDuration=out2.chewingDuration;
 s2=eval(out2.threshold);
 theseAreSuccess=s1 & s2;
-% figure();
-% polyg_x=[10 0 0 nanmax(out1.chewingPower)+1 nanmax(out1.chewingPower)+1 nanmax(out1.chewingPower)+1];
-% polyg_y=[110 160 nanmax(out2.chewingDuration)+1 nanmax(out2.chewingDuration)+1 nanmax(out2.chewingDuration)+1 110];
-% in=inpolygon(out1.chewingPower,out2.chewingDuration,polyg_x,polyg_y);
-% scatter(out1.chewingPower(in),out2.chewingDuration(in),'r+'); hold on;
-% plot(polyg_x,polyg_y);
-% scatter(out1.chewingPower(~in),out2.chewingDuration(~in),'bo');
-% theseAreSuccess=s1 & s2 & in;
 disp([out1.movieFrameInds' out2.movieFrameInds'])
 tbt=adjustTbtUsingThresh(out1.movieFrameInds,tbt,theseAreSuccess,true,finaldata);
 
