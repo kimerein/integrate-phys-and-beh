@@ -1,6 +1,8 @@
 function [tbt,finaldata]=postAnalysis_checkForChewedPellet(tbt,finaldata,savehandles,zoneVals,eat)
 
-overweightFP=6.5; % will overweight false positives if not equal to 1, FP are real drops called a success
+overweightFP=6.5; 
+% overweightFP=1; 
+% will overweight false positives if not equal to 1, FP are real drops called a success
 % false positives will count overweightFP times more than true positives
 
 settings=autoReachAnalysisSettings();

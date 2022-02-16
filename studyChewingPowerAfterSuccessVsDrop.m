@@ -14,7 +14,15 @@ frameTimes=0:(1/settings.movie_fps):(length(movieframesEarlyChews(~isnan(moviefr
 ntimes_subsequent=1.25; % in sec
 ninds_subsequent=floor(ntimes_subsequent/(1/params.Fs));
 [out1,bestThresh,bestThreshIntens]=getPowerDurationInWindow(tbt,successReachName,dropReachName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,[],[],[],[],overweightFP,eatzone,true);
-out1.threshold=['chewingPower>' num2str(bestThresh) ' & rawIntensity>' num2str(bestThreshIntens)];
+if isempty(bestThresh) && isempty(bestThreshIntens)
+    out1.threshold=['chewingPower>' num2str(-100000) ' & rawIntensity>' num2str(-100000)];
+elseif isempty(bestThresh) && ~isempty(bestThreshIntens)
+    out1.threshold=['chewingPower>' num2str(-100000) ' & rawIntensity>' num2str(bestThreshIntens)];
+elseif ~isempty(bestThresh) && isempty(bestThreshIntens)
+    out1.threshold=['chewingPower>' num2str(bestThresh) ' & rawIntensity>' num2str(-100000)];
+else
+    out1.threshold=['chewingPower>' num2str(bestThresh) ' & rawIntensity>' num2str(bestThreshIntens)];
+end
 
 % ntimes_subsequent=6; % in sec
 % ninds_subsequent=floor(ntimes_subsequent/(1/params.Fs));
@@ -25,12 +33,18 @@ ntimes_subsequent=4; % in sec
 delaytime=2; % in sec
 ninds_subsequent=floor(ntimes_subsequent/(1/params.Fs));
 delay=floor(delaytime/(1/params.Fs));
-out2=getPowerDurationInWindow(tbt,successReachName,dropReachName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,[],(6/20)*ninds_subsequent,delay,delaytime,overweightFP,eatzone,false);
-out2.threshold=['chewingDuration>' num2str((6/20)*ninds_subsequent)];
+[out2,~,~,bestThreshDur]=getPowerDurationInWindow(tbt,successReachName,dropReachName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,[],[],delay,delaytime,overweightFP,eatzone,true);
+if ~isempty(bestThreshDur)
+    out2.threshold=['chewingDuration>' num2str(bestThreshDur)];
+else
+    out2.threshold=['chewingDuration>' num2str(-100000)];
+end
+% out2=getPowerDurationInWindow(tbt,successReachName,dropReachName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,[],(6/20)*ninds_subsequent,delay,delaytime,overweightFP,eatzone,false);
+% out2.threshold=['chewingDuration>' num2str((6/20)*ninds_subsequent)];
 
 end
 
-function [out,bestThresh,bestThreshIntens]=getPowerDurationInWindow(tbt,successReachName,dropReachName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,x_thresh,y_thresh,delay,delayTime,overweightFP,eatZone,showROCthresh)
+function [out,bestThresh,bestThreshIntens,bestThreshDur]=getPowerDurationInWindow(tbt,successReachName,dropReachName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,x_thresh,y_thresh,delay,delayTime,overweightFP,eatZone,showROCthresh)
 
 temp=tbt.(successReachName);
 temp=temp(1:end);
@@ -66,10 +80,10 @@ for i=1:length(fi)
         subsequent_chewingDuration(i)=nansum(eat.isChewing(mi:mi+ninds_subsequent));
         rawIntensity(i)=nanmean(eatZone(mi:mi+ninds_subsequent));
     end
-%     if currmovieind>17078-5 && currmovieind<17078+5
-%         disp(subsequent_chewingDuration(i));
-%         disp(subsequent_chewingPower(i));
-%     end
+    if currmovieind>34130-5 && currmovieind<34130+5
+        disp(subsequent_chewingDuration(i));
+        disp(subsequent_chewingPower(i));
+    end
     out.chewingPower(i)=subsequent_chewingPower(i);
     out.chewingDuration(i)=subsequent_chewingDuration(i);
     out.rawIntensity(i)=rawIntensity(i);
@@ -113,6 +127,10 @@ for i=1:length(fi)
         subsequent_chewingDuration(i)=nansum(eat.isChewing(mi:mi+ninds_subsequent));
         rawIntensity(i)=nanmean(eatZone(mi:mi+ninds_subsequent));
     end
+    if currmovieind>34130-10 && currmovieind<34130+10
+        disp(subsequent_chewingDuration(i));
+        disp(subsequent_chewingPower(i));
+    end
 end
 scatter(subsequent_chewingPower,subsequent_chewingDuration,[],'r');
 xlabel('Chewing power');
@@ -123,10 +141,16 @@ elseif ~isempty(y_thresh)
     line([nanmin([subsequent_chewingPower mi]) nanmax([subsequent_chewingPower ma])],[y_thresh y_thresh],'Color','k');
 end
 bestThresh=buildROC([out.chewingPower subsequent_chewingPower],[ones(size(out.chewingPower)) zeros(size(subsequent_chewingPower))],overweightFP);
-if showROCthresh==true
+if showROCthresh==true && ~isempty(bestThresh)
     set(0,'CurrentFigure',f);
     temp=[out.chewingDuration subsequent_chewingDuration];
     line([bestThresh bestThresh],[nanmin(temp)-1 nanmax(temp)+1],'Color','k');
+end
+bestThreshDur=buildROC([out.chewingDuration subsequent_chewingDuration],[ones(size(out.chewingDuration)) zeros(size(subsequent_chewingDuration))],overweightFP);
+if showROCthresh==true && ~isempty(bestThreshDur)
+    set(0,'CurrentFigure',f);
+    temp=[out.chewingPower subsequent_chewingPower];
+    line([nanmin(temp)-1 nanmax(temp)+1],[bestThreshDur bestThreshDur],'Color','k');
 end
 
 f=figure(); 
@@ -135,11 +159,13 @@ hold on; scatter(subsequent_chewingPower,rawIntensity,[],'r');
 xlabel('Chewing power');
 ylabel('Raw intensity in eat zone');
 bestThreshIntens=buildROC([out.rawIntensity rawIntensity],[ones(size(out.chewingPower)) zeros(size(subsequent_chewingPower))],overweightFP);
-if showROCthresh==true
+if showROCthresh==true && ~isempty(bestThreshIntens)
     set(0,'CurrentFigure',f);
     temp=[out.chewingPower subsequent_chewingPower];
     line([nanmin(temp)-1 nanmax(temp)+1],[bestThreshIntens bestThreshIntens],'Color','k');
 end
+
+
 
 end
 
@@ -163,5 +189,10 @@ ylabel('True positive rate');
 [~,ma]=max(tpr-overweightFP*fpr,[],2,'omitnan');
 bestThresh=trythresh(ma);
 scatter(fpr(ma),tpr(ma),[],'r');
+% check whether this threshold actually provides any value
+if tpr(ma)/nansum(isSuccess==1) < 0.8 || fpr(ma)/nansum(isSuccess==0) > 0.2
+    % not helpful
+    bestThresh=[];
+end
 
 end
