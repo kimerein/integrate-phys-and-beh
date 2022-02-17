@@ -167,7 +167,7 @@ end
 for i=1:length(reach_batch.secondreach_type)
     currtype=reach_batch.secondreach_type{i};
     newstr=['reachBatch_' currtype];
-    tbt.(newstr)=tbt.(currtype);
+    tbt.(newstr)=tbt.(currtype);  
 end
 if reach_batch.removePawOnWheel==1
     if reach_batch.take_first_or_second_type==1
@@ -177,6 +177,9 @@ if reach_batch.removePawOnWheel==1
                 r=regexp(currtype,'pawOnWheel');
                 newstr=['reachBatch_' currtype(1:r-2)];
                 tbt.(newstr)=tbt.(currtype);
+                if isfield(tbt,'maybeDrop_reachStarts') && ~isempty(regexp(newstr,'drop','once'))
+                    tbt.([newstr '_maybeDrop'])=(tbt.maybeDrop_reachStarts + tbt.maybeDrop_reachStarts_pawOnWheel)>0.5;
+                end
             end
         end
     elseif reach_batch.take_first_or_second_type==2
@@ -186,6 +189,9 @@ if reach_batch.removePawOnWheel==1
                 r=regexp(currtype,'pawOnWheel');
                 newstr=['reachBatch_' currtype(1:r-2)];
                 tbt.(newstr)=tbt.(currtype(1:r-2));
+                if isfield(tbt,'maybeDrop_reachStarts') && ~isempty(regexp(newstr,'drop','once'))
+                    tbt.([newstr '_maybeDrop'])=(tbt.maybeDrop_reachStarts + tbt.maybeDrop_reachStarts_pawOnWheel)>0.5;
+                end
             end
         end
     end
@@ -262,6 +268,21 @@ for i=1:length(reach_batch.firstreach_type)
                     tempreaches(row2,col2)=1;
                     tempreaches(row,col)=0;
                     tbt.(newstr)=tempreaches;
+                    if isfield(tbt,'maybeDrop_reachStarts')
+                        if ~isempty(regexp(newstr,'pawOnWheel','once'))
+                            if tbt.maybeDrop_reachStarts_pawOnWheel(row,col)==1 || tbt.maybeDrop_reachStarts_pawOnWheel(row2,col2)==1 % if either is uncertain, propagate uncertainty to batch
+                                tempmaybes=tbt.([newstr '_maybeDrop']);
+                                tempmaybes(row2,col2)=1;
+                                tbt.([newstr '_maybeDrop'])=tempmaybes;
+                            end
+                        else
+                            if tbt.maybeDrop_reachStarts(row,col)==1 || tbt.maybeDrop_reachStarts(row2,col2)==1 % if either is uncertain, propagate uncertainty to batch
+                                tempmaybes=tbt.([newstr '_maybeDrop']);
+                                tempmaybes(row2,col2)=1;
+                                tbt.([newstr '_maybeDrop'])=tempmaybes;
+                            end
+                        end
+                    end                    
                     if reach_batch.removePawOnWheel==1
                         newstr=['reachBatch_' currtype];
                         if ~isempty(strfind(newstr,'pawOnWheel'))
@@ -300,6 +321,21 @@ for i=1:length(reach_batch.firstreach_type)
                     [row2,col2]=ind2sub(size(tbt.(currtype)),secondreach.ind);
                     tempreaches(row2,col2)=0;
                     tbt.(newstr)=tempreaches;
+                    if isfield(tbt,'maybeDrop_reachStarts')
+                        if ~isempty(regexp(newstr,'pawOnWheel','once'))
+                            if tbt.maybeDrop_reachStarts_pawOnWheel(row,col)==1 || tbt.maybeDrop_reachStarts_pawOnWheel(row2,col2)==1 % if either is uncertain, propagate uncertainty to batch
+                                tempmaybes=tbt.([newstr '_maybeDrop']);
+                                tempmaybes(row,col)=1;
+                                tbt.([newstr '_maybeDrop'])=tempmaybes;
+                            end
+                        else
+                            if tbt.maybeDrop_reachStarts(row,col)==1 || tbt.maybeDrop_reachStarts(row2,col2)==1 % if either is uncertain, propagate uncertainty to batch
+                                tempmaybes=tbt.([newstr '_maybeDrop']);
+                                tempmaybes(row,col)=1;
+                                tbt.([newstr '_maybeDrop'])=tempmaybes;
+                            end
+                        end
+                    end    
                     if reach_batch.removePawOnWheel==1
                         newstr=['reachBatch_' reach_batch.secondreach_type{secondreach.type}];
                         if ~isempty(strfind(newstr,'pawOnWheel'))
