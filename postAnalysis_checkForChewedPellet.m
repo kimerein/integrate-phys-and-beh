@@ -28,6 +28,9 @@ minIndMoreStringent=floor(minTimeMoreStringent/(1/fps));
 tbt.maybeDrop_reachStarts_pawOnWheel=zeros(size(tbt.cue));
 tbt.maybeDrop_reachStarts=zeros(size(tbt.cue));
 
+% Fix any reach values below 1
+tbt=setAllAbove0to1(tbt,'reach');
+
 % Check that for each reach classified as a success, there is at least this
 % much chewing time after the cue, 
 
@@ -121,6 +124,20 @@ tbt=rmfield(tbt,'currentstudydrop');
 
 end
 
+function tbt=setAllAbove0to1(tbt,ifFieldContains)
+
+f=fieldnames(tbt);
+for i=1:length(f)
+    currfield=f{i};
+    if ~isempty(regexp(currfield,ifFieldContains,'once'))
+        tempie=zeros(size(tbt.(currfield)));
+        tempie(tbt.(currfield)>0)=1;
+        tbt.(currfield)=tempie;
+    end
+end
+
+end
+
 function tbt=adjustTbtUsingThresh(movieframes,tbt,theseAreSuccess,isPawOnWheel,finaldata,maybeDropMaybeSuccess)
 
 for i=1:length(movieframes)
@@ -173,38 +190,62 @@ end
 
 end
 
+function [allmi,ms]=findAllMovieInds(movieframe,allmovieframes)
+
+allmi=[];
+ms=[];
+for i=1:1000
+    [m,mi]=min(abs(allmovieframes-movieframe),[],'all','omitnan','linear');
+    [a,b]=ind2sub(size(allmovieframes),mi);
+    allmi=[allmi; [a,b]];
+    ms=[ms; m];
+    allmovieframes(a,b)=movieframe+1000;
+    if m>0.5 && ~isempty(allmi)
+        break
+    end
+end
+allmi=allmi(ms<0.5,:);
+ms=ms(ms<0.5);
+
+end
+
 function tbt=adjustTbtAccordingly(currReachInd,finaldata,tbt,flipped,currFlip,isPawOnWheel)
 
 movieframe=finaldata.movieframeinds(currReachInd);
 temp=tbt.movieframeinds;
-[~,mi]=min(abs(temp-movieframe),[],'all','omitnan','linear');
-[a,b]=ind2sub(size(temp),mi);
-if isempty(a) || isempty(b)
-    error('Could not find matching movie frame in tbt IN postAnalysis_checkForChewedPellet.m');
-end
+[allmi,ms]=findAllMovieInds(movieframe,temp); % in case there are multiple instances of this time point at end and beginning of neighboring trials in tbt
+% [~,mi]=min(abs(temp-movieframe),[],'all','omitnan','linear');
+% [a,b]=ind2sub(size(temp),mi);
+% if isempty(a) || isempty(b)
+%     error('Could not find matching movie frame in tbt IN postAnalysis_checkForChewedPellet.m');
+% end
 
-if currFlip==true && flipped(currReachInd)==true
-    % should flip tbt from success to drop
-    % but tbt should already be flipped
-elseif currFlip==true && flipped(currReachInd)==false
-    % flip now although didn't flip before
-    if isPawOnWheel==true
-        tbt.drop_reachStarts_pawOnWheel(a,b)=1;
-        tbt.success_reachStarts_pawOnWheel(a,b)=0;
-    else
-        tbt.drop_reachStarts(a,b)=1;
-        tbt.success_reachStarts(a,b)=0;
-    end
-elseif currFlip==false && flipped(currReachInd)==false
-    % don't flip
-elseif currFlip==false && flipped(currReachInd)==true
-    % previously flipped success to drop, but now flip back
-    if isPawOnWheel==true
-        tbt.drop_reachStarts_pawOnWheel(a,b)=0;
-        tbt.success_reachStarts_pawOnWheel(a,b)=1;
-    else
-        tbt.drop_reachStarts(a,b)=0;
-        tbt.success_reachStarts(a,b)=1;
+for i=1:size(allmi,1)
+    a=allmi(i,1);
+    b=allmi(i,2);
+    if currFlip==true && flipped(currReachInd)==true
+        % should flip tbt from success to drop
+        % but tbt should already be flipped
+    elseif currFlip==true && flipped(currReachInd)==false
+        % flip now although didn't flip before
+        if isPawOnWheel==true
+            tbt.drop_reachStarts_pawOnWheel(a,b)=1;
+            tbt.success_reachStarts_pawOnWheel(a,b)=0;
+        else
+            tbt.drop_reachStarts(a,b)=1;
+            tbt.success_reachStarts(a,b)=0;
+        end
+    elseif currFlip==false && flipped(currReachInd)==false
+        % don't flip
+    elseif currFlip==false && flipped(currReachInd)==true
+        % previously flipped success to drop, but now flip back
+        if isPawOnWheel==true
+            tbt.drop_reachStarts_pawOnWheel(a,b)=0;
+            tbt.success_reachStarts_pawOnWheel(a,b)=1;
+        else
+            tbt.drop_reachStarts(a,b)=0;
+            tbt.success_reachStarts(a,b)=1;
+        end
     end
 end
 

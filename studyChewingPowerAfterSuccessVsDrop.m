@@ -13,8 +13,9 @@ eatzone=tempie(savehandles.discardFirstNFrames+1:end);
 % chewingFreqs=f(ma);
 frameTimes=0:(1/settings.movie_fps):(length(movieframesEarlyChews(~isnan(movieframesEarlyChews)))-1)*(1/settings.movie_fps);
 
-% ntimes_subsequent=1.667; % in sec
-ntimes_subsequent=1.25; % in sec
+disp('analyzing time window 1');
+ntimes_subsequent=1.667; % in sec
+% ntimes_subsequent=1.25; % in sec
 % ntimes_subsequent=2; % in sec
 ninds_subsequent=floor(ntimes_subsequent/(1/params.Fs));
 [out1,bestThresh,bestThreshIntens]=getPowerDurationInWindow(tbt,successReachName,dropReachName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,[],[],[],[],overweightFP,eatzone,true,isCurrReachStarts,isCurrPaw);
@@ -43,6 +44,7 @@ end
 % out2=getPowerDurationInWindow(tbt,successReachName,dropReachName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,[],(6/20)*ninds_subsequent,[],[]);
 % out2.threshold=['chewingDuration>' num2str((6/20)*ninds_subsequent)];
 
+disp('analyzing time window 2');
 ntimes_subsequent=3.75; % in sec
 delaytime=2; % in sec
 ninds_subsequent=floor(ntimes_subsequent/(1/params.Fs));
@@ -116,12 +118,12 @@ for i=1:length(fi)
         subsequent_chewingDuration(i)=nansum(eat.isChewing(mi:mi+ninds_subsequent));
         rawIntensity(i)=nanmax(eatZone(mi:mi+ninds_subsequent));
     end
-    if currmovieind>35297-5 && currmovieind<35297+5
-        disp(['chewing duration ' num2str(subsequent_chewingDuration(i))]);
-        disp(['chewing power ' num2str(subsequent_chewingPower(i))]);
-        disp(['raw intensity ' num2str(rawIntensity(i))]);
-%         disp(['chewing frequency ' num2str(chewFreqs(i))]);
-    end
+%     if currmovieind>9863-5 && currmovieind<9863+5
+%         disp(['chewing duration ' num2str(subsequent_chewingDuration(i))]);
+%         disp(['chewing power ' num2str(subsequent_chewingPower(i))]);
+%         disp(['raw intensity ' num2str(rawIntensity(i))]);
+% %         disp(['chewing frequency ' num2str(chewFreqs(i))]);
+%     end
     out.chewingPower(i)=subsequent_chewingPower(i);
     out.chewingDuration(i)=subsequent_chewingDuration(i);
     out.rawIntensity(i)=rawIntensity(i);
@@ -171,11 +173,11 @@ for i=1:length(fi)
         subsequent_chewingDuration(i)=nansum(eat.isChewing(mi:mi+ninds_subsequent));
         rawIntensity(i)=nanmax(eatZone(mi:mi+ninds_subsequent));
     end
-%     if currmovieind>34130-10 && currmovieind<34130+10
-%         disp(subsequent_chewingDuration(i));
-%         disp(subsequent_chewingPower(i));
-%         disp(rawIntensity(i));
-%     end
+    if currmovieind>22876-10 && currmovieind<22876+10
+        disp(subsequent_chewingDuration(i));
+        disp(subsequent_chewingPower(i));
+        disp(rawIntensity(i));
+    end
 end
 scatter(subsequent_chewingPower,subsequent_chewingDuration,[],'r');
 xlabel('Chewing power');

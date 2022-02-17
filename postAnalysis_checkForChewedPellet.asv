@@ -24,7 +24,12 @@ withinXInds=floor(withinXSeconds/(1/fps));
 priorXInds=floor(priorSeconds/(1/fps));
 minIndMoreStringent=floor(minTimeMoreStringent/(1/fps));
 
-% S
+% Set up fields for storing some ambiguity about drop vs. success
+tbt.maybeDrop_reachStarts_pawOnWheel=zeros(size(tbt.cue));
+tbt.maybeDrop_reachStarts=zeros(size(tbt.cue));
+
+% Fix any reach values below 1
+tbt=setAllAbove0to1(tbt,'reach');
 
 % Check that for each reach classified as a success, there is at least this
 % much chewing time after the cue, 
@@ -119,6 +124,20 @@ tbt=rmfield(tbt,'currentstudydrop');
 
 end
 
+function tbt=setAllAbove0to1(tbt,ifFieldContains)
+
+f=fieldnames(tbt);
+for i=1:length(f)
+    currfield=f{i};
+    if ~isempty(regexp(currfield,ifFieldContains,'once'))
+        tempie=zeros(size(tbt.(currfield)));
+        tempie(tbt.(currfield)>0)=1;
+        tbt.(currfield)=tempie;
+    end
+end
+
+end
+
 function tbt=adjustTbtUsingThresh(movieframes,tbt,theseAreSuccess,isPawOnWheel,finaldata,maybeDropMaybeSuccess)
 
 for i=1:length(movieframes)
@@ -171,16 +190,35 @@ end
 
 end
 
+function [allmi,ms]=findAllMovieInds(movieframe,allmovieframes)
+
+allmi=[];
+ms=[];
+for i=1:1000
+    [m,mi]=min(abs(allmovieframes-movieframe),[],'all','omitnan','linear');
+    [a,b]=ind2sub(size(allmovieframes),mi);
+    allmi=[allmi; [a,b]];
+    ms=[ms; m];
+    allmovieframes(a,b)=movieframe+1000;
+    if m>0.5 && ~isempty(allmi)
+        break
+    end
+end
+
+end
+
 function tbt=adjustTbtAccordingly(currReachInd,finaldata,tbt,flipped,currFlip,isPawOnWheel)
 
 movieframe=finaldata.movieframeinds(currReachInd);
 temp=tbt.movieframeinds;
-[~,mi]=min(abs(temp-movieframe),[],'all','omitnan','linear');
-[a,b]=ind2sub(size(temp),mi);
-if isempty(a) || isempty(b)
-    error('Could not find matching movie frame in tbt IN postAnalysis_checkForChewedPellet.m');
-end
+[allmi,ms]=findAllMovieInds(movieframe,temp); % in case there are multiple instances of this time point at end and beginning of neighboring trials in tbt
+% [~,mi]=min(abs(temp-movieframe),[],'all','omitnan','linear');
+% [a,b]=ind2sub(size(temp),mi);
+% if isempty(a) || isempty(b)
+%     error('Could not find matching movie frame in tbt IN postAnalysis_checkForChewedPellet.m');
+% end
 
+for size(allmi,1)
 if currFlip==true && flipped(currReachInd)==true
     % should flip tbt from success to drop
     % but tbt should already be flipped
