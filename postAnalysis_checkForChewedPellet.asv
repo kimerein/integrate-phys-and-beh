@@ -24,6 +24,31 @@ withinXInds=floor(withinXSeconds/(1/fps));
 priorXInds=floor(priorSeconds/(1/fps));
 minIndMoreStringent=floor(minTimeMoreStringent/(1/fps));
 
+% Plot eat zone for double check of chewing threshold
+tempie=zoneVals.eatZone;
+eatzone=tempie(savehandles.discardFirstNFrames+1:end);
+figure(); plot(eatzone,'Color','k'); 
+hold on; 
+plot(eat.isChewing*nanmax(eatzone),'Color','g');
+figure(); plot(eat.chewingInFrames,'Color','k');
+hold on;
+plot(eat.isChewing*nanmax(eat.chewingInFrames),'Color','g');
+ylabel('chewing power');
+newchewthresh=input('Enter new chewing threshold or empty to keep current thresh. ');
+if isempty(newchewthresh)
+    changedChewThresh=false;
+else
+    changedChewThresh=true;
+    disp('Changing chew threshold.');
+    eat.isChewing=eat.chewingInFrames>newchewthresh;
+    figure(); plot(eat.chewingInFrames,'Color','k');
+    hold on;
+    plot(eat.isChewing*nanmax(eat.chewingInFrames),'Color','g');
+    title('With new chew thresh');
+    eat.movieFrames=[1:length(eat.isChewing)]+savehandles.discardFirstNFrames;
+    finaldata.isChewing=mapUsingMovieFrames(finaldata.movieframeinds,dataToMap,framesInOrigData);
+end
+
 % Set up fields for storing some ambiguity about drop vs. success
 tbt.maybeDrop_reachStarts_pawOnWheel=zeros(size(tbt.cue));
 tbt.maybeDrop_reachStarts=zeros(size(tbt.cue));
@@ -41,6 +66,10 @@ finaldata.success_reachStarts=finaldata.success_reachStarts_backup;
 finaldata.drop_reachStarts=finaldata.drop_reachStarts_backup;
 finaldata.success_reachStarts_pawOnWheel=finaldata.success_reachStarts_pawOnWheel_backup;
 finaldata.drop_reachStarts_pawOnWheel=finaldata.drop_reachStarts_pawOnWheel_backup;
+
+% If want to start by considering every potential reach a success, then
+% will trim accordingly
+finaldata.success_reachStarts=(finaldata.success_reachStarts_backup + finaldata.drop_reachStarts_backup) > 0.5;
 
 % First for reaches where paw does not start on wheel
 finaldata.success_reachStarts_backup=finaldata.success_reachStarts;
@@ -124,6 +153,16 @@ tbt=rmfield(tbt,'currentstudydrop');
 
 end
 
+function finalData=mapUsingMovieFrames(movieFramesInFinalData,dataToMap,framesInOrigData)
+
+finalData=nan(size(movieFramesInFinalData));
+for i=1:length(movieFramesInFinalData)
+    [~,mi]=nanmin(abs(framesInOrigData-movieFramesInFinalData(i)));
+    finalData(i)=dataToMap(mi);    
+end
+
+end
+
 function tbt=setAllAbove0to1(tbt,ifFieldContains)
 
 f=fieldnames(tbt);
@@ -143,46 +182,46 @@ function tbt=adjustTbtUsingThresh(movieframes,tbt,theseAreSuccess,isPawOnWheel,f
 for i=1:length(movieframes)
     movieframe=movieframes(i);
     temp=tbt.movieframeinds;
-    [~,mi]=min(abs(temp-movieframe),[],'all','omitnan','linear');
-    [a,b]=ind2sub(size(temp),mi);
-    if isempty(a) || isempty(b)
-        error('Could not find matching movie frame in tbt IN postAnalysis_checkForChewedPellet.m, adjustTbtUsingThresh');
-    end
-    if theseAreSuccess(i)==true
-        % is success
-        % if finaldata also thinks that this is a success, make sure that
-        % tbt says success
-        [~,movind]=nanmin(abs(finaldata.movieframeinds-movieframe));
-        if isPawOnWheel==true
-            if finaldata.success_reachStarts_pawOnWheel(movind)>0.5
-                tbt.success_reachStarts_pawOnWheel(a,b)=1;
-                tbt.drop_reachStarts_pawOnWheel(a,b)=0;
+    [allmi,ms]=findAllMovieInds(movieframe,temp);
+    for j=1:size(allmi,1)
+        a=allmi(j,1);
+        b=allmi(j,2);
+        if theseAreSuccess(i)==true
+            % is success
+            % if finaldata also thinks that this is a success, make sure that
+            % tbt says success
+            [~,movind]=nanmin(abs(finaldata.movieframeinds-movieframe));
+            if isPawOnWheel==true
+                if finaldata.success_reachStarts_pawOnWheel(movind)>0.5
+                    tbt.success_reachStarts_pawOnWheel(a,b)=1;
+                    tbt.drop_reachStarts_pawOnWheel(a,b)=0;
+                end
+            else
+                if finaldata.success_reachStarts(movind)>0.5
+                    tbt.success_reachStarts(a,b)=1;
+                    tbt.drop_reachStarts(a,b)=0;
+                end
             end
         else
-            if finaldata.success_reachStarts(movind)>0.5
-                tbt.success_reachStarts(a,b)=1;
-                tbt.drop_reachStarts(a,b)=0;
-            end
-        end
-    else
-        % is drop
-        if isPawOnWheel==true
-            if tbt.drop_reachStarts_pawOnWheel(a,b)==0
-                disp('switching to drop based on power and duration 2D');
-            end
-            tbt.drop_reachStarts_pawOnWheel(a,b)=1;
-            tbt.success_reachStarts_pawOnWheel(a,b)=0;
-            if maybeDropMaybeSuccess(i)==1
-                tbt.maybeDrop_reachStarts_pawOnWheel(a,b)=1;
-            end
-        else
-            if tbt.drop_reachStarts(a,b)==0
-                disp('switching to drop based on power and duration 2D');
-            end
-            tbt.drop_reachStarts(a,b)=1;
-            tbt.success_reachStarts(a,b)=0;
-            if maybeDropMaybeSuccess(i)==1
-                tbt.maybeDrop_reachStarts(a,b)=1;
+            % is drop
+            if isPawOnWheel==true
+                if tbt.drop_reachStarts_pawOnWheel(a,b)==0
+                    disp('switching to drop based on power and duration 2D');
+                end
+                tbt.drop_reachStarts_pawOnWheel(a,b)=1;
+                tbt.success_reachStarts_pawOnWheel(a,b)=0;
+                if maybeDropMaybeSuccess(i)==1
+                    tbt.maybeDrop_reachStarts_pawOnWheel(a,b)=1;
+                end
+            else
+                if tbt.drop_reachStarts(a,b)==0
+                    disp('switching to drop based on power and duration 2D');
+                end
+                tbt.drop_reachStarts(a,b)=1;
+                tbt.success_reachStarts(a,b)=0;
+                if maybeDropMaybeSuccess(i)==1
+                    tbt.maybeDrop_reachStarts(a,b)=1;
+                end
             end
         end
     end  
@@ -204,6 +243,8 @@ for i=1:1000
         break
     end
 end
+allmi=allmi(ms<0.5,:);
+ms=ms(ms<0.5);
 
 end
 
@@ -218,29 +259,32 @@ temp=tbt.movieframeinds;
 %     error('Could not find matching movie frame in tbt IN postAnalysis_checkForChewedPellet.m');
 % end
 
-for size(allmi,1)
-if currFlip==true && flipped(currReachInd)==true
-    % should flip tbt from success to drop
-    % but tbt should already be flipped
-elseif currFlip==true && flipped(currReachInd)==false
-    % flip now although didn't flip before
-    if isPawOnWheel==true
-        tbt.drop_reachStarts_pawOnWheel(a,b)=1;
-        tbt.success_reachStarts_pawOnWheel(a,b)=0;
-    else
-        tbt.drop_reachStarts(a,b)=1;
-        tbt.success_reachStarts(a,b)=0;
-    end
-elseif currFlip==false && flipped(currReachInd)==false
-    % don't flip
-elseif currFlip==false && flipped(currReachInd)==true
-    % previously flipped success to drop, but now flip back
-    if isPawOnWheel==true
-        tbt.drop_reachStarts_pawOnWheel(a,b)=0;
-        tbt.success_reachStarts_pawOnWheel(a,b)=1;
-    else
-        tbt.drop_reachStarts(a,b)=0;
-        tbt.success_reachStarts(a,b)=1;
+for i=1:size(allmi,1)
+    a=allmi(i,1);
+    b=allmi(i,2);
+    if currFlip==true && flipped(currReachInd)==true
+        % should flip tbt from success to drop
+        % but tbt should already be flipped
+    elseif currFlip==true && flipped(currReachInd)==false
+        % flip now although didn't flip before
+        if isPawOnWheel==true
+            tbt.drop_reachStarts_pawOnWheel(a,b)=1;
+            tbt.success_reachStarts_pawOnWheel(a,b)=0;
+        else
+            tbt.drop_reachStarts(a,b)=1;
+            tbt.success_reachStarts(a,b)=0;
+        end
+    elseif currFlip==false && flipped(currReachInd)==false
+        % don't flip
+    elseif currFlip==false && flipped(currReachInd)==true
+        % previously flipped success to drop, but now flip back
+        if isPawOnWheel==true
+            tbt.drop_reachStarts_pawOnWheel(a,b)=0;
+            tbt.success_reachStarts_pawOnWheel(a,b)=1;
+        else
+            tbt.drop_reachStarts(a,b)=0;
+            tbt.success_reachStarts(a,b)=1;
+        end
     end
 end
 

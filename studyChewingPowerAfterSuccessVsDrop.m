@@ -173,7 +173,7 @@ for i=1:length(fi)
         subsequent_chewingDuration(i)=nansum(eat.isChewing(mi:mi+ninds_subsequent));
         rawIntensity(i)=nanmax(eatZone(mi:mi+ninds_subsequent));
     end
-    if currmovieind>22876-10 && currmovieind<22876+10
+    if currmovieind>1184-10 && currmovieind<1184+10
         disp(subsequent_chewingDuration(i));
         disp(subsequent_chewingPower(i));
         disp(rawIntensity(i));
@@ -244,7 +244,7 @@ scatter(fpr(ma),tpr(ma),[],'r');
 %     % not helpful
 %     bestThresh=[];
 % end
-if tpr(ma)/nansum(isSuccess==1) < 0.5 || fpr(ma)/nansum(isSuccess==0) > 0.05
+if tpr(ma)/nansum(isSuccess==1) < 0.7 || fpr(ma)/nansum(isSuccess==0) > 0.05
     % not helpful
     bestThresh=[];
 end
