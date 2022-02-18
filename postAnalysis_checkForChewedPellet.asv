@@ -85,6 +85,8 @@ finaldata.drop_reachStarts_pawOnWheel(newDrops==1)=1;
 
 % Chewing power and duration thresholds
 disp('Plotting which duration and power thresholds distinguish drop vs success');
+tbt.currentclassifysuccess=(tbt.('success_reachStarts_backup') + tbt.('success_reachStarts_pawOnWheel_backup')) > 0.5;
+tbt.currentclassifydrop=(tbt.('drop_reachStarts_backup') + tbt.('drop_reachStarts_pawOnWheel_backup')) > 0.5;
 if isfield(tbt,'all_reachBatch')
     tbt.currentstudysuccess=(tbt.('success_reachStarts') + tbt.('reachBatch_success_reachStarts') + tbt.('success_reachStarts_pawOnWheel') + tbt.('reachBatch_success_reachStarts_pawOnWheel')) > 0.5;
     tbt.currentstudydrop=(tbt.('drop_reachStarts') + tbt.('reachBatch_drop_reachStarts') + tbt.('drop_reachStarts_pawOnWheel') + tbt.('reachBatch_drop_reachStarts_pawOnWheel')) > 0.5;
@@ -94,14 +96,18 @@ else
 end
 whichIsReachStarts_noPawOnWheel=tbt.('success_reachStarts')>0.5;
 whichIsReachStarts_PawOnWheel=tbt.('success_reachStarts_pawOnWheel')>0.5;
-[out1,out2]=studyChewingPowerAfterSuccessVsDrop(tbt,savehandles,zoneVals,eat,'currentstudysuccess','currentstudydrop',overweightFP,whichIsReachStarts_noPawOnWheel,whichIsReachStarts_PawOnWheel);
-chewingPower=out1.chewingPower;
-chewingDuration=out1.chewingDuration;
-rawIntensity=out1.rawIntensity;
+[out1,out2]=studyChewingPowerAfterSuccessVsDrop(tbt,savehandles,zoneVals,eat,'currentstudysuccess','currentstudydrop','currentclassifysuccess','currentclassifydrop',overweightFP,whichIsReachStarts_noPawOnWheel,whichIsReachStarts_PawOnWheel);
+chewingPower=out1.chewingPower(out1.isCurrReachStart==1);
+chewingDuration=out1.chewingDuration(out1.isCurrReachStart==1);
+rawIntensity=out1.rawIntensity(out1.isCurrReachStart==1);
+predictions=out1.predictions(out1.isCurrReachStart==1);
+currmovieFrameInds=out1.movieFrameInds(out1.isCurrReachStart==1);
 s1=eval(out1.threshold);
 nopawonwheel_thresh1=out1.threshold;
-chewingPower=out2.chewingPower;
-chewingDuration=out2.chewingDuration;
+chewingPower=out2.chewingPower(out2.isCurrReachStart==1);
+chewingDuration=out2.chewingDuration(out2.isCurrReachStart==1);
+predictions=out2.predictions(out2.isCurrReachStart==1);
+out2.movieFrameInds=out2.movieFrameInds(out2.isCurrReachStart==1);
 s2=eval(out2.threshold);
 nopawonwheel_thresh2=out2.threshold;
 theseAreSuccess=s1 & s2;
@@ -109,47 +115,24 @@ maybeDropMaybeSuccess=s1~=s2;
 disp([out1.movieFrameInds' out2.movieFrameInds'])
 tbt=adjustTbtUsingThresh(out1.movieFrameInds,tbt,theseAreSuccess,false,finaldata,maybeDropMaybeSuccess);
 
-chewingPower=out1.paw_chewingPower;
-chewingDuration=out1.paw_chewingDuration;
-rawIntensity=out1.paw_rawIntensity;
+chewingPower=out1.paw_chewingPower(out1.isCurrReachPaw==1);
+chewingDuration=out1.paw_chewingDuration(out1.isCurrReachPaw==1);
+rawIntensity=out1.paw_rawIntensity(out1.isCurrReachPaw==1);
+predictions=out1.predictions(out1.isCurrReachPaw==1);
+currmovieFrameInds=out1.movieFrameInds(out1.isCurrReachPaw==1);
 s1=eval(out1.threshold);
-chewingPower=out2.paw_chewingPower;
-chewingDuration=out2.paw_chewingDuration;
+chewingPower=out2.paw_chewingPower(out2.isCurrReachPaw==1);
+chewingDuration=out2.paw_chewingDuration(out2.isCurrReachPaw==1);
+predictions=out2.predictions(out2.isCurrReachPaw==1);
 s2=eval(out2.threshold);
 theseAreSuccess=s1 & s2;
 maybeDropMaybeSuccess=s1~=s2;
-tbt=adjustTbtUsingThresh(out1.paw_movieFrameInds,tbt,theseAreSuccess,true,finaldata,maybeDropMaybeSuccess);
-
-% if isfield(tbt,'all_reachBatch')
-%     tbt.currentstudysuccess=(tbt.('success_reachStarts_pawOnWheel') + tbt.('reachBatch_success_reachStarts_pawOnWheel'))>0.5;
-%     tbt.currentstudydrop=(tbt.('drop_reachStarts_pawOnWheel') + tbt.('reachBatch_drop_reachStarts_pawOnWheel'))>0.5;
-% else
-%     tbt.currentstudysuccess=tbt.('success_reachStarts_pawOnWheel');
-%     tbt.currentstudydrop=tbt.('drop_reachStarts_pawOnWheel');
-% end
-
-% [out1,out2]=studyChewingPowerAfterSuccessVsDrop(tbt,savehandles,zoneVals,eat,'currentstudysuccess','currentstudydrop',overweightFP,whichIsReachStarts_PawOnWheel,whichIsReachStarts_PawOnWheel);
-% chewingPower=out1.chewingPower;
-% chewingDuration=out1.chewingDuration;
-% rawIntensity=out1.rawIntensity;
-% if useThreshFromNoPawOnWheel==true
-%     s1=eval(nopawonwheel_thresh1);
-% else
-%     s1=eval(out1.threshold);
-% end
-% chewingPower=out2.chewingPower;
-% chewingDuration=out2.chewingDuration;
-% if useThreshFromNoPawOnWheel==true
-%     s2=eval(nopawonwheel_thresh2);
-% else
-%     s2=eval(out2.threshold);
-% end
-% theseAreSuccess=s1 & s2;
-% disp([out1.movieFrameInds' out2.movieFrameInds'])
-% tbt=adjustTbtUsingThresh(out1.movieFrameInds,tbt,theseAreSuccess,true,finaldata);
+tbt=adjustTbtUsingThresh(currmovieFrameInds,tbt,theseAreSuccess,true,finaldata,maybeDropMaybeSuccess);
 
 tbt=rmfield(tbt,'currentstudysuccess');
 tbt=rmfield(tbt,'currentstudydrop');
+tbt=rmfield(tbt,'currentclassifysuccess');
+tbt=rmfield(tbt,'currentclassifydrop');
 
 end
 
@@ -196,10 +179,16 @@ for i=1:length(movieframes)
                     tbt.success_reachStarts_pawOnWheel(a,b)=1;
                     tbt.drop_reachStarts_pawOnWheel(a,b)=0;
                 end
+                if maybeDropMaybeSuccess(i)==1
+                    tbt.maybeDrop_reachStarts_pawOnWheel(a,b)=1;
+                end
             else
                 if finaldata.success_reachStarts(movind)>0.5
                     tbt.success_reachStarts(a,b)=1;
                     tbt.drop_reachStarts(a,b)=0;
+                end
+                if maybeDropMaybeSuccess(i)==1
+                    tbt.maybeDrop_reachStarts(a,b)=1;
                 end
             end
         else
@@ -346,6 +335,9 @@ for i=1:length(fi)
         end
     end
     [tbt,new_success]=adjustTbtAccordingly(currReachInd,finaldata,tbt,flipped,currFlip,isPawOnWheel);
+    if new_success==true
+        newSuccesses=newSuccesses+1;
+    end
     if currFlip==false && flipped(currReachInd)==true
         flippedBack=flippedBack+1;
     elseif currFlip==true && flipped(currReachInd)==false
@@ -354,5 +346,6 @@ for i=1:length(fi)
 end
 disp(['flipped back ' num2str(flippedBack)]);
 disp(['new flips ' num2str(newFlips)]);
+disp(['new successes ' num2str(newSuccesses)]);
 
 end

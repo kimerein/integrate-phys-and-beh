@@ -1,4 +1,8 @@
-function [out1,out2]=studyChewingPowerAfterSuccessVsDrop(tbt,savehandles,zoneVals,eat,successReachName,dropReachName,overweightFP,isCurrReachStarts,isCurrPaw)
+function [out1_alldata,out2_alldata]=studyChewingPowerAfterSuccessVsDrop(tbt,savehandles,zoneVals,eat,successReachName,dropReachName,successClassifyName,dropClassifyName,overweightFP,isCurrReachStarts,isCurrPaw)
+
+global useSVM
+
+useSVM=true;
 
 movieframesEarlyChews=savehandles.discardFirstNFrames+[1:length(eat.isChewing)];
 settings=autoReachAnalysisSettings;
@@ -13,12 +17,14 @@ eatzone=tempie(savehandles.discardFirstNFrames+1:end);
 % chewingFreqs=f(ma);
 frameTimes=0:(1/settings.movie_fps):(length(movieframesEarlyChews(~isnan(movieframesEarlyChews)))-1)*(1/settings.movie_fps);
 
+% first study the currently classified drop versus success trials to get
+% criteria for distinguishing
 disp('analyzing time window 1');
 ntimes_subsequent=1.667; % in sec
 % ntimes_subsequent=1.25; % in sec
 % ntimes_subsequent=2; % in sec
 ninds_subsequent=floor(ntimes_subsequent/(1/params.Fs));
-[out1,bestThresh,bestThreshIntens]=getPowerDurationInWindow(tbt,successReachName,dropReachName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,[],[],[],[],overweightFP,eatzone,true,isCurrReachStarts,isCurrPaw);
+[out1,bestThresh,bestThreshIntens]=getPowerDurationInWindow(tbt,successClassifyName,dropClassifyName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,[],[],[],[],overweightFP,eatzone,true,isCurrReachStarts,isCurrPaw);
 if isempty(bestThresh) && isempty(bestThreshIntens)
     out1.threshold=['chewingPower>' num2str(-100000) ' & rawIntensity>' num2str(-100000)];
 elseif isempty(bestThresh) && ~isempty(bestThreshIntens)
@@ -28,49 +34,43 @@ elseif ~isempty(bestThresh) && isempty(bestThreshIntens)
 else
     out1.threshold=['chewingPower>' num2str(bestThresh) ' & rawIntensity>' num2str(bestThreshIntens)];
 end
-% return only the reaches of interest
-f=fieldnames(out1);
-for i=1:length(f)
-    if strcmp(f{i},'isCurrReachStart') || strcmp(f{i},'isCurrReachPaw') || length(out1.(f{i}))~=length(out1.isCurrReachStart)
-        continue
-    end
-    temp=out1.(f{i});
-    out1.(['paw_' f{i}])=temp(out1.isCurrReachPaw==1);
-    out1.(f{i})=temp(out1.isCurrReachStart==1);
+if ~isempty(out1.predictions)
+    out1.threshold=['predictions==' num2str(out1.isSuccessVal)];
 end
-
-% ntimes_subsequent=6; % in sec
-% ninds_subsequent=floor(ntimes_subsequent/(1/params.Fs));
-% out2=getPowerDurationInWindow(tbt,successReachName,dropReachName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,[],(6/20)*ninds_subsequent,[],[]);
-% out2.threshold=['chewingDuration>' num2str((6/20)*ninds_subsequent)];
-
 disp('analyzing time window 2');
 ntimes_subsequent=3.75; % in sec
 delaytime=2; % in sec
 ninds_subsequent=floor(ntimes_subsequent/(1/params.Fs));
 delay=floor(delaytime/(1/params.Fs));
-[out2,~,~,bestThreshDur]=getPowerDurationInWindow(tbt,successReachName,dropReachName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,[],[],delay,delaytime,overweightFP,eatzone,true,isCurrReachStarts,isCurrPaw);
+[out2,~,~,bestThreshDur]=getPowerDurationInWindow(tbt,successClassifyName,dropClassifyName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,[],[],delay,delaytime,overweightFP,eatzone,true,isCurrReachStarts,isCurrPaw);
 if ~isempty(bestThreshDur)
     out2.threshold=['chewingDuration>' num2str(bestThreshDur)];
 else
     out2.threshold=['chewingDuration>' num2str(-100000)];
 end
-% out2=getPowerDurationInWindow(tbt,successReachName,dropReachName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,[],(6/20)*ninds_subsequent,delay,delaytime,overweightFP,eatzone,false);
-% out2.threshold=['chewingDuration>' num2str((6/20)*ninds_subsequent)];
-% return only the reaches of interest
-f=fieldnames(out2);
-for i=1:length(f)
-    if strcmp(f{i},'isCurrReachStart') || strcmp(f{i},'isCurrReachPaw') || length(out2.(f{i}))~=length(out2.isCurrReachStart)
-        continue
-    end
-    temp=out2.(f{i});
-    out2.(['paw_' f{i}])=temp(out2.isCurrReachPaw==1);
-    out2.(f{i})=temp(out2.isCurrReachStart==1);
+if ~isempty(out2.predictions)
+    out2.threshold=['predictions==' num2str(out2.isSuccessVal)];
 end
+
+% then get information about all currently considered trials
+disp('getting all trials data for time window 1');
+ntimes_subsequent=1.667; % in sec
+ninds_subsequent=floor(ntimes_subsequent/(1/params.Fs));
+out1_alldata=getClassificationsAllTrials(tbt,successClassifyName,dropClassifyName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,[],[],[],[],overweightFP,eatzone,true,isCurrReachStarts,isCurrPaw,out1.mdl);
+out1_alldata.threshold=out1.threshold;
+disp('getting all trials data for time window 2');
+ntimes_subsequent=3.75; % in sec
+delaytime=2; % in sec
+ninds_subsequent=floor(ntimes_subsequent/(1/params.Fs));
+delay=floor(delaytime/(1/params.Fs));
+out2_alldata=getClassificationsAllTrials(tbt,successClassifyName,dropClassifyName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,[],[],delay,delaytime,overweightFP,eatzone,true,isCurrReachStarts,isCurrPaw,out2.mdl);
+out2_alldata.threshold=out2.threshold;
 
 end
 
-function [out,bestThresh,bestThreshIntens,bestThreshDur]=getPowerDurationInWindow(tbt,successReachName,dropReachName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,x_thresh,y_thresh,delay,delayTime,overweightFP,eatZone,showROCthresh,isCurrReachStarts,isCurrPaw)
+function out=getClassificationsAllTrials(tbt,successReachName,dropReachName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,x_thresh,y_thresh,delay,delayTime,overweightFP,eatZone,showROCthresh,isCurrReachStarts,isCurrPaw,mdl)
+
+global useSVM
 
 temp=tbt.(successReachName);
 temp=temp(1:end);
@@ -118,12 +118,122 @@ for i=1:length(fi)
         subsequent_chewingDuration(i)=nansum(eat.isChewing(mi:mi+ninds_subsequent));
         rawIntensity(i)=nanmax(eatZone(mi:mi+ninds_subsequent));
     end
-%     if currmovieind>9863-5 && currmovieind<9863+5
-%         disp(['chewing duration ' num2str(subsequent_chewingDuration(i))]);
-%         disp(['chewing power ' num2str(subsequent_chewingPower(i))]);
-%         disp(['raw intensity ' num2str(rawIntensity(i))]);
-% %         disp(['chewing frequency ' num2str(chewFreqs(i))]);
-%     end
+    out.chewingPower(i)=subsequent_chewingPower(i);
+    out.chewingDuration(i)=subsequent_chewingDuration(i);
+    out.rawIntensity(i)=rawIntensity(i);
+    %         out.chewFreqs(i)=chewFreqs(i);
+    out.movieFrameInds(i)=currmovieind;
+    out.isCurrReachStart(i)=useCurrReachBecauseReachStarts;
+    out.isCurrReachPaw(i)=useCurrReachPaw;
+end
+
+temp=tbt.(dropReachName);
+temp=temp(1:end);
+temp=temp';
+fi=find(temp>0.5);
+subsequent_chewingPower=nan(1,length(fi));
+subsequent_chewingDuration=nan(1,length(fi));
+rawIntensity=nan(1,length(fi));
+% chewFreqs=nan(1,length(fi));
+for i=1:length(fi)
+    currmovieind=linearmovieframes(fi(i));
+    useCurrReachBecauseReachStarts=lineariscurrreachstarts(fi(i));
+    useCurrReachPaw=lineariscurrpaw(fi(i));
+    [~,mi]=nanmin(abs(movieframesEarlyChews-currmovieind));
+    [~,closest_t]=nanmin(abs(t-frameTimes(mi)));
+    if ~isempty(delay)
+        [~,closest_t]=nanmin(abs(t-(frameTimes(mi)+delayTime)));
+        mi=mi+delay;
+    end
+    if closest_t+ninds_subsequent>length(eat.chewingpower)
+        subsequent_chewingPower(i)=nanmean(eat.chewingpower(closest_t:end));
+%         chewFreqs(i)=nanmean(chewingFreqs(closest_t:end));
+    else
+        subsequent_chewingPower(i)=nanmean(eat.chewingpower(closest_t:closest_t+ninds_subsequent));
+%         chewFreqs(i)=nanmean(chewingFreqs(closest_t:closest_t+ninds_subsequent));
+    end
+    if mi+ninds_subsequent>length(eat.isChewing)
+        subsequent_chewingDuration(i)=nansum(eat.isChewing(mi:end))*(ninds_subsequent/length(eat.isChewing(mi:end)));
+        rawIntensity(i)=nanmax(eatZone(mi:end));
+    else
+        subsequent_chewingDuration(i)=nansum(eat.isChewing(mi:mi+ninds_subsequent));
+        rawIntensity(i)=nanmax(eatZone(mi:mi+ninds_subsequent));
+    end
+    out.drop_chewingPower(i)=subsequent_chewingPower(i);
+    out.drop_chewingDuration(i)=subsequent_chewingDuration(i);
+    out.drop_rawIntensity(i)=rawIntensity(i);
+    %         out.chewFreqs(i)=chewFreqs(i);
+    out.drop_movieFrameInds(i)=currmovieind;
+    out.drop_isCurrReachStart(i)=useCurrReachBecauseReachStarts;
+    out.drop_isCurrReachPaw(i)=useCurrReachPaw;
+end
+
+if useSVM==true 
+    X=[[out.chewingDuration subsequent_chewingDuration]' [out.chewingPower subsequent_chewingPower]' [out.rawIntensity rawIntensity]'];
+    out.predictions=predict(mdl,X);
+    if out.didFlipMdlLabels
+else
+    out.predictions=[];
+end
+
+end
+
+function [out,bestThresh,bestThreshIntens,bestThreshDur]=getPowerDurationInWindow(tbt,successReachName,dropReachName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,x_thresh,y_thresh,delay,delayTime,overweightFP,eatZone,showROCthresh,isCurrReachStarts,isCurrPaw)
+
+global useSVM
+
+temp=tbt.(successReachName);
+temp=temp(1:end);
+temp=temp';
+fi=find(temp>0.5);
+temp=tbt.movieframeinds(1:end);
+linearmovieframes=temp';
+temp=isCurrReachStarts(1:end);
+lineariscurrreachstarts=temp';
+temp=isCurrPaw(1:end);
+lineariscurrpaw=temp';
+subsequent_chewingPower=nan(1,length(fi));
+subsequent_chewingDuration=nan(1,length(fi));
+rawIntensity=nan(1,length(fi));
+% chewFreqs=nan(1,length(fi));
+% figure(); plot(t,eat.chewingpower); title('chewing power');
+out.chewingPower=[];
+out.chewingDuration=[];
+out.movieFrameInds=[];
+out.rawIntensity=[];
+% out.chewFreqs=[];
+out.isCurrReachStart=[];
+out.isCurrReachPaw=[];
+for i=1:length(fi)
+    currmovieind=linearmovieframes(fi(i));
+    useCurrReachBecauseReachStarts=lineariscurrreachstarts(fi(i));
+    useCurrReachPaw=lineariscurrpaw(fi(i));
+    [~,mi]=nanmin(abs(movieframesEarlyChews-currmovieind));
+    [~,closest_t]=nanmin(abs(t-frameTimes(mi)));
+    if ~isempty(delay)
+        [~,closest_t]=nanmin(abs(t-(frameTimes(mi)+delayTime)));
+        mi=mi+delay;
+    end
+    if closest_t+ninds_subsequent>length(eat.chewingpower)
+        subsequent_chewingPower(i)=nanmean(eat.chewingpower(closest_t:end));
+%         chewFreqs(i)=nanmean(chewingFreqs(closest_t:end));
+    else
+        subsequent_chewingPower(i)=nanmean(eat.chewingpower(closest_t:closest_t+ninds_subsequent));
+%         chewFreqs(i)=nanmean(chewingFreqs(closest_t:closest_t+ninds_subsequent));
+    end
+    if mi+ninds_subsequent>length(eat.isChewing)
+        subsequent_chewingDuration(i)=nansum(eat.isChewing(mi:end))*(ninds_subsequent/length(eat.isChewing(mi:end)));
+        rawIntensity(i)=nanmax(eatZone(mi:end));
+    else
+        subsequent_chewingDuration(i)=nansum(eat.isChewing(mi:mi+ninds_subsequent));
+        rawIntensity(i)=nanmax(eatZone(mi:mi+ninds_subsequent));
+    end
+    if currmovieind>6449-50 && currmovieind<6449+50
+        disp(['chewing duration ' num2str(subsequent_chewingDuration(i))]);
+        disp(['chewing power ' num2str(subsequent_chewingPower(i))]);
+        disp(['raw intensity ' num2str(rawIntensity(i))]);
+%         disp(['chewing frequency ' num2str(chewFreqs(i))]);
+    end
     out.chewingPower(i)=subsequent_chewingPower(i);
     out.chewingDuration(i)=subsequent_chewingDuration(i);
     out.rawIntensity(i)=rawIntensity(i);
@@ -153,6 +263,8 @@ rawIntensity=nan(1,length(fi));
 % chewFreqs=nan(1,length(fi));
 for i=1:length(fi)
     currmovieind=linearmovieframes(fi(i));
+    useCurrReachBecauseReachStarts=lineariscurrreachstarts(fi(i));
+    useCurrReachPaw=lineariscurrpaw(fi(i));
     [~,mi]=nanmin(abs(movieframesEarlyChews-currmovieind));
     [~,closest_t]=nanmin(abs(t-frameTimes(mi)));
     if ~isempty(delay)
@@ -173,11 +285,18 @@ for i=1:length(fi)
         subsequent_chewingDuration(i)=nansum(eat.isChewing(mi:mi+ninds_subsequent));
         rawIntensity(i)=nanmax(eatZone(mi:mi+ninds_subsequent));
     end
-    if currmovieind>20-10 && currmovieind<1184+10
+    if currmovieind>6449-50 && currmovieind<6449+50
         disp(subsequent_chewingDuration(i));
         disp(subsequent_chewingPower(i));
         disp(rawIntensity(i));
     end
+    out.drop_chewingPower(i)=subsequent_chewingPower(i);
+    out.drop_chewingDuration(i)=subsequent_chewingDuration(i);
+    out.drop_rawIntensity(i)=rawIntensity(i);
+    %         out.chewFreqs(i)=chewFreqs(i);
+    out.drop_movieFrameInds(i)=currmovieind;
+    out.drop_isCurrReachStart(i)=useCurrReachBecauseReachStarts;
+    out.drop_isCurrReachPaw(i)=useCurrReachPaw;
 end
 scatter(subsequent_chewingPower,subsequent_chewingDuration,[],'r');
 xlabel('Chewing power');
@@ -215,6 +334,64 @@ end
 % figure(); 
 % scatter(out.chewingPower,out.chewFreqs,[],'g');
 % hold on; scatter(subsequent_chewingPower,chewFreqs,[],'r');
+
+if useSVM==true 
+    [predictions,mdl,didFlip]=trySVM(out,subsequent_chewingDuration,subsequent_chewingPower,rawIntensity);
+    out.bestThresh=[];
+    out.bestThreshDur=[];
+    out.bestThreshIntens=[];
+    out.predictions=predictions;
+    out.isSuccessVal=1;
+    out.mdl=mdl;
+    out.didFlipMdlLabels=didFlip;
+else
+    out.predictions=[];
+end
+
+end
+
+function [predictions,Mdl,didFlip]=trySVM(out,subsequent_chewingDuration,subsequent_chewingPower,rawIntensity)
+
+X=[[out.chewingDuration subsequent_chewingDuration]' [out.chewingPower subsequent_chewingPower]' [out.rawIntensity rawIntensity]'];
+Y=[ones(size(out.chewingPower)) zeros(size(subsequent_chewingPower))]';
+Mdl=fitcsvm(X,Y);
+sv=Mdl.SupportVectors;
+figure;
+gscatter(X(:,1),X(:,3),Y,'br','xo');
+hold on;
+plot(sv(:,1),sv(:,3),'ko','MarkerSize',10);
+title('Input data View 1');
+figure;
+gscatter(X(:,1),X(:,2),Y,'br','xo');
+hold on;
+plot(sv(:,1),sv(:,2),'ko','MarkerSize',10);
+title('Input data View 2');
+figure;
+gscatter(X(:,3),X(:,2),Y,'br','xo');
+hold on;
+plot(sv(:,3),sv(:,2),'ko','MarkerSize',10);
+title('Input data View 3');
+predictions=predict(Mdl,X);
+figure;
+gscatter(X(:,1),X(:,3),predictions,'rb','ox');
+title('Prediction View 1');
+figure;
+gscatter(X(:,1),X(:,2),predictions,'rb','ox');
+title('Prediction View 2');
+figure;
+gscatter(X(:,3),X(:,2),predictions,'rb','ox');
+title('Prediction View 3');
+
+overlap=nansum(predictions==Y);
+notoverlap=nansum(predictions~=Y);
+if overlap>notoverlap
+    % assume same labels
+    didFlip=false;
+else
+    % flip labels
+    predictions=~predictions;
+    didFlip=true;
+end
 
 end
 
