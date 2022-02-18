@@ -13,11 +13,6 @@ eatzone=tempie(savehandles.discardFirstNFrames+1:end);
 % chewingFreqs=f(ma);
 frameTimes=0:(1/settings.movie_fps):(length(movieframesEarlyChews(~isnan(movieframesEarlyChews)))-1)*(1/settings.movie_fps);
 
-% Plot eat zone for double check of chewing threshold
-figure(); plot(eatZone,'Color','k'); 
-hold on; 
-plot(eat.isChewing*10e5,'Color','g');
-
 disp('analyzing time window 1');
 ntimes_subsequent=1.667; % in sec
 % ntimes_subsequent=1.25; % in sec
@@ -178,7 +173,7 @@ for i=1:length(fi)
         subsequent_chewingDuration(i)=nansum(eat.isChewing(mi:mi+ninds_subsequent));
         rawIntensity(i)=nanmax(eatZone(mi:mi+ninds_subsequent));
     end
-    if currmovieind>1184-10 && currmovieind<1184+10
+    if currmovieind>20-10 && currmovieind<1184+10
         disp(subsequent_chewingDuration(i));
         disp(subsequent_chewingPower(i));
         disp(rawIntensity(i));
@@ -249,7 +244,7 @@ scatter(fpr(ma),tpr(ma),[],'r');
 %     % not helpful
 %     bestThresh=[];
 % end
-if tpr(ma)/nansum(isSuccess==1) < 0.5 || fpr(ma)/nansum(isSuccess==0) > 0.05
+if tpr(ma)/nansum(isSuccess==1) < 0.7 || fpr(ma)/nansum(isSuccess==0) > 0.05
     % not helpful
     bestThresh=[];
 end

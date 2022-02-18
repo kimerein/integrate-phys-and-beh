@@ -248,7 +248,7 @@ ms=ms(ms<1);
 
 end
 
-function tbt=adjustTbtAccordingly(currReachInd,finaldata,tbt,flipped,currFlip,isPawOnWheel)
+function [tbt,new_success]=adjustTbtAccordingly(currReachInd,finaldata,tbt,flipped,currFlip,isPawOnWheel)
 
 movieframe=finaldata.movieframeinds(currReachInd);
 temp=tbt.movieframeinds;
@@ -259,6 +259,7 @@ temp=tbt.movieframeinds;
 %     error('Could not find matching movie frame in tbt IN postAnalysis_checkForChewedPellet.m');
 % end
 
+new_success=false;
 for i=1:size(allmi,1)
     a=allmi(i,1);
     b=allmi(i,2);
@@ -276,6 +277,21 @@ for i=1:size(allmi,1)
         end
     elseif currFlip==false && flipped(currReachInd)==false
         % don't flip
+        % check whether is drop in tbt and make success
+        if isPawOnWheel==true
+            if tbt.drop_reachStarts_pawOnWheel(a,b)==1
+                tbt.drop_reachStarts_pawOnWheel(a,b)=0;
+                tbt.success_reachStarts_pawOnWheel(a,b)=1;
+                new_success=true;
+            end
+        else
+            if tbt.drop_reachStarts(a,b)==1
+                tbt.drop_reachStarts(a,b)=0;
+                tbt.success_reachStarts(a,b)=1;
+                new_success=true;
+            end
+        end
+        
     elseif currFlip==false && flipped(currReachInd)==true
         % previously flipped success to drop, but now flip back
         if isPawOnWheel==true
@@ -296,6 +312,7 @@ fi=find(reaches==1);
 newDrops=zeros(size(reaches));
 flippedBack=0;
 newFlips=0;
+newSuccesses=0;
 for i=1:length(fi)
     currFlip=false;
     currReachInd=fi(i);
@@ -328,7 +345,10 @@ for i=1:length(fi)
             end
         end
     end
-    tbt=adjustTbtAccordingly(currReachInd,finaldata,tbt,flipped,currFlip,isPawOnWheel);
+    [tbt,new_success]=adjustTbtAccordingly(currReachInd,finaldata,tbt,flipped,currFlip,isPawOnWheel);
+    if new_success==true
+        newSuccesses=newSuccesses+1;
+    end
     if currFlip==false && flipped(currReachInd)==true
         flippedBack=flippedBack+1;
     elseif currFlip==true && flipped(currReachInd)==false
@@ -337,5 +357,6 @@ for i=1:length(fi)
 end
 disp(['flipped back ' num2str(flippedBack)]);
 disp(['new flips ' num2str(newFlips)]);
+disp(['new successes ' num2str(newSuccesses)]);
 
 end
