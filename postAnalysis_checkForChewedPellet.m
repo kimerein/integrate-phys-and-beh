@@ -85,8 +85,10 @@ finaldata.drop_reachStarts_pawOnWheel(newDrops==1)=1;
 
 % Chewing power and duration thresholds
 disp('Plotting which duration and power thresholds distinguish drop vs success');
-tbt.currentclassifysuccess=(tbt.('success_reachStarts_backup') + tbt.('success_reachStarts_pawOnWheel_backup')) > 0.5;
-tbt.currentclassifydrop=(tbt.('drop_reachStarts_backup') + tbt.('drop_reachStarts_pawOnWheel_backup')) > 0.5;
+% tbt.currentclassifysuccess=(tbt.('success_reachStarts_backup') + tbt.('success_reachStarts_pawOnWheel_backup')) > 0.5;
+% tbt.currentclassifydrop=(tbt.('drop_reachStarts_backup') + tbt.('drop_reachStarts_pawOnWheel_backup')) > 0.5;
+tbt.currentclassifysuccess=(tbt.('success_reachStarts') + tbt.('success_reachStarts_pawOnWheel')) > 0.5;
+tbt.currentclassifydrop=(tbt.('drop_reachStarts') + tbt.('drop_reachStarts_pawOnWheel')) > 0.5;
 if isfield(tbt,'all_reachBatch')
     tbt.currentstudysuccess=(tbt.('success_reachStarts') + tbt.('reachBatch_success_reachStarts') + tbt.('success_reachStarts_pawOnWheel') + tbt.('reachBatch_success_reachStarts_pawOnWheel')) > 0.5;
     tbt.currentstudydrop=(tbt.('drop_reachStarts') + tbt.('reachBatch_drop_reachStarts') + tbt.('drop_reachStarts_pawOnWheel') + tbt.('reachBatch_drop_reachStarts_pawOnWheel')) > 0.5;
