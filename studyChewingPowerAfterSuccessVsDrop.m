@@ -1,8 +1,9 @@
 function [out1_alldata,out2_alldata]=studyChewingPowerAfterSuccessVsDrop(tbt,savehandles,zoneVals,eat,successReachName,dropReachName,successClassifyName,dropClassifyName,overweightFP,isCurrReachStarts,isCurrPaw)
 
-global useSVM
+global useSVM removeOutliers
 
 useSVM=true;
+removeOutliers=false;
 
 movieframesEarlyChews=savehandles.discardFirstNFrames+[1:length(eat.isChewing)];
 settings=autoReachAnalysisSettings;
@@ -188,7 +189,7 @@ end
 
 function [out,bestThresh,bestThreshIntens,bestThreshDur]=getPowerDurationInWindow(tbt,successReachName,dropReachName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,x_thresh,y_thresh,delay,delayTime,overweightFP,eatZone,showROCthresh,isCurrReachStarts,isCurrPaw)
 
-global useSVM
+global useSVM removeOutliers
 
 temp=tbt.(successReachName);
 temp=temp(1:end);
@@ -344,7 +345,21 @@ end
 % hold on; scatter(subsequent_chewingPower,chewFreqs,[],'r');
 
 if useSVM==true 
-    [predictions,mdl,didFlip]=trySVM(out,subsequent_chewingDuration,subsequent_chewingPower,rawIntensity);
+    outrm=out;
+    if removeOutliers==true
+        [~,rmind]=rmoutliers([out.chewingPower' out.chewingDuration' out.rawIntensity'],'grubbs');
+        outrm.chewingPower=out.chewingPower(rmind==0);
+        outrm.chewingDuration=out.chewingDuration(rmind==0);
+        outrm.movieFrameInds=out.movieFrameInds(rmind==0);
+        outrm.rawIntensity=out.rawIntensity(rmind==0);
+        outrm.isCurrReachStart=out.isCurrReachStart(rmind==0);
+        outrm.isCurrReachPaw=out.isCurrReachPaw(rmind==0);
+        [~,rmind]=rmoutliers([subsequent_chewingPower' subsequent_chewingDuration' rawIntensity'],'grubbs');
+        subsequent_chewingDuration=subsequent_chewingDuration(rmind==0);
+        subsequent_chewingPower=subsequent_chewingPower(rmind==0);
+        rawIntensity=rawIntensity(rmind==0);
+    end
+    [predictions,mdl,didFlip]=trySVM(outrm,subsequent_chewingDuration,subsequent_chewingPower,rawIntensity);
     out.bestThresh=[];
     out.bestThreshDur=[];
     out.bestThreshIntens=[];
@@ -362,22 +377,22 @@ function [predictions,Mdl,didFlip]=trySVM(out,subsequent_chewingDuration,subsequ
 
 X=[[out.chewingDuration subsequent_chewingDuration]' [out.chewingPower subsequent_chewingPower]' [out.rawIntensity rawIntensity]'];
 Y=[ones(size(out.chewingPower)) zeros(size(subsequent_chewingPower))]';
-Mdl=fitcsvm(X,Y);
+Mdl=fitcsvm(X,Y,'KernelScale','auto','Standardize',true,'OutlierFraction',0.05);
 sv=Mdl.SupportVectors;
 figure;
 gscatter(X(:,1),X(:,3),Y,'br','xo');
-hold on;
-plot(sv(:,1),sv(:,3),'ko','MarkerSize',10);
+% hold on;
+% plot(sv(:,1),sv(:,3),'ko','MarkerSize',10);
 title('Input data View 1');
 figure;
 gscatter(X(:,1),X(:,2),Y,'br','xo');
-hold on;
-plot(sv(:,1),sv(:,2),'ko','MarkerSize',10);
+% hold on;
+% plot(sv(:,1),sv(:,2),'ko','MarkerSize',10);
 title('Input data View 2');
 figure;
 gscatter(X(:,3),X(:,2),Y,'br','xo');
-hold on;
-plot(sv(:,3),sv(:,2),'ko','MarkerSize',10);
+% hold on;
+% plot(sv(:,3),sv(:,2),'ko','MarkerSize',10);
 title('Input data View 3');
 predictions=predict(Mdl,X);
 figure;
