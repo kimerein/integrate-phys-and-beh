@@ -36,8 +36,9 @@ if removeZscore==true
     [S,t,f]=mtspecgramc(eatzone(~isnan(eatzone)),[5 0.25],params);
     chewingpower=nanmean(S(:,f>=chewFrequency(1) & f<=chewFrequency(2)),2);
     chewingpower=(chewingpower./nanmax(chewingpower))*nanmax(eat.chewingpower);
-    newxvals=linspace(1,length(chewingpower),length(eat.chewingInFrames(~isnan(eat.chewingInFrames))));
-    new_chewingInFrames=interp1(1:length(chewingpower),chewingpower,newxvals);
+    
+    frameTimes=0:(1/settings.movie_fps):(length(eatzone(~isnan(eatzone)))-1)*(1/settings.movie_fps);
+    new_chewingInFrames=mapToFrames(chewingpower,t,frameTimes);
 end
 figure(); plot(eatzone,'Color','k'); 
 hold on; 
@@ -157,6 +158,46 @@ tbt=rmfield(tbt,'currentstudysuccess');
 tbt=rmfield(tbt,'currentstudydrop');
 tbt=rmfield(tbt,'currentclassifysuccess');
 tbt=rmfield(tbt,'currentclassifydrop');
+
+end
+
+function dataByFrames=mapToFrames(data,times,frameTimes)
+
+dataByFrames=nan(size(frameTimes));
+
+for i=1:length(times)
+    [~,mi]=min(abs(times(i)-frameTimes));
+    dataByFrames(mi)=data(i);
+end
+
+dataByFrames=fillInNans(dataByFrames);
+
+end
+
+function data=fillInNans(data)
+
+inds=find(~isnan(data));
+for i=1:length(inds)
+    currind=inds(i);
+    if i==1
+        % fill in before
+        data(1:currind-1)=data(currind);
+    elseif i==length(inds)
+        halfLength=floor((currind-inds(i-1))/2);
+        data(inds(i-1)+1:inds(i-1)+1+halfLength)=data(inds(i-1));
+        data(inds(i-1)+2+halfLength:currind-1)=data(currind);
+        % fill in after
+        data(currind+1:end)=data(currind);
+    else
+        % fill in with recent
+        halfLength=floor((currind-inds(i-1))/2);
+        data(inds(i-1)+1:inds(i-1)+1+halfLength)=data(inds(i-1));
+        data(inds(i-1)+2+halfLength:currind-1)=data(currind);
+    end
+end
+if any(isnan(data))
+    error('Failed to replace all nans');
+end     
 
 end
 
