@@ -56,14 +56,14 @@ end
 disp('getting all trials data for time window 1');
 ntimes_subsequent=1.667; % in sec
 ninds_subsequent=floor(ntimes_subsequent/(1/params.Fs));
-out1_alldata=getClassificationsAllTrials(tbt,successClassifyName,dropClassifyName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,[],[],[],[],overweightFP,eatzone,true,isCurrReachStarts,isCurrPaw,out1.mdl,out1.didFlipMdlLabels);
+out1_alldata=getClassificationsAllTrials(tbt,successReachName,dropReachName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,[],[],[],[],overweightFP,eatzone,true,isCurrReachStarts,isCurrPaw,out1.mdl,out1.didFlipMdlLabels);
 out1_alldata.threshold=out1.threshold;
 disp('getting all trials data for time window 2');
 ntimes_subsequent=3.75; % in sec
 delaytime=2; % in sec
 ninds_subsequent=floor(ntimes_subsequent/(1/params.Fs));
 delay=floor(delaytime/(1/params.Fs));
-out2_alldata=getClassificationsAllTrials(tbt,successClassifyName,dropClassifyName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,[],[],delay,delaytime,overweightFP,eatzone,true,isCurrReachStarts,isCurrPaw,out2.mdl,out2.didFlipMdlLabels);
+out2_alldata=getClassificationsAllTrials(tbt,successReachName,dropReachName,movieframesEarlyChews,t,frameTimes,eat,ninds_subsequent,[],[],delay,delaytime,overweightFP,eatzone,true,isCurrReachStarts,isCurrPaw,out2.mdl,out2.didFlipMdlLabels);
 out2_alldata.threshold=out2.threshold;
 
 end
@@ -168,8 +168,14 @@ for i=1:length(fi)
     out.drop_isCurrReachPaw(i)=useCurrReachPaw;
 end
 
+out.chewingDuration=[out.chewingDuration subsequent_chewingDuration];
+out.chewingPower=[out.chewingPower subsequent_chewingPower];
+out.rawIntensity=[out.rawIntensity rawIntensity];
+out.movieFrameInds=[out.movieFrameInds currmovieind];
+out.isCurrReachStart=[out.isCurrReachStart useCurrReachBecauseReachStarts];
+out.isCurrReachPaw=[out.isCurrReachPaw useCurrReachPaw];
 if useSVM==true 
-    X=[[out.chewingDuration subsequent_chewingDuration]' [out.chewingPower subsequent_chewingPower]' [out.rawIntensity rawIntensity]'];
+    X=[out.chewingDuration' out.chewingPower' out.rawIntensity'];
     out.predictions=predict(mdl,X);
     if didFlipMdlLabels==true
         out.predictions=~out.predictions;
@@ -230,12 +236,12 @@ for i=1:length(fi)
         subsequent_chewingDuration(i)=nansum(eat.isChewing(mi:mi+ninds_subsequent));
         rawIntensity(i)=nanmax(eatZone(mi:mi+ninds_subsequent));
     end
-    if currmovieind>6449-50 && currmovieind<6449+50
-        disp(['chewing duration ' num2str(subsequent_chewingDuration(i))]);
-        disp(['chewing power ' num2str(subsequent_chewingPower(i))]);
-        disp(['raw intensity ' num2str(rawIntensity(i))]);
-%         disp(['chewing frequency ' num2str(chewFreqs(i))]);
-    end
+%     if currmovieind>15179-50 && currmovieind<15179+50
+%         disp(['chewing duration ' num2str(subsequent_chewingDuration(i))]);
+%         disp(['chewing power ' num2str(subsequent_chewingPower(i))]);
+%         disp(['raw intensity ' num2str(rawIntensity(i))]);
+% %         disp(['chewing frequency ' num2str(chewFreqs(i))]);
+%     end
     out.chewingPower(i)=subsequent_chewingPower(i);
     out.chewingDuration(i)=subsequent_chewingDuration(i);
     out.rawIntensity(i)=rawIntensity(i);
@@ -287,7 +293,7 @@ for i=1:length(fi)
         subsequent_chewingDuration(i)=nansum(eat.isChewing(mi:mi+ninds_subsequent));
         rawIntensity(i)=nanmax(eatZone(mi:mi+ninds_subsequent));
     end
-    if currmovieind>6449-50 && currmovieind<6449+50
+    if currmovieind>15179-50 && currmovieind<15179+50
         disp(subsequent_chewingDuration(i));
         disp(subsequent_chewingPower(i));
         disp(rawIntensity(i));
