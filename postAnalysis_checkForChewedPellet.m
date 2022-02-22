@@ -5,6 +5,7 @@ overweightFP=6.5;
 % will overweight false positives if not equal to 1, FP are real drops called a success
 % false positives will count overweightFP times more than true positives
 % useThreshFromNoPawOnWheel=true; % if true, apply threshold from no paw on wheel reaches to paw on wheel reaches
+removeZscore=true;
 
 settings=autoReachAnalysisSettings();
 disp(['priorToReach_chewWindow is ' num2str(settings.chew.priorToReach_chewWindow)]);
@@ -17,6 +18,7 @@ withinXSeconds=settings.chew.withinXSeconds;
 priorSeconds=settings.chew.priorToReach_chewWindow;
 dropIfChewingBefore=settings.chew.dropIfChewingBefore;
 minTimeMoreStringent=settings.chew.minTimeToChew_afterReach;
+chewFrequency=settings.chew.chewFrequency;
 fps=settings.movie_fps;
 % Convert to inds
 minIndToPelletChew=floor(minTimePelletChew/(1/fps));
@@ -27,19 +29,40 @@ minIndMoreStringent=floor(minTimeMoreStringent/(1/fps));
 % Plot eat zone for double check of chewing threshold
 tempie=zoneVals.eatZone;
 eatzone=tempie(savehandles.discardFirstNFrames+1:end);
+if removeZscore==true
+    params.Fs=settings.movie_fps;
+    params.tapers=settings.chew.tapers;
+    params.fpass=settings.chew.fpass; % in Hz
+    [S,t,f]=mtspecgramc(eatzone(~isnan(eatzone)),[5 0.25],params);
+    chewingpower=nanmean(S(:,f>=chewFrequency(1) & f<=chewFrequency(2)),2);
+    chewingpower=(chewingpower./nanmax(chewingpower))*nanmax(eat.chewingpower);
+    newxvals=linspace(1,length(chewingpower),length(eat.chewingInFrames(~isnan(eat.chewingInFrames))));
+    new_chewingInFrames=interp1(1:length(chewingpower),chewingpower,newxvals);
+end
 figure(); plot(eatzone,'Color','k'); 
 hold on; 
 plot(eat.isChewing*nanmax(eatzone),'Color','g');
 figure(); plot(eat.chewingInFrames,'Color','k');
 hold on;
+if removeZscore==true
+    plot(new_chewingInFrames,'Color','r');
+end
 plot(eat.isChewing*nanmax(eat.chewingInFrames),'Color','g');
 ylabel('chewing power');
-newchewthresh=input('Enter new chewing threshold or empty to keep current thresh. ');
+if removeZscore==true
+    useRed='Will use red. ';
+else
+    useRed=[];
+end
+newchewthresh=input(['Enter new chewing threshold or empty to keep current thresh. ' useRed]);
 if isempty(newchewthresh)
     changedChewThresh=false;
 else
     changedChewThresh=true;
     disp('Changing chew threshold.');
+    if removeZscore==true
+        eat.chewingInFrames=new_chewingInFrames;
+    end
     eat.isChewing=eat.chewingInFrames>newchewthresh;
     figure(); plot(eat.chewingInFrames,'Color','k');
     hold on;
@@ -113,7 +136,7 @@ s2=eval(out2.threshold);
 nopawonwheel_thresh2=out2.threshold;
 theseAreSuccess=s1 & s2;
 maybeDropMaybeSuccess=s1~=s2;
-disp([out1.movieFrameInds(out1.isCurrReachStart==1)' out2.movieFrameInds(out2.isCurrReachStart==1)'])
+% disp([out1.movieFrameInds(out1.isCurrReachStart==1)' out2.movieFrameInds(out2.isCurrReachStart==1)'])
 tbt=adjustTbtUsingThresh(currmovieFrameInds,tbt,theseAreSuccess,false,finaldata,maybeDropMaybeSuccess);
 
 chewingPower=out1.chewingPower(out1.isCurrReachPaw==1);

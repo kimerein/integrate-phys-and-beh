@@ -237,12 +237,12 @@ for i=1:length(fi)
         subsequent_chewingDuration(i)=nansum(eat.isChewing(mi:mi+ninds_subsequent));
         rawIntensity(i)=nanmax(eatZone(mi:mi+ninds_subsequent));
     end
-    if currmovieind>3446-50 && currmovieind<3446+50
-        disp(['chewing duration ' num2str(subsequent_chewingDuration(i))]);
-        disp(['chewing power ' num2str(subsequent_chewingPower(i))]);
-        disp(['raw intensity ' num2str(rawIntensity(i))]);
-%         disp(['chewing frequency ' num2str(chewFreqs(i))]);
-    end
+%     if currmovieind>30501-50 && currmovieind<30501+50
+%         disp(['chewing duration ' num2str(subsequent_chewingDuration(i))]);
+%         disp(['chewing power ' num2str(subsequent_chewingPower(i))]);
+%         disp(['raw intensity ' num2str(rawIntensity(i))]);
+% %         disp(['chewing frequency ' num2str(chewFreqs(i))]);
+%     end
     out.chewingPower(i)=subsequent_chewingPower(i);
     out.chewingDuration(i)=subsequent_chewingDuration(i);
     out.rawIntensity(i)=rawIntensity(i);
@@ -294,11 +294,11 @@ for i=1:length(fi)
         subsequent_chewingDuration(i)=nansum(eat.isChewing(mi:mi+ninds_subsequent));
         rawIntensity(i)=nanmax(eatZone(mi:mi+ninds_subsequent));
     end
-%     if currmovieind>3446-50 && currmovieind<3446+50
-%         disp(subsequent_chewingDuration(i));
-%         disp(subsequent_chewingPower(i));
-%         disp(rawIntensity(i));
-%     end
+    if currmovieind>30501-50 && currmovieind<30501+50
+        disp(subsequent_chewingDuration(i));
+        disp(subsequent_chewingPower(i));
+        disp(rawIntensity(i));
+    end
     out.drop_chewingPower(i)=subsequent_chewingPower(i);
     out.drop_chewingDuration(i)=subsequent_chewingDuration(i);
     out.drop_rawIntensity(i)=rawIntensity(i);
