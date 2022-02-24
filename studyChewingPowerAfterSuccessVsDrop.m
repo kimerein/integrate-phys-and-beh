@@ -422,7 +422,11 @@ function bestThresh=buildROC(pred,isSuccess,overweightFP)
 
 % try thresholds
 stepSize=(nanmax(pred)-nanmin(pred))/50;
-trythresh=nanmin(pred)-stepSize:stepSize:nanmax(pred)+stepSize;
+if nanmax(pred)==nanmin(pred)
+    trythresh=nanmin(pred)-0.1:0.01:nanmax(pred)+0.1;
+else
+    trythresh=nanmin(pred)-stepSize:stepSize:nanmax(pred)+stepSize;
+end
 tpr=nan(1,length(trythresh));
 fpr=nan(1,length(trythresh));
 for i=1:length(trythresh)

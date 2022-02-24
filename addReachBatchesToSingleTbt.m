@@ -3,7 +3,8 @@ function alltbt=addReachBatchesToSingleTbt(tbt,useAsCue,cueDuration,doRealign,se
 if isempty(settings)
     settings.isOrchestra=0;
     settings.tryForFiles={};
-    settings=reachExpt_analysis_settings('display settings',settings);
+%     settings=reachExpt_analysis_settings('display settings',settings);
+    settings=reachExpt_analysis_settings('do not display',settings);
 end
 
 % cueDuration in seconds
