@@ -7,7 +7,6 @@ function [data1,data2]=useDistractorAlignment(data1,whichTime1,whichField1,data2
 % whichField1 is distractor
 % whichTime2 is time matched to distractor
 % whichField2 is distractor
-
 % for photometry
 % settings.try_delay1=-150;
 % settings.try_delay2=150;
@@ -15,13 +14,27 @@ function [data1,data2]=useDistractorAlignment(data1,whichTime1,whichField1,data2
 % settings.try_scale1=0.8;
 % settings.try_scale2=1.2;  
 % for physiology
-settings.try_delay1=-50;
+settings.try_delay1=-10;
 settings.delaysteps=1;
 settings.try_delay2=50;
-settings.tryinc=0.0005;
-settings.try_scale1=0.8;
-settings.try_scale2=1.2;  
-alignInd=10;
+settings.tryinc=0.02;
+% settings.try_scale1=0.6;
+% settings.try_scale2=1;  
+alignInd=6;
+downSampData2=true;
+ds=1000;
+
+if downSampData2==true
+    f=fieldnames(data2);
+    for i=1:length(f)
+        temp=data2.(f{i});
+        data2.(f{i})=downSampMatrix(temp,ds);
+    end
+    a=questdlg('Beware will downsample data2 and return downsampled. Do you want to continue? ');
+    if ~strcmp(a,'Yes')
+        return
+    end
+end
 
 switch whichToShift
     case 'data1'
@@ -46,6 +59,13 @@ dis1=data1.(whichField1);
 t1=data1.(whichTime1);
 dis2=data2.(whichField2);
 t2=data2.(whichTime2);
+
+figure(); plot(t2(alignInd,:),dis2(alignInd,:),'Color','r'); 
+figure(); plot(t1(alignInd,:),dis1(alignInd,:),'Color','k');
+scaleMid=input('What is scaling of red divided by black time duration? ');
+settings.try_scale1=scaleMid-0.2;
+settings.try_scale2=scaleMid+0.2;  
+
 figure();
 offset=0;
 for i=1:size(data1.(whichTime1),1)
@@ -120,7 +140,11 @@ disp(mi_col);
 disp('Best scale row');
 disp(mi_row);
 
-[data1_LED,data1_t,timestep]=shiftRow(dis1(alignInd,:),t1(alignInd,:),tryscales,mi_row,trydelays,mi_col,false,[],[]);
+% [data1_LED,data1_t,timestep]=shiftRow(dis1(alignInd,:),t1(alignInd,:),tryscales,mi_row,trydelays,mi_col,true,[],[]);
+guess_best_delay=trydelays(mi_col); 
+trydelays=guess_best_delay-50:1:guess_best_delay+50;
+mi_col=floor(length(trydelays)/2);
+[data1_LED,data1_t,timestep]=shiftRow(dis1(alignInd,:),t1(alignInd,:),tryscales,mi_row,trydelays,mi_col,true,dis2(alignInd,:),t2(alignInd,:));
 figure(); plot(data1_t,data1_LED,'Color','k'); hold on; plot(t2(alignInd,:),dis2(alignInd,:),'Color','r'); title('Alignment of test row');
 pause;
 

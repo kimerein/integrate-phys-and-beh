@@ -7,7 +7,6 @@ function [data1,data2]=useDistractorAlignment(data1,whichTime1,whichField1,data2
 % whichField1 is distractor
 % whichTime2 is time matched to distractor
 % whichField2 is distractor
-
 % for photometry
 % settings.try_delay1=-150;
 % settings.try_delay2=150;
@@ -15,12 +14,13 @@ function [data1,data2]=useDistractorAlignment(data1,whichTime1,whichField1,data2
 % settings.try_scale1=0.8;
 % settings.try_scale2=1.2;  
 % for physiology
-settings.try_delay1=-50;
+settings.try_delay1=-150;
 settings.delaysteps=1;
 settings.try_delay2=50;
-settings.tryinc=0.0005; 
-settings.try_scale1=0.8;
-settings.try_scale2=1.2;  
+settings.tryinc=0.025;
+% settings.try_scale1=0.6;
+% settings.try_scale2=1;  
+alignInd=6;
 
 switch whichToShift
     case 'data1'
@@ -45,6 +45,13 @@ dis1=data1.(whichField1);
 t1=data1.(whichTime1);
 dis2=data2.(whichField2);
 t2=data2.(whichTime2);
+
+figure(); plot(t2(alignInd,:),dis2(alignInd,:),'Color','r'); 
+figure(); plot(t1(alignInd,:),dis1(alignInd,:),'Color','k');
+scaleMid=input('What is scaling of red divided by black time duration? ');
+settings.try_scale1=scaleMid-0.2;
+settings.try_scale2=scaleMid+0.2;  
+
 figure();
 offset=0;
 for i=1:size(data1.(whichTime1),1)
@@ -63,7 +70,6 @@ trydelays=guess_best_delay+settings.try_delay1:settings.delaysteps:guess_best_de
 tryscales=settings.try_scale1:tryinc:settings.try_scale2;
 sumdiffs=nan(length(tryscales),length(trydelays));
 
-alignInd=1;
 data1_LED=dis1(alignInd,:);
 data1_LED(isnan(data1_LED))=0;
 data1_t=t1(alignInd,:);
@@ -92,7 +98,9 @@ for j=1:length(tryscales)
             data1_t=data1_t(1:length(data1_LED));
         end
         takeoutnan=isnan(data2_t);
-        if isempty(data2_t(~takeoutnan)) || isempty(data2_LED(~takeoutnan)) 
+        if isempty(data2_t(~takeoutnan)) || isempty(data2_LED(~takeoutnan)) || isempty(data1_t)
+            error('There is a problem with this alignInd. Change it.');
+        end
         y2i=interp1(data2_t(~takeoutnan),data2_LED(~takeoutnan),data1_t);
         dontuse=isnan(y2i);
 %         [c,lags]=xcorr(data1_LED(~dontuse),y2i(~dontuse),0,'normalized');
@@ -118,8 +126,15 @@ disp(mi_col);
 disp('Best scale row');
 disp(mi_row);
 
+settings.try_delay1=-150;
+settings.delaysteps=1;
+settings.try_delay2=50;
+guess_best_delay=trydelays(micol);
+trydelays=guess_best_delay+settings.try_delay1:settings.delaysteps:guess_best_delay+settings.try_delay2;
+
 [data1_LED,data1_t,timestep]=shiftRow(dis1(alignInd,:),t1(alignInd,:),tryscales,mi_row,trydelays,mi_col,false,[],[]);
 figure(); plot(data1_t,data1_LED,'Color','k'); hold on; plot(t2(alignInd,:),dis2(alignInd,:),'Color','r'); title('Alignment of test row');
+pause;
 
 % Scale/shift all rows of time structure similarly
 for i=1:size(t1,1)
@@ -221,6 +236,9 @@ if getNewDelay==true
             data1_t=data1_t(1:length(data1_LED));
         end
         takeoutnan=isnan(data2_t);
+        if isempty(data2_t(~takeoutnan)) || isempty(data2_LED(~takeoutnan)) || isempty(data1_t)
+            continue
+        end
         y2i=interp1(data2_t(~takeoutnan),data2_LED(~takeoutnan),data1_t);
         dontuse=isnan(y2i);
 %         [c,lags]=xcorr(data1_LED(~dontuse),y2i(~dontuse),0,'normalized');

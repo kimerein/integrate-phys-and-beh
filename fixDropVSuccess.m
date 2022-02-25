@@ -2,9 +2,9 @@ function fixDropVSuccess
 
 % script for fixing drop vs success classifications
 
-currentVid='Z:\Kim\Behavior Final Data Sets\Learning curves w interleaved silencing\Dec_d\2020-03-17 13-17-56-C_processed_data';
-datestr='20200317';
-mousename='Dec_d';
+currentVid='Z:\Kim\Behavior Final Data Sets\Learning curves w interleaved silencing\Jan_1\2011-03-28 01-12-26-C_processed_data';
+datestr='20200828';
+mousename='Jan_1';
 
 f_pr=regexp(currentVid,'_processed_data');
 fslash=regexp(currentVid,'\');
