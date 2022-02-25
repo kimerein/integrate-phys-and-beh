@@ -110,9 +110,16 @@ end
 physiology_tbt.av_over_singleunit=physiology_tbt.sum_over_singleunit./length(physiology_tbt.details.unitnames);
 
 % downSamp=20; % downSamp=6; % if don't want to downSamp, set to 1, else set to index binsize for downSamp
-% downSamp=6; % if don't want to downSamp, set to 1, else set to index binsize for downSamp
-downSamp=1; % if don't want to downSamp, set to 1, else set to index binsize for downSamp
+downSamp=6; % if don't want to downSamp, set to 1, else set to index binsize for downSamp
+% downSamp=1; % if don't want to downSamp, set to 1, else set to index binsize for downSamp
 physiology_tbt=makeUnitSubgroups(physiology_tbt,downSamp);
+
+% physiology_tbt=addUnitSubgroups(physiology_tbt,downSamp,physiology_tbt.details.whichDAgrp,physiology_tbt.details.whichgrp==1,'DA');
+% physiology_tbt=addUnitSubgroups(physiology_tbt,downSamp,physiology_tbt.details.whichDAgrp,physiology_tbt.details.whichgrp==1,'negDA');
+temp=physiology_tbt.details.whichDAgrp;
+temp(physiology_tbt.details.whichDAgrp~=physiology_tbt.details.whichnegDAgrp)=3;
+physiology_tbt.details.whichConsensusDAgrp=temp;
+physiology_tbt=addUnitSubgroups(physiology_tbt,downSamp,physiology_tbt.details.whichConsensusDAgrp,physiology_tbt.details.whichgrp==1,'consensusDA');
 
 % figure 5
 photothresh=0.75;
@@ -131,35 +138,89 @@ phys_beh_tbt=putPhotoBehFieldIntoPhysBeh(photo_beh_tbt,phys_beh_tbt,'isPhotoEven
 alignments={'isPhotoEvent'};
 xranges={[0 maxTrialLength]};
 timewindows={[-0.25 16]};
-withintimewindow={'first'};
-beh_fields={'all_reachBatch','fidgetData'};
-photo_fields={'green_ch'};
+withintimewindow={'last'};
+% beh_fields={'all_reachBatch','fidgetData'};
+% photo_fields={'green_ch'};
 phys_fields={'unit_by_unit','av_over_singleunit','grp1_unitav','grp2_unitav','grp3_unitav'};
+beh_fields={'all_reachBatch'};
+photo_fields={'green_ch'};
+% phys_fields={'unit_by_unit'};
 physthenphoto_fields(1:length(phys_fields))=phys_fields;
 physthenphoto_fields(length(phys_fields)+1:length(phys_fields)+length(photo_fields))=photo_fields;
 isPhysField=[ones(size(1:length(phys_fields))) zeros(size(1:length(photo_fields)))];
 outSU=makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength);
 firstDAchange=classifyUnitsAsDAincreaseOrDecrease(outSU);
 timewindows={[-0.25 16]};
-withintimewindow={'last'};
-beh_fields={'all_reachBatch','fidgetData'};
+withintimewindow={'first'};
+% beh_fields={'all_reachBatch','fidgetData'};
+% photo_fields={'green_ch'};
+% phys_fields={'unit_by_unit','av_over_singleunit','grp1_unitav','grp2_unitav','grp3_unitav'};
+beh_fields={'all_reachBatch'};
 photo_fields={'green_ch'};
-phys_fields={'unit_by_unit','av_over_singleunit','grp1_unitav','grp2_unitav','grp3_unitav'};
+phys_fields={'unit_by_unit'};
 physthenphoto_fields(1:length(phys_fields))=phys_fields;
 physthenphoto_fields(length(phys_fields)+1:length(phys_fields)+length(photo_fields))=photo_fields;
 isPhysField=[ones(size(1:length(phys_fields))) zeros(size(1:length(photo_fields)))];
 outSU=makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength);
-lastDAchange=classifyUnitsAsDAincreaseOrDecrease(outSU);
-physiology_tbt=compareFirstAndLastDAchange(firstDAchange,lastDAchange,physiology_tbt.details.whichgrp,physiology_tbt);
-physiology_tbt=addUnitSubgroups(physiology_tbt,1,physiology_tbt.details.whichDAgrp,'DA');
+% lastDAchange=classifyUnitsAsDAincreaseOrDecrease(outSU);
+% DAfieldname='whichDAgrp';
+% physiology_tbt=compareFirstAndLastDAchange(firstDAchange,lastDAchange,physiology_tbt.details.whichgrp,physiology_tbt,DAfieldname);
+% physiology_tbt=addUnitSubgroups(physiology_tbt,1,physiology_tbt.details.whichDAgrp,physiology_tbt.details.whichgrp==1,'DA');
+
+% figure 6
+% photothresh=-0.75;
+% lowPassCutoff=5; % in Hz
+% dosmooth=true;
+% smoothFields={'green_ch'};
+% triggerOnField=smoothFields{1};
+% if dosmooth==true
+%     phototimes=nanmean(photometry_tbt.times_wrt_trial_start,1);
+%     photometry_tbt=smoothPhotometry(photometry_tbt,1/mode(diff(phototimes)),lowPassCutoff,smoothFields);
+%     disp(['using photometry Fs ' num2str(1/mode(diff(phototimes)))]);
+% end
+% photometry_tbt.isPhotoEvent=double(photometry_tbt.(triggerOnField)<photothresh);
+% photo_beh_tbt=makeSameFieldInBeh(photometry_tbt,photo_beh_tbt,'isPhotoEvent',photometry_tbt.times_wrt_trial_start,photo_beh_tbt.times_wrt_trial_start);
+% phys_beh_tbt=putPhotoBehFieldIntoPhysBeh(photo_beh_tbt,phys_beh_tbt,'isPhotoEvent');
+% alignments={'isPhotoEvent'};
+% xranges={[0 maxTrialLength]};
+% timewindows={[-0.25 16]};
+% withintimewindow={'first'};
+% % beh_fields={'all_reachBatch','fidgetData'};
+% % photo_fields={'green_ch'};
+% % phys_fields={'unit_by_unit','av_over_singleunit','grp1_unitav','grp2_unitav','grp3_unitav'};
+% beh_fields={'all_reachBatch'};
+% photo_fields={'green_ch'};
+% phys_fields={'unit_by_unit'};
+% physthenphoto_fields(1:length(phys_fields))=phys_fields;
+% physthenphoto_fields(length(phys_fields)+1:length(phys_fields)+length(photo_fields))=photo_fields;
+% isPhysField=[ones(size(1:length(phys_fields))) zeros(size(1:length(photo_fields)))];
+% outSU=makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength);
+% firstDAchange=classifyUnitsAsDAincreaseOrDecrease(outSU);
+% timewindows={[-0.25 16]};
+% withintimewindow={'last'};
+% % beh_fields={'all_reachBatch','fidgetData'};
+% % photo_fields={'green_ch'};
+% % phys_fields={'unit_by_unit','av_over_singleunit','grp1_unitav','grp2_unitav','grp3_unitav'};
+% beh_fields={'all_reachBatch'};
+% photo_fields={'green_ch'};
+% phys_fields={'unit_by_unit'};
+% physthenphoto_fields(1:length(phys_fields))=phys_fields;
+% physthenphoto_fields(length(phys_fields)+1:length(phys_fields)+length(photo_fields))=photo_fields;
+% isPhysField=[ones(size(1:length(phys_fields))) zeros(size(1:length(photo_fields)))];
+% outSU=makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength);
+% lastDAchange=classifyUnitsAsDAincreaseOrDecrease(outSU);
+% DAfieldname='whichnegDAgrp';
+% physiology_tbt=compareFirstAndLastDAchange(firstDAchange,lastDAchange,physiology_tbt.details.whichgrp,physiology_tbt,DAfieldname);
+% physiology_tbt=addUnitSubgroups(physiology_tbt,1,physiology_tbt.details.whichnegDAgrp,physiology_tbt.details.whichgrp==1,'negDA');
 
 % figure 1
 % alignments={'cue','all_reachBatch'};
-% timewindows={[-1 16],[-1 16]};
-% withintimewindow={[],[]};
+% alignments={'cue'};
+% timewindows={[-1 16]};
+% withintimewindow={[]};
 % beh_fields={'all_reachBatch','fidgetData'};
 % photo_fields={'green_ch'};
-% phys_fields={'unit_by_unit','av_over_singleunit'}; % each field must contain "unit"
+% phys_fields={'unit_by_unit','av_over_singleunit','grp1_unitav','grp2_unitav','grp3_unitav'}; % each field must contain "unit"
 % xranges={[0 maxTrialLength],[0 maxTrialLength]};
 % physthenphoto_fields(1:length(phys_fields))=phys_fields;
 % physthenphoto_fields(length(phys_fields)+1:length(phys_fields)+length(photo_fields))=photo_fields;
@@ -168,13 +229,14 @@ physiology_tbt=addUnitSubgroups(physiology_tbt,1,physiology_tbt.details.whichDAg
 
 % figure 2
 % alignments={'success_fromPerchOrWheel','success batch when pellet dislodged','drop_fromPerchOrWheel','misses_and_pelletMissing'};
-% alignments={'success_fromPerchOrWheel','success batch when pellet dislodged','drop_fromPerchOrWheel','pelletmissingreach_reachStarts'};
+% alignments={'success_fromPerchOrWheel','success batch when pellet dislodged','drop batch when pellet dislodged','pelletmissingreach_reachStarts'};
 % xranges={[0 maxTrialLength],[0 maxTrialLength],[0 maxTrialLength],[0 maxTrialLength]};
 % timewindows={[-1 16],[-1 16],[-1 16],[-1 16]};
 % withintimewindow={'first','first','first','first'};
 % beh_fields={'all_reachBatch','fidgetData'};
 % photo_fields={'green_ch'};
-% phys_fields={'unit_by_unit','av_over_singleunit','grp1_unitav','grp2_unitav','grp3_unitav'};
+% % phys_fields={'unit_by_unit','av_over_singleunit','grp1_unitav','grp2_unitav','grp3_unitav','grpDA1_unitav','grpDA2_unitav','grpDA3_unitav'};
+% phys_fields={'unit_by_unit','av_over_singleunit','grp1_unitav','grp2_unitav','grp3_unitav','grpconsensusDA1_unitav','grpconsensusDA2_unitav','grpconsensusDA3_unitav'};
 % physthenphoto_fields(1:length(phys_fields))=phys_fields;
 % physthenphoto_fields(length(phys_fields)+1:length(phys_fields)+length(photo_fields))=photo_fields;
 % isPhysField=[ones(size(1:length(phys_fields))) zeros(size(1:length(photo_fields)))];
@@ -185,6 +247,19 @@ physiology_tbt=addUnitSubgroups(physiology_tbt,1,physiology_tbt.details.whichDAg
 % xranges={[0 maxTrialLength],[0 maxTrialLength],[0 maxTrialLength]};
 % timewindows={[0 3],[0 3],[0 3]};
 % withintimewindow={'first','first','first'};
+% beh_fields={'all_reachBatch','fidgetData'};
+% photo_fields={'green_ch'};
+% phys_fields={'unit_by_unit','av_over_singleunit','grp1_unitav','grp2_unitav','grp3_unitav'};
+% physthenphoto_fields(1:length(phys_fields))=phys_fields;
+% physthenphoto_fields(length(phys_fields)+1:length(phys_fields)+length(photo_fields))=photo_fields;
+% isPhysField=[ones(size(1:length(phys_fields))) zeros(size(1:length(photo_fields)))];
+% makeSummaryFig(beh_fields,photo_fields,phys_fields,alignments,physthenphoto_fields,withintimewindow,timewindows,isPhysField,xranges,photometry_tbt,photo_beh_tbt,physiology_tbt,phys_beh_tbt,normalizeSU,maxTrialLength);
+
+% figure 3.5
+% alignments={'success batch when pellet dislodged','success batch when pellet dislodged','success batch when pellet dislodged','misses_and_pelletMissing','misses_and_pelletMissing','misses_and_pelletMissing'};
+% xranges={[0 maxTrialLength],[0 maxTrialLength],[0 maxTrialLength],[0 maxTrialLength],[0 maxTrialLength],[0 maxTrialLength]};
+% timewindows={[-1.5 0],[0 1],[1 16],[-1.5 0],[0 1],[1 16]};
+% withintimewindow={'first','first','first','first','first','first'};
 % beh_fields={'all_reachBatch','fidgetData'};
 % photo_fields={'green_ch'};
 % phys_fields={'unit_by_unit','av_over_singleunit','grp1_unitav','grp2_unitav','grp3_unitav'};
@@ -210,7 +285,7 @@ plotSpikeWvfmsByFR(all_wvfms,all_halfWidths,unitnames,physiology_tbt);
 
 end
 
-function physiology_tbt=compareFirstAndLastDAchange(firstDAchange,lastDAchange,whichUnitGrp,physiology_tbt)
+function physiology_tbt=compareFirstAndLastDAchange(firstDAchange,lastDAchange,whichUnitGrp,physiology_tbt,DAfieldname)
 
 % out.changeIn1=changeIn1;
 % out.changeIn2=changeIn2;
@@ -257,25 +332,38 @@ cs(whichUnitGrp~=1,:)=repmat([1 1 1],nansum(whichUnitGrp~=1),1);
 % grpA=((lastDAchange.around1-lastDAchange.before1)./lastDAchange.before1)>0.05 & (firstDAchange.changeIn2./firstDAchange.before2)>0.5;
 % grpB=((lastDAchange.around1-lastDAchange.before1)./lastDAchange.before1)<0.05 & (firstDAchange.changeIn2./firstDAchange.before2)<=0.5;
 
-figure(); 
-scatter(lastDAchange.changeIn2./lastDAchange.before2,firstDAchange.changeIn2./firstDAchange.before2,50,cs);
-grpA=(lastDAchange.changeIn2./lastDAchange.before2)>0;
-grpB=(lastDAchange.changeIn2./lastDAchange.before2)<0;
-grpC=~(grpA | grpB);
+if strcmp(DAfieldname,'whichDAgrp')
+    figure();
+    scatter(lastDAchange.changeIn2./lastDAchange.before2,firstDAchange.changeIn2./firstDAchange.before2,50,cs);
+    grpA=(lastDAchange.changeIn2./lastDAchange.before2)>0;
+    grpB=(lastDAchange.changeIn2./lastDAchange.before2)<0;
+    grpC=~(grpA | grpB);
+elseif strcmp(DAfieldname,'whichnegDAgrp')
+    figure();
+    scatter(firstDAchange.changeIn2./firstDAchange.before2,lastDAchange.changeIn2./lastDAchange.before2,50,cs);
+    grpB=(firstDAchange.changeIn2./firstDAchange.before2)>0;
+    grpA=~grpB;
+    grpC=~(grpA | grpB);
+end
 
-physiology_tbt.details.whichDAgrp=grpA==true;
-physiology_tbt.details.whichDAgrp=(grpB==true)*2;
-physiology_tbt.details.whichDAgrp=(grpC==true)*3;
+temp=nan(size(physiology_tbt.details.whichgrp));
+temp(grpA==true)=1;
+temp(grpB==true)=2;
+temp(grpC==true)=3;
+physiology_tbt.details.(DAfieldname)=temp;
 
 end
 
-function physiology_tbt=addUnitSubgroups(physiology_tbt,downSamp,whichgrp,subgroupName)
+function physiology_tbt=addUnitSubgroups(physiology_tbt,downSamp,whichgrp,whichToUse,subgroupName)
 
 unitnames=physiology_tbt.details.unitnames;
 
 for i=1:3 % 3 groups
     physiology_tbt.(['grp' subgroupName num2str(i) '_unitav'])=zeros(size(physiology_tbt.unitsum));
     for j=1:length(whichgrp)
+        if whichToUse(j)==false
+            continue
+        end
         if whichgrp(j)==i
             tmp=cat(3,physiology_tbt.(['grp' subgroupName num2str(i) '_unitav']),physiology_tbt.(unitnames{j})); 
             physiology_tbt.(['grp' subgroupName num2str(i) '_unitav'])=nansum(tmp,3);

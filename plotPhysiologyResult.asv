@@ -11,7 +11,7 @@ su=[];
 
 if strcmp(plotPhotoField,'unit_by_unit')
     doingMultipleUnits=true;
-    nonUnitFields={'unitTimes','unitsum','multiunit','sum_over_singleunit','av_over_singleunit','unitTimes_wrt_trial_start','grp1_unitav','grp2_unitav','grp3_unitav','grpDA1_unitav','grpDA2_unitav','grpDA3_unitav','grpnegDA1_unitav','grpnegDA2_unitav','grpnegDA3_unitav','grpconsensusDA1_unitav','grpconsensusDA2_unitav','grpconsensusDA3_unitav'}; % every other field that contains 'unit' is assumed to be one single unit
+    nonUnitFields={'unitTimes','unitsum','multiunit','sum_over_singleunit','av_over_singleunit','unitTimes_wrt_trial_start','grp1_unitav','grp2_unitav','grp3_unitav','grpDA1_unitav','grpDA2_unitav','grpDA3_unitav','grpnegDA1_unitav','grpnegDA2_unitav','grpnegDA3_unitav','grpconsensusDA1_unitav','grpconsensusDA2_unitav','grpnegDA3_unitav'}; % every other field that contains 'unit' is assumed to be one single unit
     plotPhotoField='unitsum';
 else
     doingMultipleUnits=false;
