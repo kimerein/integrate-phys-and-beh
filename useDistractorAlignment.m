@@ -19,8 +19,8 @@ settings.try_delay1=-50;
 settings.delaysteps=1;
 settings.try_delay2=50;
 settings.tryinc=0.0005;
-settings.try_scale1=0.4;
-settings.try_scale2=0.7;  
+settings.try_scale1=0.8;
+settings.try_scale2=1.2;  
 alignInd=10;
 
 switch whichToShift
