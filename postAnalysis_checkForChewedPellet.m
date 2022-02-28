@@ -132,6 +132,13 @@ whichIsReachStarts_PawOnWheel=tbt.('success_reachStarts_pawOnWheel')>0.5;
 chewingPower=out1.chewingPower(out1.isCurrReachStart==1);
 chewingDuration=out1.chewingDuration(out1.isCurrReachStart==1);
 rawIntensity=out1.rawIntensity(out1.isCurrReachStart==1);
+if isempty(out1.predictions)
+    tbt=rmfield(tbt,'currentstudysuccess');
+    tbt=rmfield(tbt,'currentstudydrop');
+    tbt=rmfield(tbt,'currentclassifysuccess');
+    tbt=rmfield(tbt,'currentclassifydrop');
+    return
+end
 predictions=out1.predictions(out1.isCurrReachStart==1);
 currmovieFrameInds=out1.movieFrameInds(out1.isCurrReachStart==1);
 s1=eval(out1.threshold);

@@ -178,7 +178,7 @@ out.rawIntensity=[out.rawIntensity rawIntensity];
 out.movieFrameInds=[out.movieFrameInds currmovieind];
 out.isCurrReachStart=[out.isCurrReachStart useCurrReachBecauseReachStarts];
 out.isCurrReachPaw=[out.isCurrReachPaw useCurrReachPaw];
-if useSVM==true && ~isempty(out.chewingDuration)
+if useSVM==true && ~isempty(out.chewingDuration) && ~isempty(mdl)
     X=[out.chewingDuration' out.chewingPower' out.rawIntensity'];
     out.predictions=predict(mdl,X);
     if didFlipMdlLabels==true
