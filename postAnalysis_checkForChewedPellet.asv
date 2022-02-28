@@ -87,8 +87,6 @@ tbt=setAllAbove0to1(tbt,'reach');
 if ~isfield(finaldata,'success_reachStarts_backup')
     finaldata.success_reachStarts_backup=finaldata.success_reachStarts;
     finaldata.drop_reachStarts_backup=finaldata.drop_reachStarts;
-    finaldata.success_reachStarts_pawOnWheel_backup=finaldata.success_reachStarts_pawOnWheel;
-    finaldata.drop_reachStarts_pawOnWheel_backup=finaldata.drop_reachStarts_pawOnWheel;
 end
 finaldata.flippedThese=finaldata.success_reachStarts~=finaldata.success_reachStarts_backup;
 finaldata.flippedThese_pawOnWheel=finaldata.success_reachStarts_pawOnWheel~=finaldata.success_reachStarts_pawOnWheel_backup;
