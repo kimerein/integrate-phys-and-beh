@@ -186,19 +186,12 @@ out.fracsThroughSess=fracsThroughSess;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Plot output
-[moreout,meansForProportionality_x,meansForProportionality_y]=plotAverageAcrossSessions_trialByTrialWithinSession(useRateMethod,settings,ratein_fixed_window1,ratein_fixed_window2,ratein_fixed_window3,ratein_acrossSess_window1,ratein_acrossSess_window2,ratein_acrossSess_window3,n_for_init_rate,useWindowsForUncued,trial1_window1,trial1_window2,trial1_window3,reachprobin_window1,reachprobin_window2,ratein_window3,addSatietyLines);
-Y_distance_from_proportionality(useRateMethod,settings,meansForProportionality_x,meansForProportionality_y,moreout,scatterPointSize,n_for_init_rate);
-f=fieldnames(moreout);
-for i=1:length(f)
-    out.(f{i})=moreout.(f{i});
-end
+out=plotAverageAcrossSessions_trialByTrialWithinSession(useRateMethod,settings,ratein_fixed_window1,ratein_fixed_window2,ratein_fixed_window3,ratein_acrossSess_window1,ratein_acrossSess_window2,ratein_acrossSess_window3,n_for_init_rate,useWindowsForUncued,trial1_window1,trial1_window2,trial1_window3,reachprobin_window1,reachprobin_window2,ratein_window3,addSatietyLines);
 
 end
 
-function [out,meansForProportionality_x,meansForProportionality_y]=plotAverageAcrossSessions_trialByTrialWithinSession(useRateMethod,settings,ratein_fixed_window1,ratein_fixed_window2,ratein_fixed_window3,ratein_acrossSess_window1,ratein_acrossSess_window2,ratein_acrossSess_window3,n_for_init_rate,useWindowsForUncued,trial1_window1,trial1_window2,trial1_window3,reachprobin_window1,reachprobin_window2,ratein_window3,addSatietyLines)
+function out=plotAverageAcrossSessions_trialByTrialWithinSession(useRateMethod,settings,ratein_fixed_window1,ratein_fixed_window2,ratein_fixed_window3,ratein_acrossSess_window1,ratein_acrossSess_window2,ratein_acrossSess_window3,n_for_init_rate,useWindowsForUncued,trial1_window1,trial1_window2,trial1_window3,reachprobin_window1,reachprobin_window2,ratein_window3,addSatietyLines)
 
-meansForProportionality_x=[]; % return uncued reach rates for first few trials in each session
-meansForProportionality_y=[]; % return cued reach rates for first few trials in each session
 if useRateMethod==1 || useRateMethod==3
     if settings.suppressPlots==false
         figure(); % Approach 1
@@ -473,14 +466,12 @@ end
 
 end
 
-function Y_distance_from_proportionality(useRateMethod,settings,meansForProportionality_x,meansForProportionality_y,out,scatterPointSize,n_for_init_rate)
+function Y_distance_from_proportionality(useRateMethod,settings,meansForProportionality_x,meansForProportionality_y,out)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Plot Y distance from proportionality line -- only reasonable for Approach
 % 1 or 3
-nIndsForfirstRates=nanmean(n_for_init_rate);
 if (useRateMethod==1 || useRateMethod==3) && settings.suppressPlots==false
-    cmap=colormap('cool');
     tempuncued=nanmean(nanmean(meansForProportionality_x,2),1);
     tempcued=nanmean(nanmean(meansForProportionality_y,2),1);
     m=tempcued/tempuncued;
@@ -535,7 +526,7 @@ if (useRateMethod==1 || useRateMethod==3) && settings.suppressPlots==false
     xlabel('Real uncued reach rate');
     disp('Slope of quiver');
     disp((secondPart(2)-firstPart(2))/(secondPart(1)-firstPart(1)));
-    legend([s sbin q],{'Actual uncued reach rate versus difference between expected and actual cued rate','Down-sampled','First part of session to last part of session'});
+    legend([],{});
 end
 
 end
