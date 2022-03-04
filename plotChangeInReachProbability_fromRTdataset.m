@@ -188,9 +188,99 @@ out.fracsThroughSess=fracsThroughSess;
 % Plot output
 [moreout,meansForProportionality_x,meansForProportionality_y]=plotAverageAcrossSessions_trialByTrialWithinSession(useRateMethod,settings,ratein_fixed_window1,ratein_fixed_window2,ratein_fixed_window3,ratein_acrossSess_window1,ratein_acrossSess_window2,ratein_acrossSess_window3,n_for_init_rate,useWindowsForUncued,trial1_window1,trial1_window2,trial1_window3,reachprobin_window1,reachprobin_window2,ratein_window3,addSatietyLines);
 Y_distance_from_proportionality(useRateMethod,settings,meansForProportionality_x,meansForProportionality_y,moreout,scatterPointSize,n_for_init_rate);
+plotTrialByTrialWithinSession_noAveraging(settings.binThisManyTrials,useRateMethod,settings,ratein_fixed_window1,ratein_fixed_window2,ratein_fixed_window3,ratein_acrossSess_window1,ratein_acrossSess_window2,ratein_acrossSess_window3,useWindowsForUncued,trial1_window1,trial1_window2,trial1_window3,reachprobin_window1,reachprobin_window2,ratein_window3);
 f=fieldnames(moreout);
 for i=1:length(f)
     out.(f{i})=moreout.(f{i});
+end
+
+end
+
+function out=plotTrialByTrialWithinSession_noAveraging(binThisManyTrials,useRateMethod,settings,ratein_fixed_window1,ratein_fixed_window2,ratein_fixed_window3,ratein_acrossSess_window1,ratein_acrossSess_window2,ratein_acrossSess_window3,useWindowsForUncued,trial1_window1,trial1_window2,trial1_window3,reachprobin_window1,reachprobin_window2,ratein_window3)
+
+trialBins=[1:binThisManyTrials:size(ratein_fixed_window1,2) size(ratein_fixed_window1,2)];
+if settings.suppressPlots==false
+    figure(); % Approach 1
+end
+cmap=colormap('cool');
+k=1;
+kstep=ceil(size(cmap,1)/(length(trialBins)-1));
+approach_alltrials_cued=nan(size(ratein_fixed_window1,1),length(trialBins)-1);
+approach_alltrials_uncued=nan(size(ratein_fixed_window1,1),length(trialBins)-1);
+approach_trial1_cued=nan(size(ratein_fixed_window1,1),length(trialBins)-1);
+approach_trial1_uncued=nan(size(ratein_fixed_window1,1),length(trialBins)-1);
+for i=1:length(trialBins)-1 % across trials binned
+    takeTheseTrials=trialBins(i):trialBins(i+1);
+    if useRateMethod==1
+        rateinwindow1=ratein_fixed_window1;
+        rateinwindow2=ratein_fixed_window2;
+        rateinwindow3=ratein_fixed_window3;
+    elseif useRateMethod==2
+        rateinwindow1=reachprobin_window1;
+        rateinwindow2=reachprobin_window2;
+        rateinwindow3=ratein_window3;
+    elseif useRateMethod==3
+        rateinwindow1=ratein_acrossSess_window1;
+        rateinwindow2=ratein_acrossSess_window2;
+        rateinwindow3=ratein_acrossSess_window3;
+    end
+    if all(ismember([2 3],useWindowsForUncued))
+        % average uncued reaching in these two windows
+        temp_uncued=nanmean([rateinwindow2(:,takeTheseTrials) rateinwindow3(:,takeTheseTrials)],2);
+        temp_uncued_trial1=nanmean([trial1_window2(:,takeTheseTrials) trial1_window3(:,takeTheseTrials)],2);
+    elseif ismember(2,useWindowsForUncued)
+        temp_uncued=nanmean([rateinwindow2(:,takeTheseTrials)],2);
+        temp_uncued_trial1=nanmean([trial1_window2(:,takeTheseTrials)],2);
+    elseif ismember(3,useWindowsForUncued)
+        temp_uncued=nanmean([rateinwindow3(:,takeTheseTrials)],2);
+        temp_uncued_trial1=nanmean([trial1_window3(:,takeTheseTrials)],2);
+    end
+    % rows are different sessions, columns are different trials in each
+    % session
+    temp_cued=nanmean(rateinwindow1(:,takeTheseTrials),2);
+    temp_cued_trial1=nanmean(trial1_window1(:,takeTheseTrials),2);
+    a=-0.01;
+    b=0.01;
+    r=(b-a).*rand(size(temp_cued))+a;
+    if i==1 && settings.suppressPlots==false
+        trial1start=scatter(temp_uncued+r,temp_cued+r,[],'k'); hold on; % first trial in session, last trial in sequence
+    elseif settings.suppressPlots==false
+        scatter(temp_uncued+r,temp_cued+r,[],cmap(k,:)); hold on;
+    end
+    k=k+kstep;
+    if k>size(cmap,1)
+        k=size(cmap,1);
+    end
+    approach_alltrials_cued(:,i)=temp_cued;
+    approach_alltrials_uncued(:,i)=temp_uncued;
+    approach_trial1_cued(:,i)=temp_cued_trial1;
+    approach_trial1_uncued(:,i)=temp_uncued_trial1;
+end
+if settings.suppressPlots==false
+    xlabel('Uncued reach rate (1/sec)');
+    ylabel('Cued reach rate (1/sec)');
+    if useRateMethod==1
+        title('Approach 1, window 2/3 vs window 1 NO AVERAGING ACROSS SESSIONS');
+    elseif useRateMethod==2
+        title('Approach 2, window 2 vs window 1');
+        xlabel('Uncued reach rate (1/sec)');
+        ylabel('Probability that reached faster after cue on second trial');
+    elseif useRateMethod==3
+        title('Approach 3, window 2/3 vs window 1');
+    end
+end
+l=[];
+if settings.addSessionLines==true
+    for i=1:size(approach_alltrials_cued,1)
+        l=line(approach_alltrials_uncued(i,:),approach_alltrials_cued(i,:),'Color',[0.5 0.5 0.5],'LineWidth',0.1);
+    end
+end
+out.alltrials_cued=approach_alltrials_cued;
+out.alltrials_uncued=approach_alltrials_uncued;
+out.trial1_alltrials_uncued=approach_trial1_uncued;
+out.trial1_alltrials_cued=approach_trial1_cued;
+if settings.suppressPlots==false
+    legend([trial1start l],{'Each trial (end of sequence) in each session','Lines connect trials within same session'});
 end
 
 end

@@ -186,12 +186,346 @@ out.fracsThroughSess=fracsThroughSess;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Plot output
-out=plotAverageAcrossSessions_trialByTrialWithinSession(useRateMethod,settings,ratein_fixed_window1,ratein_fixed_window2,ratein_fixed_window3,ratein_acrossSess_window1,ratein_acrossSess_window2,ratein_acrossSess_window3,n_for_init_rate,useWindowsForUncued,trial1_window1,trial1_window2,trial1_window3,reachprobin_window1,reachprobin_window2,ratein_window3,addSatietyLines);
+[moreout,meansForProportionality_x,meansForProportionality_y]=plotAverageAcrossSessions_trialByTrialWithinSession(useRateMethod,settings,ratein_fixed_window1,ratein_fixed_window2,ratein_fixed_window3,ratein_acrossSess_window1,ratein_acrossSess_window2,ratein_acrossSess_window3,n_for_init_rate,useWindowsForUncued,trial1_window1,trial1_window2,trial1_window3,reachprobin_window1,reachprobin_window2,ratein_window3,addSatietyLines);
+Y_distance_from_proportionality(useRateMethod,settings,meansForProportionality_x,meansForProportionality_y,moreout,scatterPointSize,n_for_init_rate);
+f=fieldnames(moreout);
+for i=1:length(f)
+    out.(f{i})=moreout.(f{i});
+end
 
 end
 
-function out=plotAverageAcrossSessions_trialByTrialWithinSession(useRateMethod,settings,ratein_fixed_window1,ratein_fixed_window2,ratein_fixed_window3,ratein_acrossSess_window1,ratein_acrossSess_window2,ratein_acrossSess_window3,n_for_init_rate,useWindowsForUncued,trial1_window1,trial1_window2,trial1_window3,reachprobin_window1,reachprobin_window2,ratein_window3,addSatietyLines)
+function out=plotTrialByTrialWithinSession_noAveraging(binThisManyTrials,useRateMethod,settings,ratein_fixed_window1,ratein_fixed_window2,ratein_fixed_window3,ratein_acrossSess_window1,ratein_acrossSess_window2,ratein_acrossSess_window3,n_for_init_rate,useWindowsForUncued,trial1_window1,trial1_window2,trial1_window3,reachprobin_window1,reachprobin_window2,ratein_window3,addSatietyLines)
 
+trialBins=[1:binThisManyTrials:size(ratein_fixed_window1,2) size(ratein_fixed_window1,2)];
+if useRateMethod==1 || useRateMethod==3
+    if settings.suppressPlots==false
+        figure(); % Approach 1
+    end
+    cmap=colormap('cool');
+    k=1;
+    kstep=ceil(size(cmap,1)/(length(trialBins)-1));
+    approach_alltrials_cued=nan(size(ratein_fixed_window1,1),length(trialBins)-1);
+    approach_alltrials_uncued=nan(size(ratein_fixed_window1,1),length(trialBins)-1);
+    approach_trial1_cued=nan(size(ratein_fixed_window1,1),length(trialBins)-1);
+    approach_trial1_uncued=nan(size(ratein_fixed_window1,1),length(trialBins)-1);
+    nIndsForfirstRates=nanmean(n_for_init_rate);
+    for i=1:length(trialBins)-1 % across trials binned
+        takeTheseTrials=trialBins(i):trialBins(i+1);
+        if useRateMethod==1
+            rateinwindow1=ratein_fixed_window1;
+            rateinwindow2=ratein_fixed_window2;
+            rateinwindow3=ratein_fixed_window3;
+        elseif useRateMethod==3
+            rateinwindow1=ratein_acrossSess_window1;
+            rateinwindow2=ratein_acrossSess_window2;
+            rateinwindow3=ratein_acrossSess_window3;
+        end
+        if all(ismember([2 3],useWindowsForUncued))
+            % average uncued reaching in these two windows
+            temp_uncued=nanmean([rateinwindow2(:,takeTheseTrials) rateinwindow3(:,takeTheseTrials)],2);
+            temp_uncued_trial1=nanmean([trial1_window2(:,takeTheseTrials) trial1_window3(:,takeTheseTrials)],2);
+        elseif ismember(2,useWindowsForUncued)
+            temp_uncued=nanmean([rateinwindow2(:,takeTheseTrials)],2);
+            temp_uncued_trial1=nanmean([trial1_window2(:,takeTheseTrials)],2);
+        elseif ismember(3,useWindowsForUncued)
+            temp_uncued=nanmean([rateinwindow3(:,takeTheseTrials)],2);
+            temp_uncued_trial1=nanmean([trial1_window3(:,takeTheseTrials)],2);
+        end
+        % rows are different sessions, columns are different trials in each
+        % session
+        temp_cued=nanmean(rateinwindow1(:,takeTheseTrials),2); 
+        temp_cued_trial1=nanmean(trial1_window1(:,takeTheseTrials),2);
+        if i==1 && settings.suppressPlots==false
+            trial1start=scatter(temp_uncued,temp_cued,[],'k'); hold on; % first trial in session, last trial in sequence
+        elseif settings.suppressPlots==false
+            scatter(temp_uncued,temp_cued,[],cmap(k,:)); hold on;
+        end
+        k=k+kstep;
+        if k>size(cmap,1)
+            k=size(cmap,1);
+        end
+        approach_alltrials_cued(:,i)=temp_cued;
+        approach_alltrials_uncued(:,i)=temp_uncued;
+        approach_trial1_cued(:,i)=temp_cued_trial1;
+        approach_trial1_uncued(:,i)=temp_uncued_trial1;
+        if i<=nIndsForfirstRates
+            meansForProportionality_x(:,i)=temp_uncued;
+            meansForProportionality_y(:,i)=temp_cued;
+        end
+        delta_uncued=(nanmean(temp_uncued))/(nanmean(temp_uncued)+nanmean(temp_cued));
+        delta_cued=(nanmean(temp_cued))/(nanmean(temp_cued)+nanmean(temp_uncued));
+        m=delta_cued/delta_uncued; % this is just y over x ratio
+        approach_m(i)=m; % for each trial in session, approach_m saves y/x (i.e., cued over uncued)
+        if addSatietyLines==true && settings.suppressPlots==false
+            length_line_segment=nanmean([nanstd(temp_uncued)./sqrt(nansum(~isnan(temp_uncued))) nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued)))])/m;
+            y_x_proportionality_lines=line([nanmean(temp_uncued)-length_line_segment/2 nanmean(temp_uncued)+length_line_segment/2],[nanmean(temp_cued)-(length_line_segment*m)/2 nanmean(temp_cued)+(length_line_segment*m)/2],'Color','k','LineWidth',0.25);
+            hold on;
+        end
+    end
+    % tmp=cat(3,ratein_fixed_window2,ratein_fixed_window3);
+    % C=nansum(tmp,3);
+    % tempuncued=nanmean(nanmean(C/2,1),2);
+    % tempcued=nanmean(nanmean(ratein_fixed_window1,1),2);
+    tempuncued=nanmean(nanmean(meansForProportionality_x,1),2);
+    tempcued=nanmean(nanmean(meansForProportionality_y,1),2);
+    tempuncued(isnan(tempuncued) | isinf(tempuncued))=0;
+    tempcued(isnan(tempcued) | isinf(tempcued))=0;
+    % quiver(0,0,tempuncued,tempcued,'Color','k');
+    if settings.suppressPlots==false
+        trial1line=line([0 approach_uncued(1)],[0 (tempcued/tempuncued)*approach_uncued(1)],'Color','k','LineWidth',3);
+        xlabel('Uncued reach rate (1/sec)');
+        ylabel('Cued reach rate (1/sec)');
+        if useRateMethod==1
+            title('Approach 1, window 2/3 vs window 1');
+        elseif useRateMethod==3
+            title('Approach 3, window 2/3 vs window 1');
+        end
+    end
+    out.cued=approach_cued;
+    out.uncued=approach_uncued;
+    out.alltrials_cued=approach_alltrials_cued;
+    out.alltrials_uncued=approach_alltrials_uncued;
+    out.m=approach_m;
+    out.trial1_alltrials_uncued=approach_trial1_uncued;
+    out.trial1_alltrials_cued=approach_trial1_cued;
+    
+    % Bootstrap means include all trials in session
+    altogether_prob_cued=approach_alltrials_cued(1:end);
+    altogether_prob_uncued=approach_alltrials_uncued(1:end);
+    takeTrials=~isnan(altogether_prob_cued) & ~isnan(altogether_prob_uncued);
+    altogether_prob_cued=altogether_prob_cued(takeTrials==1);
+    altogether_prob_uncued=altogether_prob_uncued(takeTrials==1);
+    % Show bootstrapped 95% CI
+    takeFracForBootstrap=0.66;
+    takeIndsForBootstrap=ceil(takeFracForBootstrap*length(altogether_prob_cued));
+    nRuns=100;
+    bootMeans=nan(2,nRuns);
+    for i=1:nRuns
+        takeTheseForBoot=randi(length(altogether_prob_cued),1,takeIndsForBootstrap); % with replacement
+        sub_prob_cued=altogether_prob_cued(takeTheseForBoot);
+        sub_prob_uncued=altogether_prob_uncued(takeTheseForBoot);
+        bootMeans(1,i)=nanmean(sub_prob_uncued);
+        bootMeans(2,i)=nanmean(sub_prob_cued);
+    end
+    if settings.suppressPlots==false
+        s_alltrials=scatter(bootMeans(1,:),bootMeans(2,:),20,'k','filled');
+        s_alltrials.AlphaData = 0.5*ones(1,size(bootMeans,2));
+        s_alltrials.MarkerFaceAlpha = 'flat';
+        scatter(nanmean(altogether_prob_uncued),nanmean(altogether_prob_cued),50,'k','filled');
+    end
+    out.boot_trialn_realmean_x=nanmean(altogether_prob_uncued);
+    out.boot_trialn_realmean_y=nanmean(altogether_prob_cued);
+    out.boot_trialn=bootMeans;
+    % Bootstrap trial 1
+    altogether_prob_cued=approach_trial1_cued(1:end);
+    altogether_prob_uncued=approach_trial1_uncued(1:end);
+    takeTrials=~isnan(altogether_prob_cued) & ~isnan(altogether_prob_uncued);
+    altogether_prob_cued=altogether_prob_cued(takeTrials==1);
+    altogether_prob_uncued=altogether_prob_uncued(takeTrials==1);
+    % Show bootstrapped 95% CI
+    takeFracForBootstrap=0.66;
+    takeIndsForBootstrap=ceil(takeFracForBootstrap*length(altogether_prob_cued));
+    nRuns=100;
+    bootMeans=nan(2,nRuns);
+    for i=1:nRuns
+        takeTheseForBoot=randi(length(altogether_prob_cued),1,takeIndsForBootstrap); % with replacement
+        sub_prob_cued=altogether_prob_cued(takeTheseForBoot);
+        sub_prob_uncued=altogether_prob_uncued(takeTheseForBoot);
+        bootMeans(1,i)=nanmean(sub_prob_uncued);
+        bootMeans(2,i)=nanmean(sub_prob_cued);
+    end
+    if settings.suppressPlots==false
+        s=scatter(bootMeans(1,:),bootMeans(2,:),20,'c','filled');
+        s.AlphaData = 0.5*ones(1,size(bootMeans,2));
+        s.MarkerFaceAlpha = 'flat';
+        scatter(nanmean(altogether_prob_uncued),nanmean(altogether_prob_cued),50,'c','filled');
+    end
+    out.boot_trial1_realmean_x=nanmean(altogether_prob_uncued);
+    out.boot_trial1_realmean_y=nanmean(altogether_prob_cued);
+    out.boot_trial1=bootMeans;
+    if settings.suppressPlots==false
+        legend([trial1start targets y_x_proportionality_lines trial1line s_alltrials s],{'First trial in session','Each trial in session','X-Y proportionality lines','Y over X first trial in session','Bootstrap all trials','Bootstrap trial 1'});
+    end
+end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if useRateMethod==2
+    if settings.suppressPlots==false
+        figure(); % Approach 2, proportionality lines won't make sense
+    end
+    cmap=colormap('cool');
+    k=1;
+    kstep=ceil(size(cmap,1)/nansum(~isnan(nanmean(reachprobin_window1,1))));
+    approach2_cued=nan(1,size(ratein_fixed_window1,2));
+    approach2_uncued=nan(1,size(ratein_fixed_window1,2));
+    approach2_alltrials_cued=nan(size(ratein_fixed_window1));
+    approach2_alltrials_uncued=nan(size(ratein_fixed_window1));
+    for i=1:size(reachprobin_window1,2) % across trials
+        if all(ismember([2 3],useWindowsForUncued))
+            % average uncued reaching in these two windows
+            temp_uncued=nanmean([reachprobin_window2(:,i) ratein_window3(:,i)],2);
+        elseif ismember(2,useWindowsForUncued)
+            temp_uncued=nanmean([reachprobin_window2(:,i)],2);
+        elseif ismember(3,useWindowsForUncued)
+            temp_uncued=nanmean([ratein_window3(:,i)],2);
+        end
+        temp_cued=reachprobin_window1(:,i);
+        if i==1 && settings.suppressPlots==false
+            trial1start=scatter(nanmean(temp_uncued),nanmean(temp_cued),[],'k');
+        end
+        if settings.suppressPlots==false
+            line([nanmean(temp_uncued)-nanstd(temp_uncued)./sqrt(nansum(~isnan(temp_uncued))) nanmean(temp_uncued)+nanstd(temp_uncued)./sqrt(nansum(~isnan(temp_uncued)))],...
+                [nanmean(temp_cued) nanmean(temp_cued)],'Color',cmap(k,:),'LineWidth',1);
+            hold on;
+            if i==1
+                targets=line([nanmean(temp_uncued) nanmean(temp_uncued)],...
+                    [nanmean(temp_cued)-nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued))) nanmean(temp_cued)+nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued)))],'Color',cmap(k,:),'LineWidth',1);
+            else
+                line([nanmean(temp_uncued) nanmean(temp_uncued)],...
+                    [nanmean(temp_cued)-nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued))) nanmean(temp_cued)+nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued)))],'Color',cmap(k,:),'LineWidth',1);
+            end
+        end
+        approach2_cued(i)=nanmean(temp_cued);
+        approach2_uncued(i)=nanmean(temp_uncued);
+        approach2_alltrials_cued(:,i)=temp_cued;
+        approach2_alltrials_uncued(:,i)=temp_uncued;
+        k=k+kstep;
+        if k>size(cmap,1)
+            k=size(cmap,1);
+        end
+    end
+    altogether_prob_cued=approach2_alltrials_cued(1:end);
+    altogether_prob_uncued=approach2_alltrials_uncued(1:end);
+    takeTrials=~isnan(altogether_prob_cued) & ~isnan(altogether_prob_uncued);
+    altogether_prob_cued=altogether_prob_cued(takeTrials==1);
+    altogether_prob_uncued=altogether_prob_uncued(takeTrials==1);
+    % Show bootstrapped 95% CI
+    takeFracForBootstrap=0.66;
+    takeIndsForBootstrap=ceil(takeFracForBootstrap*length(altogether_prob_cued));
+    nRuns=100;
+    bootMeans=nan(2,nRuns);
+    for i=1:nRuns
+        takeTheseForBoot=randi(length(altogether_prob_cued),1,takeIndsForBootstrap); % with replacement
+        sub_prob_cued=altogether_prob_cued(takeTheseForBoot);
+        sub_prob_uncued=altogether_prob_uncued(takeTheseForBoot);
+        bootMeans(1,i)=nanmean(sub_prob_uncued);
+        bootMeans(2,i)=nanmean(sub_prob_cued);
+    end
+    s=scatter(bootMeans(1,:),bootMeans(2,:),20,'k','filled');
+    s.AlphaData = 0.5*ones(1,size(bootMeans,2));
+    s.MarkerFaceAlpha = 'flat';
+    scatter(nanmean(altogether_prob_uncued),nanmean(altogether_prob_cued),50,'k','filled');
+%     tmp=cat(3,reachprobin_window2,ratein_window3);
+%     C=nansum(tmp,3);
+%     tempuncued=nanmean(nanmean(C/2,1),2);
+%     tempuncued(isnan(tempuncued) | isinf(tempuncued))=0;
+%     tempcued=nanmean(nanmean(reachprobin_window1,1),2);
+%     tempcued(isnan(tempcued) | isinf(tempcued))=0;
+%     quiver(0,0,tempuncued,tempcued,'Color','k');
+    xlabel('Uncued reach rate (1/sec)');
+%     xlabel('Probability that he reached in uncued window (-2 to -1 sec before cue)');
+    % ylabel('Cued reach rate (1/sec)');
+    ylabel('Probability that reached faster after cue on second trial');
+    title('Approach 2, window 2 vs window 1');
+    out.cued=approach2_cued;
+    out.uncued=approach2_uncued;
+    out.alltrials_cued=approach2_alltrials_cued;
+    out.alltrials_uncued=approach2_alltrials_uncued;
+    out.m=nan; % doesn't really make sense to return slopes for this approach   
+    
+    % Plot average and s.e. cued vs. uncued for all trials, all sessions
+    temp_cued=approach2_cued(1:end);
+    temp_uncued=approach2_uncued(1:end);
+    [~,isout]=rmoutliers(temp_cued,'percentiles',[5 95]);
+    [~,isout2]=rmoutliers(temp_uncued,'percentiles',[5 95]);
+    isout=isout | isout2;
+%     isout=zeros(size(temp_cued));
+    temp_cued=temp_cued(~isout);
+    temp_uncued=temp_uncued(~isout);
+    if settings.suppressPlots==false
+        l=line([mean(temp_uncued,'omitnan') mean(temp_uncued,'omitnan')],[mean(temp_cued,'omitnan')-std(temp_cued,[],2,'omitnan')./sqrt(sum(~isnan(temp_cued))) ...
+                                                                        mean(temp_cued,'omitnan')+std(temp_cued,[],2,'omitnan')./sqrt(sum(~isnan(temp_cued)))],'Color','k','LineWidth',2);
+        line([mean(temp_uncued,'omitnan')-std(temp_uncued,[],2,'omitnan')./sqrt(sum(~isnan(temp_uncued))) ...
+          mean(temp_uncued,'omitnan')+std(temp_uncued,[],2,'omitnan')./sqrt(sum(~isnan(temp_uncued)))],[mean(temp_cued,'omitnan') mean(temp_cued,'omitnan')],'Color','k','LineWidth',2);                                                           
+        legend([trial1start targets s l],{'First trial in session','Each trial in session','Bootstrap of probability faster cued & uncued reach rate','Mean and std err'});
+    end
+end
+
+end
+
+function Y_distance_from_proportionality(useRateMethod,settings,meansForProportionality_x,meansForProportionality_y,out,scatterPointSize,n_for_init_rate)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Plot Y distance from proportionality line -- only reasonable for Approach
+% 1 or 3
+nIndsForfirstRates=nanmean(n_for_init_rate);
+if (useRateMethod==1 || useRateMethod==3) && settings.suppressPlots==false
+    cmap=colormap('cool');
+    tempuncued=nanmean(nanmean(meansForProportionality_x,2),1);
+    tempcued=nanmean(nanmean(meansForProportionality_y,2),1);
+    m=tempcued/tempuncued;
+    expected_y=m*out.uncued;
+    actual_y=out.cued; % average across all sessions, cued reaching rate for each trial in session, i.e., trial 1 to last trial in session
+    actual_x=out.uncued; % average across all sessions, uncued reaching rate for each trial in session, i.e., trial 1 to last trial in session
+    figure();
+    k=1;
+    kstep=ceil(size(cmap,1)/length(actual_y));
+    for i=1:length(actual_y)
+        s=scatter(actual_x(i),actual_y(i)-expected_y(i),scatterPointSize,cmap(k,:),'LineWidth',0.8);
+        hold on;
+        k=k+kstep;
+        if k>size(cmap,1)
+            k=size(cmap,1);
+        end
+    end
+    line([0 nanmax(out.uncued)],[0 -m*nanmax(out.uncued)],'Color',[0.5 0.5 0.5]);
+    binned_x=downSampAv(actual_x,4);
+    ydiff=actual_y-expected_y;
+    binned_ydiff=downSampAv(ydiff,4);
+    k=1;
+    kstep=ceil(size(cmap,1)/length(binned_ydiff));
+    for i=1:length(binned_ydiff)
+        sbin=scatter(binned_x(i),binned_ydiff(i),scatterPointSize,cmap(k,:),'filled','LineWidth',1);
+        hold on;
+        k=k+kstep;
+        if k>size(cmap,1)
+            k=size(cmap,1);
+        end
+    end
+    % rmoutliers only for plotting
+    [~,isout]=rmoutliers(actual_x);
+    [~,isout2]=rmoutliers(ydiff);
+    isout=isout | isout2;
+    lims=[min([actual_x(~isout) ydiff(~isout)],[],'omitnan') max([actual_x(~isout) ydiff(~isout)],[],'omitnan')];
+    if lims(2)==0
+        isout=zeros(size(actual_x));
+        lims=[min([actual_x(~isout) ydiff(~isout)],[],'omitnan') max([actual_x(~isout) ydiff(~isout)],[],'omitnan')];
+    end
+    xlim([0 lims(2)]);
+    ylim([lims(1) lims(2)]);
+    tempx=actual_x(~isout);
+    tempy=ydiff(~isout);
+    firstPart=[mean(tempx(1:floor(nIndsForfirstRates)),'omitnan') mean(tempy(1:floor(nIndsForfirstRates)),'omitnan')];
+    secondPart=[mean(tempx(end-floor(nIndsForfirstRates):end),'omitnan') mean(tempy(end-floor(nIndsForfirstRates):end),'omitnan')];
+    if all(~isnan([firstPart secondPart])) && all(~isinf([firstPart secondPart]))
+        q=quiver(firstPart(1),firstPart(2),secondPart(1)-firstPart(1),secondPart(2)-firstPart(2),'Color','k','LineWidth',2);
+    end
+    daspect([1 1 1]);
+    ylabel('Cued reach rate distance from proportionality line');
+    xlabel('Real uncued reach rate');
+    disp('Slope of quiver');
+    disp((secondPart(2)-firstPart(2))/(secondPart(1)-firstPart(1)));
+    legend([s sbin q],{'Actual uncued reach rate versus difference between expected and actual cued rate','Down-sampled','First part of session to last part of session'});
+end
+
+end
+
+function [out,meansForProportionality_x,meansForProportionality_y]=plotAverageAcrossSessions_trialByTrialWithinSession(useRateMethod,settings,ratein_fixed_window1,ratein_fixed_window2,ratein_fixed_window3,ratein_acrossSess_window1,ratein_acrossSess_window2,ratein_acrossSess_window3,n_for_init_rate,useWindowsForUncued,trial1_window1,trial1_window2,trial1_window3,reachprobin_window1,reachprobin_window2,ratein_window3,addSatietyLines)
+
+meansForProportionality_x=[]; % return uncued reach rates for first few trials in each session
+meansForProportionality_y=[]; % return cued reach rates for first few trials in each session
 if useRateMethod==1 || useRateMethod==3
     if settings.suppressPlots==false
         figure(); % Approach 1
@@ -466,12 +800,14 @@ end
 
 end
 
-function Y_distance_from_proportionality(useRateMethod,settings,meansForProportionality_x,meansForProportionality_y,out)
+function Y_distance_from_proportionality(useRateMethod,settings,meansForProportionality_x,meansForProportionality_y,out,scatterPointSize,n_for_init_rate)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Plot Y distance from proportionality line -- only reasonable for Approach
 % 1 or 3
+nIndsForfirstRates=nanmean(n_for_init_rate);
 if (useRateMethod==1 || useRateMethod==3) && settings.suppressPlots==false
+    cmap=colormap('cool');
     tempuncued=nanmean(nanmean(meansForProportionality_x,2),1);
     tempcued=nanmean(nanmean(meansForProportionality_y,2),1);
     m=tempcued/tempuncued;
@@ -526,7 +862,7 @@ if (useRateMethod==1 || useRateMethod==3) && settings.suppressPlots==false
     xlabel('Real uncued reach rate');
     disp('Slope of quiver');
     disp((secondPart(2)-firstPart(2))/(secondPart(1)-firstPart(1)));
-    legend([],{});
+    legend([s sbin q],{'Actual uncued reach rate versus difference between expected and actual cued rate','Down-sampled','First part of session to last part of session'});
 end
 
 end
