@@ -178,7 +178,7 @@ out.rawIntensity=[out.rawIntensity rawIntensity];
 out.movieFrameInds=[out.movieFrameInds currmovieind];
 out.isCurrReachStart=[out.isCurrReachStart useCurrReachBecauseReachStarts];
 out.isCurrReachPaw=[out.isCurrReachPaw useCurrReachPaw];
-if useSVM==true 
+if useSVM==true && ~isempty(out.chewingDuration) && ~isempty(mdl)
     X=[out.chewingDuration' out.chewingPower' out.rawIntensity'];
     out.predictions=predict(mdl,X);
     if didFlipMdlLabels==true
@@ -362,7 +362,13 @@ if useSVM==true
         subsequent_chewingPower=subsequent_chewingPower(rmind==0);
         rawIntensity=rawIntensity(rmind==0);
     end
-    [predictions,mdl,didFlip]=trySVM(outrm,subsequent_chewingDuration,subsequent_chewingPower,rawIntensity);
+    if isempty(subsequent_chewingDuration)
+        predictions=[];
+        mdl=[];
+        didFlip=[];
+    else
+        [predictions,mdl,didFlip]=trySVM(outrm,subsequent_chewingDuration,subsequent_chewingPower,rawIntensity);
+    end
     out.bestThresh=[];
     out.bestThreshDur=[];
     out.bestThreshIntens=[];
@@ -422,6 +428,11 @@ end
 end
 
 function bestThresh=buildROC(pred,isSuccess,overweightFP)
+
+if isempty(isSuccess)
+    bestThresh=[];
+    return
+end
 
 % try thresholds
 stepSize=(nanmax(pred)-nanmin(pred))/50;

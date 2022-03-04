@@ -42,7 +42,7 @@ settings.useOptoZone=0;
 % Details on how this happens in reachBatchSettings.m
 if convert_to_batches==1
     % Find and convert reach batches
-    alltbt=findReachBatches(alltbt,lowThresh,~settings.isOrchestra); % last argument is 1 if plot, else 0
+%     alltbt=findReachBatches(alltbt,lowThresh,~settings.isOrchestra); % last argument is 1 if plot, else 0
 %     alltbt=findReachBatches(alltbt,lowThresh,0); % last argument is 1 if plot, else 0
     temp=(alltbt.pelletmissingreach_reachStarts+alltbt.reachBatch_miss_reachStarts+alltbt.reachBatch_success_reachStarts_pawOnWheel+alltbt.reachBatch_drop_reachStarts_pawOnWheel+alltbt.reachBatch_miss_reachStarts_pawOnWheel+alltbt.reachBatch_success_reachStarts+alltbt.reachBatch_drop_reachStarts)>0;
     alltbt.all_reachBatch=zeros(size(alltbt.reachBatch_miss_reachStarts));

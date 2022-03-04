@@ -5,9 +5,11 @@ function [spikes,auxData]=convertSpikesToTrials_and_saveAuxChs(spikes,filename)
 % seconds before cue to begin trial
 cueRelativeToTrialStart=1; % in seconds
 
+% THERE IS AN OFFSET SUCH THAT SPIKEGLX READS "ch 192" 
+% BUT THIS IS SAVED AND READ INTO MATLAB AS "ch 193"
 ledch='auxData193'; % WHISPER system distractor LED
 cuech='auxData195invert'; % WHISPER system inverted cue
-optoch='auxData194';
+optoch='auxData196invert';
 
 [cuetimes,cueData]=getEventsFromAnalogCh(filename,cuech);
 [distractortimes,distractorData]=getEventsFromAnalogCh(filename,ledch);

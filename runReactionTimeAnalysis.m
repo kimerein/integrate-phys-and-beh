@@ -8,7 +8,7 @@ exptDataDir='Z:\Kim\for_orchestra\combineReachData\O2 output\alltbt02Mar20221457
 
 % only load these fields of alltbt
 disp('loading alltbt');
-whichFieldsToLoad={'cue','all_reachBatch','maybeDrop_reachStarts','maybeDrop_reachStarts_pawOnWheel','cueZone_onVoff','dprimes','isChewing','isHold','optoOn','optoZone','pawOnWheel','pelletPresent','reachBatch_all_pawOnWheel','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','reachBatch_success_reachStarts','reachStarts','pelletmissingreach_reachStarts','reachStarts_pelletPresent','times','times_wrt_trial_start','timesFromSessionStart'};
+whichFieldsToLoad={'cue','all_reachBatch','cueZone_onVoff','dprimes','isChewing','maybeDrop_reachStarts','maybeDrop_reachStarts_pawOnWheel','isHold','optoOn','optoZone','pawOnWheel','pelletPresent','reachBatch_all_pawOnWheel','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','reachBatch_success_reachStarts','reachStarts','pelletmissingreach_reachStarts','reachStarts_pelletPresent','times','times_wrt_trial_start','timesFromSessionStart'};
 alltbt=loadStructFieldByField([exptDataDir '\alltbt'],whichFieldsToLoad); % load alltbt
 disp('loading out');
 trialTypes=loadStructFieldByField([exptDataDir '\out']); % load out
@@ -71,9 +71,6 @@ tbt_filter.clock_progress=true;
 
 % filter alltbt
 [alltbt,trialTypes,metadata]=filtTbt(alltbt,trialTypes,tbt_filter.sortField,tbt_filter.range_values,metadata,tbt_filter.clock_progress);
-
-%%
-%plotSummaryOfRTresults(alltbt,trialTypes,metadata,ledIsOn,useLongITIonly,excludeFromAllTrials,alsoExcludeFromSubset,useCorrected)
 
 %% build relevant data sets
 

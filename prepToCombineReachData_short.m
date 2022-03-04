@@ -1,10 +1,11 @@
 % script for preparing directory structure before combining data across videos and days
 
 % assign mouse and session numbers
-expt_dir='Z:\Kim\WHISPER recs\dLight1\20210421\processed beh';
-optoOnHere=0; % 1 if there was opto, else 0
+expt_dir='Z:\Kim\Behavior Final Data Sets\Learning curves w interleaved silencing';
+optoOnHere=1; % 1 if there was opto, else 0
+onlySaveOptoIfDoesNotExist=true;
 startMouseNumberingAt=1; % if want to start mouse numbers at some offset
-% organiziation of data in this directory must be 
+% organization of data in this directory must be 
 % top folder: by mouse name
 % next folder: by session
 % each folder within should contain a .txt with the date of the session,
@@ -57,7 +58,14 @@ for i=1:length(ls) % iterate through mice
                 end
                 save([expt_dir '\' thisname '\' sub_thisname '\nth_session.mat'],'nth_session');
                 % save optoOnHere or not
-                save([expt_dir '\' thisname '\' sub_thisname '\optoOnHere.mat'],'optoOnHere');
+                if onlySaveOptoIfDoesNotExist==true
+                    if isfile([expt_dir '\' thisname '\' sub_thisname '\optoOnHere.mat'])
+                    else
+                        save([expt_dir '\' thisname '\' sub_thisname '\optoOnHere.mat'],'optoOnHere');
+                    end
+                else
+                    save([expt_dir '\' thisname '\' sub_thisname '\optoOnHere.mat'],'optoOnHere');
+                end
                 k=k+1;
             end
         end
