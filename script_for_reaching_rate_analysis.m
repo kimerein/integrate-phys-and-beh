@@ -2,11 +2,11 @@
 
 % script for running a frequently used subset of analyses
 
-% DON'T FORGET: FEB_3 (mouse_id 3), FEB_4 (mouse_id 4) AND MITCH_NONE (mouse_id 14) WERE CONTROLS
+% DON'T FORGET: FEB_3 (mouse_id 4), FEB_4 (mouse_id 5) AND MITCH_NONE (mouse_id 19) WERE CONTROLS
 
 %% load in data
 
-exptDataDir='/Volumes/Neurobio/MICROSCOPE/Kim/for_orchestra/combineReachData/O2 output/alltbt25May2021220005/'; % directory containing experimental data
+exptDataDir='Z:\Kim\for_orchestra\combineReachData\O2 output\alltbt02Mar2022145751/'; % directory containing experimental data
 
 if ismac==true
     sprtr='/';
@@ -16,7 +16,7 @@ end
 
 % only load these fields of alltbt
 disp('loading alltbt');
-whichFieldsToLoad={'cue','all_reachBatch','cueZone_onVoff','dprimes','isChewing','isHold','optoOn','optoZone','pawOnWheel','pelletPresent','reachBatch_all_pawOnWheel','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','reachBatch_success_reachStarts','reachStarts','pelletmissingreach_reachStarts','reachStarts_pelletPresent','times','times_wrt_trial_start','timesFromSessionStart'};
+whichFieldsToLoad={'cue','all_reachBatch','cueZone_onVoff','maybeDrop_reachStarts','maybeDrop_reachStarts_pawOnWheel','dprimes','isChewing','isHold','optoOn','optoZone','pawOnWheel','pelletPresent','reachBatch_all_pawOnWheel','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','reachBatch_success_reachStarts','reachStarts','pelletmissingreach_reachStarts','reachStarts_pelletPresent','times','times_wrt_trial_start','timesFromSessionStart'};
 alltbt=loadStructFieldByField([exptDataDir sprtr 'alltbt'],whichFieldsToLoad); % load alltbt
 disp('loading out');
 trialTypes=loadStructFieldByField([exptDataDir sprtr 'out']); % load out
@@ -32,7 +32,7 @@ backup.trialTypes=trialTypes;
 backup.metadata=metadata;
 
 % Optional: correct any LED trials for blinded control mice
-[alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,[3 4 14]);
+[alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,[4 5 19]);
 
 % Optional: discard preemptive
 [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
@@ -80,7 +80,7 @@ saveDir=['/Volumes/Neurobio/MICROSCOPE/Kim/RT pairs data sets/' temp]; % where t
 
 % filter settings
 tbt_filter.sortField='dprimes';
-tbt_filter.range_values=[1 2];
+tbt_filter.range_values=[-100 100];
 tbt_filter.name=[tbt_filter.sortField num2str(tbt_filter.range_values(1)) 'to' num2str(tbt_filter.range_values(2))];
 temp=tbt_filter.name;
 temp(~ismember(temp,['A':'Z' 'a':'z' '0':'9']))=''; 
@@ -101,8 +101,8 @@ trialTypes.isLongITI_1forward=[trialTypes.isLongITI(2:end); 0];
 trialTypes.optoGroup_1forward=[trialTypes.optoGroup(2:end); 0];
 % trial1='trialTypes.optoGroup~=1';
 % trial1='trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
-trial1='trialTypes.cued_reach_1forward==1 & trialTypes.touched_pellet_1forward==0 & (trialTypes.led_1forward==0) & trialTypes.optoGroup~=1  & trialTypes.optoGroup_1forward~=1';
-% trial1='trialTypes.cued_reach_1forward==0  & trialTypes.touched_pellet_1forward==1 & (trialTypes.led_1forward==0) & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
+% trial1='trialTypes.cued_reach_1forward==1 & trialTypes.touched_pellet_1forward==1 & (trialTypes.led_1forward==0) & trialTypes.optoGroup~=1  & trialTypes.optoGroup_1forward~=1';
+trial1='trialTypes.cued_reach_1forward==0  & trialTypes.touched_pellet_1forward==1 & (trialTypes.led_1forward==0) & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
 test.trial1=trial1;
 test.templateSequence2_cond=eval(trial1);
 % trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
