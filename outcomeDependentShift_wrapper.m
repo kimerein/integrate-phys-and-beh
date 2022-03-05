@@ -172,7 +172,7 @@ end
 s=scatter(bootMeans(1,:),bootMeans(2,:),20,'filled','MarkerEdgeColor',scatterPointsEdgeColor,'MarkerFaceColor',colorForBootstrapPoints); hold on;
 s.AlphaData = 0.5*ones(1,size(bootMeans,2));
 s.MarkerFaceAlpha = 'flat';
-scatter(nanmean(altogether_prob_uncued),nanmean(altogether_prob_cued),50,colorForBootstrapPoints,'filled');
+scatter(nanmean(altogether_prob_uncued),nanmean(altogether_prob_cued),50,'filled','MarkerEdgeColor',scatterPointsEdgeColor,'MarkerFaceColor',colorForBootstrapPoints);
 uncued_mean_out=nanmean(altogether_prob_uncued);
 cued_mean_out=nanmean(altogether_prob_cued);
 
