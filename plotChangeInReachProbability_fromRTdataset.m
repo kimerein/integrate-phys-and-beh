@@ -325,7 +325,10 @@ end
 % session
 temp_cued=nanmean(rateinwindow1,2);
 temp_cued_trial1=nanmean(trial1_window1,2);
-bigq=quiver(nanmean(temp_uncued_trial1),nanmean(temp_cued_trial1),nanmean(temp_uncued-temp_uncued_trial1),nanmean(temp_cued-temp_cued_trial1),'Color','k','Linewidth',4); hold on;
+bigq=[];
+if settings.suppressPlots==false
+    bigq=quiver(nanmean(temp_uncued_trial1),nanmean(temp_cued_trial1),nanmean(temp_uncued-temp_uncued_trial1),nanmean(temp_cued-temp_cued_trial1),'Color','k','Linewidth',4); hold on;
+end
 % remove outliers using vector length
 [~,isout]=rmoutliers(sqrt((temp_cued-temp_cued_trial1).^2+(temp_uncued-temp_uncued_trial1).^2),'percentiles',[10 90]);
 % [~,isout]=rmoutliers(temp_cued,'percentiles',[5 95]);

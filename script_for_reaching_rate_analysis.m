@@ -32,7 +32,7 @@ backup.trialTypes=trialTypes;
 backup.metadata=metadata;
 
 % Optional: correct any LED trials for blinded control mice
-[alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,[3 4 14]);
+[alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,[4 5 19]);
 
 % Optional: discard preemptive
 [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
@@ -219,3 +219,7 @@ test=backup_test;
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,50,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 plotPairedChangeMinusSatiety(reachrates);
+
+%% plot outcome-dependent shifts, rate approach 2 bootstrap
+
+outcomeDependentShift_wrapper(alltbt,trialTypes);
