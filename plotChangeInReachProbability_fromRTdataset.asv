@@ -46,6 +46,7 @@ allreaches_trial_nplus1=dataset.realDistributions.rawReaching_event_trialiInSeq{
 
 % get fixed windows from average RT at beginning of each session
 matchesEventCond_trial_n=dataset.realDistributions.event_isSeq{1}==1;
+matchesEventCond_trial_all=dataset.realDistributions.allTrialsSequence_isSeq{1}==1;
 matchesEventCond_trial_nplus1=dataset.realDistributions.templateSequence2_end;
 % check whether sessids are unique, else make them unique
 u=unique(metadata.mouseid);
@@ -71,8 +72,8 @@ else
         j=j+nanmax(metadata.sessid(metadata.mouseid==u(i)));
     end
 end
-nth_sessions=metadata.sessid(matchesEventCond_trial_n);
-mouseid=metadata.mouseid(matchesEventCond_trial_n);
+nth_sessions=metadata.sessid(matchesEventCond_trial_all);
+mouseid=metadata.mouseid(matchesEventCond_trial_all);
 [metadata,fractionThroughSess]=howFarThroughSession(metadata,false,[]);
 fractionThroughSess=fractionThroughSess(matchesEventCond_trial_n); % how far through session was each trial in sequence
 
@@ -243,6 +244,7 @@ for i=1:length(trialBins)-1 % across trials binned
     a=-0.01;
     b=0.01;
     r=(b-a).*rand(size(temp_cued))+a;
+    s=[];
     if i==1 && settings.suppressPlots==false
         trial1start=scatter(temp_uncued+r,temp_cued+r,[],'k'); hold on; % first trial in session, last trial in sequence
     elseif settings.suppressPlots==false
@@ -304,6 +306,11 @@ elseif useRateMethod==3
     rateinwindow2=ratein_acrossSess_window2;
     rateinwindow3=ratein_acrossSess_window3;
 end
+% throw out sessions with not enough trials in session
+atleastntrials=20;
+rateinwindow1(nansum(~isnan(rateinwindow1),2)<atleastntrials)=nan;
+rateinwindow2(nansum(~isnan(rateinwindow2),2)<atleastntrials)=nan;
+rateinwindow3(nansum(~isnan(rateinwindow3),2)<atleastntrials)=nan;
 if all(ismember([2 3],useWindowsForUncued))
     % average uncued reaching in these two windows
     temp_uncued=nanmean([rateinwindow2 rateinwindow3],2);
@@ -319,13 +326,18 @@ end
 % session
 temp_cued=nanmean(rateinwindow1,2);
 temp_cued_trial1=nanmean(trial1_window1,2);
-bigq=quiver(nanmean(temp_uncued_trial1),nanmean(temp_cued_trial1),nanmean(temp_uncued-temp_uncued_trial1),nanmean(temp_cued-temp_cued_trial1),'Color','k','Linewidth',4); hold on;
-% remove outliers
-[~,isout]=rmoutliers(temp_cued,'percentiles',[5 95]);
-[~,isout2]=rmoutliers(temp_uncued,'percentiles',[5 95]);
-[~,isout3]=rmoutliers(temp_cued_trial1,'percentiles',[5 95]);
-[~,isout4]=rmoutliers(temp_uncued_trial1,'percentiles',[5 95]);
-isout=isout | isout2 | isout3 | isout4;
+bigq=[];
+if settings.suppressPlots==false
+    bigq=quiver(nanmean(temp_uncued_trial1),nanmean(temp_cued_trial1),nanmean(temp_uncued-temp_uncued_trial1),nanmean(temp_cued-temp_cued_trial1),'Color','k','Linewidth',4); hold on;
+end
+% remove outliers using vector length
+[~,isout]=rmoutliers(sqrt((temp_cued-temp_cued_trial1).^2+(temp_uncued-temp_uncued_trial1).^2),'percentiles',[10 90]);
+% [~,isout]=rmoutliers(temp_cued,'percentiles',[5 95]);
+% [~,isout2]=rmoutliers(temp_uncued,'percentiles',[5 95]);
+% [~,isout3]=rmoutliers(temp_cued_trial1,'percentiles',[5 95]);
+% [~,isout4]=rmoutliers(temp_uncued_trial1,'percentiles',[5 95]);
+% isout=isout | isout2 | isout3 | isout4;
+% isout=zeros(size(temp_cued));
 temp_cued=temp_cued(~isout);
 temp_uncued=temp_uncued(~isout);
 temp_cued_trial1=temp_cued_trial1(~isout);
@@ -397,6 +409,9 @@ for i=1:length(binsForZones_y)-1
                 [nanmean(temp_cued_trial1) nanmean(temp_cued_trial1)],'Color','k');
             line([nanmean(temp_uncued_trial1) nanmean(temp_uncued_trial1)],...
                 [nanmean(temp_cued_trial1)-nanstd(temp_cued_trial1)./sqrt(nansum(~isnan(temp_cued_trial1))) nanmean(temp_cued_trial1)+nanstd(temp_cued_trial1)./sqrt(nansum(~isnan(temp_cued_trial1)))],'Color','k');
+            if nansum(whichToUse)<3 % not enough sessions to feel confident
+                continue
+            end
             quiver(nanmean(temp_uncued_trial1),nanmean(temp_cued_trial1),nanmean(temp_uncued-temp_uncued_trial1),nanmean(temp_cued-temp_cued_trial1),'Color',cmap(k,:),'Linewidth',2);
         end
     end
@@ -419,7 +434,7 @@ out.alltrials_uncued=approach_alltrials_uncued;
 out.trial1_alltrials_uncued=approach_trial1_uncued;
 out.trial1_alltrials_cued=approach_trial1_cued;
 if settings.suppressPlots==false
-    line([
+    line([rangex(1) rangex(2)],[rangex(1) rangex(2)],'Color',[0.5 0.5 0.5]);
     legend([bigq lastTrialInSeq l firstTrialInSeq la],{'Av over all sess','Last trial in sequence across session','Mean and se last trial in seq','First trial in sequence across session','Mean and se first trial in seq'});
 end
 

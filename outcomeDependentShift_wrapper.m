@@ -65,7 +65,7 @@ trial2=[flankingTrials];
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 if compareToFirstTrial==false
-    [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,'k','k');
+    [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,'k','k',false);
 end
 % success
 nInSequence=3;
@@ -74,9 +74,11 @@ trial2=[flankingTrials];
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
-[uncued_mean_out,cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,'g','g');
+[uncued_mean_out,cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,'g','g',false);
+% plotMeAndSe(reachrates.alltrials_uncued,reachrates.alltrials_cued,'g',2,false);
 if compareToFirstTrial==true
-    [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.trial1_alltrials_uncued,reachrates.trial1_alltrials_cued,'k','k');
+    [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.trial1_alltrials_uncued,reachrates.trial1_alltrials_cued,'k','k',false);
+%     plotMeAndSe(reachrates.trial1_alltrials_uncued,reachrates.trial1_alltrials_cued,'k',2,false);
 end
 quiver(baseEffect_uncued_mean_out,baseEffect_cued_mean_out,uncued_mean_out-baseEffect_uncued_mean_out,cued_mean_out-baseEffect_cued_mean_out,'Color','g','LineWidth',2);
 line([0 baseEffect_uncued_mean_out],[0 baseEffect_cued_mean_out],'Color',[0.2 0.2 0.2]);
@@ -87,9 +89,9 @@ trial2=[flankingTrials];
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
-[uncued_mean_out,cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,'r','r');
+[uncued_mean_out,cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,'r','r',false);
 if compareToFirstTrial==true
-    [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.trial1_alltrials_uncued,reachrates.trial1_alltrials_cued,'k','k');
+    [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.trial1_alltrials_uncued,reachrates.trial1_alltrials_cued,'k','k',false);
 end
 quiver(baseEffect_uncued_mean_out,baseEffect_cued_mean_out,uncued_mean_out-baseEffect_uncued_mean_out,cued_mean_out-baseEffect_cued_mean_out,'Color','r','LineWidth',2);
 % touched after cue, i.e., success or drop
@@ -99,9 +101,9 @@ trial2=[flankingTrials];
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
-[uncued_mean_out,cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,[171 104 87]./255,[171 104 87]./255);
+[uncued_mean_out,cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,[171 104 87]./255,[171 104 87]./255,false);
 if compareToFirstTrial==true
-    [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.trial1_alltrials_uncued,reachrates.trial1_alltrials_cued,'k','k');
+    [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.trial1_alltrials_uncued,reachrates.trial1_alltrials_cued,'k','k',false);
 end
 quiver(baseEffect_uncued_mean_out,baseEffect_cued_mean_out,uncued_mean_out-baseEffect_uncued_mean_out,cued_mean_out-baseEffect_cued_mean_out,'Color',[171 104 87]./255,'LineWidth',2);
 % miss before cue
@@ -111,9 +113,9 @@ trial2=[flankingTrials];
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
-[uncued_mean_out,cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,'c','c');
+[uncued_mean_out,cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,'c','c',false);
 if compareToFirstTrial==true
-    [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.trial1_alltrials_uncued,reachrates.trial1_alltrials_cued,'k','k');
+    [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.trial1_alltrials_uncued,reachrates.trial1_alltrials_cued,'k','k',false);
 end
 quiver(baseEffect_uncued_mean_out,baseEffect_cued_mean_out,uncued_mean_out-baseEffect_uncued_mean_out,cued_mean_out-baseEffect_cued_mean_out,'Color','c','LineWidth',2);
 % does not reach
@@ -123,9 +125,9 @@ trial2=[flankingTrials];
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
-[uncued_mean_out,cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,[0.8 0.8 0.8],[0.8 0.8 0.8]);
+[uncued_mean_out,cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,[0.8 0.8 0.8],[0.8 0.8 0.8],false);
 if compareToFirstTrial==true
-    [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.trial1_alltrials_uncued,reachrates.trial1_alltrials_cued,'k','k');
+    [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.trial1_alltrials_uncued,reachrates.trial1_alltrials_cued,'k','k',false);
 end
 quiver(baseEffect_uncued_mean_out,baseEffect_cued_mean_out,uncued_mean_out-baseEffect_uncued_mean_out,cued_mean_out-baseEffect_cued_mean_out,'Color',[0.8 0.8 0.8],'LineWidth',2);
 
@@ -138,7 +140,7 @@ trial2=[flankingTrials];
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 if compareToFirstTrial==false
-    [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,'k','m');
+    [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,'k','m',false);
 end
 % success
 nInSequence=3;
@@ -147,9 +149,13 @@ trial2=[flankingTrials];
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
-[uncued_mean_out,cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,'g','m');
+[uncued_mean_out,cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,'g','m',false);
+% plotMeAndSe(reachrates.alltrials_uncued,reachrates.alltrials_cued,'g',2,false);
+% plotMeAndSe(reachrates.alltrials_uncued,reachrates.alltrials_cued,'m',0.5,false);
 if compareToFirstTrial==true
-    [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.trial1_alltrials_uncued,reachrates.trial1_alltrials_cued,'k','m');
+    [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.trial1_alltrials_uncued,reachrates.trial1_alltrials_cued,'k','m',false);
+%     plotMeAndSe(reachrates.trial1_alltrials_uncued,reachrates.trial1_alltrials_cued,'k',2,false);
+%     plotMeAndSe(reachrates.trial1_alltrials_uncued,reachrates.trial1_alltrials_cued,'m',0.5,false);
 end
 quiver(baseEffect_uncued_mean_out,baseEffect_cued_mean_out,uncued_mean_out-baseEffect_uncued_mean_out,cued_mean_out-baseEffect_cued_mean_out,'Color','g','LineWidth',2);
 quiver(baseEffect_uncued_mean_out,baseEffect_cued_mean_out,uncued_mean_out-baseEffect_uncued_mean_out,cued_mean_out-baseEffect_cued_mean_out,'Color','m','LineWidth',0.5);
@@ -161,9 +167,9 @@ trial2=[flankingTrials];
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
-[uncued_mean_out,cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,'r','m');
+[uncued_mean_out,cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,'r','m',false);
 if compareToFirstTrial==true
-    [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.trial1_alltrials_uncued,reachrates.trial1_alltrials_cued,'k','m');
+    [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.trial1_alltrials_uncued,reachrates.trial1_alltrials_cued,'k','m',false);
 end
 quiver(baseEffect_uncued_mean_out,baseEffect_cued_mean_out,uncued_mean_out-baseEffect_uncued_mean_out,cued_mean_out-baseEffect_cued_mean_out,'Color','r','LineWidth',2);
 quiver(baseEffect_uncued_mean_out,baseEffect_cued_mean_out,uncued_mean_out-baseEffect_uncued_mean_out,cued_mean_out-baseEffect_cued_mean_out,'Color','m','LineWidth',0.5);
@@ -174,9 +180,9 @@ trial2=[flankingTrials];
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
-[uncued_mean_out,cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,[171 104 87]./255,'m');
+[uncued_mean_out,cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,[171 104 87]./255,'m',false);
 if compareToFirstTrial==true
-    [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.trial1_alltrials_uncued,reachrates.trial1_alltrials_cued,'k','m');
+    [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.trial1_alltrials_uncued,reachrates.trial1_alltrials_cued,'k','m',false);
 end
 quiver(baseEffect_uncued_mean_out,baseEffect_cued_mean_out,uncued_mean_out-baseEffect_uncued_mean_out,cued_mean_out-baseEffect_cued_mean_out,'Color',[171 104 87]./255,'LineWidth',2);
 quiver(baseEffect_uncued_mean_out,baseEffect_cued_mean_out,uncued_mean_out-baseEffect_uncued_mean_out,cued_mean_out-baseEffect_cued_mean_out,'Color','m','LineWidth',0.5);
@@ -187,9 +193,9 @@ trial2=[flankingTrials];
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
-[uncued_mean_out,cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,'c','m');
+[uncued_mean_out,cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,'c','m',false);
 if compareToFirstTrial==true
-    [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.trial1_alltrials_uncued,reachrates.trial1_alltrials_cued,'k','m');
+    [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.trial1_alltrials_uncued,reachrates.trial1_alltrials_cued,'k','m',false);
 end
 quiver(baseEffect_uncued_mean_out,baseEffect_cued_mean_out,uncued_mean_out-baseEffect_uncued_mean_out,cued_mean_out-baseEffect_cued_mean_out,'Color','c','LineWidth',2);
 quiver(baseEffect_uncued_mean_out,baseEffect_cued_mean_out,uncued_mean_out-baseEffect_uncued_mean_out,cued_mean_out-baseEffect_cued_mean_out,'Color','m','LineWidth',0.5);
@@ -200,12 +206,33 @@ trial2=[flankingTrials];
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
-[uncued_mean_out,cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,[0.8 0.8 0.8],'m');
+[uncued_mean_out,cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,[0.8 0.8 0.8],'m',false);
 if compareToFirstTrial==true
-    [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.trial1_alltrials_uncued,reachrates.trial1_alltrials_cued,'k','m');
+    [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.trial1_alltrials_uncued,reachrates.trial1_alltrials_cued,'k','m',false);
 end
 quiver(baseEffect_uncued_mean_out,baseEffect_cued_mean_out,uncued_mean_out-baseEffect_uncued_mean_out,cued_mean_out-baseEffect_cued_mean_out,'Color',[0.8 0.8 0.8],'LineWidth',2);
 quiver(baseEffect_uncued_mean_out,baseEffect_cued_mean_out,uncued_mean_out-baseEffect_uncued_mean_out,cued_mean_out-baseEffect_cued_mean_out,'Color','m','LineWidth',0.5);
+
+end
+
+function out=dprime(hit_rates,FA_rates)
+
+out=norminv(hit_rates)-norminv(FA_rates);
+
+end
+
+function plotMeAndSe(data1,data2,c,linewidth,suppressOutput)
+% make inputs vectors if they are not
+% data1=data1(1:end);
+% data2=data2(1:end);
+% average within each session
+data1=nanmean(data1,2); data1=data1';
+data2=nanmean(data2,2); data2=data2';
+if suppressOutput==false
+    line([nanmean(data1)-nanstd(data1,[],2)./sqrt(nansum(~isnan(data1))) nanmean(data1)+nanstd(data1,[],2)./sqrt(nansum(~isnan(data1)))],[nanmean(data2) nanmean(data2)],'Color',c,'LineWidth',linewidth);
+    hold on;
+    line([nanmean(data1) nanmean(data1)],[nanmean(data2)-nanstd(data2,[],2)./sqrt(nansum(~isnan(data2))) nanmean(data2)+nanstd(data2,[],2)./sqrt(nansum(~isnan(data2)))],'Color',c,'LineWidth',linewidth);
+end
 
 end
 
@@ -227,7 +254,7 @@ skipCorrected=true;
 
 end
 
-function [uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(approach2_alltrials_uncued,approach2_alltrials_cued,colorForBootstrapPoints,scatterPointsEdgeColor)
+function [uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(approach2_alltrials_uncued,approach2_alltrials_cued,colorForBootstrapPoints,scatterPointsEdgeColor,suppressOutput)
 
 % altogether_prob_cued=nanmean(approach2_alltrials_cued,2);
 % altogether_prob_uncued=nanmean(approach2_alltrials_uncued,2);
@@ -249,10 +276,12 @@ for i=1:nRuns
     bootMeans(1,i)=nanmean(sub_prob_uncued);
     bootMeans(2,i)=nanmean(sub_prob_cued);
 end
-s=scatter(bootMeans(1,:),bootMeans(2,:),20,'filled','MarkerEdgeColor',scatterPointsEdgeColor,'MarkerFaceColor',colorForBootstrapPoints); hold on;
-s.AlphaData = 0.5*ones(1,size(bootMeans,2));
-s.MarkerFaceAlpha = 'flat';
-scatter(nanmean(altogether_prob_uncued),nanmean(altogether_prob_cued),50,'filled','MarkerEdgeColor',scatterPointsEdgeColor,'MarkerFaceColor',colorForBootstrapPoints);
+if suppressOutput==false
+    s=scatter(bootMeans(1,:),bootMeans(2,:),20,'filled','MarkerEdgeColor',scatterPointsEdgeColor,'MarkerFaceColor',colorForBootstrapPoints); hold on;
+    s.AlphaData = 0.5*ones(1,size(bootMeans,2));
+    s.MarkerFaceAlpha = 'flat';
+    scatter(nanmean(altogether_prob_uncued),nanmean(altogether_prob_cued),50,'filled','MarkerEdgeColor',scatterPointsEdgeColor,'MarkerFaceColor',colorForBootstrapPoints);
+end
 uncued_mean_out=nanmean(altogether_prob_uncued);
 cued_mean_out=nanmean(altogether_prob_cued);
 

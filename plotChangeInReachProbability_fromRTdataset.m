@@ -46,6 +46,7 @@ allreaches_trial_nplus1=dataset.realDistributions.rawReaching_event_trialiInSeq{
 
 % get fixed windows from average RT at beginning of each session
 matchesEventCond_trial_n=dataset.realDistributions.event_isSeq{1}==1;
+matchesEventCond_trial_all=dataset.realDistributions.allTrialsSequence_isSeq{1}==1;
 matchesEventCond_trial_nplus1=dataset.realDistributions.templateSequence2_end;
 % check whether sessids are unique, else make them unique
 u=unique(metadata.mouseid);
@@ -72,11 +73,12 @@ else
     end
 end
 nth_sessions=metadata.sessid(matchesEventCond_trial_n);
+nth_sessions_alltrials=metadata.sessid(matchesEventCond_trial_all);
 mouseid=metadata.mouseid(matchesEventCond_trial_n);
 [metadata,fractionThroughSess]=howFarThroughSession(metadata,false,[]);
 fractionThroughSess=fractionThroughSess(matchesEventCond_trial_n); % how far through session was each trial in sequence
 
-u=unique(nth_sessions);
+u=unique(nth_sessions_alltrials);
 sessidsperrow=u;
 n_for_init_cond=nan(length(u),1);
 n_for_init_rate=nan(length(u),1);
