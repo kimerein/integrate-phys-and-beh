@@ -7,10 +7,15 @@ timestep=mode(diff(nanmean(alltbt.times,1)));
 flankingTrials='trialTypes.optoGroup~=1';
 trialTypes.isLongITI_1forward=[trialTypes.isLongITI(2:end); 0];
 trialTypes.optoGroup_1forward=[trialTypes.optoGroup(2:end); 0];
+trialTypes.optoGroup_1back=[0; trialTypes.optoGroup(1:end-1)];
 trialTypes.noReach=~any(alltbt.all_reachBatch>0.05,2);
 trialTypes.noReach_1forward=[trialTypes.noReach(2:end); 0];
 trialTypes.reachedBeforeCue=any(alltbt.all_reachBatch(:,1:cueindma-1)>0.05,2);
+trialTypes.reachedAfterCue=any(alltbt.all_reachBatch(:,cueindma:end)>0.05,2);
+trialTypes.reachToPelletBeforeCue=any(alltbt.reachStarts_pelletPresent(:,1:cueindma-1)>0.05,2);
 trialTypes.reachedBeforeCue_1forward=[trialTypes.reachedBeforeCue(2:end); 0];
+trialTypes.reachToPelletBeforeCue_1forward=[trialTypes.reachToPelletBeforeCue(2:end); 0];
+trialTypes.reachedAfterCue_1forward=[trialTypes.reachedAfterCue(2:end); 0];
 timeWindow=[];
 % timeWindow=[0.5 1]; % from cue, in seconds
 % timeWindowInds(1)=floor(timeWindow(1)/timestep);
@@ -33,6 +38,7 @@ reachratesettings.minTrialLength=-2; % wrt cue, in sec
 reachratesettings.suppressPlots=true;
  % sec wrt cue onset
 reachratesettings.acrossSess_window1=[0.05 1]; % cued window [0.05 1]
+% reachratesettings.acrossSess_window1=[0 9.5]; % cued window [0.05 1]
 % reachratesettings.acrossSess_window1=[4 7];
 % note that after mouse gets a pellet, reaching is suppressed
 reachratesettings.acrossSess_window2=[7 reachratesettings.maxTrialLength]; % beware reach suppression after a success
@@ -63,7 +69,7 @@ if compareToFirstTrial==false
 end
 % success
 nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
+trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.success_in_cued_window_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
 trial2=[flankingTrials];
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
@@ -76,7 +82,7 @@ quiver(baseEffect_uncued_mean_out,baseEffect_cued_mean_out,uncued_mean_out-baseE
 line([0 baseEffect_uncued_mean_out],[0 baseEffect_cued_mean_out],'Color',[0.2 0.2 0.2]);
 % drop
 nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==0' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.after_cue_drop_1forward==1 & trialTypes.consumed_pellet_1forward==0 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
+trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==0' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==1 & trialTypes.consumed_pellet_1forward==0 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
 trial2=[flankingTrials];
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
@@ -100,7 +106,7 @@ end
 quiver(baseEffect_uncued_mean_out,baseEffect_cued_mean_out,uncued_mean_out-baseEffect_uncued_mean_out,cued_mean_out-baseEffect_cued_mean_out,'Color',[171 104 87]./255,'LineWidth',2);
 % miss before cue
 nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.reachedBeforeCue_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
+trial1=[flankingTrials ' & trialTypes.reachedBeforeCue_1forward==1 & trialTypes.reachToPelletBeforeCue_1forward==0 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
 trial2=[flankingTrials];
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
@@ -136,7 +142,7 @@ if compareToFirstTrial==false
 end
 % success
 nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
+trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.success_in_cued_window_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
 trial2=[flankingTrials];
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
@@ -150,7 +156,7 @@ quiver(baseEffect_uncued_mean_out,baseEffect_cued_mean_out,uncued_mean_out-baseE
 line([0 baseEffect_uncued_mean_out],[0 baseEffect_cued_mean_out],'Color',[0.2 0.2 0.2]);
 % drop
 nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==0' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.after_cue_drop_1forward==1 & trialTypes.consumed_pellet_1forward==0 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
+trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==0' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==1 & trialTypes.consumed_pellet_1forward==0 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
 trial2=[flankingTrials];
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
@@ -176,7 +182,7 @@ quiver(baseEffect_uncued_mean_out,baseEffect_cued_mean_out,uncued_mean_out-baseE
 quiver(baseEffect_uncued_mean_out,baseEffect_cued_mean_out,uncued_mean_out-baseEffect_uncued_mean_out,cued_mean_out-baseEffect_cued_mean_out,'Color','m','LineWidth',0.5);
 % miss before cue
 nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.reachedBeforeCue_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
+trial1=[flankingTrials ' & trialTypes.reachedBeforeCue_1forward==1 & trialTypes.reachToPelletBeforeCue_1forward==0 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
 trial2=[flankingTrials];
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
@@ -223,10 +229,10 @@ end
 
 function [uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(approach2_alltrials_uncued,approach2_alltrials_cued,colorForBootstrapPoints,scatterPointsEdgeColor)
 
-altogether_prob_cued=nanmean(approach2_alltrials_cued,2);
-altogether_prob_uncued=nanmean(approach2_alltrials_uncued,2);
-% altogether_prob_cued=approach2_alltrials_cued(1:end); % better to bootstrap across trials, not sessions, because in some sessions, mouse drops a lot
-% altogether_prob_uncued=approach2_alltrials_uncued(1:end);
+% altogether_prob_cued=nanmean(approach2_alltrials_cued,2);
+% altogether_prob_uncued=nanmean(approach2_alltrials_uncued,2);
+altogether_prob_cued=approach2_alltrials_cued(1:end); % better to bootstrap across trials, not sessions, because in some sessions, mouse drops a lot
+altogether_prob_uncued=approach2_alltrials_uncued(1:end);
 takeTrials=~isnan(altogether_prob_cued) & ~isnan(altogether_prob_uncued);
 disp(['dropping this many trials because of nan ' num2str(nansum(~takeTrials))]);
 altogether_prob_cued=altogether_prob_cued(takeTrials==1);
