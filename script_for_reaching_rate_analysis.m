@@ -45,6 +45,7 @@ settings=RTanalysis_settings('display settings','clear');
 trialTypes=getLongITIs(alltbt,trialTypes,settings);
 
 trialTypes=getTimingOfOpto(alltbt,'optoOn',trialTypes,settings.multipleOptoTimes);
+trialTypes.led(~isnan(trialTypes.optoGroup))=1;
 
 trialTypes.mouseid=metadata.mouseid;
 
@@ -79,8 +80,10 @@ temp=temp(~isspace(temp));
 saveDir=['/Volumes/Neurobio/MICROSCOPE/Kim/RT pairs data sets/' temp]; % where to save details of alltbt filtering and RT pairs data set
 
 % filter settings
+alltbt.mouseid=metadata.mouseid;
 tbt_filter.sortField='dprimes';
-tbt_filter.range_values=[-100 100];
+% tbt_filter.range_values=[1 2 6 9 10 11 12 18];
+tbt_filter.range_values=[1 1.5];
 tbt_filter.name=[tbt_filter.sortField num2str(tbt_filter.range_values(1)) 'to' num2str(tbt_filter.range_values(2))];
 temp=tbt_filter.name;
 temp(~ismember(temp,['A':'Z' 'a':'z' '0':'9']))=''; 
