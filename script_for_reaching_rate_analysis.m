@@ -225,6 +225,11 @@ dataset=buildReachingRTModel(alltbt,trialTypes,metadata,50,saveDir,test,skipCorr
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 plotPairedChangeMinusSatiety(reachrates);
 
-%% plot outcome-dependent shifts, rate approach 2 bootstrap
+%% plot outcome-dependent shifts
 
-outcomeDependentShift_wrapper(alltbt,trialTypes);
+outcomeDependentShift_wrapper(alltbt,trialTypes,metadata,saveDir,[],[]);
+
+%% plot outcome-dependent shifts AND separate by dprime
+
+alltbt=backup.alltbt; trialTypes=backup.trialTypes; metadata=backup.metadata;
+outcomeDependentShift_acrossDprimes(alltbt,trialTypes,metadata);
