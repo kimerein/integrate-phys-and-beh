@@ -124,6 +124,11 @@ if dispStuff==1
     disp(nanmedian(RT_pairs2.rt_change(RT_pairs2.real_rt_pair==true & testcond2==true),2));
 end
 
+if isempty(RT_pairs1.real_rt_pair)
+    p=nan;
+    return
+end
+
 if all(isnan(RT_pairs1.rt_change(RT_pairs1.real_rt_pair==true & testcond1==true))) | all(isnan(RT_pairs2.rt_change(RT_pairs2.real_rt_pair==true & testcond2==true)))
     p=nan;
     return

@@ -188,6 +188,10 @@ out.fracsThroughSess=fracsThroughSess;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Plot output
+if isempty(ratein_fixed_window1)
+    out=[];
+    return
+end
 [moreout,meansForProportionality_x,meansForProportionality_y]=plotAverageAcrossSessions_trialByTrialWithinSession(useRateMethod,settings,ratein_fixed_window1,ratein_fixed_window2,ratein_fixed_window3,ratein_acrossSess_window1,ratein_acrossSess_window2,ratein_acrossSess_window3,n_for_init_rate,useWindowsForUncued,trial1_window1,trial1_window2,trial1_window3,reachprobin_window1,reachprobin_window2,ratein_window3,addSatietyLines);
 Y_distance_from_proportionality(useRateMethod,settings,meansForProportionality_x,meansForProportionality_y,moreout,scatterPointSize,n_for_init_rate);
 plotTrialByTrialWithinSession_noAveraging(settings.binThisManyTrials,useRateMethod,settings,ratein_fixed_window1,ratein_fixed_window2,ratein_fixed_window3,ratein_acrossSess_window1,ratein_acrossSess_window2,ratein_acrossSess_window3,useWindowsForUncued,trial1_window1,trial1_window2,trial1_window3,reachprobin_window1,reachprobin_window2,ratein_window3);
@@ -445,6 +449,7 @@ function [out,meansForProportionality_x,meansForProportionality_y]=plotAverageAc
 
 meansForProportionality_x=[]; % return uncued reach rates for first few trials in each session
 meansForProportionality_y=[]; % return cued reach rates for first few trials in each session
+suppressBootstrap=true;
 if useRateMethod==1 || useRateMethod==3
     if settings.suppressPlots==false
         figure(); % Approach 1
@@ -462,6 +467,9 @@ if useRateMethod==1 || useRateMethod==3
     nIndsForfirstRates=nanmean(n_for_init_rate);
     meansForProportionality_x=nan(size(ratein_fixed_window1,1),floor(nIndsForfirstRates));
     meansForProportionality_y=nan(size(ratein_fixed_window1,1),floor(nIndsForfirstRates));
+    currbincued=zeros(size(ratein_fixed_window1,1),1);
+    currbinuncued=zeros(size(ratein_fixed_window1,1),1);
+    currbincounter=0;
     for i=1:size(ratein_fixed_window1,2) % across trials
         if useRateMethod==1
             rateinwindow1=ratein_fixed_window1;
@@ -491,16 +499,47 @@ if useRateMethod==1 || useRateMethod==3
         if i==1 && settings.suppressPlots==false
             trial1start=scatter(nanmean(temp_uncued),nanmean(temp_cued),[],'k'); % first trial in SESSION, last trial in sequence
         end
-        if settings.suppressPlots==false
-            line([nanmean(temp_uncued)-nanstd(temp_uncued)./sqrt(nansum(~isnan(temp_uncued))) nanmean(temp_uncued)+nanstd(temp_uncued)./sqrt(nansum(~isnan(temp_uncued)))],...
-                [nanmean(temp_cued) nanmean(temp_cued)],'Color',cmap(k,:),'LineWidth',1); % later trials in SESSION, last trial in sequence
-            hold on;
-            if i==1
-                targets=line([nanmean(temp_uncued) nanmean(temp_uncued)],...
-                [nanmean(temp_cued)-nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued))) nanmean(temp_cued)+nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued)))],'Color',cmap(k,:),'LineWidth',1);
+        targets=[];
+        if settings.suppressPlots==false && i<=settings.stopPlottingTrialsAfterN
+            if settings.binTrialsForAvAcrossSess==true
+                currbincued=currbincued+temp_cued;
+                currbinuncued=currbinuncued+temp_uncued;
+                currbincounter=currbincounter+1;
+                if currbincounter==settings.binThisManyTrials
+                    % plot and reset
+                    currbincued=currbincued/settings.binThisManyTrials;
+                    currbinuncued=currbinuncued/settings.binThisManyTrials;
+                    currbincounter=0;
+                    backup_temp_cued=temp_cued;
+                    backup_temp_uncued=temp_uncued;
+                    temp_cued=currbincued;
+                    temp_uncued=currbinuncued;
+                    currbincued=zeros(size(ratein_fixed_window1,1),1);
+                    currbinuncued=zeros(size(ratein_fixed_window1,1),1);
+                    line([nanmean(temp_uncued)-nanstd(temp_uncued)./sqrt(nansum(~isnan(temp_uncued))) nanmean(temp_uncued)+nanstd(temp_uncued)./sqrt(nansum(~isnan(temp_uncued)))],...
+                        [nanmean(temp_cued) nanmean(temp_cued)],'Color',cmap(k,:),'LineWidth',1); % later trials in SESSION, last trial in sequence
+                    hold on;
+                    if i==1
+                        targets=line([nanmean(temp_uncued) nanmean(temp_uncued)],...
+                            [nanmean(temp_cued)-nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued))) nanmean(temp_cued)+nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued)))],'Color',cmap(k,:),'LineWidth',1);
+                    else
+                        line([nanmean(temp_uncued) nanmean(temp_uncued)],...
+                            [nanmean(temp_cued)-nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued))) nanmean(temp_cued)+nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued)))],'Color',cmap(k,:),'LineWidth',1);
+                    end
+                    temp_cued=backup_temp_cued;
+                    temp_uncued=backup_temp_uncued;
+                end
             else
-                line([nanmean(temp_uncued) nanmean(temp_uncued)],...
-                [nanmean(temp_cued)-nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued))) nanmean(temp_cued)+nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued)))],'Color',cmap(k,:),'LineWidth',1);
+                line([nanmean(temp_uncued)-nanstd(temp_uncued)./sqrt(nansum(~isnan(temp_uncued))) nanmean(temp_uncued)+nanstd(temp_uncued)./sqrt(nansum(~isnan(temp_uncued)))],...
+                    [nanmean(temp_cued) nanmean(temp_cued)],'Color',cmap(k,:),'LineWidth',1); % later trials in SESSION, last trial in sequence
+                hold on;
+                if i==1
+                    targets=line([nanmean(temp_uncued) nanmean(temp_uncued)],...
+                        [nanmean(temp_cued)-nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued))) nanmean(temp_cued)+nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued)))],'Color',cmap(k,:),'LineWidth',1);
+                else
+                    line([nanmean(temp_uncued) nanmean(temp_uncued)],...
+                        [nanmean(temp_cued)-nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued))) nanmean(temp_cued)+nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued)))],'Color',cmap(k,:),'LineWidth',1);
+                end
             end
         end
         k=k+kstep;
@@ -525,7 +564,19 @@ if useRateMethod==1 || useRateMethod==3
             length_line_segment=nanmean([nanstd(temp_uncued)./sqrt(nansum(~isnan(temp_uncued))) nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued)))])/m;
             y_x_proportionality_lines=line([nanmean(temp_uncued)-length_line_segment/2 nanmean(temp_uncued)+length_line_segment/2],[nanmean(temp_cued)-(length_line_segment*m)/2 nanmean(temp_cued)+(length_line_segment*m)/2],'Color','k','LineWidth',0.25);
             hold on;
+        else
+            y_x_proportionality_lines=[];
         end
+    end
+    if settings.showFitLine==true
+        lastToUse=settings.stopPlottingTrialsAfterN;
+        if lastToUse>length(approach_uncued)
+            lastToUse=length(approach_uncued);
+        end
+        X=[ones(length(approach_uncued(1:lastToUse)),1) approach_uncued(1:lastToUse)'];
+        b=X\approach_cued(1:lastToUse)';
+        plot(approach_uncued(1:lastToUse)',X*b,'Color','k');
+%         plot(downSampAv(approach_uncued(1:lastToUse),10),downSampAv(approach_cued(1:lastToUse),10),'Color','k');
     end
     % tmp=cat(3,ratein_fixed_window2,ratein_fixed_window3);
     % C=nansum(tmp,3);
@@ -572,7 +623,8 @@ if useRateMethod==1 || useRateMethod==3
         bootMeans(1,i)=nanmean(sub_prob_uncued);
         bootMeans(2,i)=nanmean(sub_prob_cued);
     end
-    if settings.suppressPlots==false
+    s_alltrials=[];
+    if settings.suppressPlots==false && suppressBootstrap~=true
         s_alltrials=scatter(bootMeans(1,:),bootMeans(2,:),20,'k','filled');
         s_alltrials.AlphaData = 0.5*ones(1,size(bootMeans,2));
         s_alltrials.MarkerFaceAlpha = 'flat';
@@ -599,7 +651,8 @@ if useRateMethod==1 || useRateMethod==3
         bootMeans(1,i)=nanmean(sub_prob_uncued);
         bootMeans(2,i)=nanmean(sub_prob_cued);
     end
-    if settings.suppressPlots==false
+    s=[];
+    if settings.suppressPlots==false && suppressBootstrap~=true
         s=scatter(bootMeans(1,:),bootMeans(2,:),20,'c','filled');
         s.AlphaData = 0.5*ones(1,size(bootMeans,2));
         s.MarkerFaceAlpha = 'flat';

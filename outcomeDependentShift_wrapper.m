@@ -20,7 +20,7 @@ trialTypes.reachToPelletBeforeCue_1forward=[trialTypes.reachToPelletBeforeCue(2:
 trialTypes.reachedAfterCue_1forward=[trialTypes.reachedAfterCue(2:end); 0];
 
 % which to plot
-whichToPlot='wildcard'; % can be 'success','delayed success','drop','cued touch','cued touch and switch color','failed cued reach','false alarm','no reach','basic','wildcard'
+whichToPlot='delayed success'; % can be 'success','delayed success','drop','cued touch','cued touch and switch color','failed cued reach','false alarm','no reach','basic','wildcard'
 [plotset,trialTypes]=whichToPlotNow(whichToPlot,trialTypes,alltbt);
 
 shuffleTrialOrder=false; % if want to randomly permute trial order to test for ordering effects
@@ -48,6 +48,8 @@ reachratesettings.binThisManyTrials=25; % how many trials to bin within each ses
 reachratesettings.nBinsForZones=40; % will be nBinsForZones squared total bins, this is # bins for each x and y axis
 reachratesettings.useRateMethod=3; % 1, 2 or 3 (see explanation below)
 % see script_for_reaching_rate_analysis.m for explanation of rate methods
+dprimes_noLED_lasttrial=[];
+dprimes_LED_lasttrial=[];
 
 if ~isempty(f1)
     set(0,'CurrentFigure',f1);
@@ -64,6 +66,10 @@ trial2=[flankingTrials];
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
+if isempty(reachrates)
+    disp('No trials matching this criterion');
+    return
+end
 if compareToFirstTrial==false
     [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,'k','k',true);
 end
@@ -86,7 +92,7 @@ if ~isempty(a)
 end
 % delayed success
 nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1 & trialTypes.isLongITI_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.isLongITI_1forward==1'];
+trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
 trial2=[flankingTrials];
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
@@ -195,7 +201,7 @@ if ~isempty(a)
 end
 % delayed success
 nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1 & trialTypes.isLongITI_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.isLongITI_1forward==1'];
+trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
 trial2=[flankingTrials];
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
@@ -266,7 +272,7 @@ if ~isempty(a)
     dprimes_LED_firsttrial=b;
 end
 
-if ~strcmp(whichToPlot,'basic')
+if ~strcmp(whichToPlot,'basic') && ~isempty(dprimes_noLED_lasttrial) && ~isempty(dprimes_LED_lasttrial)
     mi=nanmin([dprimes_noLED_lasttrial-dprimes_noLED_firsttrial; dprimes_LED_lasttrial-dprimes_LED_firsttrial]);
     ma=nanmax([dprimes_noLED_lasttrial-dprimes_noLED_firsttrial; dprimes_LED_lasttrial-dprimes_LED_firsttrial]);
     binstep=0.3;
@@ -275,6 +281,10 @@ if ~strcmp(whichToPlot,'basic')
     dprimes_noLED_firsttrial(anyisnan)=nan;
     dprimes_LED_lasttrial(anyisnan)=nan;
     dprimes_LED_firsttrial(anyisnan)=nan;
+    if isempty([fliplr(0-binstep/2:-binstep:mi) 0+binstep/2:binstep:ma]) || isinf(mi) || isinf(ma) || isnan(mi) || isnan(ma) || range([fliplr(0-binstep/2:-binstep:mi) 0+binstep/2:binstep:ma])==0
+        disp('No bins');
+        return
+    end
     [n,x]=hist(dprimes_noLED_lasttrial-dprimes_noLED_firsttrial,[fliplr(0-binstep/2:-binstep:mi) 0+binstep/2:binstep:ma]);
     [noLED_n,noLED_x]=cityscape_hist(n,x);
     [n,x]=hist(dprimes_LED_lasttrial-dprimes_LED_firsttrial,[fliplr(0-binstep/2:-binstep:mi) 0+binstep/2:binstep:ma]);
@@ -302,6 +312,9 @@ function [dprimes_lasttrial,dprimes_firsttrial]=doPlottingAndBootstrap(reachrate
 
 dprimes_lasttrial=[];
 dprimes_firsttrial=[];
+if isempty(reachrates)
+    return
+end
 [uncued_mean_out,cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,color1,color2,~thisplotset);
 if thisplotset
     plotMeAndSe(reachrates.alltrials_uncued,reachrates.alltrials_cued,color1,2,false);
@@ -337,7 +350,9 @@ switch whichToPlot
         plotset.falsealarm=false;
         plotset.noreach=false;
     case 'delayed success'
-        timeWindow=[5 9]; % from cue, in seconds
+%         timeWindow=[5 9]; % from cue, in seconds
+%         timeWindow=[3 7.5]; % from cue, in seconds
+        timeWindow=[5 7.5]; % from cue, in seconds
         plotset.wildcard=false;
         plotset.success=false;
         plotset.delayed=true;
@@ -499,6 +514,8 @@ end
 
 function [uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(approach2_alltrials_uncued,approach2_alltrials_cued,colorForBootstrapPoints,scatterPointsEdgeColor,suppressOutput)
 
+stillsuppressbootstrap=true;
+
 % altogether_prob_cued=nanmean(approach2_alltrials_cued,2);
 % altogether_prob_uncued=nanmean(approach2_alltrials_uncued,2);
 altogether_prob_cued=approach2_alltrials_cued(1:end); % better to bootstrap across trials, not sessions, because in some sessions, mouse drops a lot
@@ -519,7 +536,7 @@ for i=1:nRuns
     bootMeans(1,i)=nanmean(sub_prob_uncued);
     bootMeans(2,i)=nanmean(sub_prob_cued);
 end
-if suppressOutput==false
+if suppressOutput==false && stillsuppressbootstrap==false
     s=scatter(bootMeans(1,:),bootMeans(2,:),20,'filled','MarkerEdgeColor',scatterPointsEdgeColor,'MarkerFaceColor',colorForBootstrapPoints); hold on;
     s.AlphaData = 0.5*ones(1,size(bootMeans,2));
     s.MarkerFaceAlpha = 'flat';

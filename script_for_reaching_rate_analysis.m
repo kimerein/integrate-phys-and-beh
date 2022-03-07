@@ -84,7 +84,8 @@ alltbt.mouseid=metadata.mouseid;
 tbt_filter.sortField='dprimes';
 % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
 % tbt_filter.range_values=[1     2     3     6     7     8     9    10    11    12    14    15    17    18];
-tbt_filter.range_values=[0.3 0.5];
+% tbt_filter.range_values=[0.9 2];
+tbt_filter.range_values=[-100 0];
 tbt_filter.name=[tbt_filter.sortField num2str(tbt_filter.range_values(1)) 'to' num2str(tbt_filter.range_values(2))];
 temp=tbt_filter.name;
 temp(~ismember(temp,['A':'Z' 'a':'z' '0':'9']))=''; 
@@ -98,21 +99,22 @@ tbt_filter.clock_progress=true;
 %% build relevant data sets
 
 % settings for paired RT data set
-test.nInSequence=[3]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
+test.nInSequence=[2]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
 % requirement for first trial in pair
 % trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
 trialTypes.isLongITI_1forward=[trialTypes.isLongITI(2:end); 0];
 trialTypes.optoGroup_1forward=[trialTypes.optoGroup(2:end); 0];
 % trial1='trialTypes.optoGroup~=1';
+trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
 % trial1='trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup~=1  & trialTypes.isLongITI_1forward==1';
 % trial1='trialTypes.cued_reach_1forward==1 & trialTypes.touched_pellet_1forward==1 & (trialTypes.led_1forward==0) & trialTypes.optoGroup~=1  & trialTypes.optoGroup_1forward~=1';
 % trial1='trialTypes.cued_reach_1forward==0  & trialTypes.touched_pellet_1forward==1 & (trialTypes.led_1forward==0) & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
 % trial1='trialTypes.cued_reach_1forward==1 & trialTypes.consumed_pellet_1forward==0 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
-trial1='trialTypes.optoGroup~=1 & trialTypes.consumed_pellet_1back==1 & trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1';
+% trial1='trialTypes.optoGroup~=1 & trialTypes.consumed_pellet_1back==1 & trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1';
 test.trial1=trial1;
 test.templateSequence2_cond=eval(trial1);
-% trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
-trial2='trialTypes.optoGroup~=1';
+trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
+% trial2='trialTypes.optoGroup~=1';
 test.trial2=trial2;
 test.templateSequence2_end=eval(trial2);
 test.fillInBetweenWithAnything=true; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1
@@ -160,13 +162,16 @@ reachratesettings.acrossSess_window1=[0.05 1]; % cued window [0.05 1]
 reachratesettings.acrossSess_window2=[7 reachratesettings.maxTrialLength]; % beware reach suppression after a success
 reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength -1]; 
 reachratesettings.scatterPointSize=50; % size for points in scatter plot
-reachratesettings.addSatietyLines=true; % whether to add proportionality lines to figure
+reachratesettings.addSatietyLines=false; % whether to add proportionality lines to figure
+reachratesettings.stopPlottingTrialsAfterN=170; % will stop plotting after this nth trial in session, also only use this many trials for regression fit -- see next line
+reachratesettings.showFitLine=true; % whether to show linear fit to change across trials
 reachratesettings.useWindowsForUncued=[3]; % to use window2 or window3 or both for the uncued reach rate
 reachratesettings.initWindows=[]; % empty if want to calculate from dataset
 reachratesettings.addSessionLines=false; % for no averaging across sessions plot, whether to connect trial bins within same session with lines
-reachratesettings.binThisManyTrials=25; % how many trials to bin within each session
+reachratesettings.binTrialsForAvAcrossSess=false; % whether to bin multiple trials for first figure, will bin into binThisManyTrials
+reachratesettings.binThisManyTrials=4; % how many trials to bin within each session
 reachratesettings.nBinsForZones=40; % will be nBinsForZones squared total bins, this is # bins for each x and y axis
-reachratesettings.useRateMethod=2; % 1, 2 or 3 (see explanation below)
+reachratesettings.useRateMethod=3; % 1, 2 or 3 (see explanation below)
 % There are 3 approaches available for determing reach rates
 % Code will calculate all three but only return useRateMethod
 %
@@ -192,6 +197,10 @@ reachratesettings.useRateMethod=2; % 1, 2 or 3 (see explanation below)
 % i.e., use windows specified above as acrossSess_window1, acrossSess_window2, acrossSess_window3 
 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
+
+%% Plot hallmarks of satiety
+
+plotHallmarksOfSatiety(reachrates,dataset,alltbt,metadata,trialTypes);
 
 %% shift in reach rate between trial pair
 

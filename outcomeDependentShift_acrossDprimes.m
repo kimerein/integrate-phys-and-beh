@@ -1,6 +1,6 @@
 function outcomeDependentShift_acrossDprimes(backup_alltbt,backup_trialTypes,backup_metadata)
 
-dprimesBins={[-100 0]; [0 0.5]; [0.5 1.8]; [1.8 3]}; 
+dprimesBins={[-100 0]; [0 0.5]; [0.5 1.8]; [1.8 3]}; % success
 f1=[];
 f2=[];
 for i=1:length(dprimesBins)
