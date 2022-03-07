@@ -20,7 +20,7 @@ trialTypes.reachToPelletBeforeCue_1forward=[trialTypes.reachToPelletBeforeCue(2:
 trialTypes.reachedAfterCue_1forward=[trialTypes.reachedAfterCue(2:end); 0];
 
 % which to plot
-whichToPlot='drop'; % can be 'success','delayed success','drop','cued touch','cued touch and switch color','failed cued reach','false alarm','no reach','basic'
+whichToPlot='wildcard'; % can be 'success','delayed success','drop','cued touch','cued touch and switch color','failed cued reach','false alarm','no reach','basic','wildcard'
 [plotset,trialTypes]=whichToPlotNow(whichToPlot,trialTypes,alltbt);
 
 shuffleTrialOrder=false; % if want to randomly permute trial order to test for ordering effects
@@ -66,6 +66,11 @@ dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 if compareToFirstTrial==false
     [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,'k','k',true);
+end
+[a,b]=doPlottingAndBootstrap(reachrates,[0.5 0.5 0.5],[0.5 0.5 0.5],'k',plotset.wildcard,compareToFirstTrial);
+if ~isempty(a)
+    dprimes_noLED_lasttrial=a;
+    dprimes_noLED_firsttrial=b;
 end
 % success
 nInSequence=3;
@@ -170,6 +175,11 @@ dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 if compareToFirstTrial==false
     [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,'k','m',true);
+end
+[a,b]=doPlottingAndBootstrap(reachrates,[0.5 0.5 0.5],'m','k',plotset.wildcard,compareToFirstTrial);
+if ~isempty(a)
+    dprimes_LED_lasttrial=a;
+    dprimes_LED_firsttrial=b;
 end
 % success
 nInSequence=3;
@@ -277,9 +287,13 @@ if ~strcmp(whichToPlot,'basic')
     plot(noLED_x,noLED_n,'Color','k');
     hold on;
     plot(LED_x,LED_n,'Color','r');
-    pval=signrank(dprimes_noLED_lasttrial-dprimes_noLED_firsttrial,dprimes_LED_lasttrial-dprimes_LED_firsttrial);
-    disp('pval from signrank comparing change in dprime');
-    disp(pval);
+    if ~any(~isnan(dprimes_noLED_lasttrial-dprimes_noLED_firsttrial+dprimes_LED_lasttrial-dprimes_LED_firsttrial))
+        disp('all nans');
+    else
+        pval=signrank(dprimes_noLED_lasttrial-dprimes_noLED_firsttrial,dprimes_LED_lasttrial-dprimes_LED_firsttrial);
+        disp('pval from signrank comparing change in dprime');
+        disp(pval);
+    end
 end
 
 end
@@ -314,6 +328,7 @@ plotset.cuedtouchcolor=[171 104 87]./255;
 switch whichToPlot
     case 'success'
         timeWindow=[];
+        plotset.wildcard=false;
         plotset.success=true;
         plotset.delayed=false;
         plotset.drop=false;
@@ -323,6 +338,7 @@ switch whichToPlot
         plotset.noreach=false;
     case 'delayed success'
         timeWindow=[5 9]; % from cue, in seconds
+        plotset.wildcard=false;
         plotset.success=false;
         plotset.delayed=true;
         plotset.drop=false;
@@ -332,6 +348,7 @@ switch whichToPlot
         plotset.noreach=false;
     case 'drop'
         timeWindow=[];
+        plotset.wildcard=false;
         plotset.success=false;
         plotset.delayed=false;
         plotset.drop=true;
@@ -341,6 +358,7 @@ switch whichToPlot
         plotset.noreach=false;
     case 'cued touch'
         timeWindow=[];
+        plotset.wildcard=false;
         plotset.success=false;
         plotset.delayed=false;
         plotset.drop=false;
@@ -350,6 +368,7 @@ switch whichToPlot
         plotset.noreach=false;
     case 'cued touch and switch color'
         timeWindow=[];
+        plotset.wildcard=false;
         plotset.success=false;
         plotset.delayed=false;
         plotset.drop=false;
@@ -360,6 +379,7 @@ switch whichToPlot
         plotset.cuedtouchcolor='g';
     case 'failed cued reach'
         timeWindow=[0 1.5];
+        plotset.wildcard=false;
         plotset.success=false;
         plotset.delayed=false;
         plotset.drop=false;
@@ -369,6 +389,7 @@ switch whichToPlot
         plotset.noreach=false;
     case 'false alarm'
         timeWindow=[];
+        plotset.wildcard=false;
         plotset.success=false;
         plotset.delayed=false;
         plotset.drop=false;
@@ -378,6 +399,7 @@ switch whichToPlot
         plotset.noreach=false;
     case 'no reach'
         timeWindow=[];
+        plotset.wildcard=false;
         plotset.success=false;
         plotset.delayed=false;
         plotset.drop=false;
@@ -385,8 +407,19 @@ switch whichToPlot
         plotset.failedcued=false;
         plotset.falsealarm=false;
         plotset.noreach=true;
+    case 'wildcard'
+        timeWindow=[];
+        plotset.wildcard=true;
+        plotset.success=false;
+        plotset.delayed=false;
+        plotset.drop=false;
+        plotset.cuedtouch=false;
+        plotset.failedcued=false;
+        plotset.falsealarm=false;
+        plotset.noreach=false;
     case 'basic'
         timeWindow=[];
+        plotset.wildcard=false;
         plotset.success=true;
         plotset.delayed=false;
         plotset.drop=false;
