@@ -20,7 +20,7 @@ trialTypes.reachToPelletBeforeCue_1forward=[trialTypes.reachToPelletBeforeCue(2:
 trialTypes.reachedAfterCue_1forward=[trialTypes.reachedAfterCue(2:end); 0];
 
 % which to plot
-whichToPlot='success'; % can be 'success','delayed success','drop','cued touch','cued touch and switch color','failed cued reach','false alarm','no reach','basic'
+whichToPlot='drop'; % can be 'success','delayed success','drop','cued touch','cued touch and switch color','failed cued reach','false alarm','no reach','basic'
 [plotset,trialTypes]=whichToPlotNow(whichToPlot,trialTypes,alltbt);
 
 shuffleTrialOrder=false; % if want to randomly permute trial order to test for ordering effects
@@ -202,7 +202,7 @@ trial2=[flankingTrials];
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
-[a,b]=doPlottingAndBootstrap(reachrates,'r','m','k',plotset.delayed,compareToFirstTrial);
+[a,b]=doPlottingAndBootstrap(reachrates,'r','m','k',plotset.drop,compareToFirstTrial);
 if ~isempty(a)
     dprimes_LED_lasttrial=a;
     dprimes_LED_firsttrial=b;
