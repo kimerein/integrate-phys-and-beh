@@ -41,10 +41,13 @@ for i=1:length(u)
 end
 
 cmap=colormap('cool');
-cmap_steps=linspace(1,size(cmap,1),100);
+cmap_steps=floor(linspace(1,size(cmap,1),100));
 figure();
 bincounter=1;
 rr_count=0;
+avrr=[];
+pelletsEaten=[];
+timesintosess=[];
 for i=1:size(rr.alltrials_cued,1)
     for j=1:size(rr.alltrials_cued,2)
         % for each session, for each trial
@@ -53,15 +56,24 @@ for i=1:size(rr.alltrials_cued,1)
         % get time into session
         % get number of pellets consumed so far
         curr_rr=nanmean([rr.alltrials_cued(i,j) rr.alltrials_uncued(i,j)]);
-        if bincounter~=binByNTrials
-            rr_count=rr_count+curr_rr;
-            continue
+        if j+1>size(rr.fracsThroughSess,2)
+            nextFrac=rr.fracsThroughSess(i,j);
         else
-            rr_count=rr_count+curr_rr;
-            curr_rr=curr_rr/binByNTrials;
+            nextFrac=rr.fracsThroughSess(i,j+1);
         end
         frac=rr.fracsThroughSess(i,j);
+        if isnan(nextFrac) || bincounter==binByNTrials
+            rr_count=rr_count+curr_rr;
+            rr_count=rr_count/bincounter;
+            bincounter=1;
+        else
+            rr_count=rr_count+curr_rr;
+            bincounter=bincounter+1;
+            continue
+        end
         if isnan(frac)
+            rr_count=0;
+            bincounter=1;
             continue
         end
         timeIntoSess=frac*sessionLengths(i);
@@ -78,12 +90,29 @@ for i=1:size(rr.alltrials_cued,1)
         if co>length(cmap_steps)
             co=length(cmap_steps);
         end
-        scatter(timeIntoSess,curr_rr,[],cmap(cmap_steps(co),:));
+        scatter(timeIntoSess,rr_count,[],cmap(cmap_steps(co),:));
+        avrr=[avrr rr_count];
+        pelletsEaten=[pelletsEaten pelletsSoFar];
+        timesintosess=[timesintosess timeIntoSess];
         hold on;
+        rr_count=0;
     end
 end
 xlabel('Time into session (seconds)');
 ylabel('Average reach rate (1/sec)');
+
+figure();
+scatter(pelletsEaten,avrr,[],cmap(ceil(((timesintosess+0.01)/nanmax(timesintosess+0.01))*size(cmap,1)),:));
+
+figure();
+scatter(timesintosess,avrr,[],cmap(ceil((pelletsEaten/nanmax(pelletsEaten))*size(cmap,1)),:));
+
+figure();
+scatter(timesintosess,pelletsEaten,[],cmap(ceil(((avrr+0.01)/nanmax(avrr+0.01))*size(cmap,1)),:));
+
+X=[ones(length(avrr)) timesintosess pelletsEaten];
+
+end
         
         
         

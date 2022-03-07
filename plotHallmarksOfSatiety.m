@@ -102,10 +102,17 @@ xlabel('Time into session (seconds)');
 ylabel('Average reach rate (1/sec)');
 
 figure();
-scatter(pelletsEaten,avrr);
+scatter(pelletsEaten,avrr,[],cmap(ceil(((timesintosess+0.01)/nanmax(timesintosess+0.01))*size(cmap,1)),:));
 
 figure();
-scatter(timesintosess,avrr);
+scatter(timesintosess,avrr,[],cmap(ceil((pelletsEaten/nanmax(pelletsEaten))*size(cmap,1)),:));
+
+figure();
+scatter(timesintosess,pelletsEaten,[],cmap(ceil(((avrr+0.01)/nanmax(avrr+0.01))*size(cmap,1)),:));
+
+X=[ones(length(avrr),1) timesintosess' pelletsEaten'];
+b=X\avrr';
+disp(b);
 
 end
         
