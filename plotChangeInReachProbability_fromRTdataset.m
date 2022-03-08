@@ -357,6 +357,9 @@ rangex=[nanmin([temp_uncued; temp_uncued_trial1]) nanmax([temp_uncued; temp_uncu
 binsForZones_x=rangex(1):range(rangex)/(nBinsForZones-1):rangex(2);
 rangey=[nanmin([temp_cued; temp_cued_trial1]) nanmax([temp_cued; temp_cued_trial1])];
 binsForZones_y=rangey(1):range(rangey)/(nBinsForZones-1):rangey(2);
+if rangey(1)-rangey(2)<1e5
+    return
+end
 % find which bins actually occupied
 occupiedBins=zeros(length(binsForZones_x)-1,length(binsForZones_y)-1);
 testToUse='nanmean([approach_trial1_cued approach_alltrials_cued],2)>=currbin_y(1) & nanmean([approach_trial1_cued approach_alltrials_cued],2)<=currbin_y(2) & nanmean([approach_trial1_uncued approach_alltrials_uncued],2)>=currbin_x(1) & nanmean([approach_trial1_uncued approach_alltrials_uncued],2)<=currbin_x(2)';
@@ -456,7 +459,11 @@ if useRateMethod==1 || useRateMethod==3
     end
     cmap=colormap('cool');
     k=1;
-    kstep=ceil(size(cmap,1)/nansum(~isnan(nanmean(ratein_fixed_window1,1))));
+    if ~isempty(settings.stopPlottingTrialsAfterN)
+        kstep=ceil(size(cmap,1)/settings.stopPlottingTrialsAfterN);
+    else
+        kstep=ceil(size(cmap,1)/nansum(~isnan(nanmean(ratein_fixed_window1,1))));
+    end
     approach_cued=nan(1,size(ratein_fixed_window1,2));
     approach_uncued=nan(1,size(ratein_fixed_window1,2));
     approach_alltrials_cued=nan(size(ratein_fixed_window1));
@@ -525,6 +532,9 @@ if useRateMethod==1 || useRateMethod==3
                     else
                         line([nanmean(temp_uncued) nanmean(temp_uncued)],...
                             [nanmean(temp_cued)-nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued))) nanmean(temp_cued)+nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued)))],'Color',cmap(k,:),'LineWidth',1);
+                    end
+                    if size(ratein_fixed_window1,1)==1
+                        scatter(nanmean(temp_uncued),nanmean(temp_cued),[],cmap(k,:),'filled');
                     end
                     temp_cued=backup_temp_cued;
                     temp_uncued=backup_temp_uncued;
@@ -604,6 +614,28 @@ if useRateMethod==1 || useRateMethod==3
     out.m=approach_m;
     out.trial1_alltrials_uncued=approach_trial1_uncued;
     out.trial1_alltrials_cued=approach_trial1_cued;
+    
+    nIndsForfirstRates=nanmean(n_for_init_rate);
+    upTo=settings.stopPlottingTrialsAfterN;
+    if upTo>length(approach_cued)
+        upTo=length(approach_cued);
+    end
+    quiver(nanmean(approach_uncued(1:n_for_init_rate)),nanmean(approach_cued(1:n_for_init_rate)),...
+        nanmean(approach_uncued(upTo-n_for_init_rate:upTo))-nanmean(approach_uncued(1:n_for_init_rate)),...
+        nanmean(approach_cued(upTo-n_for_init_rate:upTo))-nanmean(approach_cued(1:n_for_init_rate)),'Color','k');
+    quiver_y=nanmean(approach_cued(upTo-n_for_init_rate:upTo))-nanmean(approach_cued(1:n_for_init_rate));
+    quiver_x=nanmean(approach_uncued(upTo-n_for_init_rate:upTo))-nanmean(approach_uncued(1:n_for_init_rate));
+    quiver_m=quiver_y/quiver_x;
+    ang=atand(quiver_m);
+    if quiver_y<0 && quiver_x<0
+        ang=180+abs(ang);
+    end
+    disp(['vector angle ' num2str(ang)]);
+    proportional_m=nanmean(approach_cued(1:n_for_init_rate))/nanmean(approach_uncued(1:n_for_init_rate));
+    ang2=atand(proportional_m);
+    ang2=180+abs(ang2);
+    disp(['proportional angle ' num2str(ang2)]);
+    disp(['diff between angles ' num2str(ang2-ang)]);
     
     % Bootstrap means include all trials in session
     altogether_prob_cued=approach_alltrials_cued(1:end);
@@ -789,8 +821,13 @@ if (useRateMethod==1 || useRateMethod==3) && settings.suppressPlots==false
     figure();
     k=1;
     kstep=ceil(size(cmap,1)/length(actual_y));
+    suppressUnfilled=true;
     for i=1:length(actual_y)
-        s=scatter(actual_x(i),actual_y(i)-expected_y(i),scatterPointSize,cmap(k,:),'LineWidth',0.8);
+        if suppressUnfilled==false
+            s=scatter(actual_x(i),actual_y(i)-expected_y(i),scatterPointSize,cmap(k,:),'LineWidth',0.8);
+        else
+            s=[];
+        end
         hold on;
         k=k+kstep;
         if k>size(cmap,1)

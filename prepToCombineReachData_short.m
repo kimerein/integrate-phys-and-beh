@@ -1,7 +1,7 @@
 % script for preparing directory structure before combining data across videos and days
 
 % assign mouse and session numbers
-expt_dir='Z:\Kim\Behavior Final Data Sets\Constant sil throughout learning';
+expt_dir='Z:\Kim\Behavior Final Data Sets\Controls for learning curves';
 optoOnHere=1; % 1 if there was opto, else 0
 onlySaveOptoIfDoesNotExist=true;
 startMouseNumberingAt=1; % if want to start mouse numbers at some offset
