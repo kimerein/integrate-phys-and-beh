@@ -105,12 +105,17 @@ figure();
 scatter(pelletsEaten,avrr,[],cmap(ceil(((timesintosess+0.01)/nanmax(timesintosess+0.01))*size(cmap,1)),:));
 
 figure();
-scatter(timesintosess,avrr,[],cmap(ceil((pelletsEaten/nanmax(pelletsEaten))*size(cmap,1)),:));
+scatter(timesintosess,avrr,[],cmap(ceil(((pelletsEaten+0.01)/nanmax(pelletsEaten+0.01))*size(cmap,1)),:));
 
+% figure();
+% scatter(timesintosess,pelletsEaten,[],cmap(ceil(((avrr+0.01)/nanmax(avrr+0.01))*size(cmap,1)),:));
 figure();
-scatter(timesintosess,pelletsEaten,[],cmap(ceil(((avrr+0.01)/nanmax(avrr+0.01))*size(cmap,1)),:));
+r = -5 + (5+5)*rand(10,1);
+scatter(timesintosess,pelletsEaten,[],'k');
 
-X=[ones(length(avrr)) timesintosess pelletsEaten];
+X=[ones(length(avrr),1) timesintosess' pelletsEaten'];
+b=X\avrr';
+disp(b);
 
 end
         

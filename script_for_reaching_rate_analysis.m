@@ -6,7 +6,7 @@
 
 %% load in data
 
-exptDataDir='Z:\Kim\for_orchestra\combineReachData\O2 output\alltbt02Mar2022145751\'; % directory containing experimental data
+exptDataDir='Z:\Kim\for_orchestra\combineReachData\O2 output\alltbt07Mar2022151900\'; % directory containing experimental data
 
 if ismac==true
     sprtr='/';
@@ -32,7 +32,7 @@ backup.trialTypes=trialTypes;
 backup.metadata=metadata;
 
 % Optional: correct any LED trials for blinded control mice
-[alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,[4 5 19]);
+% [alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,[4 5 19]);
 
 % Optional: discard preemptive
 [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
@@ -45,6 +45,9 @@ settings=RTanalysis_settings('display settings','clear');
 trialTypes=getLongITIs(alltbt,trialTypes,settings);
 
 trialTypes=getTimingOfOpto(alltbt,'optoOn',trialTypes,settings.multipleOptoTimes);
+if ~isfield(trialTypes,'optoGroup')
+    trialTypes.optoGroup=zeros(size(trialTypes.led));
+end
 trialTypes.led(~isnan(trialTypes.optoGroup))=1;
 
 trialTypes.mouseid=metadata.mouseid;
@@ -85,7 +88,7 @@ tbt_filter.sortField='dprimes';
 % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
 % tbt_filter.range_values=[1     2     3     6     7     8     9    10    11    12    14    15    17    18];
 % tbt_filter.range_values=[0.9 2];
-tbt_filter.range_values=[-100 0];
+tbt_filter.range_values=[0.1 1.6];
 tbt_filter.name=[tbt_filter.sortField num2str(tbt_filter.range_values(1)) 'to' num2str(tbt_filter.range_values(2))];
 temp=tbt_filter.name;
 temp(~ismember(temp,['A':'Z' 'a':'z' '0':'9']))=''; 
@@ -163,12 +166,13 @@ reachratesettings.acrossSess_window2=[7 reachratesettings.maxTrialLength]; % bew
 reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength -1]; 
 reachratesettings.scatterPointSize=50; % size for points in scatter plot
 reachratesettings.addSatietyLines=false; % whether to add proportionality lines to figure
-reachratesettings.stopPlottingTrialsAfterN=170; % will stop plotting after this nth trial in session, also only use this many trials for regression fit -- see next line
+reachratesettings.stopPlottingTrialsAfterN=183; % will stop plotting after this nth trial in session, also only use this many trials for regression fit -- see next line
+% reachratesettings.stopPlottingTrialsAfterN=140; % will stop plotting after this nth trial in session, also only use this many trials for regression fit -- see next line
 reachratesettings.showFitLine=true; % whether to show linear fit to change across trials
 reachratesettings.useWindowsForUncued=[3]; % to use window2 or window3 or both for the uncued reach rate
 reachratesettings.initWindows=[]; % empty if want to calculate from dataset
 reachratesettings.addSessionLines=false; % for no averaging across sessions plot, whether to connect trial bins within same session with lines
-reachratesettings.binTrialsForAvAcrossSess=false; % whether to bin multiple trials for first figure, will bin into binThisManyTrials
+reachratesettings.binTrialsForAvAcrossSess=true; % whether to bin multiple trials for first figure, will bin into binThisManyTrials
 reachratesettings.binThisManyTrials=4; % how many trials to bin within each session
 reachratesettings.nBinsForZones=40; % will be nBinsForZones squared total bins, this is # bins for each x and y axis
 reachratesettings.useRateMethod=3; % 1, 2 or 3 (see explanation below)
