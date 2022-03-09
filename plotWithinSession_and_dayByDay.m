@@ -100,8 +100,8 @@ for i=1:length(days)
     reachratesettings.scatterPointSize=50; % size for points in scatter plot
     reachratesettings.addSatietyLines=false; % whether to add proportionality lines to figure
     % reachratesettings.stopPlottingTrialsAfterN=500; % will stop plotting after this nth trial in session, also only use this many trials for regression fit -- see next line, also controls colormap
-%     reachratesettings.stopPlottingTrialsAfterN=175; % will stop plotting
-    reachratesettings.stopPlottingTrialsAfterN=150; % will stop plotting
+%     reachratesettings.stopPlottingTrialsAfterN=190; % will stop plotting
+    reachratesettings.stopPlottingTrialsAfterN=160; % will stop plotting
     % after this nth trial in session, also only use this many trials for
     % regression fit -- see next line, also controls colormap
     reachratesettings.showFitLine=true; % whether to show linear fit to change across trials
@@ -111,7 +111,7 @@ for i=1:length(days)
     reachratesettings.binTrialsForAvAcrossSess=true; % whether to bin multiple trials for first figure, will bin into binThisManyTrials
 %     reachratesettings.binThisManyTrials=30; % how many trials to bin within each session
 %     reachratesettings.binThisManyTrials=70; % how many trials to bin within each session
-    reachratesettings.binThisManyTrials=40; % how many trials to bin within each session
+    reachratesettings.binThisManyTrials=160; % how many trials to bin within each session
     reachratesettings.nBinsForZones=40; % will be nBinsForZones squared total bins, this is # bins for each x and y axis
     reachratesettings.useRateMethod=3; % 1, 2 or 3 (see explanation below)
     
@@ -126,6 +126,8 @@ for i=1:length(days)
         tempuncued(reachratesettings.stopPlottingTrialsAfterN+1:end)=nan;
         tempcued(reachratesettings.stopPlottingTrialsAfterN+1:end)=nan;
     end
+    maxReachRate=2; % in reaches per sec
+    tempcued(tempcued>maxReachRate)=maxReachRate;
     daybyday_uncued{i}=downSampAv(tempuncued,reachratesettings.binThisManyTrials);
     daybyday_cued{i}=downSampAv(tempcued,reachratesettings.binThisManyTrials);
     tempuncued=daybyday_uncued{i};

@@ -90,17 +90,18 @@ for i=1:length(days)
     reachratesettings.minTrialLength=-2; % wrt cue, in sec
     reachratesettings.suppressPlots=true;
     % sec wrt cue onset
-%     reachratesettings.acrossSess_window1=[0.05 1]; % cued window [0.05 1]
+    reachratesettings.acrossSess_window1=[0.05 1]; % cued window [0.05 1]
     % reachratesettings.acrossSess_window1=[4 7];
     % note that after mouse gets a pellet, reaching is suppressed
     reachratesettings.acrossSess_window2=[7 reachratesettings.maxTrialLength]; % beware reach suppression after a success
-    reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength -1];
+%     reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength -1];
+    reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength 0];
 %     reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength -0.35];
     reachratesettings.scatterPointSize=50; % size for points in scatter plot
     reachratesettings.addSatietyLines=false; % whether to add proportionality lines to figure
     % reachratesettings.stopPlottingTrialsAfterN=500; % will stop plotting after this nth trial in session, also only use this many trials for regression fit -- see next line, also controls colormap
-%     reachratesettings.stopPlottingTrialsAfterN=175; % will stop plotting
-    reachratesettings.stopPlottingTrialsAfterN=150; % will stop plotting
+    reachratesettings.stopPlottingTrialsAfterN=210; % will stop plotting
+%     reachratesettings.stopPlottingTrialsAfterN=160; % will stop plotting
     % after this nth trial in session, also only use this many trials for
     % regression fit -- see next line, also controls colormap
     reachratesettings.showFitLine=true; % whether to show linear fit to change across trials
@@ -109,8 +110,8 @@ for i=1:length(days)
     reachratesettings.addSessionLines=false; % for no averaging across sessions plot, whether to connect trial bins within same session with lines
     reachratesettings.binTrialsForAvAcrossSess=true; % whether to bin multiple trials for first figure, will bin into binThisManyTrials
 %     reachratesettings.binThisManyTrials=30; % how many trials to bin within each session
-%     reachratesettings.binThisManyTrials=70; % how many trials to bin within each session
-    reachratesettings.binThisManyTrials=50; % how many trials to bin within each session
+    reachratesettings.binThisManyTrials=70; % how many trials to bin within each session
+%     reachratesettings.binThisManyTrials=40; % how many trials to bin within each session
     reachratesettings.nBinsForZones=40; % will be nBinsForZones squared total bins, this is # bins for each x and y axis
     reachratesettings.useRateMethod=3; % 1, 2 or 3 (see explanation below)
     
@@ -125,6 +126,11 @@ for i=1:length(days)
         tempuncued(reachratesettings.stopPlottingTrialsAfterN+1:end)=nan;
         tempcued(reachratesettings.stopPlottingTrialsAfterN+1:end)=nan;
     end
+%     if i==27
+%         tempcued(164:end)=nan; % huge ridiculous outlier
+%     end
+    [~,rmi1]=rmoutliers(tempuncued);
+    [~,rmi2]=rmoutliers(tempcued);
     daybyday_uncued{i}=downSampAv(tempuncued,reachratesettings.binThisManyTrials);
     daybyday_cued{i}=downSampAv(tempcued,reachratesettings.binThisManyTrials);
     tempuncued=daybyday_uncued{i};
@@ -146,8 +152,8 @@ xlim([0 maxuncued]);
 ylim([0 maxcued]);
 line([0 maxuncued],[0 maxuncued],'Color',[0.95 0.95 0.95],'LineWidth',3); hold on;
 axis square;
-ylim([0 0.9]);
-xlim([0 0.45]);
+ylim([0 1.2]);
+xlim([0 0.52]);
 % daspect([1 1 1]);
 imgcounter=1;
 for i=1:length(days)
