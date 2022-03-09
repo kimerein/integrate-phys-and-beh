@@ -1,4 +1,4 @@
-function plotWithinSession_and_dayByDay(alltbt,metadata,trialTypes,startSessId,endSessId)
+function plotWithinSession_and_dayByDay(alltbt,metadata,trialTypes,startSessId,endSessId,saveFigDir,imgType,outlierTest)
 
 days=startSessId:endSessId;
 daybyday_uncued=cell(1,length(days));
@@ -6,6 +6,8 @@ daybyday_cued=cell(1,length(days));
 backup_alltbt=alltbt;
 backup_metadata=metadata;
 backup_trialTypes=trialTypes;
+maxuncued=0;
+maxcued=0;
 for i=1:length(days)
     alltbt=backup_alltbt;
     metadata=backup_metadata;
@@ -96,10 +98,12 @@ for i=1:length(days)
     % note that after mouse gets a pellet, reaching is suppressed
     reachratesettings.acrossSess_window2=[7 reachratesettings.maxTrialLength]; % beware reach suppression after a success
     reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength -1];
+%     reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength -0.35];
     reachratesettings.scatterPointSize=50; % size for points in scatter plot
     reachratesettings.addSatietyLines=false; % whether to add proportionality lines to figure
     % reachratesettings.stopPlottingTrialsAfterN=500; % will stop plotting after this nth trial in session, also only use this many trials for regression fit -- see next line, also controls colormap
-    reachratesettings.stopPlottingTrialsAfterN=175; % will stop plotting
+%     reachratesettings.stopPlottingTrialsAfterN=175; % will stop plotting
+    reachratesettings.stopPlottingTrialsAfterN=150; % will stop plotting
     % after this nth trial in session, also only use this many trials for
     % regression fit -- see next line, also controls colormap
     reachratesettings.showFitLine=true; % whether to show linear fit to change across trials
@@ -113,6 +117,9 @@ for i=1:length(days)
     
     reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
     close all;
+    if isempty(reachrates)
+        continue
+    end
     if ~isempty(reachratesettings.stopPlottingTrialsAfterN)
         tempuncued=reachrates.uncued;
         tempcued=reachrates.cued;
@@ -121,19 +128,61 @@ for i=1:length(days)
     end
     daybyday_uncued{i}=downSampAv(tempuncued,reachratesettings.binThisManyTrials);
     daybyday_cued{i}=downSampAv(tempcued,reachratesettings.binThisManyTrials);
+    tempuncued=daybyday_uncued{i};
+    tempcued=daybyday_cued{i};
+    if any(tempuncued(~isnan(tempuncued))>maxuncued)
+        maxuncued=nanmax(daybyday_uncued{i});
+    end
+    if any(tempcued(~isnan(tempcued))>maxcued)
+        maxcued=nanmax(daybyday_cued{i});
+    end
 end
 
 cmap=colormap('cool');
 k=1;
 kstep=ceil(size(cmap,1)/length(days));
-figure();
+f=figure();
+xlim([0 maxuncued]);
+ylim([0 maxcued]);
+line([0 maxuncued],[0 maxuncued],'Color',[0.95 0.95 0.95],'LineWidth',3); hold on;
+axis square;
+imgcounter=1;
 for i=1:length(days)
     withinday_maptocmap=1:ceil(size(cmap,1)/nansum(~isnan(daybyday_uncued{i}))):size(cmap,1);
     tempuncued=daybyday_uncued{i};
     tempcued=daybyday_cued{i};
-    scatter(tempuncued(~isnan(tempuncued)),tempcued(~isnan(tempcued)),[],cmap(withinday_maptocmap(1:nansum(~isnan(daybyday_uncued{i}))),:),'filled');
-    hold on;
-    plot(daybyday_uncued{i},daybyday_cued{i},'Color',cmap(k,:));
+    if isempty(tempuncued)
+        continue
+    end
+    tempuncued=tempuncued(~isnan(tempuncued));
+    tempcued=tempcued(~isnan(tempcued));
+    if ~isempty(saveFigDir)
+        templine_uncued=daybyday_uncued{i};
+        templine_cued=daybyday_cued{i};
+        for j=1:length(tempuncued)
+            if ~isempty(outlierTest)
+                if eval(outlierTest) % e.g., tempcued(j)>1 && i<10
+                    continue 
+                end
+            end
+            scatter(tempuncued(j),tempcued(j),50,cmap(withinday_maptocmap(j),:),'filled');
+            hold on;
+            if j~=1
+                plot(templine_uncued(1:j),templine_cued(1:j),'Color',cmap(k,:),'LineWidth',1.5);
+            end
+            saveas(f,[saveFigDir 'image' sprintf('%03d',imgcounter) imgType]);
+            imgcounter=imgcounter+1;
+        end
+    else
+        if ~isempty(outlierTest)
+            if eval(outlierTest) % e.g., any(tempcued>1) && i<10
+                continue
+            end
+        end
+        scatter(tempuncued,tempcued,50,cmap(withinday_maptocmap(1:nansum(~isnan(daybyday_uncued{i}))),:),'filled');
+        hold on;
+        plot(daybyday_uncued{i},daybyday_cued{i},'Color',cmap(k,:),'LineWidth',1.5);
+    end
     k=k+kstep;
     if k>size(cmap,1)
         k=size(cmap,1);

@@ -35,7 +35,7 @@ backup.metadata=metadata;
 [alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,[4 5 19]);
 
 % Optional: discard preemptive
-% [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
+[alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
 
 %% choose additional settings for reaction time analysis
 
@@ -90,10 +90,9 @@ trialTypes.sessid=metadata.sessid;
 tbt_filter.sortField='mouseid';
 % tbt_filter.sortField='fractionThroughSess';
 % tbt_filter.sortField='dprimes';
-tbt_filter.range_values=[2 3 4 5 6 7 8 9 10 11 12 14 15 17 18 19]; % which mice start at non-learning 
 % tbt_filter.range_values=[1 2 4 5 6 7 8 9 10 11 12 17 18 19];
 % tbt_filter.range_values=[1     2     3     6     7     8     9    10    11    12    14    15    17    18];
-% tbt_filter.range_values=[1.5 2.5];
+tbt_filter.range_values=[0.2 0.8];
 % tbt_filter.range_values=[0.1 1];
 tbt_filter.name=[tbt_filter.sortField num2str(tbt_filter.range_values(1)) 'to' num2str(tbt_filter.range_values(2))];
 temp=tbt_filter.name;
@@ -129,7 +128,7 @@ test.templateSequence2_cond=eval(trial1);
 % trial2='trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3';
 % trial2='trialTypes.optoGroup~=1 & trialTypes.led==0 & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
 % trial2='trialTypes.optoGroup~=1 & trialTypes.led==0';
-trial2='trialTypes.optoGroup~=1 & trialTypes.led==0';
+trial2='trialTypes.optoGroup~=1 & trialTypes.led==1';
 test.trial2=trial2;
 test.templateSequence2_end=eval(trial2);
 test.fillInBetweenWithAnything=true; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1
@@ -151,8 +150,8 @@ skipCorrected=true;
 
 % last argument chooses type of plot
 % see function plotBehaviorEventFx.m for options
-plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching');
-% plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching_cdf'); 
+% plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching');
+plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching_cdf'); 
 
 %% plot trial to trial change in reach CDF
 
@@ -260,30 +259,3 @@ outcomeDependentShift_wrapper(alltbt,trialTypes,metadata,saveDir,[],[]);
 
 alltbt=backup.alltbt; trialTypes=backup.trialTypes; metadata=backup.metadata;
 outcomeDependentShift_acrossDprimes(alltbt,trialTypes,metadata);
-
-%% plot change in behavior within session and across days for a single mouse (or average mouse)
-
-% if want to do average mouse, use nth_session instead of sessid
-doAverageMouse=true;
-if doAverageMouse==true
-    backup_sessid=alltbt.sessid;
-    alltbt.sessid=metadata.nth_session;
-    metadata.sessid=metadata.nth_session;
-    trialTypes.sessid=metadata.nth_session;
-    start_sessid=nanmin(metadata.nth_session);
-%     end_sessid=nanmax(metadata.nth_session); % but may be quite noisy
-    end_sessid=30;
-else
-    start_sessid=33;
-    end_sessid=71;
-end
-% outlierTest='tempcued(j)>1 && i<10'; % make empty if don't want to remove any outlier points
-outlierTest=[]; % make empty if don't want to remove any outlier points
-% learningFigSaveDir='Z:\Kim\example mouse learning\';
-learningFigSaveDir=[];
-plotWithinSession_and_dayByDay(alltbt,metadata,trialTypes,start_sessid,end_sessid,learningFigSaveDir,'.png',outlierTest);
-if doAverageMouse==true
-    alltbt.sessid=backup_sessid;
-    metadata.sessid=backup_sessid;
-    trialTypes.sessid=backup_sessid;
-end

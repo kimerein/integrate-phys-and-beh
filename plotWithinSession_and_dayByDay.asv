@@ -3,7 +3,13 @@ function plotWithinSession_and_dayByDay(alltbt,metadata,trialTypes,startSessId,e
 days=startSessId:endSessId;
 daybyday_uncued=cell(1,length(days));
 daybyday_cued=cell(1,length(days));
+backup_alltbt=alltbt;
+backup_metadata=metadata;
+backup_trialTypes=trialTypes;
 for i=1:length(days)
+    alltbt=backup_alltbt;
+    metadata=backup_metadata;
+    trialTypes=backup_trialTypes;
     day=days(i);
     disp(['Day ' i]);
 
@@ -106,26 +112,46 @@ for i=1:length(days)
     reachratesettings.useRateMethod=3; % 1, 2 or 3 (see explanation below)
     
     reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
-    if ~isempty(settings.stopPlottingTrialsAfterN)
+    close all;
+    if ~isempty(reachratesettings.stopPlottingTrialsAfterN)
         tempuncued=reachrates.uncued;
         tempcued=reachrates.cued;
-        tempuncued=reachrates.uncued(settings.stopPlottingTrialsAfterN+1:end)=nan;
-        tempcued=reachrates.cued(settings.stopPlottingTrialsAfterN+1:end)=nan;
-    daybyday_uncued{i}=downSampAv(,reachratesettings.binThisManyTrials);
-    daybyday_cued{i}=downSampAv(reachrates.cued,reachratesettings.binThisManyTrials);
+        tempuncued(reachratesettings.stopPlottingTrialsAfterN+1:end)=nan;
+        tempcued(reachratesettings.stopPlottingTrialsAfterN+1:end)=nan;
+    end
+    daybyday_uncued{i}=downSampAv(tempuncued,reachratesettings.binThisManyTrials);
+    daybyday_cued{i}=downSampAv(tempcued,reachratesettings.binThisManyTrials);
 end
 
 cmap=colormap('cool');
 k=1;
-    if ~isempty(settings.stopPlottingTrialsAfterN)
-        kstep=ceil(size(cmap,1)/settings.stopPlottingTrialsAfterN);
-    else
-        kstep=ceil(size(cmap,1)/nansum(~isnan(nanmean(ratein_fixed_window1,1))));
-    end
-    
-    k=k+kstep;
-        if k>size(cmap,1)
-            k=size(cmap,1);
+kstep=ceil(size(cmap,1)/length(days));
+figure();
+doInterp=true;
+for i=1:length(days)
+    withinday_maptocmap=1:ceil(size(cmap,1)/nansum(~isnan(daybyday_uncued{i}))):size(cmap,1);
+    tempuncued=daybyday_uncued{i};
+    tempcued=daybyday_cued{i};
+    scatter(tempuncued(~isnan(tempuncued)),tempcued(~isnan(tempcued)),[],cmap(withinday_maptocmap(1:nansum(~isnan(daybyday_uncued{i}))),:),'filled');
+    hold on;
+    if doInterp==true
+        addUp_uncued=[];
+        addUp_cued=[];
+        for j=1:length(tempuncued)-1
+            vq=interp1(tempuncued(j:j+1),tempcued(j:j+1),tempuncued(j):0.01:tempuncued(j+1),'linear');
+            addUp_cued=[addUp_cued vq];
+            addUp_uncued=[addUp_uncued tempuncued(j):0.01:tempuncued(j+1)];
         end
-
+        withinday_maptocmap=1:ceil(size(cmap,1)/length(addUp_uncued)):size(cmap,1);
+        for j=1:length(addUp_uncued)-1
+            line([addUp_uncued(j) addUp_uncued(j+1)],[addUp_cued(j) addUp_cued(j+1)],'Color',cmap(
+        
+    plot(daybyday_uncued{i},daybyday_cued{i},'Color',cmap(k,:),'LineWidth',2);
+    k=k+kstep;
+    if k>size(cmap,1)
+        k=size(cmap,1);
+    end
+end
+xlabel('Uncued reach rate (1/sec)');
+ylabel('Cued reach rate (1/sec)');
 end
