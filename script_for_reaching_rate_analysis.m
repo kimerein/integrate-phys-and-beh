@@ -295,7 +295,7 @@ if doAverageMouse==true
     
     alltbt.sessid(backup_sessid==75)=1;
     alltbt.sessid(backup_sessid==76)=21;
-    alltbt.sessid(backup_sessid==77)=22;
+    alltbt.sessid(backup_sessid==77)=22; 
     alltbt.sessid(backup_sessid==78)=23;
     
     alltbt.sessid(backup_sessid==153)=1;
@@ -303,10 +303,10 @@ if doAverageMouse==true
     alltbt.sessid(backup_sessid==155)=7;
     alltbt.sessid(backup_sessid==156)=9;
     alltbt.sessid(backup_sessid==157)=13;
-    alltbt.sessid(backup_sessid==158)=15;
+    alltbt.sessid(backup_sessid==158)=16; % 15 watched video there is some cued reaching but also to distractor and box was open, not sure
     alltbt.sessid(backup_sessid==159)=17;
-    alltbt.sessid(backup_sessid==160)=19; %
-    alltbt.sessid(backup_sessid==161)=21;
+    alltbt.sessid(backup_sessid==160)=22; % 19 so much preemptive reaching
+    alltbt.sessid(backup_sessid==161)=21; 
     alltbt.sessid(backup_sessid==162)=23;
     
     alltbt.sessid(backup_sessid==315)=6;
@@ -326,7 +326,7 @@ if doAverageMouse==true
     alltbt.sessid(backup_sessid==641)=9;
     alltbt.sessid(backup_sessid==642)=11;
     alltbt.sessid(backup_sessid==643)=13;
-    alltbt.sessid(backup_sessid==644)=21;
+    alltbt.sessid(backup_sessid==644)=21; 
     alltbt.sessid(backup_sessid==645)=23;
     alltbt.sessid(backup_sessid==646)=24; % 25
     alltbt.sessid(backup_sessid==647)=26;
@@ -355,7 +355,7 @@ if doAverageMouse==true
 %     start_sessid=nanmin(metadata.nth_session);
 %     end_sessid=nanmax(metadata.nth_session); % but may be quite noisy
     start_sessid=1;
-    end_sessid=30;
+    end_sessid=26;
 else
     start_sessid=33;
     end_sessid=71;

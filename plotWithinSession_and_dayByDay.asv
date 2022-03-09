@@ -13,7 +13,7 @@ for i=1:length(days)
     metadata=backup_metadata;
     trialTypes=backup_trialTypes;
     day=days(i);
-    disp(['Day ' i]);
+    disp(['Day ' num2str(i)]);
 
     % perform any filtering on alltbt
     % for example, filter by d-prime
@@ -24,9 +24,6 @@ for i=1:length(days)
     saveDir=['/Volumes/Neurobio/MICROSCOPE/Kim/RT pairs data sets/' temp]; % where to save details of alltbt filtering and RT pairs data set
     
     % filter settings
-    alltbt.mouseid=metadata.mouseid;
-    alltbt.sessid=metadata.sessid;
-    trialTypes.sessid=metadata.sessid;
     % tbt_filter.sortField='mouseid';
     tbt_filter.sortField='sessid';
     % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
@@ -93,7 +90,7 @@ for i=1:length(days)
     reachratesettings.minTrialLength=-2; % wrt cue, in sec
     reachratesettings.suppressPlots=true;
     % sec wrt cue onset
-    reachratesettings.acrossSess_window1=[0.05 1]; % cued window [0.05 1]
+%     reachratesettings.acrossSess_window1=[0.05 1]; % cued window [0.05 1]
     % reachratesettings.acrossSess_window1=[4 7];
     % note that after mouse gets a pellet, reaching is suppressed
     reachratesettings.acrossSess_window2=[7 reachratesettings.maxTrialLength]; % beware reach suppression after a success
@@ -111,8 +108,9 @@ for i=1:length(days)
     reachratesettings.initWindows=[]; % empty if want to calculate from dataset
     reachratesettings.addSessionLines=false; % for no averaging across sessions plot, whether to connect trial bins within same session with lines
     reachratesettings.binTrialsForAvAcrossSess=true; % whether to bin multiple trials for first figure, will bin into binThisManyTrials
-    reachratesettings.binThisManyTrials=30; % how many trials to bin within each session
-    reachratesettings.binThisManyTrials=30; % how many trials to bin within each session
+%     reachratesettings.binThisManyTrials=30; % how many trials to bin within each session
+%     reachratesettings.binThisManyTrials=70; % how many trials to bin within each session
+    reachratesettings.binThisManyTrials=50; % how many trials to bin within each session
     reachratesettings.nBinsForZones=40; % will be nBinsForZones squared total bins, this is # bins for each x and y axis
     reachratesettings.useRateMethod=3; % 1, 2 or 3 (see explanation below)
     
@@ -141,13 +139,15 @@ end
 
 cmap=colormap('cool');
 k=1;
-kstep=ceil(size(cmap,1)/length(days));
+kstep=ceil(size(cmap,1)/(length(days)-1));
 % f=figure('Position',[50 50 1000 1000]);
 f=figure();
 xlim([0 maxuncued]);
 ylim([0 maxcued]);
 line([0 maxuncued],[0 maxuncued],'Color',[0.95 0.95 0.95],'LineWidth',3); hold on;
 axis square;
+ylim([0 0.9]);
+xlim([0 0.45]);
 % daspect([1 1 1]);
 imgcounter=1;
 for i=1:length(days)
@@ -155,6 +155,10 @@ for i=1:length(days)
     tempuncued=daybyday_uncued{i};
     tempcued=daybyday_cued{i};
     if isempty(tempuncued)
+        k=k+kstep;
+        if k>size(cmap,1)
+            k=size(cmap,1);
+        end
         continue
     end
     tempuncued=tempuncued(~isnan(tempuncued));

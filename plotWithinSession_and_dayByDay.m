@@ -94,7 +94,8 @@ for i=1:length(days)
     % reachratesettings.acrossSess_window1=[4 7];
     % note that after mouse gets a pellet, reaching is suppressed
     reachratesettings.acrossSess_window2=[7 reachratesettings.maxTrialLength]; % beware reach suppression after a success
-    reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength -1];
+%     reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength -1];
+    reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength 0];
 %     reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength -0.35];
     reachratesettings.scatterPointSize=50; % size for points in scatter plot
     reachratesettings.addSatietyLines=false; % whether to add proportionality lines to figure
@@ -110,7 +111,7 @@ for i=1:length(days)
     reachratesettings.binTrialsForAvAcrossSess=true; % whether to bin multiple trials for first figure, will bin into binThisManyTrials
 %     reachratesettings.binThisManyTrials=30; % how many trials to bin within each session
 %     reachratesettings.binThisManyTrials=70; % how many trials to bin within each session
-    reachratesettings.binThisManyTrials=50; % how many trials to bin within each session
+    reachratesettings.binThisManyTrials=40; % how many trials to bin within each session
     reachratesettings.nBinsForZones=40; % will be nBinsForZones squared total bins, this is # bins for each x and y axis
     reachratesettings.useRateMethod=3; % 1, 2 or 3 (see explanation below)
     
@@ -139,13 +140,15 @@ end
 
 cmap=colormap('cool');
 k=1;
-kstep=ceil(size(cmap,1)/length(days));
+kstep=ceil(size(cmap,1)/(length(days)-1));
 % f=figure('Position',[50 50 1000 1000]);
 f=figure();
 xlim([0 maxuncued]);
 ylim([0 maxcued]);
 line([0 maxuncued],[0 maxuncued],'Color',[0.95 0.95 0.95],'LineWidth',3); hold on;
 axis square;
+ylim([0 0.9]);
+xlim([0 0.45]);
 % daspect([1 1 1]);
 imgcounter=1;
 for i=1:length(days)
@@ -153,6 +156,10 @@ for i=1:length(days)
     tempuncued=daybyday_uncued{i};
     tempcued=daybyday_cued{i};
     if isempty(tempuncued)
+        k=k+kstep;
+        if k>size(cmap,1)
+            k=size(cmap,1);
+        end
         continue
     end
     tempuncued=tempuncued(~isnan(tempuncued));
