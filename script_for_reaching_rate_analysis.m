@@ -266,84 +266,87 @@ outcomeDependentShift_acrossDprimes(alltbt,trialTypes,metadata);
 % if want to do average mouse, use nth_session instead of sessid
 doAverageMouse=true;
 if doAverageMouse==true
+    alltbt.sessid=metadata.sessid;
     backup_sessid=alltbt.sessid;
     
     % for mice where didn't analyze each day, fix nth_session
-    alltbt.sessid(alltbt.sessid==1)=1;
-    alltbt.sessid(alltbt.sessid==2)=3;
-    alltbt.sessid(alltbt.sessid==3)=7;
-    alltbt.sessid(alltbt.sessid==4)=9;
+    alltbt.sessid(backup_sessid==1)=1;
+    alltbt.sessid(backup_sessid==2)=3;
+    alltbt.sessid(backup_sessid==3)=7;
+    alltbt.sessid(backup_sessid==4)=9;
     
-    alltbt.sessid(alltbt.sessid==5)=2;
-    alltbt.sessid(alltbt.sessid==6)=4;
-    alltbt.sessid(alltbt.sessid==7)=8;
-    alltbt.sessid(alltbt.sessid==8)=10;
-    alltbt.sessid(alltbt.sessid==9)=12;
-    alltbt.sessid(alltbt.sessid==10)=14;
-    alltbt.sessid(alltbt.sessid==11)=16;
+    alltbt.sessid(backup_sessid==5)=2;
+    alltbt.sessid(backup_sessid==6)=4;
+    alltbt.sessid(backup_sessid==7)=8;
+    alltbt.sessid(backup_sessid==8)=10;
+    alltbt.sessid(backup_sessid==9)=12;
+    alltbt.sessid(backup_sessid==10)=14; 
+    alltbt.sessid(backup_sessid==11)=19; % 16
     
-    alltbt.sessid(alltbt.sessid==16)=2;
-    alltbt.sessid(alltbt.sessid==17)=4;
-    alltbt.sessid(alltbt.sessid==18)=6;
-    alltbt.sessid(alltbt.sessid==19)=20;
-    alltbt.sessid(alltbt.sessid==20)=21;
-    alltbt.sessid(alltbt.sessid==21)=22;
+    alltbt.sessid(backup_sessid==16)=2;
+    alltbt.sessid(backup_sessid==17)=4;
+    alltbt.sessid(backup_sessid==18)=6;
+    alltbt.sessid(backup_sessid==19)=20;
+    alltbt.sessid(backup_sessid==20)=21;
+    alltbt.sessid(backup_sessid==21)=27; % 22 
     
-    alltbt.sessid(alltbt.sessid==37)=3;
-    alltbt.sessid(alltbt.sessid==38)=4;
+    alltbt.sessid(backup_sessid==37)=3;
+    alltbt.sessid(backup_sessid==38)=4;
     
-    alltbt.sessid(alltbt.sessid==75)=1;
-    alltbt.sessid(alltbt.sessid==76)=21;
-    alltbt.sessid(alltbt.sessid==77)=22;
-    alltbt.sessid(alltbt.sessid==78)=23;
+    alltbt.sessid(backup_sessid==75)=1;
+    alltbt.sessid(backup_sessid==76)=21;
+    alltbt.sessid(backup_sessid==77)=22;
+    alltbt.sessid(backup_sessid==78)=23;
     
-    alltbt.sessid(alltbt.sessid==153)=1;
-    alltbt.sessid(alltbt.sessid==154)=5;
-    alltbt.sessid(alltbt.sessid==155)=7;
-    alltbt.sessid(alltbt.sessid==156)=9;
-    alltbt.sessid(alltbt.sessid==157)=13;
-    alltbt.sessid(alltbt.sessid==158)=15;
-    alltbt.sessid(alltbt.sessid==159)=17;
-    alltbt.sessid(alltbt.sessid==160)=19;
-    alltbt.sessid(alltbt.sessid==161)=21;
-    alltbt.sessid(alltbt.sessid==162)=23;
+    alltbt.sessid(backup_sessid==153)=1;
+    alltbt.sessid(backup_sessid==154)=5;
+    alltbt.sessid(backup_sessid==155)=7;
+    alltbt.sessid(backup_sessid==156)=9;
+    alltbt.sessid(backup_sessid==157)=13;
+    alltbt.sessid(backup_sessid==158)=15;
+    alltbt.sessid(backup_sessid==159)=17;
+    alltbt.sessid(backup_sessid==160)=19; %
+    alltbt.sessid(backup_sessid==161)=21;
+    alltbt.sessid(backup_sessid==162)=23;
     
-    alltbt.sessid(alltbt.sessid==315)=6;
-    alltbt.sessid(alltbt.sessid==316)=10;
-    alltbt.sessid(alltbt.sessid==317)=12;
-    alltbt.sessid(alltbt.sessid==318)=14;
-    alltbt.sessid(alltbt.sessid==319)=16;
-    alltbt.sessid(alltbt.sessid==320)=20;
-    alltbt.sessid(alltbt.sessid==321)=22;
-    alltbt.sessid(alltbt.sessid==322)=24;
-    alltbt.sessid(alltbt.sessid==323)=27;
-    alltbt.sessid(alltbt.sessid==324)=29;
+    alltbt.sessid(backup_sessid==315)=6;
+    alltbt.sessid(backup_sessid==316)=10;
+    alltbt.sessid(backup_sessid==317)=12;
+    alltbt.sessid(backup_sessid==318)=14;
+    alltbt.sessid(backup_sessid==319)=16;
+    alltbt.sessid(backup_sessid==320)=20;
+    alltbt.sessid(backup_sessid==321)=22;
+    alltbt.sessid(backup_sessid==322)=24; %
+    alltbt.sessid(backup_sessid==323)=27; %
+    alltbt.sessid(backup_sessid==324)=29;
     
-    alltbt.sessid(alltbt.sessid==638)=1;
-    alltbt.sessid(alltbt.sessid==639)=3;
-    alltbt.sessid(alltbt.sessid==640)=7;
-    alltbt.sessid(alltbt.sessid==641)=9;
-    alltbt.sessid(alltbt.sessid==642)=11;
-    alltbt.sessid(alltbt.sessid==643)=13;
-    alltbt.sessid(alltbt.sessid==644)=21;
-    alltbt.sessid(alltbt.sessid==645)=23;
-    alltbt.sessid(alltbt.sessid==646)=25;
-    alltbt.sessid(alltbt.sessid==647)=26;
-    alltbt.sessid(alltbt.sessid==648)=29;
-    alltbt.sessid(alltbt.sessid==649)=30;
+    alltbt.sessid(backup_sessid==638)=1;
+    alltbt.sessid(backup_sessid==639)=3;
+    alltbt.sessid(backup_sessid==640)=7;
+    alltbt.sessid(backup_sessid==641)=9;
+    alltbt.sessid(backup_sessid==642)=11;
+    alltbt.sessid(backup_sessid==643)=13;
+    alltbt.sessid(backup_sessid==644)=21;
+    alltbt.sessid(backup_sessid==645)=23;
+    alltbt.sessid(backup_sessid==646)=24; % 25
+    alltbt.sessid(backup_sessid==647)=26;
+    alltbt.sessid(backup_sessid==648)=29;
+    alltbt.sessid(backup_sessid==649)=30; 
     
-    alltbt.sessid(alltbt.sessid==1287)=2;
-    alltbt.sessid(alltbt.sessid==1288)=4;
-    alltbt.sessid(alltbt.sessid==1289)=6;
-    alltbt.sessid(alltbt.sessid==1290)=9;
-    alltbt.sessid(alltbt.sessid==1291)=10;
-    alltbt.sessid(alltbt.sessid==1292)=12;
-    alltbt.sessid(alltbt.sessid==1293)=14;
-    alltbt.sessid(alltbt.sessid==1294)=16;
-    alltbt.sessid(alltbt.sessid==1295)=18;
-    alltbt.sessid(alltbt.sessid==1296)=20;
-    alltbt.sessid(alltbt.sessid==1297)=22;
-    alltbt.sessid(alltbt.sessid==1298)=31;
+    alltbt.sessid(backup_sessid==1287)=2;
+    alltbt.sessid(backup_sessid==1288)=4;
+    alltbt.sessid(backup_sessid==1289)=6;
+    alltbt.sessid(backup_sessid==1290)=9;
+    alltbt.sessid(backup_sessid==1291)=10;
+    alltbt.sessid(backup_sessid==1292)=12;
+    alltbt.sessid(backup_sessid==1293)=14; 
+    alltbt.sessid(backup_sessid==1294)=16;
+    alltbt.sessid(backup_sessid==1295)=18;
+    alltbt.sessid(backup_sessid==1296)=20;
+    alltbt.sessid(backup_sessid==1297)=22;
+    alltbt.sessid(backup_sessid==1298)=31;
+    metadata.sessid=alltbt.sessid;
+    trialTypes.sessid=alltbt.sessid;
     
     
 %     alltbt.sessid=metadata.nth_session;

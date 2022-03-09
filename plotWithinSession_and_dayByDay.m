@@ -13,7 +13,7 @@ for i=1:length(days)
     metadata=backup_metadata;
     trialTypes=backup_trialTypes;
     day=days(i);
-    disp(['Day ' i]);
+    disp(['Day ' num2str(i)]);
 
     % perform any filtering on alltbt
     % for example, filter by d-prime
@@ -109,7 +109,8 @@ for i=1:length(days)
     reachratesettings.addSessionLines=false; % for no averaging across sessions plot, whether to connect trial bins within same session with lines
     reachratesettings.binTrialsForAvAcrossSess=true; % whether to bin multiple trials for first figure, will bin into binThisManyTrials
 %     reachratesettings.binThisManyTrials=30; % how many trials to bin within each session
-    reachratesettings.binThisManyTrials=70; % how many trials to bin within each session
+%     reachratesettings.binThisManyTrials=70; % how many trials to bin within each session
+    reachratesettings.binThisManyTrials=50; % how many trials to bin within each session
     reachratesettings.nBinsForZones=40; % will be nBinsForZones squared total bins, this is # bins for each x and y axis
     reachratesettings.useRateMethod=3; % 1, 2 or 3 (see explanation below)
     
