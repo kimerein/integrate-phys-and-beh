@@ -6,7 +6,7 @@
 
 %% load in data
 
-exptDataDir='Z:\Kim\for_orchestra\combineReachData\O2 output\alltbt02Mar2022145751\'; % directory containing experimental data
+exptDataDir='Z:\Kim\for_orchestra\combineReachData\O2 output\alltbt07Mar2022151900\'; % directory containing experimental data
 
 if ismac==true
     sprtr='/';
@@ -32,7 +32,7 @@ backup.trialTypes=trialTypes;
 backup.metadata=metadata;
 
 % Optional: correct any LED trials for blinded control mice
-[alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,[4 5 19]);
+% [alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,[4 5 19]);
 
 % Optional: discard preemptive
 % [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
@@ -87,14 +87,14 @@ saveDir=['/Volumes/Neurobio/MICROSCOPE/Kim/RT pairs data sets/' temp]; % where t
 alltbt.mouseid=metadata.mouseid;
 alltbt.sessid=metadata.sessid;
 trialTypes.sessid=metadata.sessid;
-tbt_filter.sortField='mouseid';
+% tbt_filter.sortField='mouseid';
 % tbt_filter.sortField='fractionThroughSess';
-% tbt_filter.sortField='dprimes';
-tbt_filter.range_values=[2 3 4 5 6 7 8 9 10 11 12 14 15 17 18 19]; % which mice start at non-learning 
+tbt_filter.sortField='dprimes';
+% tbt_filter.range_values=[2 3 4 5 6 7 8 9 10 11 12 14 15 17 18 19]; % which mice start at non-learning 
 % tbt_filter.range_values=[1 2 4 5 6 7 8 9 10 11 12 17 18 19];
 % tbt_filter.range_values=[1     2     3     6     7     8     9    10    11    12    14    15    17    18];
 % tbt_filter.range_values=[1.5 2.5];
-% tbt_filter.range_values=[0.1 1];
+tbt_filter.range_values=[-100 100];
 tbt_filter.name=[tbt_filter.sortField num2str(tbt_filter.range_values(1)) 'to' num2str(tbt_filter.range_values(2))];
 temp=tbt_filter.name;
 temp(~ismember(temp,['A':'Z' 'a':'z' '0':'9']))=''; 
@@ -267,11 +267,91 @@ outcomeDependentShift_acrossDprimes(alltbt,trialTypes,metadata);
 doAverageMouse=true;
 if doAverageMouse==true
     backup_sessid=alltbt.sessid;
-    alltbt.sessid=metadata.nth_session;
-    metadata.sessid=metadata.nth_session;
-    trialTypes.sessid=metadata.nth_session;
-    start_sessid=nanmin(metadata.nth_session);
+    
+    % for mice where didn't analyze each day, fix nth_session
+    alltbt.sessid(alltbt.sessid==1)=1;
+    alltbt.sessid(alltbt.sessid==2)=3;
+    alltbt.sessid(alltbt.sessid==3)=7;
+    alltbt.sessid(alltbt.sessid==4)=9;
+    
+    alltbt.sessid(alltbt.sessid==5)=2;
+    alltbt.sessid(alltbt.sessid==6)=4;
+    alltbt.sessid(alltbt.sessid==7)=8;
+    alltbt.sessid(alltbt.sessid==8)=10;
+    alltbt.sessid(alltbt.sessid==9)=12;
+    alltbt.sessid(alltbt.sessid==10)=14;
+    alltbt.sessid(alltbt.sessid==11)=16;
+    
+    alltbt.sessid(alltbt.sessid==16)=2;
+    alltbt.sessid(alltbt.sessid==17)=4;
+    alltbt.sessid(alltbt.sessid==18)=6;
+    alltbt.sessid(alltbt.sessid==19)=20;
+    alltbt.sessid(alltbt.sessid==20)=21;
+    alltbt.sessid(alltbt.sessid==21)=22;
+    
+    alltbt.sessid(alltbt.sessid==37)=3;
+    alltbt.sessid(alltbt.sessid==38)=4;
+    
+    alltbt.sessid(alltbt.sessid==75)=1;
+    alltbt.sessid(alltbt.sessid==76)=21;
+    alltbt.sessid(alltbt.sessid==77)=22;
+    alltbt.sessid(alltbt.sessid==78)=23;
+    
+    alltbt.sessid(alltbt.sessid==153)=1;
+    alltbt.sessid(alltbt.sessid==154)=5;
+    alltbt.sessid(alltbt.sessid==155)=7;
+    alltbt.sessid(alltbt.sessid==156)=9;
+    alltbt.sessid(alltbt.sessid==157)=13;
+    alltbt.sessid(alltbt.sessid==158)=15;
+    alltbt.sessid(alltbt.sessid==159)=17;
+    alltbt.sessid(alltbt.sessid==160)=19;
+    alltbt.sessid(alltbt.sessid==161)=21;
+    alltbt.sessid(alltbt.sessid==162)=23;
+    
+    alltbt.sessid(alltbt.sessid==315)=6;
+    alltbt.sessid(alltbt.sessid==316)=10;
+    alltbt.sessid(alltbt.sessid==317)=12;
+    alltbt.sessid(alltbt.sessid==318)=14;
+    alltbt.sessid(alltbt.sessid==319)=16;
+    alltbt.sessid(alltbt.sessid==320)=20;
+    alltbt.sessid(alltbt.sessid==321)=22;
+    alltbt.sessid(alltbt.sessid==322)=24;
+    alltbt.sessid(alltbt.sessid==323)=27;
+    alltbt.sessid(alltbt.sessid==324)=29;
+    
+    alltbt.sessid(alltbt.sessid==638)=1;
+    alltbt.sessid(alltbt.sessid==639)=3;
+    alltbt.sessid(alltbt.sessid==640)=7;
+    alltbt.sessid(alltbt.sessid==641)=9;
+    alltbt.sessid(alltbt.sessid==642)=11;
+    alltbt.sessid(alltbt.sessid==643)=13;
+    alltbt.sessid(alltbt.sessid==644)=21;
+    alltbt.sessid(alltbt.sessid==645)=23;
+    alltbt.sessid(alltbt.sessid==646)=25;
+    alltbt.sessid(alltbt.sessid==647)=26;
+    alltbt.sessid(alltbt.sessid==648)=29;
+    alltbt.sessid(alltbt.sessid==649)=30;
+    
+    alltbt.sessid(alltbt.sessid==1287)=2;
+    alltbt.sessid(alltbt.sessid==1288)=4;
+    alltbt.sessid(alltbt.sessid==1289)=6;
+    alltbt.sessid(alltbt.sessid==1290)=9;
+    alltbt.sessid(alltbt.sessid==1291)=10;
+    alltbt.sessid(alltbt.sessid==1292)=12;
+    alltbt.sessid(alltbt.sessid==1293)=14;
+    alltbt.sessid(alltbt.sessid==1294)=16;
+    alltbt.sessid(alltbt.sessid==1295)=18;
+    alltbt.sessid(alltbt.sessid==1296)=20;
+    alltbt.sessid(alltbt.sessid==1297)=22;
+    alltbt.sessid(alltbt.sessid==1298)=31;
+    
+    
+%     alltbt.sessid=metadata.nth_session;
+%     metadata.sessid=metadata.nth_session;
+%     trialTypes.sessid=metadata.nth_session;
+%     start_sessid=nanmin(metadata.nth_session);
 %     end_sessid=nanmax(metadata.nth_session); % but may be quite noisy
+    start_sessid=1;
     end_sessid=30;
 else
     start_sessid=33;

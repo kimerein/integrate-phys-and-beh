@@ -24,9 +24,6 @@ for i=1:length(days)
     saveDir=['/Volumes/Neurobio/MICROSCOPE/Kim/RT pairs data sets/' temp]; % where to save details of alltbt filtering and RT pairs data set
     
     % filter settings
-    alltbt.mouseid=metadata.mouseid;
-    alltbt.sessid=metadata.sessid;
-    trialTypes.sessid=metadata.sessid;
     % tbt_filter.sortField='mouseid';
     tbt_filter.sortField='sessid';
     % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
@@ -111,7 +108,8 @@ for i=1:length(days)
     reachratesettings.initWindows=[]; % empty if want to calculate from dataset
     reachratesettings.addSessionLines=false; % for no averaging across sessions plot, whether to connect trial bins within same session with lines
     reachratesettings.binTrialsForAvAcrossSess=true; % whether to bin multiple trials for first figure, will bin into binThisManyTrials
-    reachratesettings.binThisManyTrials=30; % how many trials to bin within each session
+%     reachratesettings.binThisManyTrials=30; % how many trials to bin within each session
+    reachratesettings.binThisManyTrials=70; % how many trials to bin within each session
     reachratesettings.nBinsForZones=40; % will be nBinsForZones squared total bins, this is # bins for each x and y axis
     reachratesettings.useRateMethod=3; % 1, 2 or 3 (see explanation below)
     
@@ -141,11 +139,13 @@ end
 cmap=colormap('cool');
 k=1;
 kstep=ceil(size(cmap,1)/length(days));
+% f=figure('Position',[50 50 1000 1000]);
 f=figure();
 xlim([0 maxuncued]);
 ylim([0 maxcued]);
 line([0 maxuncued],[0 maxuncued],'Color',[0.95 0.95 0.95],'LineWidth',3); hold on;
 axis square;
+% daspect([1 1 1]);
 imgcounter=1;
 for i=1:length(days)
     withinday_maptocmap=1:ceil(size(cmap,1)/nansum(~isnan(daybyday_uncued{i}))):size(cmap,1);
