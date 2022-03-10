@@ -87,11 +87,12 @@ saveDir=['/Volumes/Neurobio/MICROSCOPE/Kim/RT pairs data sets/' temp]; % where t
 alltbt.mouseid=metadata.mouseid;
 alltbt.sessid=metadata.sessid;
 trialTypes.sessid=metadata.sessid;
-% tbt_filter.sortField='mouseid';
+tbt_filter.sortField='mouseid';
 % tbt_filter.sortField='fractionThroughSess';
-tbt_filter.sortField='opto_enhanced_reach';
+% tbt_filter.sortField='opto_enhanced_reach';
+% tbt_filter.sortField='dprimes';
 % tbt_filter.range_values=[1 6 7 8 10 14 18];
-tbt_filter.range_values=[-0.5 0.5];
+tbt_filter.range_values=[1 2 6 9 10 11 12 18];
 % tbt_filter.range_values=[2 3 4 5 6 7 8 9 10 11 12 14 15 17 18 19]; % which mice start at non-learning 
 % tbt_filter.range_values=[1 2 4 5 6 7 8 9 10 11 12 17 18 19];
 % tbt_filter.range_values=[1     2     3     6     7     8     9    10    11    12    14    15    17    18];
@@ -106,13 +107,14 @@ tbt_filter.clock_progress=true;
 [alltbt,trialTypes,metadata]=filtTbt(alltbt,trialTypes,tbt_filter.sortField,tbt_filter.range_values,metadata,tbt_filter.clock_progress);
 
 %% check for opto-enhanced reaching
-alltbt=checkForOptoEnhancedReach(alltbt,metadata,trialTypes,'all_reachBatch','trialTypes.led==1','cueZone_onVoff',[-0.25 0.5],10);
+alltbt.sessid=metadata.sessid;
+alltbt=checkForOptoEnhancedReach(alltbt,metadata,trialTypes,'all_reachBatch','trialTypes.led==1','cueZone_onVoff',[-0.25 0.5],20);
 trialTypes.opto_enhanced_reach=alltbt.opto_enhanced_reach;
 
 %% build relevant data sets
 
 % settings for paired RT data set
-test.nInSequence=[4]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
+test.nInSequence=[2]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
 % requirement for first trial in pair
 % trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
 trialTypes.isLongITI_1forward=[trialTypes.isLongITI(2:end); 0];
@@ -120,9 +122,9 @@ trialTypes.optoGroup_1forward=[trialTypes.optoGroup(2:end); 0];
 % trial1='trialTypes.optoGroup~=1';
 % trial1='trialTypes.led~=1 & trialTypes.led_1back~=1';
 % memory
-trial1='trialTypes.led~=1'; 
+% trial1='trialTypes.led~=1'; 
 % trial1='trialTypes.isLongITI==1';
-% trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
+trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
 % trial1='trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1'; % & trialTypes.isLongITI_1forward==1'];
 % trial1='trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup~=1  & trialTypes.isLongITI_1forward==1';
 % trial1='trialTypes.cued_reach_1forward==1 & trialTypes.touched_pellet_1forward==1 & (trialTypes.led_1forward==0) & trialTypes.optoGroup~=1  & trialTypes.optoGroup_1forward~=1';
@@ -131,12 +133,12 @@ trial1='trialTypes.led~=1';
 % trial1='trialTypes.optoGroup~=1 & trialTypes.consumed_pellet_1back==1 & trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1';
 test.trial1=trial1;
 test.templateSequence2_cond=eval(trial1);
-% trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
+trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
 % memory
 % trial2='trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3';
 % trial2='trialTypes.optoGroup~=1 & trialTypes.led==0 & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
-trial2='trialTypes.optoGroup~=1 & trialTypes.led==0';
 % trial2='trialTypes.optoGroup~=1 & trialTypes.led==0';
+% trial2='trialTypes.led~=1';
 test.trial2=trial2;
 test.templateSequence2_end=eval(trial2);
 test.fillInBetweenWithAnything=false; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1
@@ -203,7 +205,7 @@ reachratesettings.useWindowsForUncued=[3]; % to use window2 or window3 or both f
 reachratesettings.initWindows=[]; % empty if want to calculate from dataset
 reachratesettings.addSessionLines=false; % for no averaging across sessions plot, whether to connect trial bins within same session with lines
 reachratesettings.binTrialsForAvAcrossSess=true; % whether to bin multiple trials for first figure, will bin into binThisManyTrials
-reachratesettings.binThisManyTrials=6; % how many trials to bin within each session
+reachratesettings.binThisManyTrials=4; % how many trials to bin within each session
 reachratesettings.nBinsForZones=40; % will be nBinsForZones squared total bins, this is # bins for each x and y axis
 reachratesettings.useRateMethod=3; % 1, 2 or 3 (see explanation below)
 % There are 3 approaches available for determing reach rates
@@ -239,7 +241,7 @@ plotHallmarksOfSatiety(reachrates,dataset,alltbt,metadata,trialTypes);
 %% memory effect
 
 nInSeq=4;
-useFractionThroughSession=[0.6 0.8];
+useFractionThroughSession=[0.7 1];
 memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession);
 
 %% shift in reach rate between trial pair

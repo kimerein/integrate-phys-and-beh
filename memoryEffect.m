@@ -190,7 +190,7 @@ LED_all_uncued=LED_all_uncued(~isnan(LED_all_fracs));
 LED_all_cued=LED_all_cued(~isnan(LED_all_fracs));
 LED_all_fracs=LED_all_fracs(~isnan(LED_all_fracs));
 
-binsForFracs=0:0.025:1;
+binsForFracs=0:0.02:1;
 figure();
 [n,x]=histcounts(fracs_inThisPartOfSess_noLED(~isnan(fracs_inThisPartOfSess_noLED)),binsForFracs);
 [new_n,new_x]=cityscape_hist(n,x);
