@@ -112,7 +112,7 @@ trialTypes.opto_enhanced_reach=alltbt.opto_enhanced_reach;
 %% build relevant data sets
 
 % settings for paired RT data set
-test.nInSequence=[2]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
+test.nInSequence=[4]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
 % requirement for first trial in pair
 % trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
 trialTypes.isLongITI_1forward=[trialTypes.isLongITI(2:end); 0];
@@ -120,9 +120,9 @@ trialTypes.optoGroup_1forward=[trialTypes.optoGroup(2:end); 0];
 % trial1='trialTypes.optoGroup~=1';
 % trial1='trialTypes.led~=1 & trialTypes.led_1back~=1';
 % memory
-% trial1='trialTypes.led~=1'; 
+trial1='trialTypes.led~=1'; 
 % trial1='trialTypes.isLongITI==1';
-trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
+% trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
 % trial1='trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1'; % & trialTypes.isLongITI_1forward==1'];
 % trial1='trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup~=1  & trialTypes.isLongITI_1forward==1';
 % trial1='trialTypes.cued_reach_1forward==1 & trialTypes.touched_pellet_1forward==1 & (trialTypes.led_1forward==0) & trialTypes.optoGroup~=1  & trialTypes.optoGroup_1forward~=1';
@@ -131,15 +131,15 @@ trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start
 % trial1='trialTypes.optoGroup~=1 & trialTypes.consumed_pellet_1back==1 & trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1';
 test.trial1=trial1;
 test.templateSequence2_cond=eval(trial1);
-trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
+% trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
 % memory
 % trial2='trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3';
 % trial2='trialTypes.optoGroup~=1 & trialTypes.led==0 & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
-% trial2='trialTypes.optoGroup~=1 & trialTypes.led==0';
+trial2='trialTypes.optoGroup~=1 & trialTypes.led==0';
 % trial2='trialTypes.optoGroup~=1 & trialTypes.led==0';
 test.trial2=trial2;
 test.templateSequence2_end=eval(trial2);
-test.fillInBetweenWithAnything=true; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1
+test.fillInBetweenWithAnything=false; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1
 test.event_name=['alltrials' tbt_filter.name 'inBetweenAnything' num2str(test.fillInBetweenWithAnything)];
 % test.onlyConsiderReachType='reachBatch_success_reachStarts';
 test.onlyConsiderReachType=[];
@@ -235,6 +235,12 @@ reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'c
 %% Plot hallmarks of satiety
 
 plotHallmarksOfSatiety(reachrates,dataset,alltbt,metadata,trialTypes);
+
+%% memory effect
+
+nInSeq=4;
+useFractionThroughSession=[0.6 0.8];
+memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession);
 
 %% shift in reach rate between trial pair
 
