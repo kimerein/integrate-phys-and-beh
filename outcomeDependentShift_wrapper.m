@@ -23,7 +23,7 @@ flankingTrials='trialTypes.optoGroup~=1';
 % flankingTrials='(trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1)';
 
 % which to plot
-whichToPlot='success'; % can be 'success','delayed success','drop','cued touch','cued touch and switch color','failed cued reach','false alarm','no reach','basic','wildcard','backward success'
+whichToPlot='backward success'; % can be 'success','delayed success','drop','cued touch','cued touch and switch color','failed cued reach','false alarm','no reach','basic','wildcard','backward success'
 [plotset,trialTypes]=whichToPlotNow(whichToPlot,trialTypes,alltbt);
 
 shuffleTrialOrder=false; % if want to randomly permute trial order to test for ordering effects
@@ -98,7 +98,8 @@ if ~isempty(a)
 end
 % backwards success
 nInSequence=3;
-trial1=[flankingTrials];
+trial1=[flankingTrials ' & trialTypes.led_1back==1 & trialTypes.optoGroup_1back~=1'];
+% trial1=[flankingTrials];
 trial2=[flankingTrials ' & trialTypes.consumed_pellet_1forward==1' ' & trialTypes.reachedInTimeWindow_1back==1 & trialTypes.success_in_cued_window_1back==1 & trialTypes.consumed_pellet_1back==1 & trialTypes.led_1back==0 & trialTypes.optoGroup_1back~=1']; % & trialTypes.isLongITI_1forward==1'];];
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
@@ -220,6 +221,7 @@ if ~isempty(a)
 end
 % backwards success
 nInSequence=3;
+trial1=[flankingTrials ' & trialTypes.led_1back==0'];
 trial1=[flankingTrials];
 trial2=[flankingTrials ' & trialTypes.consumed_pellet_1forward==1' ' & trialTypes.reachedInTimeWindow_1back==1 & trialTypes.success_in_cued_window_1back==1 & trialTypes.consumed_pellet_1back==1 & trialTypes.led_1back==1 & trialTypes.optoGroup_1back~=1']; % & trialTypes.isLongITI_1forward==1'];];
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
@@ -397,7 +399,7 @@ switch whichToPlot
     case 'backward success'
         timeWindow=[];
         plotset.wildcard=false;
-        plotset.success=true;
+        plotset.success=false;
         plotset.delayed=false;
         plotset.drop=false;
         plotset.cuedtouch=false;
