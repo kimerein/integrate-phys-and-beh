@@ -3,9 +3,10 @@ function plotEffectsOfOutcomeAcrossDprimes(alltbt,trialTypes,metadata)
 dprimes_steps={[-100 0.3+0.01],[0.3-0.01 0.6+0.01],[0.6-0.01 0.9+0.01],[0.9-0.01 1.2+0.01],[1.2-0.01 1.6+0.01],[1.6-0.01 100+0.01]};
 trialTypes.isLongITI_1back=[0; trialTypes.isLongITI(1:end-1)];
 % dprimes_steps={[-100 0.25],[0.25 0.5],[0.5 0.75],[0.75 1],[1 1.25],[1.25 1.5],[1.5 1.75],[1.75 2],[2 2.25],[2.25 2.5],[2.5 100]};
-% trial1backup='trialTypes.touch_in_cued_window_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
-% trial1backup='trialTypes.cued_reach_1forward==1 & trialTypes.touched_pellet_1forward==0 & trialTypes.optoGroup~=1 & trialTypes.optoGroup_1forward~=1';
-trial1backup='trialTypes.cued_reach_1forward==0  & trialTypes.touched_pellet_1forward==1 & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
+%trial1backup='trialTypes.touch_in_cued_window_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
+%trial1backup='trialTypes.cued_reach_1forward==1 & trialTypes.touched_pellet_1forward==0 & trialTypes.optoGroup~=1 & trialTypes.optoGroup_1forward~=1';
+%trial1backup='trialTypes.cued_reach_1forward==0  & trialTypes.touched_pellet_1forward==1 & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
+trial1backup='trialTypes.touch_in_cued_window_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
 
 backup.alltbt=alltbt; backup.trialTypes=trialTypes; backup.metadata=metadata;
 
