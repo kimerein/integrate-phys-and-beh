@@ -4,11 +4,11 @@
 
 %% load in data
 
-exptDataDir='\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt25May2021220005'; % directory containing experimental data
+exptDataDir='Z:\Kim\for_orchestra\combineReachData\O2 output\alltbt02Mar2022145751'; % directory containing experimental data
 
 % only load these fields of alltbt
 disp('loading alltbt');
-whichFieldsToLoad={'cue','all_reachBatch','cueZone_onVoff','dprimes','isChewing','isHold','optoOn','optoZone','pawOnWheel','pelletPresent','reachBatch_all_pawOnWheel','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','reachBatch_success_reachStarts','reachStarts','pelletmissingreach_reachStarts','reachStarts_pelletPresent','times','times_wrt_trial_start','timesFromSessionStart'};
+whichFieldsToLoad={'cue','all_reachBatch','cueZone_onVoff','dprimes','isChewing','maybeDrop_reachStarts','maybeDrop_reachStarts_pawOnWheel','isHold','optoOn','optoZone','pawOnWheel','pelletPresent','reachBatch_all_pawOnWheel','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','reachBatch_success_reachStarts','reachStarts','pelletmissingreach_reachStarts','reachStarts_pelletPresent','times','times_wrt_trial_start','timesFromSessionStart'};
 alltbt=loadStructFieldByField([exptDataDir '\alltbt'],whichFieldsToLoad); % load alltbt
 disp('loading out');
 trialTypes=loadStructFieldByField([exptDataDir '\out']); % load out

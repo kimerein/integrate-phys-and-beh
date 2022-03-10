@@ -1,4 +1,4 @@
-function [photometry_tbt,behavior_tbt,data]=photometry_triggered_on_reach(datadir_forPhotometry,datadir_forBehavior,photometry,savename_photometry)
+function [physiology_tbt,behavior_tbt,data]=physiology_triggered_on_reach(datadir_forBehavior,auxData)
 
 % rig-specific settings
 % distractor threshold
@@ -12,14 +12,25 @@ rmpath(chronuxPathWFindpeaks);
 % other settings
 distract_thresh_movie=0.5; % from alignment
 
-if isempty(photometry)
-    % load and process photometry data
-    data=processPhotometry(datadir_forPhotometry);
-
-    % save photometry
-    save(savename_photometry,'data');
-else
-    data=photometry;
+data.Fs=auxData.distractorData.ADFreq;
+data.distractor=auxData.distractorData.Values;
+data.phys_timepoints=0:1/data.Fs:(length(data.distractor)-1)*(1/data.Fs);
+data.phys_inds=1:length(data.distractor);
+data.cue=auxData.cueData.Values;
+data.opto=auxData.optoData.Values;
+% If also photometry_times as a way to keep track of indexing into
+% photometry data, rename photometry_times as green_time
+if isfield(auxData,'photometry_times')
+    data.green_time=auxData.photometry_times;
+end
+% make all 1D fields row vectors
+f=fieldnames(data);
+for i=1:length(f)
+    if size(data.(f{i}),2)==1 && size(data.(f{i}),1)>1
+        % column vector
+        temp=data.(f{i});
+        data.(f{i})=temp';
+    end
 end
 
 % load already processed behavior data
@@ -67,11 +78,7 @@ settings.movie_fs=1/(mode(diff(tempalign1.timesfromarduino))/1000); % movie data
 disp(['Check this. Movie data sampling rate is ' num2str(settings.movie_fs)]);
 pause;
 settings.scale_factor=floor(settings.photo_fs/settings.movie_fs);
-% Choose the following two numbers based on approximate relationship between
-% sampling rate of arduino data and sampling rate of movie data.
-% For example, if movie rate is 30 frames per second and photometry data is
-% timed in ms, 1000 ms/30 ms = 33 ... scale factor is 33.
-settings.photo_dec=settings.scale_factor+2;
+settings.photo_dec=settings.scale_factor-15;
 settings.movie_dec=1;
 % discard this many frames from beginning
 settings.maxlagForInitialAlign=[]; % [] is don't want to constrain alignment
@@ -124,17 +131,17 @@ if length(a)>1
     end
 end
 
-ds=100; % use this downsample factor for the fields in downsampfields
-downsampfields={'green_mod','red_mod','opto','cue','distractor','cue_times'};
-if ds~=1
-    tbt_data_vid1=downSampleData(tbt_data_vid1,ds,downsampfields);
-    if length(a)>1
-        tbt_data_vid2=downSampleData(tbt_data_vid2,ds,downsampfields);
-        if isfield(totalalignment,'from_third_video')
-            tbt_data_vid3=downSampleData(tbt_data_vid3,ds,downsampfields);
-        end
-    end
-end
+% ds=100; % use this downsample factor for the fields in downsampfields
+% downsampfields={'green_mod','red_mod','opto','cue','distractor','cue_times'};
+% if ds~=1
+%     tbt_data_vid1=downSampleData(tbt_data_vid1,ds,downsampfields);
+%     if length(a)>1
+%         tbt_data_vid2=downSampleData(tbt_data_vid2,ds,downsampfields);
+%         if isfield(totalalignment,'from_third_video')
+%             tbt_data_vid3=downSampleData(tbt_data_vid3,ds,downsampfields);
+%         end
+%     end
+% end
 
 % concatenate tbts from two videos, should match cues in behavior tbt
 if length(a)>1
@@ -150,11 +157,16 @@ else
 end
 
 % add times wrt trial start for photometry
-photometry_tbt.trialDurations=nanmax(photometry_tbt.green_time,[],2)-photometry_tbt.green_time(:,1);
-photometry_tbt.times_wrt_trial_start=photometry_tbt.green_time-repmat(photometry_tbt.green_time(:,1),1,size(photometry_tbt.green_time,2));
-photometry_tbt.times_wrt_trial_start(photometry_tbt.times_wrt_trial_start<0)=nan;
+if isfield(data,'green_time')
+    photometry_tbt.trialDurations=nanmax(photometry_tbt.green_time,[],2)-photometry_tbt.green_time(:,1);
+    photometry_tbt.times_wrt_trial_start=photometry_tbt.green_time-repmat(photometry_tbt.green_time(:,1),1,size(photometry_tbt.green_time,2));
+    photometry_tbt.times_wrt_trial_start(photometry_tbt.times_wrt_trial_start<0)=nan;
+end
 photometry_tbt.cuetimes_wrt_trial_start=photometry_tbt.cue_times-repmat(photometry_tbt.cue_times(:,1),1,size(photometry_tbt.cue_times,2));
 photometry_tbt.cuetimes_wrt_trial_start(photometry_tbt.cuetimes_wrt_trial_start<0)=nan;
+
+% Actually this is physiology
+physiology_tbt=photometry_tbt;
 
 end
 
@@ -264,8 +276,11 @@ function [tbt_data,shifted_data,alltbt]=shiftPhotometryToBehavior(data,discarded
 % only shift
 % then make trial-by-trial and align at cues
 
-fields_like_distractor={'green_mod','red_mod','opto','cue','cue_times'};
-fields_like_photometry={'green_ch','red_ch','green_time','raw_green_ch','red_time','raw_red_ch'};
+fields_like_distractor={'cue','opto','cue_times','phys_timepoints','phys_inds'};
+fields_like_photometry={'green_time'};
+if ~isfield(data,'green_time')
+    fields_like_photometry={};
+end
 
 shifted_data=data;
 % start with distractor
@@ -294,21 +309,24 @@ for i=1:length(fields_like_distractor)
     temp=temp(discardedPhotoFrames_inds+1:end);
     shifted_data.(fields_like_distractor{i})=temp(shiftByInds+1:end);
 end
+disp(['min cue times in shifted data is ' num2str(nanmin(shifted_data.cue_times))]);
 
 % then discard same times from fields like photometry
-padPhotoFrames_inds_photo=floor(padPhotoTimesAtFront./mode(data.green_time(2:end)-data.green_time(1:end-1)));
-discardedPhotoFrames_inds_photo=floor(discardedPhotoFrames_time./mode(data.green_time(2:end)-data.green_time(1:end-1)));
-shiftByInds_photo=floor(frontShift_time./mode(data.green_time(2:end)-data.green_time(1:end-1)));
-for i=1:length(fields_like_photometry)
-    % discard time at front
-    temp=shifted_data.(fields_like_photometry{i});
-    temp=[nan(1,padPhotoFrames_inds_photo) temp]; 
-    temp=temp(discardedPhotoFrames_inds_photo+1:end);
-    shifted_data.(fields_like_photometry{i})=temp(shiftByInds_photo+1:end);
+if ~isempty(fields_like_photometry)
+    if isfield(data,'green_time')
+        padPhotoFrames_inds_photo=floor(padPhotoTimesAtFront./mode(data.green_time(2:end)-data.green_time(1:end-1)));
+        discardedPhotoFrames_inds_photo=floor(discardedPhotoFrames_time./mode(data.green_time(2:end)-data.green_time(1:end-1)));
+        shiftByInds_photo=floor(frontShift_time./mode(data.green_time(2:end)-data.green_time(1:end-1)));
+        for i=1:length(fields_like_photometry)
+            % discard time at front
+            temp=shifted_data.(fields_like_photometry{i});
+            temp=[nan(1,padPhotoFrames_inds_photo) temp];
+            temp=temp(discardedPhotoFrames_inds_photo+1:end);
+            shifted_data.(fields_like_photometry{i})=temp(shiftByInds_photo+1:end);
+        end
+        disp(['min photometry times in shifted data is ' num2str(nanmin(shifted_data.green_time))]);
+    end
 end
-
-disp(['min cue times in shifted data is ' num2str(nanmin(shifted_data.cue_times))]);
-disp(['min photometry times in shifted data is ' num2str(nanmin(shifted_data.green_time))]);
 
 movie_cue=movie_cue(fromCurrVid);
 
@@ -338,12 +356,16 @@ if ~isempty(zo)
 end
 [mapping_signal1,mapping_signal2]=countCues(shifted_data.cue./nanmax(shifted_data.cue),shifted_data.distractor_times,movie_cue,movie_times,0.5,anchor_index_signal1,anchor_index_signal2,minSpacingBetweenCues_sig1,minSpacingBetweenCues_sig2);
 % signal2 is movie, signal1 is data.distractor
-mapping_signal3=getPhotoCueMapping(mapping_signal1,shifted_data.distractor_times,shifted_data.green_time);
 % sort cues from first to last
 [~,si]=sort(mapping_signal2);
 mapping_signal2=mapping_signal2(si);
 mapping_signal1=mapping_signal1(si);
-mapping_signal3=mapping_signal3(si);
+if isfield(data,'green_time')
+    mapping_signal3=getPhotoCueMapping(mapping_signal1,shifted_data.distractor_times,shifted_data.green_time);
+    mapping_signal3=mapping_signal3(si);
+else
+    mapping_signal3=[];
+end
 
 fields_like_distractor{length(fields_like_distractor)+1}='distractor';
 [tbt_data,alltbt]=makeTbtData(shifted_data,alltbt,fromCurrVid_tbt,mapping_signal1,mapping_signal2,mapping_signal3,'cueZone_onVoff',fields_like_distractor,fields_like_photometry);
@@ -411,6 +433,8 @@ if size(temp(fromCurrVid==1,:),1)~=length(cue_mapping_data_distract)
             n=[0 n];
         elseif n<0
             n=[n 0];
+        else
+            n=[0 0];
         end
     end
     if n(2)>0
@@ -448,8 +472,10 @@ secBeforeCue=nanmean(alltbt.times_wrt_trial_start(:,cueInd));
 distractorIndsBeforeCue=floor(secBeforeCue/mode(data.distractor_times(2:end)-data.distractor_times(1:end-1)));
 maxDistractorIndsAfterCue=nanmax(diff(cue_mapping_data_distract));
 maxTimeAfterCue=maxDistractorIndsAfterCue*mode(data.distractor_times(2:end)-data.distractor_times(1:end-1));
-photoIndsBeforeCue=floor(secBeforeCue/mode(data.green_time(2:end)-data.green_time(1:end-1)));
-maxPhotoIndsAfterCue=floor(maxTimeAfterCue/mode(data.green_time(2:end)-data.green_time(1:end-1)));
+if isfield(data,'green_time')
+    photoIndsBeforeCue=floor(secBeforeCue/mode(data.green_time(2:end)-data.green_time(1:end-1)));
+    maxPhotoIndsAfterCue=floor(maxTimeAfterCue/mode(data.green_time(2:end)-data.green_time(1:end-1)));
+end
 
 % line up each cue in data to get trial-by-trial (tbt)
 % make each row include the pre-cue baseline and all points up to but not

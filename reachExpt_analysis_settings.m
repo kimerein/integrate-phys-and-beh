@@ -1,10 +1,13 @@
 function outSettings=reachExpt_analysis_settings(varargin)
+% first argument is whether to display settings, second argument overwrites
+% any default settings
 
-persistent settings
+% persistent settings
+settings=[];
 
 displ=false;
 if ~isempty(varargin)
-    if strcmp(varargin{1},'display settings');
+    if strcmp(varargin{1},'display settings')
         displ=true;
     end
 end
@@ -27,6 +30,21 @@ if isempty(settings)
     settings.doRealign=1; % in tbt, cue can be any time point when cue is on; 1 if want to realign data based on cue starts (i.e., align all cue onsets)
     settings.useOptoZone=0; % 1 if want to use manually defined optoZone in video instead of Arduino-based optoOn
     settings.maxDelayUntilOpto=9.5; % in seconds, max time from trial onset until opto turns on
+    settings.isOrchestra=1; % will suppress figures if running on server
+    settings.tryForFiles={'optoOnHere','nth_session','optoThresh','preemptCue'}; % look for these files in each directory
+end
+
+if ~isempty(varargin) && length(varargin)>1
+    if isstruct(varargin{2})
+        set=varargin{2};
+        % passing in some settings
+        f=fieldnames(set);
+        for i=1:length(f)
+            settings.(f{i})=set.(f{i});
+            disp([f{i} ' is ' ]);
+            disp(settings.(f{i}));
+        end
+    end
 end
 
 if displ==true
@@ -56,9 +74,6 @@ if displ==true
     end
 end
 
-settings.isOrchestra=1;
-
-settings.tryForFiles={'optoOnHere','nth_session','optoThresh','preemptCue'}; % look for these files in each directory
 if displ==true
     strtoshow=[];
     for i=1:length(settings.tryForFiles)

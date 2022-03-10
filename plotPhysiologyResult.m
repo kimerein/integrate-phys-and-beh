@@ -1,4 +1,4 @@
-function [fout,dataout,n_events_in_av,alignmentCompanion,f_heatmap,plotBehFieldOut]=plotPhotometryResult(photometry_tbt,behavior_tbt,outdata,alignTo,plotPhotoField,plotBehField,firstInTrialOrLast,withinRange,hax)
+function [fout,dataout,n_events_in_av,alignmentCompanion,f_heatmap,plotBehFieldOut,su]=plotPhysiologyResult(photometry_tbt,behavior_tbt,outdata,alignTo,plotPhotoField,plotBehField,firstInTrialOrLast,withinRange,hax)
 
 % alignTo can be 'cue','success_reachStarts', etc.
 fout=[];
@@ -7,6 +7,15 @@ n_events_in_av=[];
 alignmentCompanion=[];
 f_heatmap=[];
 plotBehFieldOut=[];
+su=[];
+
+if strcmp(plotPhotoField,'unit_by_unit')
+    doingMultipleUnits=true;
+    nonUnitFields={'unitTimes','unitsum','multiunit','sum_over_singleunit','av_over_singleunit','unitTimes_wrt_trial_start','grp1_unitav','grp2_unitav','grp3_unitav','grpDA1_unitav','grpDA2_unitav','grpDA3_unitav','grpnegDA1_unitav','grpnegDA2_unitav','grpnegDA3_unitav','grpconsensusDA1_unitav','grpconsensusDA2_unitav','grpconsensusDA3_unitav'}; % every other field that contains 'unit' is assumed to be one single unit
+    plotPhotoField='unitsum';
+else
+    doingMultipleUnits=false;
+end
 
 if strcmp(firstInTrialOrLast,'first')
     firstInTrial=true;
@@ -28,38 +37,59 @@ if ~isfield(behavior_tbt,'all_reachBatch')
 end
     
 cutBeforeNextCue=true; % if is true, will only plot inter-trial interval after first cue
+alwaysRealignToCue=false;
 minITI=9; % in seconds
 behaviorCue='cueZone_onVoff';
 dosmooth=true;
-lowPassCutoff=5; % in Hz
+% lowPassCutoff=5; % in Hz
+lowPassCutoff=100000; % in Hz
 alignPeaks=false;
 indsFromPeak=5;
 % withinRange=[-0.1 1.5];  % take reaches in this range, time is in seconds from onset of cue
 % withinRange=[1.5 16];  % take reaches in this range, time is in seconds from onset of cue
 % withinRange=[-0.1 1.5];  % take reaches in this range, time is in seconds from onset of cue
 % withinRange=[-0.1 16];  % take reaches in this range, time is in seconds from onset of cue
-downSamp=false;
-ds=1;
+downSamp=true;
+ds=100;
 maxTimeForHeatmap=9;
 
 if downSamp==true
+    downSampWhichFields={'cue','opto','cue_times','distractor','cuetimes_wrt_trial_start'};
+    discardWhichFields={'phys_timepoints','phys_inds','from_first_video','from_second_video','from_third_video'};
     f=fieldnames(photometry_tbt);
     for i=1:length(f)
-        photometry_tbt.(f{i})=downSampMatrix(photometry_tbt.(f{i}),ds);
+        if ismember(f{i},discardWhichFields)
+            rmfield(photometry_tbt,f{i});
+            continue
+        end
+        if ismember(f{i},downSampWhichFields)
+            photometry_tbt.(f{i})=downSampMatrix(photometry_tbt.(f{i}),ds);
+        end
     end
 end
 
-thesePhotoFieldsUseTimeField1={'green_mod','red_mod','opto','cue','cue_times','distractor','from_first_video','from_second_video'};
+thesePhotoFieldsUseTimeField1={'cue'};
 timeField1='cue_times';
-thesePhotoFieldsUseTimeField2={'green_ch','red_ch','nan_out_red_ch','green_time','raw_green_ch','red_time','raw_red_ch','recalc_green_ch','recalc_red_ch'};
-timeField2='red_time';
+f=fieldnames(photometry_tbt);
+thesePhotoFieldsUseTimeField2={};
+for i=1:length(f)
+    if ~isempty(regexp(f{i},'unit'))
+        if strcmp(f{i},'unitTimes')
+            continue
+        end
+        thesePhotoFieldsUseTimeField2{length(thesePhotoFieldsUseTimeField2)+1}=f{i};
+    end
+end
+timeField2='unitTimes';
 
 temp=photometry_tbt.(timeField1);
 photometry_tbt.([timeField1 '_wrt_trial_start'])=temp-repmat(temp(:,1),1,size(temp,2));
 temp=photometry_tbt.(timeField2);
 photometry_tbt.([timeField2 '_wrt_trial_start'])=temp-repmat(temp(:,1),1,size(temp,2));
 
-[photometry_tbt,alignedCueTo]=realignToCue(photometry_tbt,'cue',thesePhotoFieldsUseTimeField1,timeField1,timeField2);
+if strcmp(alignTo,'cue') || alwaysRealignToCue==true
+    [photometry_tbt,alignedCueTo]=realignToCue(photometry_tbt,'cue',thesePhotoFieldsUseTimeField1,timeField1,timeField2);
+end
 [~,fpe]=nanmax(nanmean(behavior_tbt.cueZone_onVoff,1));
 temp=nanmean(behavior_tbt.times_wrt_trial_start,1);
 beh_cue=temp(fpe);
@@ -110,7 +140,8 @@ if cutBeforeNextCue==true
     ftostart_photo=find(~isnan(temp(1,:)),1,'first');
     
     f_times=nanmean(photometry_tbt.cue_times(:,f)-photometry_tbt.cue_times(:,ftostart),1);
-    [~,f_photometry_ind]=nanmin(abs(nanmean(photometry_tbt.green_time-repmat(photometry_tbt.green_time(:,ftostart_photo),1,size(photometry_tbt.green_time,2)),1)-f_times));
+    thisTimeField=photometry_tbt.(timeField2);
+    [~,f_photometry_ind]=nanmin(abs(nanmean(thisTimeField-repmat(thisTimeField(:,ftostart_photo),1,size(thisTimeField,2)),1)-f_times));
     if ismember(plotPhotoField,thesePhotoFieldsUseTimeField1)
         plotUntilInd=f;
     elseif ismember(plotPhotoField,thesePhotoFieldsUseTimeField2)
@@ -136,7 +167,7 @@ else
 end
 
 if dosmooth==true
-    photometry_tbt=smoothPhotometry(photometry_tbt,1/mode(diff(phototimes)),lowPassCutoff);
+    photometry_tbt=smoothPhotometry(photometry_tbt,1/mode(diff(phototimes)),lowPassCutoff,plotPhotoField);
     disp(['using photometry Fs ' num2str(1/mode(diff(phototimes)))]);
 end
 
@@ -156,7 +187,7 @@ switch alignTo
         else
             f_heatmap=figure();
         end
-        plotTrialsAsHeatmap(photometry_tbt.(plotPhotoField),phototimes,photometry_tbt.cue,f_times,10,maxTimeForHeatmap);
+        plotTrialsAsHeatmap(photometry_tbt.(plotPhotoField),phototimes,photometry_tbt.cue,f_times,10,maxTimeForHeatmap,false);
         hold on;
         plotEventsScatter(behavior_tbt,1:size(behavior_tbt.cue,1),'cueZone_onVoff','all_reachBatch','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts',[]);
         if ~isempty(hax)
@@ -177,10 +208,26 @@ switch alignTo
         plotWStderr(nanmean(photometry_tbt.cue,1)*(nanmax(nanmean(temp(:,1:plotUntilInd),1))/nanmax(nanmean(photometry_tbt.cue,1))),f_times,'b',f,size(photometry_tbt.cue,1));
         n_events_in_av=size(photometry_tbt.(plotPhotoField),1);
         alignmentCompanion.x=f_times;
-        alignmentCompanion.y=nanmean(photometry_tbt.cue,1)*nanmax(nanmean(photometry_tbt.(plotPhotoField),1));
+        alignmentCompanion.y=photometry_tbt.cue.*nanmax(nanmean(photometry_tbt.(plotPhotoField),1));
         if ~isempty(plotBehField)
             plotBehFieldOut.x=nanmean(behavior_tbt.times_wrt_trial_start,1);
             plotBehFieldOut.y=behavior_tbt.(plotBehField);
+        end
+        if doingMultipleUnits==true
+            tryforSUfields=fieldnames(photometry_tbt);
+            j=1;
+            for i=1:length(tryforSUfields)
+                if ~isempty(regexp(tryforSUfields{i},'unit','ONCE')) && ~ismember(tryforSUfields{i},nonUnitFields)
+                    % this is a single unit
+                    SUfields{j}=tryforSUfields{i};
+                    j=j+1;
+                end
+            end
+            disp('will plot units in this order:');
+            for i=1:length(SUfields)
+                su(i).alignedData=photometry_tbt.(SUfields{i});
+                disp(SUfields{i});
+            end
         end
     case 'success_fromPerchOrWheel'
         typeOfReach=true;
@@ -204,13 +251,49 @@ switch alignTo
         if excludeAfterSuccess==true
             for i=1:size(useCombo,1)
                 f=find(useCombo(i,:)>0.5,1,'first');
-                starter=f-excludeWithinInds;
-                if starter<1
-                    starter=1;
+                if isempty(f)
+                    continue
                 end
-                if any(behavior_tbt.success_reachStarts(i,starter:f)>0.5)
-                    % success before this, exclude
-                    useCombo(i,~isnan(useCombo(i,:)))=0;
+                for j=1:length(f)
+                    currf=f(j);
+                    starter=currf-excludeWithinInds;
+                    if starter<1
+                        starter=1;
+                    end
+                    if any(behavior_tbt.success_reachStarts(i,starter:currf)>0.5 | behavior_tbt.reachBatch_success_reachStarts(i,starter:currf)>0.5 | behavior_tbt.reachBatch_success_reachStarts_pawOnWheel(i,starter:currf)>0.5)
+                        % success before this, exclude
+                        useCombo(i,f)=0;
+                    end
+                end
+            end
+        end
+    case 'misses_and_pelletMissing_and_drop'
+        typeOfReach=true;
+        useReach='combo';
+        excludeAfterSuccess=true;
+        excludeWithinTimeWindow=6; % in sec
+        excludeWithinInds=floor(excludeWithinTimeWindow/mode(diff(nanmean(behavior_tbt.times,1))));
+        useCombo=behavior_tbt.reachBatch_miss_reachStarts+behavior_tbt.reachBatch_miss_reachStarts_pawOnWheel+behavior_tbt.pelletmissingreach_reachStarts+behavior_tbt.reachBatch_drop_reachStarts+behavior_tbt.reachBatch_drop_reachStarts_pawOnWheel;
+        if excludeAfterSuccess==true
+            for i=1:size(useCombo,1)
+                f=find(useCombo(i,:)>0.05,1,'first');
+                if isempty(f)
+                    continue
+                end
+                for j=1:length(f)
+                    currf=f(j);
+                    starter=currf-excludeWithinInds;
+                    if starter<1
+                        starter=1;
+                    end
+                    if any(behavior_tbt.success_reachStarts(i,starter:currf)>0.5 | behavior_tbt.reachBatch_success_reachStarts(i,starter:currf)>0.5 | behavior_tbt.reachBatch_success_reachStarts_pawOnWheel(i,starter:currf)>0.5)
+                        % success before this, exclude
+                        upto=currf+10; 
+                        if upto>length(useCombo(i,:))
+                            upto=length(useCombo(i,:));
+                        end
+                        useCombo(i,starter:upto)=0;
+                    end
                 end
             end
         end
@@ -268,6 +351,22 @@ if typeOfReach==true
     alignTimes=getValsFromRows(behavior_tbt.times_wrt_trial_start,alignInds,fromInputRow);
     indsIntoPhoto=getIndsFromRows(photometry_tbt.(getCorrectTime_wrtTrialStart),alignTimes,fromInputRow);
     [alignedData,alignedAt]=alignRowsToInds(photometry_tbt.(plotPhotoField),indsIntoPhoto,nanmin(indsIntoPhoto),fromInputRow,alignPeaks,indsFromPeak);
+    if doingMultipleUnits==true
+        tryforSUfields=fieldnames(photometry_tbt);
+        j=1;
+        for i=1:length(tryforSUfields)
+            if ~isempty(regexp(tryforSUfields{i},'unit','ONCE')) && ~ismember(tryforSUfields{i},nonUnitFields)
+                % this is a single unit
+                SUfields{j}=tryforSUfields{i};
+                j=j+1;
+            end
+        end
+        disp('will plot units in this order:');
+        for i=1:length(SUfields)
+            [su(i).alignedData,~]=alignRowsToInds(photometry_tbt.(SUfields{i}),indsIntoPhoto,nanmin(indsIntoPhoto),fromInputRow,alignPeaks,indsFromPeak);
+            disp(SUfields{i});
+        end
+    end
     
     % check other reaches with respect to this reach type
     [allReachesAlignedData,allReachesAlignedAt]=alignRowsToInds(behavior_tbt.reachStarts,alignInds,300,fromInputRow,false,indsFromPeak);
@@ -291,6 +390,9 @@ if typeOfReach==true
         plotBehFieldOut.y=allReachesAlignedData;
     end
     
+    figure();
+    plotTrialsAsHeatmap(alignedData,phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),behAligned,behTimes,10,maxTimeForHeatmap,true);
+    
     if ~isempty(hax)
         if ~isnumeric(hax{1})
             axes(hax{1});
@@ -301,10 +403,7 @@ if typeOfReach==true
     else
         f_heatmap=figure();
     end
-    plotTrialsAsHeatmap(alignedData,phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),behAligned,behTimes,10,maxTimeForHeatmap);
-    
-    figure();
-    plotTrialsAsHeatmap(alignedData,phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),behAligned,behTimes,10,maxTimeForHeatmap);
+    plotTrialsAsHeatmap(alignedData,phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),behAligned,behTimes,10,maxTimeForHeatmap,true);
     hold on;
     whichFields={'cueZone_onVoff','all_reachBatch','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts','success_reachStarts_pawOnWheel'};
     if ~isempty(plotBehField)
@@ -319,7 +418,7 @@ if typeOfReach==true
     
     if ~isempty(plotBehField)
         figure();
-        plotTrialsAsHeatmap(alignedData,phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),behAligned,behTimes,10,maxTimeForHeatmap);
+        plotTrialsAsHeatmap(alignedData,phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),behAligned,behTimes,10,maxTimeForHeatmap,true);
         hold on;
         plotEventsScatter(newBehavior_tbt,fromInputRow(~isnan(fromInputRow)),'cueZone_onVoff','all_reachBatch','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts',plotBehField);
         title(['Black dots are ' plotBehField]);
@@ -341,6 +440,9 @@ if typeOfReach==true
     plotWStderr(alignedData,phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),'k',[],size(behAligned,1));
     dataout.x=phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax));
     dataout.y=alignedData;
+    if doingMultipleUnits==true
+        dataout.y=su;
+    end
     hold on;
     te=nanmean(alignedData,1);
     te=te(~isnan(te));
@@ -410,33 +512,31 @@ end
 
 end
 
-function data=smoothPhotometry(data,Fs,lowPassCutoff)
-    smoothFields={'green_ch','red_ch'};
-    disp('Smoothing photometry fields');
-    for i=1:length(smoothFields)
-        currField=smoothFields{i};
-        temp=data.(currField);
-        % truncate after nans begin AFTER real signal ends
-        for j=1:size(temp,1)
-            frealsig=find(~isnan(temp(j,:)) & temp(j,:)~=0,1,'last');
-            fna=find(isnan(temp(j,frealsig+1:end)),1,'first');
-            if ~isempty(fna)
-                fna=frealsig+fna;
-                temp(j,fna:end)=nan;
-            end
-        end
-        data.(currField)=temp;
-        
-        disp(['Smoothing field named ' currField]);
-        % can't put in nans, pad with a low value
-        padval=prctile(temp(1:end),10);
-        temp(isnan(temp))=padval;
-        newtemp=fftFilter(temp',Fs,lowPassCutoff,1);
-        beforenans=real(newtemp');
-        % put nans back in
-        beforenans(isnan(data.(currField)))=nan;
-        data.(currField)=beforenans;
+function data=smoothPhotometry(data,Fs,lowPassCutoff,currField)
+
+disp('Smoothing fields');
+temp=data.(currField);
+% truncate after nans begin AFTER real signal ends
+for j=1:size(temp,1)
+    frealsig=find(~isnan(temp(j,:)) & temp(j,:)~=0,1,'last');
+    fna=find(isnan(temp(j,frealsig+1:end)),1,'first');
+    if ~isempty(fna)
+        fna=frealsig+fna;
+        temp(j,fna:end)=nan;
     end
+end
+data.(currField)=temp;
+
+disp(['Smoothing field named ' currField]);
+% can't put in nans, pad with a low value
+padval=prctile(temp(1:end),10);
+temp(isnan(temp))=padval;
+newtemp=fftFilter(temp',Fs,lowPassCutoff,1);
+beforenans=real(newtemp');
+% put nans back in
+beforenans(isnan(data.(currField)))=nan;
+data.(currField)=beforenans;
+    
 end
 
 function [newBehavior_tbt,alignedAt]=makeShiftedTbt(behavior_tbt,whichFields,alignInds,nBefore,fromInputRow)
@@ -558,7 +658,9 @@ end
 
 end
 
-function plotTrialsAsHeatmap(alignedData,times,behAligned,behTimes,ceilAbove,maxTimeInSec)
+function plotTrialsAsHeatmap(alignedData,times,behAligned,behTimes,ceilAbove,maxTimeInSec,plotBehLines)
+
+dormoutlier=true;
 
 if ~isempty(ceilAbove)
     alignedData(alignedData>ceilAbove)=ceilAbove;
@@ -571,22 +673,36 @@ for i=1:length(ft)
     if any(isnan(temp))
         temp=temp(~isnan(temp));
     end
-    alignedData(ft(i),1:length(temp))=smooth(temp,60);
+%     alignedData(ft(i),1:length(temp))=smooth(temp,60);
+    alignedData(ft(i),1:length(temp))=smooth(temp,50);
     alignedData(ft(i),length(temp)+1:end)=nan;
 %     alignedData(ft(i),1:end-floor(size(alignedData,2)/2))=smooth(temp,60);
 %     alignedData(ft(i),end-floor(size(alignedData,2)/2)-60:end)=nan;
 end
 [~,mi]=nanmin(abs(times-maxTimeInSec));
 
-imagesc(times(1:mi),1:nansum(useTheseTrials),alignedData(useTheseTrials,1:mi));
+if dormoutlier==true
+    temp=alignedData(useTheseTrials,1:mi);
+    bottomcut=prctile(temp(1:end),1);
+    uppercut=prctile(temp(1:end),99);
+    temp(temp<bottomcut)=bottomcut;
+    temp(temp>uppercut)=uppercut;
+    alignedData(useTheseTrials,1:mi)=temp;
+end    
+imAlpha=ones(size(alignedData(useTheseTrials,1:mi)));
+imAlpha(isnan(alignedData(useTheseTrials,1:mi)))=0;
+% colormap('jet');
+imagesc(times(1:mi),1:nansum(useTheseTrials),alignedData(useTheseTrials,1:mi),'AlphaData',imAlpha);
 f=find(useTheseTrials);
-hold on;
-for i=1:length(f)
-    [~,fp]=nanmax(behAligned(i,:));
-    line([behTimes(fp) behTimes(fp)],[i-0.5 i+0.5],'Color','w','LineWidth',2);
-    fp=find(behAligned(i,:)>0.5);
-    for j=1:length(fp)
-        line([behTimes(fp(j)) behTimes(fp(j))],[i-0.5 i+0.5],'Color','w');
+if plotBehLines==true
+    hold on;
+    for i=1:length(f)
+        [~,fp]=nanmax(behAligned(i,:));
+        line([behTimes(fp) behTimes(fp)],[i-0.5 i+0.5],'Color','w','LineWidth',1);
+        fp=find(behAligned(i,:)>0.5);
+        for j=1:length(fp)
+            line([behTimes(fp(j)) behTimes(fp(j))],[i-0.5 i+0.5],'Color','w');
+        end
     end
 end
 

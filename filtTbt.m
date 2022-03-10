@@ -3,8 +3,13 @@ function [newtbt,newout,newmetadata,takeThese]=filtTbt(alltbt,out,sortField,rang
 fieldForSort=out.(sortField);
 
 f=fieldnames(alltbt);
-if length(range_values)>1
+if length(range_values)==1
+    error('Need at least two range values for filtTbt');
+elseif length(range_values)==2
+    disp(['Taking fieldforsort BETWEEN two values']);
     takeThese=fieldForSort>=range_values(1) & fieldForSort<=range_values(2);
+elseif length(range_values)>2
+    takeThese=ismember(fieldForSort,range_values);
 end
 for i=1:length(f)
     if displayProgress==true && i~=length(f)

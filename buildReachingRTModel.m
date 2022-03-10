@@ -302,6 +302,9 @@ for i=1:length(nInSequence)
         dim2_rt_change_cond2(i,j)=dim2.med2;
         dim2_p(i,j)=dim2.p;
         dim2_closeup_rt_change_cond1(i,j)=dim2_closeup.med1;
+        if isempty(dim2_closeup.med2)
+            dim2_closeup.med2=nan;
+        end
         dim2_closeup_rt_change_cond2(i,j)=dim2_closeup.med2;
         dim2_closeup_p(i,j)=dim2_closeup.p;
         allVals1_alldim=[allVals1_alldim allDims.vals1];
