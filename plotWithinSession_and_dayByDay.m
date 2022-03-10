@@ -111,7 +111,7 @@ for i=1:length(days)
     reachratesettings.binTrialsForAvAcrossSess=true; % whether to bin multiple trials for first figure, will bin into binThisManyTrials
 %     reachratesettings.binThisManyTrials=30; % how many trials to bin within each session
 %     reachratesettings.binThisManyTrials=70; % how many trials to bin within each session
-    reachratesettings.binThisManyTrials=160; % how many trials to bin within each session
+    reachratesettings.binThisManyTrials=40; % how many trials to bin within each session
     reachratesettings.nBinsForZones=40; % will be nBinsForZones squared total bins, this is # bins for each x and y axis
     reachratesettings.useRateMethod=3; % 1, 2 or 3 (see explanation below)
     
@@ -158,6 +158,13 @@ for i=1:length(days)
     tempuncued=daybyday_uncued{i};
     tempcued=daybyday_cued{i};
     if isempty(tempuncued)
+        k=k+kstep;
+        if k>size(cmap,1)
+            k=size(cmap,1);
+        end
+        continue
+    end
+    if ismember(i,[2 4 6 8 10 12 14 16 18 20 22 24 26])
         k=k+kstep;
         if k>size(cmap,1)
             k=size(cmap,1);

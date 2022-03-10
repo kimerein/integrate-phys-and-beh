@@ -357,6 +357,9 @@ rangex=[nanmin([temp_uncued; temp_uncued_trial1]) nanmax([temp_uncued; temp_uncu
 binsForZones_x=rangex(1):range(rangex)/(nBinsForZones-1):rangex(2);
 rangey=[nanmin([temp_cued; temp_cued_trial1]) nanmax([temp_cued; temp_cued_trial1])];
 binsForZones_y=rangey(1):range(rangey)/(nBinsForZones-1):rangey(2);
+if rangey(1)-rangey(2)<1e5
+    return
+end
 % find which bins actually occupied
 occupiedBins=zeros(length(binsForZones_x)-1,length(binsForZones_y)-1);
 testToUse='nanmean([approach_trial1_cued approach_alltrials_cued],2)>=currbin_y(1) & nanmean([approach_trial1_cued approach_alltrials_cued],2)<=currbin_y(2) & nanmean([approach_trial1_uncued approach_alltrials_uncued],2)>=currbin_x(1) & nanmean([approach_trial1_uncued approach_alltrials_uncued],2)<=currbin_x(2)';
@@ -530,6 +533,9 @@ if useRateMethod==1 || useRateMethod==3
                         line([nanmean(temp_uncued) nanmean(temp_uncued)],...
                             [nanmean(temp_cued)-nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued))) nanmean(temp_cued)+nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued)))],'Color',cmap(k,:),'LineWidth',1);
                     end
+                    if size(ratein_fixed_window1,1)==1
+                        scatter(nanmean(temp_uncued),nanmean(temp_cued),[],cmap(k,:),'filled');
+                    end
                     temp_cued=backup_temp_cued;
                     temp_uncued=backup_temp_uncued;
                 end
@@ -615,13 +621,13 @@ if useRateMethod==1 || useRateMethod==3
         upTo=length(approach_cued);
     end
     quiver(nanmean(approach_uncued(1:n_for_init_rate)),nanmean(approach_cued(1:n_for_init_rate)),...
-        nanmean(approach_uncued(n_for_init_rate+1:upTo))-nanmean(approach_uncued(1:n_for_init_rate)),...
-        nanmean(approach_cued(n_for_init_rate+1:upTo))-nanmean(approach_cued(1:n_for_init_rate)),'Color','k');
-    quiver_y=nanmean(approach_cued(n_for_init_rate+1:upTo))-nanmean(approach_cued(1:n_for_init_rate));
-    quiver_x=nanmean(approach_uncued(n_for_init_rate+1:upTo))-nanmean(approach_uncued(1:n_for_init_rate));
-    quiver_m=/;
+        nanmean(approach_uncued(upTo-n_for_init_rate:upTo))-nanmean(approach_uncued(1:n_for_init_rate)),...
+        nanmean(approach_cued(upTo-n_for_init_rate:upTo))-nanmean(approach_cued(1:n_for_init_rate)),'Color','k');
+    quiver_y=nanmean(approach_cued(upTo-n_for_init_rate:upTo))-nanmean(approach_cued(1:n_for_init_rate));
+    quiver_x=nanmean(approach_uncued(upTo-n_for_init_rate:upTo))-nanmean(approach_uncued(1:n_for_init_rate));
+    quiver_m=quiver_y/quiver_x;
     ang=atand(quiver_m);
-    if nanmean(approach_cued(n_for_init_rate+1:upTo))-nanmean(approach_cued(1:n_for_init_rate))<0 && nanmean(approach_uncued(n_for_init_rate+1:upTo))-nanmean(approach_uncued(1:n_for_init_rate))<0
+    if quiver_y<0 && quiver_x<0
         ang=180+abs(ang);
     end
     disp(['vector angle ' num2str(ang)]);
@@ -814,7 +820,11 @@ if (useRateMethod==1 || useRateMethod==3) && settings.suppressPlots==false
     actual_x=out.uncued; % average across all sessions, uncued reaching rate for each trial in session, i.e., trial 1 to last trial in session
     figure();
     k=1;
-    kstep=ceil(size(cmap,1)/length(actual_y));
+    if ~isempty(settings.stopPlottingTrialsAfterN)
+        kstep=ceil(size(cmap,1)/length(actual_y));
+    else
+        kstep=ceil(size(cmap,1)/length(actual_y));
+    end
     suppressUnfilled=true;
     for i=1:length(actual_y)
         if suppressUnfilled==false

@@ -820,11 +820,22 @@ if (useRateMethod==1 || useRateMethod==3) && settings.suppressPlots==false
     actual_x=out.uncued; % average across all sessions, uncued reaching rate for each trial in session, i.e., trial 1 to last trial in session
     figure();
     k=1;
-    kstep=ceil(size(cmap,1)/length(actual_y));
+    if ~isempty(settings.stopPlottingTrialsAfterN)
+        kstep=ceil(size(cmap,1)/length(settings.stopPlottingTrialsAfterN));
+    else
+        kstep=ceil(size(cmap,1)/length(actual_y));
+    end
     suppressUnfilled=true;
     for i=1:length(actual_y)
         if suppressUnfilled==false
-            s=scatter(actual_x(i),actual_y(i)-expected_y(i),scatterPointSize,cmap(k,:),'LineWidth',0.8);
+            if ~isempty(settings.stopPlottingTrialsAfterN)
+                if i>settings.stopPlottingTrialsAfterN
+                else
+                    s=scatter(actual_x(i),actual_y(i)-expected_y(i),scatterPointSize,cmap(k,:),'LineWidth',0.8);
+                end
+            else
+                s=scatter(actual_x(i),actual_y(i)-expected_y(i),scatterPointSize,cmap(k,:),'LineWidth',0.8);
+            end            
         else
             s=[];
         end
@@ -835,13 +846,29 @@ if (useRateMethod==1 || useRateMethod==3) && settings.suppressPlots==false
         end
     end
     line([0 nanmax(out.uncued)],[0 -m*nanmax(out.uncued)],'Color',[0.5 0.5 0.5]);
-    binned_x=downSampAv(actual_x,4);
+    downSampForFilled=3;
+    binned_x=downSampAv(actual_x,downSampForFilled);
     ydiff=actual_y-expected_y;
-    binned_ydiff=downSampAv(ydiff,4);
+    binned_ydiff=downSampAv(ydiff,downSampForFilled);
+    binnedStopPlotting=floor(settings.stopPlottingTrialsAfterN/downSampForFilled);
+    if binnedStopPlotting<1
+        binnedStopPlotting=1;
+    end
     k=1;
-    kstep=ceil(size(cmap,1)/length(binned_ydiff));
+    if ~isempty(settings.stopPlottingTrialsAfterN)
+        kstep=ceil(size(cmap,1)/binnedStopPlotting);
+    else
+        kstep=ceil(size(cmap,1)/length(binned_ydiff));
+    end
     for i=1:length(binned_ydiff)
-        sbin=scatter(binned_x(i),binned_ydiff(i),scatterPointSize,cmap(k,:),'filled','LineWidth',1);
+        if ~isempty(settings.stopPlottingTrialsAfterN)
+            if i>binnedStopPlotting
+            else
+                sbin=scatter(binned_x(i),binned_ydiff(i),scatterPointSize,cmap(k,:),'filled','LineWidth',1);
+            end
+        else
+            sbin=scatter(binned_x(i),binned_ydiff(i),scatterPointSize,cmap(k,:),'filled','LineWidth',1);
+        end
         hold on;
         k=k+kstep;
         if k>size(cmap,1)
