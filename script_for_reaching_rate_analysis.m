@@ -6,7 +6,9 @@
 
 %% load in data
 
-exptDataDir='/Volumes/Neurobio/MICROSCOPE/Kim/for_orchestra/combineReachData/O2 output/alltbt25May2021220005/'; % directory containing experimental data
+%exptDataDir='/Volumes/Neurobio/MICROSCOPE/Kim/for_orchestra/combineReachData/O2 output/alltbt25May2021220005/'; % directory containing experimental data
+%exptDataDir='/Volumes/Neurobio-1/MICROSCOPE/Kim/for_orchestra/combineReachData/O2 output/alltbt25May2021231914/';
+exptDataDir='/Volumes/Neurobio/MICROSCOPE/Kim/for_orchestra/combineReachData/O2 output/alltbt26May2021144114/'; % directory containing experimental data
 
 if ismac==true
     sprtr='/';
@@ -32,7 +34,7 @@ backup.trialTypes=trialTypes;
 backup.metadata=metadata;
 
 % Optional: correct any LED trials for blinded control mice
-[alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,[3 4 14]);
+%[alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,[3 4 14]);
 
 % Optional: discard preemptive
 [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
@@ -78,10 +80,12 @@ temp(~ismember(temp,['A':'Z' 'a':'z' '0':'9']))='';
 temp=temp(~isspace(temp));
 saveDir=['/Volumes/Neurobio/MICROSCOPE/Kim/RT pairs data sets/' temp]; % where to save details of alltbt filtering and RT pairs data set
 
+%trialTypes.ismousetotake=ismember(metadata.mouseid,[1 3 10 11]);
+
 % filter settings
 tbt_filter.sortField='dprimes';
-tbt_filter.range_values=[1 2];
-tbt_filter.name=[tbt_filter.sortField num2str(tbt_filter.range_values(1)) 'to' num2str(tbt_filter.range_values(2))];
+tbt_filter.range_values=[-100 0.8];
+tbt_filter.name=[tbt_filter.sortField]; %num2str(tbt_filter.range_values(1)) 'to' num2str(tbt_filter.range_values(2))];
 temp=tbt_filter.name;
 temp(~ismember(temp,['A':'Z' 'a':'z' '0':'9']))=''; 
 temp=temp(~isspace(temp));

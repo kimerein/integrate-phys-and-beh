@@ -1,4 +1,4 @@
-function plotChangeInReachCDF(dataset,alltbt)
+function out=plotChangeInReachCDF(dataset,alltbt)
 
 preCueWindow=[-2 -1];
 maxTrialLength=9.5;
@@ -17,6 +17,7 @@ for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
 end
 
 line([timeBinsForReaching(f) timeBinsForReaching(f)],[0 1],'Color','b');
+out.cueTime=timeBinsForReaching(f);
 c=polyfit(timeBinsForReaching(timeBinsForReaching>=preCueWindow(1) & timeBinsForReaching<=preCueWindow(2)),d1(timeBinsForReaching>=preCueWindow(1) & timeBinsForReaching<=preCueWindow(2)),1);
 yest=polyval(c,timeBinsForReaching);
 plot(timeBinsForReaching,yest,'Color','g');
@@ -36,6 +37,9 @@ takeIndsForBootstrap=ceil(takeFracForBootstrap*size(dat2,1));
 nRuns=100;
 bootCDFs=nan(nRuns,length(timeBinsForReaching));
 for i=1:nRuns
+    if isempty(dat2)
+        continue
+    end
     takeTheseForBoot=randi(size(dat2,1),1,takeIndsForBootstrap); % with replacement
     sub_dat2=dat2(takeTheseForBoot,:);
     sub_dat2=sum(sub_dat2,1,'omitnan');
@@ -55,11 +59,15 @@ for i=1:size(bootCDFs,2)
 end
 plot(timeBinsForReaching,fifthPerc,'Color','r');
 plot(timeBinsForReaching,ninetyfifthPerc,'Color','r');
+out.meanCDF=d2;
 
 line([timeBinsForReaching(f) timeBinsForReaching(f)],[0 1],'Color','b');
 c2=polyfit(timeBinsForReaching(timeBinsForReaching>=preCueWindow(1) & timeBinsForReaching<=preCueWindow(2)),d2(timeBinsForReaching>=preCueWindow(1) & timeBinsForReaching<=preCueWindow(2)),1);
 yest=polyval(c2,timeBinsForReaching);
 plot(timeBinsForReaching,yest,'Color','g');
+out.y_fitToUncued=yest;
+out.fitToUncued=c2;
+out.timebins=timeBinsForReaching;
 
 c1=polyfit(timeBinsForReaching(timeBinsForReaching>=preCueWindow(1) & timeBinsForReaching<=preCueWindow(2)),d1(timeBinsForReaching>=preCueWindow(1) & timeBinsForReaching<=preCueWindow(2)),1);
 yest=polyval(c1,timeBinsForReaching);
