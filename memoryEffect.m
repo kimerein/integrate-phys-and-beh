@@ -18,7 +18,7 @@ trial1='trialTypes.led~=1';
 test.trial1=trial1;
 test.templateSequence2_cond=eval(trial1);
 % memory
-trial2='trialTypes.led~=1';
+trial2=['trialTypes.led~=1' ' & trialTypes.led_1forward==1'];
 test.trial2=trial2;
 test.templateSequence2_end=eval(trial2);
 test.fillInBetweenWithAnything=false; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1
@@ -109,7 +109,7 @@ trial1='trialTypes.led~=1';
 test.trial1=trial1;
 test.templateSequence2_cond=eval(trial1);
 % memory
-trial2='trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3';
+trial2=['trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3'];
 test.trial2=trial2;
 test.templateSequence2_end=eval(trial2);
 test.fillInBetweenWithAnything=false; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1
@@ -216,6 +216,10 @@ if resampleToMatchFracs==true
         startingpool_LEDcued=LED_all_cued(LED_all_fracs>=binsForFracs(i) & LED_all_fracs<binsForFracs(i+1));
         startingpool_LEDfracs=LED_all_fracs(LED_all_fracs>=binsForFracs(i) & LED_all_fracs<binsForFracs(i+1));
         takeN=con.n(i);
+        if takeN~= 0 && isempty(startingpool_LEDuncued)
+            disp('Cannot resample, not enough trials');
+            return
+        end
         if takeN>length(startingpool_LEDuncued)
             newpool_LEDuncued=[];
             newpool_LEDcued=[];
