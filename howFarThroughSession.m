@@ -3,6 +3,7 @@ function [metadata,fractionThroughSess]=howFarThroughSession(metadata,excludeNoT
 theseSess=unique(metadata.sessid);
 
 metadata.fractionThroughSess=nan(size(metadata.sessid));
+metadata.fractionThroughSess_adjusted=nan(size(metadata.sessid));
 for i=1:length(theseSess)
     currSess=theseSess(i);
     if excludeNoTouchTrialsFlag==false
@@ -22,8 +23,14 @@ for i=1:length(theseSess)
         % rescale using last trial with touch
         ltouch=temp(find(touches==true,1,'last'));
         temp=temp./ltouch;
-        metadata.fractionThroughSess(metadata.sessid==currSess)=temp;
+        metadata.fractionThroughSess_adjusted(metadata.sessid==currSess)=temp;
     end
 end
 
-fractionThroughSess=metadata.fractionThroughSess;
+if excludeNoTouchTrialsFlag==false
+    fractionThroughSess=metadata.fractionThroughSess;
+    metadata=rmfield(metadata,'fractionThroughSess_adjusted');
+else
+    fractionThroughSess=metadata.fractionThroughSess_adjusted;
+    metadata=rmfield(metadata,'fractionThroughSess');
+end
