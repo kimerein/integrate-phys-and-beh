@@ -18,7 +18,7 @@ trial1='trialTypes.led~=1';
 test.trial1=trial1;
 test.templateSequence2_cond=eval(trial1);
 % memory
-trial2=['trialTypes.led~=1' ' & trialTypes.led_1forward==1'];
+trial2=['trialTypes.led~=1' ' & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup_1forward~=3 & trialTypes.led_2forward==0'];
 test.trial2=trial2;
 test.templateSequence2_end=eval(trial2);
 test.fillInBetweenWithAnything=false; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1
@@ -54,11 +54,11 @@ reachratesettings.maxTrialLength=9.5; % in sec, wrt cue
 reachratesettings.minTrialLength=-2; % wrt cue, in sec
 reachratesettings.suppressPlots=true;
  % sec wrt cue onset
-reachratesettings.acrossSess_window1=[0.05 1]; % cued window [0.05 1]
+reachratesettings.acrossSess_window1=[0.05 2]; % cued window [0.05 1]
 % reachratesettings.acrossSess_window1=[4 7];
 % note that after mouse gets a pellet, reaching is suppressed
 reachratesettings.acrossSess_window2=[7 reachratesettings.maxTrialLength]; % beware reach suppression after a success
-reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength -1];
+reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength 0];
 reachratesettings.scatterPointSize=50; % size for points in scatter plot
 reachratesettings.addSatietyLines=false; % whether to add proportionality lines to figure
 % reachratesettings.stopPlottingTrialsAfterN=500; % will stop plotting after this nth trial in session, also only use this many trials for regression fit -- see next line, also controls colormap
@@ -109,7 +109,10 @@ trial1='trialTypes.led~=1';
 test.trial1=trial1;
 test.templateSequence2_cond=eval(trial1);
 % memory
-trial2=['trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3'];
+trialTypes.led_4forward=[trialTypes.led(5:end); 0; 0; 0; 0];
+linker=' & trialTypes.led_1forward~=1 & trialTypes.led_2forward~=1';
+% linker=' & trialTypes.led_1forward==0 & trialTypes.led_2forward==0 & trialTypes.led_3forward==0 & trialTypes.led_4forward==0';
+trial2=['trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3' linker];
 test.trial2=trial2;
 test.templateSequence2_end=eval(trial2);
 test.fillInBetweenWithAnything=false; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1
@@ -144,11 +147,11 @@ reachratesettings.maxTrialLength=9.5; % in sec, wrt cue
 reachratesettings.minTrialLength=-2; % wrt cue, in sec
 reachratesettings.suppressPlots=true;
  % sec wrt cue onset
-reachratesettings.acrossSess_window1=[0.05 1]; % cued window [0.05 1]
+reachratesettings.acrossSess_window1=[0.05 2]; % cued window [0.05 1]
 % reachratesettings.acrossSess_window1=[4 7];
 % note that after mouse gets a pellet, reaching is suppressed
 reachratesettings.acrossSess_window2=[7 reachratesettings.maxTrialLength]; % beware reach suppression after a success
-reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength -1];
+reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength 0];
 reachratesettings.scatterPointSize=50; % size for points in scatter plot
 reachratesettings.addSatietyLines=false; % whether to add proportionality lines to figure
 % reachratesettings.stopPlottingTrialsAfterN=500; % will stop plotting after this nth trial in session, also only use this many trials for regression fit -- see next line, also controls colormap
@@ -205,7 +208,7 @@ led.x=x;
 led.n=n;
 title('Before matching fracs');
 
-resampleToMatchFracs=true;
+resampleToMatchFracs=false;
 if resampleToMatchFracs==true
     nRuns=10;
     resampled_LEDuncued=[];
@@ -218,7 +221,9 @@ if resampleToMatchFracs==true
         takeN=con.n(i);
         if takeN~= 0 && isempty(startingpool_LEDuncued)
             disp('Cannot resample, not enough trials');
-            return
+            disp('Proceeding without resample');
+            resampleToMatchFracs=false;
+            break
         end
         if takeN>length(startingpool_LEDuncued)
             newpool_LEDuncued=[];
@@ -247,20 +252,21 @@ if resampleToMatchFracs==true
             resampled_LEDfracs=[resampled_LEDfracs newpool_LEDfracs(r)];
         end
     end
-    
-    figure();
-    [n,x]=histcounts(fracs_inThisPartOfSess_noLED(~isnan(fracs_inThisPartOfSess_noLED)),binsForFracs);
-    [new_n,new_x]=cityscape_hist(n,x);
-    plot(new_x,new_n./nanmax(new_n),'Color','k');
-    con.x=x;
-    con.n=n;
-    hold on;
-    [n,x]=histcounts(resampled_LEDfracs(~isnan(resampled_LEDfracs)),binsForFracs);
-    [new_n,new_x]=cityscape_hist(n,x);
-    plot(new_x,new_n./nanmax(new_n),'Color','r');
-    title('After matching fracs');
-    mean_uncued_LED=nanmean(resampled_LEDuncued);
-    mean_cued_LED=nanmean(resampled_LEDcued);
+    if resampleToMatchFracs==true
+        figure();
+        [n,x]=histcounts(fracs_inThisPartOfSess_noLED(~isnan(fracs_inThisPartOfSess_noLED)),binsForFracs);
+        [new_n,new_x]=cityscape_hist(n,x);
+        plot(new_x,new_n./nanmax(new_n),'Color','k');
+        con.x=x;
+        con.n=n;
+        hold on;
+        [n,x]=histcounts(resampled_LEDfracs(~isnan(resampled_LEDfracs)),binsForFracs);
+        [new_n,new_x]=cityscape_hist(n,x);
+        plot(new_x,new_n./nanmax(new_n),'Color','r');
+        title('After matching fracs');
+        mean_uncued_LED=nanmean(resampled_LEDuncued);
+        mean_cued_LED=nanmean(resampled_LEDcued);
+    end
 end
 
 

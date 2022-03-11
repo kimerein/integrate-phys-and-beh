@@ -18,7 +18,7 @@ trial1='trialTypes.led~=1';
 test.trial1=trial1;
 test.templateSequence2_cond=eval(trial1);
 % memory
-trial2='trialTypes.led~=1';
+trial2=['trialTypes.led~=1' ' & trialTypes.led_1forward==1'];
 test.trial2=trial2;
 test.templateSequence2_end=eval(trial2);
 test.fillInBetweenWithAnything=false; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1
@@ -109,7 +109,7 @@ trial1='trialTypes.led~=1';
 test.trial1=trial1;
 test.templateSequence2_cond=eval(trial1);
 % memory
-trial2='trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3';
+trial2=['trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3'];
 test.trial2=trial2;
 test.templateSequence2_end=eval(trial2);
 test.fillInBetweenWithAnything=false; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1
@@ -190,7 +190,7 @@ LED_all_uncued=LED_all_uncued(~isnan(LED_all_fracs));
 LED_all_cued=LED_all_cued(~isnan(LED_all_fracs));
 LED_all_fracs=LED_all_fracs(~isnan(LED_all_fracs));
 
-binsForFracs=0:0.05:1;
+binsForFracs=0:0.02:1;
 figure();
 [n,x]=histcounts(fracs_inThisPartOfSess_noLED(~isnan(fracs_inThisPartOfSess_noLED)),binsForFracs);
 [new_n,new_x]=cityscape_hist(n,x);
@@ -208,14 +208,19 @@ title('Before matching fracs');
 resampleToMatchFracs=true;
 if resampleToMatchFracs==true
     nRuns=10;
+    resampled_LEDuncued=[];
+    resampled_LEDcued=[];
+    resampled_LEDfracs=[];
     for i=1:length(con.x)-1
         startingpool_LEDuncued=LED_all_uncued(LED_all_fracs>=binsForFracs(i) & LED_all_fracs<binsForFracs(i+1));
         startingpool_LEDcued=LED_all_cued(LED_all_fracs>=binsForFracs(i) & LED_all_fracs<binsForFracs(i+1));
         startingpool_LEDfracs=LED_all_fracs(LED_all_fracs>=binsForFracs(i) & LED_all_fracs<binsForFracs(i+1));
         takeN=con.n(i);
-        newmeans_uncued=nan(1,nRuns);
-        newmeans_cued=nan(1,nRuns);
-        newfracs=nan(1,nRuns);
+        if takeN~= 0 && isempty(startingpool_LEDuncued)
+            disp('Cannot resample, not enough trials');
+            disp('Porce
+            return
+        end
         if takeN>length(startingpool_LEDuncued)
             newpool_LEDuncued=[];
             newpool_LEDcued=[];
@@ -232,14 +237,16 @@ if resampleToMatchFracs==true
         if isempty(newpool_LEDuncued) && takeN>0
             error('Need bigger binning for fracs');
         end
+        if takeN==0
+            continue
+        end
         for j=1:nRuns
             disp(j);
             r=randsample(length(newpool_LEDuncued),takeN);
-            newmeans_uncued(j)=nanmean(newpool_LEDuncued(r));
-            newmeans_cued(j)=nanmean(newpool_LEDcued(r));
-            newfracs(j)=nanmean(newpool_LEDfracs(r));
+            resampled_LEDuncued=[resampled_LEDuncued newpool_LEDuncued(r)];
+            resampled_LEDcued=[resampled_LEDcued newpool_LEDcued(r)];
+            resampled_LEDfracs=[resampled_LEDfracs newpool_LEDfracs(r)];
         end
-        
     end
     
     figure();
@@ -249,12 +256,12 @@ if resampleToMatchFracs==true
     con.x=x;
     con.n=n;
     hold on;
-    [n,x]=histcounts(newfracs(~isnan(newfracs)),binsForFracs);
+    [n,x]=histcounts(resampled_LEDfracs(~isnan(resampled_LEDfracs)),binsForFracs);
     [new_n,new_x]=cityscape_hist(n,x);
     plot(new_x,new_n./nanmax(new_n),'Color','r');
     title('After matching fracs');
-    mean_uncued_LED=nanmean(newmeans_uncued);
-    mean_cued_LED=nanmean(newmeans_cued);
+    mean_uncued_LED=nanmean(resampled_LEDuncued);
+    mean_cued_LED=nanmean(resampled_LEDcued);
 end
 
 

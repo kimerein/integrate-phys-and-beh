@@ -87,12 +87,13 @@ saveDir=['/Volumes/Neurobio/MICROSCOPE/Kim/RT pairs data sets/' temp]; % where t
 alltbt.mouseid=metadata.mouseid;
 alltbt.sessid=metadata.sessid;
 trialTypes.sessid=metadata.sessid;
-tbt_filter.sortField='mouseid';
+% tbt_filter.sortField='opto_enhanced_reach';
 % tbt_filter.sortField='fractionThroughSess';
 % tbt_filter.sortField='opto_enhanced_reach';
-% tbt_filter.sortField='dprimes';
+tbt_filter.sortField='mouseLearned';
 % tbt_filter.range_values=[1 6 7 8 10 14 18];
-tbt_filter.range_values=[1 2 6 9 10 11 12 18];
+% tbt_filter.range_values=[1 2 6 9 10 11 12 18];
+tbt_filter.range_values=[0.5 1.5];
 % tbt_filter.range_values=[2 3 4 5 6 7 8 9 10 11 12 14 15 17 18 19]; % which mice start at non-learning 
 % tbt_filter.range_values=[1 2 4 5 6 7 8 9 10 11 12 17 18 19];
 % tbt_filter.range_values=[1     2     3     6     7     8     9    10    11    12    14    15    17    18];
@@ -108,7 +109,7 @@ tbt_filter.clock_progress=true;
 
 %% check for opto-enhanced reaching
 alltbt.sessid=metadata.sessid;
-alltbt=checkForOptoEnhancedReach(alltbt,metadata,trialTypes,'all_reachBatch','trialTypes.led==1','cueZone_onVoff',[-0.25 0.5],20);
+alltbt=checkForOptoEnhancedReach(alltbt,metadata,trialTypes,'all_reachBatch','trialTypes.led==1','cueZone_onVoff',[-0.25 0.5],30);
 trialTypes.opto_enhanced_reach=alltbt.opto_enhanced_reach;
 
 %% build relevant data sets
@@ -122,7 +123,7 @@ trialTypes.optoGroup_1forward=[trialTypes.optoGroup(2:end); 0];
 % trial1='trialTypes.optoGroup~=1';
 % trial1='trialTypes.led~=1 & trialTypes.led_1back~=1';
 % memory
-% trial1='trialTypes.led~=1'; 
+% trial1='trialTypes.led==1'; 
 % trial1='trialTypes.isLongITI==1';
 trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
 % trial1='trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1'; % & trialTypes.isLongITI_1forward==1'];
@@ -138,10 +139,10 @@ trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start
 % trial2='trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3';
 % trial2='trialTypes.optoGroup~=1 & trialTypes.led==0 & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
 % trial2='trialTypes.optoGroup~=1 & trialTypes.led==0';
-% trial2='trialTypes.led~=1';
+% trial2='trialTypes.led==1';
 test.trial2=trial2;
 test.templateSequence2_end=eval(trial2);
-test.fillInBetweenWithAnything=false; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1
+test.fillInBetweenWithAnything=true; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1
 test.event_name=['alltrials' tbt_filter.name 'inBetweenAnything' num2str(test.fillInBetweenWithAnything)];
 % test.onlyConsiderReachType='reachBatch_success_reachStarts';
 test.onlyConsiderReachType=[];
@@ -205,7 +206,7 @@ reachratesettings.useWindowsForUncued=[3]; % to use window2 or window3 or both f
 reachratesettings.initWindows=[]; % empty if want to calculate from dataset
 reachratesettings.addSessionLines=false; % for no averaging across sessions plot, whether to connect trial bins within same session with lines
 reachratesettings.binTrialsForAvAcrossSess=true; % whether to bin multiple trials for first figure, will bin into binThisManyTrials
-reachratesettings.binThisManyTrials=4; % how many trials to bin within each session
+reachratesettings.binThisManyTrials=6; % how many trials to bin within each session
 reachratesettings.nBinsForZones=40; % will be nBinsForZones squared total bins, this is # bins for each x and y axis
 reachratesettings.useRateMethod=3; % 1, 2 or 3 (see explanation below)
 % There are 3 approaches available for determing reach rates
@@ -238,9 +239,17 @@ reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'c
 
 plotHallmarksOfSatiety(reachrates,dataset,alltbt,metadata,trialTypes);
 
-%% memory effect
+%% find sessions where mouse learned
 
-nInSeq=4;
+part1_fracThroughSess=[0 0.2];
+part2_fracThroughSess=[0.2 0.8];
+learningThresh=0.1;
+alltbt=findSessWhereMouseLearned(alltbt,metadata,trialTypes,part1_fracThroughSess,part2_fracThroughSess,learningThresh);
+trialTypes.mouseLearned=alltbt.mouseLearned;
+
+%% memory effect
+% filter for no opto enhanced
+nInSeq=3; % may need to change linker in memoryEffect.m if change this
 useFractionThroughSession=[0.7 1];
 memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession);
 
