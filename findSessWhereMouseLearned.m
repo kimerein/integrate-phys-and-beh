@@ -27,8 +27,6 @@ reachratesettings.addSessionLines=false; % for no averaging across sessions plot
 reachratesettings.binThisManyTrials=25; % how many trials to bin within each session
 reachratesettings.nBinsForZones=40; % will be nBinsForZones squared total bins, this is # bins for each x and y axis
 reachratesettings.useRateMethod=3; % 1, 2 or 3 (see explanation below)
-dprimes_noLED_lasttrial=[];
-dprimes_LED_lasttrial=[];
 
 backup_alltbt=alltbt; backup_metadata=metadata; backup_trialTypes=trialTypes;
 % FIRST PART OF SESSION
@@ -38,7 +36,7 @@ temp=temp(~isspace(temp));
 saveDir=['/Volumes/Neurobio/MICROSCOPE/Kim/RT pairs data sets/' temp]; % where to save details of alltbt filtering and RT pairs data set
 alltbt.sessid=metadata.sessid;
 trialTypes.sessid=metadata.sessid;
-tbt_filter.sortField='fractionThroughSess';
+tbt_filter.sortField='fractionThroughSess_adjusted';
 tbt_filter.range_values=part1_fracThroughSess;
 tbt_filter.name=[tbt_filter.sortField num2str(tbt_filter.range_values(1)) 'to' num2str(tbt_filter.range_values(2))];
 temp=tbt_filter.name;
@@ -71,7 +69,7 @@ temp=temp(~isspace(temp));
 saveDir=['/Volumes/Neurobio/MICROSCOPE/Kim/RT pairs data sets/' temp]; % where to save details of alltbt filtering and RT pairs data set
 alltbt.sessid=metadata.sessid;
 trialTypes.sessid=metadata.sessid;
-tbt_filter.sortField='fractionThroughSess';
+tbt_filter.sortField='fractionThroughSess_adjusted';
 tbt_filter.range_values=part2_fracThroughSess;
 tbt_filter.name=[tbt_filter.sortField num2str(tbt_filter.range_values(1)) 'to' num2str(tbt_filter.range_values(2))];
 temp=tbt_filter.name;

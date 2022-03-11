@@ -893,6 +893,8 @@ if (useRateMethod==1 || useRateMethod==3) && settings.suppressPlots==false
     secondPart=[mean(tempx(end-floor(nIndsForfirstRates):end),'omitnan') mean(tempy(end-floor(nIndsForfirstRates):end),'omitnan')];
     if all(~isnan([firstPart secondPart])) && all(~isinf([firstPart secondPart]))
         q=quiver(firstPart(1),firstPart(2),secondPart(1)-firstPart(1),secondPart(2)-firstPart(2),'Color','k','LineWidth',2);
+    else
+        q=[];
     end
     daspect([1 1 1]);
     ylabel('Cued reach rate distance from proportionality line');

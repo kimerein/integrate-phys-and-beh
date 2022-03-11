@@ -253,8 +253,8 @@ reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'c
 plotHallmarksOfSatiety(reachrates,dataset,alltbt,metadata,trialTypes);
 
 %% memory effect
-% filter for no opto enhanced
-nInSeq=2; % may need to change linker in memoryEffect.m if change this
+% consider filtering for no opto enhanced
+nInSeq=2; 
 useFractionThroughSession=[0.2 0.8];
 memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession);
 
