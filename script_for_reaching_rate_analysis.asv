@@ -254,9 +254,9 @@ plotHallmarksOfSatiety(reachrates,dataset,alltbt,metadata,trialTypes);
 
 %% memory effect
 % consider filtering for no opto enhanced
-nInSeq=3; 
-useFractionThroughSession=[0.6 1];
-% useFractionThroughSession=[0 0.2];
+nInSeq=2; 
+% useFractionThroughSession=[0.6 1];
+useFractionThroughSession=[0 0.];
 memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession);
 
 %% shift in reach rate between trial pair

@@ -30,11 +30,12 @@ title('All trial types over session');
 test.nInSequence=[nInSequence]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
 trial1='trialTypes.led~=1'; 
 test.trial1=trial1;
-linker=' & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup_1forward~=3'; % & trialTypes.led_2forward==0'];
+linker=' & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup_1forward~=3'; 
 trial2=['trialTypes.led~=1' linker];
 test.trial2=trial2;
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
+plotChangeInReachCDF(dataset.realDistributions,alltbt); title('No LED');
 reachratesettings.suppressPlots=false;
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 title('No led sequence');
@@ -43,13 +44,14 @@ title('No led sequence');
 
 % LED SECOND
 test.nInSequence=[nInSequence]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
-trial1='trialTypes.led~=1'; 
+linker=' & trialTypes.led_1back~=1'; 
+trial1=['trialTypes.led~=1' linker]; 
 test.trial1=trial1;
-linker=' & trialTypes.led_1forward~=1'; % & trialTypes.led_2forward~=1';
-trial2=['trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3' linker];
+trial2=['trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3'];
 test.trial2=trial2;
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
+plotChangeInReachCDF(dataset.realDistributions,alltbt); title('LED');
 reachratesettings.suppressPlots=false;
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 title('Led sequence');
@@ -62,7 +64,7 @@ LED_all_uncued=LED_all_uncued(~isnan(LED_all_fracs));
 LED_all_cued=LED_all_cued(~isnan(LED_all_fracs));
 LED_all_fracs=LED_all_fracs(~isnan(LED_all_fracs));
 
-binsForFracs=0:0.02:1;
+binsForFracs=0:0.05:1;
 figure();
 [n,x]=histcounts(fracs_inThisPartOfSess_noLED(~isnan(fracs_inThisPartOfSess_noLED)),binsForFracs);
 [new_n,new_x]=cityscape_hist(n,x);
@@ -150,7 +152,7 @@ cued_inThisPartOfSess=reachrates.alltrials_cued;
 fracs_inThisPartOfSess=reachrates.fracsThroughSess;
 for i=1:size(reachrates.alltrials_uncued,1)
     for j=1:size(reachrates.alltrials_uncued,2)
-        if reachrates.fracsThroughSess(i,j)>=useFractionThroughSession(1) && reachrates.fracsThroughSess(i,j)<=useFractionThroughSession(2) 
+        if reachrates.fracsThroughSess(i,j)>=useFractionThroughSession(1) && reachrates.fracsThroughSess(i,j)<useFractionThroughSession(2) 
         else
             uncued_inThisPartOfSess(i,j)=nan;
             cued_inThisPartOfSess(i,j)=nan;
@@ -175,7 +177,8 @@ reachratesettings.percentOfReachesFromSess_forInitRate=20; % use this fraction o
 reachratesettings.maxTrialLength=9.5; % in sec, wrt cue
 reachratesettings.minTrialLength=-2; % wrt cue, in sec
 reachratesettings.suppressPlots=true;
-reachratesettings.acrossSess_window1=[0.05 2]; % cued window [0.05 1]
+% reachratesettings.acrossSess_window1=[0.05 2]; % cued window [0.05 1]
+reachratesettings.acrossSess_window1=[0.05 1]; % cued window [0.05 1]
 reachratesettings.acrossSess_window2=[7 reachratesettings.maxTrialLength]; % beware reach suppression after a success
 reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength -1]; 
 reachratesettings.scatterPointSize=50; % size for points in scatter plot
