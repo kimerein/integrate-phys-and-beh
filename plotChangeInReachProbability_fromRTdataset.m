@@ -75,7 +75,8 @@ end
 nth_sessions=metadata.sessid(matchesEventCond_trial_n);
 nth_sessions_alltrials=metadata.sessid(matchesEventCond_trial_all);
 mouseid=metadata.mouseid(matchesEventCond_trial_n);
-[metadata,fractionThroughSess]=howFarThroughSession(metadata,false,[]);
+% [metadata,fractionThroughSess]=howFarThroughSession(metadata,false,[]);
+fractionThroughSess=alltbt.fractionThroughSess_adjusted;
 fractionThroughSess=fractionThroughSess(matchesEventCond_trial_n); % how far through session was each trial in sequence
 
 u=unique(nth_sessions_alltrials);
