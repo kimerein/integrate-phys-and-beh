@@ -508,16 +508,11 @@ if useRateMethod==1 || useRateMethod==3
             trial1start=scatter(nanmean(temp_uncued),nanmean(temp_cued),[],'k'); % first trial in SESSION, last trial in sequence
         end
         targets=[];
-        if ~isempty(settings.stopPlottingTrialsAfterN)
+        if ~isempty(settings.
             if i<=settings.stopPlottingTrialsAfterN
-                goAhead=true;
-            else
-                goAhead=false;
-            end
-        else
-            goAhead=true;
-        end
-        if settings.suppressPlots==false && goAhead
+        if settings.suppressPlots==false 
+            
+                
             if settings.binTrialsForAvAcrossSess==true
                 currbincued=currbincued+temp_cued;
                 currbinuncued=currbinuncued+temp_uncued;
@@ -626,12 +621,8 @@ if useRateMethod==1 || useRateMethod==3
     out.trial1_alltrials_cued=approach_trial1_cued;
     
     nIndsForfirstRates=nanmean(n_for_init_rate);
-    if ~isempty(settings.stopPlottingTrialsAfterN)
-        upTo=settings.stopPlottingTrialsAfterN;
-        if upTo>length(approach_cued)
-            upTo=length(approach_cued);
-        end
-    else
+    upTo=settings.stopPlottingTrialsAfterN;
+    if upTo>length(approach_cued)
         upTo=length(approach_cued);
     end
     quiver(nanmean(approach_uncued(1:n_for_init_rate)),nanmean(approach_cued(1:n_for_init_rate)),...
