@@ -257,7 +257,12 @@ plotHallmarksOfSatiety(reachrates,dataset,alltbt,metadata,trialTypes);
 nInSeq=3; 
 useFractionThroughSession=[0.6 1];
 % useFractionThroughSession=[0 0.2];
-memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession);
+memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,[]);
+
+%% led ongoing reach motor effects
+nInSeq=2; 
+useFractionThroughSession=[0 1];
+memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,'reachBatch_success_reachStarts');
 
 %% shift in reach rate between trial pair
 

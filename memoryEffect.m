@@ -1,4 +1,4 @@
-function memoryEffect(alltbt,metadata,trialTypes,nInSequence,useFractionThroughSession)
+function memoryEffect(alltbt,metadata,trialTypes,nInSequence,useFractionThroughSession,useReachType)
 
 flankingTrials='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1'; % take every trial
 
@@ -34,7 +34,9 @@ linker=' & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1 & trial
 trial2=['trialTypes.led~=1' linker];
 test.trial2=trial2;
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
+alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch');
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
+alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch back');
 plotChangeInReachCDF(dataset.realDistributions,alltbt); title('No LED');
 reachratesettings.suppressPlots=false;
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
@@ -50,7 +52,9 @@ test.trial1=trial1;
 trial2=['trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3'];
 test.trial2=trial2;
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
+alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch');
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
+alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch back');
 plotChangeInReachCDF(dataset.realDistributions,alltbt); title('LED');
 reachratesettings.suppressPlots=false;
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
@@ -141,6 +145,22 @@ line([mean_uncued-se_uncued mean_uncued+se_uncued],[mean_cued mean_cued],'Color'
 line([mean_uncued mean_uncued],[mean_cued-se_cued mean_cued+se_cued],'Color','k');
 line([mean_uncued_LED-se_uncued_LED mean_uncued_LED+se_uncued_LED],[mean_cued_LED mean_cued_LED],'Color','r');
 line([mean_uncued_LED mean_uncued_LED],[mean_cued_LED-se_cued_LED mean_cued_LED+se_cued_LED],'Color','r');
+
+end
+
+function alltbt=useDifferentReachType(alltbt,useReachType,defaultAnalyzedReachType,switchOrSwitchBack)
+
+if isempty(useReachType)
+    return
+end
+
+switch switchOrSwitchBack
+    case 'switch'
+        alltbt.(['backup_' defaultAnalyzedReachType])=alltbt.(defaultAnalyzedReachType);
+        alltbt.(defaultAnalyzedReachType)=alltbt.(useReachType);
+    case 'switch back'
+        alltbt.(defaultAnalyzedReachType)=alltbt.(['backup_' defaultAnalyzedReachType]);
+end
 
 end
 
