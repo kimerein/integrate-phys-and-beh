@@ -90,6 +90,7 @@ if ~isempty(a)
     dprimes_firsttrial_secondPart=b;
 end
 
+alltbt=backup_alltbt; metadata=backup_metadata; trialTypes=backup_trialTypes;
 unique_sessid=unique(metadata.sessid);
 changeInDprimes=dprimes_lasttrial_secondPart-dprimes_lasttrial;
 alltbt.mouseLearned=nan(size(alltbt.sessid));
