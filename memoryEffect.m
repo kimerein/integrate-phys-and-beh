@@ -26,7 +26,8 @@ dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,
 reachratesettings.suppressPlots=false;
 reachratesettings.binTrialsForAvAcrossSess=true;
 reachratesettings.binThisManyTrials=6; 
-reachratesettings.stopPlottingTrialsAfterN=100;
+reachratesettings.stopPlottingTrialsAfterN=175;
+reachratesettings.discardNoisySessions=true;
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 title('All trial types over session');
 [dprimes,fracs_over_sess]=plotDprimesFromReachRates(reachrates,false,plotVersusFrac);
@@ -37,7 +38,7 @@ for i=1:length(fracsThroughSessBins)-1
     [cmap,k,kstep]=plotMeAndSE_dprime(i,fracsThroughSessBins,me_dprime,s_dprime,fracs_inThisPart,cmap,k,kstep);
 end
 % Plot 2D sorted by fracThroughSession
-fracsThroughSessBins=[0 0.1 0.2 0.4 0.52 0.7 1.0001];
+fracsThroughSessBins=[0 0.05 0.1 0.15 0.2 0.3 0.4 0.46 0.52 0.62 0.7 0.85 1.0001];
 k=[]; kstep=[]; cmap=[];
 for i=1:length(fracsThroughSessBins)-1
     [me_uncued,s_uncued,me_cued,s_cued]=getCuedUncuedMeanSE(reachrates,[fracsThroughSessBins(i) fracsThroughSessBins(i+1)]);
@@ -347,8 +348,9 @@ reachratesettings.acrossSess_window2=[7 reachratesettings.maxTrialLength]; % bew
 reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength -1]; 
 reachratesettings.scatterPointSize=50; % size for points in scatter plot
 reachratesettings.addSatietyLines=false; % whether to add proportionality lines to figure
-reachratesettings.stopPlottingTrialsAfterN=175;
+reachratesettings.stopPlottingTrialsAfterN=180;
 reachratesettings.showFitLine=false;
+settings.discardNoisySessions=false; % will discard sessions with fewer than 3 trials
 reachratesettings.useWindowsForUncued=[3]; % to use window2 or window3 or both for the uncued reach rate
 reachratesettings.initWindows=[]; % empty if want to calculate from dataset
 reachratesettings.addSessionLines=false; % for no averaging across sessions plot, whether to connect trial bins within same session with lines

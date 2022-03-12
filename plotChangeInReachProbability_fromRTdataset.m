@@ -475,8 +475,8 @@ if useRateMethod==1 || useRateMethod==3
     nIndsForfirstRates=nanmean(n_for_init_rate);
     meansForProportionality_x=nan(size(ratein_fixed_window1,1),floor(nIndsForfirstRates));
     meansForProportionality_y=nan(size(ratein_fixed_window1,1),floor(nIndsForfirstRates));
-    currbincued=zeros(size(ratein_fixed_window1,1),1);
-    currbinuncued=zeros(size(ratein_fixed_window1,1),1);
+    currbincued=[];
+    currbinuncued=[];
     currbincounter=0;
     for i=1:size(ratein_fixed_window1,2) % across trials
         if useRateMethod==1
@@ -519,20 +519,20 @@ if useRateMethod==1 || useRateMethod==3
         end
         if settings.suppressPlots==false && goAhead
             if settings.binTrialsForAvAcrossSess==true
-                currbincued=currbincued+temp_cued;
-                currbinuncued=currbinuncued+temp_uncued;
+                currbincued=[currbincued temp_cued];
+                currbinuncued=[currbinuncued temp_uncued];
                 currbincounter=currbincounter+1;
                 if currbincounter==settings.binThisManyTrials
                     % plot and reset
-                    currbincued=currbincued/settings.binThisManyTrials;
-                    currbinuncued=currbinuncued/settings.binThisManyTrials;
+                    currbincued=nanmean(currbincued,2);
+                    currbinuncued=nanmean(currbinuncued,2);
                     currbincounter=0;
                     backup_temp_cued=temp_cued;
                     backup_temp_uncued=temp_uncued;
                     temp_cued=currbincued;
                     temp_uncued=currbinuncued;
-                    currbincued=zeros(size(ratein_fixed_window1,1),1);
-                    currbinuncued=zeros(size(ratein_fixed_window1,1),1);
+                    currbincued=[];
+                    currbinuncued=[];
                     line([nanmean(temp_uncued)-nanstd(temp_uncued)./sqrt(nansum(~isnan(temp_uncued))) nanmean(temp_uncued)+nanstd(temp_uncued)./sqrt(nansum(~isnan(temp_uncued)))],...
                         [nanmean(temp_cued) nanmean(temp_cued)],'Color',cmap(k,:),'LineWidth',1); % later trials in SESSION, last trial in sequence
                     hold on;

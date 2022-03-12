@@ -99,11 +99,11 @@ alltbt.sessid=metadata.sessid;
 trialTypes.sessid=metadata.sessid;
 % tbt_filter.sortField='opto_enhanced_reach';
 % tbt_filter.sortField='fractionThroughSess';
-tbt_filter.sortField='opto_enhanced_reach';
-% tbt_filter.sortField='mouseLearned';
+% tbt_filter.sortField='opto_enhanced_reach';
+tbt_filter.sortField='mouseLearned';
 % tbt_filter.range_values=[1 6 7 8 10 14 18];
 % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
-tbt_filter.range_values=[-0.5 0.5];
+tbt_filter.range_values=[0.5 1.5];
 % tbt_filter.range_values=[2 3 4 5 6 7 8 9 10 11 12 14 15 17 18 19]; % which mice start at non-learning 
 % tbt_filter.range_values=[1 2 4 5 6 7 8 9 10 11 12 17 18 19];
 % tbt_filter.range_values=[1     2     3     6     7     8     9    10    11    12    14    15    17    18];
@@ -119,7 +119,7 @@ tbt_filter.clock_progress=true;
 
 %% check for opto-enhanced reaching
 alltbt.sessid=metadata.sessid;
-alltbt=checkForOptoEnhancedReach(alltbt,metadata,trialTypes,'all_reachBatch','trialTypes.led==1','cueZone_onVoff',[-0.25 0.5],20);
+alltbt=checkForOptoEnhancedReach(alltbt,metadata,trialTypes,'all_reachBatch','trialTypes.led==1','cueZone_onVoff',[-0.25 0.5],15);
 trialTypes.opto_enhanced_reach=alltbt.opto_enhanced_reach;
 
 %% find sessions where mouse learned
@@ -258,10 +258,8 @@ plotHallmarksOfSatiety(reachrates,dataset,alltbt,metadata,trialTypes);
 
 %% memory effect
 % consider filtering for no opto enhanced
-nInSeq=5; % nInSeq=5; % nInSeq=3;  
+nInSeq=5; 
 useFractionThroughSession=[0.3 1];
-% useFractionThroughSession=[0 1];
-% useFractionThroughSession=[0 0.2];
 plotCDFUpTo=3;
 memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,[],plotCDFUpTo);
 
