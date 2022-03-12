@@ -37,6 +37,10 @@ backup.metadata=metadata;
 % Optional: discard preemptive
 [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
 
+% fix weird bug where reach batch sometimes get stuck at 1 (in less than 0.1% of trials), possibly an
+% interp problem somewhere?? not sure
+alltbt=fixReachesStuckAtOne(alltbt);
+
 %% choose additional settings for reaction time analysis
 
 settings=RTanalysis_settings('display settings','clear');
@@ -115,7 +119,7 @@ tbt_filter.clock_progress=true;
 
 %% check for opto-enhanced reaching
 alltbt.sessid=metadata.sessid;
-alltbt=checkForOptoEnhancedReach(alltbt,metadata,trialTypes,'all_reachBatch','trialTypes.led==1','cueZone_onVoff',[-0.25 0.5],30);
+alltbt=checkForOptoEnhancedReach(alltbt,metadata,trialTypes,'all_reachBatch','trialTypes.led==1','cueZone_onVoff',[-0.25 0.5],20);
 trialTypes.opto_enhanced_reach=alltbt.opto_enhanced_reach;
 
 %% find sessions where mouse learned
@@ -254,9 +258,9 @@ plotHallmarksOfSatiety(reachrates,dataset,alltbt,metadata,trialTypes);
 
 %% memory effect
 % consider filtering for no opto enhanced
-nInSeq=5; % nInSeq=3; 
-% useFractionThroughSession=[0.6 1];
+nInSeq=5; % nInSeq=5; % nInSeq=3;  
 useFractionThroughSession=[0.3 1];
+% useFractionThroughSession=[0 1];
 % useFractionThroughSession=[0 0.2];
 plotCDFUpTo=3;
 memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,[],plotCDFUpTo);

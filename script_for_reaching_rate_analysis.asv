@@ -37,6 +37,8 @@ backup.metadata=metadata;
 % Optional: discard preemptive
 [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
 
+% fix weird bug where
+
 %% choose additional settings for reaction time analysis
 
 settings=RTanalysis_settings('display settings','clear');
@@ -115,7 +117,7 @@ tbt_filter.clock_progress=true;
 
 %% check for opto-enhanced reaching
 alltbt.sessid=metadata.sessid;
-alltbt=checkForOptoEnhancedReach(alltbt,metadata,trialTypes,'all_reachBatch','trialTypes.led==1','cueZone_onVoff',[-0.25 0.5],30);
+alltbt=checkForOptoEnhancedReach(alltbt,metadata,trialTypes,'all_reachBatch','trialTypes.led==1','cueZone_onVoff',[-0.25 0.5],5);
 trialTypes.opto_enhanced_reach=alltbt.opto_enhanced_reach;
 
 %% find sessions where mouse learned
@@ -188,7 +190,7 @@ plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching');
 
 %% plot trial to trial change in reach CDF
 
-plotChangeInReachCDF(dataset.realDistributions,alltbt);
+plotChangeInReachCDF(dataset.realDistributions,alltbt,9.5);
 
 %% measure how reach rate changes over course of session
 
@@ -254,10 +256,19 @@ plotHallmarksOfSatiety(reachrates,dataset,alltbt,metadata,trialTypes);
 
 %% memory effect
 % consider filtering for no opto enhanced
+nInSeq=5; % nInSeq=5; % nInSeq=3;  
+% useFractionThroughSession=[0.4 1];
+% useFractionThroughSession=[0.5 0.7];
+useFractionThroughSession=[0 1];
+% useFractionThroughSession=[0 0.2];
+plotCDFUpTo=3;
+memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,[],plotCDFUpTo);
+
+%% led ongoing reach motor effects
 nInSeq=2; 
-% useFractionThroughSession=[0.6 1];
-useFractionThroughSession=[0 0.];
-memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession);
+useFractionThroughSession=[0 1];
+plotCDFUpTo=3;
+memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,'reachBatch_miss_reachStarts',plotCDFUpTo);
 
 %% shift in reach rate between trial pair
 
