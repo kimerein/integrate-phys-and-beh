@@ -1,6 +1,7 @@
 function memoryEffect(alltbt,metadata,trialTypes,nInSequence,useFractionThroughSession,useReachType)
 
 flankingTrials='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1'; % take every trial
+plotVersusFrac=true;
 
 trialTypes.isLongITI_1forward=[trialTypes.isLongITI(2:end); 0];
 trialTypes.optoGroup_1forward=[trialTypes.optoGroup(2:end); 0];
@@ -22,8 +23,14 @@ test.trial2=trial2;
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
 reachratesettings.suppressPlots=false;
-plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
+reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 title('All trial types over session');
+[dprimes,fracs_over_sess]=plotDprimesFromReachRates(reachrates,false,plotVersusFrac);
+fracsThroughSessBins=[0:0.1:nanmax(fracs_over_sess(1:end)) nanmax(fracs_over_sess(1:end))+0.001];
+for i=1:length(fracsThroughSessBins)-1
+    [me_dprime,s_dprime,~,fracs_inThisPart]=getDprimeMeanSE(dprimes,fracs_over_sess,[fracsThroughSessBins(i) fracsThroughSessBins(i+1)]);
+    
+end
 
 % THEN
 % NO LED FIRST
@@ -40,9 +47,10 @@ alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch back')
 plotChangeInReachCDF(dataset.realDistributions,alltbt); title('No LED');
 reachratesettings.suppressPlots=false;
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
+[dprimes_noLED,fracs_over_sess_noLED]=plotDprimesFromReachRates(reachrates,false,plotVersusFrac);
 title('No led sequence');
-dprimes_lasttrial_noLED=getdprimes(reachrates);
 [mean_uncued,se_uncued,mean_cued,se_cued,~,~,fracs_inThisPartOfSess_noLED]=getCuedUncuedMeanSE(reachrates,useFractionThroughSession);
+[mean_dprime,se_dprime,dprimes_inThisPartOfSess,fracs_inThisPartOfSess_dprimeNoLED]=getDprimeMeanSE(dprimes_noLED,fracs_over_sess_noLED,useFractionThroughSession);
 
 % LED SECOND
 test.nInSequence=[nInSequence]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
@@ -58,17 +66,64 @@ alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch back')
 plotChangeInReachCDF(dataset.realDistributions,alltbt); title('LED');
 reachratesettings.suppressPlots=false;
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
+[dprimes_LED,fracs_over_sess_LED]=plotDprimesFromReachRates(reachrates,false,plotVersusFrac);
 title('Led sequence');
-dprimes_lasttrial_LED=getdprimes(reachrates);
 [mean_uncued_LED,se_uncued_LED,mean_cued_LED,se_cued_LED,uncued_inThisPartOfSess,cued_inThisPartOfSess,fracs_inThisPartOfSess_LED]=getCuedUncuedMeanSE(reachrates,useFractionThroughSession);
+[mean_dprime_LED,se_dprime_LED,dprimes_inThisPartOfSess,fracs_inThisPartOfSess_dprimeLED]=getDprimeMeanSE(dprimes_LED,fracs_over_sess_LED,useFractionThroughSession);
+
 LED_all_uncued=uncued_inThisPartOfSess(1:end);
 LED_all_cued=cued_inThisPartOfSess(1:end);
 LED_all_fracs=fracs_inThisPartOfSess_LED(1:end);
 LED_all_uncued=LED_all_uncued(~isnan(LED_all_fracs));
 LED_all_cued=LED_all_cued(~isnan(LED_all_fracs));
 LED_all_fracs=LED_all_fracs(~isnan(LED_all_fracs));
-
 binsForFracs=0:0.05:1;
+con=plotHistoOfFracs(binsForFracs,fracs_inThisPartOfSess_noLED,fracs_inThisPartOfSess_LED);
+resampleToMatchFracs=false;
+if resampleToMatchFracs==true
+    [mean_uncued_LED,mean_cued_LED]=resampleMatchingFracs(con,binsForFracs,LED_all_uncued,LED_all_cued,LED_all_fracs);
+end
+
+% plot output in 2D cued vs. uncued space
+figure();
+scatter(mean_uncued,mean_cued,[],'k','filled');
+hold on; 
+scatter(mean_uncued_LED,mean_cued_LED,[],'r','filled');
+line([mean_uncued-se_uncued mean_uncued+se_uncued],[mean_cued mean_cued],'Color','k');
+line([mean_uncued mean_uncued],[mean_cued-se_cued mean_cued+se_cued],'Color','k');
+line([mean_uncued_LED-se_uncued_LED mean_uncued_LED+se_uncued_LED],[mean_cued_LED mean_cued_LED],'Color','r');
+line([mean_uncued_LED mean_uncued_LED],[mean_cued_LED-se_cued_LED mean_cued_LED+se_cued_LED],'Color','r');
+
+% plot output in 1D dprime space
+figure();
+scatter(nanmean(fracs_inThisPartOfSess_dprimeNoLED(1:end)),mean_dprime,[],'k','filled');
+hold on; 
+scatter(nanmean(fracs_inThisPartOfSess_dprimeLED(1:end)),mean_dprime_LED,[],'r','filled');
+line([nanmean(fracs_inThisPartOfSess_dprimeNoLED(1:end)) nanmean(fracs_inThisPartOfSess_dprimeNoLED(1:end))],[mean_dprime-se_dprime mean_dprime+se_dprime],'Color','k');
+line([nanmean(fracs_inThisPartOfSess_dprimeLED(1:end)) nanmean(fracs_inThisPartOfSess_dprimeLED(1:end))],[mean_dprime_LED-se_dprime_LED mean_dprime_LED+se_dprime_LED],'Color','r');
+
+end
+
+function [k]=plotMeAndSE_dprime(i,fracsThroughSessBins,me_dprime,s_dprime,fracs_inThisPart,k,kstep)
+
+if i==1
+    figure();
+    cmap=colormap('cool');
+    hold on;
+    k=1;
+    kstep=ceil(size(cmap,1)/(length(fracsThroughSessBins)-1));
+end
+scatter(nanmean(fracs_inThisPart(1:end)),me_dprime,[],cmap(k,:),'filled');    
+line([nanmean(fracs_inThisPart(1:end)) nanmean(fracs_inThisPart(1:end))],[me_dprime-s_dprime me_dprime+s_dprime],'Color',cmap(k,:));   
+k=k+kstep;
+if k>size(cmap,1)
+    k=size(cmap,1);
+end
+
+end
+
+function con=plotHistoOfFracs(binsForFracs,fracs_inThisPartOfSess_noLED,fracs_inThisPartOfSess_LED)
+
 figure();
 [n,x]=histcounts(fracs_inThisPartOfSess_noLED(~isnan(fracs_inThisPartOfSess_noLED)),binsForFracs);
 [new_n,new_x]=cityscape_hist(n,x);
@@ -80,73 +135,62 @@ plot(new_x,new_n,'Color','r');
 led.x=x; led.n=n;
 title('Before matching fracs');
 
-resampleToMatchFracs=false;
-if resampleToMatchFracs==true
-    nRuns=10;
-    resampled_LEDuncued=[];
-    resampled_LEDcued=[];
-    resampled_LEDfracs=[];
-    for i=1:length(con.x)-1
-        startingpool_LEDuncued=LED_all_uncued(LED_all_fracs>=binsForFracs(i) & LED_all_fracs<binsForFracs(i+1));
-        startingpool_LEDcued=LED_all_cued(LED_all_fracs>=binsForFracs(i) & LED_all_fracs<binsForFracs(i+1));
-        startingpool_LEDfracs=LED_all_fracs(LED_all_fracs>=binsForFracs(i) & LED_all_fracs<binsForFracs(i+1));
-        takeN=con.n(i);
-        if takeN~= 0 && isempty(startingpool_LEDuncued)
-            disp('Cannot resample, not enough trials');
-            disp('Proceeding without resample');
-            resampleToMatchFracs=false;
-            break
-        end
-        if takeN>length(startingpool_LEDuncued)
-            nTimesMore=ceil(takeN/length(startingpool_LEDuncued));
-            newpool_LEDuncued=repmat(startingpool_LEDuncued,1,nTimesMore);
-            newpool_LEDcued=repmat(startingpool_LEDcued,1,nTimesMore);
-            newpool_LEDfracs=repmat(startingpool_LEDfracs,1,nTimesMore);
-        else
-            newpool_LEDuncued=startingpool_LEDuncued;
-            newpool_LEDcued=startingpool_LEDcued;
-            newpool_LEDfracs=startingpool_LEDfracs;
-        end
-        if isempty(newpool_LEDuncued) && takeN>0
-            error('Need bigger binning for fracs');
-        end
-        if takeN==0
-            continue
-        end
-        for j=1:nRuns
-            disp(j);
-            r=randsample(length(newpool_LEDuncued),takeN);
-            resampled_LEDuncued=[resampled_LEDuncued newpool_LEDuncued(r)];
-            resampled_LEDcued=[resampled_LEDcued newpool_LEDcued(r)];
-            resampled_LEDfracs=[resampled_LEDfracs newpool_LEDfracs(r)];
-        end
-    end
-    if resampleToMatchFracs==true
-        figure();
-        [n,x]=histcounts(fracs_inThisPartOfSess_noLED(~isnan(fracs_inThisPartOfSess_noLED)),binsForFracs);
-        [new_n,new_x]=cityscape_hist(n,x);
-        plot(new_x,new_n./nanmax(new_n),'Color','k'); hold on;
-        con.x=x; con.n=n;
-        [n,x]=histcounts(resampled_LEDfracs(~isnan(resampled_LEDfracs)),binsForFracs);
-        [new_n,new_x]=cityscape_hist(n,x);
-        plot(new_x,new_n./nanmax(new_n),'Color','r');
-        title('After matching fracs');
-        mean_uncued_LED=nanmean(resampled_LEDuncued);
-        mean_cued_LED=nanmean(resampled_LEDcued);
-    end
 end
 
-% plot output
-figure();
-scatter(mean_uncued,mean_cued,[],'k','filled');
-hold on; 
-scatter(mean_uncued_LED,mean_cued_LED,[],'r','filled');
-line([mean_uncued-se_uncued mean_uncued+se_uncued],[mean_cued mean_cued],'Color','k');
-line([mean_uncued mean_uncued],[mean_cued-se_cued mean_cued+se_cued],'Color','k');
-line([mean_uncued_LED-se_uncued_LED mean_uncued_LED+se_uncued_LED],[mean_cued_LED mean_cued_LED],'Color','r');
-line([mean_uncued_LED mean_uncued_LED],[mean_cued_LED-se_cued_LED mean_cued_LED+se_cued_LED],'Color','r');
+function [mean_uncued_LED,mean_cued_LED]=resampleMatchingFracs(con,binsForFracs,LED_all_uncued,LED_all_cued,LED_all_fracs)
 
-
+nRuns=10;
+resampled_LEDuncued=[];
+resampled_LEDcued=[];
+resampled_LEDfracs=[];
+for i=1:length(con.x)-1
+    startingpool_LEDuncued=LED_all_uncued(LED_all_fracs>=binsForFracs(i) & LED_all_fracs<binsForFracs(i+1));
+    startingpool_LEDcued=LED_all_cued(LED_all_fracs>=binsForFracs(i) & LED_all_fracs<binsForFracs(i+1));
+    startingpool_LEDfracs=LED_all_fracs(LED_all_fracs>=binsForFracs(i) & LED_all_fracs<binsForFracs(i+1));
+    takeN=con.n(i);
+    if takeN~= 0 && isempty(startingpool_LEDuncued)
+        disp('Cannot resample, not enough trials');
+        disp('Proceeding without resample');
+        resampleToMatchFracs=false;
+        break
+    end
+    if takeN>length(startingpool_LEDuncued)
+        nTimesMore=ceil(takeN/length(startingpool_LEDuncued));
+        newpool_LEDuncued=repmat(startingpool_LEDuncued,1,nTimesMore);
+        newpool_LEDcued=repmat(startingpool_LEDcued,1,nTimesMore);
+        newpool_LEDfracs=repmat(startingpool_LEDfracs,1,nTimesMore);
+    else
+        newpool_LEDuncued=startingpool_LEDuncued;
+        newpool_LEDcued=startingpool_LEDcued;
+        newpool_LEDfracs=startingpool_LEDfracs;
+    end
+    if isempty(newpool_LEDuncued) && takeN>0
+        error('Need bigger binning for fracs');
+    end
+    if takeN==0
+        continue
+    end
+    for j=1:nRuns
+        disp(j);
+        r=randsample(length(newpool_LEDuncued),takeN);
+        resampled_LEDuncued=[resampled_LEDuncued newpool_LEDuncued(r)];
+        resampled_LEDcued=[resampled_LEDcued newpool_LEDcued(r)];
+        resampled_LEDfracs=[resampled_LEDfracs newpool_LEDfracs(r)];
+    end
+end
+if resampleToMatchFracs==true
+    figure();
+    [n,x]=histcounts(fracs_inThisPartOfSess_noLED(~isnan(fracs_inThisPartOfSess_noLED)),binsForFracs);
+    [new_n,new_x]=cityscape_hist(n,x);
+    plot(new_x,new_n./nanmax(new_n),'Color','k'); hold on;
+    con.x=x; con.n=n;
+    [n,x]=histcounts(resampled_LEDfracs(~isnan(resampled_LEDfracs)),binsForFracs);
+    [new_n,new_x]=cityscape_hist(n,x);
+    plot(new_x,new_n./nanmax(new_n),'Color','r');
+    title('After matching fracs');
+    mean_uncued_LED=nanmean(resampled_LEDuncued);
+    mean_cued_LED=nanmean(resampled_LEDcued);
+end
 
 end
 
@@ -163,6 +207,25 @@ switch switchOrSwitchBack
     case 'switch back'
         alltbt.(defaultAnalyzedReachType)=alltbt.(['backup_' defaultAnalyzedReachType]);
 end
+
+end
+
+function [mean_dprime,se_dprime,dprimes_inThisPartOfSess,fracs_inThisPartOfSess]=getDprimeMeanSE(dprimes,fracsThroughSess,useFractionThroughSession)
+
+% get average and s.e. reach rate for useFractionThroughSession
+dprimes_inThisPartOfSess=dprimes;
+fracs_inThisPartOfSess=fracsThroughSess;
+for i=1:size(dprimes,1)
+    for j=1:size(dprimes,2)
+        if fracsThroughSess(i,j)>=useFractionThroughSession(1) && fracsThroughSess(i,j)<useFractionThroughSession(2) 
+        else
+            dprimes_inThisPartOfSess(i,j)=nan;
+            fracs_inThisPartOfSess(i,j)=nan;
+        end
+    end
+end
+mean_dprime=nanmean(dprimes_inThisPartOfSess(1:end));
+se_dprime=nanstd(dprimes_inThisPartOfSess(1:end),[],2)./sqrt(nansum(~isnan(dprimes_inThisPartOfSess(1:end))));
 
 end
 

@@ -1,8 +1,8 @@
-function plotChangeInReachCDF(dataset,alltbt)
+function plotChangeInReachCDF(dataset,alltbt,maxTrialLength_for_CDFs)
 
 preCueWindow=[-2 -1];
 maxTrialLength=9.5;
-maxTrialLength_for_CDFs=[];
+% maxTrialLength_for_CDFs=[];
 
 timeStep=mode(diff(nanmean(alltbt.times,1)));
 timeBinsForReaching=0:timeStep:(size(dataset.rawReaching_allTrialsSequence_trial1InSeq{1},2)-1)*timeStep;

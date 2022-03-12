@@ -1,21 +1,29 @@
-function plotDprimesFromReachRates(reachrates)
+function [dprimes,fracs_over_sess]=plotDprimesFromReachRates(reachrates,suppressPlots,plotVersusFrac)
 
 settings.stopPlottingTrialsAfterN=175;
 settings.binTrialsForAvAcrossSess=true;
 settings.binThisManyTrials=6;
 settings.stopPlottingBinsAfterN=[];
 settings.furtherBinBins=false;
-settings.binThisManyBins=1;
+settings.binThisManyBins=2;
+settings.plotVersusFrac=plotVersusFrac; % if is true, will plot dprime versus fraction through session instead of trial count
 
-dprimes=getdprimes(reachrates,settings.binThisManyTrials,settings);
-makePlot(settings,dprimes);
-xlabel('Trial #');
-ylabel('d-prime');
+[dprimes,fracs_over_sess]=getdprimes(reachrates,settings.binThisManyTrials,settings);
+if suppressPlots==false
+    makePlot(settings,dprimes,fracs_over_sess);
+    if plotVersusFrac==true
+        xlabel('Fraction through session');
+    else
+        xlabel('Trial #');
+    end
+    ylabel('d-prime');
+end
 
 end
 
-function makePlot(settings,approach_alltrials_dprime)
+function makePlot(settings,approach_alltrials_dprime,fracs_over_sess)
 
+plotVersusFrac=settings.plotVersusFrac;
 figure();
 cmap=colormap('cool');
 hold on;
@@ -26,6 +34,7 @@ else
     kstep=ceil(size(cmap,1)/nansum(~isnan(nanmean(approach_alltrials_dprime,1))));
 end
 currbincued=zeros(size(approach_alltrials_dprime,1),1);
+currbinfracs=zeros(size(approach_alltrials_dprime,1),1);
 currbintrialnum=0;
 currbincounter=0;
 trial_nums=1:settings.binThisManyTrials:settings.binThisManyTrials*(size(approach_alltrials_dprime,2)+1);
@@ -34,8 +43,14 @@ for i=1:size(approach_alltrials_dprime,2) % across trials
     % session
     % so ACROSS ALL SESSIONS, take each trial in session
     temp_cued=approach_alltrials_dprime(:,i); % reach rate in trial n+i (last trial) of sequence
+    temp_fracs=fracs_over_sess(:,i);
     if i==1 
-        scatter(trial_nums(i),nanmean(temp_cued),[],'k'); % first trial in SESSION, last trial in sequence
+        if plotVersusFrac==true
+            xToPlot=nanmean(temp_fracs);
+        else
+            xToPlot=trial_nums(i);
+        end
+        scatter(xToPlot,nanmean(temp_cued),[],'k'); % first trial in SESSION, last trial in sequence
     end
     if ~isempty(settings.stopPlottingBinsAfterN)
         if i<=settings.stopPlottingBinsAfterN
@@ -49,29 +64,45 @@ for i=1:size(approach_alltrials_dprime,2) % across trials
     if goAhead
         if settings.furtherBinBins==true
             currbincued=currbincued+temp_cued;
+            currbinfracs=currbinfracs+temp_fracs;
             currbintrialnum=currbintrialnum+trial_nums(i);
             currbincounter=currbincounter+1;
             if currbincounter==settings.binThisManyBins
                 % plot and reset
                 currbincued=currbincued/settings.binThisManyBins;
+                currbinfracs=currbinfracs/settings.binThisManyBins;
                 currbintrialnum=currbintrialnum/settings.binThisManyBins;
                 currbincounter=0;
                 backup_temp_cued=temp_cued;
+                backup_temp_fracs=temp_fracs;
                 temp_cued=currbincued;
+                temp_fracs=currbinfracs;
                 temp_currbintrialnum=currbintrialnum;
                 currbincued=zeros(size(approach_alltrials_dprime,1),1);
+                currbinfracs=zeros(size(approach_alltrials_dprime,1),1);
                 currbintrialnum=0;
-                scatter(temp_currbintrialnum,nanmean(temp_cued),[],cmap(k,:),'filled'); % later trials in SESSION, last trial in sequence
+                if plotVersusFrac==true
+                    xToPlot=nanmean(temp_fracs);
+                else
+                    xToPlot=temp_currbintrialnum;
+                end
+                scatter(xToPlot,nanmean(temp_cued),[],cmap(k,:),'filled'); % later trials in SESSION, last trial in sequence
                 hold on;
                 % plot mean and s.e. across session
-                line([temp_currbintrialnum temp_currbintrialnum],...
+                line([xToPlot xToPlot],...
                      [nanmean(temp_cued)-nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued))) nanmean(temp_cued)+nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued)))],'Color',cmap(k,:),'LineWidth',1);
                 temp_cued=backup_temp_cued;
+                temp_fracs=backup_temp_fracs;
             end
         else
-            scatter(trial_nums(i),nanmean(temp_cued),[],cmap(k,:),'filled'); % later trials in SESSION, last trial in sequence
+            if plotVersusFrac==true
+                xToPlot=nanmean(temp_fracs);
+            else
+                xToPlot=trial_nums(i);
+            end
+            scatter(xToPlot,nanmean(temp_cued),[],cmap(k,:),'filled'); % later trials in SESSION, last trial in sequence
             hold on;
-            line([trial_nums(i) trial_nums(i)],...
+            line([xToPlot xToPlot],...
                 [nanmean(temp_cued)-nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued))) nanmean(temp_cued)+nanstd(temp_cued)./sqrt(nansum(~isnan(temp_cued)))],'Color',cmap(k,:),'LineWidth',1);
         end
     end
@@ -83,13 +114,14 @@ end
 
 end
 
-function dprimes_over_sess=getdprimes(reachrates,trialBinSize,settings)
+function [dprimes_over_sess,fracs_over_sess]=getdprimes(reachrates,trialBinSize,settings)
 
 % get dprimes per average trial in session
 if isempty(reachrates)
     return
 end
 dprimes_over_sess=nan(size(reachrates.alltrials_uncued,1),ceil(size(reachrates.alltrials_uncued,2)/trialBinSize));
+fracs_over_sess=nan(size(reachrates.alltrials_uncued,1),ceil(size(reachrates.alltrials_uncued,2)/trialBinSize));
 currbincounter=0;
 currtrial=0;
 goAhead=true;
@@ -111,17 +143,22 @@ for i=1:size(reachrates.alltrials_uncued,2)
     end            
     currbincued=reachrates.alltrials_cued(:,takeInds); % reach rate in trial n+i (last trial) of sequence
     currbinuncued=reachrates.alltrials_uncued(:,takeInds); % reach rate in trial n+i (last trial) of sequence
+    curr_bin_fracs=reachrates.fracsThroughSess(:,takeInds);
     if all(isnan(currbincued(1:end))) && all(isnan(currbinuncued(1:end)))
         currbincounter=currbincounter-1;
         break
     end
+    fracs_av=nanmean(curr_bin_fracs,2);
     dprimes_lasttrial=calc_dprimes(currbinuncued,currbincued);
     dprimes_over_sess(:,currbincounter)=dprimes_lasttrial;
+    fracs_over_sess(:,currbincounter)=fracs_av;
 end
 dprimes_over_sess=dprimes_over_sess(:,1:currbincounter);
+fracs_over_sess=fracs_over_sess(:,1:currbincounter);
 fi=find(all(isnan(dprimes_over_sess),1),2,'first');
 if ~isempty(fi)
     dprimes_over_sess=dprimes_over_sess(:,1:fi-1);
+    fracs_over_sess=fracs_over_sess(:,1:fi-1);
 end
 
 end

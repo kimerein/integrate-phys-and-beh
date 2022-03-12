@@ -188,7 +188,7 @@ plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching');
 
 %% plot trial to trial change in reach CDF
 
-plotChangeInReachCDF(dataset.realDistributions,alltbt);
+plotChangeInReachCDF(dataset.realDistributions,alltbt,9.5);
 
 %% measure how reach rate changes over course of session
 
@@ -254,15 +254,18 @@ plotHallmarksOfSatiety(reachrates,dataset,alltbt,metadata,trialTypes);
 
 %% memory effect
 % consider filtering for no opto enhanced
-nInSeq=3; 
-useFractionThroughSession=[0.6 1];
+nInSeq=5; % nInSeq=3; 
+% useFractionThroughSession=[0.6 1];
+useFractionThroughSession=[0.3 1];
 % useFractionThroughSession=[0 0.2];
-memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,[]);
+plotCDFUpTo=3;
+memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,[],plotCDFUpTo);
 
 %% led ongoing reach motor effects
 nInSeq=2; 
 useFractionThroughSession=[0 1];
-memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,'reachBatch_miss_reachStarts');
+plotCDFUpTo=3;
+memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,'reachBatch_miss_reachStarts',plotCDFUpTo);
 
 %% shift in reach rate between trial pair
 
