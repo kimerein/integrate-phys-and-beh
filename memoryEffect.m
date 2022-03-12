@@ -22,8 +22,9 @@ test.trial2=trial2;
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
 reachratesettings.suppressPlots=false;
-plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
+reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 title('All trial types over session');
+plotDprimesFromReachRates(reachrates);
 
 % THEN
 % NO LED FIRST
@@ -41,7 +42,7 @@ plotChangeInReachCDF(dataset.realDistributions,alltbt); title('No LED');
 reachratesettings.suppressPlots=false;
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 title('No led sequence');
-% [dprimes_lasttrial,dprimes_firsttrial]=getdprimes(reachrates);
+% dprimes_lasttrial_noLED=getdprimes(reachrates);
 [mean_uncued,se_uncued,mean_cued,se_cued,~,~,fracs_inThisPartOfSess_noLED]=getCuedUncuedMeanSE(reachrates,useFractionThroughSession);
 
 % LED SECOND
@@ -59,7 +60,7 @@ plotChangeInReachCDF(dataset.realDistributions,alltbt); title('LED');
 reachratesettings.suppressPlots=false;
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 title('Led sequence');
-% [dprimes_lasttrial,dprimes_firsttrial]=getdprimes(reachrates);
+% dprimes_lasttrial_LED=getdprimes(reachrates);
 [mean_uncued_LED,se_uncued_LED,mean_cued_LED,se_cued_LED,uncued_inThisPartOfSess,cued_inThisPartOfSess,fracs_inThisPartOfSess_LED]=getCuedUncuedMeanSE(reachrates,useFractionThroughSession);
 LED_all_uncued=uncued_inThisPartOfSess(1:end);
 LED_all_cued=cued_inThisPartOfSess(1:end);
@@ -233,15 +234,30 @@ skipCorrected=true;
 
 end
 
-function [dprimes_lasttrial,dprimes_firsttrial]=getdprimes(reachrates)
+function dprimes_lasttrial=getdprimes(reachrates)
 
+% get dprimes per average trial in session
 dprimes_lasttrial=[];
-dprimes_firsttrial=[];
 if isempty(reachrates)
     return
 end
-dprimes_lasttrial=calc_dprime_per_sess(reachrates.alltrials_uncued,reachrates.alltrials_cued);
-dprimes_firsttrial=calc_dprime_per_sess(reachrates.trial1_alltrials_uncued,reachrates.trial1_alltrials_cued);
+dprimes_lasttrial=calc_dprimes(reachrates.alltrials_uncued,reachrates.alltrials_cued);
+
+end
+
+function dprimes=calc_dprimes(uncued_events,cued_events)
+
+hit_rates=nansum(cued_events>0,2)./nansum(~isnan(cued_events),2);
+fa_rates=nansum(uncued_events>0,2)./nansum(~isnan(uncued_events),2);
+% closest we can get to 1 or zero is defined by number of trials
+ns=nansum(~isnan(cued_events),2);
+hit_rates(ns<3)=nan;
+fa_rates(ns<3)=nan;
+hit_rates(hit_rates==1)=1-(1./ns(hit_rates==1));
+hit_rates(hit_rates==0)=0+(1./ns(hit_rates==0));
+fa_rates(fa_rates==1)=1-(1./ns(fa_rates==1));
+fa_rates(fa_rates==0)=0+(1./ns(fa_rates==0));
+dprimes=dprime(hit_rates,fa_rates);
 
 end
 

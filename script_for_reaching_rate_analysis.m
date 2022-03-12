@@ -262,7 +262,7 @@ memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,[]);
 %% led ongoing reach motor effects
 nInSeq=2; 
 useFractionThroughSession=[0 1];
-memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,'reachBatch_success_reachStarts');
+memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,'reachBatch_miss_reachStarts');
 
 %% shift in reach rate between trial pair
 
