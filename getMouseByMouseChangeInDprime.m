@@ -1,4 +1,4 @@
-function plotWithinSession_and_dayByDay(alltbt,metadata,trialTypes,startSessId,endSessId,saveFigDir,imgType,outlierTest,plotDprimes)
+function [dprime_firsthalf,dprime_secondhalf]=getMouseByMouseChangeInDprime(alltbt,metadata,trialTypes,startSessId,endSessId,saveFigDir,imgType,outlierTest,plotDprimes)
 
 days=startSessId:endSessId;
 daybyday_uncued=cell(1,length(days));
@@ -26,8 +26,8 @@ for i=1:length(days)
     saveDir=['/Volumes/Neurobio/MICROSCOPE/Kim/RT pairs data sets/' temp]; % where to save details of alltbt filtering and RT pairs data set
     
     % filter settings
-    % tbt_filter.sortField='mouseid';
-    tbt_filter.sortField='sessid';
+    tbt_filter.sortField='mouseid';
+%     tbt_filter.sortField='sessid';
     % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
     % tbt_filter.range_values=[1     2     3     6     7     8     9    10    11    12    14    15    17    18];
     tbt_filter.range_values=[day-0.5 day+0.5];
@@ -145,11 +145,8 @@ for i=1:length(days)
     [dprimes,fracs_over_sess]=plotDprimesFromRR(reachrates,true,plotVersusFrac);
     avdprimes=nanmean(dprimes,1);
     halfwaypoint=floor(length(avdprimes)/2);
-    dprime_firsthalf(i)=nanmean(avdprimes(3:6));
-    dprime_secondhalf(i)=nanmean(avdprimes(19:end));
-%     dprime_firsthalf(i)=nanmean(avdprimes(1:halfwaypoint));
-%     dprime_secondhalf(i)=nanmean(avdprimes(halfwaypoint+1:end));
-    
+    dprime_firsthalf(i)=nanmean(avdprimes(1:halfwaypoint));
+    dprime_secondhalf(i)=nanmean(avdprimes(halfwaypoint+1:end));
 %     thirdwaypoint=floor(length(avdprimes)/3);
 %     dprime_firsthalf(i)=nanmean(avdprimes(1:thirdwaypoint));
 %     dprime_secondhalf(i)=nanmean(avdprimes(thirdwaypoint+1:2*thirdwaypoint));

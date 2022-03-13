@@ -32,10 +32,10 @@ backup.trialTypes=trialTypes;
 backup.metadata=metadata;
 
 % Optional: correct any LED trials for blinded control mice
-[alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,[4 5 19]);
+% [alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,[4 5 19]);
 
 % Optional: discard preemptive
-[alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
+% [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
 
 % fix weird bug where reach batch sometimes get stuck at 1 (in less than 0.1% of trials), possibly an
 % interp problem somewhere?? not sure
@@ -97,13 +97,13 @@ saveDir=['/Volumes/Neurobio/MICROSCOPE/Kim/RT pairs data sets/' temp]; % where t
 alltbt.mouseid=metadata.mouseid;
 alltbt.sessid=metadata.sessid;
 trialTypes.sessid=metadata.sessid;
-% tbt_filter.sortField='opto_enhanced_reach';
+tbt_filter.sortField='dprimes';
 % tbt_filter.sortField='fractionThroughSess';
 % tbt_filter.sortField='opto_enhanced_reach';
-tbt_filter.sortField='mouseLearned';
+% tbt_filter.sortField='mouseLearned';
 % tbt_filter.range_values=[1 6 7 8 10 14 18];
 % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
-tbt_filter.range_values=[0.5 1.5];
+tbt_filter.range_values=[-100 1];
 % tbt_filter.range_values=[2 3 4 5 6 7 8 9 10 11 12 14 15 17 18 19]; % which mice start at non-learning 
 % tbt_filter.range_values=[1 2 4 5 6 7 8 9 10 11 12 17 18 19];
 % tbt_filter.range_values=[1     2     3     6     7     8     9    10    11    12    14    15    17    18];
@@ -119,7 +119,7 @@ tbt_filter.clock_progress=true;
 
 %% check for opto-enhanced reaching
 alltbt.sessid=metadata.sessid;
-alltbt=checkForOptoEnhancedReach(alltbt,metadata,trialTypes,'all_reachBatch','trialTypes.led==1','cueZone_onVoff',[-0.25 0.5],15);
+alltbt=checkForOptoEnhancedReach(alltbt,metadata,trialTypes,'all_reachBatch','trialTypes.led==1','cueZone_onVoff',[-0.25 0.5],20);
 trialTypes.opto_enhanced_reach=alltbt.opto_enhanced_reach;
 
 %% find sessions where mouse learned
@@ -215,7 +215,8 @@ reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength -1];
 reachratesettings.scatterPointSize=50; % size for points in scatter plot
 reachratesettings.addSatietyLines=false; % whether to add proportionality lines to figure
 % reachratesettings.stopPlottingTrialsAfterN=500; % will stop plotting after this nth trial in session, also only use this many trials for regression fit -- see next line, also controls colormap
-reachratesettings.stopPlottingTrialsAfterN=175; % will stop plotting
+% reachratesettings.stopPlottingTrialsAfterN=175; % will stop plotting
+reachratesettings.stopPlottingTrialsAfterN=200; % will stop plotting
 % after this nth trial in session, also only use this many trials for
 % regression fit -- see next line, also controls colormap
 reachratesettings.showFitLine=true; % whether to show linear fit to change across trials
@@ -223,7 +224,7 @@ reachratesettings.useWindowsForUncued=[3]; % to use window2 or window3 or both f
 reachratesettings.initWindows=[]; % empty if want to calculate from dataset
 reachratesettings.addSessionLines=false; % for no averaging across sessions plot, whether to connect trial bins within same session with lines
 reachratesettings.binTrialsForAvAcrossSess=true; % whether to bin multiple trials for first figure, will bin into binThisManyTrials
-reachratesettings.binThisManyTrials=6; % how many trials to bin within each session
+reachratesettings.binThisManyTrials=30; %6; % how many trials to bin within each session
 reachratesettings.nBinsForZones=40; % will be nBinsForZones squared total bins, this is # bins for each x and y axis
 reachratesettings.useRateMethod=3; % 1, 2 or 3 (see explanation below)
 % There are 3 approaches available for determing reach rates
@@ -252,14 +253,23 @@ reachratesettings.useRateMethod=3; % 1, 2 or 3 (see explanation below)
 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 
+%% Plot dprimes
+plotVersusFrac=false;
+[dprimes,fracs_over_sess]=plotDprimesFromReachRates(reachrates,false,plotVersusFrac);
+
 %% Plot hallmarks of satiety
 
 plotHallmarksOfSatiety(reachrates,dataset,alltbt,metadata,trialTypes);
 
 %% memory effect
 % consider filtering for no opto enhanced
-nInSeq=5; 
-useFractionThroughSession=[0.3 1];
+% nInSeq=5; % WHAT I USED FOR OPTO GRC TALK
+% useFractionThroughSession=[0.4 0.6];
+% plotCDFUpTo=3;
+% memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,[],plotCDFUpTo);
+nInSeq=2; 
+% useFractionThroughSession=[0.2 100];
+useFractionThroughSession=[-100 100];
 plotCDFUpTo=3;
 memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,[],plotCDFUpTo);
 
@@ -319,7 +329,7 @@ if doAverageMouse==true
 %     alltbt=backup.alltbt; trialTypes=backup.trialTypes; metadata=backup.metadata;
     alltbt.sessid=metadata.sessid;
     backup_sessid=alltbt.sessid;
-    
+%     
 %     % for mice where didn't analyze each day, fix nth_session
 %     alltbt.sessid(backup_sessid==1)=1;
 %     alltbt.sessid(backup_sessid==2)=3;
@@ -409,17 +419,23 @@ if doAverageMouse==true
 %     end_sessid=26;
 %     end_sessid=12;
     end_sessid=29;
+%     end_sessid=18;
 else
     start_sessid=33;
     end_sessid=71;
 end
 % outlierTest='tempcued(j)>1 && i<10'; % make empty if don't want to remove any outlier points
 outlierTest=[]; % make empty if don't want to remove any outlier points
-learningFigSaveDir='Z:\Kim\example mouse learning\';
-% learningFigSaveDir=[];
-plotWithinSession_and_dayByDay(alltbt,metadata,trialTypes,start_sessid,end_sessid,learningFigSaveDir,'.png',outlierTest);
+% learningFigSaveDir='Z:\Kim\example mouse learning\';
+learningFigSaveDir=[];
+plotDprimes=true;
+plotWithinSession_and_dayByDay(alltbt,metadata,trialTypes,start_sessid,end_sessid,learningFigSaveDir,'.png',outlierTest,plotDprimes);
 if doAverageMouse==true
     alltbt.sessid=backup_sessid;
     metadata.sessid=backup_sessid;
     trialTypes.sessid=backup_sessid;
 end
+
+%% Mouse by mouse change in dprime
+
+[dfirst,dsecond]=getMouseByMouseChangeInDprime(alltbt,metadata,trialTypes,1,19,learningFigSaveDir,'.png',outlierTest,plotDprimes);
