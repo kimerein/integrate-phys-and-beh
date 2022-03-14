@@ -42,7 +42,7 @@ for i=1:nRuns
     sub_dat2=sum(sub_dat2,1,'omitnan');
     if isempty(maxTrialLength_for_CDFs)
     else
-        sub_dat2(timeBinsForReaching>maxTrialLength)=0;
+        sub_dat2(timeBinsForReaching>maxTrialLength_for_CDFs)=0;
     end
     cond2_cdf=accumulateDistribution(sub_dat2);
     cond2_cdf=cond2_cdf./nanmax(cond2_cdf);
@@ -57,7 +57,7 @@ for i=1:size(bootCDFs,2)
     fifthPerc(i)=prctile(sorted_bootCDFs(:,i),5);
     ninetyfifthPerc(i)=prctile(sorted_bootCDFs(:,i),95);
 end
-plot(timeBinsForReaching,fifthPerc,'Color','r');
+plot(timeBinsForReaching,fifthPerc,'Color','r'); hold on;
 plot(timeBinsForReaching,ninetyfifthPerc,'Color','r');
 
 line([timeBinsForReaching(f) timeBinsForReaching(f)],[0 1],'Color','b');

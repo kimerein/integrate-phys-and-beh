@@ -6,7 +6,7 @@
 
 %% load in data
 
-exptDataDir='Z:\Kim\for_orchestra\combineReachData\O2 output\alltbt02Mar2022145751\'; % directory containing experimental data
+exptDataDir='Z:\Kim\for_orchestra\combineReachData\O2 output\alltbt07Mar2022151900\'; % directory containing experimental data
 
 if ismac==true
     sprtr='/';
@@ -97,13 +97,14 @@ saveDir=['/Volumes/Neurobio/MICROSCOPE/Kim/RT pairs data sets/' temp]; % where t
 alltbt.mouseid=metadata.mouseid;
 alltbt.sessid=metadata.sessid;
 trialTypes.sessid=metadata.sessid;
-tbt_filter.sortField='dprimes';
-% tbt_filter.sortField='fractionThroughSess';
+% tbt_filter.sortField='sessid';
+tbt_filter.sortField='fractionThroughSess_adjusted';
+% tbt_filter.sortField='mouseid';
 % tbt_filter.sortField='opto_enhanced_reach';
 % tbt_filter.sortField='mouseLearned';
 % tbt_filter.range_values=[1 6 7 8 10 14 18];
 % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
-tbt_filter.range_values=[-100 1];
+tbt_filter.range_values=[0 0.2];
 % tbt_filter.range_values=[2 3 4 5 6 7 8 9 10 11 12 14 15 17 18 19]; % which mice start at non-learning 
 % tbt_filter.range_values=[1 2 4 5 6 7 8 9 10 11 12 17 18 19];
 % tbt_filter.range_values=[1     2     3     6     7     8     9    10    11    12    14    15    17    18];
@@ -192,7 +193,7 @@ plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching');
 
 %% plot trial to trial change in reach CDF
 
-plotChangeInReachCDF(dataset.realDistributions,alltbt,9.5);
+plotChangeInReachCDF(dataset.realDistributions,alltbt,6); %9.5);
 
 %% measure how reach rate changes over course of session
 
@@ -330,89 +331,89 @@ if doAverageMouse==true
     alltbt.sessid=metadata.sessid;
     backup_sessid=alltbt.sessid;
 %     
-%     % for mice where didn't analyze each day, fix nth_session
-%     alltbt.sessid(backup_sessid==1)=1;
-%     alltbt.sessid(backup_sessid==2)=3;
-%     alltbt.sessid(backup_sessid==3)=7;
-%     alltbt.sessid(backup_sessid==4)=9;
-%     
-%     alltbt.sessid(backup_sessid==5)=2-1;
-%     alltbt.sessid(backup_sessid==6)=4-1;
-%     alltbt.sessid(backup_sessid==7)=8-1;
-%     alltbt.sessid(backup_sessid==8)=10-1;
-%     alltbt.sessid(backup_sessid==9)=12-1;
-%     alltbt.sessid(backup_sessid==10)=14-1; 
-%     alltbt.sessid(backup_sessid==11)=19; % 16
-%     
-%     alltbt.sessid(backup_sessid==16)=2-1;
-%     alltbt.sessid(backup_sessid==17)=4-1;
-%     alltbt.sessid(backup_sessid==18)=7; %6-1;
-%     alltbt.sessid(backup_sessid==19)=20-1;
-%     alltbt.sessid(backup_sessid==20)=21;
-%     alltbt.sessid(backup_sessid==21)=22; % 22 
-%     
-%     alltbt.sessid(backup_sessid==37)=3;
-%     alltbt.sessid(backup_sessid==38)=4+1;
-%     
-%     alltbt.sessid(backup_sessid==75)=1;
-%     alltbt.sessid(backup_sessid==76)=21;
-%     alltbt.sessid(backup_sessid==77)=22; 
-%     alltbt.sessid(backup_sessid==78)=23;
-%     
-%     alltbt.sessid(backup_sessid==153)=1;
-%     alltbt.sessid(backup_sessid==154)=5;
-%     alltbt.sessid(backup_sessid==155)=7;
-%     alltbt.sessid(backup_sessid==156)=9;
-%     alltbt.sessid(backup_sessid==157)=13;
-%     alltbt.sessid(backup_sessid==158)=16-1; % 15 watched video there is some cued reaching but also to distractor and box was open, not sure
-%     alltbt.sessid(backup_sessid==159)=17;
-%     alltbt.sessid(backup_sessid==160)=19; % 19 so much preemptive reaching
-%     alltbt.sessid(backup_sessid==161)=21; 
-%     alltbt.sessid(backup_sessid==162)=23;
-%     
-%     alltbt.sessid(backup_sessid==315)=6-1;
-%     alltbt.sessid(backup_sessid==316)=10-1;
-%     alltbt.sessid(backup_sessid==317)=12-1;
-%     alltbt.sessid(backup_sessid==318)=14-1;
-%     alltbt.sessid(backup_sessid==319)=16-1;
-%     alltbt.sessid(backup_sessid==320)=20-1;
-%     alltbt.sessid(backup_sessid==321)=22-1;
-%     alltbt.sessid(backup_sessid==322)=24-1; %
-%     alltbt.sessid(backup_sessid==323)=29; % 27 but it's the only one, average
-%     alltbt.sessid(backup_sessid==324)=29;
-%     
-%     alltbt.sessid(backup_sessid==638)=1;
-%     alltbt.sessid(backup_sessid==639)=3;
-%     alltbt.sessid(backup_sessid==640)=7;
-%     alltbt.sessid(backup_sessid==641)=9;
-%     alltbt.sessid(backup_sessid==642)=11;
-%     alltbt.sessid(backup_sessid==643)=13;
-%     alltbt.sessid(backup_sessid==644)=21; 
-%     alltbt.sessid(backup_sessid==645)=23;
-%     alltbt.sessid(backup_sessid==646)=25; % 25
-%     alltbt.sessid(backup_sessid==647)=26+1;
-%     alltbt.sessid(backup_sessid==648)=29;
-%     alltbt.sessid(backup_sessid==649)=29; % 30 
-%     
-%     alltbt.sessid(backup_sessid==1287)=2-1;
-%     alltbt.sessid(backup_sessid==1288)=4-1;
-%     alltbt.sessid(backup_sessid==1289)=6-1;
-%     alltbt.sessid(backup_sessid==1290)=9-2;
-%     alltbt.sessid(backup_sessid==1291)=10-1;
-%     alltbt.sessid(backup_sessid==1292)=12-1;
-%     alltbt.sessid(backup_sessid==1293)=14-1; 
-%     alltbt.sessid(backup_sessid==1294)=16-1;
-%     alltbt.sessid(backup_sessid==1295)=18-1;
-%     alltbt.sessid(backup_sessid==1296)=20-1;
-%     alltbt.sessid(backup_sessid==1297)=22-1;
-%     alltbt.sessid(backup_sessid==1298)=29; % 31
-%     metadata.sessid=alltbt.sessid;
-%     trialTypes.sessid=alltbt.sessid;
+    % for mice where didn't analyze each day, fix nth_session
+    alltbt.sessid(backup_sessid==1)=1;
+    alltbt.sessid(backup_sessid==2)=3;
+    alltbt.sessid(backup_sessid==3)=7;
+    alltbt.sessid(backup_sessid==4)=9;
+    
+    alltbt.sessid(backup_sessid==5)=2-1;
+    alltbt.sessid(backup_sessid==6)=4-1;
+    alltbt.sessid(backup_sessid==7)=8-1;
+    alltbt.sessid(backup_sessid==8)=10-1;
+    alltbt.sessid(backup_sessid==9)=12-1;
+    alltbt.sessid(backup_sessid==10)=14-1; 
+    alltbt.sessid(backup_sessid==11)=19; % 16
+    
+    alltbt.sessid(backup_sessid==16)=2-1;
+    alltbt.sessid(backup_sessid==17)=4-1;
+    alltbt.sessid(backup_sessid==18)=7; %6-1;
+    alltbt.sessid(backup_sessid==19)=20-1;
+    alltbt.sessid(backup_sessid==20)=21;
+    alltbt.sessid(backup_sessid==21)=22; % 22 
+    
+    alltbt.sessid(backup_sessid==37)=3;
+    alltbt.sessid(backup_sessid==38)=4+1;
+    
+    alltbt.sessid(backup_sessid==75)=1;
+    alltbt.sessid(backup_sessid==76)=21;
+    alltbt.sessid(backup_sessid==77)=22; 
+    alltbt.sessid(backup_sessid==78)=23;
+    
+    alltbt.sessid(backup_sessid==153)=1;
+    alltbt.sessid(backup_sessid==154)=5;
+    alltbt.sessid(backup_sessid==155)=7;
+    alltbt.sessid(backup_sessid==156)=9;
+    alltbt.sessid(backup_sessid==157)=13;
+    alltbt.sessid(backup_sessid==158)=16-1; % 15 watched video there is some cued reaching but also to distractor and box was open, not sure
+    alltbt.sessid(backup_sessid==159)=17;
+    alltbt.sessid(backup_sessid==160)=19; % 19 so much preemptive reaching
+    alltbt.sessid(backup_sessid==161)=19; %21; 
+    alltbt.sessid(backup_sessid==162)=23;
+    
+    alltbt.sessid(backup_sessid==315)=6-1;
+    alltbt.sessid(backup_sessid==316)=10-1;
+    alltbt.sessid(backup_sessid==317)=12-1;
+    alltbt.sessid(backup_sessid==318)=14-1;
+    alltbt.sessid(backup_sessid==319)=16-1;
+    alltbt.sessid(backup_sessid==320)=20-1;
+    alltbt.sessid(backup_sessid==321)=19; %22-1;
+    alltbt.sessid(backup_sessid==322)=24-1; %
+    alltbt.sessid(backup_sessid==323)=29; % 27 but it's the only one, average
+    alltbt.sessid(backup_sessid==324)=29;
+    
+    alltbt.sessid(backup_sessid==638)=1;
+    alltbt.sessid(backup_sessid==639)=3;
+    alltbt.sessid(backup_sessid==640)=7;
+    alltbt.sessid(backup_sessid==641)=9;
+    alltbt.sessid(backup_sessid==642)=11;
+    alltbt.sessid(backup_sessid==643)=13;
+    alltbt.sessid(backup_sessid==644)=19; % 21; 
+    alltbt.sessid(backup_sessid==645)=23;
+    alltbt.sessid(backup_sessid==646)=25; % 25
+    alltbt.sessid(backup_sessid==647)=26+1;
+    alltbt.sessid(backup_sessid==648)=29;
+    alltbt.sessid(backup_sessid==649)=29; % 30 
+    
+    alltbt.sessid(backup_sessid==1287)=2-1;
+    alltbt.sessid(backup_sessid==1288)=4-1;
+    alltbt.sessid(backup_sessid==1289)=6-1;
+    alltbt.sessid(backup_sessid==1290)=9-2;
+    alltbt.sessid(backup_sessid==1291)=10-1;
+    alltbt.sessid(backup_sessid==1292)=12-1;
+    alltbt.sessid(backup_sessid==1293)=14-1; 
+    alltbt.sessid(backup_sessid==1294)=16-1;
+    alltbt.sessid(backup_sessid==1295)=18-1;
+    alltbt.sessid(backup_sessid==1296)=20-1;
+    alltbt.sessid(backup_sessid==1297)=19; %22-1;
+    alltbt.sessid(backup_sessid==1298)=29; % 31
+    metadata.sessid=alltbt.sessid;
+    trialTypes.sessid=alltbt.sessid;
     
     
-    alltbt.sessid=metadata.nth_session;
-    metadata.sessid=metadata.nth_session;
-    trialTypes.sessid=metadata.nth_session;
+%     alltbt.sessid=metadata.nth_session;
+%     metadata.sessid=metadata.nth_session;
+%     trialTypes.sessid=metadata.nth_session;
 % %     start_sessid=nanmin(metadata.nth_session);
 % %     end_sessid=nanmax(metadata.nth_session); % but may be quite noisy
     start_sessid=1;

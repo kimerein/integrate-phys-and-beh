@@ -145,10 +145,10 @@ for i=1:length(days)
     [dprimes,fracs_over_sess]=plotDprimesFromRR(reachrates,true,plotVersusFrac);
     avdprimes=nanmean(dprimes,1);
     halfwaypoint=floor(length(avdprimes)/2);
-    dprime_firsthalf(i)=nanmean(avdprimes(3:6));
-    dprime_secondhalf(i)=nanmean(avdprimes(19:end));
-%     dprime_firsthalf(i)=nanmean(avdprimes(1:halfwaypoint));
-%     dprime_secondhalf(i)=nanmean(avdprimes(halfwaypoint+1:end));
+%     dprime_firsthalf(i)=nanmean(avdprimes(3:6));
+%     dprime_secondhalf(i)=nanmean(avdprimes(19:end));
+    dprime_firsthalf(i)=nanmean(avdprimes(1:halfwaypoint));
+    dprime_secondhalf(i)=nanmean(avdprimes(halfwaypoint+1:end));
     
 %     thirdwaypoint=floor(length(avdprimes)/3);
 %     dprime_firsthalf(i)=nanmean(avdprimes(1:thirdwaypoint));

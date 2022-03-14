@@ -6,7 +6,7 @@
 
 %% load in data
 
-exptDataDir='Z:\Kim\for_orchestra\combineReachData\O2 output\alltbt02Mar2022145751\'; % directory containing experimental data
+exptDataDir='Z:\Kim\for_orchestra\combineReachData\O2 output\alltbt07Mar2022151900\'; % directory containing experimental data
 
 if ismac==true
     sprtr='/';
@@ -32,10 +32,10 @@ backup.trialTypes=trialTypes;
 backup.metadata=metadata;
 
 % Optional: correct any LED trials for blinded control mice
-[alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,[4 5 19]);
+% [alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,[4 5 19]);
 
 % Optional: discard preemptive
-[alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
+% [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
 
 % fix weird bug where reach batch sometimes get stuck at 1 (in less than 0.1% of trials), possibly an
 % interp problem somewhere?? not sure
@@ -97,14 +97,15 @@ saveDir=['/Volumes/Neurobio/MICROSCOPE/Kim/RT pairs data sets/' temp]; % where t
 alltbt.mouseid=metadata.mouseid;
 alltbt.sessid=metadata.sessid;
 trialTypes.sessid=metadata.sessid;
+% tbt_filter.sortField='dprimes';
+% tbt_filter.sortField='dprimes';
+tbt_filter.sortField='mouseid';
 % tbt_filter.sortField='opto_enhanced_reach';
-% tbt_filter.sortField='fractionThroughSess';
-% tbt_filter.sortField='opto_enhanced_reach';
-tbt_filter.sortField='mouseLearned';
+% tbt_filter.sortField='mouseLearned';
 % tbt_filter.range_values=[1 6 7 8 10 14 18];
 % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
-tbt_filter.range_values=[0.5 1.5];
-% tbt_filter.range_values=[2 3 4 5 6 7 8 9 10 11 12 14 15 17 18 19]; % which mice start at non-learning 
+% tbt_filter.range_values=[-100 20.1];
+tbt_filter.range_values=[2 3 4 5 6 7 8 9 10 11 12 14 15 17 18 19]; % which mice start at non-learning 
 % tbt_filter.range_values=[1 2 4 5 6 7 8 9 10 11 12 17 18 19];
 % tbt_filter.range_values=[1     2     3     6     7     8     9    10    11    12    14    15    17    18];
 tbt_filter.name=[tbt_filter.sortField num2str(tbt_filter.range_values(1)) 'to' num2str(tbt_filter.range_values(2))];
@@ -119,7 +120,7 @@ tbt_filter.clock_progress=true;
 
 %% check for opto-enhanced reaching
 alltbt.sessid=metadata.sessid;
-alltbt=checkForOptoEnhancedReach(alltbt,metadata,trialTypes,'all_reachBatch','trialTypes.led==1','cueZone_onVoff',[-0.25 0.5],15);
+alltbt=checkForOptoEnhancedReach(alltbt,metadata,trialTypes,'all_reachBatch','trialTypes.led==1','cueZone_onVoff',[-0.25 0.5],20);
 trialTypes.opto_enhanced_reach=alltbt.opto_enhanced_reach;
 
 %% find sessions where mouse learned
@@ -215,7 +216,8 @@ reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength -1];
 reachratesettings.scatterPointSize=50; % size for points in scatter plot
 reachratesettings.addSatietyLines=false; % whether to add proportionality lines to figure
 % reachratesettings.stopPlottingTrialsAfterN=500; % will stop plotting after this nth trial in session, also only use this many trials for regression fit -- see next line, also controls colormap
-reachratesettings.stopPlottingTrialsAfterN=175; % will stop plotting
+% reachratesettings.stopPlottingTrialsAfterN=175; % will stop plotting
+reachratesettings.stopPlottingTrialsAfterN=200; % will stop plotting
 % after this nth trial in session, also only use this many trials for
 % regression fit -- see next line, also controls colormap
 reachratesettings.showFitLine=true; % whether to show linear fit to change across trials
@@ -223,7 +225,7 @@ reachratesettings.useWindowsForUncued=[3]; % to use window2 or window3 or both f
 reachratesettings.initWindows=[]; % empty if want to calculate from dataset
 reachratesettings.addSessionLines=false; % for no averaging across sessions plot, whether to connect trial bins within same session with lines
 reachratesettings.binTrialsForAvAcrossSess=true; % whether to bin multiple trials for first figure, will bin into binThisManyTrials
-reachratesettings.binThisManyTrials=6; % how many trials to bin within each session
+reachratesettings.binThisManyTrials=30; %6; % how many trials to bin within each session
 reachratesettings.nBinsForZones=40; % will be nBinsForZones squared total bins, this is # bins for each x and y axis
 reachratesettings.useRateMethod=3; % 1, 2 or 3 (see explanation below)
 % There are 3 approaches available for determing reach rates
@@ -252,14 +254,23 @@ reachratesettings.useRateMethod=3; % 1, 2 or 3 (see explanation below)
 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 
+%% Plot dprimes
+plotVersusFrac=false;
+[dprimes,fracs_over_sess]=plotDprimesFromReachRates(reachrates,false,plotVersusFrac);
+
 %% Plot hallmarks of satiety
 
 plotHallmarksOfSatiety(reachrates,dataset,alltbt,metadata,trialTypes);
 
 %% memory effect
 % consider filtering for no opto enhanced
-nInSeq=5; % nInSeq=5; % nInSeq=3;  
-useFractionThroughSession=[0.3 1];
+% nInSeq=5; % WHAT I USED FOR OPTO GRC TALK
+% useFractionThroughSession=[0.4 0.6];
+% plotCDFUpTo=3;
+% memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,[],plotCDFUpTo);
+nInSeq=2; 
+% useFractionThroughSession=[0.2 100];
+useFractionThroughSession=[-100 100];
 plotCDFUpTo=3;
 memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,[],plotCDFUpTo);
 
@@ -317,87 +328,87 @@ doAverageMouse=true;
 if doAverageMouse==true
     alltbt=mouse_alltbt; metadata=mouse_metadata; trialTypes=mouse_trialTypes;
 %     alltbt=backup.alltbt; trialTypes=backup.trialTypes; metadata=backup.metadata;
-    alltbt.sessid=metadata.sessid;
-    backup_sessid=alltbt.sessid;
+%     alltbt.sessid=metadata.sessid;
+%     backup_sessid=alltbt.sessid;
+%     
+    % for mice where didn't analyze each day, fix nth_session
+    alltbt.sessid(backup_sessid==1)=1;
+    alltbt.sessid(backup_sessid==2)=3;
+    alltbt.sessid(backup_sessid==3)=7;
+    alltbt.sessid(backup_sessid==4)=9;
     
-%     % for mice where didn't analyze each day, fix nth_session
-%     alltbt.sessid(backup_sessid==1)=1;
-%     alltbt.sessid(backup_sessid==2)=3;
-%     alltbt.sessid(backup_sessid==3)=7;
-%     alltbt.sessid(backup_sessid==4)=9;
-%     
-%     alltbt.sessid(backup_sessid==5)=2-1;
-%     alltbt.sessid(backup_sessid==6)=4-1;
-%     alltbt.sessid(backup_sessid==7)=8-1;
-%     alltbt.sessid(backup_sessid==8)=10-1;
-%     alltbt.sessid(backup_sessid==9)=12-1;
-%     alltbt.sessid(backup_sessid==10)=14-1; 
-%     alltbt.sessid(backup_sessid==11)=19; % 16
-%     
-%     alltbt.sessid(backup_sessid==16)=2-1;
-%     alltbt.sessid(backup_sessid==17)=4-1;
-%     alltbt.sessid(backup_sessid==18)=7; %6-1;
-%     alltbt.sessid(backup_sessid==19)=20-1;
-%     alltbt.sessid(backup_sessid==20)=21;
-%     alltbt.sessid(backup_sessid==21)=22; % 22 
-%     
-%     alltbt.sessid(backup_sessid==37)=3;
-%     alltbt.sessid(backup_sessid==38)=4+1;
-%     
-%     alltbt.sessid(backup_sessid==75)=1;
-%     alltbt.sessid(backup_sessid==76)=21;
-%     alltbt.sessid(backup_sessid==77)=22; 
-%     alltbt.sessid(backup_sessid==78)=23;
-%     
-%     alltbt.sessid(backup_sessid==153)=1;
-%     alltbt.sessid(backup_sessid==154)=5;
-%     alltbt.sessid(backup_sessid==155)=7;
-%     alltbt.sessid(backup_sessid==156)=9;
-%     alltbt.sessid(backup_sessid==157)=13;
-%     alltbt.sessid(backup_sessid==158)=16-1; % 15 watched video there is some cued reaching but also to distractor and box was open, not sure
-%     alltbt.sessid(backup_sessid==159)=17;
-%     alltbt.sessid(backup_sessid==160)=19; % 19 so much preemptive reaching
-%     alltbt.sessid(backup_sessid==161)=21; 
-%     alltbt.sessid(backup_sessid==162)=23;
-%     
-%     alltbt.sessid(backup_sessid==315)=6-1;
-%     alltbt.sessid(backup_sessid==316)=10-1;
-%     alltbt.sessid(backup_sessid==317)=12-1;
-%     alltbt.sessid(backup_sessid==318)=14-1;
-%     alltbt.sessid(backup_sessid==319)=16-1;
-%     alltbt.sessid(backup_sessid==320)=20-1;
-%     alltbt.sessid(backup_sessid==321)=22-1;
-%     alltbt.sessid(backup_sessid==322)=24-1; %
-%     alltbt.sessid(backup_sessid==323)=29; % 27 but it's the only one, average
-%     alltbt.sessid(backup_sessid==324)=29;
-%     
-%     alltbt.sessid(backup_sessid==638)=1;
-%     alltbt.sessid(backup_sessid==639)=3;
-%     alltbt.sessid(backup_sessid==640)=7;
-%     alltbt.sessid(backup_sessid==641)=9;
-%     alltbt.sessid(backup_sessid==642)=11;
-%     alltbt.sessid(backup_sessid==643)=13;
-%     alltbt.sessid(backup_sessid==644)=21; 
-%     alltbt.sessid(backup_sessid==645)=23;
-%     alltbt.sessid(backup_sessid==646)=25; % 25
-%     alltbt.sessid(backup_sessid==647)=26+1;
-%     alltbt.sessid(backup_sessid==648)=29;
-%     alltbt.sessid(backup_sessid==649)=29; % 30 
-%     
-%     alltbt.sessid(backup_sessid==1287)=2-1;
-%     alltbt.sessid(backup_sessid==1288)=4-1;
-%     alltbt.sessid(backup_sessid==1289)=6-1;
-%     alltbt.sessid(backup_sessid==1290)=9-2;
-%     alltbt.sessid(backup_sessid==1291)=10-1;
-%     alltbt.sessid(backup_sessid==1292)=12-1;
-%     alltbt.sessid(backup_sessid==1293)=14-1; 
-%     alltbt.sessid(backup_sessid==1294)=16-1;
-%     alltbt.sessid(backup_sessid==1295)=18-1;
-%     alltbt.sessid(backup_sessid==1296)=20-1;
-%     alltbt.sessid(backup_sessid==1297)=22-1;
-%     alltbt.sessid(backup_sessid==1298)=29; % 31
-%     metadata.sessid=alltbt.sessid;
-%     trialTypes.sessid=alltbt.sessid;
+    alltbt.sessid(backup_sessid==5)=2-1;
+    alltbt.sessid(backup_sessid==6)=4-1;
+    alltbt.sessid(backup_sessid==7)=8-1;
+    alltbt.sessid(backup_sessid==8)=10-1;
+    alltbt.sessid(backup_sessid==9)=12-1;
+    alltbt.sessid(backup_sessid==10)=14-1; 
+    alltbt.sessid(backup_sessid==11)=19; % 16
+    
+    alltbt.sessid(backup_sessid==16)=2-1;
+    alltbt.sessid(backup_sessid==17)=4-1;
+    alltbt.sessid(backup_sessid==18)=7; %6-1;
+    alltbt.sessid(backup_sessid==19)=20-1;
+    alltbt.sessid(backup_sessid==20)=21;
+    alltbt.sessid(backup_sessid==21)=22; % 22 
+    
+    alltbt.sessid(backup_sessid==37)=3;
+    alltbt.sessid(backup_sessid==38)=4+1;
+    
+    alltbt.sessid(backup_sessid==75)=1;
+    alltbt.sessid(backup_sessid==76)=21;
+    alltbt.sessid(backup_sessid==77)=22; 
+    alltbt.sessid(backup_sessid==78)=23;
+    
+    alltbt.sessid(backup_sessid==153)=1;
+    alltbt.sessid(backup_sessid==154)=5;
+    alltbt.sessid(backup_sessid==155)=7;
+    alltbt.sessid(backup_sessid==156)=9;
+    alltbt.sessid(backup_sessid==157)=13;
+    alltbt.sessid(backup_sessid==158)=16-1; % 15 watched video there is some cued reaching but also to distractor and box was open, not sure
+    alltbt.sessid(backup_sessid==159)=17;
+    alltbt.sessid(backup_sessid==160)=19; % 19 so much preemptive reaching
+    alltbt.sessid(backup_sessid==161)=19; %21; 
+    alltbt.sessid(backup_sessid==162)=23;
+    
+    alltbt.sessid(backup_sessid==315)=6-1;
+    alltbt.sessid(backup_sessid==316)=10-1;
+    alltbt.sessid(backup_sessid==317)=12-1;
+    alltbt.sessid(backup_sessid==318)=14-1;
+    alltbt.sessid(backup_sessid==319)=16-1;
+    alltbt.sessid(backup_sessid==320)=20-1;
+    alltbt.sessid(backup_sessid==321)=19; %22-1;
+    alltbt.sessid(backup_sessid==322)=24-1; %
+    alltbt.sessid(backup_sessid==323)=29; % 27 but it's the only one, average
+    alltbt.sessid(backup_sessid==324)=29;
+    
+    alltbt.sessid(backup_sessid==638)=1;
+    alltbt.sessid(backup_sessid==639)=3;
+    alltbt.sessid(backup_sessid==640)=7;
+    alltbt.sessid(backup_sessid==641)=9;
+    alltbt.sessid(backup_sessid==642)=11;
+    alltbt.sessid(backup_sessid==643)=13;
+    alltbt.sessid(backup_sessid==644)=19; % 21; 
+    alltbt.sessid(backup_sessid==645)=23;
+    alltbt.sessid(backup_sessid==646)=25; % 25
+    alltbt.sessid(backup_sessid==647)=26+1;
+    alltbt.sessid(backup_sessid==648)=29;
+    alltbt.sessid(backup_sessid==649)=29; % 30 
+    
+    alltbt.sessid(backup_sessid==1287)=2-1;
+    alltbt.sessid(backup_sessid==1288)=4-1;
+    alltbt.sessid(backup_sessid==1289)=6-1;
+    alltbt.sessid(backup_sessid==1290)=9-2;
+    alltbt.sessid(backup_sessid==1291)=10-1;
+    alltbt.sessid(backup_sessid==1292)=12-1;
+    alltbt.sessid(backup_sessid==1293)=14-1; 
+    alltbt.sessid(backup_sessid==1294)=16-1;
+    alltbt.sessid(backup_sessid==1295)=18-1;
+    alltbt.sessid(backup_sessid==1296)=20-1;
+    alltbt.sessid(backup_sessid==1297)=19; %22-1;
+    alltbt.sessid(backup_sessid==1298)=29; % 31
+    metadata.sessid=alltbt.sessid;
+    trialTypes.sessid=alltbt.sessid;
     
     
     alltbt.sessid=metadata.nth_session;
@@ -409,17 +420,23 @@ if doAverageMouse==true
 %     end_sessid=26;
 %     end_sessid=12;
     end_sessid=29;
+%     end_sessid=18;
 else
     start_sessid=33;
     end_sessid=71;
 end
 % outlierTest='tempcued(j)>1 && i<10'; % make empty if don't want to remove any outlier points
 outlierTest=[]; % make empty if don't want to remove any outlier points
-learningFigSaveDir='Z:\Kim\example mouse learning\';
-% learningFigSaveDir=[];
-plotWithinSession_and_dayByDay(alltbt,metadata,trialTypes,start_sessid,end_sessid,learningFigSaveDir,'.png',outlierTest);
+% learningFigSaveDir='Z:\Kim\example mouse learning\';
+learningFigSaveDir=[];
+plotDprimes=true;
+plotWithinSession_and_dayByDay(alltbt,metadata,trialTypes,start_sessid,end_sessid,learningFigSaveDir,'.png',outlierTest,plotDprimes);
 if doAverageMouse==true
     alltbt.sessid=backup_sessid;
     metadata.sessid=backup_sessid;
     trialTypes.sessid=backup_sessid;
 end
+
+%% Mouse by mouse change in dprime
+
+[dfirst,dsecond]=getMouseByMouseChangeInDprime(alltbt,metadata,trialTypes,1,19,learningFigSaveDir,'.png',outlierTest,plotDprimes);
