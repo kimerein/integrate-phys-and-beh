@@ -12,6 +12,7 @@ trialTypes.isLongITI_1back=[0; trialTypes.isLongITI(1:end-1)];
 trialTypes.optoGroup_2back=[0; 0; trialTypes.optoGroup(1:end-2)];
 trialTypes.noReach=~any(alltbt.all_reachBatch>0.05,2);
 trialTypes.noReach_1forward=[trialTypes.noReach(2:end); 0];
+trialTypes.noReach_1back=[0; trialTypes.noReach(1:end-1)];
 trialTypes.reachedBeforeCue=any(alltbt.all_reachBatch(:,1:cueindma-1)>0.05,2);
 trialTypes.reachedAfterCue=any(alltbt.all_reachBatch(:,cueindma:end)>0.05,2);
 trialTypes.reachToPelletBeforeCue=any(alltbt.reachStarts_pelletPresent(:,1:cueindma-1)>0.05,2);
@@ -24,7 +25,7 @@ flankingTrials='trialTypes.optoGroup~=1';
 % flankingTrials='(trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1)';
 
 % which to plot
-whichToPlot='delayed success'; % can be 'success','delayed success','drop','cued touch','cued touch and switch color','failed cued reach','false alarm','no reach','basic','wildcard','backward success'
+whichToPlot='failed cued reach'; % can be 'success','delayed success','drop','cued touch','cued touch and switch color','failed cued reach','false alarm','no reach','basic','wildcard','backward success'
 [plotset,trialTypes]=whichToPlotNow(whichToPlot,trialTypes,alltbt);
 
 shuffleTrialOrder=false; % if want to randomly permute trial order to test for ordering effects
@@ -158,7 +159,7 @@ if ~isempty(a)
 end
 % did not touch after cue despite reaching
 nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.touched_pellet_1back==0' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==0 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
+trial1=[flankingTrials ' & trialTypes.touched_pellet_1back==0 & trialTypes.noReach_1back==0' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==0 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
 if linkSuccesses==false
     trial2=[flankingTrials];
 else
@@ -295,7 +296,7 @@ if ~isempty(a)
 end
 % did not touch after cue despite reaching
 nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.touched_pellet_1back==0' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==0 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
+trial1=[flankingTrials ' & trialTypes.touched_pellet_1back==0 & trialTypes.noReach_1back==0' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==0 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
 if linkSuccesses==false
     trial2=[flankingTrials];
 else

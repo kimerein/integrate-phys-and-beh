@@ -6,7 +6,7 @@
 
 %% load in data
 
-exptDataDir='Z:\Kim\for_orchestra\combineReachData\O2 output\alltbt07Mar2022151900\'; % directory containing experimental data
+exptDataDir='Z:\Kim\for_orchestra\combineReachData\O2 output\alltbt02Mar2022145751\'; % directory containing experimental data
 
 if ismac==true
     sprtr='/';
@@ -32,7 +32,7 @@ backup.trialTypes=trialTypes;
 backup.metadata=metadata;
 
 % Optional: correct any LED trials for blinded control mice
-% [alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,[4 5 19]);
+[alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,[4 5 19]);
 
 % Optional: discard preemptive
 % [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
@@ -97,15 +97,15 @@ saveDir=['/Volumes/Neurobio/MICROSCOPE/Kim/RT pairs data sets/' temp]; % where t
 alltbt.mouseid=metadata.mouseid;
 alltbt.sessid=metadata.sessid;
 trialTypes.sessid=metadata.sessid;
-% tbt_filter.sortField='dprimes';
-% tbt_filter.sortField='dprimes';
-tbt_filter.sortField='mouseid';
-% tbt_filter.sortField='opto_enhanced_reach';
+% tbt_filter.sortField='mouseid';
+% tbt_filter.sortField='fractionThroughSess_adjusted';
+% tbt_filter.sortField='mouseid';
+tbt_filter.sortField='opto_enhanced_reach';
 % tbt_filter.sortField='mouseLearned';
 % tbt_filter.range_values=[1 6 7 8 10 14 18];
 % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
-% tbt_filter.range_values=[-100 20.1];
-tbt_filter.range_values=[2 3 4 5 6 7 8 9 10 11 12 14 15 17 18 19]; % which mice start at non-learning 
+tbt_filter.range_values=[-0.5 0.5];
+% tbt_filter.range_values=[2 3 4 5 6 7 8 9 10 11 12 14 15 17 18 19]; % which mice start at non-learning 
 % tbt_filter.range_values=[1 2 4 5 6 7 8 9 10 11 12 17 18 19];
 % tbt_filter.range_values=[1     2     3     6     7     8     9    10    11    12    14    15    17    18];
 tbt_filter.name=[tbt_filter.sortField num2str(tbt_filter.range_values(1)) 'to' num2str(tbt_filter.range_values(2))];
@@ -193,7 +193,7 @@ plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching');
 
 %% plot trial to trial change in reach CDF
 
-plotChangeInReachCDF(dataset.realDistributions,alltbt,9.5);
+plotChangeInReachCDF(dataset.realDistributions,alltbt,6); %9.5);
 
 %% measure how reach rate changes over course of session
 
@@ -269,8 +269,8 @@ plotHallmarksOfSatiety(reachrates,dataset,alltbt,metadata,trialTypes);
 % plotCDFUpTo=3;
 % memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,[],plotCDFUpTo);
 nInSeq=2; 
-% useFractionThroughSession=[0.2 100];
-useFractionThroughSession=[-100 100];
+useFractionThroughSession=[0.6 100];
+% useFractionThroughSession=[-100 100];
 plotCDFUpTo=3;
 memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,[],plotCDFUpTo);
 
@@ -328,8 +328,8 @@ doAverageMouse=true;
 if doAverageMouse==true
     alltbt=mouse_alltbt; metadata=mouse_metadata; trialTypes=mouse_trialTypes;
 %     alltbt=backup.alltbt; trialTypes=backup.trialTypes; metadata=backup.metadata;
-%     alltbt.sessid=metadata.sessid;
-%     backup_sessid=alltbt.sessid;
+    alltbt.sessid=metadata.sessid;
+    backup_sessid=alltbt.sessid;
 %     
     % for mice where didn't analyze each day, fix nth_session
     alltbt.sessid(backup_sessid==1)=1;
@@ -411,9 +411,9 @@ if doAverageMouse==true
     trialTypes.sessid=alltbt.sessid;
     
     
-    alltbt.sessid=metadata.nth_session;
-    metadata.sessid=metadata.nth_session;
-    trialTypes.sessid=metadata.nth_session;
+%     alltbt.sessid=metadata.nth_session;
+%     metadata.sessid=metadata.nth_session;
+%     trialTypes.sessid=metadata.nth_session;
 % %     start_sessid=nanmin(metadata.nth_session);
 % %     end_sessid=nanmax(metadata.nth_session); % but may be quite noisy
     start_sessid=1;
@@ -440,3 +440,14 @@ end
 %% Mouse by mouse change in dprime
 
 [dfirst,dsecond]=getMouseByMouseChangeInDprime(alltbt,metadata,trialTypes,1,19,learningFigSaveDir,'.png',outlierTest,plotDprimes);
+
+%% Plot successes drops etc and dprime
+[~,ui]=unique(metadata.nth_session);
+dprimes=metadata.dprimes(ui);
+nthsess=unique(metadata.nth_session);
+success=nan(1,length(nthsess));
+drop=nan(1,length(nthsess));
+miss=nan(1,length(nthsess));
+for i=1:length(nthsess)
+    currsess=nthsess(i);
+disp([num2str(nansum(trialTypes.success_in_cued_window

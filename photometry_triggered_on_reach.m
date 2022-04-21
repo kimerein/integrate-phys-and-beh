@@ -125,7 +125,11 @@ if length(a)>1
 end
 
 ds=100; % use this downsample factor for the fields in downsampfields
-downsampfields={'green_mod','red_mod','opto','cue','distractor','cue_times'};
+if isfield(tbt_data_vid1,'opto')
+    downsampfields={'green_mod','red_mod','opto','cue','distractor','cue_times'};
+else
+    downsampfields={'green_mod','red_mod','cue','distractor','cue_times'};
+end
 if ds~=1
     tbt_data_vid1=downSampleData(tbt_data_vid1,ds,downsampfields);
     if length(a)>1
@@ -263,8 +267,11 @@ function [tbt_data,shifted_data,alltbt]=shiftPhotometryToBehavior(data,discarded
 % will not resample photometry or physiology, might introduce artifacts
 % only shift
 % then make trial-by-trial and align at cues
-
-fields_like_distractor={'green_mod','red_mod','opto','cue','cue_times'};
+if isfield(data,'opto')
+    fields_like_distractor={'green_mod','red_mod','opto','cue','cue_times'};
+else
+    fields_like_distractor={'green_mod','red_mod','cue','cue_times'};
+end
 fields_like_photometry={'green_ch','red_ch','green_time','raw_green_ch','red_time','raw_red_ch'};
 
 shifted_data=data;

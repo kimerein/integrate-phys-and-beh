@@ -1,7 +1,7 @@
 function [f1,f2]=outcomeDependentShift_wrapper(alltbt,trialTypes,metadata,saveDir,f1,f2)
 
 compareToFirstTrial=true;
-linkSuccesses=true;
+linkSuccesses=false;
 [~,cueindma]=nanmax(nanmean(alltbt.cueZone_onVoff,1));
 timestep=mode(diff(nanmean(alltbt.times,1)));
 
@@ -24,7 +24,7 @@ flankingTrials='trialTypes.optoGroup~=1';
 % flankingTrials='(trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1)';
 
 % which to plot
-whichToPlot='backward success'; % can be 'success','delayed success','drop','cued touch','cued touch and switch color','failed cued reach','false alarm','no reach','basic','wildcard','backward success'
+whichToPlot='failed cued reach'; % can be 'success','delayed success','drop','cued touch','cued touch and switch color','failed cued reach','false alarm','no reach','basic','wildcard','backward success'
 [plotset,trialTypes]=whichToPlotNow(whichToPlot,trialTypes,alltbt);
 
 shuffleTrialOrder=false; % if want to randomly permute trial order to test for ordering effects
@@ -102,10 +102,12 @@ if ~isempty(a)
 end
 % backwards success
 nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.led_1back==1 & trialTypes.optoGroup_1back~=1'];
 if linkSuccesses==false
-     trial1=[flankingTrials];
-trial2=[flankingTrials ' & trialTypes.consumed_pellet_1forward==1' ' & trialTypes.reachedInTimeWindow_1back==1 & trialTypes.success_in_cued_window_1back==1 & trialTypes.consumed_pellet_1back==1 & trialTypes.led_1back==0 & trialTypes.optoGroup_1back~=1']; % & trialTypes.isLongITI_1forward==1'];];
+    trial1=[flankingTrials];
+else
+    trial1=[flankingTrials ' & trialTypes.led_1back==1 & trialTypes.optoGroup_1back~=1'];
+end
+trial2=[flankingTrials ' & trialTypes.consumed_pellet_1forward==1' ' & trialTypes.reachedInTimeWindow_1back==1 & trialTypes.success_in_cued_window_1back==1 & trialTypes.consumed_pellet_1back==1 & trialTypes.led_1back==0 & trialTypes.optoGroup_1back~=1']; % & trialTypes.isLongITI_1forward==1'];
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
@@ -117,7 +119,11 @@ end
 % delayed success
 nInSequence=3;
 trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
-trial2=[flankingTrials];
+if linkSuccesses==false
+    trial2=[flankingTrials];
+else
+    trial2=[flankingTrials ' & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1'];
+end
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
@@ -152,8 +158,12 @@ if ~isempty(a)
 end
 % did not touch after cue despite reaching
 nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.touched_pellet_1back==0' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==0 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
-trial2=[flankingTrials];
+trial1=[flankingTrials ' & trialTypes.touched_pellet_1back==0 & ' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==0 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
+if linkSuccesses==false
+    trial2=[flankingTrials];
+else
+    trial2=[flankingTrials ' & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1'];
+end
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
@@ -214,8 +224,11 @@ end
 % success
 nInSequence=3;
 trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.success_in_cued_window_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup_1forward==2']; % & trialTypes.isLongITI_1forward==1'];
-% trial2=[flankingTrials];
-trial2=[flankingTrials ' & trialTypes.led_1forward==0'];
+if linkSuccesses==false
+    trial2=[flankingTrials];
+else
+    trial2=[flankingTrials ' & trialTypes.led_1forward==0'];
+end
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
@@ -226,8 +239,11 @@ if ~isempty(a)
 end
 % backwards success
 nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.led_1back==0'];
-trial1=[flankingTrials];
+if linkSuccesses==false
+    trial1=[flankingTrials];
+else
+    trial1=[flankingTrials ' & trialTypes.led_1back==0'];
+end
 trial2=[flankingTrials ' & trialTypes.consumed_pellet_1forward==1' ' & trialTypes.reachedInTimeWindow_1back==1 & trialTypes.success_in_cued_window_1back==1 & trialTypes.consumed_pellet_1back==1 & trialTypes.led_1back==1 & trialTypes.optoGroup_1back~=1']; % & trialTypes.isLongITI_1forward==1'];];
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
@@ -240,7 +256,11 @@ end
 % delayed success
 nInSequence=3;
 trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
-trial2=[flankingTrials];
+if linkSuccesses==false
+    trial2=[flankingTrials];
+else
+    trial2=[flankingTrials ' & trialTypes.led_1forward==0'];
+end
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
@@ -276,7 +296,11 @@ end
 % did not touch after cue despite reaching
 nInSequence=3;
 trial1=[flankingTrials ' & trialTypes.touched_pellet_1back==0' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==0 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
-trial2=[flankingTrials];
+if linkSuccesses==false
+    trial2=[flankingTrials];
+else
+    trial2=[flankingTrials ' & trialTypes.led_1forward==0'];
+end
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
