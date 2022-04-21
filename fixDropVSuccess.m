@@ -2,14 +2,14 @@ function fixDropVSuccess
 
 % script for fixing drop vs success classifications
 
-currentVid='Z:\Kim\Behavior Final Data Sets\Constant sil throughout learning\Feb_1\2019-07-11 15-36-00-C_processed_data';
-datestr='20190711';
-mousename='Feb_1';
+currentVid='Z:\MICROSCOPE\Kim\KER Behavior\By date\Low speed\20220420\dLight_152\O2 output\VID_20130530_202536_processed_data';
+datestr='20220420';
+mousename='dLight_152';
 
 f_pr=regexp(currentVid,'_processed_data');
 fslash=regexp(currentVid,'\');
 aviName=currentVid(fslash(end)+1:f_pr-1);
-placeForO2data=['Z:\Kim\KER Behavior\By date\Low speed\' datestr '\' mousename '\O2 output\' aviName];
+placeForO2data=['Z:\MICROSCOPE\Kim\KER Behavior\By date\Low speed\' datestr '\' mousename '\O2 output\' aviName];
 
 load([currentVid '\tbt.mat'])
 backuptbt=tbt;
