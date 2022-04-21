@@ -6,7 +6,7 @@
 
 %% load in data
 
-exptDataDir='Z:\Kim\for_orchestra\combineReachData\O2 output\alltbt07Mar2022151900\'; % directory containing experimental data
+exptDataDir='Z:\Kim\for_orchestra\combineReachData\O2 output\alltbt02Mar2022145751\'; % directory containing experimental data
 
 if ismac==true
     sprtr='/';
@@ -32,7 +32,7 @@ backup.trialTypes=trialTypes;
 backup.metadata=metadata;
 
 % Optional: correct any LED trials for blinded control mice
-% [alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,[4 5 19]);
+[alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,[4 5 19]);
 
 % Optional: discard preemptive
 % [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
@@ -97,14 +97,15 @@ saveDir=['/Volumes/Neurobio/MICROSCOPE/Kim/RT pairs data sets/' temp]; % where t
 alltbt.mouseid=metadata.mouseid;
 alltbt.sessid=metadata.sessid;
 trialTypes.sessid=metadata.sessid;
-% tbt_filter.sortField='sessid';
-tbt_filter.sortField='fractionThroughSess_adjusted';
 % tbt_filter.sortField='mouseid';
-% tbt_filter.sortField='opto_enhanced_reach';
+% tbt_filter.sortField='fractionThroughSess_adjusted';
+% tbt_filter.sortField='dprimes';
+tbt_filter.sortField='opto_enhanced_reach';
 % tbt_filter.sortField='mouseLearned';
 % tbt_filter.range_values=[1 6 7 8 10 14 18];
 % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
-tbt_filter.range_values=[0 0.2];
+tbt_filter.range_values=[-0.5 0.5]; % maybe 2,6,7,12
+% tbt_filter.range_values=[0.5 3]; % maybe 2,6,7,12
 % tbt_filter.range_values=[2 3 4 5 6 7 8 9 10 11 12 14 15 17 18 19]; % which mice start at non-learning 
 % tbt_filter.range_values=[1 2 4 5 6 7 8 9 10 11 12 17 18 19];
 % tbt_filter.range_values=[1     2     3     6     7     8     9    10    11    12    14    15    17    18];
@@ -152,9 +153,9 @@ trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start
 % trial1='trialTypes.optoGroup~=1 & trialTypes.consumed_pellet_1back==1 & trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1';
 test.trial1=trial1;
 test.templateSequence2_cond=eval(trial1);
-trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
+% trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
 % memory
-% trial2='trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3';
+trial2='trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3';
 % trial2='trialTypes.optoGroup~=1 & trialTypes.led==0 & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
 % trial2='trialTypes.optoGroup~=1 & trialTypes.led==0';
 % trial2='trialTypes.led~=1';
@@ -269,8 +270,8 @@ plotHallmarksOfSatiety(reachrates,dataset,alltbt,metadata,trialTypes);
 % plotCDFUpTo=3;
 % memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,[],plotCDFUpTo);
 nInSeq=2; 
-% useFractionThroughSession=[0.2 100];
-useFractionThroughSession=[-100 100];
+useFractionThroughSession=[0.6 100];
+% useFractionThroughSession=[-100 100];
 plotCDFUpTo=3;
 memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,[],plotCDFUpTo);
 
@@ -440,3 +441,32 @@ end
 %% Mouse by mouse change in dprime
 
 [dfirst,dsecond]=getMouseByMouseChangeInDprime(alltbt,metadata,trialTypes,1,19,learningFigSaveDir,'.png',outlierTest,plotDprimes);
+
+%% Plot successes drops etc and dprime
+[~,ui]=unique(metadata.nth_session);
+dprimes=metadata.dprimes(ui);
+nthsess=unique(metadata.nth_session);
+success=nan(1,length(nthsess));
+drop=nan(1,length(nthsess));
+miss=nan(1,length(nthsess));
+for i=1:length(nthsess)
+    currsess=nthsess(i);
+    success(i)=nansum(trialTypes.success_in_cued_window(metadata.nth_session==currsess)==1);
+    drop(i)=nansum(trialTypes.touch_in_cued_window(metadata.nth_session==currsess)==1 & trialTypes.consumed_pellet(metadata.nth_session==currsess)==0);
+    miss(i)=nansum(trialTypes.cued_reach(metadata.nth_session==currsess)==1 & trialTypes.touched_pellet(metadata.nth_session==currsess)==0);
+end
+figure(); 
+plot(nthsess,dprimes,'Color','k'); title('dprimes');
+figure(); 
+plot(nthsess,success,'Color','g'); hold on; title('outcomes');
+plot(nthsess,drop,'Color','r');
+plot(nthsess,miss,'Color','c');
+
+%%
+figure();
+whichTrials=6:19;
+for j=1:length(whichTrials)-1
+i=whichTrials(j);
+quiver(fraction_trials_reach_in_uncued(i)/1.5,fraction_trials_reach_in_cued_window(i)/1.5,(fraction_trials_reach_in_uncued(i+1)/1.5)-(fraction_trials_reach_in_uncued(i)/1.5),(fraction_trials_reach_in_cued_window(i+1)/1.5)-(fraction_trials_reach_in_cued_window(i)/1.5),'Color',cmap(mapintocmap(j),:));
+hold on;
+end

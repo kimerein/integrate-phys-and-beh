@@ -21,7 +21,7 @@ settings.tryinc=0.02;
 % settings.try_scale1=0.6;
 % settings.try_scale2=1;  
 alignInd=6;
-downSampData2=true;
+downSampData2=false; %true;
 ds=1000;
 
 if downSampData2==true

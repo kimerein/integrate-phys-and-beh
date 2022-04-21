@@ -3,12 +3,12 @@ function [dprimes,fracs_over_sess]=plotDprimesFromReachRates(reachrates,suppress
 % settings.stopPlottingTrialsAfterN=286;
 settings.stopPlottingTrialsAfterN=10000; %2500;
 settings.binTrialsForAvAcrossSess=true;
-settings.binThisManyTrials=200; %50; %4; %10; % somehow this makes dprime bigger, SO sensitive to this
+settings.binThisManyTrials=10; %50; %200; %50; %4; %10; % somehow this makes dprime bigger, SO sensitive to this
 settings.stopPlottingBinsAfterN=60; %55;
-settings.furtherBinBins=true;
+settings.furtherBinBins=false; %true; %false; %true;
 settings.binThisManyBins=5;
 settings.plotVersusFrac=plotVersusFrac; % if is true, will plot dprime versus fraction through session instead of trial count
-settings.plotChangeInDprimes=true;
+settings.plotChangeInDprimes=false; %true;
 
 [dprimes,fracs_over_sess]=getdprimes(reachrates,settings.binThisManyTrials,settings);
 if settings.plotChangeInDprimes==true

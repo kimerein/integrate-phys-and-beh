@@ -1,4 +1,4 @@
-function data=processPhotometry(datadir)
+function data=processPhotometry(datadir,whosRig)
 
 % Kim's setup
 % first analog channel:     photodiode green channel
@@ -10,25 +10,47 @@ function data=processPhotometry(datadir)
 % seventh analog channel:   distractor
 
 % set indices to different analog inputs
-inds(1).name='green_ch'; % name of channel
-inds(1).num=1; % offset into acquired analog channel, i.e., acquisition order
-useGreenCh=true;
-inds(2).name='red_ch';
-inds(2).num=2;
-useRedCh=true;
-inds(3).name='green_mod';
-inds(3).num=3;
-inds(4).name='red_mod';
-inds(4).num=4;
-inds(5).name='opto';
-inds(5).num=5;
-inds(6).name='cue';
-inds(6).num=6;
-inds(7).name='distractor';
-inds(7).num=7;
-totalAcqChannels=7; % total number of acquired analog channels
-Fs=2000; % in Hz, sampling rate of photometry
-data.Fs=Fs;
+switch whosRig
+    case 'Kim'
+        inds(1).name='green_ch'; % name of channel
+        inds(1).num=1; % offset into acquired analog channel, i.e., acquisition order
+        useGreenCh=true;
+        inds(2).name='red_ch';
+        inds(2).num=2;
+        useRedCh=true;
+        inds(3).name='green_mod';
+        inds(3).num=3;
+        inds(4).name='red_mod';
+        inds(4).num=4;
+        inds(5).name='opto';
+        inds(5).num=5;
+        inds(6).name='cue';
+        inds(6).num=6;
+        inds(7).name='distractor';
+        inds(7).num=7;
+        totalAcqChannels=7; % total number of acquired analog channels
+        Fs=2000; % in Hz, sampling rate of photometry
+        data.Fs=Fs;
+    case 'Marci'
+        inds(1).name='green_ch'; % name of channel
+        inds(1).num=1; % offset into acquired analog channel, i.e., acquisition order
+        useGreenCh=true;
+        inds(2).name='red_ch';
+        inds(2).num=2;
+        useRedCh=true;
+        inds(3).name='green_mod';
+        inds(3).num=3;
+        inds(4).name='red_mod';
+        inds(4).num=4;
+        inds(5).name='cue';
+        inds(5).num=5;
+        inds(6).name='distractor';
+        inds(6).num=6;
+        totalAcqChannels=6; % total number of acquired analog channels
+        Fs=2000; % in Hz, sampling rate of photometry
+        data.Fs=Fs;
+end
+
 
 % Analysis approach to extract photometry transients
 settings.keepPhase='yes'; % 'yes' or 'no'
@@ -90,6 +112,11 @@ for i=1:length(inds)
     temp=data.(currname);
     temp=temp';
     data.(currname)=temp(1:end);
+end
+
+% deal with skipped samples
+if strcmp(whosRig,'Marci')
+    data=dealWithSkippedPhotometrySamples(data);
 end
 
 % process photometry
