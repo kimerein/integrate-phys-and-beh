@@ -63,7 +63,9 @@ disp(['found ' num2str(length(cueInds)) ' cues in totalalignment']);
 % matching times
 settings.photo_fs=data.Fs; % photometry data sampling rate in Hz
 tempalign1=a{1};
-settings.movie_fs=1/(mode(diff(tempalign1.timesfromarduino))/1000); % movie data sampling rate in Hz
+tempie=diff(tempalign1.timesfromarduino);
+tempie=tempie(tempie~=0);
+settings.movie_fs=1/(mode(tempie)/1000); % movie data sampling rate in Hz
 disp(['Check this. Movie data sampling rate is ' num2str(settings.movie_fs)]);
 pause;
 settings.scale_factor=floor(settings.photo_fs/settings.movie_fs);
