@@ -284,9 +284,14 @@ if typeOfReach==true
     end
     
     % check other reaches with respect to this reach type
-    [allReachesAlignedData,allReachesAlignedAt]=alignRowsToInds(behavior_tbt.reachStarts,alignInds,300,fromInputRow,false,indsFromPeak,minBaselineSamples);
+    [allReachesAlignedData,allReachesAlignedAt]=alignRowsToInds(behavior_tbt.reachStarts,alignInds,nIndsToTake,fromInputRow,false,indsFromPeak,minBaselineSamples);
     behTimesAllReaches=nanmean(behavior_tbt.times_wrt_trial_start(:,1:size(allReachesAlignedData,2)),1);
-    behTimes=nanmean(behavior_tbt.times_wrt_trial_start(:,1:size(behAligned,2)),1);
+    if size(behAligned,2)>size(behavior_tbt.times_wrt_trial_start,2)
+        behTimes=nanmean(behavior_tbt.times_wrt_trial_start,1);
+        behTimes=0:mode(diff(behTimes)):(size(behAligned,2)-1)*mode(diff(behTimes));
+    else
+        behTimes=nanmean(behavior_tbt.times_wrt_trial_start(:,1:size(behAligned,2)),1);
+    end
     [~,bmax]=nanmax(nanmean(behAligned,1));
     figure();
     plotWStderr(behAligned,behTimes,'g',[],size(behAligned,1));
@@ -295,7 +300,7 @@ if typeOfReach==true
     
     if ~isempty(plotBehField)
         % plot another behavior event aligned in same way 
-        [allReachesAlignedData,allReachesAlignedAt]=alignRowsToInds(behavior_tbt.(plotBehField),alignInds,300,fromInputRow,false,indsFromPeak,minBaselineSamples);
+        [allReachesAlignedData,allReachesAlignedAt]=alignRowsToInds(behavior_tbt.(plotBehField),alignInds,nIndsToTake,fromInputRow,false,indsFromPeak,minBaselineSamples);
         figure();
         plotWStderr(behAligned,behTimes,'g',[],size(behAligned,1));
         hold on;
@@ -327,7 +332,7 @@ if typeOfReach==true
     if isfield(behavior_tbt,'pelletDislodgedAfterSuccess')
         whichFields{length(whichFields)+1}='pelletDislodgedAfterSuccess';
     end
-    [newBehavior_tbt,allbalignedAt]=makeShiftedTbt(behavior_tbt,whichFields,alignInds,300,fromInputRow,minBaselineSamples);
+    [newBehavior_tbt,allbalignedAt]=makeShiftedTbt(behavior_tbt,whichFields,alignInds,nIndsToTake,fromInputRow,minBaselineSamples);
     newBehavior_tbt.times=behTimesAllReaches-(behTimesAllReaches(allbalignedAt)-behTimes(bmax));
     plotEventsScatter(newBehavior_tbt,fromInputRow(~isnan(fromInputRow)),'cueZone_onVoff','all_reachBatch','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts','success_reachStarts_pawOnWheel');
     
