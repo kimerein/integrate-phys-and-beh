@@ -2,8 +2,8 @@ function fixDropVSuccess
 
 % script for fixing drop vs success classifications
 
-currentVid='Z:\MICROSCOPE\Kim\WHISPER recs\Oct_B\20210402\O2 output\2021-04-02 13-34-50-C_processed_data';
-datestr='20210402';
+currentVid='Z:\MICROSCOPE\Kim\WHISPER recs\Oct_B\20210311\O2 output\2021-03-11 13-26-19-C_processed_data';
+datestr='20210310';
 mousename='Oct_B';
 
 f_pr=regexp(currentVid,'_processed_data');

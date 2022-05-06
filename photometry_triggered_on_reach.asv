@@ -9,10 +9,7 @@ chronuxPathWFindpeaks='C:\Users\sabatini\Documents\MATLAB\chronux_2_11\spectral_
 askUserIfFixedDrops=true;
 
 if askUserIfFixedDrops==true
-    answer=questdlg('Have you fixed drop v success yet?','Check','Yes, continue','No','Cancel');
-    if ~strcmp(answer,'Yes, continue')
-        return
-    end
+    answer=questdlg('Have you fixed drop v success yet?','Check','Yes, continue','No')
 end
 
 rmpath(chronuxPathWFindpeaks);

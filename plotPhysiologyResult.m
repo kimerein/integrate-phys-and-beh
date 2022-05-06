@@ -37,6 +37,7 @@ if ~isfield(behavior_tbt,'all_reachBatch')
 end
     
 cutBeforeNextCue=true; % if is true, will only plot inter-trial interval after first cue
+minITI=9; % in seconds
 alwaysRealignToCue=false;
 minITI=9; % in seconds
 behaviorCue='cueZone_onVoff';
@@ -88,7 +89,7 @@ temp=photometry_tbt.(timeField2);
 photometry_tbt.([timeField2 '_wrt_trial_start'])=temp-repmat(temp(:,1),1,size(temp,2));
 
 if strcmp(alignTo,'cue') || alwaysRealignToCue==true
-    [photometry_tbt,alignedCueTo]=realignToCue(photometry_tbt,'cue',thesePhotoFieldsUseTimeField1,timeField1,timeField2);
+    [photometry_tbt,alignedCueTo]=realignToCue(photometry_tbt,'cue',thesePhotoFieldsUseTimeField1,timeField1,timeField2,minITI);
 end
 [~,fpe]=nanmax(nanmean(behavior_tbt.cueZone_onVoff,1));
 temp=nanmean(behavior_tbt.times_wrt_trial_start,1);
@@ -708,9 +709,17 @@ end
 
 end
 
-function [data,alignedCueTo]=realignToCue(data,cueField,fieldsLikeCue,cueTimesName,otherTimesName)
+function [data,alignedCueTo]=realignToCue(data,cueField,fieldsLikeCue,cueTimesName,otherTimesName,minITI)
 
-[ma,cueInd]=nanmax(nanmean(data.(cueField),1)); % align all to this mode
+temp=nanmean(data.(cueField),1);
+[ma,cueInd]=nanmax(temp); % align all to this mode
+[~,fbeyond]=nanmin(abs(nanmean(data.('cue_times_wrt_trial_start'),1)-minITI));
+if cueInd>fbeyond
+    % cue max cannot occur after minITI
+    tempie=data.(cueField);
+    tempie(:,fbeyond:end)=0;
+    [ma,cueInd]=nanmax(nanmean(tempie,1)); % align all to this mode
+end
 cueHalfMax=ma/2;
 temp=data.(cueTimesName);
 tim=nanmean(temp-repmat(temp(:,1),1,size(temp,2)),1);
