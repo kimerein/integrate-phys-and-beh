@@ -1,6 +1,6 @@
 function [out1_alldata,out2_alldata]=studyChewingPowerAfterSuccessVsDrop(tbt,savehandles,zoneVals,eat,successReachName,dropReachName,successClassifyName,dropClassifyName,overweightFP,isCurrReachStarts,isCurrPaw)
 
-global useSVM removeOutliers
+global useSVM removeOutliers 
 
 useSVM=true;
 removeOutliers=false;

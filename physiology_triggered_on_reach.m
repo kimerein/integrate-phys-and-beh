@@ -80,7 +80,7 @@ pause;
 settings.scale_factor=floor(settings.photo_fs/settings.movie_fs);
 settings.photo_dec=settings.scale_factor-15;
 settings.movie_dec=1;
-% discard this many frames from beginning
+settings.minlagForInitialAlign=[];
 settings.maxlagForInitialAlign=[]; % [] is don't want to constrain alignment
 settings.try_delay1=0;
 settings.try_delay2=0;
@@ -707,6 +707,10 @@ end
 
 temp1=arduino_LED_ITIs./max(arduino_LED_ITIs);
 temp2=movie_LED_ITIs./max(movie_LED_ITIs);
+
+if ~isempty(settings.minlagForInitialAlign)
+    temp2=[nan(1,settings.minlagForInitialAlign) temp2];
+end
 
 if isempty(settings.maxlagForInitialAlign) 
     [X,Y,D]=alignsignals(temp1,temp2); 

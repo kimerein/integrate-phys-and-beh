@@ -53,7 +53,7 @@ indsFromPeak=5;
 downSamp=false;
 ds=100;
 maxTimeForHeatmap=9;
-nIndsToTake=1000; %nIndsToTake=200;
+nIndsToTake=300; %nIndsToTake=200;
 
 if downSamp==true
     downSampWhichFields={'cue','opto','cue_times','distractor','cuetimes_wrt_trial_start'};
@@ -337,6 +337,10 @@ if typeOfReach==true
         temp=useCombo;
     else
         temp=behavior_tbt.(useReach);
+    end
+    if ~any(any(temp))
+        disp('There are no such behavior events.');
+        return
     end
     % note that pellet is only present after cue
     timeStep=mode(diff(nanmean(behavior_tbt.times,1)));
