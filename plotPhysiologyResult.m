@@ -70,7 +70,7 @@ if downSamp==true
     end
 end
 
-thesePhotoFieldsUseTimeField1={'cue'};
+thesePhotoFieldsUseTimeField1={'cue','cuetimes_wrt_trial_start'};
 timeField1='cue_times';
 f=fieldnames(photometry_tbt);
 thesePhotoFieldsUseTimeField2={};
@@ -84,8 +84,17 @@ for i=1:length(f)
 end
 timeField2='unitTimes';
 
-temp=photometry_tbt.(timeField1);
-photometry_tbt.([timeField1 '_wrt_trial_start'])=temp-repmat(temp(:,1),1,size(temp,2));
+if strcmp(timeField1,'cue_times') 
+    if isfield(photometry_tbt,'cuetimes_wrt_trial_start')
+        photometry_tbt.([timeField1 '_wrt_trial_start'])=photometry_tbt.('cuetimes_wrt_trial_start');
+    else
+        temp=photometry_tbt.(timeField1);
+        photometry_tbt.([timeField1 '_wrt_trial_start'])=temp-repmat(temp(:,1),1,size(temp,2));
+    end
+else
+    temp=photometry_tbt.(timeField1);
+    photometry_tbt.([timeField1 '_wrt_trial_start'])=temp-repmat(temp(:,1),1,size(temp,2));
+end
 temp=photometry_tbt.(timeField2);
 photometry_tbt.([timeField2 '_wrt_trial_start'])=temp-repmat(temp(:,1),1,size(temp,2));
 
@@ -127,9 +136,13 @@ phototimes=nanmean(photometry_tbt.(getCorrectTime)-repmat(temp(:,f),1,size(temp,
 
 if cutBeforeNextCue==true
     % find second cue time
-    temp=mode(photometry_tbt.cue_times(2,2:end)-photometry_tbt.cue_times(2,1:end-1));
+    temp=mode(diff(photometry_tbt.cue_times(2,1:end)));
     if temp==0
-        temp=mode(photometry_tbt.cue_times(3,2:end)-photometry_tbt.cue_times(3,1:end-1));
+        temp=diff(photometry_tbt.cue_times(3,1:end));
+        if mode(temp)==0
+            temp(temp==0)=nan;
+            temp=mode(temp);
+        end
     end
     firstSearchInd=floor(minITI./temp);
     f=find(nanmean(photometry_tbt.cue(:,firstSearchInd:end),1)>0.01,1,'first');
@@ -177,8 +190,7 @@ typeOfReach=false;
 useCombo=false;
 switch alignTo
     case 'cue'
-        ftostart=find(~isnan(photometry_tbt.cue_times(1,:)),1,'first');
-        f_times=nanmean(photometry_tbt.cue_times-repmat(photometry_tbt.cue_times(:,ftostart),1,size(photometry_tbt.cue_times,2)),1);
+        f_times=nanmean(photometry_tbt.cue_times_wrt_trial_start,1);
         if ~isempty(hax)
             if ~isnumeric(hax{1})
                 axes(hax{1});
@@ -189,7 +201,15 @@ switch alignTo
         else
             f_heatmap=figure();
         end
-        plotTrialsAsHeatmap(photometry_tbt.(plotPhotoField),phototimes,photometry_tbt.cue,f_times,10,maxTimeForHeatmap,false);
+        if ismember(plotPhotoField,thesePhotoFieldsUseTimeField1)
+            getCorrectTime_wrtTrialStart=[timeField1 '_wrt_trial_start'];
+        elseif ismember(plotPhotoField,thesePhotoFieldsUseTimeField2)
+            getCorrectTime_wrtTrialStart=[timeField2 '_wrt_trial_start'];
+        else
+            error('Do not recognize this photometry_tbt field name.');
+        end
+        tempphototimes=nanmean(photometry_tbt.(getCorrectTime),1);
+        plotTrialsAsHeatmap(photometry_tbt.(plotPhotoField),tempphototimes,photometry_tbt.cue,f_times,10,maxTimeForHeatmap,false);
         hold on;
         plotEventsScatter(behavior_tbt,1:size(behavior_tbt.cue,1),'cueZone_onVoff','all_reachBatch','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts',[]);
         if ~isempty(hax)
@@ -202,12 +222,12 @@ switch alignTo
         else
             fout=figure();
         end
-        plotWStderr(photometry_tbt.(plotPhotoField),phototimes,'k',plotUntilInd,size(photometry_tbt.cue,1));
-        dataout.x=phototimes;
+        plotWStderr(photometry_tbt.(plotPhotoField),tempphototimes,'k',plotUntilInd,size(photometry_tbt.cue,1));
+        dataout.x=tempphototimes;
         dataout.y=photometry_tbt.(plotPhotoField);
         hold on;
         temp=photometry_tbt.(plotPhotoField);
-        plotWStderr(nanmean(photometry_tbt.cue,1)*(nanmax(nanmean(temp(:,1:plotUntilInd),1))/nanmax(nanmean(photometry_tbt.cue,1))),f_times,'b',f,size(photometry_tbt.cue,1));
+        plotWStderr(nanmean(photometry_tbt.cue,1),f_times,'b',f,size(photometry_tbt.cue,1));
         n_events_in_av=size(photometry_tbt.(plotPhotoField),1);
         alignmentCompanion.x=f_times;
         alignmentCompanion.y=photometry_tbt.cue.*nanmax(nanmean(photometry_tbt.(plotPhotoField),1));
