@@ -25,14 +25,17 @@ alignInd=6;
 ds=1000;
 
 if downSampData2==true
+    a=questdlg('Beware will downsample data2 and return downsampled. Do you want to continue? ');
+    if ~strcmp(a,'Yes')
+        return
+    end
+end
+
+if downSampData2==true
     f=fieldnames(data2);
     for i=1:length(f)
         temp=data2.(f{i});
         data2.(f{i})=downSampMatrix(temp,ds);
-    end
-    a=questdlg('Beware will downsample data2 and return downsampled. Do you want to continue? ');
-    if ~strcmp(a,'Yes')
-        return
     end
 end
 
