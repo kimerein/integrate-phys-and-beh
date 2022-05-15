@@ -2,9 +2,9 @@ function fixDropVSuccess
 
 % script for fixing drop vs success classifications
 
-currentVid='Z:\MICROSCOPE\Kim\WHISPER recs\Mar_3\20210716\O2 output\2012-02-13 00-53-30-C_processed_data';
-datestr='20210716';
-mousename='Mar_3';
+currentVid='Z:\MICROSCOPE\Kim\WHISPER recs\Oct_B\20210312\O2 output\2021-03-12 16-44-31-C_processed_data';
+datestr='20210312';
+mousename='Oct_B';
 
 f_pr=regexp(currentVid,'_processed_data');
 fslash=regexp(currentVid,'\');
