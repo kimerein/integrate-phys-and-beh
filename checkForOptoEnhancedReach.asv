@@ -1,7 +1,0 @@
-function alltbt=checkForOptoEnhancedReach(alltbt,metadata,trialTypes,reachType,)
-
-u=unique(metadata.sessid);
-for i=1:length(u)
-    currsess=u(i);
-    temp=
-end
