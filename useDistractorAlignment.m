@@ -1,4 +1,4 @@
-function [data1,data2]=useDistractorAlignment(data1,whichTime1,whichField1,data2,whichTime2,whichField2,whichToShift)
+function [data1,data2]=useDistractorAlignment(data1,whichTime1,whichField1,data2,whichTime2,whichField2,whichToShift,downSampData2)
 
 % whichToShift is either 'data1' or 'data2' -- indicates which dataset to
 % resample for alignment; other dataset will not be changed
@@ -21,7 +21,7 @@ settings.tryinc=0.02;
 % settings.try_scale1=0.6;
 % settings.try_scale2=1;  
 alignInd=6;
-downSampData2=false; %true;
+% downSampData2=true;
 ds=1000;
 
 if downSampData2==true

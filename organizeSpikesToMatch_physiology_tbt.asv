@@ -17,6 +17,9 @@ for i=1:size(physiology_tbt.phys_timepoints,1)-1
     temp_nexttrial=physiology_tbt.phys_timepoints(i+1,:);
     temp(temp==0)=nan;
     temp_nexttrial(temp_nexttrial==0)=nan;
+    if i==182 || i==183
+        pause;
+    end
     % label all spikes that belong to this trial
     spikes.trials(spikes.unwrapped_times>=nanmin(temp) & spikes.unwrapped_times<nanmin(temp_nexttrial))=i;
     % get spikes.spiketimes relative to each trial start
@@ -60,6 +63,5 @@ for i=1:size(temp,1)
         temp(i,:)=temprow;
     end
 end
-tbt.(thisFieldName)=temp;
 
 end

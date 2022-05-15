@@ -1,6 +1,6 @@
 function [out1_alldata,out2_alldata]=studyChewingPowerAfterSuccessVsDrop(tbt,savehandles,zoneVals,eat,successReachName,dropReachName,successClassifyName,dropClassifyName,overweightFP,isCurrReachStarts,isCurrPaw)
 
-global useSVM removeOutliers
+global useSVM removeOutliers 
 
 useSVM=true;
 removeOutliers=false;
@@ -105,6 +105,9 @@ for i=1:length(fi)
         [~,closest_t]=nanmin(abs(t-(frameTimes(mi)+delayTime)));
         mi=mi+delay;
     end
+    if mi>length(eatZone)
+        continue
+    end
     if closest_t+ninds_subsequent>length(eat.chewingpower)
         subsequent_chewingPower(i)=nanmean(eat.chewingpower(closest_t:end));
 %         chewFreqs(i)=nanmean(chewingFreqs(closest_t:end));
@@ -148,6 +151,9 @@ for i=1:length(fi)
     if ~isempty(delay)
         [~,closest_t]=nanmin(abs(t-(frameTimes(mi)+delayTime)));
         mi=mi+delay;
+    end
+    if mi>length(eatZone)
+        continue
     end
     if closest_t+ninds_subsequent>length(eat.chewingpower)
         subsequent_chewingPower(i)=nanmean(eat.chewingpower(closest_t:end));
@@ -226,6 +232,9 @@ for i=1:length(fi)
         [~,closest_t]=nanmin(abs(t-(frameTimes(mi)+delayTime)));
         mi=mi+delay;
     end
+    if mi>length(eatZone)
+        continue
+    end
     if closest_t+ninds_subsequent>length(eat.chewingpower)
         subsequent_chewingPower(i)=nanmean(eat.chewingpower(closest_t:end));
 %         chewFreqs(i)=nanmean(chewingFreqs(closest_t:end));
@@ -282,6 +291,9 @@ for i=1:length(fi)
     if ~isempty(delay)
         [~,closest_t]=nanmin(abs(t-(frameTimes(mi)+delayTime)));
         mi=mi+delay;
+    end
+    if mi>length(eatZone)
+        continue
     end
     if closest_t+ninds_subsequent>length(eat.chewingpower)
         subsequent_chewingPower(i)=nanmean(eat.chewingpower(closest_t:end));
