@@ -41,6 +41,7 @@ indsFromPeak=5;
 downSamp=false;
 ds=1;
 maxTimeForHeatmap=9;
+takeIndsBeforeEvent=100;
 
 if downSamp==true
     f=fieldnames(photometry_tbt);
@@ -182,6 +183,15 @@ switch alignTo
             plotBehFieldOut.x=nanmean(behavior_tbt.times_wrt_trial_start,1);
             plotBehFieldOut.y=behavior_tbt.(plotBehField);
         end
+    case 'distractor'
+        temp=behavior_tbt.movie_distractor;
+        temp=temp>0.5;
+        tempdiff=diff(temp,1,2);
+        tempdiff(tempdiff~=1)=0;
+        behavior_tbt.distractorStarts=tempdiff;
+        typeOfReach=true;
+        useReach='combo';
+        useCombo=behavior_tbt.distractorStarts;
     case 'success_fromPerchOrWheel'
         typeOfReach=true;
         useReach='combo';
@@ -267,11 +277,17 @@ if typeOfReach==true
     end
     alignTimes=getValsFromRows(behavior_tbt.times_wrt_trial_start,alignInds,fromInputRow);
     indsIntoPhoto=getIndsFromRows(photometry_tbt.(getCorrectTime_wrtTrialStart),alignTimes,fromInputRow);
-    [alignedData,alignedAt]=alignRowsToInds(photometry_tbt.(plotPhotoField),indsIntoPhoto,nanmin(indsIntoPhoto),fromInputRow,alignPeaks,indsFromPeak);
+%     [alignedData,alignedAt]=alignRowsToInds(photometry_tbt.(plotPhotoField),indsIntoPhoto,nanmin(indsIntoPhoto),fromInputRow,alignPeaks,indsFromPeak);
+    [alignedData,alignedAt]=alignRowsToInds(photometry_tbt.(plotPhotoField),indsIntoPhoto,takeIndsBeforeEvent,fromInputRow,alignPeaks,indsFromPeak);
     
     % check other reaches with respect to this reach type
-    [allReachesAlignedData,allReachesAlignedAt]=alignRowsToInds(behavior_tbt.reachStarts,alignInds,300,fromInputRow,false,indsFromPeak);
-    behTimesAllReaches=nanmean(behavior_tbt.times_wrt_trial_start(:,1:size(allReachesAlignedData,2)),1);
+    [allReachesAlignedData,allReachesAlignedAt]=alignRowsToInds(behavior_tbt.reachStarts,alignInds,takeIndsBeforeEvent,fromInputRow,false,indsFromPeak);
+    if size(allReachesAlignedData,2)>size(behavior_tbt.times_wrt_trial_start,2)
+        modeForBehTimes=mode(diff(nanmean(behavior_tbt.times_wrt_trial_start,1)));
+        behTimesAllReaches=0:modeForBehTimes:(size(allReachesAlignedData,2)-1)*modeForBehTimes;
+    else
+        behTimesAllReaches=nanmean(behavior_tbt.times_wrt_trial_start(:,1:size(allReachesAlignedData,2)),1);
+    end
     behTimes=nanmean(behavior_tbt.times_wrt_trial_start(:,1:size(behAligned,2)),1);
     [~,bmax]=nanmax(nanmean(behAligned,1));
     figure();
@@ -281,7 +297,7 @@ if typeOfReach==true
     
     if ~isempty(plotBehField)
         % plot another behavior event aligned in same way 
-        [allReachesAlignedData,allReachesAlignedAt]=alignRowsToInds(behavior_tbt.(plotBehField),alignInds,300,fromInputRow,false,indsFromPeak);
+        [allReachesAlignedData,allReachesAlignedAt]=alignRowsToInds(behavior_tbt.(plotBehField),alignInds,takeIndsBeforeEvent,fromInputRow,false,indsFromPeak);
         figure();
         plotWStderr(behAligned,behTimes,'g',[],size(behAligned,1));
         hold on;
@@ -313,7 +329,7 @@ if typeOfReach==true
     if isfield(behavior_tbt,'pelletDislodgedAfterSuccess')
         whichFields{length(whichFields)+1}='pelletDislodgedAfterSuccess';
     end
-    [newBehavior_tbt,allbalignedAt]=makeShiftedTbt(behavior_tbt,whichFields,alignInds,300,fromInputRow);
+    [newBehavior_tbt,allbalignedAt]=makeShiftedTbt(behavior_tbt,whichFields,alignInds,takeIndsBeforeEvent,fromInputRow);
     newBehavior_tbt.times=behTimesAllReaches-(behTimesAllReaches(allbalignedAt)-behTimes(bmax));
     plotEventsScatter(newBehavior_tbt,fromInputRow(~isnan(fromInputRow)),'cueZone_onVoff','all_reachBatch','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts','success_reachStarts_pawOnWheel');
     
@@ -674,10 +690,11 @@ end
 function [alignedData,alignedAt]=alignRowsToInds(data,alignTo,indsBeforeAlign,fromInputRow,alignPeaks,withinInds)
 
 mi=nanmin(alignTo);
-if indsBeforeAlign>=mi
-    indsBeforeAlign=mi-1;
-end
+% if indsBeforeAlign>=mi
+%     indsBeforeAlign=mi-1;
+% end
 alignedData=nan(length(alignTo),indsBeforeAlign+size(data,2)-mi);
+% alignedData=nan(length(alignTo),indsBeforeAlign+size(data,2));
 for i=1:length(alignTo)
     if isnan(alignTo(i))
         continue
@@ -689,7 +706,11 @@ for i=1:length(alignTo)
         %newf=find(peaksAreIn(alignTo(i)-withinInds:alignTo(i)+withinInds)>=pe/2,1,'first');
         alignTo(i)=alignTo(i)-1+newf;
     end
-    alignedData(i,1:length(data(fromInputRow(i),alignTo(i)-indsBeforeAlign:end)))=data(fromInputRow(i),alignTo(i)-indsBeforeAlign:end);
+    if alignTo(i)-indsBeforeAlign<1
+        alignedData(i,1:length([nan(1,abs(alignTo(i)-indsBeforeAlign)) data(fromInputRow(i),1:end)]))=[nan(1,abs(alignTo(i)-indsBeforeAlign)) data(fromInputRow(i),1:end)];
+    else
+        alignedData(i,1:length(data(fromInputRow(i),alignTo(i)-indsBeforeAlign:end)))=data(fromInputRow(i),alignTo(i)-indsBeforeAlign:end);
+    end
 end
 alignedAt=indsBeforeAlign+1;
 
