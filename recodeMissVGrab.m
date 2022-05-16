@@ -1,9 +1,9 @@
 function recodeMissVGrab
 
-currentVid='Z:\MICROSCOPE\Kim\WHISPER recs\Oct_B\20210312\O2 output\2021-03-12 16-44-31-C_processed_data';
-datestr='20210312';
-mousename='Oct_B';
-timeForDislodged=0.35;
+currentVid='Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210311\O2 output\2021-03-11 16-57-29-C_processed_data';
+datestr='20210311';
+mousename='dLight1';
+timeForDislodged=0.4;
 
 f_pr=regexp(currentVid,'_processed_data');
 fslash=regexp(currentVid,'\');
@@ -99,6 +99,8 @@ tbt=adjustTbtUsingThresh(movieframeinds,tbt,~missType,false,finaldata);
 % For reaches where paw does start on wheel
 [missType,movieframeinds]=whetherPelletDislodged(finaldata,'miss_reachStarts_pawOnWheel',indsForDislodged);
 tbt=adjustTbtUsingThresh(movieframeinds,tbt,~missType,true,finaldata);
+
+tbt=addReachBatchesToSingleTbt(tbt,'cueZone_onVoff',0.25,0,[]);
 
 % double check drops and successes
 [missType,movieframeinds]=whetherPelletDislodged(finaldata,'success_reachStarts',indsForDislodged);
