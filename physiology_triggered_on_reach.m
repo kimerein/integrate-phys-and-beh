@@ -406,11 +406,11 @@ minITI=settings.minITI; % in seconds, minimal ITI
 % Get time delay
 timeIncs=diff(data.timesfromarduino(data.timesfromarduino~=0));
 mo=mode(timeIncs);
+bettermode=mo;
 if mo==0
     timeIncs(timeIncs==mo)=nan;
     bettermode=mode(timeIncs); % in ms
 end
-bettermode=mo;
 bettermode=bettermode/1000; % in seconds
 
 % Fix aliasing issues with resampled data
