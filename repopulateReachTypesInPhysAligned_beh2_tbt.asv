@@ -1,0 +1,19 @@
+function repopulateReachTypesInPhysAligned_beh2_tbt(fixedtbt,beh2_tbt)
+
+reachTypeFieldNames={'success_reachStarts',};
+
+[fixedtbt,beh2_tbt]=commonReference_usingDistractor(fixedtbt,beh2_tbt,'movie_distractor');
+
+% reference_into field refers to which row of other behavior tbt
+
+% for each row of fixedtbt, repopulate rows of beh2_tbt
+for i=1:size(fixedtbt.reference_into_beh2trialinds,1)
+    rowInOtherBehTbt=fixedtbt.reference_into_beh2trialinds(i,1);
+    if isnan(rowInOtherBehTbt)
+        continue
+    end
+    % repopulate all reach types
+
+end
+
+end

@@ -1,6 +1,6 @@
 function recodeMissVGrab
 
-currentVid='Z:\MICROSCOPE\Kim\WHISPER recs\Oct_B\20210312\O2 output\2021-03-12 17-14-19-C_processed_data';
+currentVid='Z:\MICROSCOPE\Kim\WHISPER recs\Oct_B\20210312\O2 output\2021-03-12 16-44-31-C_processed_data';
 datestr='20210312';
 mousename='Oct_B';
 timeForDislodged=0.35;
