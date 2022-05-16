@@ -142,6 +142,8 @@ if cutBeforeNextCue==true
         if mode(temp)==0
             temp(temp==0)=nan;
             temp=mode(temp);
+        else
+            temp=mode(temp);
         end
     end
     firstSearchInd=floor(minITI./temp);
