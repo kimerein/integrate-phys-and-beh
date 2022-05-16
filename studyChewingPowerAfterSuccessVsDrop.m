@@ -106,6 +106,13 @@ for i=1:length(fi)
         mi=mi+delay;
     end
     if mi>length(eatZone)
+        out.chewingPower(i)=nan;
+        out.chewingDuration(i)=nan;
+        out.rawIntensity(i)=nan;
+        %         out.chewFreqs(i)=chewFreqs(i);
+        out.movieFrameInds(i)=currmovieind;
+        out.isCurrReachStart(i)=useCurrReachBecauseReachStarts;
+        out.isCurrReachPaw(i)=useCurrReachPaw;
         continue
     end
     if closest_t+ninds_subsequent>length(eat.chewingpower)
@@ -153,6 +160,13 @@ for i=1:length(fi)
         mi=mi+delay;
     end
     if mi>length(eatZone)
+        out.drop_chewingPower(i)=nan;
+        out.drop_chewingDuration(i)=nan;
+        out.drop_rawIntensity(i)=nan;
+        %         out.chewFreqs(i)=chewFreqs(i);
+        out.drop_movieFrameInds(i)=currmovieind;
+        out.drop_isCurrReachStart(i)=useCurrReachBecauseReachStarts;
+        out.drop_isCurrReachPaw(i)=useCurrReachPaw;
         continue
     end
     if closest_t+ninds_subsequent>length(eat.chewingpower)
@@ -233,6 +247,13 @@ for i=1:length(fi)
         mi=mi+delay;
     end
     if mi>length(eatZone)
+        out.chewingPower(i)=nan;
+        out.chewingDuration(i)=nan;
+        out.rawIntensity(i)=nan;
+        %         out.chewFreqs(i)=chewFreqs(i);
+        out.movieFrameInds(i)=currmovieind;
+        out.isCurrReachStart(i)=useCurrReachBecauseReachStarts;
+        out.isCurrReachPaw(i)=useCurrReachPaw;
         continue
     end
     if closest_t+ninds_subsequent>length(eat.chewingpower)
@@ -293,6 +314,13 @@ for i=1:length(fi)
         mi=mi+delay;
     end
     if mi>length(eatZone)
+        out.drop_chewingPower(i)=nan;
+        out.drop_chewingDuration(i)=nan;
+        out.drop_rawIntensity(i)=nan;
+        %         out.chewFreqs(i)=chewFreqs(i);
+        out.drop_movieFrameInds(i)=currmovieind;
+        out.drop_isCurrReachStart(i)=useCurrReachBecauseReachStarts;
+        out.drop_isCurrReachPaw(i)=useCurrReachPaw;
         continue
     end
     if closest_t+ninds_subsequent>length(eat.chewingpower)

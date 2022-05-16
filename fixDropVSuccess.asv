@@ -10,20 +10,15 @@ if isempty(varargin)
     fslash=regexp(currentVid,'\');
     aviName=currentVid(fslash(end)+1:f_pr-1);
     placeForO2data=['Z:\MICROSCOPE\Kim\WHISPER recs\' mousename '\' datestr '\O2 output\' aviName];
-    usePreviousChewingThresh=false;
 else
     if length(varargin)==2
         currentVid=varargin{1};
         placeForO2data=varargin{2};
-        usePreviousChewingThresh=true;
     end 
     % check for whether have already run this code, in which case use
     % existing chewing threshold
-    if exist([currentVid '\fixed_tbt_success_v_drop.txt'],'file')
-        disp('using previously set chewing threshold');
-    else
-        usePreviousChewingThresh=false;
-    end
+    
+    disp('using previously set chewing threshold');
 end
 
 load([currentVid '\tbt.mat'])
@@ -32,7 +27,7 @@ load([currentVid '\final_aligned_data.mat'])
 load([placeForO2data '_zoneVals.mat'])
 load([placeForO2data '_eat.mat'])
 load([placeForO2data '_savehandles.mat'])
-newtbt=postAnalysis_checkForChewedPellet(tbt,alignment,savehandles,zoneVals,eat,usePreviousChewingThresh);
+newtbt=postAnalysis_checkForChewedPellet(tbt,alignment,savehandles,zoneVals,eat);
 newtbt=addReachBatchesToSingleTbt(newtbt,'cueZone_onVoff',0.25,0,[]);
 tbt=newtbt;
 

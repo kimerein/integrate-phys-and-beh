@@ -1,8 +1,9 @@
 function recodeMissVGrab
 
-currentVid='Z:\MICROSCOPE\Kim\WHISPER recs\Oct_B\20210312\O2 output\2021-03-12 16-44-31-C_processed_data';
+currentVid='Z:\MICROSCOPE\Kim\WHISPER recs\Oct_B\20210312\O2 output\2021-03-12 17-14-19-C_processed_data';
 datestr='20210312';
 mousename='Oct_B';
+timeForDislodged=0.35;
 
 f_pr=regexp(currentVid,'_processed_data');
 fslash=regexp(currentVid,'\');
@@ -12,29 +13,69 @@ placeForO2data=['Z:\MICROSCOPE\Kim\WHISPER recs\' mousename '\' datestr '\O2 out
 load([currentVid '\tbt.mat'])
 backuptbt=tbt;
 load([currentVid '\final_aligned_data.mat'])
-load([placeForO2data '_zoneVals.mat'])
-load([placeForO2data '_eat.mat'])
-load([placeForO2data '_savehandles.mat'])
-load([placeForO2data '_paw.mat'])
-newtbt=postAnalysis_checkForPelletDislodged(tbt,alignment,savehandles,zoneVals,eat);
+ti=mode(diff(alignment.timesfromarduino));
+if ti==0
+    temp=diff(alignment.timesfromarduino);
+    temp(temp==0)=nan;
+    ti=mode(temp);
+end
+ti=ti/1000;
+indsForDislodged=ceil(timeForDislodged/ti);
+disp(['will allow ' num2str(timeForDislodged) ' sec for mouse to dislodge pellet / ' num2str(indsForDislodged) ' indices']);
+newtbt=postAnalysis_checkForPelletDislodged(tbt,alignment,indsForDislodged);
 newtbt=addReachBatchesToSingleTbt(newtbt,'cueZone_onVoff',0.25,0,[]);
 tbt=newtbt;
 
 save([currentVid '\backuptbt.mat'],'backuptbt');
 save([currentVid '\tbt.mat'],'tbt');
-
-% if have already fixed success v drop, recode all reaches using success v
-% drop threshold
-
-
 fid=fopen([currentVid '\fixed_miss_v_grab.txt'],'wt');
 fclose(fid);
 
+% if have already fixed success v drop, recode all reaches using success v
+% drop threshold
+fixDropVSuccess(currentVid,placeForO2data);
+
 end
 
-function [tbt,finaldata]=postAnalysis_checkForPelletDislodged(tbt,finaldata,savehandles,zoneVals,eat)
+function [missType,movieframeinds]=whetherPelletDislodged(finaldata,whichfield,indsForDislodged)
 
-fps=settings.movie_fps;
+temp=finaldata.(whichfield);
+temp(temp>0.5)=1;
+misses=find(temp>0.5);
+reachEnds=finaldata.reachEnds;
+missType=zeros(size(misses));
+movieframeinds=nan(size(misses));
+for i=1:length(misses)
+    % for each miss, check whether pellet dislodged within indsForDislodged
+    % find closest subsequent reachEnd
+    fend=find(reachEnds(misses(i):end)>0.5,1,'first')+misses(i)-1;
+    movieframeinds(i)=finaldata.movieframeinds(misses(i));
+    if isempty(fend)
+        disp('could not find end of reach');
+        fend=length(reachEnds);
+    end
+    if fend+indsForDislodged>length(finaldata.pelletPresent)
+        if all(finaldata.pelletPresent(fend+1:end)>0.5)
+            % mouse did not move pellet, so miss
+            missType(i)=true;
+        else
+            % mouse did move pellet, so grab
+            missType(i)=false;
+        end
+    else
+        if all(finaldata.pelletPresent(fend+1:fend+indsForDislodged)>0.5)
+            % mouse did not move pellet, so miss
+            missType(i)=true;
+        else
+            % mouse did move pellet, so grab
+            missType(i)=false;
+        end
+    end
+end
+
+end
+
+function [tbt,finaldata]=postAnalysis_checkForPelletDislodged(tbt,finaldata,indsForDislodged)
 
 % Fix any reach values below 1
 tbt=setAllAbove0to1(tbt,'reach');
@@ -52,85 +93,24 @@ end
 % If pellet is dislodged within 10 indices of end of reach start, then
 % consider this a grab rather than a miss
 % get all misses
-temp=find(finaldata.)
-
-
-
-
-% If want to start by considering every potential reach a success, then
-% will trim accordingly
-finaldata.success_reachStarts=(finaldata.success_reachStarts_backup + finaldata.drop_reachStarts_backup) > 0.5;
-
 % First for reaches where paw does not start on wheel
-finaldata.success_reachStarts_backup=finaldata.success_reachStarts;
-[finaldata.success_reachStarts,newDrops,tbt]=checkForSufficientChewing(finaldata.success_reachStarts,finaldata.isChewing,minIndToPelletChew,withinXInds,dropIfChewingBefore,priorXInds,minIndMoreStringent,finaldata,tbt,finaldata.flippedThese,false);
-finaldata.drop_reachStarts_backup=finaldata.drop_reachStarts;
-finaldata.drop_reachStarts(newDrops==1)=1;
-
+[missType,movieframeinds]=whetherPelletDislodged(finaldata,'miss_reachStarts',indsForDislodged);
+tbt=adjustTbtUsingThresh(movieframeinds,tbt,~missType,false,finaldata);
 % For reaches where paw does start on wheel
-finaldata.success_reachStarts_pawOnWheel_backup=finaldata.success_reachStarts_pawOnWheel;
-[finaldata.success_reachStarts_pawOnWheel,newDrops,tbt]=checkForSufficientChewing(finaldata.success_reachStarts_pawOnWheel,finaldata.isChewing,minIndToPelletChew,withinXInds,dropIfChewingBefore,priorXInds,minIndMoreStringent,finaldata,tbt,finaldata.flippedThese_pawOnWheel,true);
-finaldata.drop_reachStarts_pawOnWheel_backup=finaldata.drop_reachStarts_pawOnWheel;
-finaldata.drop_reachStarts_pawOnWheel(newDrops==1)=1;
+[missType,movieframeinds]=whetherPelletDislodged(finaldata,'miss_reachStarts_pawOnWheel',indsForDislodged);
+tbt=adjustTbtUsingThresh(movieframeinds,tbt,~missType,true,finaldata);
 
-% Chewing power and duration thresholds
-disp('Plotting which duration and power thresholds distinguish drop vs success');
-% tbt.currentclassifysuccess=(tbt.('success_reachStarts_backup') + tbt.('success_reachStarts_pawOnWheel_backup')) > 0.5;
-% tbt.currentclassifydrop=(tbt.('drop_reachStarts_backup') + tbt.('drop_reachStarts_pawOnWheel_backup')) > 0.5;
-tbt.currentclassifysuccess=(tbt.('success_reachStarts') + tbt.('success_reachStarts_pawOnWheel')) > 0.5;
-tbt.currentclassifydrop=(tbt.('drop_reachStarts') + tbt.('drop_reachStarts_pawOnWheel')) > 0.5;
-if isfield(tbt,'all_reachBatch')
-    tbt.currentstudysuccess=(tbt.('success_reachStarts') + tbt.('reachBatch_success_reachStarts') + tbt.('success_reachStarts_pawOnWheel') + tbt.('reachBatch_success_reachStarts_pawOnWheel')) > 0.5;
-    tbt.currentstudydrop=(tbt.('drop_reachStarts') + tbt.('reachBatch_drop_reachStarts') + tbt.('drop_reachStarts_pawOnWheel') + tbt.('reachBatch_drop_reachStarts_pawOnWheel')) > 0.5;
-else
-    tbt.currentstudysuccess=(tbt.('success_reachStarts') + tbt.('success_reachStarts_pawOnWheel')) > 0.5;
-    tbt.currentstudydrop=(tbt.('drop_reachStarts') + tbt.('drop_reachStarts_pawOnWheel')) > 0.5;
-end
-whichIsReachStarts_noPawOnWheel=tbt.('success_reachStarts')>0.5;
-whichIsReachStarts_PawOnWheel=tbt.('success_reachStarts_pawOnWheel')>0.5;
-[out1,out2]=studyChewingPowerAfterSuccessVsDrop(tbt,savehandles,zoneVals,eat,'currentstudysuccess','currentstudydrop','currentclassifysuccess','currentclassifydrop',overweightFP,whichIsReachStarts_noPawOnWheel,whichIsReachStarts_PawOnWheel);
-chewingPower=out1.chewingPower(out1.isCurrReachStart==1);
-chewingDuration=out1.chewingDuration(out1.isCurrReachStart==1);
-rawIntensity=out1.rawIntensity(out1.isCurrReachStart==1);
-if isempty(out1.predictions)
-    tbt=rmfield(tbt,'currentstudysuccess');
-    tbt=rmfield(tbt,'currentstudydrop');
-    tbt=rmfield(tbt,'currentclassifysuccess');
-    tbt=rmfield(tbt,'currentclassifydrop');
-    return
-end
-predictions=out1.predictions(out1.isCurrReachStart==1);
-currmovieFrameInds=out1.movieFrameInds(out1.isCurrReachStart==1);
-s1=eval(out1.threshold);
-nopawonwheel_thresh1=out1.threshold;
-chewingPower=out2.chewingPower(out2.isCurrReachStart==1);
-chewingDuration=out2.chewingDuration(out2.isCurrReachStart==1);
-predictions=out2.predictions(out2.isCurrReachStart==1);
-s2=eval(out2.threshold);
-nopawonwheel_thresh2=out2.threshold;
-theseAreSuccess=s1 & s2;
-maybeDropMaybeSuccess=s1~=s2;
-% disp([out1.movieFrameInds(out1.isCurrReachStart==1)' out2.movieFrameInds(out2.isCurrReachStart==1)'])
-tbt=adjustTbtUsingThresh(currmovieFrameInds,tbt,theseAreSuccess,false,finaldata,maybeDropMaybeSuccess);
-
-chewingPower=out1.chewingPower(out1.isCurrReachPaw==1);
-chewingDuration=out1.chewingDuration(out1.isCurrReachPaw==1);
-rawIntensity=out1.rawIntensity(out1.isCurrReachPaw==1);
-predictions=out1.predictions(out1.isCurrReachPaw==1);
-currmovieFrameInds=out1.movieFrameInds(out1.isCurrReachPaw==1);
-s1=eval(out1.threshold);
-chewingPower=out2.chewingPower(out2.isCurrReachPaw==1);
-chewingDuration=out2.chewingDuration(out2.isCurrReachPaw==1);
-predictions=out2.predictions(out2.isCurrReachPaw==1);
-s2=eval(out2.threshold);
-theseAreSuccess=s1 & s2;
-maybeDropMaybeSuccess=s1~=s2;
-tbt=adjustTbtUsingThresh(currmovieFrameInds,tbt,theseAreSuccess,true,finaldata,maybeDropMaybeSuccess);
-
-tbt=rmfield(tbt,'currentstudysuccess');
-tbt=rmfield(tbt,'currentstudydrop');
-tbt=rmfield(tbt,'currentclassifysuccess');
-tbt=rmfield(tbt,'currentclassifydrop');
+% double check drops and successes
+[missType,movieframeinds]=whetherPelletDislodged(finaldata,'success_reachStarts',indsForDislodged);
+tbt=adjustTbtUsingThresh(movieframeinds,tbt,~missType,false,finaldata);
+% For reaches where paw does start on wheel
+[missType,movieframeinds]=whetherPelletDislodged(finaldata,'success_reachStarts_pawOnWheel',indsForDislodged);
+tbt=adjustTbtUsingThresh(movieframeinds,tbt,~missType,true,finaldata);
+[missType,movieframeinds]=whetherPelletDislodged(finaldata,'drop_reachStarts',indsForDislodged);
+tbt=adjustTbtUsingThresh(movieframeinds,tbt,~missType,false,finaldata);
+% For reaches where paw does start on wheel
+[missType,movieframeinds]=whetherPelletDislodged(finaldata,'drop_reachStarts_pawOnWheel',indsForDislodged);
+tbt=adjustTbtUsingThresh(movieframeinds,tbt,~missType,true,finaldata);
 
 end
 
@@ -210,7 +190,6 @@ for i=1:length(movieframes)
         if theseAreSuccess(i)==true % if mouse actually grabbed pellet
             % is grab
             % make sure that tbt says success
-            [~,movind]=nanmin(abs(finaldata.movieframeinds-movieframe));
             if isPawOnWheel==true
                 tbt.success_reachStarts_pawOnWheel(a,b)=1;
                 tbt.miss_reachStarts_pawOnWheel(a,b)=0;
@@ -220,6 +199,15 @@ for i=1:length(movieframes)
             end
         else
             % is actually a miss
+            if isPawOnWheel==true
+                tbt.success_reachStarts_pawOnWheel(a,b)=0;
+                tbt.drop_reachStarts_pawOnWheel(a,b)=0;
+                tbt.miss_reachStarts_pawOnWheel(a,b)=1;
+            else
+                tbt.success_reachStarts(a,b)=0;
+                tbt.drop_reachStarts(a,b)=0;
+                tbt.miss_reachStarts(a,b)=1;
+            end
         end
     end  
 end

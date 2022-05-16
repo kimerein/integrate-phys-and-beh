@@ -1,4 +1,4 @@
-function [tbt,finaldata]=postAnalysis_checkForChewedPellet(tbt,finaldata,savehandles,zoneVals,eat)
+function [tbt,finaldata]=postAnalysis_checkForChewedPellet(tbt,finaldata,savehandles,zoneVals,eat,usePreviousChewingThresh)
 
 overweightFP=6.5; 
 % overweightFP=1; 
@@ -55,8 +55,12 @@ if removeZscore==true
 else
     useRed=[];
 end
-newchewthresh=input(['Enter new chewing threshold or empty to keep current thresh. ' useRed]);
-if isempty(newchewthresh)
+if usePreviousChewingThresh==false
+    newchewthresh=input(['Enter new chewing threshold or empty to keep current thresh. ' useRed]);
+else
+    newchewthresh=[];
+end
+if isempty(newchewthresh) || usePreviousChewingThresh==true
     changedChewThresh=false;
 else
     changedChewThresh=true;
