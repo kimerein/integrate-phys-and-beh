@@ -6,6 +6,17 @@ overweightFP=6.5;
 % false positives will count overweightFP times more than true positives
 % useThreshFromNoPawOnWheel=true; % if true, apply threshold from no paw on wheel reaches to paw on wheel reaches
 removeZscore=true;
+userSetsThresh=false;
+userThresh=2.5*10^5;
+if userSetsThresh==true
+    ans=questdlg('User sets thresh ... continue?');
+    if ~strcmp(ans,'Yes')
+        return
+    end
+end
+
+settings.chew.minTimeToChewPellet=1;
+settings.chew.minTimeToChew_afterReach=2;
 
 settings=autoReachAnalysisSettings();
 disp(['priorToReach_chewWindow is ' num2str(settings.chew.priorToReach_chewWindow)]);
@@ -55,13 +66,12 @@ if removeZscore==true
 else
     useRed=[];
 end
-if usePreviousChewingThresh==true
-    % deduce previously used chewing threshold
-    
-else
+if usePreviousChewingThresh==false
     newchewthresh=input(['Enter new chewing threshold or empty to keep current thresh. ' useRed]);
+else
+    newchewthresh=[];
 end
-if isempty(newchewthresh)
+if isempty(newchewthresh) || usePreviousChewingThresh==true
     changedChewThresh=false;
 else
     changedChewThresh=true;
@@ -155,6 +165,9 @@ s2=eval(out2.threshold);
 nopawonwheel_thresh2=out2.threshold;
 theseAreSuccess=s1 & s2;
 maybeDropMaybeSuccess=s1~=s2;
+if userSetsThresh
+    theseAreSuccess=rawIntensity > userThresh;
+end
 % disp([out1.movieFrameInds(out1.isCurrReachStart==1)' out2.movieFrameInds(out2.isCurrReachStart==1)'])
 tbt=adjustTbtUsingThresh(currmovieFrameInds,tbt,theseAreSuccess,false,finaldata,maybeDropMaybeSuccess);
 
@@ -170,6 +183,9 @@ predictions=out2.predictions(out2.isCurrReachPaw==1);
 s2=eval(out2.threshold);
 theseAreSuccess=s1 & s2;
 maybeDropMaybeSuccess=s1~=s2;
+if userSetsThresh
+    theseAreSuccess=rawIntensity > userThresh;
+end
 tbt=adjustTbtUsingThresh(currmovieFrameInds,tbt,theseAreSuccess,true,finaldata,maybeDropMaybeSuccess);
 
 tbt=rmfield(tbt,'currentstudysuccess');

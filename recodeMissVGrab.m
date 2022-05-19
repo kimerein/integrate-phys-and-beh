@@ -1,7 +1,7 @@
 function recodeMissVGrab
 
-currentVid='Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210311\O2 output\2021-03-11 17-27-16-C_processed_data';
-datestr='20210311';
+currentVid='Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210319\O2 output\2021-03-19 11-26-13-C_processed_data';
+datestr='20210319';
 mousename='dLight1';
 timeForDislodged=0.4;
 
@@ -22,7 +22,7 @@ end
 ti=ti/1000;
 indsForDislodged=ceil(timeForDislodged/ti);
 disp(['will allow ' num2str(timeForDislodged) ' sec for mouse to dislodge pellet / ' num2str(indsForDislodged) ' indices']);
-newtbt=postAnalysis_checkForPelletDislodged(tbt,alignment,indsForDislodged);
+[newtbt,alignment]=postAnalysis_checkForPelletDislodged(tbt,alignment,indsForDislodged);
 newtbt=addReachBatchesToSingleTbt(newtbt,'cueZone_onVoff',0.25,0,[]);
 tbt=newtbt;
 
@@ -33,13 +33,14 @@ fclose(fid);
 
 % if have already fixed success v drop, recode all reaches using success v
 % drop threshold
-fixDropVSuccess(currentVid,placeForO2data);
+fixDropVSuccess(currentVid,placeForO2data,alignment);
 
 end
 
-function [missType,movieframeinds]=whetherPelletDislodged(finaldata,whichfield,indsForDislodged)
+function [missType,movieframeinds,newGrabs]=whetherPelletDislodged(finaldata,whichfield,indsForDislodged)
 
 temp=finaldata.(whichfield);
+newGrabs=zeros(size(finaldata.(whichfield)));
 temp(temp>0.5)=1;
 misses=find(temp>0.5);
 reachEnds=finaldata.reachEnds;
@@ -58,17 +59,21 @@ for i=1:length(misses)
         if all(finaldata.pelletPresent(fend+1:end)>0.5)
             % mouse did not move pellet, so miss
             missType(i)=true;
+            newGrabs(misses(i))=0;
         else
             % mouse did move pellet, so grab
             missType(i)=false;
+            newGrabs(misses(i))=1;
         end
     else
         if all(finaldata.pelletPresent(fend+1:fend+indsForDislodged)>0.5)
             % mouse did not move pellet, so miss
             missType(i)=true;
+            newGrabs(misses(i))=0;
         else
             % mouse did move pellet, so grab
             missType(i)=false;
+            newGrabs(misses(i))=1;
         end
     end
 end
@@ -94,24 +99,28 @@ end
 % consider this a grab rather than a miss
 % get all misses
 % First for reaches where paw does not start on wheel
-[missType,movieframeinds]=whetherPelletDislodged(finaldata,'miss_reachStarts',indsForDislodged);
+[missType,movieframeinds,newGrabs]=whetherPelletDislodged(finaldata,'miss_reachStarts',indsForDislodged);
+finaldata.miss_reachStarts(newGrabs==1)=0;
+finaldata.success_reachStarts(newGrabs==1)=1; % converts misses to successes
 tbt=adjustTbtUsingThresh(movieframeinds,tbt,~missType,false,finaldata);
 % For reaches where paw does start on wheel
-[missType,movieframeinds]=whetherPelletDislodged(finaldata,'miss_reachStarts_pawOnWheel',indsForDislodged);
+[missType,movieframeinds,newGrabs]=whetherPelletDislodged(finaldata,'miss_reachStarts_pawOnWheel',indsForDislodged);
+finaldata.miss_reachStarts_pawOnWheel(newGrabs==1)=0;
+finaldata.success_reachStarts_pawOnWheel(newGrabs==1)=1;
 tbt=adjustTbtUsingThresh(movieframeinds,tbt,~missType,true,finaldata);
 
 tbt=addReachBatchesToSingleTbt(tbt,'cueZone_onVoff',0.25,0,[]);
 
 % double check drops and successes
-[missType,movieframeinds]=whetherPelletDislodged(finaldata,'success_reachStarts',indsForDislodged);
+[missType,movieframeinds,newGrabs]=whetherPelletDislodged(finaldata,'success_reachStarts',indsForDislodged);
 tbt=adjustTbtUsingThresh(movieframeinds,tbt,~missType,false,finaldata);
 % For reaches where paw does start on wheel
-[missType,movieframeinds]=whetherPelletDislodged(finaldata,'success_reachStarts_pawOnWheel',indsForDislodged);
+[missType,movieframeinds,newGrabs]=whetherPelletDislodged(finaldata,'success_reachStarts_pawOnWheel',indsForDislodged);
 tbt=adjustTbtUsingThresh(movieframeinds,tbt,~missType,true,finaldata);
-[missType,movieframeinds]=whetherPelletDislodged(finaldata,'drop_reachStarts',indsForDislodged);
+[missType,movieframeinds,newGrabs]=whetherPelletDislodged(finaldata,'drop_reachStarts',indsForDislodged);
 tbt=adjustTbtUsingThresh(movieframeinds,tbt,~missType,false,finaldata);
 % For reaches where paw does start on wheel
-[missType,movieframeinds]=whetherPelletDislodged(finaldata,'drop_reachStarts_pawOnWheel',indsForDislodged);
+[missType,movieframeinds,newGrabs]=whetherPelletDislodged(finaldata,'drop_reachStarts_pawOnWheel',indsForDislodged);
 tbt=adjustTbtUsingThresh(movieframeinds,tbt,~missType,true,finaldata);
 
 end
@@ -191,12 +200,14 @@ for i=1:length(movieframes)
         b=allmi(j,2);
         if theseAreSuccess(i)==true % if mouse actually grabbed pellet
             % is grab
-            % make sure that tbt says success
+            % make sure that tbt says success 
             if isPawOnWheel==true
                 tbt.success_reachStarts_pawOnWheel(a,b)=1;
+%                 tbt.drop_reachStarts_pawOnWheel(a,b)=1;
                 tbt.miss_reachStarts_pawOnWheel(a,b)=0;
             else
                 tbt.success_reachStarts(a,b)=1;
+%                 tbt.drop_reachStarts(a,b)=1;
                 tbt.miss_reachStarts(a,b)=0;
             end
         else

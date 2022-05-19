@@ -14,13 +14,13 @@ function [data1,data2]=useDistractorAlignment(data1,whichTime1,whichField1,data2
 % settings.try_scale1=0.8;
 % settings.try_scale2=1.2;  
 % for physiology
-settings.try_delay1=-10;
+settings.try_delay1=-20;
 settings.delaysteps=1;
 settings.try_delay2=50;
 settings.tryinc=0.02;
 % settings.try_scale1=0.6;
 % settings.try_scale2=1;  
-alignInd=6;
+alignInd=15;
 % downSampData2=true;
 ds=1000;
 

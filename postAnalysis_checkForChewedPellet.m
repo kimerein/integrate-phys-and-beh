@@ -1,11 +1,20 @@
 function [tbt,finaldata]=postAnalysis_checkForChewedPellet(tbt,finaldata,savehandles,zoneVals,eat,usePreviousChewingThresh)
 
 overweightFP=6.5; 
+doOr=true;
 % overweightFP=1; 
 % will overweight false positives if not equal to 1, FP are real drops called a success
 % false positives will count overweightFP times more than true positives
 % useThreshFromNoPawOnWheel=true; % if true, apply threshold from no paw on wheel reaches to paw on wheel reaches
 removeZscore=true;
+userSetsThresh=false;
+userThresh=2.5*10^5;
+if userSetsThresh==true
+    ans=questdlg('User sets thresh ... continue?');
+    if ~strcmp(ans,'Yes')
+        return
+    end
+end
 
 settings=autoReachAnalysisSettings();
 disp(['priorToReach_chewWindow is ' num2str(settings.chew.priorToReach_chewWindow)]);
@@ -96,26 +105,25 @@ if ~isfield(finaldata,'success_reachStarts_backup')
 end
 finaldata.flippedThese=finaldata.success_reachStarts~=finaldata.success_reachStarts_backup;
 finaldata.flippedThese_pawOnWheel=finaldata.success_reachStarts_pawOnWheel~=finaldata.success_reachStarts_pawOnWheel_backup;
-finaldata.success_reachStarts=finaldata.success_reachStarts_backup;
-finaldata.drop_reachStarts=finaldata.drop_reachStarts_backup;
-finaldata.success_reachStarts_pawOnWheel=finaldata.success_reachStarts_pawOnWheel_backup;
-finaldata.drop_reachStarts_pawOnWheel=finaldata.drop_reachStarts_pawOnWheel_backup;
 
 % If want to start by considering every potential reach a success, then
 % will trim accordingly
-finaldata.success_reachStarts=(finaldata.success_reachStarts_backup + finaldata.drop_reachStarts_backup) > 0.5;
+finaldata.success_reachStarts=(finaldata.success_reachStarts + finaldata.drop_reachStarts + finaldata.success_reachStarts_backup + finaldata.drop_reachStarts_backup) > 0.5;
+finaldata.success_reachStarts_pawOnWheel=(finaldata.success_reachStarts_pawOnWheel + finaldata.drop_reachStarts_pawOnWheel + finaldata.success_reachStarts_pawOnWheel_backup + finaldata.drop_reachStarts_pawOnWheel_backup) > 0.5;
 
-% First for reaches where paw does not start on wheel
-finaldata.success_reachStarts_backup=finaldata.success_reachStarts;
+% % First for reaches where paw does not start on wheel
+% finaldata.success_reachStarts_backup=finaldata.success_reachStarts;
 [finaldata.success_reachStarts,newDrops,tbt]=checkForSufficientChewing(finaldata.success_reachStarts,finaldata.isChewing,minIndToPelletChew,withinXInds,dropIfChewingBefore,priorXInds,minIndMoreStringent,finaldata,tbt,finaldata.flippedThese,false);
-finaldata.drop_reachStarts_backup=finaldata.drop_reachStarts;
+% finaldata.drop_reachStarts_backup=finaldata.drop_reachStarts;
 finaldata.drop_reachStarts(newDrops==1)=1;
+finaldata.drop_reachStarts(newDrops==0)=0;
 
 % For reaches where paw does start on wheel
-finaldata.success_reachStarts_pawOnWheel_backup=finaldata.success_reachStarts_pawOnWheel;
+% finaldata.success_reachStarts_pawOnWheel_backup=finaldata.success_reachStarts_pawOnWheel;
 [finaldata.success_reachStarts_pawOnWheel,newDrops,tbt]=checkForSufficientChewing(finaldata.success_reachStarts_pawOnWheel,finaldata.isChewing,minIndToPelletChew,withinXInds,dropIfChewingBefore,priorXInds,minIndMoreStringent,finaldata,tbt,finaldata.flippedThese_pawOnWheel,true);
-finaldata.drop_reachStarts_pawOnWheel_backup=finaldata.drop_reachStarts_pawOnWheel;
+% finaldata.drop_reachStarts_pawOnWheel_backup=finaldata.drop_reachStarts_pawOnWheel;
 finaldata.drop_reachStarts_pawOnWheel(newDrops==1)=1;
+finaldata.drop_reachStarts_pawOnWheel(newDrops==0)=0;
 
 % Chewing power and duration thresholds
 disp('Plotting which duration and power thresholds distinguish drop vs success');
@@ -123,13 +131,13 @@ disp('Plotting which duration and power thresholds distinguish drop vs success')
 % tbt.currentclassifydrop=(tbt.('drop_reachStarts_backup') + tbt.('drop_reachStarts_pawOnWheel_backup')) > 0.5;
 tbt.currentclassifysuccess=(tbt.('success_reachStarts') + tbt.('success_reachStarts_pawOnWheel')) > 0.5;
 tbt.currentclassifydrop=(tbt.('drop_reachStarts') + tbt.('drop_reachStarts_pawOnWheel')) > 0.5;
-if isfield(tbt,'all_reachBatch')
-    tbt.currentstudysuccess=(tbt.('success_reachStarts') + tbt.('reachBatch_success_reachStarts') + tbt.('success_reachStarts_pawOnWheel') + tbt.('reachBatch_success_reachStarts_pawOnWheel')) > 0.5;
-    tbt.currentstudydrop=(tbt.('drop_reachStarts') + tbt.('reachBatch_drop_reachStarts') + tbt.('drop_reachStarts_pawOnWheel') + tbt.('reachBatch_drop_reachStarts_pawOnWheel')) > 0.5;
-else
+% if isfield(tbt,'all_reachBatch')
+%     tbt.currentstudysuccess=(tbt.('success_reachStarts') + tbt.('reachBatch_success_reachStarts') + tbt.('success_reachStarts_pawOnWheel') + tbt.('reachBatch_success_reachStarts_pawOnWheel')) > 0.5;
+%     tbt.currentstudydrop=(tbt.('drop_reachStarts') + tbt.('reachBatch_drop_reachStarts') + tbt.('drop_reachStarts_pawOnWheel') + tbt.('reachBatch_drop_reachStarts_pawOnWheel')) > 0.5;
+% else
     tbt.currentstudysuccess=(tbt.('success_reachStarts') + tbt.('success_reachStarts_pawOnWheel')) > 0.5;
     tbt.currentstudydrop=(tbt.('drop_reachStarts') + tbt.('drop_reachStarts_pawOnWheel')) > 0.5;
-end
+% end
 whichIsReachStarts_noPawOnWheel=tbt.('success_reachStarts')>0.5;
 whichIsReachStarts_PawOnWheel=tbt.('success_reachStarts_pawOnWheel')>0.5;
 [out1,out2]=studyChewingPowerAfterSuccessVsDrop(tbt,savehandles,zoneVals,eat,'currentstudysuccess','currentstudydrop','currentclassifysuccess','currentclassifydrop',overweightFP,whichIsReachStarts_noPawOnWheel,whichIsReachStarts_PawOnWheel);
@@ -152,8 +160,15 @@ chewingDuration=out2.chewingDuration(out2.isCurrReachStart==1);
 predictions=out2.predictions(out2.isCurrReachStart==1);
 s2=eval(out2.threshold);
 nopawonwheel_thresh2=out2.threshold;
-theseAreSuccess=s1 & s2;
+if doOr==true
+    theseAreSuccess=s1 | s2;
+else
+    theseAreSuccess=s1 & s2;
+end
 maybeDropMaybeSuccess=s1~=s2;
+if userSetsThresh
+    theseAreSuccess=rawIntensity > userThresh;
+end
 % disp([out1.movieFrameInds(out1.isCurrReachStart==1)' out2.movieFrameInds(out2.isCurrReachStart==1)'])
 tbt=adjustTbtUsingThresh(currmovieFrameInds,tbt,theseAreSuccess,false,finaldata,maybeDropMaybeSuccess);
 
@@ -167,8 +182,15 @@ chewingPower=out2.chewingPower(out2.isCurrReachPaw==1);
 chewingDuration=out2.chewingDuration(out2.isCurrReachPaw==1);
 predictions=out2.predictions(out2.isCurrReachPaw==1);
 s2=eval(out2.threshold);
-theseAreSuccess=s1 & s2;
+if doOr==true
+    theseAreSuccess=s1 | s2;
+else
+    theseAreSuccess=s1 & s2;
+end
 maybeDropMaybeSuccess=s1~=s2;
+if userSetsThresh
+    theseAreSuccess=rawIntensity > userThresh;
+end
 tbt=adjustTbtUsingThresh(currmovieFrameInds,tbt,theseAreSuccess,true,finaldata,maybeDropMaybeSuccess);
 
 tbt=rmfield(tbt,'currentstudysuccess');

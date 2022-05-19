@@ -3,19 +3,21 @@ function fixDropVSuccess(varargin)
 % script for fixing drop vs success classifications
 
 if isempty(varargin)
-    currentVid='Z:\MICROSCOPE\Kim\WHISPER recs\Oct_B\20210312\O2 output\2021-03-12 16-44-31-C_processed_data';
-    datestr='20210312';
-    mousename='Oct_B';
+    currentVid='Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210319\O2 output\2021-03-19 11-26-13-C_processed_data';
+    datestr='20210319';
+    mousename='dLight1';
     f_pr=regexp(currentVid,'_processed_data');
     fslash=regexp(currentVid,'\');
     aviName=currentVid(fslash(end)+1:f_pr-1);
     placeForO2data=['Z:\MICROSCOPE\Kim\WHISPER recs\' mousename '\' datestr '\O2 output\' aviName];
     usePreviousChewingThresh=false;
+    alignment=[];
 else
-    if length(varargin)==2
+    if length(varargin)==3
         currentVid=varargin{1};
         placeForO2data=varargin{2};
         usePreviousChewingThresh=true;
+        alignment=varargin{3};
     end 
     % check for whether have already run this code, in which case use
     % existing chewing threshold
@@ -28,7 +30,9 @@ end
 
 load([currentVid '\tbt.mat'])
 backuptbt=tbt;
-load([currentVid '\final_aligned_data.mat'])
+if isempty(alignment)
+    load([currentVid '\final_aligned_data.mat'])
+end
 load([placeForO2data '_zoneVals.mat'])
 load([placeForO2data '_eat.mat'])
 load([placeForO2data '_savehandles.mat'])

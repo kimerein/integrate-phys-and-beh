@@ -54,6 +54,7 @@ downSamp=false;
 ds=100;
 maxTimeForHeatmap=9;
 nIndsToTake=300; %nIndsToTake=200;
+nIndsBefore=500;
 
 if downSamp==true
     downSampWhichFields={'cue','opto','cue_times','distractor','cuetimes_wrt_trial_start'};
@@ -211,6 +212,9 @@ switch alignTo
             error('Do not recognize this photometry_tbt field name.');
         end
         tempphototimes=nanmean(photometry_tbt.(getCorrectTime),1);
+        if any(isnan(tempphototimes))
+            tempphototimes(isnan(tempphototimes))=0;
+        end
         plotTrialsAsHeatmap(photometry_tbt.(plotPhotoField),tempphototimes,photometry_tbt.cue,f_times,10,maxTimeForHeatmap,false);
         hold on;
         plotEventsScatter(behavior_tbt,1:size(behavior_tbt.cue,1),'cueZone_onVoff','all_reachBatch','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts',[]);
@@ -253,6 +257,13 @@ switch alignTo
                 disp(SUfields{i});
             end
         end
+    case 'cue_followedby_success'
+        typeOfReach=true;
+        useReach='combo';
+        [~,f]=nanmax(nanmean(behavior_tbt.cueZone_onVoff,1));
+        temp=behavior_tbt.cueZone_onVoff;
+        temp(~any(behavior_tbt.reachBatch_success_reachStarts(:,f:end)>0.5,2),:)=0;
+        useCombo=temp;
     case 'success_fromPerchOrWheel'
         typeOfReach=true;
         useReach='combo';
@@ -369,11 +380,11 @@ if typeOfReach==true
     cueInd=find(nanmean(behavior_tbt.(behaviorCue),1)>0,1,'first');
     withinRange_inds=[cueInd+ceil(withinRange(1)/timeStep) cueInd+ceil(withinRange(2)/timeStep)];
     if firstInTrial==true
-        [behAligned,alignInds,fromInputRow]=alignToEventFirstInTrial(temp,withinRange_inds,temp,nIndsToTake,90);
+        [behAligned,alignInds,fromInputRow]=alignToEventFirstInTrial(temp,withinRange_inds,temp,nIndsToTake,nIndsBefore);
     elseif lastInTrial==true
-        [behAligned,alignInds,fromInputRow]=alignToEventLastInTrial(temp,withinRange_inds,temp,nIndsToTake,90);
+        [behAligned,alignInds,fromInputRow]=alignToEventLastInTrial(temp,withinRange_inds,temp,nIndsToTake,nIndsBefore);
     else
-        [behAligned,alignInds,fromInputRow]=alignToEvent(temp,withinRange_inds,temp,nIndsToTake,90);
+        [behAligned,alignInds,fromInputRow]=alignToEvent(temp,withinRange_inds,temp,nIndsToTake,nIndsBefore);
     end
     alignTimes=getValsFromRows(behavior_tbt.times_wrt_trial_start,alignInds,fromInputRow);
     indsIntoPhoto=getIndsFromRows(photometry_tbt.(getCorrectTime_wrtTrialStart),alignTimes,fromInputRow);
