@@ -1,5 +1,7 @@
 function alignToCompanion(datadir)
 
+excludeHigherFR=true;
+
 ls=dir(datadir);
 unitbyunit_x=[];
 unitbyunit_y=[];
@@ -10,6 +12,14 @@ testForAlignment=false;
 unitbaseline=150;
 for i=3:length(ls)
     a=load([ls(i).folder '\' ls(i).name]);
+    
+    if excludeHigherFR
+        if nanmean(nanmean(a.dataout.y,1),2)>4
+            disp('excluding unit based on high FR');
+            continue
+        end
+    end
+    
     % realign first!
     timestep_for_aligncomp=mode(diff(a.alignComp.x));
     timestep_for_unit=mode(diff(a.dataout.x));
@@ -31,6 +41,10 @@ for i=3:length(ls)
     else
         upTo2=length(a.alignComp.x)+(padsize-ma);
     end
+    if upTo2-(padsize-ma)>length(a.alignComp.x)
+        a.alignComp.x=[a.alignComp.x nan(1,upTo2-(padsize-ma)-length(a.alignComp.x))];
+        a.alignComp.y=[a.alignComp.y nan(size(a.alignComp.y,1),upTo2-(padsize-ma)-size(a.alignComp.y,2))];
+    end
     aligncomp_x=[aligncomp_x; [nan(1,padsize-ma) a.alignComp.x(1:upTo2-(padsize-ma))]];
     aligncomp_y=[aligncomp_y; [nan(1,padsize-ma) nanmean(a.alignComp.y(:,1:upTo2-(padsize-ma)),1)]];
     if ~isempty(unitbyunit_x)
@@ -48,7 +62,7 @@ for i=3:length(ls)
     unitbyunit_y=[unitbyunit_y; [nanmean(a.dataout.y(:,1:upTo),1)]];
 end
 
-ds=1;
+ds=3;
 if ds~=1
     unitbyunit_x=downSampMatrix(unitbyunit_x,ds);
     unitbyunit_y=downSampMatrix(unitbyunit_y,ds);
