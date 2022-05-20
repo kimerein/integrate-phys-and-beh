@@ -6,21 +6,48 @@ unitbyunit_y=[];
 aligncomp_x=[];
 aligncomp_y=[];
 padsize=1000;
+testForAlignment=true;
+unitbaseline=150;
 for i=3:length(ls)
     a=load([ls(i).folder '\' ls(i).name]);
     % realign first!
+    timestep_for_aligncomp=mode(diff(a.alignComp.x));
+    timestep_for_unit=mode(diff(a.dataout.x));
     [~,ma]=nanmax(nanmean(a.alignComp.y,1));
+    [~,mi]=nanmin(abs(a.dataout.x-a.alignComp.x(ma)));
+    if testForAlignment==true
+        a.dataout.y(:,mi)=a.dataout.y(:,mi)+100;
+    end
+    % ensure that each unit data has the same length baseline before mi
+    if mi<unitbaseline
+        a.dataout.x=[nan(1,unitbaseline-mi) a.dataout.x];
+        a.dataout.y=[nan(size(a.dataout.y,1),unitbaseline-mi) a.dataout.y];
+    elseif unitbaseline<mi
+        a.dataout.x=a.dataout.x(mi-unitbaseline:end);
+        a.dataout.y=a.dataout.y(:,mi-unitbaseline:end);
+    end
     if ~isempty(unitbyunit_x)
-        upTo=size(unitbyunit_x,2);
         upTo2=size(aligncomp_x,2);
     else
-        upTo=length(a.dataout.x)+(padsize-ma);
-        upTo2=length(a.align
+        upTo2=length(a.alignComp.x)+(padsize-ma);
     end
-    unitbyunit_x=[unitbyunit_x; [nan(1,padsize-ma) a.dataout.x(1:upTo-(padsize-ma))]];
-    unitbyunit_y=[unitbyunit_y; [nan(1,padsize-ma) nanmean(a.dataout.y(:,1:upTo-(padsize-ma)),1)]];
-    aligncomp_x=[aligncomp_x; [nan(1,padsize-ma) a.alignComp.x(1:upTo-(padsize-ma))]];
-    aligncomp_y=[aligncomp_y; [nan(1,padsize-ma) nanmean(a.alignComp.y(:,1:upTo-(padsize-ma)),1)]];
+    aligncomp_x=[aligncomp_x; [nan(1,padsize-ma) a.alignComp.x(1:upTo2-(padsize-ma))]];
+    aligncomp_y=[aligncomp_y; [nan(1,padsize-ma) nanmean(a.alignComp.y(:,1:upTo2-(padsize-ma)),1)]];
+    shiftUnitByInds=ceil((timestep_for_aligncomp*ma)/timestep_for_unit);
+    if ~isempty(unitbyunit_x)
+        upTo=size(unitbyunit_x,2);
+    else
+        upTo=length(a.dataout.x)+(padsize-shiftUnitByInds);
+    end
+    if upTo-(padsize-shiftUnitByInds)>size(a.dataout.x,2)
+        % truncate
+        uptolength=length([nan(1,padsize-shiftUnitByInds) a.dataout.x(1:end)]);
+        unitbyunit_x=unitbyunit_x(:,1:uptolength);
+        unitbyunit_y=unitbyunit_y(:,1:uptolength);
+        upTo=size(unitbyunit_x,2);
+    end
+    unitbyunit_x=[unitbyunit_x; [nan(1,padsize-shiftUnitByInds) a.dataout.x(1:upTo-(padsize-shiftUnitByInds))]];
+    unitbyunit_y=[unitbyunit_y; [nan(1,padsize-shiftUnitByInds) nanmean(a.dataout.y(:,1:upTo-(padsize-shiftUnitByInds)),1)]];
 end
 
 ds=1;
@@ -34,9 +61,9 @@ end
 figure();
 plot(nanmean(unitbyunit_x,1),unitbyunit_y');
 hold on;
-plot(nanmean(aligncomp_x,1),nanmean(aligncomp_y,1),'Color','b');
+plot(nanmean(aligncomp_x,1),aligncomp_y','Color','b');
 
-figure();
+figure(); 
 plot(nanmean(unitbyunit_x,1),nanmean(unitbyunit_y,1),'Color','k');
 hold on;
 plot(nanmean(unitbyunit_x,1),nanmean(unitbyunit_y,1)-nanstd(unitbyunit_y,[],1)./sqrt(size(unitbyunit_y,1)),'Color','k');
@@ -44,5 +71,5 @@ plot(nanmean(unitbyunit_x,1),nanmean(unitbyunit_y,1)+nanstd(unitbyunit_y,[],1)./
 
 plot(nanmean(aligncomp_x,1),nanmean(aligncomp_y,1),'Color','b');
 hold on;
-plot(nanmean(aligncomp_x,1),nanmean(aligncomp_y,1)-nanstd(aligncomp_y,[],1)./sqrt(size(aligncomp_y,1)),'Color','k');
-plot(nanmean(aligncomp_x,1),nanmean(aligncomp_y,1)+nanstd(aligncomp_y,[],1)./sqrt(size(aligncomp_y,1)),'Color','k');
+plot(nanmean(aligncomp_x,1),nanmean(aligncomp_y,1)-nanstd(aligncomp_y,[],1)./sqrt(size(aligncomp_y,1)),'Color','b');
+plot(nanmean(aligncomp_x,1),nanmean(aligncomp_y,1)+nanstd(aligncomp_y,[],1)./sqrt(size(aligncomp_y,1)),'Color','b');
