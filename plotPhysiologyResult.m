@@ -339,6 +339,36 @@ switch alignTo
                 end
             end
         end
+    case 'misses_and_pelletMissing_and_drop_noPawOnWheel'
+        typeOfReach=true;
+        useReach='combo';
+        excludeAfterSuccess=true;
+        excludeWithinTimeWindow=6; % in sec
+        excludeWithinInds=floor(excludeWithinTimeWindow/mode(diff(nanmean(behavior_tbt.times,1))));
+        useCombo=behavior_tbt.reachBatch_miss_reachStarts+behavior_tbt.pelletmissingreach_reachStarts+behavior_tbt.reachBatch_drop_reachStarts;
+        if excludeAfterSuccess==true
+            for i=1:size(useCombo,1)
+                f=find(useCombo(i,:)>0.05,1,'first');
+                if isempty(f)
+                    continue
+                end
+                for j=1:length(f)
+                    currf=f(j);
+                    starter=currf-excludeWithinInds;
+                    if starter<1
+                        starter=1;
+                    end
+                    if any(behavior_tbt.success_reachStarts(i,starter:currf)>0.5 | behavior_tbt.reachBatch_success_reachStarts(i,starter:currf)>0.5 | behavior_tbt.reachBatch_success_reachStarts_pawOnWheel(i,starter:currf)>0.5)
+                        % success before this, exclude
+                        upto=currf+10; 
+                        if upto>length(useCombo(i,:))
+                            upto=length(useCombo(i,:));
+                        end
+                        useCombo(i,starter:upto)=0;
+                    end
+                end
+            end
+        end
     case 'reachBatch_success_reachStarts'
         typeOfReach=true;
         useReach=alignTo;
