@@ -20,7 +20,7 @@ settings.try_delay2=50;
 settings.tryinc=0.02;
 % settings.try_scale1=0.6;
 % settings.try_scale2=1;  
-alignInd=15;
+alignInd=6;
 % downSampData2=true;
 ds=1000;
 

@@ -1,14 +1,14 @@
 function [tbt,finaldata]=postAnalysis_checkForChewedPellet(tbt,finaldata,savehandles,zoneVals,eat,usePreviousChewingThresh)
 
 overweightFP=6.5; 
-doOr=true;
+doOr=false;
 % overweightFP=1; 
 % will overweight false positives if not equal to 1, FP are real drops called a success
 % false positives will count overweightFP times more than true positives
 % useThreshFromNoPawOnWheel=true; % if true, apply threshold from no paw on wheel reaches to paw on wheel reaches
 removeZscore=true;
-userSetsThresh=false;
-userThresh=2.5*10^5;
+userSetsThresh=true;
+userThresh=1.5*10^5;
 if userSetsThresh==true
     ans=questdlg('User sets thresh ... continue?');
     if ~strcmp(ans,'Yes')

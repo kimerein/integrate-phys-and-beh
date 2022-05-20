@@ -264,6 +264,13 @@ switch alignTo
         temp=behavior_tbt.cueZone_onVoff;
         temp(~any(behavior_tbt.reachBatch_success_reachStarts(:,f:end)>0.5,2),:)=0;
         useCombo=temp;
+    case 'cue_followedby_late_success'
+        typeOfReach=true;
+        useReach='combo';
+        [~,f]=nanmax(nanmean(behavior_tbt.cueZone_onVoff,1));
+        temp=behavior_tbt.cueZone_onVoff;
+        temp(~any(behavior_tbt.reachBatch_success_reachStarts(:,f+75:end)>0.5,2),:)=0;
+        useCombo=temp;
     case 'success_fromPerchOrWheel'
         typeOfReach=true;
         useReach='combo';
