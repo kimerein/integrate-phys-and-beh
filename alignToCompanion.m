@@ -1,6 +1,7 @@
-function alignToCompanion(datadir)
+function [cueCD,uncueCD,lateUncueCD]=alignToCompanion(datadir,getCDs,cueCD,uncueCD,lateUncueCD)
 
 excludeHigherFR=true;
+% getCDs=true;
 
 ls=dir(datadir);
 unitbyunit_x=[];
@@ -60,6 +61,8 @@ for i=3:length(ls)
     end
     unitbyunit_x=[unitbyunit_x; [a.dataout.x(1:upTo)]]; 
     unitbyunit_y=[unitbyunit_y; [nanmean(a.dataout.y(:,1:upTo),1)]];
+
+    disp(['Added ' ls(i).name]);
 end
 
 ds=3;
@@ -85,3 +88,80 @@ plot(nanmean(aligncomp_x,1),nanmean(aligncomp_y,1),'Color','b');
 hold on;
 plot(nanmean(aligncomp_x,1),nanmean(aligncomp_y,1)-nanstd(aligncomp_y,[],1)./sqrt(size(aligncomp_y,1)),'Color','b');
 plot(nanmean(aligncomp_x,1),nanmean(aligncomp_y,1)+nanstd(aligncomp_y,[],1)./sqrt(size(aligncomp_y,1)),'Color','b');
+
+if getCDs==true
+    cueCD=findCD(unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,[0 1.5]);
+    uncueCD=findCD(unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,[-1.5 0]);
+    lateUncueCD=findCD(unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,[4 9.5]);
+else
+    cueCD=[];
+    uncueCD=[];
+    lateUncueCD=[];
+end
+
+plotEvolutionOfPopulationVector(unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,cueCD,uncueCD);
+
+end
+
+function CD=findCD(unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,windowWrtAlignCompMax)
+
+% Find cue coding dimension
+% Find max of alignment companion
+[~,ma]=nanmax(nanmean(aligncomp_y,1));
+aligncomp_times=nanmean(aligncomp_x,1);
+subtractOff=aligncomp_times(ma);
+aligncomp_times=aligncomp_times-subtractOff;
+unit_times=nanmean(unitbyunit_x,1);
+unit_times=unit_times-subtractOff;
+[~,beginIndsForCD]=nanmin(abs(unit_times-windowWrtAlignCompMax(1)));
+[~,endIndsForCD]=nanmin(abs(unit_times-windowWrtAlignCompMax(2)));
+indsForCD=beginIndsForCD:endIndsForCD;
+disp(['Calculating CD for time window ' num2str(unit_times(indsForCD(1))) ' to ' num2str(unit_times(indsForCD(end)))]);
+
+% Find population vector during window
+CD=nanmean(unitbyunit_y(:,indsForCD),2);
+
+end
+
+function plotEvolutionOfPopulationVector(unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,cueCD,uncueCD)
+
+[~,ma]=nanmax(nanmean(aligncomp_y,1));
+aligncomp_times=nanmean(aligncomp_x,1);
+subtractOff=aligncomp_times(ma);
+aligncomp_times=aligncomp_times-subtractOff;
+unit_times=nanmean(unitbyunit_x,1);
+unit_times=unit_times-subtractOff;
+
+evolveProjectOntoCue=nan(1,size(unitbyunit_y,2));
+evolveProjectOntoUncue=nan(1,size(unitbyunit_y,2));
+for i=1:size(unitbyunit_y,2)
+    evolveProjectOntoCue(i)=projectTimePointOntoCD(unitbyunit_y(:,i),cueCD);
+    evolveProjectOntoUncue(i)=projectTimePointOntoCD(unitbyunit_y(:,i),uncueCD);
+end
+
+cmap=colormap('cool');
+stepintocmap=ceil(size(cmap,1)/nansum(~isnan(evolveProjectOntoCue)));
+indsintocmap=1:stepintocmap:nansum(~isnan(evolveProjectOntoCue));
+
+figure();
+k=1;
+for i=1:length(evolveProjectOntoCue)
+    if isnan(evolveProjectOntoCue(i)) | isnan(evolveProjectOntoUncue(i))
+        continue
+    end
+    scatter(evolveProjectOntoUncue(i),evolveProjectOntoCue(i),[],cmap(indsintocmap(k),:));
+    k=k+1;
+    hold on;
+end
+
+end
+
+function proj=projectTimePointOntoCD(activity,CD)
+
+% Project activity onto CD
+% Find unit vector of CD
+unit_CD=CD./norm(CD);
+disp(norm(unit_CD));
+proj=dot(activity,unit_CD);
+
+end
