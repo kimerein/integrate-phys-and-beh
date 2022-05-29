@@ -14,7 +14,7 @@ for i=3:length(ls)
     a=load([ls(i).folder '\' ls(i).name]);
     
     if excludeHigherFR
-        if nanmean(nanmean(a.dataout.y,1),2)>4
+        if nanmean(nanmean(a.dataout.y,1),2)>5
             disp('excluding unit based on high FR');
             continue
         end
