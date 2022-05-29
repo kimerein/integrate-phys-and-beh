@@ -1,7 +1,7 @@
 function [cueCD,uncueCD,lateUncueCD]=alignToCompanion(datadir,getCDs,cueCD,uncueCD,lateUncueCD)
 
-excludeHigherFR=true;
-cutAtTime=5; % stop plotting this many seconds after max of alignment companion
+excludeHigherFR=false;
+cutAtTime=3; % stop plotting this many seconds after max of alignment companion
 % or make cutAtTime empty to plot all time points
 % getCDs=true;
 
@@ -18,7 +18,7 @@ for i=3:length(ls)
     
     if excludeHigherFR
         if nanmean(nanmean(a.dataout.y,1),2)>4
-            disp('excluding unit based on high FR');
+            disp(['excluding unit ' ls(i).name ' based on high FR']);
             continue
         end
     end
@@ -92,13 +92,18 @@ plot(nanmean(aligncomp_x,1),nanmean(aligncomp_y,1)-nanstd(aligncomp_y,[],1)./sqr
 plot(nanmean(aligncomp_x,1),nanmean(aligncomp_y,1)+nanstd(aligncomp_y,[],1)./sqrt(size(aligncomp_y,1)),'Color','b');
 
 if getCDs==true
+%     % for cue
     cueCD=findCD(unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,[-0.25 1.25]); % cue duration is 250 ms
+%     cueCD=findCD(unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,[-0.25 0.25]); % cue duration is 250 ms
     uncueCD=findCD(unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,[-1.75 -0.25]);
     lateUncueCD=findCD(unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,[4 9.5]);
+    % for reach
+%     cueCD=findCD(unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,[-1 0]); % around reach
+% %     cueCD=findCD(unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,[-0.25 0.25]); % cue duration is 250 ms
+%     uncueCD=findCD(unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,[3 9]); % after reach
+%     lateUncueCD=findCD(unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,[4 9.5]);
 else
-    cueCD=[];
-    uncueCD=[];
-    lateUncueCD=[];
+    % use CDs passed in
 end
 
 % If want to cut off the plotting at a particular time after the
@@ -176,6 +181,9 @@ end
 daspect([1 1 1]);
 xlabel('Projection onto uncued CD');
 ylabel('Projection onto cued CD');
+linemi=min([evolveProjectOntoUncue evolveProjectOntoCue],[],2,'omitnan');
+linema=max([evolveProjectOntoUncue evolveProjectOntoCue],[],2,'omitnan');
+line([linemi linema],[linemi linema],'Color',[0.8 0.8 0.8]);
 
 figure(); plot(nanmean(aligncomp_x,1),nanmean(aligncomp_y,1),'Color','b');
 hold on; 
