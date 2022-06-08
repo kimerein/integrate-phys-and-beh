@@ -8,7 +8,7 @@ doOr=false;
 % useThreshFromNoPawOnWheel=true; % if true, apply threshold from no paw on wheel reaches to paw on wheel reaches
 removeZscore=true;
 userSetsThresh=false;
-userThresh=2.5*10^5;
+userThresh=2*10^5;
 if userSetsThresh==true
     ans=questdlg('User sets thresh ... continue?');
     if ~strcmp(ans,'Yes')
@@ -71,7 +71,6 @@ else
 end
 if isempty(newchewthresh) || usePreviousChewingThresh==true
     changedChewThresh=false;
-    getch
 else
     changedChewThresh=true;
     disp('Changing chew threshold.');

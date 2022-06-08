@@ -8,7 +8,7 @@ doOr=false;
 % useThreshFromNoPawOnWheel=true; % if true, apply threshold from no paw on wheel reaches to paw on wheel reaches
 removeZscore=true;
 userSetsThresh=true;
-userThresh=1.5*10^5;
+userThresh=0*10^5;
 if userSetsThresh==true
     ans=questdlg('User sets thresh ... continue?');
     if ~strcmp(ans,'Yes')
@@ -282,6 +282,10 @@ for i=1:length(movieframes)
                 if finaldata.success_reachStarts_pawOnWheel(movind)>0.5
                     tbt.success_reachStarts_pawOnWheel(a,b)=1;
                     tbt.drop_reachStarts_pawOnWheel(a,b)=0;
+                else
+                    tbt.success_reachStarts_pawOnWheel(a,b)=1;
+                    tbt.drop_reachStarts_pawOnWheel(a,b)=0;
+                    tbt.maybeDrop_reachStarts_pawOnWheel(a,b)=1;
                 end
                 if maybeDropMaybeSuccess(i)==1
                     tbt.maybeDrop_reachStarts_pawOnWheel(a,b)=1;
@@ -290,6 +294,10 @@ for i=1:length(movieframes)
                 if finaldata.success_reachStarts(movind)>0.5
                     tbt.success_reachStarts(a,b)=1;
                     tbt.drop_reachStarts(a,b)=0;
+                else
+                    tbt.success_reachStarts(a,b)=1;
+                    tbt.drop_reachStarts(a,b)=0;
+                    tbt.maybeDrop_reachStarts(a,b)=1;
                 end
                 if maybeDropMaybeSuccess(i)==1
                     tbt.maybeDrop_reachStarts(a,b)=1;

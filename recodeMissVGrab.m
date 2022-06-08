@@ -1,8 +1,8 @@
 function recodeMissVGrab
 
-currentVid='Z:\MICROSCOPE\Kim\WHISPER recs\dLight4\20210217\O2 output\2021-02-17 11-10-37-C_processed_data';
-datestr='20210217';
-mousename='dLight4';
+currentVid='Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210308\O2 output\2021-03-08 16-31-27-C_processed_data';
+datestr='20210308';
+mousename='dLight1';
 timeForDislodged=0.4;
 
 f_pr=regexp(currentVid,'_processed_data');
