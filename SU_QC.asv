@@ -24,14 +24,24 @@ varAdditionalInputs.furtherProcessData=@furtherProcessWHISPER;
 % Layout 
 % Column 1, Row 1 - average spike waveform
 % Column 1, Row 2 - spike amplitude distribution
-% Column 2, Row 1 - LFP segment
-% Column 2, Row 2 - HF segment
-% Column 3, Row 1 - LFP closeup
-% Column 3, Row 2 - HF closeup
+% Column 2, Row 1 - autocorrelation
+% Column 2, Row 2 - waveform stability and firing rate
+% Column 3, Row 1 - LFP segment
+% Column 3, Row 2 - HF segment
+% Column 4, Row 1 - LFP closeup
+% Column 4, Row 2 - HF closeup
 % Next columns - PCA space
 % Next columns - PSTH aligned to behavior events
 n_rows=2;
-show_N_views_of_PCA_space=4;
+PC_mode='unique'; % either 'unique' or 'all'
+switch PC_mode
+    case 'all'
+        show_first_N_PCs=10; % number of PCs to show
+        show_N_views_of_PCA_space=factorial(show_first_N_PCs)/(factorial(2)*factorial(show_first_N_PCs-2));
+    case 'unique'
+        show_first_N_PCs=4; % will show combos of this many PCs (top PCs that separate this unit from rest of spikes)
+        show_N_views_of_PCA_space=factorial(show_first_N_PCs)/(factorial(2)*factorial(show_first_N_PCs-2));
+end
 N_behavior_alignments=4;
 PCA_columns=ceil(show_N_views_of_PCA_space/n_rows);
 beh_columns=ceil(N_behavior_alignments/n_rows);
@@ -42,16 +52,21 @@ n_columns=3+PCA_columns+beh_columns;
 
 % # refractory period violations (RPVs)
 rpv=count_RPV(spikes, unit_assign);
+total_spikes=countTotalSpikes(spikes, unit_assign);
 
 % Unit waveform
 wvfms=unitWaveform(spikes, unit_assign);
 ind_into_ha=1;
 ind_into_ha=nextPlot(ha, ind_into_ha);
-wvfmPlot(wvfms, spikes.params.Fs, rpv);
+wvfmPlot(wvfms, spikes.params.Fs, rpv, total_spikes);
 
 % Spike amplitude histogram
 ind_into_ha=nextPlot(ha, ind_into_ha);
 plot_detection_criterion(spikes, unit_assign);
+
+% Autocorrelation
+ind_into_ha=nextPlot(ha, ind_into_ha);
+plot_autocorr(spikes, unit_assign);
 
 % Get some raw data
 s=getUnitSpiketimes(spikes, unit_assign);
@@ -69,8 +84,70 @@ ind_into_ha=nextPlot(ha, ind_into_ha);
 plotHF(HFValues, times, varAdditionalInputs, s);
 
 % PCA space
+switch PC_mode
+    case 'all'
+        for i=1:show_first_N_PCs
+            for j=i+1:show_first_N_PCs
+                ind_into_ha=nextPlot(ha, ind_into_ha);
+                plotPCspace(spikes, unit_assign, i, j);
+            end
+        end
+    case 'unique'
+        distance=findUniquePCs(spikes, unit_assign);
+        [~,si]=sort(distance,'descend');
+        for i=1:show_first_N_PCs
+            for j=i+1:show_first_N_PCs
+                ind_into_ha=nextPlot(ha, ind_into_ha);
+                plotPCspace(spikes, unit_assign, si(i), si(j));
+            end
+        end
+end
 
 % Behavior-triggered PSTHs
+
+end
+
+function n_spikes=countTotalSpikes(spikes, unit_assign)
+
+n_spikes=sum(ismember(spikes.assigns, unit_assign));
+
+end
+
+function distance=findUniquePCs(spikes, unit_assign)
+
+% subsample other spikes
+which_other=randsample(find(~ismember(spikes.assigns, unit_assign)),sum(ismember(spikes.assigns, unit_assign)));
+% spikes in unit
+which=ismember(spikes.assigns, unit_assign);
+
+distance=nan(1,size(spikes.info.pca.v,2));
+for i=1:size(spikes.info.pca.v,2)
+    pc_other=spikes.waveforms(which_other,:) * spikes.info.pca.v(:,i);
+    pc=spikes.waveforms(which,:) * spikes.info.pca.v(:,i);
+    distance(i)=abs(mean(pc_other)-mean(pc))/sqrt(std(pc_other).^2 + std(pc).^2);
+end
+
+end
+
+function plotPCspace(spikes, unit_assign, pc_dim1, pc_dim2)
+
+% subsample other spikes
+which=randsample(find(~ismember(spikes.assigns, unit_assign)),sum(ismember(spikes.assigns, unit_assign)));
+plotUnitInPCspace(spikes, which, pc_dim1, pc_dim2, 'c'); hold on;
+
+% plot spikes in unit
+which=ismember(spikes.assigns, unit_assign);
+plotUnitInPCspace(spikes, which, pc_dim1, pc_dim2, 'y');
+xlabel(['PC' num2str(pc_dim1)]);
+ylabel(['PC' num2str(pc_dim2)]);
+
+end
+
+function plotUnitInPCspace(spikes, which, pc_dim1, pc_dim2, c)
+
+x = spikes.waveforms(which,:) * spikes.info.pca.v(:,pc_dim1);
+y = spikes.waveforms(which,:) * spikes.info.pca.v(:,pc_dim2);
+scatter(x,y,[],c,'filled','MarkerFaceAlpha',0.2);
 
 end
 
@@ -245,6 +322,8 @@ end
 
 function wvfmPlot(wvfms, Fs, rpv)
 
+wvfms=wvfms(:,[2 1 3 4]);
+wvfms=[wvfms; nan(1,size(wvfms,2))];
 wvfms=wvfms(1:end);
 plot(0:1/Fs:(size(wvfms,2)-1)*(1/Fs),wvfms,'Color','k','LineWidth',1);
 xlabel('Time (s)');
@@ -291,4 +370,38 @@ for i=0:Nw-1
 end
 ha=ha(reorder);
 
+end
+
+function plot_autocorr(spikes, unit_assign)     
+
+spiketimes = spikes.spiketimes(ismember(spikes.assigns, unit_assign));
+shadow = spikes.params.shadow;
+rp     = spikes.params.refractory_period;
+
+maxlag = 0.1; % in seconds
+corr_bin_size=2; % in ms
+
+% calculate autocorrelation
+if length(spiketimes) > 1
+    [cross,lags] = pxcorr(spiketimes,spiketimes, round(1000/corr_bin_size), maxlag);
+else
+    cross = 0;  lags = 0;
+end
+cross(lags==0) = 0;
+
+% plot autocorrelation histogram
+bb = bar(lags*1000,cross,1.0); hold on;
+set(bb,'FaceColor',[0 0 0 ],'EdgeColor',[0 0 0 ])
+% place patches to represent shadow and refractory period
+ymax = max(cross) + 1;
+patch(shadow*[-1 1 1 -1], [0 0 ymax ymax], [.5 .5 .5],'EdgeColor', 'none'); hold on;
+patch([shadow [rp rp] shadow ], [0 0 ymax ymax], [1 0 0],'EdgeColor','none');
+patch(-[shadow [rp rp] shadow ], [0 0 ymax ymax], [1 0 0],'EdgeColor','none');
+
+% set axes
+set(gca, 'XLim', maxlag*1000*[-1 1]);
+set(gca,'YLim',[0 ymax])
+xlabel('Time lag (msec)')
+ylabel('Autocorrelation (Hz)')
+    
 end
