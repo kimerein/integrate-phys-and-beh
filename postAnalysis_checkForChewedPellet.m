@@ -7,8 +7,8 @@ doOr=false;
 % false positives will count overweightFP times more than true positives
 % useThreshFromNoPawOnWheel=true; % if true, apply threshold from no paw on wheel reaches to paw on wheel reaches
 removeZscore=true;
-userSetsThresh=true;
-userThresh=0*10^5;
+userSetsThresh=false;
+userThresh=1.8*10^5;
 if userSetsThresh==true
     ans=questdlg('User sets thresh ... continue?');
     if ~strcmp(ans,'Yes')

@@ -43,6 +43,9 @@ settings.useOptoZone=0;
 if convert_to_batches==1
     % Find and convert reach batches
     settings.isOrchestra=1;
+    if ~isfield(alltbt,'reachBatch_success_reachStarts_maybeDrop')
+        alltbt.('reachBatch_success_reachStarts_maybeDrop')=zeros(size(alltbt.cue));
+    end
     alltbt=findReachBatches(alltbt,lowThresh,~settings.isOrchestra); % last argument is 1 if plot, else 0
 %     alltbt=findReachBatches(alltbt,lowThresh,0); % last argument is 1 if plot, else 0
     temp=(alltbt.pelletmissingreach_reachStarts+alltbt.reachBatch_miss_reachStarts+alltbt.reachBatch_success_reachStarts_pawOnWheel+alltbt.reachBatch_drop_reachStarts_pawOnWheel+alltbt.reachBatch_miss_reachStarts_pawOnWheel+alltbt.reachBatch_success_reachStarts+alltbt.reachBatch_drop_reachStarts)>0;
