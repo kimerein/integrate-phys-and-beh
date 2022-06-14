@@ -68,6 +68,11 @@ plot_detection_criterion(spikes, unit_assign);
 ind_into_ha=nextPlot(ha, ind_into_ha);
 plot_autocorr(spikes, unit_assign);
 
+% Waveform stability and firing rate
+ind_into_ha=nextPlot(ha, ind_into_ha);
+plotWaveformAmplitudeStability(spikes, unit_assign); hold on;
+plotFiringRate(spikes, unit_assign, 100); % last argument is binsize in ms for histogram of firing rate
+
 % Get some raw data
 s=getUnitSpiketimes(spikes, unit_assign);
 varAdditionalInputs.firstNSpikes=20;
@@ -104,6 +109,48 @@ switch PC_mode
 end
 
 % Behavior-triggered PSTHs
+
+end
+
+function plotFiringRate(spikes, unit_assign, binsize)
+
+% binsize in ms
+spiketimes=spikes.spiketimes(ismember(spikes.assigns, unit_assign));
+[n,x]=histcounts(spiketimes,0:binsize/1000:max(spiketimes));
+[n,x]=cityscape_hist(n,x);
+yyaxis right
+plot(x,n);
+xlabel('Time (s)');
+ylabel('Firing rate (1/s)');
+
+end
+
+function [new_n,new_x]=cityscape_hist(n,x)
+
+new_x=nan(1,length(x)*2-1);
+j=1;
+x_step=mode(diff(x));
+new_n=nan(1,length(x)*2-1);
+for i=1:length(x)-1
+    new_x(j)=x(i);
+    new_n(j)=n(i);
+    j=j+1;
+    new_x(j)=x(i)+x_step;
+    new_n(j)=n(i);
+    j=j+1;
+end
+
+end
+
+function plotWaveformAmplitudeStability(spikes, unit_assign)
+
+which=ismember(spikes.assigns, unit_assign);
+onChannel=mode(spikes.info.detect.event_channel(ismember(spikes.assigns, unit_assign)));
+y=range(squeeze(spikes.waveforms(which,:,onChannel)),2);
+x=spikes.spiketimes(ismember(spikes.assigns, unit_assign));
+scatter(x,y,[],'b','filled','MarkerFaceAlpha',0.2);
+xlabel('Time (s)');
+ylabel('Waveform amp','Color','b');
 
 end
 

@@ -68,6 +68,10 @@ plot_detection_criterion(spikes, unit_assign);
 ind_into_ha=nextPlot(ha, ind_into_ha);
 plot_autocorr(spikes, unit_assign);
 
+% Waveform stability and firing rate
+ind_into_ha=nextPlot(ha, ind_into_ha);
+
+
 % Get some raw data
 s=getUnitSpiketimes(spikes, unit_assign);
 varAdditionalInputs.firstNSpikes=20;
@@ -104,6 +108,20 @@ switch PC_mode
 end
 
 % Behavior-triggered PSTHs
+
+end
+
+function plotFiringRate()
+
+
+end
+
+function plotWaveformAmplitudeStability(spikes, unit_assign)
+
+shiw
+
+x = range( squeeze( spikes.waveforms(which,:,param) ),2 );
+
 
 end
 
@@ -320,14 +338,14 @@ end
 
 end
 
-function wvfmPlot(wvfms, Fs, rpv)
+function wvfmPlot(wvfms, Fs, rpv, total_spikes)
 
 wvfms=wvfms(:,[2 1 3 4]);
 wvfms=[wvfms; nan(1,size(wvfms,2))];
 wvfms=wvfms(1:end);
 plot(0:1/Fs:(size(wvfms,2)-1)*(1/Fs),wvfms,'Color','k','LineWidth',1);
 xlabel('Time (s)');
-ylabel(['# RPVs = ' num2str(rpv)]);
+ylabel([num2str(total_spikes) ' spikes (# RPVs = ' num2str(rpv) ')']);
 
 end
 
