@@ -7,8 +7,8 @@ chewing_cycle=0.143; % in seconds
 % standard deviation of the high-frequency noise, this is likely a chewing
 % bout
 threshX=1*10^-4;
-% nStdDevsForChew=7.5; % n times the std dev of high freq noise
-nStdDevsForChew=0; % n times the std dev of high freq noise
+nStdDevsForChew=7.5; % n times the std dev of high freq noise
+% nStdDevsForChew=0; % n times the std dev of high freq noise
 % good spike amplitudes tend to be between 4 and 7 times the std dev of the
 % HF noise
 % importantly, chewing is nearly identical across all channels, whereas

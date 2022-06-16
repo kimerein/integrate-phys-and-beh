@@ -75,9 +75,9 @@ plotFiringRate(spikes, unit_assign, 1000); % last argument is binsize in ms for 
 
 % Get some raw data
 s=getUnitSpiketimes(spikes, unit_assign);
-varAdditionalInputs.firstNSpikes=6;
+varAdditionalInputs.firstNSpikes=4;
 varAdditionalInputs.firstNmins=ceil(s(varAdditionalInputs.firstNSpikes)/60); % for WHISPER only
-[HFValues,LFPValues,ADFreq,times]=rawDataFromChannel(raw_data_filename, raw_data_directory, unit_on_channel, varAdditionalInputs);
+[HFValues,LFPValues,ADFreq,times,allChsHF]=rawDataFromChannel(raw_data_filename, raw_data_directory, unit_on_channel, varAdditionalInputs);
 
 % LFP
 ind_into_ha=nextPlot(ha, ind_into_ha);
@@ -85,7 +85,8 @@ plotLFP(LFPValues, times, varAdditionalInputs, s);
 
 % High pass-filtered
 ind_into_ha=nextPlot(ha, ind_into_ha);
-plotHF(HFValues, times, varAdditionalInputs, s);
+% plotHF(HFValues, times, varAdditionalInputs, s);
+plotAllChsHF(allChsHF, times, varAdditionalInputs, s);
 
 % PCA space
 switch PC_mode
@@ -215,6 +216,46 @@ times=0:timestep:(length(HFValues)-1)*timestep;
 
 end
 
+function plotAllChsHF(HFValues, times, varAdditionalInputs, spiketimes)
+
+if isfield(varAdditionalInputs, 'timeWindowToPlotAtSpike')
+    window=varAdditionalInputs.timeWindowToPlotAtSpike;
+else
+    window=5; % default time window in secs
+end
+if isfield(varAdditionalInputs, 'firstNSpikes')
+    plotSpike=varAdditionalInputs.firstNSpikes;
+else
+    plotSpike=1; % default spike to plot
+end
+if spiketimes(plotSpike)-(window/2)<times(1)
+    startAtTime=times(1);
+else
+    startAtTime=spiketimes(plotSpike)-(window/2);
+end
+if spiketimes(plotSpike)+(window/2)>times(end)
+    endAtTime=times(end);
+else
+    endAtTime=spiketimes(plotSpike)+(window/2);
+end
+if endAtTime<startAtTime
+    endAtTime=times(end);
+end
+[~,startind]=min(abs(times-startAtTime),[],'all','omitnan');
+[~,endind]=min(abs(times-endAtTime),[],'all','omitnan');
+
+plot(times(startind:endind),HFValues(:,startind:endind));
+
+% Label spike times
+s=spiketimes(spiketimes>startAtTime & spiketimes<endAtTime);
+hold on;
+scatter(s,max(HFValues(:,startind:endind),[],'all','omitnan'),50,'r','Marker','*');
+axis tight
+xlabel('Time (s)');
+ylabel('High-passed');
+
+end
+
 function plotHF(HFValues, times, varAdditionalInputs, spiketimes)
 
 if isfield(varAdditionalInputs, 'timeWindowToPlotAtSpike')
@@ -312,12 +353,10 @@ data=data';
 
 end
 
-function [HFout,LFPout,Fs,times]=rawDataFromChannel(raw_data_filename, raw_data_directory, unit_on_channel, varAdditionalInputs)
+function [HFout,LFPout,Fs,times,allChsHF]=rawDataFromChannel(raw_data_filename, raw_data_directory, unit_on_channel, varAdditionalInputs)
 
 % Replace with your own function
-
-% For WHISPER system
-[HFout,LFPout,Fs,times]=readRawData(raw_data_filename, raw_data_directory, unit_on_channel, varAdditionalInputs.firstNmins, varAdditionalInputs);
+[HFout,LFPout,Fs,times,allChsHF]=readRawData(raw_data_filename, raw_data_directory, unit_on_channel, varAdditionalInputs.firstNmins, varAdditionalInputs);
 
 end
 
@@ -334,15 +373,30 @@ ADFreq=a.data.ADFreq;
 
 end
 
-function [HFout,LFPout,Fs,times]=readRawData(raw_data_filename, raw_data_directory, readCh, firstNmins, varAdditionalInputs)
+function [readinorder,chnames]=probeMapping()
+
+supertodeep=[13 10 12 14 2 15 32 4 6 8 9 11 5 3 26 24 30 28 31 29 16 17 18 1 25 19 27 21 20 22 23];
+acqorder=[0:31]+1;
+[~,si]=sort(supertodeep,'ascend');
+readinorder=acqorder(si);
+chnames=1:length(readinorder);
+
+end
+
+function [HFout,LFPout,Fs,times,data]=readRawData(raw_data_filename, raw_data_directory, readCh, firstNmins, varAdditionalInputs)
 
 % Replace with your own code
 
 % Kim uses this for WHISPER system
 disp('Reading in raw data');
-[data,Fs]=readWHISPER(raw_data_filename, raw_data_directory, varAdditionalInputs.trodeChs, firstNmins);
+[readinorder,chnames]=probeMapping();
+readthese=nan(1,length(varAdditionalInputs.trodeChs));
+for i=1:length(varAdditionalInputs.trodeChs)
+    readthese(i)=readinorder(chnames==varAdditionalInputs.trodeChs(i));
+end
+[data,Fs]=readWHISPER(raw_data_filename, raw_data_directory, readthese, firstNmins);
 disp('Finished reading raw data');
-times=0:1/Fs:(size(data,2)-1)*(1/Fs);
+times=1/Fs:1/Fs:size(data,2)*(1/Fs); 
 % take only some of the data
 takeLastNMinutes=1; % in minutes
 takeInds=ceil(takeLastNMinutes*60)*Fs;
@@ -353,7 +407,8 @@ end
 f=find(varAdditionalInputs.trodeChs==readCh);
 LFPout=bandpass(data(f,:), Fs, 0.1, 300);
 for i=1:size(data,1)
-    data(i,:)=bandpass(data(i,:), Fs, 300, Fs);
+    temp=fftFilt_short(data(i,:)', Fs, 300, 2); % high pass
+    data(i,:)=temp';
 end
 if isfield(varAdditionalInputs,'furtherProcessData')
     if ~isempty(varAdditionalInputs.furtherProcessData) % this field should contain a function handle
