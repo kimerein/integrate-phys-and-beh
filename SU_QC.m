@@ -71,14 +71,13 @@ plot_autocorr(spikes, unit_assign);
 % Waveform stability and firing rate
 ind_into_ha=nextPlot(ha, ind_into_ha);
 plotWaveformAmplitudeStability(spikes, unit_assign); hold on;
-plotFiringRate(spikes, unit_assign, 100); % last argument is binsize in ms for histogram of firing rate
+plotFiringRate(spikes, unit_assign, 1000); % last argument is binsize in ms for histogram of firing rate
 
 % Get some raw data
 s=getUnitSpiketimes(spikes, unit_assign);
-varAdditionalInputs.firstNSpikes=20;
-varAdditionalInputs.firstNmins=s(varAdditionalInputs.firstNSpikes)/60; % for WHISPER only
-[HFValues,LFPValues,ADFreq]=rawDataFromChannel(raw_data_filename, raw_data_directory, unit_on_channel, varAdditionalInputs);
-times=timepoints(ADFreq,HFValues);
+varAdditionalInputs.firstNSpikes=6;
+varAdditionalInputs.firstNmins=ceil(s(varAdditionalInputs.firstNSpikes)/60); % for WHISPER only
+[HFValues,LFPValues,ADFreq,times]=rawDataFromChannel(raw_data_filename, raw_data_directory, unit_on_channel, varAdditionalInputs);
 
 % LFP
 ind_into_ha=nextPlot(ha, ind_into_ha);
@@ -109,13 +108,24 @@ switch PC_mode
 end
 
 % Behavior-triggered PSTHs
+trialDuration=5;
+timeBin=0.1;
+baselineWindow=1;
+if ~isempty(behavior_timepoints)
+    % plot behavior event-aligned PSTH
+    for i=1:length(behavior_timepoints)
+        beh_timepoints=behavior_timepoints{i};
+        ind_into_ha=nextPlot(ha, ind_into_ha);
+        plotPSTH(spikes, unit_assign, beh_timepoints, trialDuration, timeBin, baselineWindow, true);
+    end
+end
 
 end
 
 function plotFiringRate(spikes, unit_assign, binsize)
 
 % binsize in ms
-spiketimes=spikes.spiketimes(ismember(spikes.assigns, unit_assign));
+spiketimes=spikes.unwrapped_times(ismember(spikes.assigns, unit_assign));
 [n,x]=histcounts(spiketimes,0:binsize/1000:max(spiketimes));
 [n,x]=cityscape_hist(n,x);
 yyaxis right
@@ -147,8 +157,8 @@ function plotWaveformAmplitudeStability(spikes, unit_assign)
 which=ismember(spikes.assigns, unit_assign);
 onChannel=mode(spikes.info.detect.event_channel(ismember(spikes.assigns, unit_assign)));
 y=range(squeeze(spikes.waveforms(which,:,onChannel)),2);
-x=spikes.spiketimes(ismember(spikes.assigns, unit_assign));
-scatter(x,y,[],'b','filled','MarkerFaceAlpha',0.2);
+x=spikes.unwrapped_times(ismember(spikes.assigns, unit_assign));
+scatter(x,y,[],'b','filled','MarkerFaceAlpha',0.05);
 xlabel('Time (s)');
 ylabel('Waveform amp','Color','b');
 
@@ -194,7 +204,7 @@ function plotUnitInPCspace(spikes, which, pc_dim1, pc_dim2, c)
 
 x = spikes.waveforms(which,:) * spikes.info.pca.v(:,pc_dim1);
 y = spikes.waveforms(which,:) * spikes.info.pca.v(:,pc_dim2);
-scatter(x,y,[],c,'filled','MarkerFaceAlpha',0.2);
+scatter(x,y,[],c,'filled','MarkerFaceAlpha',0.05);
 
 end
 
@@ -213,7 +223,7 @@ else
     window=5; % default time window in secs
 end
 if isfield(varAdditionalInputs, 'firstNSpikes')
-    plotSpike=ceil(varAdditionalInputs.firstNSpikes/2);
+    plotSpike=varAdditionalInputs.firstNSpikes;
 else
     plotSpike=1; % default spike to plot
 end
@@ -226,6 +236,9 @@ if spiketimes(plotSpike)+(window/2)>times(end)
     endAtTime=times(end);
 else
     endAtTime=spiketimes(plotSpike)+(window/2);
+end
+if endAtTime<startAtTime
+    endAtTime=times(end);
 end
 [~,startind]=min(abs(times-startAtTime),[],'all','omitnan');
 [~,endind]=min(abs(times-endAtTime),[],'all','omitnan');
@@ -250,7 +263,7 @@ else
     window=5; % default time window in secs
 end
 if isfield(varAdditionalInputs, 'firstNSpikes')
-    plotSpike=ceil(varAdditionalInputs.firstNSpikes/2);
+    plotSpike=varAdditionalInputs.firstNSpikes;
 else
     plotSpike=1; % default spike to plot
 end
@@ -263,6 +276,9 @@ if spiketimes(plotSpike)+(window/2)>times(end)
     endAtTime=times(end);
 else
     endAtTime=spiketimes(plotSpike)+(window/2);
+end
+if endAtTime<startAtTime
+    endAtTime=times(end);
 end
 [~,startind]=min(abs(times-startAtTime),[],'all','omitnan');
 [~,endind]=min(abs(times-endAtTime),[],'all','omitnan');
@@ -292,21 +308,16 @@ data=fftFilt_short(data',Fs,highCutoff,1);
 data=data';
 % High-pass-filter data
 data=fftFilt_short(data',Fs,lowCutoff,2);
-data=real(data');
-% Align all traces to initial value = 0
-for i=1:size(data,1)
-    initVal=data(i,1);
-    data(i,:)=data(i,:)-initVal;
-end
+data=data';
 
 end
 
-function [HFout,LFPout,Fs]=rawDataFromChannel(raw_data_filename, raw_data_directory, unit_on_channel, varAdditionalInputs)
+function [HFout,LFPout,Fs,times]=rawDataFromChannel(raw_data_filename, raw_data_directory, unit_on_channel, varAdditionalInputs)
 
 % Replace with your own function
 
 % For WHISPER system
-[HFout,LFPout,Fs]=readRawData(raw_data_filename, raw_data_directory, unit_on_channel, varAdditionalInputs.firstNmins, varAdditionalInputs);
+[HFout,LFPout,Fs,times]=readRawData(raw_data_filename, raw_data_directory, unit_on_channel, varAdditionalInputs.firstNmins, varAdditionalInputs);
 
 end
 
@@ -323,12 +334,22 @@ ADFreq=a.data.ADFreq;
 
 end
 
-function [HFout,LFPout,Fs]=readRawData(raw_data_filename, raw_data_directory, readCh, firstNmins, varAdditionalInputs)
+function [HFout,LFPout,Fs,times]=readRawData(raw_data_filename, raw_data_directory, readCh, firstNmins, varAdditionalInputs)
 
 % Replace with your own code
 
 % Kim uses this for WHISPER system
+disp('Reading in raw data');
 [data,Fs]=readWHISPER(raw_data_filename, raw_data_directory, varAdditionalInputs.trodeChs, firstNmins);
+disp('Finished reading raw data');
+times=0:1/Fs:(size(data,2)-1)*(1/Fs);
+% take only some of the data
+takeLastNMinutes=1; % in minutes
+takeInds=ceil(takeLastNMinutes*60)*Fs;
+if size(data,2)>takeInds
+    data=data(:,end-takeInds:end);
+    times=times(:,end-takeInds:end);
+end
 f=find(varAdditionalInputs.trodeChs==readCh);
 LFPout=bandpass(data(f,:), Fs, 0.1, 300);
 for i=1:size(data,1)
@@ -369,7 +390,6 @@ end
 
 function wvfmPlot(wvfms, Fs, rpv, total_spikes)
 
-wvfms=wvfms(:,[2 1 3 4]);
 wvfms=[wvfms; nan(1,size(wvfms,2))];
 wvfms=wvfms(1:end);
 plot(0:1/Fs:(size(wvfms,2)-1)*(1/Fs),wvfms,'Color','k','LineWidth',1);
@@ -421,7 +441,7 @@ end
 
 function plot_autocorr(spikes, unit_assign)     
 
-spiketimes = spikes.spiketimes(ismember(spikes.assigns, unit_assign));
+spiketimes = spikes.unwrapped_times(ismember(spikes.assigns, unit_assign));
 shadow = spikes.params.shadow;
 rp     = spikes.params.refractory_period;
 
@@ -451,4 +471,109 @@ set(gca,'YLim',[0 ymax])
 xlabel('Time lag (msec)')
 ylabel('Autocorrelation (Hz)')
     
+end
+
+function [spikecounts,timepoints]=lineUpSpikesToBehavior(spikes, unit_assign, beh_timepoints, trialDuration, timeBin, baselineWindow)
+
+% Sort spikes into beh-aligned trials
+s=spikes.spiketimes(spikes.assigns == unit_assign);
+timepoints=0:timeBin:trialDuration;
+spikecounts=nan(length(beh_timepoints),length(timepoints)-1);
+for i=1:length(beh_timepoints)
+    spikes_in_this_trial=s(s>=beh_timepoints(i)-baselineWindow & s<=beh_timepoints(i)+(trialDuration-baselineWindow));
+    [N,edges]=histcounts(spikes_in_this_trial-beh_timepoints(i)+baselineWindow,timepoints);
+    spikecounts(i,:)=N;
+end
+
+end
+
+function plotPSTH(spikes, unit_assign, beh_timepoints, trialDuration, timeBin, baselineWindow, bsmooth)
+
+[spikecounts,timepoints]=lineUpSpikesToBehavior(spikes, unit_assign, beh_timepoints, trialDuration, timeBin, baselineWindow);
+% Compute center of bins
+centers = timepoints + diff(timepoints(1:2))/2;
+n=mean(spikecounts,1);
+se=std(spikecounts,0,1,'omitnan')./sqrt(size(spikecounts,1));
+if bsmooth
+    xpoints=centers(1:end-1);
+    ypoints=smooth(n(1:end-1),3);
+else
+    xpoints=centers(1:end-1);
+    ypoints=n(1:end-1);
+end
+se=se(1:end-1);
+plot(xpoints,ypoints,'Color','k','LineWidth',1); hold on;
+plot(xpoints,ypoints-se,'Color','k','LineWidth',0.5);
+plot(xpoints,ypoints+se,'Color','k','LineWidth',0.5);
+
+end
+
+function [varargout]=psth_trialByTrial(spikes,spiketimes_field,binsize,bsmooth,duration,nTrials,theseTrials)
+
+% Set duration and number of trials
+if ~isempty(nTrials)
+    numtrials=nTrials;
+elseif isfield(spikes,'sweeps')
+    a=unique(spikes.trials);
+    if length(spikes.sweeps.trials)==4*length(a)
+        numtrials=length(unique(spikes.trials));
+    else
+        numtrials = length(spikes.sweeps.trials);
+    end
+else
+    numtrials=length(unique(spikes.trials));
+end
+% Set spiketimes
+spiketimes = spikes.(spiketimes_field);
+% Convert binsize from ms to s
+binsize = binsize/1000;
+% Get counts
+edges = 0:binsize:duration;
+n = histc(spiketimes,edges);
+n = n/numtrials/binsize;
+
+nsForStdev=zeros(numtrials,size(n,2));
+if ~isempty(theseTrials)
+    allTrials=theseTrials;
+else
+    allTrials=unique(spikes.trials);
+end
+if length(allTrials)~=numtrials
+    if ~isempty(theseTrials)
+        allTrials=theseTrials;
+    elseif length(spikes.sweeps.trials)==numtrials
+        allTrials=spikes.sweeps.trials;
+    else
+        disp('Needed to fill in trials -- be sure you are using contiguous daq files');
+        allTrials=min(unique(spikes.trials)):max(unique(spikes.trials));
+    end
+end      
+for i=1:length(allTrials)
+    cspikes=filtspikes(spikes,0,'trials',allTrials(i));
+    if isempty(cspikes.spiketimes)
+        continue
+    end
+    nsForStdev(i,:)=histc(cspikes.spiketimes,edges);
+end
+nsForStdev=nsForStdev/binsize;
+if all(isnan(n))
+    n = 0;
+end
+% Compute center of bins
+centers = edges + diff(edges(1:2))/2;
+% Last point of n contains values falling on edge(end) -- usually zero
+if bsmooth
+    xpoints=centers(1:end-1);
+    ypoints=smooth(n(1:end-1),3);
+else
+    xpoints=centers(1:end-1);
+    ypoints=n(1:end-1);
+end
+
+varargout{1} = n;
+varargout{2} = centers;
+varargout{3} = edges;
+varargout{4} = xpoints;
+varargout{5} = ypoints;
+varargout{6} = nsForStdev;
 end
