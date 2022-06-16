@@ -31,7 +31,7 @@ varAdditionalInputs.furtherProcessData=@furtherProcessWHISPER;
 % Column 4, Row 1 - LFP closeup
 % Column 4, Row 2 - HF closeup
 % Next columns - PCA space
-% Next columns - PSTH aligned to behavior events
+% Next columns - PSTH aligned to behavior events (optional)
 n_rows=2;
 PC_mode='unique'; % either 'unique' or 'all'
 switch PC_mode
@@ -42,7 +42,7 @@ switch PC_mode
         show_first_N_PCs=4; % will show combos of this many PCs (top PCs that separate this unit from rest of spikes)
         show_N_views_of_PCA_space=factorial(show_first_N_PCs)/(factorial(2)*factorial(show_first_N_PCs-2));
 end
-N_behavior_alignments=4;
+N_behavior_alignments=0;
 PCA_columns=ceil(show_N_views_of_PCA_space/n_rows);
 beh_columns=ceil(N_behavior_alignments/n_rows);
 n_columns=3+PCA_columns+beh_columns;
@@ -75,7 +75,7 @@ plotFiringRate(spikes, unit_assign, 1000); % last argument is binsize in ms for 
 
 % Get some raw data
 s=getUnitSpiketimes(spikes, unit_assign);
-varAdditionalInputs.firstNSpikes=4;
+varAdditionalInputs.firstNSpikes=10;
 varAdditionalInputs.firstNmins=ceil(s(varAdditionalInputs.firstNSpikes)/60); % for WHISPER only
 [HFValues,LFPValues,ADFreq,times,allChsHF]=rawDataFromChannel(raw_data_filename, raw_data_directory, unit_on_channel, varAdditionalInputs);
 

@@ -31,7 +31,6 @@ varAdditionalInputs.furtherProcessData=@furtherProcessWHISPER;
 % Column 4, Row 1 - LFP closeup
 % Column 4, Row 2 - HF closeup
 % Next columns - PCA space
-% Next columns - PSTH aligned to behavior events
 n_rows=2;
 PC_mode='unique'; % either 'unique' or 'all'
 switch PC_mode
@@ -42,9 +41,7 @@ switch PC_mode
         show_first_N_PCs=4; % will show combos of this many PCs (top PCs that separate this unit from rest of spikes)
         show_N_views_of_PCA_space=factorial(show_first_N_PCs)/(factorial(2)*factorial(show_first_N_PCs-2));
 end
-N_behavior_alignments=4;
 PCA_columns=ceil(show_N_views_of_PCA_space/n_rows);
-beh_columns=ceil(N_behavior_alignments/n_rows);
 n_columns=3+PCA_columns+beh_columns;
 
 % Format figure
@@ -77,7 +74,7 @@ plotFiringRate(spikes, unit_assign, 1000); % last argument is binsize in ms for 
 s=getUnitSpiketimes(spikes, unit_assign);
 varAdditionalInputs.firstNSpikes=4;
 varAdditionalInputs.firstNmins=ceil(s(varAdditionalInputs.firstNSpikes)/60); % for WHISPER only
-[HFValues,LFPValues,ADFreq,times,allChsHF]=rawDataFromChannel(raw_data_filename, raw_data_directory, unit_on_channel, varAdditionalInputs, spikes);
+[HFValues,LFPValues,ADFreq,times,allChsHF]=rawDataFromChannel(raw_data_filename, raw_data_directory, unit_on_channel, varAdditionalInputs);
 
 % LFP
 ind_into_ha=nextPlot(ha, ind_into_ha);
@@ -353,15 +350,10 @@ data=data';
 
 end
 
-function [HFout,LFPout,Fs,times,allChsHF]=rawDataFromChannel(raw_data_filename, raw_data_directory, unit_on_channel, varAdditionalInputs, spikes)
+function [HFout,LFPout,Fs,times,allChsHF]=rawDataFromChannel(raw_data_filename, raw_data_directory, unit_on_channel, varAdditionalInputs)
 
 % Replace with your own function
-
-% For WHISPER system
-% spikes.params.window_size  = 1.5;       % ms, width of a spike
-%     spikes.params.shadow = 0.75;            % ms, enforced dead region after each spike
-%     spikes.params.cross_time = 0.6;  
-[HFout,LFPout,Fs,times,allChsHF]=readRawData(raw_data_filename, raw_data_directory, unit_on_channel, varAdditionalInputs.firstNmins, varAdditionalInputs, size(spikes.waveforms,2)+ceil(size(spikes.waveforms,2)/2));
+[HFout,LFPout,Fs,times,allChsHF]=readRawData(raw_data_filename, raw_data_directory, unit_on_channel, varAdditionalInputs.firstNmins, varAdditionalInputs);
 
 end
 
@@ -388,19 +380,20 @@ chnames=1:length(readinorder);
 
 end
 
-function [HFout,LFPout,Fs,times,data]=readRawData(raw_data_filename, raw_data_directory, readCh, firstNmins, varAdditionalInputs, chunkSize)
+function [HFout,LFPout,Fs,times,data]=readRawData(raw_data_filename, raw_data_directory, readCh, firstNmins, varAdditionalInputs)
 
 % Replace with your own code
 
 % Kim uses this for WHISPER system
 disp('Reading in raw data');
 [readinorder,chnames]=probeMapping();
-[data,Fs]=readWHISPER(raw_data_filename, raw_data_directory, varAdditionalInputs.trodeChs, firstNmins);
+readthese=nan(1,length(varAdditionalInputs.trodeChs));
+for i=1:length(varAdditionalInputs.trodeChs)
+    readthese(i)=readinorder(chnames==varAdditionalInputs.trodeChs(i));
+end
+[data,Fs]=readWHISPER(raw_data_filename, raw_data_directory, readthese, firstNmins);
 disp('Finished reading raw data');
 times=1/Fs:1/Fs:size(data,2)*(1/Fs); 
-% spike sorting with UltraMegaSort takes chunks of data
-% offsets time by
-% times=times-(chunkSize*(1/Fs));
 % take only some of the data
 takeLastNMinutes=1; % in minutes
 takeInds=ceil(takeLastNMinutes*60)*Fs;
