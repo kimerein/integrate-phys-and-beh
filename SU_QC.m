@@ -1,10 +1,9 @@
 function SU_QC(spikes, unit_assign, unit_on_channel, raw_data_filename, raw_data_directory, behavior_timepoints, varAdditionalInputs)
 
-varAdditionalInputs.furtherProcessData=@furtherProcessWHISPER;
-
 % Creates summary figure for quality control (QC) of single units (SU)
 
-% spikes structure
+% spikes structure          a structure of all spikes detected on these
+%                           channels in this experiment
 % spikes.params.Fs          sampling rate of signal
 % spikes.waveforms          for each spike, waveform around spike minimum
 %                           (peak of action potential), as a 3D array
@@ -14,14 +13,46 @@ varAdditionalInputs.furtherProcessData=@furtherProcessWHISPER;
 %                           (e.g., a tetrode would have P = 4)
 % spikes.params.refractory_period 
 %                           refractory period in milliseconds
-%
+% spikes.assigns            a number representing each unit to which
+%                           spike belongs (1 X N)
+% spikes.info.detect.event_channel
+%                           1 X N vector indicating which channel has
+%                           biggest deflection
+% spikes.info.pca.v         a Q X Q matrix, where Q = M X P,
+%                           such that spikes.waveforms(which,:) * spikes.info.pca.v(:,pc_dim)
+%                           gives the value of the spike waveform (concatenated across channels) 
+%                           projected onto principal component pc_dim
+% spikes.params.shadow      ms, enforced dead region after each spike
+
+% unit_assign               a number representing which single unit to plot
+%                           corresponds to numbers in spikes.assigns
+
+% unit_on_channel           for reading raw data from WHISPER system
+
+% raw_data_filename         filename containing raw data
+
+% raw_data_directory        directory with raw data
+
+% behavior_timepoints       optional cell array containing timepoints of
+%                           behavior events. Each cell is a different type
+%                           of behavior event. Each cell contains a vector
+%                           of event times (matching times in
+%                           spikes.spiketimes).
+
 % varAdditionalInputs       structure containing any other necessary inputs
 % varAdditionalInputs may contain
 %       varAdditionalInputs.timeWindowToPlotAtSpike 
 %                           time window around a spike for plotting
 %                           high-passed and low-passed raw data
+%       varAdditionalInputs.furtherProcessData
+%                           any further processing steps after reading raw
+%                           data, passed as a function handle
+%                           e.g., @furtherProcessWHISPER
+%       varAdditionalInputs.trodeChs 
+%                           for reading in data from WHISPER system, which
+%                           channels were included in this spike sorting
 
-% Layout 
+% Layout -- change here to modify figure layout
 % Column 1, Row 1 - average spike waveform
 % Column 1, Row 2 - spike amplitude distribution
 % Column 2, Row 1 - autocorrelation
@@ -126,7 +157,7 @@ end
 function plotFiringRate(spikes, unit_assign, binsize)
 
 % binsize in ms
-spiketimes=spikes.unwrapped_times(ismember(spikes.assigns, unit_assign));
+spiketimes=spikes.spiketimes(ismember(spikes.assigns, unit_assign));
 [n,x]=histcounts(spiketimes,0:binsize/1000:max(spiketimes));
 [n,x]=cityscape_hist(n,x);
 yyaxis right
@@ -158,7 +189,7 @@ function plotWaveformAmplitudeStability(spikes, unit_assign)
 which=ismember(spikes.assigns, unit_assign);
 onChannel=mode(spikes.info.detect.event_channel(ismember(spikes.assigns, unit_assign)));
 y=range(squeeze(spikes.waveforms(which,:,onChannel)),2);
-x=spikes.unwrapped_times(ismember(spikes.assigns, unit_assign));
+x=spikes.spiketimes(ismember(spikes.assigns, unit_assign));
 scatter(x,y,[],'b','filled','MarkerFaceAlpha',0.05);
 xlabel('Time (s)');
 ylabel('Waveform amp','Color','b');
@@ -496,7 +527,7 @@ end
 
 function plot_autocorr(spikes, unit_assign)     
 
-spiketimes = spikes.unwrapped_times(ismember(spikes.assigns, unit_assign));
+spiketimes = spikes.spiketimes(ismember(spikes.assigns, unit_assign));
 shadow = spikes.params.shadow;
 rp     = spikes.params.refractory_period;
 
@@ -561,74 +592,4 @@ plot(xpoints,ypoints,'Color','k','LineWidth',1); hold on;
 plot(xpoints,ypoints-se,'Color','k','LineWidth',0.5);
 plot(xpoints,ypoints+se,'Color','k','LineWidth',0.5);
 
-end
-
-function [varargout]=psth_trialByTrial(spikes,spiketimes_field,binsize,bsmooth,duration,nTrials,theseTrials)
-
-% Set duration and number of trials
-if ~isempty(nTrials)
-    numtrials=nTrials;
-elseif isfield(spikes,'sweeps')
-    a=unique(spikes.trials);
-    if length(spikes.sweeps.trials)==4*length(a)
-        numtrials=length(unique(spikes.trials));
-    else
-        numtrials = length(spikes.sweeps.trials);
-    end
-else
-    numtrials=length(unique(spikes.trials));
-end
-% Set spiketimes
-spiketimes = spikes.(spiketimes_field);
-% Convert binsize from ms to s
-binsize = binsize/1000;
-% Get counts
-edges = 0:binsize:duration;
-n = histc(spiketimes,edges);
-n = n/numtrials/binsize;
-
-nsForStdev=zeros(numtrials,size(n,2));
-if ~isempty(theseTrials)
-    allTrials=theseTrials;
-else
-    allTrials=unique(spikes.trials);
-end
-if length(allTrials)~=numtrials
-    if ~isempty(theseTrials)
-        allTrials=theseTrials;
-    elseif length(spikes.sweeps.trials)==numtrials
-        allTrials=spikes.sweeps.trials;
-    else
-        disp('Needed to fill in trials -- be sure you are using contiguous daq files');
-        allTrials=min(unique(spikes.trials)):max(unique(spikes.trials));
-    end
-end      
-for i=1:length(allTrials)
-    cspikes=filtspikes(spikes,0,'trials',allTrials(i));
-    if isempty(cspikes.spiketimes)
-        continue
-    end
-    nsForStdev(i,:)=histc(cspikes.spiketimes,edges);
-end
-nsForStdev=nsForStdev/binsize;
-if all(isnan(n))
-    n = 0;
-end
-% Compute center of bins
-centers = edges + diff(edges(1:2))/2;
-% Last point of n contains values falling on edge(end) -- usually zero
-if bsmooth
-    xpoints=centers(1:end-1);
-    ypoints=smooth(n(1:end-1),3);
-else
-    xpoints=centers(1:end-1);
-    ypoints=n(1:end-1);
-end
-
-varargout{1} = n;
-varargout{2} = centers;
-varargout{3} = edges;
-varargout{4} = xpoints;
-varargout{5} = ypoints;
-varargout{6} = nsForStdev;
 end
