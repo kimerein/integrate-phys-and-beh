@@ -23,6 +23,17 @@ end
 
 for i=1:framesPerChunk % How many frames to read initially
     [frame,EOF]=step(videoFReader);
+    % X and Y might be flipped ... check this with user
+    if i==1
+        answer=questdlg(['Frame size is ' num2str(size(frame,1)) ' horizontal vs ' num2str(size(frame,2)) ' vertical. Flip horizontal and vertical?']);
+    end
+    switch answer
+        case 'Yes'
+            flipXandY=true;
+        case 'No'
+        case 'Cancel'
+            return
+    end
     if EOF==true
         allframes=allframes(:,:,:,1:i-1);
         break
@@ -71,8 +82,8 @@ end
 
 % Change mirrors to "virtual cameras"
 % Need to flip both mirror points horizontally
-side_image_points=flipImagePoints(side_image_points,size(frame,2),size(frame,1),'horizontal');
-under_image_points=flipImagePoints(under_image_points,size(frame,2),size(frame,1),'horizontal');
+side_image_points=flipImagePoints(side_image_points,size(frame,1),size(frame,2),'horizontal');
+under_image_points=flipImagePoints(under_image_points,size(frame,1),size(frame,2),'horizontal');
 
 end
 

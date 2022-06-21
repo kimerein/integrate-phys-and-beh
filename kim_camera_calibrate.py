@@ -25,8 +25,8 @@ from deeplabcut.utils import auxiliaryfunctions
 from deeplabcut.utils import auxiliaryfunctions_3d
 
 def main():
-    config=r'C:\Users\sabatini\Documents\DLC_3D\Test2022-Kim-2022-01-04-3d\config.yaml'
-    testimg=r'C:\Users\sabatini\Documents\vid_2021-02-10-165418-0067-1.jpg'
+    config=r'C:\Users\sabatini\Documents\DLC_3D\Test3D-Whitney-2022-06-21-3d\config.yaml'
+    testimg=r'C:\Users\sabatini\Documents\test_vid_july3.jpg'
      
     # this code is only for one camera/mirror/view pair, called for example 'sidecam' and 'undercam'
     # can rerun this calibration for a different camera pair

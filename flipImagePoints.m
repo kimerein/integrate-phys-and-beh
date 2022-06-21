@@ -9,6 +9,9 @@ switch flipwhichway
             flipped_imgpoints(i,:)=[image_xsize-imgpoints(i,1), imgpoints(i,2)];
         end
     case 'vertical'
+        for i=1:size(imgpoints,1)
+            flipped_imgpoints(i,:)=[imgpoints(i,1), image_ysize-imgpoints(i,2)];
+        end
 end
 
 end
