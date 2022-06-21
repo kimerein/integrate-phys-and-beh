@@ -453,7 +453,7 @@ end
 function rpv=count_RPV(spikes, unit_assign)
 
 % counts refractory period violations
-spiketimes =  sort( spikes.unwrapped_times(ismember(spikes.assigns, unit_assign)) );
+spiketimes =  sort( spikes.spiketimes(ismember(spikes.assigns, unit_assign)) );
 rpv  = sum( diff(spiketimes)  <= (spikes.params.refractory_period * .001) );
 
 end

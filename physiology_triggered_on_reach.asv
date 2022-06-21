@@ -87,7 +87,7 @@ settings.scale_factor=floor(settings.photo_fs/settings.movie_fs);
 settings.photo_dec=settings.scale_factor-15;
 settings.movie_dec=1;
 settings.minlagForInitialAlign=[];
-settings.maxlagForInitialAlign=[]; % [] is don't want to constrain alignment
+settings.maxlagForInitialAlign=10; %[]; % [] is don't want to constrain alignment
 settings.try_delay1=0;
 settings.try_delay2=0;
 
@@ -111,10 +111,10 @@ alltbt1=selectRows(alltbt,fromvid);
 
 if length(a)>1
     isInBackHalf=true;
-    fractionThru=0.5;
+    fractionThru=0.65;
 %     isInBackHalf=[];
 %     fractionThru=[];
-    [discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes,padPhotoTimesAtFront]=alignDistractors(totalalignment.movie_distractor(totalalignment.from_second_video==1),data.distractor,distract_thresh_movie,distract_thresh_photometry,totalalignment.timesfromarduino(totalalignment.from_second_video==1),data.distractor_times,settings,[],[]);
+    [discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes,padPhotoTimesAtFront]=alignDistractors(totalalignment.movie_distractor(totalalignment.from_second_video==1),data.distractor,distract_thresh_movie,distract_thresh_photometry,totalalignment.timesfromarduino(totalalignment.from_second_video==1),data.distractor_times,settings,isInBackHalf,fractionThru);
     alltbt2=scaleMovTimes(alltbt,scaleMovieTimes,addToMovieTimes,alltbt.from_second_video(:,1));
     [tbt_data_vid2,shifted_data_vid2,alltbt2]=shiftPhotometryToBehavior(data,discardedPhotoFrames_time,frontShift_time,movie_LED,movie_times,totalalignment.(useCue),totalalignment,alltbt2,minTimeBetweenCues,totalalignment.from_second_video==1,alltbt.from_second_video(:,1),padPhotoTimesAtFront);
     fromvid=alltbt.from_second_video(:,1);
@@ -127,7 +127,11 @@ if length(a)>1
     alltbt2=selectRows(alltbt,fromvid);
     
     if isfield(totalalignment,'from_third_video')
-        [discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes,padPhotoTimesAtFront]=alignDistractors(totalalignment.movie_distractor(totalalignment.from_third_video==1),data.distractor,distract_thresh_movie,distract_thresh_photometry,totalalignment.timesfromarduino(totalalignment.from_third_video==1),data.distractor_times,settings,true,0.5);
+%         isInBackHalf=true;
+%         fractionThru=0.95;
+        isInBackHalf=[];
+        fractionThru=[];
+        [discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes,padPhotoTimesAtFront]=alignDistractors(totalalignment.movie_distractor(totalalignment.from_third_video==1),data.distractor,distract_thresh_movie,distract_thresh_photometry,totalalignment.timesfromarduino(totalalignment.from_third_video==1),data.distractor_times,settings,isInBackHalf,fractionThru);
         alltbt3=scaleMovTimes(alltbt,scaleMovieTimes,addToMovieTimes,alltbt.from_third_video(:,1));
         [tbt_data_vid3,shifted_data_vid3,alltbt3]=shiftPhotometryToBehavior(data,discardedPhotoFrames_time,frontShift_time,movie_LED,movie_times,totalalignment.(useCue),totalalignment,alltbt3,minTimeBetweenCues,totalalignment.from_third_video==1,alltbt.from_third_video(:,1),padPhotoTimesAtFront);
         fromvid=alltbt.from_third_video(:,1);
@@ -402,9 +406,11 @@ minITI=settings.minITI; % in seconds, minimal ITI
 % Get time delay
 timeIncs=diff(data.timesfromarduino(data.timesfromarduino~=0));
 mo=mode(timeIncs);
-timeIncs(timeIncs==mo)=nan;
-bettermode=mode(timeIncs); % in ms
-% bettermode=mo;
+bettermode=mo;
+if mo==0
+    timeIncs(timeIncs==mo)=nan;
+    bettermode=mode(timeIncs); % in ms
+end
 bettermode=bettermode/1000; % in seconds
 
 % Fix aliasing issues with resampled data
