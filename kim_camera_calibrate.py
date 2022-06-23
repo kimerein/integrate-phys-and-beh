@@ -46,9 +46,9 @@ def main():
     camera_focal_length_pixels=2*paw_length_in_pixels
     f_x=camera_focal_length_pixels # assume same focal lengths in x and y
     f_y=camera_focal_length_pixels
-    obj_x_offset=70 # in mm
-    obj_y_offset=66 # in mm
-    obj_z_offset=20 # in mm
+    obj_x_offset=0 #200 #70 # in mm
+    obj_y_offset=0 #100 #66 # in mm
+    obj_z_offset=0 #60 #20 # in mm
     
     # read image size
     imagesize={}

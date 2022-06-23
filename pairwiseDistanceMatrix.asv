@@ -1,0 +1,24 @@
+function pairDist=pairwiseDistanceMatrix(dataArray,referenceArray)
+
+% rows are 3 dimensions
+% columns are different points
+
+if size(dataArray,2)~=size(referenceArray,2)
+    error('dataArray and referenceArray must have the same number of points');
+end
+
+pairDist=nan(size(dataArray,2),1);
+for i=1:size(dataArray,2)
+        pairDist(i,j)=sqrt((dataArray(1,i)-dataArray(1,j))^2 + (dataArray(2,i)-dataArray(2,j))^2 + (dataArray(3,i)-dataArray(3,j))^2);
+    end
+end
+% subtract off mean
+pairDist=pairDist-mean(mean(pairDist,1,'omitnan'),2,'omitnan');
+
+figure();
+imagesc(pairDist);
+
+disp('Abs val sum of pairwise distances');
+disp(sum(sum(abs(pairDist),1,'omitnan'),2,'omitnan'));
+
+end
