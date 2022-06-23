@@ -64,7 +64,7 @@ def getRigEvents(
             cap = cv2.VideoCapture(video)
             if not cap.isOpened():
                 raise IOError(
-                    "Video could not be opened. Please check that the the file integrity."
+                    "Video could not be opened. Please check the file integrity."
                 )
             fps = cap.get(
                 5
