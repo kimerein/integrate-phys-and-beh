@@ -8,6 +8,8 @@ varNames={'Trials', 'TrialStart', 'TrialStart_s', 'Cue_onset', 'Opto_onset', 'Op
           'First_reach_timing', 'First_reach_type', 'Bin1_start', 'Bin1_end', 'N_reaches_bin1', ...
           'Bin2_start', 'Bin2_end', 'N_reaches_bin2', 'Bin3_start', 'Bin3_end', 'N_reaches_bin3'};
 
+% Realign to cue ONSET, versus OFFSET, if this was not done previously      
+      
 % Re-expand alignment into single row for signals
 % Using alignment of photometry and physiology
 % and times in tbt's
@@ -33,12 +35,24 @@ end
 
 % Add signals and names of signals
 [signal_cue,signal_cue_times,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial]=getLinedUpCueSignal(tbt, signalSpikeFields);
+% Double check
+nextSignalTbt=tbt.cueZone_onVoff;
+nextSignalTimes=tbt.times_wrt_trial_start;
+nextSignalCue=tbt.cueZone_onVoff;
+sig=fillInOtherSignals(nextSignalTbt,nextSignalTimes,nextSignalCue,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial);
+signal_ind=1;
+signals{signal_ind}=sig;
+signal_names{signal_ind}='cueZone_onVoff';
+figure();
+plot(signals{signal_ind});
+hold on;
+scatter(find(signal_cue>0.5),ones(size(find(signal_cue>0.5))));
 % Now fill in other signals
 nextSignalTbt=tbt.all_reachBatch;
 nextSignalTimes=tbt.times_wrt_trial_start;
 nextSignalCue=tbt.cueZone_onVoff;
 sig=fillInOtherSignals(nextSignalTbt,nextSignalTimes,nextSignalCue,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial);
-signal_ind=1;
+signal_ind=signal_ind+1;
 signals{signal_ind}=sig;
 signal_names{signal_ind}='all_reachBatch';
 % then go through phys and photo signals, adding them
@@ -56,8 +70,15 @@ end
 for i=1:length(photoFieldsNames)
     nextSignalTbt=signalPhotoFields.(photoFieldsNames{i});
     nextSignalTimes=signalPhotoFields.times_wrt_trial_start;
+    % for photometry, sampling rate of cue might not match sampling rate of
+    % processed photometry signal, so resample cue to match processed
+    % photometry sampling rate
     nextSignalCue=signalPhotoFields.cue;
-    sig=fillInOtherSignals(nextSignalTbt,nextSignalTimes,nextSignalCue,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial);
+    resampledSignalCue=nan(size(nextSignalTbt));
+    for j=1:size(nextSignalCue,1)
+        resampledSignalCue(j,:)=fillInFromMatchingTimes(nextSignalCue(j,:), signalPhotoFields.cue_times(j,:), signalPhotoFields.green_time(j,:));
+    end
+    sig=fillInOtherSignals(nextSignalTbt,nextSignalTimes,resampledSignalCue,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial);
     signal_ind=signal_ind+1;
     signals{signal_ind}=sig;
     signal_names{signal_ind}=photoFieldsNames{i};
@@ -109,12 +130,14 @@ if ~isempty(tbt_photo)
 end
 if ~isempty(signalSpikeFields)
     if ~isfield(signalSpikeFields,'times_wrt_trial_start')
+        signalSpikeFields.phys_timepoints(signalSpikeFields.phys_timepoints==0)=nan;
         signalSpikeFields=addTimesWrtTrialStarts(signalSpikeFields,'phys_timepoints','cue');
+        signalSpikeFields.times_wrt_trial_start(signalSpikeFields.times_wrt_trial_start<0)=nan;
     end
 end
 if ~isempty(signalPhotoFields)
     if ~isfield(signalPhotoFields,'times_wrt_trial_start')  
-        signalPhotoFields=addTimesWrtTrialStarts(signalPhotoFields,'green_time','cue;);
+        signalPhotoFields=addTimesWrtTrialStarts(signalPhotoFields,'green_time','cue');
     end
 end
 
@@ -170,6 +193,17 @@ end
 
 end
 
+function out=fillInFromMatchingTimes(signal, signal_times, match_to_times)
+
+out=nan(1,length(match_to_times));
+for i=1:length(match_to_times)
+    % find nearest neighbor
+    [~,mi]=nanmin(abs(signal_times-match_to_times(i)));
+    out(i)=signal(mi);
+end
+
+end
+
 function [signal_cue,signal_cue_times,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial]=lineUpCueChunks(tbt, cuefield, cuetimes)
 
 cue=tbt.(cuefield);
@@ -184,6 +218,7 @@ for i=1:size(cue,1)
     % find first cue onset 
     temp=cue(i,:);
     f=find(temp>0.5,1,'first');
+    fcue=f;
     % find index before next cue onset (or last index of trial)
     f2=find(temp<0.5,1,'last');
     if i==1
@@ -192,7 +227,7 @@ for i=1:size(cue,1)
     chunk=temp(f:f2);
     signal_cue=[signal_cue chunk];
     signal_cue_times=[signal_cue_times cue_times(i,f:f2)];
-    signal_cue_times_wrt_thisTrialCueStart=[signal_cue_times_wrt_thisTrialCueStart cue_times(i,f:f2)-cue_times(i,f)];
+    signal_cue_times_wrt_thisTrialCueStart=[signal_cue_times_wrt_thisTrialCueStart cue_times(i,f:f2)-cue_times(i,fcue)];
     signal_which_trial=[signal_which_trial i*ones(size(chunk))];
 end
 
@@ -305,6 +340,9 @@ function tbt=takeOnlyTheseTrials(tbt,takeThese)
 f=fieldnames(tbt);
 for i=1:length(f)
     temp=tbt.(f{i});
+    if isvector(temp)
+        continue
+    end
     temp=temp(takeThese(~isnan(takeThese)),:);
     tbt.(f{i})=temp;
 end
