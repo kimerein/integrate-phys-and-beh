@@ -8,19 +8,6 @@ varNames={'Trials', 'TrialStart', 'TrialStart_s', 'Cue_onset', 'Opto_onset', 'Op
           'First_reach_timing', 'First_reach_type', 'Bin1_start', 'Bin1_end', 'N_reaches_bin1', ...
           'Bin2_start', 'Bin2_end', 'N_reaches_bin2', 'Bin3_start', 'Bin3_end', 'N_reaches_bin3'};
 
-% Realign to cue ONSET, versus OFFSET, if this was not done previously      
-minITI=9.5;
-thesePhotoFieldsUseTimeField1={'green_mod','red_mod','opto','cue','cue_times','distractor','from_first_video','from_second_video'};
-timeField1='cue_times';
-thesePhotoFieldsUseTimeField2={'green_ch','red_ch','nan_out_red_ch','green_time','raw_green_ch','red_time','raw_red_ch','recalc_green_ch','recalc_red_ch'};
-timeField2='red_time';
-temp=photometry_tbt.(timeField1);
-photometry_tbt.([timeField1 '_wrt_trial_start'])=temp-repmat(temp(:,1),1,size(temp,2));
-temp=photometry_tbt.(timeField2);
-photometry_tbt.([timeField2 '_wrt_trial_start'])=temp-repmat(temp(:,1),1,size(temp,2));
-
-[photometry_tbt,alignedCueTo]=realignToCue(tbt_photo,'cue',thesePhotoFieldsUseTimeField1,timeField1,timeField2,minITI);
-
 % Re-expand alignment into single row for signals
 % Using alignment of photometry and physiology
 % and times in tbt's
@@ -45,7 +32,7 @@ end
 [tbt, tbt_photo, signalSpikeFields, signalPhotoFields]=addTimes(tbt, tbt_photo, signalSpikeFields, signalPhotoFields);
 
 % Add signals and names of signals
-[signal_cue,signal_cue_times,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial,signal_times_wrt_thisTrialStart]=getLinedUpCueSignal(tbt, signalSpikeFields);
+[signal_cue,signal_cue_times,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial,signal_times_wrt_thisTrialStart,cuechunkoffset]=getLinedUpCueSignal(tbt, signalSpikeFields);
 signal_cue_times_wrt_thisTrialCueStart(signal_cue_times_wrt_thisTrialCueStart<-100)=nan;
 signal_cue_times(signal_cue_times<-100)=nan;
 signal_times_wrt_thisTrialStart(signal_cue_times<-100)=nan;
@@ -66,8 +53,8 @@ scatter(find(signal_cue>0.5),ones(size(find(signal_cue>0.5))));
 nextSignalTbt=tbt.all_reachBatch;
 nextSignalTimes=tbt.times_wrt_trial_start;
 nextSignalCue=tbt.cueZone_onVoff;
-sig=fillInOtherSignalsSkipCue(nextSignalTbt,nextSignalTimes,signal_times_wrt_thisTrialStart,signal_which_trial);
-%sig=fillInOtherSignals(nextSignalTbt,nextSignalTimes,nextSignalCue,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial);
+%sig=fillInOtherSignalsSkipCue(nextSignalTbt,nextSignalTimes,signal_times_wrt_thisTrialStart,signal_which_trial);
+sig=fillInOtherSignals(nextSignalTbt,nextSignalTimes,nextSignalCue,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial);
 signal_ind=signal_ind+1;
 signals{signal_ind}=sig;
 signal_names{signal_ind}='all_reachBatch';
@@ -77,8 +64,8 @@ for i=1:length(spikeFieldsNames)
     nextSignalTbt=signalSpikeFields.(spikeFieldsNames{i});
     nextSignalTimes=signalSpikeFields.times_wrt_trial_start;
     nextSignalCue=signalSpikeFields.cue;
-    sig=fillInOtherSignalsSkipCue(nextSignalTbt,nextSignalTimes,signal_times_wrt_thisTrialStart,signal_which_trial);
-    %sig=fillInOtherSignals(nextSignalTbt,nextSignalTimes,nextSignalCue,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial);
+    %sig=fillInOtherSignalsSkipCue(nextSignalTbt,nextSignalTimes,signal_times_wrt_thisTrialStart,signal_which_trial);
+    sig=fillInOtherSignals(nextSignalTbt,nextSignalTimes,nextSignalCue,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial);
     signal_ind=signal_ind+1;
     signals{signal_ind}=sig;
     signal_names{signal_ind}=spikeFieldsNames{i};
@@ -95,8 +82,8 @@ for i=1:length(photoFieldsNames)
     for j=1:size(nextSignalCue,1)
         resampledSignalCue(j,:)=fillInFromMatchingTimes(nextSignalCue(j,:), signalPhotoFields.cue_times(j,:), signalPhotoFields.green_time(j,:));
     end
-    sig=fillInOtherSignalsSkipCue(nextSignalTbt,nextSignalTimes,signal_times_wrt_thisTrialStart,signal_which_trial);
-    %sig=fillInOtherSignals(nextSignalTbt,nextSignalTimes,resampledSignalCue,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial);
+    %sig=fillInOtherSignalsSkipCue(nextSignalTbt,nextSignalTimes,signal_times_wrt_thisTrialStart,signal_which_trial);
+    sig=fillInOtherSignals(nextSignalTbt,nextSignalTimes,resampledSignalCue,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial);
     signal_ind=signal_ind+1;
     signals{signal_ind}=sig;
     signal_names{signal_ind}=photoFieldsNames{i};
@@ -108,9 +95,10 @@ Trials=(1:size(tbt.cue,1))';
 % Cue onset
 %Cue_onset=
 % Pellet presentation wheel begins to move
-%TrialStart=
+% TrialStart
+TrialStart=find(diff(signal_which_trial)==1)+1;
 % Trial start seconds
-
+%TrialStart_s=
 
 % Opto manipulation onset
 % Opto manipulation end
@@ -161,7 +149,7 @@ end
 
 end
 
-function [signal_cue,signal_cue_times,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial,signal_times_wrt_thisTrialStart]=getLinedUpCueSignal(tbt, signalSpikeFields)
+function [signal_cue,signal_cue_times,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial,signal_times_wrt_thisTrialStart,cuechunkoffset]=getLinedUpCueSignal(tbt, signalSpikeFields)
 
 % could use timesfromarduino to line trials back up 
 % or movieframeinds*timestep sec
@@ -179,9 +167,15 @@ timestep=mode(temp2(temp2>0));
 % If is physiology, use cue times from physiology
 % Else use cue times from behavior tbt
 if ~isempty(signalSpikeFields)
-    [signal_cue,signal_cue_times,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial,signal_times_wrt_thisTrialStart]=lineUpCueChunks(signalSpikeFields, 'cue', 'cue_times', 'cuetimes_wrt_trial_start');
+    temp=diff(signalSpikeFields.cue_times(1,:)); 
+    ts=mode(temp(temp~=0));
+    cuechunkoffset=floor(1.015/ts);
+    [signal_cue,signal_cue_times,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial,signal_times_wrt_thisTrialStart]=lineUpCueChunks(signalSpikeFields, 'cue', 'cue_times', 'cuetimes_wrt_trial_start', cuechunkoffset);
 else
-    [signal_cue,signal_cue_times,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial,signal_times_wrt_thisTrialStart]=lineUpCueChunks(tbt, 'cueZone_onVoff', 'times_wrt_trial_start', 'times_wrt_trial_start');
+    temp=diff(tbt.times_wrt_trial_start(1,:)); 
+    ts=mode(temp(temp~=0));
+    cuechunkoffset=floor(1.015/ts);
+    [signal_cue,signal_cue_times,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial,signal_times_wrt_thisTrialStart]=lineUpCueChunks(tbt, 'cueZone_onVoff', 'times_wrt_trial_start', 'times_wrt_trial_start', cuechunkoffset);
     signal_cue_times=0:timestep:(length(signal_cue_times)-1)*timestep;
 end
 
@@ -271,7 +265,7 @@ end
 
 end
 
-function [signal_cue,signal_cue_times,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial,signal_times_wrt_thisTrialStart]=lineUpCueChunks(tbt, cuefield, cuetimes, timeswrttrialstart)
+function [signal_cue,signal_cue_times,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial,signal_times_wrt_thisTrialStart]=lineUpCueChunks(tbt, cuefield, cuetimes, timeswrttrialstart, cuechunkoffset)
 
 cue=tbt.(cuefield);
 cue_times=tbt.(cuetimes);
@@ -292,6 +286,8 @@ for i=1:size(cue,1)
     temp(fnan:end)=nan;
     % find index before next cue onset (or last index of trial)
     f2=find(temp<0.5,1,'last');
+    f=f-cuechunkoffset;
+    f2=f2-cuechunkoffset;
     if i==1
         f=1; % include ITI before first trial
     end
