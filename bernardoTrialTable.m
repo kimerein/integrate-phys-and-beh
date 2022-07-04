@@ -60,6 +60,27 @@ signals{signal_ind}=sig;
 signal_names{signal_ind}='all_reachBatch';
 % then go through phys and photo signals, adding them
 % single units
+if ~isempty(signalSpikeFields) 
+    % get opto from phys acquisition
+    nextSignalTbt=signalSpikeFields.opto;
+    nextSignalTimes=signalSpikeFields.times_wrt_trial_start;
+    nextSignalCue=signalSpikeFields.cue;
+    %sig=fillInOtherSignalsSkipCue(nextSignalTbt,nextSignalTimes,signal_times_wrt_thisTrialStart,signal_which_trial);
+    sig=fillInOtherSignals(nextSignalTbt,nextSignalTimes,nextSignalCue,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial);
+    signal_ind=signal_ind+1;
+    signals{signal_ind}=sig;
+    signal_names{signal_ind}='opto';
+else
+    % get opto from behavior acquisition
+    nextSignalTbt=tbt.optoOn;
+    nextSignalTimes=tbt.times_wrt_trial_start;
+    nextSignalCue=tbt.cueZone_onVoff;
+    %sig=fillInOtherSignalsSkipCue(nextSignalTbt,nextSignalTimes,signal_times_wrt_thisTrialStart,signal_which_trial);
+    sig=fillInOtherSignals(nextSignalTbt,nextSignalTimes,nextSignalCue,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial);
+    signal_ind=signal_ind+1;
+    signals{signal_ind}=sig;
+    signal_names{signal_ind}='opto';
+end
 for i=1:length(spikeFieldsNames)
     nextSignalTbt=signalSpikeFields.(spikeFieldsNames{i});
     nextSignalTimes=signalSpikeFields.times_wrt_trial_start;
@@ -92,15 +113,17 @@ end
 
 % Trials
 Trials=(1:size(tbt.cue,1))';
-% Cue onset
-%Cue_onset=
-% Pellet presentation wheel begins to move
 % TrialStart
+% Pellet presentation wheel begins to move
 TrialStart=find(diff(signal_which_trial)==1)+1;
 % Trial start seconds
-%TrialStart_s=
-
+TrialStart_s=signal_cue_times(TrialStart);
+% Cue onset
+Cue_onset=find(diff(signal_which_trial)==1)+1+cuechunkoffset;
 % Opto manipulation onset
+whichIsCurrent=find(ismember(signal_names,'opto'));
+temp=signals{whichIsCurrent};
+
 % Opto manipulation end
 % First reach batch timing
 % First reach batch type
@@ -113,10 +136,6 @@ TrialStart=find(diff(signal_which_trial)==1)+1;
 % Bin 3 start
 % Bin 3 end
 % Number of reaches bin 3 (long time after the cue)
-
-% Convert times to indices into signals
-
-
 
 
 end
