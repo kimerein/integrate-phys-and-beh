@@ -123,11 +123,24 @@ Cue_onset=find(diff(signal_which_trial)==1)+1+cuechunkoffset;
 % Opto manipulation onset
 whichIsCurrent=find(ismember(signal_names,'opto'));
 temp=signals{whichIsCurrent};
-
+optoStarts=[];
+optoEnds=[];
+for i=1:length(temp)-1
+    if temp(i)<0.5 && temp(i+1)>0.5
+        optoStarts=[optoStarts i+1];
+    elseif temp(i)>0.5 && temp(i+1)<0.5
+        optoEnds=[optoEnds i];
+    end
+end
+Opto_onset=optoStarts;
 % Opto manipulation end
+Opto_offset=optoEnds;
 % First reach batch timing
 % First reach batch type
+[ReactionTimes,FirstCuedReachType]=getFirstReachesAndReachTypes(tbt);
 % Bin 1 start
+% find indices matching bin 1 start
+[Bin1starts, Bin1ends]=getWindowIndices(bin1, signal_which_trial, signal_times_wrt_thisTrialStart);
 % Bin 1 end
 % Number of reaches bin 1 (before the cue)
 % Bin 2 start
@@ -137,10 +150,56 @@ temp=signals{whichIsCurrent};
 % Bin 3 end
 % Number of reaches bin 3 (long time after the cue)
 
-% Convert times to indices into signals
 
+end
 
+function [binStarts, binEnds]=getWindowIndices(binWindow, signal_which_trial, signal_times_wrt_thisTrialStart)
 
+t=unique(signal_which_trial(~isnan(signal_which_trial)));
+binStarts=nan(1,length(t));
+binEnds=nan(1,length(t));
+for i=1:length(t)
+    temp=signal_times_wrt_thisTrialStart;
+    temp(signal_which_trial~=t(i))=nan;
+    [~,binStarts(i)=find(temp>binWindow(1),1,'first');
+    binEnds(i)=find(temp>binWindow(2),1,'first');
+end
+
+end
+
+function [reactionTimes,reachTypes]=getFirstReachesAndReachTypes(tbt)
+
+temp=tbt.times_wrt_trial_start; 
+temp=temp'; 
+temp2=diff(temp(1:end)); 
+timestep=mode(temp2(temp2>0));
+[~,fcue]=max(nanmean(tbt.cueZone_onVoff,1),[],'all','omitnan');
+reactionTimes=nan(1,size(temp,1));
+reachTypes=cell(1,size(temp,1));
+for i=1:size(tbt.all_reachBatch,1)
+    temp=tbt.all_reachBatch(i,:);
+    firstreachind=find(temp(fcue:end)>0.5,1,'first')+fcue-1;
+    reactionTimes(i)=(find(temp(fcue:end)>0.5,1,'first'))*timestep;
+    if tbt.reachBatch_success_reachStarts(i,firstreachind)>0.5
+        % success
+        thisreachtype='success';
+    elseif tbt.reachBatch_drop_reachStarts(i,firstreachind)>0.5
+        % drop
+        thisreachtype='drop';
+    elseif tbt.reachBatch_miss_reachStarts(i,firstreachind)>0.5
+        % miss
+        thisreachtype='miss';
+    elseif tbt.reachBatch_success_reachStarts_pawOnWheel(i,firstreachind)>0.5
+        thisreachtype='success_pawOnWheel';
+    elseif tbt.reachBatch_drop_reachStarts_pawOnWheel(i,firstreachind)>0.5
+        thisreachtype='drop_pawOnWheel';
+    elseif tbt.reachBatch_miss_reachStarts_pawOnWheel(i,firstreachind)>0.5
+        thisreachtype='miss_pawOnWheel';
+    else
+        thisreachtype='unknown';
+    end
+    reachTypes{i}=thisreachtype;
+end
 
 end
 
