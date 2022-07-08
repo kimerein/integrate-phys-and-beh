@@ -138,6 +138,8 @@ Opto_offset=optoEnds;
 % First reach batch timing
 % First reach batch type
 [ReactionTimes,FirstCuedReachType]=getFirstReachesAndReachTypes(tbt);
+% Convert bins from times wrt cue to times wrt trial start
+
 % Bin 1 start
 % find indices matching bin 1 start
 [Bin1starts, Bin1ends]=getWindowIndices(bin1, signal_which_trial, signal_times_wrt_thisTrialStart);
@@ -179,7 +181,13 @@ reachTypes=cell(1,size(temp,1));
 for i=1:size(tbt.all_reachBatch,1)
     temp=tbt.all_reachBatch(i,:);
     firstreachind=find(temp(fcue:end)>0.5,1,'first')+fcue-1;
-    reactionTimes(i)=(find(temp(fcue:end)>0.5,1,'first'))*timestep;
+    reachAfterCueInd=find(temp(fcue:end)>0.5,1,'first');
+    if isempty(reachAfterCueInd)
+        % no reach, leave reactionTimes as nan
+        reachTypes{i}='no reach';
+        continue
+    end
+    reactionTimes(i)=reachAfterCueInd*timestep;
     if tbt.reachBatch_success_reachStarts(i,firstreachind)>0.5
         % success
         thisreachtype='success';
@@ -359,6 +367,7 @@ signal_cue_times=[];
 signal_cue_times_wrt_thisTrialCueStart=[];
 signal_times_wrt_thisTrialStart=[];
 signal_which_trial=[];
+% if this is physiology_tbt, can also use phys_timepoints as a reference
 for i=1:size(cue,1)
     % find first cue onset 
     temp=cue(i,:);
@@ -372,6 +381,15 @@ for i=1:size(cue,1)
     f2=f2-cuechunkoffset;
     if i==1
         f=1; % include ITI before first trial
+    else
+        if isfield(tbt, 'phys_timepoints')
+            % adjust according to last time taken
+            [~,mi]=nanmin(abs(tbt.phys_timepoints(i,:)-lastTimeTaken));
+            f=mi+1;
+        end
+    end
+    if isfield(tbt, 'phys_timepoints')
+        lastTimeTaken=tbt.phys_timepoints(i,f2);
     end
     chunk=temp(f:f2);
     signal_cue=[signal_cue chunk];
