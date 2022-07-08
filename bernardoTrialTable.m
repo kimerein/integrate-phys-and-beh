@@ -1,12 +1,7 @@
-function bernardoTrialTable(tbt, bin1, bin2, bin3, signalSpikeFields, spikeFieldsNames, tbt_photo, signalPhotoFields, photoFieldsNames)
+function [T,signals]=bernardoTrialTable(tbt, bin1, bin2, bin3, signalSpikeFields, spikeFieldsNames, tbt_photo, signalPhotoFields, photoFieldsNames)
 
+% bin1, bin2, bin3 are with respect to cue onset
 % Time delay Arduino to cue onset
-
-
-% Names of columns:
-varNames={'Trials', 'TrialStart', 'TrialStart_s', 'Cue_onset', 'Opto_onset', 'Opto_offset', ...
-          'First_reach_timing', 'First_reach_type', 'Bin1_start', 'Bin1_end', 'N_reaches_bin1', ...
-          'Bin2_start', 'Bin2_end', 'N_reaches_bin2', 'Bin3_start', 'Bin3_end', 'N_reaches_bin3'};
 
 % Re-expand alignment into single row for signals
 % Using alignment of photometry and physiology
@@ -116,11 +111,11 @@ end
 Trials=(1:size(tbt.cue,1))';
 % TrialStart
 % Pellet presentation wheel begins to move
-TrialStart=find(diff(signal_which_trial)==1)+1;
+TrialStart=[1 find(diff(signal_which_trial)==1)+1];
 % Trial start seconds
 TrialStart_s=signal_cue_times(TrialStart);
 % Cue onset
-Cue_onset=find(diff(signal_which_trial)==1)+1+cuechunkoffset;
+Cue_onset=[0+1+cuechunkoffset find(diff(signal_which_trial)==1)+1+cuechunkoffset];
 % Opto manipulation onset
 whichIsCurrent=find(ismember(signal_names,'opto'));
 temp=signals{whichIsCurrent};
@@ -133,26 +128,72 @@ for i=1:length(temp)-1
         optoEnds=[optoEnds i];
     end
 end
-Opto_onset=optoStarts;
+% assign optos to trials
+Opto_onset=nan(1,length(Cue_onset));
 % Opto manipulation end
-Opto_offset=optoEnds;
+Opto_offset=nan(1,length(Cue_onset));
+u=unique(signal_which_trial);
+for i=1:length(u)
+   f=find(signal_which_trial==u(i));
+   thisopto=find(ismember(optoStarts,f(1:floor(end/2))));
+   % opto should only ever be in first half of trial
+   if ~isempty(thisopto)
+       Opto_onset(i)=optoStarts(thisopto);
+       Opto_offset(i)=optoEnds(thisopto);
+   end
+end
 % First reach batch timing
 % First reach batch type
 [ReactionTimes,FirstCuedReachType]=getFirstReachesAndReachTypes(tbt);
-% Convert bins from times wrt cue to times wrt trial start
-
 % Bin 1 start
 % find indices matching bin 1 start
-[Bin1starts, Bin1ends]=getWindowIndices(bin1, signal_which_trial, signal_times_wrt_thisTrialStart);
+[Bin1starts, Bin1ends]=getWindowIndices(bin1, signal_which_trial, signal_cue_times_wrt_thisTrialCueStart);
 % Bin 1 end
 % Number of reaches bin 1 (before the cue)
+whichIsCurrent=find(ismember(signal_names,'all_reachBatch'));
+ReachesInBin1=findReachesBetween(signals{whichIsCurrent}, Bin1starts, Bin1ends);
 % Bin 2 start
+[Bin2starts, Bin2ends]=getWindowIndices(bin2, signal_which_trial, signal_cue_times_wrt_thisTrialCueStart);
 % Bin 2 end
 % Number of reaches bin 2 (after the cue)
+ReachesInBin2=findReachesBetween(signals{whichIsCurrent}, Bin2starts, Bin2ends);
 % Bin 3 start
+[Bin3starts, Bin3ends]=getWindowIndices(bin3, signal_which_trial, signal_cue_times_wrt_thisTrialCueStart);
 % Bin 3 end
 % Number of reaches bin 3 (long time after the cue)
+ReachesInBin3=findReachesBetween(signals{whichIsCurrent}, Bin3starts, Bin3ends);
+TrialStart=TrialStart';
+TrialStart_s=TrialStart_s';
+Cue_onset=Cue_onset';
+Opto_onset=Opto_onset';
+Opto_offset=Opto_offset';
+ReactionTimes=ReactionTimes';
+FirstCuedReachType=FirstCuedReachType';
+Bin1starts=Bin1starts';
+Bin1ends=Bin1ends';
+ReachesInBin1=ReachesInBin1';
+Bin2starts=Bin2starts';
+Bin2ends=Bin2ends';
+ReachesInBin2=ReachesInBin2';
+Bin3starts=Bin3starts';
+Bin3ends=Bin3ends';
+ReachesInBin3=ReachesInBin3';
+T=table(Trials,TrialStart,TrialStart_s,Cue_onset,Opto_onset,Opto_offset,ReactionTimes,...
+        FirstCuedReachType,Bin1starts,Bin1ends,ReachesInBin1,Bin2starts,Bin2ends,ReachesInBin2,...
+        Bin3starts,Bin3ends,ReachesInBin3,...
+        'VariableNames',...
+       {'Trials','TrialStart','TrialStart_s','Cue_onset','Opto_onset','Opto_offset','ReactionTimes',...
+       'FirstCuedReachType','Bin1starts','Bin1ends','ReachesInBin1','Bin2starts','Bin2ends','ReachesInBin2',...
+       'Bin3starts','Bin3ends','ReachesInBin3'});
 
+end
+
+function countReaches=findReachesBetween(reaches, binstarts, binends)
+
+countReaches=nan(1,length(binstarts));
+for i=1:length(binstarts)
+    countReaches(i)=sum(reaches(binstarts(i):binends(i))>0.5,'all','omitnan');
+end
 
 end
 
@@ -177,8 +218,8 @@ temp=temp';
 temp2=diff(temp(1:end)); 
 timestep=mode(temp2(temp2>0));
 [~,fcue]=max(nanmean(tbt.cueZone_onVoff,1),[],'all','linear','omitnan');
-reactionTimes=nan(1,size(temp,1));
-reachTypes=cell(1,size(temp,1));
+reactionTimes=nan(1,size(tbt.times_wrt_trial_start,1));
+reachTypes=cell(1,size(tbt.times_wrt_trial_start,1));
 for i=1:size(tbt.all_reachBatch,1)
     temp=tbt.all_reachBatch(i,:);
     firstreachind=find(temp(fcue:end)>0.5,1,'first')+fcue-1;
