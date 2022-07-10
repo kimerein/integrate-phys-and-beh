@@ -34,6 +34,9 @@ cmap=colormap('cool');
 hold on;
 k=1;
 if ~isempty(settings.stopPlottingBinsAfterN)
+    if settings.stopPlottingBinsAfterN>nansum(~isnan(nanmean(approach_alltrials_dprime,1)))
+        settings.stopPlottingBinsAfterN=nansum(~isnan(nanmean(approach_alltrials_dprime,1)));
+    end
     kstep=ceil(size(cmap,1)/settings.stopPlottingBinsAfterN);
 else
     kstep=ceil(size(cmap,1)/nansum(~isnan(nanmean(approach_alltrials_dprime,1))));
