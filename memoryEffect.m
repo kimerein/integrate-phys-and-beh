@@ -105,7 +105,7 @@ binsForFracs=0:0.01:1;
 con=plotHistoOfFracs(binsForFracs,fracs_inThisPartOfSess_noLED,fracs_inThisPartOfSess_LED);
 % what's more important is to the sample the actual number of trials,
 % because it's binomial
-resampleToMatchNumberTrials=true;
+resampleToMatchNumberTrials=true; 
 if resampleToMatchNumberTrials
     % whichever has fewer trials
     nTrials_con=nansum(~isnan(noLED_all_uncued));
@@ -377,54 +377,5 @@ mkdir(saveDir2);
 save([saveDir2 '\test_settings.mat'],'test');
 fakeCueInd=50; 
 skipCorrected=true;
-
-end
-
-function dprimes_lasttrial=getdprimes(reachrates)
-
-% get dprimes per average trial in session
-dprimes_lasttrial=[];
-if isempty(reachrates)
-    return
-end
-dprimes_lasttrial=calc_dprimes(reachrates.alltrials_uncued,reachrates.alltrials_cued);
-
-end
-
-function dprimes=calc_dprimes(uncued_events,cued_events)
-
-hit_rates=nansum(cued_events>0,2)./nansum(~isnan(cued_events),2);
-fa_rates=nansum(uncued_events>0,2)./nansum(~isnan(uncued_events),2);
-% closest we can get to 1 or zero is defined by number of trials
-ns=nansum(~isnan(cued_events),2);
-hit_rates(ns<3)=nan;
-fa_rates(ns<3)=nan;
-hit_rates(hit_rates==1)=1-(1./ns(hit_rates==1));
-hit_rates(hit_rates==0)=0+(1./ns(hit_rates==0));
-fa_rates(fa_rates==1)=1-(1./ns(fa_rates==1));
-fa_rates(fa_rates==0)=0+(1./ns(fa_rates==0));
-dprimes=dprime(hit_rates,fa_rates);
-
-end
-
-function dprimes=calc_dprime_per_sess(uncued_events,cued_events)
-
-hit_rates=nansum(cued_events>0,2)./nansum(~isnan(cued_events),2);
-fa_rates=nansum(uncued_events>0,2)./nansum(~isnan(uncued_events),2);
-% closest we can get to 1 or zero is defined by number of trials
-ns=nansum(~isnan(cued_events),2);
-hit_rates(ns<3)=nan;
-fa_rates(ns<3)=nan;
-hit_rates(hit_rates==1)=1-(1./ns(hit_rates==1));
-hit_rates(hit_rates==0)=0+(1./ns(hit_rates==0));
-fa_rates(fa_rates==1)=1-(1./ns(fa_rates==1));
-fa_rates(fa_rates==0)=0+(1./ns(fa_rates==0));
-dprimes=dprime(hit_rates,fa_rates);
-
-end
-
-function out=dprime(hit_rates,FA_rates)
-
-out=norminv(hit_rates)-norminv(FA_rates);
 
 end

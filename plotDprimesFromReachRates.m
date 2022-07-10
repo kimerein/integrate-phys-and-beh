@@ -172,16 +172,24 @@ end
 
 function dprimes=calc_dprimes(uncued_events,cued_events)
 
-hit_rates=nansum(cued_events>0,2)./nansum(~isnan(cued_events),2);
-fa_rates=nansum(uncued_events>0,2)./nansum(~isnan(uncued_events),2);
-% closest we can get to 1 or zero is defined by number of trials
-ns=nansum(~isnan(cued_events),2);
-hit_rates(ns<3)=nan;
-fa_rates(ns<3)=nan;
-hit_rates(hit_rates==1)=1-(1./ns(hit_rates==1));
-hit_rates(hit_rates==0)=0+(1./ns(hit_rates==0));
-fa_rates(fa_rates==1)=1-(1./ns(fa_rates==1));
-fa_rates(fa_rates==0)=0+(1./ns(fa_rates==0));
+useBayes=true;
+
+if useBayes==true
+    disp('USING BAYES!');
+    hit_rates=(nansum(cued_events>0,2)+1)./(nansum(~isnan(cued_events),2)+2);
+    fa_rates=(nansum(uncued_events>0,2)+1)./(nansum(~isnan(uncued_events),2)+2);
+else
+    hit_rates=nansum(cued_events>0,2)./nansum(~isnan(cued_events),2);
+    fa_rates=nansum(uncued_events>0,2)./nansum(~isnan(uncued_events),2);
+    % closest we can get to 1 or zero is defined by number of trials
+    ns=nansum(~isnan(cued_events),2);
+    hit_rates(ns<3)=nan;
+    fa_rates(ns<3)=nan;
+    hit_rates(hit_rates==1)=1-(1./ns(hit_rates==1));
+    hit_rates(hit_rates==0)=0+(1./ns(hit_rates==0));
+    fa_rates(fa_rates==1)=1-(1./ns(fa_rates==1));
+    fa_rates(fa_rates==0)=0+(1./ns(fa_rates==0));
+end
 dprimes=dprime(hit_rates,fa_rates);
 
 end
