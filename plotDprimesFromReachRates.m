@@ -1,18 +1,37 @@
-function [dprimes,fracs_over_sess]=plotDprimesFromReachRates(reachrates,suppressPlots,plotVersusFrac)
+function [dprimes,fracs_over_sess,firstBinDprimes]=plotDprimesFromReachRates(varargin)
+
+if length(varargin)==3
+    reachrates=varargin{1};
+    suppressPlots=varargin{2};
+    plotVersusFrac=varargin{3};
+    initialDprimes=[];
+elseif length(varargin)==4
+    reachrates=varargin{1};
+    suppressPlots=varargin{2};
+    plotVersusFrac=varargin{3};
+    initialDprimes=varargin{4};
+else
+    error('Wrong number of arguments to plotDprimesFromReachRates');
+end
 
 % settings.stopPlottingTrialsAfterN=286;
 settings.stopPlottingTrialsAfterN=10000; %2500;
 settings.binTrialsForAvAcrossSess=true;
-settings.binThisManyTrials=10; %50; %200; %50; %4; %10; % somehow this makes dprime bigger, SO sensitive to this
-settings.stopPlottingBinsAfterN=60; %55;
+settings.binThisManyTrials=4; %10; %50; %200; %50; %4; %10; % somehow this makes dprime bigger, SO sensitive to this
+settings.stopPlottingBinsAfterN=200; %60; %55;
 settings.furtherBinBins=false; %true; %false; %true;
 settings.binThisManyBins=5;
 settings.plotVersusFrac=plotVersusFrac; % if is true, will plot dprime versus fraction through session instead of trial count
-settings.plotChangeInDprimes=false; %true;
+settings.plotChangeInDprimes=false;
 
 [dprimes,fracs_over_sess]=getdprimes(reachrates,settings.binThisManyTrials,settings);
+firstBinDprimes=dprimes(:,1);
 if settings.plotChangeInDprimes==true
-    dprimes=dprimes-repmat(dprimes(:,1),1,size(dprimes,2));
+    if ~isempty(initialDprimes)
+        dprimes=dprimes-repmat(initialDprimes,1,size(dprimes,2));
+    else
+        dprimes=dprimes-repmat(dprimes(:,1),1,size(dprimes,2));
+    end
 end
 if suppressPlots==false
     makePlot(settings,dprimes,fracs_over_sess);

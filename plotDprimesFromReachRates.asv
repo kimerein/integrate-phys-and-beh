@@ -1,14 +1,20 @@
 function [dprimes,fracs_over_sess]=plotDprimesFromReachRates(reachrates,suppressPlots,plotVersusFrac)
 
+if length(varargin)==3
+    reachrates=varargin{1};
+    suppressPlots=varargin{2};
+    plotVersusFrac=varargin{3};
+elseif l
+
 % settings.stopPlottingTrialsAfterN=286;
 settings.stopPlottingTrialsAfterN=10000; %2500;
 settings.binTrialsForAvAcrossSess=true;
-settings.binThisManyTrials=100;%10 %50; %200; %50; %4; %10; % somehow this makes dprime bigger, SO sensitive to this
+settings.binThisManyTrials=10; %50; %200; %50; %4; %10; % somehow this makes dprime bigger, SO sensitive to this
 settings.stopPlottingBinsAfterN=60; %55;
 settings.furtherBinBins=false; %true; %false; %true;
 settings.binThisManyBins=5;
 settings.plotVersusFrac=plotVersusFrac; % if is true, will plot dprime versus fraction through session instead of trial count
-settings.plotChangeInDprimes=false; %true;
+settings.plotChangeInDprimes=false;
 
 [dprimes,fracs_over_sess]=getdprimes(reachrates,settings.binThisManyTrials,settings);
 if settings.plotChangeInDprimes==true
@@ -34,6 +40,9 @@ cmap=colormap('cool');
 hold on;
 k=1;
 if ~isempty(settings.stopPlottingBinsAfterN)
+    if settings.stopPlottingBinsAfterN>nansum(~isnan(nanmean(approach_alltrials_dprime,1)))
+        settings.stopPlottingBinsAfterN=nansum(~isnan(nanmean(approach_alltrials_dprime,1)));
+    end
     kstep=ceil(size(cmap,1)/settings.stopPlottingBinsAfterN);
 else
     kstep=ceil(size(cmap,1)/nansum(~isnan(nanmean(approach_alltrials_dprime,1))));
