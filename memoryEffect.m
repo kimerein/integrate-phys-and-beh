@@ -1,8 +1,8 @@
 function memoryEffect(alltbt,metadata,trialTypes,nInSequence,useFractionThroughSession,useReachType,plotCDFUpTo)
 
 flankingTrials='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1'; % take every trial
-% flankingTrials='trialTypes.led~=1'; % take no LED trials only
-plotVersusFrac=true;
+%flankingTrials='trialTypes.led~=1'; % take no LED trials only
+plotVersusFrac=false;
 
 trialTypes.isLongITI_1forward=[trialTypes.isLongITI(2:end); 0];
 trialTypes.optoGroup_1forward=[trialTypes.optoGroup(2:end); 0];

@@ -2,7 +2,8 @@ function SU_QC(spikes, unit_assign, unit_on_channel, raw_data_filename, raw_data
 
 % Creates summary figure for quality control (QC) of single units (SU)
 
-% spikes structure
+% spikes structure          a structure of all spikes detected on these
+%                           channels in this experiment
 % spikes.params.Fs          sampling rate of signal
 % spikes.waveforms          for each spike, waveform around spike minimum
 %                           (peak of action potential), as a 3D array
@@ -23,6 +24,21 @@ function SU_QC(spikes, unit_assign, unit_on_channel, raw_data_filename, raw_data
 %                           projected onto principal component pc_dim
 % spikes.params.shadow      ms, enforced dead region after each spike
 
+% unit_assign               a number representing which single unit to plot
+%                           corresponds to numbers in spikes.assigns
+
+% unit_on_channel           for reading raw data from WHISPER system
+
+% raw_data_filename         filename containing raw data
+
+% raw_data_directory        directory with raw data
+
+% behavior_timepoints       optional cell array containing timepoints of
+%                           behavior events. Each cell is a different type
+%                           of behavior event. Each cell contains a vector
+%                           of event times (matching times in
+%                           spikes.spiketimes).
+
 % varAdditionalInputs       structure containing any other necessary inputs
 % varAdditionalInputs may contain
 %       varAdditionalInputs.timeWindowToPlotAtSpike 
@@ -32,9 +48,11 @@ function SU_QC(spikes, unit_assign, unit_on_channel, raw_data_filename, raw_data
 %                           any further processing steps after reading raw
 %                           data, passed as a function handle
 %                           e.g., @furtherProcessWHISPER
-%   
+%       varAdditionalInputs.trodeChs 
+%                           for reading in data from WHISPER system, which
+%                           channels were included in this spike sorting
 
-% Layout 
+% Layout -- change here to modify figure layout
 % Column 1, Row 1 - average spike waveform
 % Column 1, Row 2 - spike amplitude distribution
 % Column 2, Row 1 - autocorrelation
@@ -334,7 +352,7 @@ end
 if endAtTime<startAtTime
     endAtTime=times(end);
 end
-[~,startind]=min(abs(times-startAtTime),[],'all','omitnan');
+[~,startind]=min(abs(times-startAtTime),[],'all','linear','omitnan',);
 [~,endind]=min(abs(times-endAtTime),[],'all','omitnan');
 
 plot(times(startind:endind),LFPValues(startind:endind),'Color','k');
@@ -435,7 +453,7 @@ end
 function rpv=count_RPV(spikes, unit_assign)
 
 % counts refractory period violations
-spiketimes =  sort( spikes.unwrapped_times(ismember(spikes.assigns, unit_assign)) );
+spiketimes =  sort( spikes.spiketimes(ismember(spikes.assigns, unit_assign)) );
 rpv  = sum( diff(spiketimes)  <= (spikes.params.refractory_period * .001) );
 
 end

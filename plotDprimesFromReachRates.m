@@ -17,7 +17,7 @@ end
 % settings.stopPlottingTrialsAfterN=286;
 settings.stopPlottingTrialsAfterN=10000; %2500;
 settings.binTrialsForAvAcrossSess=true;
-settings.binThisManyTrials=4; %10; %50; %200; %50; %4; %10; % somehow this makes dprime bigger, SO sensitive to this
+settings.binThisManyTrials=10; %50; %200; %50; %4; %10; % somehow this makes dprime bigger, SO sensitive to this
 settings.stopPlottingBinsAfterN=200; %60; %55;
 settings.furtherBinBins=false; %true; %false; %true;
 settings.binThisManyBins=5;
