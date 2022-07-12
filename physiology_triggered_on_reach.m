@@ -86,8 +86,9 @@ pause;
 settings.scale_factor=floor(settings.photo_fs/settings.movie_fs);
 settings.photo_dec=settings.scale_factor-15;
 settings.movie_dec=1;
-settings.minlagForInitialAlign=[];
-settings.maxlagForInitialAlign=[]; % [] is don't want to constrain alignment
+settings.minlagForInitialAlign=-20000; % if these are negative, works differently and will truncate this many frames from front of first movie only
+% if one is negative, the other (positive) value will be the actual maxlagForInitialAlign
+settings.maxlagForInitialAlign=50; % [] is don't want to constrain alignment
 settings.try_delay1=0;
 settings.try_delay2=0;
 
@@ -97,7 +98,32 @@ data.distractor_times=0:(1/data.Fs):(length(data.distractor)-1)*(1/data.Fs);
 data.cue_times=0:(1/data.Fs):(length(data.distractor)-1)*(1/data.Fs);
 % because there is a break between the videos, and user can throw out first
 % frames in each video, align each video separately
-[discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes,padPhotoTimesAtFront]=alignDistractors(totalalignment.movie_distractor(totalalignment.from_first_video==1),data.distractor,distract_thresh_movie,distract_thresh_photometry,totalalignment.timesfromarduino(totalalignment.from_first_video==1),data.distractor_times,settings,[],[]);
+[discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes,padPhotoTimesAtFront,truncateThisMuchMovie]=alignDistractors(totalalignment.movie_distractor(totalalignment.from_first_video==1),data.distractor,distract_thresh_movie,distract_thresh_photometry,totalalignment.timesfromarduino(totalalignment.from_first_video==1),data.distractor_times,settings,[],[]);
+if ~isnan(truncateThisMuchMovie)
+    settings.minlagForInitialAlign=[]; % new values
+    settings.maxlagForInitialAlign=[];
+    % truncate all fields similarly
+    truncateBeforeMovieFrame=totalalignment.movieframeinds(truncateThisMuchMovie);
+    f=fieldnames(totalalignment);
+    for i=1:length(f)
+        temp=totalalignment.(f{i});
+        totalalignment.(f{i})=temp(truncateThisMuchMovie:end);
+    end
+    for i=1:size(alltbt.movieframeinds,1)
+        % find this movieframeind, throw out everything before
+        temp=alltbt.movieframeinds(i,:);
+        if any(temp>truncateBeforeMovieFrame)
+            throwOut_i_upTo=i;
+            break
+        end
+    end
+    f=fieldnames(alltbt);
+    for i=1:length(f)
+        temp=alltbt.(f{i});
+        temp=temp(throwOut_i_upTo:end,:);
+        alltbt.(f{i})=temp;
+    end
+end
 alltbt1=scaleMovTimes(alltbt,scaleMovieTimes,addToMovieTimes,alltbt.from_first_video(:,1));
 [tbt_data_vid1,shifted_data_vid1,alltbt1]=shiftPhotometryToBehavior(data,discardedPhotoFrames_time,frontShift_time,movie_LED,movie_times,totalalignment.(useCue),totalalignment,alltbt1,minTimeBetweenCues,totalalignment.from_first_video==1,alltbt.from_first_video(:,1),padPhotoTimesAtFront);
 fromvid=alltbt.from_first_video(:,1);
@@ -108,9 +134,10 @@ if isfield(alltbt1,'threwOutCuesAtFront')
     fromvid(find(fromvid==1,1,'first'):find(fromvid==1,1,'first')+(alltbt1.threwOutCuesAtFront-1))=0;
 end
 alltbt1=selectRows(alltbt,fromvid);
+close all;
 
 if length(a)>1
-    isInBackHalf=true;
+    isInBackHalf=false;
     fractionThru=0.5;
 %     isInBackHalf=[];
 %     fractionThru=[];
@@ -127,10 +154,11 @@ if length(a)>1
     alltbt2=selectRows(alltbt,fromvid);
     
     if isfield(totalalignment,'from_third_video')
-%         isInBackHalf=true;
-%         fractionThru=0.95;
-        isInBackHalf=[];
-        fractionThru=[];
+        close all;
+        isInBackHalf=true;
+        fractionThru=0.8;
+%         isInBackHalf=[];
+%         fractionThru=[];
         [discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes,padPhotoTimesAtFront]=alignDistractors(totalalignment.movie_distractor(totalalignment.from_third_video==1),data.distractor,distract_thresh_movie,distract_thresh_photometry,totalalignment.timesfromarduino(totalalignment.from_third_video==1),data.distractor_times,settings,isInBackHalf,fractionThru);
         alltbt3=scaleMovTimes(alltbt,scaleMovieTimes,addToMovieTimes,alltbt.from_third_video(:,1));
         [tbt_data_vid3,shifted_data_vid3,alltbt3]=shiftPhotometryToBehavior(data,discardedPhotoFrames_time,frontShift_time,movie_LED,movie_times,totalalignment.(useCue),totalalignment,alltbt3,minTimeBetweenCues,totalalignment.from_third_video==1,alltbt.from_third_video(:,1),padPhotoTimesAtFront);
@@ -145,17 +173,18 @@ if length(a)>1
     end
 end
 
-% ds=100; % use this downsample factor for the fields in downsampfields
-% downsampfields={'green_mod','red_mod','opto','cue','distractor','cue_times'};
-% if ds~=1
-%     tbt_data_vid1=downSampleData(tbt_data_vid1,ds,downsampfields);
-%     if length(a)>1
-%         tbt_data_vid2=downSampleData(tbt_data_vid2,ds,downsampfields);
-%         if isfield(totalalignment,'from_third_video')
-%             tbt_data_vid3=downSampleData(tbt_data_vid3,ds,downsampfields);
-%         end
-%     end
-% end
+ds=100; % use this downsample factor for the fields in downsampfields
+downsampfields=fieldnames(tbt_data_vid1);
+%{'cue','cue_times','cuetimes_wrt_trial_start','distractor','from_first_video','from_second_video','from_third_video','opto','phys_inds','phys_timepoints'};
+if ds~=1
+    tbt_data_vid1=downSampleData(tbt_data_vid1,ds,downsampfields);
+    if length(a)>1
+        tbt_data_vid2=downSampleData(tbt_data_vid2,ds,downsampfields);
+        if isfield(totalalignment,'from_third_video')
+            tbt_data_vid3=downSampleData(tbt_data_vid3,ds,downsampfields);
+        end
+    end
+end
 
 % concatenate tbts from two videos, should match cues in behavior tbt
 if length(a)>1
@@ -675,7 +704,28 @@ end
 
 end
 
-function [discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes,padPhotoTimesAtFront]=alignDistractors(movie_distract,photo_distract,distract_thresh_movie,distract_thresh_photometry,movie_times,photo_times,settings,isInBackHalf,fractionThrough)
+function [discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes,padPhotoTimesAtFront,truncateThisMuchMovie]=alignDistractors(movie_distract,photo_distract,distract_thresh_movie,distract_thresh_photometry,movie_times,photo_times,settings,isInBackHalf,fractionThrough)
+
+truncateThisMuchMovie=nan;
+if ~isempty(settings.minlagForInitialAlign)
+    if settings.minlagForInitialAlign<0 && settings.maxlagForInitialAlign<0 
+        m=max(abs(settings.minlagForInitialAlign),abs(settings.maxlagForInitialAlign));
+        settings.minlagForInitialAlign=[];
+        settings.maxlagForInitialAlign=[];
+    elseif settings.minlagForInitialAlign<0
+        m=abs(settings.minlagForInitialAlign);
+        settings.minlagForInitialAlign=[];
+        settings.maxlagForInitialAlign=settings.maxlagForInitialAlign;
+    elseif settings.maxlagForInitialAlign<0
+        m=abs(settings.maxlagForInitialAlign);
+        settings.maxlagForInitialAlign=settings.minlagForInitialAlign;
+        settings.minlagForInitialAlign=[];
+    end
+    % truncate before attempting align
+    movie_distract=movie_distract(m:end);
+    movie_times=movie_times(m:end);
+    truncateThisMuchMovie=m;
+end
 
 % Get when LED was on in movie vs off
 movie_LED=single(movie_distract>distract_thresh_movie);

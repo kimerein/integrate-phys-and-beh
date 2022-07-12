@@ -22,7 +22,7 @@ settings.tryinc=0.02;
 % settings.try_scale2=1;  
 alignInd=6;
 % downSampData2=true;
-ds=1000;
+ds=3; %1000;
 
 if downSampData2==true
     a=questdlg('Beware will downsample data2 and return downsampled. Do you want to continue? ');
