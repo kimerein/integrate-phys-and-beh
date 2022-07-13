@@ -86,9 +86,9 @@ pause;
 settings.scale_factor=floor(settings.photo_fs/settings.movie_fs);
 settings.photo_dec=settings.scale_factor-15;
 settings.movie_dec=1;
-settings.minlagForInitialAlign=-20000; % if these are negative, works differently and will truncate this many frames from front of first movie only
+settings.minlagForInitialAlign=[]; %-20000; % if these are negative, works differently and will truncate this many frames from front of first movie only
 % if one is negative, the other (positive) value will be the actual maxlagForInitialAlign
-settings.maxlagForInitialAlign=50; % [] is don't want to constrain alignment
+settings.maxlagForInitialAlign=[]; %50; % [] is don't want to constrain alignment
 settings.try_delay1=0;
 settings.try_delay2=0;
 

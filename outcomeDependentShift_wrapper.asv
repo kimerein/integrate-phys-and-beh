@@ -233,7 +233,7 @@ if ~isempty(a)
 end
 % success
 nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.success_in_cued_window_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==1 & (trialTypes.optoGroup_1forward==2)']; % & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup_1forward==2']; % & trialTypes.isLongITI_1forward==1'];
+trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.success_in_cued_window_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==1']; % ' & (trialTypes.optoGroup_1forward==2)']; % & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup_1forward==2']; % & trialTypes.isLongITI_1forward==1'];
 if linkSuccesses==false
     trial2=[flankingTrials];
 else
@@ -461,7 +461,7 @@ plotset.cuedtouchcolor=[171 104 87]./255;
 switch whichToPlot
     case 'success'
 %         timeWindow=[];
-        timeWindow=[0.1 1]; %[0.1 1]; % change this to select only trials with a reach in this window
+        timeWindow=[]; %[0.1 1]; % change this to select only trials with a reach in this window
         plotset.wildcard=false;
         plotset.success=true;
         plotset.delayed=false;
@@ -603,7 +603,7 @@ end
 
 function dprimes=calc_dprime_per_sess(uncued_events,cued_events)
 
-useBayes=true; % Bayes estimator helps to ameliorate SOME of the shift in d-prime that results from simply having too few trials
+useBayes=t; % Bayes estimator helps to ameliorate SOME of the shift in d-prime that results from simply having too few trials
 
 if useBayes==true
     disp('USING BAYES!');

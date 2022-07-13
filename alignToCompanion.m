@@ -2,8 +2,8 @@ function [cueCD,uncueCD,lateUncueCD]=alignToCompanion(datadir,getCDs,cueCD,uncue
 
 excludeHigherFR=false;
 cutAtTime=3; % stop plotting this many seconds after max of alignment companion
-ds=6; % downsample bin size
-onlyTakeTheseUnits=''; % if is not empty, will only take units with this string in filename, e.g., 'D1tagged'
+ds=2; % downsample bin size
+onlyTakeTheseUnits='A2atagged'; % if is not empty, will only take units with this string in filename, e.g., 'D1tagged'
 % or make cutAtTime empty to plot all time points
 % getCDs=true;
 
@@ -26,6 +26,13 @@ for j=1:length(dd)
     ls=dir(datadir);
     for i=3:length(ls)
         a=load([ls(i).folder '\' ls(i).name]);
+        
+        if ~isempty(onlyTakeTheseUnits)
+            if isempty(regexp(ls(i).name, onlyTakeTheseUnits))
+                % doesn't contain string, continue and skip this unit
+                continue
+            end
+        end
         
         if excludeHigherFR
             if nanmean(nanmean(a.dataout.y,1),2)>4

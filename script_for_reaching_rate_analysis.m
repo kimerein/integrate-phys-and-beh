@@ -315,7 +315,7 @@ plotPairedChangeMinusSatiety(reachrates);
 
 %% plot outcome-dependent shifts
 
-outcomeDependentShift_wrapper(alltbt,trialTypes,metadata,saveDir,[],[]);
+outcomeDependentShift_wrapper(alltbt,trialTypes,metadata,saveDir,[],[]); % change e.g. line 407 in outcomeDependentShift_wrapper.m for varied timing
 
 %% plot outcome-dependent shifts AND separate by dprime
 
