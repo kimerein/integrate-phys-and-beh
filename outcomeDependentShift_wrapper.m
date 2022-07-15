@@ -233,7 +233,7 @@ if ~isempty(a)
 end
 % success
 nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.success_in_cued_window_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==1 & (trialTypes.optoGroup_1forward==2)']; % & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup_1forward==2']; % & trialTypes.isLongITI_1forward==1'];
+trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.success_in_cued_window_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==1 & (trialTypes.optoGroup_1forward==3)']; % & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup_1forward==2']; % & trialTypes.isLongITI_1forward==1'];
 if linkSuccesses==false
     trial2=[flankingTrials];
 else
@@ -385,17 +385,73 @@ if ~strcmp(whichToPlot,'basic') && ~isempty(dprimes_noLED_lasttrial) && ~isempty
         disp(pval);
     end
     figure();
-    plotMouseByMouseChangeTrialToTrial(noLED_rr,metadata,'k'); hold on;
-    plotMouseByMouseChangeTrialToTrial(LED_rr,metadata,'r');
+    [black_x,black_y]=plotMouseByMouseChangeTrialToTrial(noLED_rr,metadata,'k'); hold on;
+    [red_x,red_y]=plotMouseByMouseChangeTrialToTrial(LED_rr,metadata,'r');
 end
 
 end
 
-function plotMouseByMouseChangeTrialToTrial(reachrates,metadata,c)
+function [x_mousebymouse,y_mousebymouse]=plotMouseByMouseChangeTrialToTrial(reachrates,metadata,c)
 
-atleastthismanytrials=15;
+atleastthismanytrials=3; %15;
 [~,ui]=unique(metadata.sessid);
 mouseids=metadata.mouseid(ui);
+
+u=unique(mouseids);
+mousebymouse_trialn_uncued_all=cell(1,length(u));
+mousebymouse_trialn_cued_all=cell(1,length(u));
+mousebymouse_trialnplus_uncued_all=cell(1,length(u));
+mousebymouse_trialnplus_cued_all=cell(1,length(u));
+for i=1:length(ui)
+    currmouse=mouseids(i);
+    
+    temp=mousebymouse_trialn_uncued_all{u==currmouse};
+    temprr=reachrates.trial1_alltrials_uncued(i,:);
+    if isempty(temp)
+        temp=temprr(~isnan(temprr));
+    else
+        temp=[temp temprr(~isnan(temprr))];
+    end
+    mousebymouse_trialn_uncued_all{u==currmouse}=temp;
+    
+    temp=mousebymouse_trialn_cued_all{u==currmouse};
+    temprr=reachrates.trial1_alltrials_cued(i,:);
+    if isempty(temp)
+        temp=temprr(~isnan(temprr));
+    else
+        temp=[temp temprr(~isnan(temprr))];
+    end
+    mousebymouse_trialn_cued_all{u==currmouse}=temp;
+    
+    temp=mousebymouse_trialnplus_uncued_all{u==currmouse};
+    temprr=reachrates.alltrials_uncued(i,:);
+    if isempty(temp)
+        temp=temprr(~isnan(temprr));
+    else
+        temp=[temp temprr(~isnan(temprr))];
+    end
+    mousebymouse_trialnplus_uncued_all{u==currmouse}=temp;
+    
+    temp=mousebymouse_trialnplus_cued_all{u==currmouse};
+    temprr=reachrates.alltrials_cued(i,:);
+    if isempty(temp)
+        temp=temprr(~isnan(temprr));
+    else
+        temp=[temp temprr(~isnan(temprr))];
+    end
+    mousebymouse_trialnplus_cued_all{u==currmouse}=temp;
+end
+mousebymouse_trialn_uncued=nan(1,length(u));
+mousebymouse_trialn_cued=nan(1,length(u));
+mousebymouse_trialnplus_uncued=nan(1,length(u));
+mousebymouse_trialnplus_cued=nan(1,length(u));
+for i=1:length(u)
+    mousebymouse_trialn_uncued(i)=nanmean(mousebymouse_trialn_uncued_all{i});
+    mousebymouse_trialn_cued(i)=nanmean(mousebymouse_trialn_cued_all{i});
+    mousebymouse_trialnplus_uncued(i)=nanmean(mousebymouse_trialnplus_uncued_all{i});
+    mousebymouse_trialnplus_cued(i)=nanmean(mousebymouse_trialnplus_cued_all{i});
+end
+
 temp=reachrates.trial1_alltrials_uncued;
 temp(nansum(~isnan(temp),2)<atleastthismanytrials,:)=nan;
 sessbysess_trialn_uncued=nanmean(temp,2);
@@ -408,23 +464,37 @@ sessbysess_trialnplus_uncued=nanmean(temp,2);
 temp=reachrates.alltrials_cued;
 temp(nansum(~isnan(temp),2)<atleastthismanytrials,:)=nan;
 sessbysess_trialnplus_cued=nanmean(temp,2);
-mousebymouse_trialn_uncued=nan(1,length(unique(mouseids)));
-mousebymouse_trialn_cued=nan(1,length(unique(mouseids)));
-mousebymouse_trialnplus_uncued=nan(1,length(unique(mouseids)));
-mousebymouse_trialnplus_cued=nan(1,length(unique(mouseids)));
-u=unique(mouseids);
-for i=1:length(u)
-    currmouse=u(i);
-    mousebymouse_trialn_uncued(i)=nanmean(sessbysess_trialn_uncued(ismember(mouseids,currmouse)));
-    mousebymouse_trialn_cued(i)=nanmean(sessbysess_trialn_cued(ismember(mouseids,currmouse)));
-    mousebymouse_trialnplus_uncued(i)=nanmean(sessbysess_trialnplus_uncued(ismember(mouseids,currmouse)));
-    mousebymouse_trialnplus_cued(i)=nanmean(sessbysess_trialnplus_cued(ismember(mouseids,currmouse)));
-end
-for i=1:length(u)
-    quiver(0,0,mousebymouse_trialnplus_uncued(i)-mousebymouse_trialn_uncued(i),mousebymouse_trialnplus_cued(i)-mousebymouse_trialn_cued(i),'Color',c);
+% SESSION BY SESSION
+temp1=sessbysess_trialnplus_uncued-sessbysess_trialn_uncued;
+temp2=sessbysess_trialnplus_cued-sessbysess_trialn_cued;
+a=[temp1(~isnan(temp1) & ~isnan(temp2)) temp2(~isnan(temp1) & ~isnan(temp2))];
+for i=1:size(a,1)
+    quiver(0,0,a(i,1),a(i,2),'Color',c);
     hold on;
 end
-quiver(0,0,nanmean(mousebymouse_trialnplus_uncued-mousebymouse_trialn_uncued),nanmean(mousebymouse_trialnplus_cued-mousebymouse_trialn_cued),'Color',c,'LineWidth',4);
+quiver(0,0,nanmean(a(:,1)),nanmean(a(:,2)),'Color',c,'LineWidth',4);
+
+% mousebymouse_trialn_uncued=nan(1,length(unique(mouseids)));
+% mousebymouse_trialn_cued=nan(1,length(unique(mouseids)));
+% mousebymouse_trialnplus_uncued=nan(1,length(unique(mouseids)));
+% mousebymouse_trialnplus_cued=nan(1,length(unique(mouseids)));
+% u=unique(mouseids);
+% for i=1:length(u)
+%     currmouse=u(i);
+%     mousebymouse_trialn_uncued(i)=nanmean(sessbysess_trialn_uncued(ismember(mouseids,currmouse)));
+%     mousebymouse_trialn_cued(i)=nanmean(sessbysess_trialn_cued(ismember(mouseids,currmouse)));
+%     mousebymouse_trialnplus_uncued(i)=nanmean(sessbysess_trialnplus_uncued(ismember(mouseids,currmouse)));
+%     mousebymouse_trialnplus_cued(i)=nanmean(sessbysess_trialnplus_cued(ismember(mouseids,currmouse)));
+% end
+
+% MOUSE BY MOUSE
+% for i=1:length(u)
+%     quiver(0,0,mousebymouse_trialnplus_uncued(i)-mousebymouse_trialn_uncued(i),mousebymouse_trialnplus_cued(i)-mousebymouse_trialn_cued(i),'Color',c);
+%     hold on;
+% end
+% quiver(0,0,nanmean(mousebymouse_trialnplus_uncued-mousebymouse_trialn_uncued),nanmean(mousebymouse_trialnplus_cued-mousebymouse_trialn_cued),'Color',c,'LineWidth',4);
+x_mousebymouse=mousebymouse_trialnplus_uncued-mousebymouse_trialn_uncued;
+y_mousebymouse=mousebymouse_trialnplus_cued-mousebymouse_trialn_cued;
 
 end
 
@@ -461,7 +531,8 @@ plotset.cuedtouchcolor=[171 104 87]./255;
 switch whichToPlot
     case 'success'
 %         timeWindow=[];
-        timeWindow=[0.1 1]; %[0.1 1]; % change this to select only trials with a reach in this window
+        % for opto grc, used time window 0.25 to 1.25
+        timeWindow=[0.1 0.5]; %[0.1 1]; % change this to select only trials with a reach in this window
         plotset.wildcard=false;
         plotset.success=true;
         plotset.delayed=false;
