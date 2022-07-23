@@ -1,4 +1,4 @@
-function [T,signals,signal_names,signal_cue_times]=bernardoTrialTable(tbt, bin1, bin2, bin3, signalSpikeFields, spikeFieldsNames, tbt_photo, signalPhotoFields, photoFieldsNames)
+function [T,signals,signal_names,signal_phys_times]=bernardoTrialTable(tbt, bin1, bin2, bin3, signalSpikeFields, spikeFieldsNames, tbt_photo, signalPhotoFields, photoFieldsNames)
 
 % bin1, bin2, bin3 are with respect to cue onset
 % Time delay Arduino to cue onset
@@ -27,7 +27,7 @@ end
 [tbt, tbt_photo, signalSpikeFields, signalPhotoFields]=addTimes(tbt, tbt_photo, signalSpikeFields, signalPhotoFields);
 
 % Add signals and names of signals
-[signal_cue,signal_cue_times,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial,signal_times_wrt_thisTrialStart,cuechunkoffset]=getLinedUpCueSignal(tbt, signalSpikeFields);
+[signal_cue,signal_cue_times,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial,signal_times_wrt_thisTrialStart,cuechunkoffset,signal_phys_times]=getLinedUpCueSignal(tbt, signalSpikeFields);
 signal_cue_times_wrt_thisTrialCueStart(signal_cue_times_wrt_thisTrialCueStart<-100)=nan;
 signal_cue_times(signal_cue_times<-100)=nan;
 signal_times_wrt_thisTrialStart(signal_cue_times<-100)=nan;
@@ -302,7 +302,7 @@ end
 
 end
 
-function [signal_cue,signal_cue_times,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial,signal_times_wrt_thisTrialStart,cuechunkoffset]=getLinedUpCueSignal(tbt, signalSpikeFields)
+function [signal_cue,signal_cue_times,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial,signal_times_wrt_thisTrialStart,cuechunkoffset,signal_phys_times]=getLinedUpCueSignal(tbt, signalSpikeFields)
 
 % could use timesfromarduino to line trials back up 
 % or movieframeinds*timestep sec
@@ -323,12 +323,12 @@ if ~isempty(signalSpikeFields)
     temp=diff(signalSpikeFields.cue_times(1,:)); 
     ts=mode(temp(temp~=0));
     cuechunkoffset=floor(1.015/ts);
-    [signal_cue,signal_cue_times,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial,signal_times_wrt_thisTrialStart]=lineUpCueChunks(signalSpikeFields, 'cue', 'cue_times', 'cuetimes_wrt_trial_start', cuechunkoffset);
+    [signal_cue,signal_cue_times,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial,signal_times_wrt_thisTrialStart,signal_phys_times]=lineUpCueChunks(signalSpikeFields, 'cue', 'cue_times', 'cuetimes_wrt_trial_start', cuechunkoffset);
 else
     temp=diff(tbt.times_wrt_trial_start(1,:)); 
     ts=mode(temp(temp~=0));
     cuechunkoffset=floor(1.015/ts);
-    [signal_cue,signal_cue_times,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial,signal_times_wrt_thisTrialStart]=lineUpCueChunks(tbt, 'cueZone_onVoff', 'times_wrt_trial_start', 'times_wrt_trial_start', cuechunkoffset);
+    [signal_cue,signal_cue_times,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial,signal_times_wrt_thisTrialStart,signal_phys_times]=lineUpCueChunks(tbt, 'cueZone_onVoff', 'times_wrt_trial_start', 'times_wrt_trial_start', cuechunkoffset);
     signal_cue_times=0:timestep:(length(signal_cue_times)-1)*timestep;
 end
 
@@ -612,11 +612,14 @@ end
 
 end
 
-function [signal_cue,signal_cue_times,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial,signal_times_wrt_thisTrialStart]=lineUpCueChunks(tbt, cuefield, cuetimes, timeswrttrialstart, cuechunkoffset)
+function [signal_cue,signal_cue_times,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial,signal_times_wrt_thisTrialStart,signal_phys_times]=lineUpCueChunks(tbt, cuefield, cuetimes, timeswrttrialstart, cuechunkoffset)
 
 cue=tbt.(cuefield);
 cue_times=tbt.(cuetimes);
 timeswrt=tbt.(timeswrttrialstart);
+if isfield(tbt, 'phys_timepoints')
+    phystimes=tbt.phys_timepoints;
+end
 % Each chunk begins at the start of each cue onset, chunk continues until
 % the start of the next chunk onset
 signal_cue=[];
@@ -624,6 +627,7 @@ signal_cue_times=[];
 signal_cue_times_wrt_thisTrialCueStart=[];
 signal_times_wrt_thisTrialStart=[];
 signal_which_trial=[];
+signal_phys_times=[];
 % if this is physiology_tbt, can also use phys_timepoints as a reference
 for i=1:size(cue,1)
     % find first cue onset 
@@ -650,6 +654,9 @@ for i=1:size(cue,1)
     end
     chunk=temp(f:f2);
     signal_cue=[signal_cue chunk];
+    if isfield(tbt, 'phys_timepoints')
+        signal_phys_times=[signal_phys_times phystimes(i,f:f2)];
+    end
     signal_cue_times=[signal_cue_times cue_times(i,f:f2)];
     signal_cue_times_wrt_thisTrialCueStart=[signal_cue_times_wrt_thisTrialCueStart cue_times(i,f:f2)-cue_times(i,fcue)];
     signal_times_wrt_thisTrialStart=[signal_times_wrt_thisTrialStart timeswrt(i,f:f2)];

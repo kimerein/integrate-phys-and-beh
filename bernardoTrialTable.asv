@@ -1,4 +1,4 @@
-function [T,signals,signal_names]=bernardoTrialTable(tbt, bin1, bin2, bin3, signalSpikeFields, spikeFieldsNames, tbt_photo, signalPhotoFields, photoFieldsNames)
+function [T,signals,signal_names,signal_cue_times]=bernardoTrialTable(tbt, bin1, bin2, bin3, signalSpikeFields, spikeFieldsNames, tbt_photo, signalPhotoFields, photoFieldsNames)
 
 % bin1, bin2, bin3 are with respect to cue onset
 % Time delay Arduino to cue onset
@@ -591,7 +591,8 @@ else
     % note that phys is up-sampled wrt behavior, so need to average to
     % prevent aliasing issues
     % resample green_times and green_ch_data
-    green_times=resample(green_times,length(signal_cue_times),length(green_times));
+    green_times=downSampAv(green_times,ceil(length(green_times)/length(signal_cue_times)));
+    green_ch_data=downSampAv(green_ch_data,ceil(length(green_ch_data)/length(signal_cue_times)));
     for i=1:length(signal_cue_times)
         [~,mi]=nanmin(abs(green_times-signal_cue_times(i)));
         sig(i)=green_ch_data(mi);
@@ -616,6 +617,9 @@ function [signal_cue,signal_cue_times,signal_cue_times_wrt_thisTrialCueStart,sig
 cue=tbt.(cuefield);
 cue_times=tbt.(cuetimes);
 timeswrt=tbt.(timeswrttrialstart);
+if isfield(tbt, 'phys_timepoints')
+    phystimes=tbt.phys_timepoints;
+end
 % Each chunk begins at the start of each cue onset, chunk continues until
 % the start of the next chunk onset
 signal_cue=[];
@@ -623,6 +627,7 @@ signal_cue_times=[];
 signal_cue_times_wrt_thisTrialCueStart=[];
 signal_times_wrt_thisTrialStart=[];
 signal_which_trial=[];
+signal_phys_times=[];
 % if this is physiology_tbt, can also use phys_timepoints as a reference
 for i=1:size(cue,1)
     % find first cue onset 
@@ -649,6 +654,9 @@ for i=1:size(cue,1)
     end
     chunk=temp(f:f2);
     signal_cue=[signal_cue chunk];
+    if isfield(tbt, 'phys_timepoints')
+        signal_phys_times=[signal_phys_times cue_times(i,f:f2)];
+    end
     signal_cue_times=[signal_cue_times cue_times(i,f:f2)];
     signal_cue_times_wrt_thisTrialCueStart=[signal_cue_times_wrt_thisTrialCueStart cue_times(i,f:f2)-cue_times(i,fcue)];
     signal_times_wrt_thisTrialStart=[signal_times_wrt_thisTrialStart timeswrt(i,f:f2)];
