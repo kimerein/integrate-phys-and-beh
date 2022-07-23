@@ -528,17 +528,17 @@ firstcuephoto=green_times(find(cue_data>0.5,1,'first'));
 firstcuephys=signal_cue_times(find(signal_cue>0.5,1,'first'));
 figure(); plot(green_times-green_times(find(cue_data>0.5,1,'first')),cue_data,'Color','k'); 
 hold on; plot(signal_cue_times-signal_cue_times(find(signal_cue>0.5,1,'first')),signal_cue,'Color','b');
-answer=questdlg('Does alignment look good?');
-switch answer
-    case 'Yes'
-        useAlignment=true;
-    case 'No'
-        useAlignment=false;
-    case 'Cancel'
-        error('Stop script');
-    case ''
-        error('Stop script');
-end
+% answer=questdlg('Does alignment look good?');
+% switch answer
+%     case 'Yes'
+%         useAlignment=true;
+%     case 'No'
+%         useAlignment=false;
+%     case 'Cancel'
+%         error('Stop script');
+%     case ''
+%         error('Stop script');
+% end
 useAlignment=true;
 
 sig=nan(size(signal_cue_times_wrt_thisTrialCueStart)); % must be the same size as other signals
