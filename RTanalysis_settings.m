@@ -22,7 +22,7 @@ if isempty(settings)
     settings.excludePawOnWheelDuringCue=0; % 1 if want to exclude trials where mouse reached before/during cue, else 0
     settings.longRT_ifNoReach=1; % if mouse does not reach in this trial, fill in reaction time as longer than trial length IF this is set to 1, else throw out trial
     settings.reverse_trial_order=0; % 1 if want to flip trial order (fake time goes backwards)
-    settings.longITIthresh=20; % in sec, trials lasting longer than this will be considered long ITI trials
+    settings.longITIthresh=18; % in sec, trials lasting longer than this will be considered long ITI trials
     settings.multipleOptoTimes=0; % if there were multiple different opto timings
 end
 

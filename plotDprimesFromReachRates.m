@@ -1,18 +1,37 @@
-function [dprimes,fracs_over_sess]=plotDprimesFromReachRates(reachrates,suppressPlots,plotVersusFrac)
+function [dprimes,fracs_over_sess,firstBinDprimes]=plotDprimesFromReachRates(varargin)
+
+if length(varargin)==3
+    reachrates=varargin{1};
+    suppressPlots=varargin{2};
+    plotVersusFrac=varargin{3};
+    initialDprimes=[];
+elseif length(varargin)==4
+    reachrates=varargin{1};
+    suppressPlots=varargin{2};
+    plotVersusFrac=varargin{3};
+    initialDprimes=varargin{4};
+else
+    error('Wrong number of arguments to plotDprimesFromReachRates');
+end
 
 % settings.stopPlottingTrialsAfterN=286;
 settings.stopPlottingTrialsAfterN=10000; %2500;
 settings.binTrialsForAvAcrossSess=true;
 settings.binThisManyTrials=10; %50; %200; %50; %4; %10; % somehow this makes dprime bigger, SO sensitive to this
-settings.stopPlottingBinsAfterN=60; %55;
+settings.stopPlottingBinsAfterN=200; %60; %55;
 settings.furtherBinBins=false; %true; %false; %true;
 settings.binThisManyBins=5;
 settings.plotVersusFrac=plotVersusFrac; % if is true, will plot dprime versus fraction through session instead of trial count
-settings.plotChangeInDprimes=false; %true;
+settings.plotChangeInDprimes=false;
 
 [dprimes,fracs_over_sess]=getdprimes(reachrates,settings.binThisManyTrials,settings);
+firstBinDprimes=dprimes(:,1);
 if settings.plotChangeInDprimes==true
-    dprimes=dprimes-repmat(dprimes(:,1),1,size(dprimes,2));
+    if ~isempty(initialDprimes)
+        dprimes=dprimes-repmat(initialDprimes,1,size(dprimes,2));
+    else
+        dprimes=dprimes-repmat(dprimes(:,1),1,size(dprimes,2));
+    end
 end
 if suppressPlots==false
     makePlot(settings,dprimes,fracs_over_sess);
@@ -34,13 +53,15 @@ cmap=colormap('cool');
 hold on;
 k=1;
 if ~isempty(settings.stopPlottingBinsAfterN)
+    if settings.stopPlottingBinsAfterN>nansum(~isnan(nanmean(approach_alltrials_dprime,1)))
+        settings.stopPlottingBinsAfterN=nansum(~isnan(nanmean(approach_alltrials_dprime,1)));
+    end
     kstep=ceil(size(cmap,1)/settings.stopPlottingBinsAfterN);
 else
     kstep=ceil(size(cmap,1)/nansum(~isnan(nanmean(approach_alltrials_dprime,1))));
 end
 currbincued=[];
 currbinfracs=[];
-currbintrialnum=0;
 currbincounter=0;
 trial_nums=1:settings.binThisManyTrials:settings.binThisManyTrials*(size(approach_alltrials_dprime,2)+1);
 for i=1:size(approach_alltrials_dprime,2) % across trials
@@ -70,7 +91,7 @@ for i=1:size(approach_alltrials_dprime,2) % across trials
         if settings.furtherBinBins==true
             currbincued=[currbincued temp_cued];
             currbinfracs=[currbinfracs temp_fracs];
-            currbintrialnum=currbintrialnum+trial_nums(i);
+            currbintrialnum=trial_nums(i);
             currbincounter=currbincounter+1;
             if currbincounter==settings.binThisManyBins
                 % plot and reset
@@ -78,7 +99,6 @@ for i=1:size(approach_alltrials_dprime,2) % across trials
 %                 currbinfracs=nanmean(currbinfracs,2);
                 currbincued=currbincued(1:end);
                 currbinfracs=currbinfracs(1:end);
-                currbintrialnum=currbintrialnum/settings.binThisManyBins;
                 currbincounter=0;
                 backup_temp_cued=temp_cued;
                 backup_temp_fracs=temp_fracs;
@@ -87,7 +107,6 @@ for i=1:size(approach_alltrials_dprime,2) % across trials
                 temp_currbintrialnum=currbintrialnum;
                 currbincued=[];
                 currbinfracs=[];
-                currbintrialnum=0;
                 if plotVersusFrac==true
                     xToPlot=nanmean(temp_fracs);
                 else
@@ -132,7 +151,7 @@ fracs_over_sess=nan(size(reachrates.alltrials_uncued,1),ceil(size(reachrates.all
 currbincounter=0;
 currtrial=0;
 goAhead=true;
-for i=1:size(reachrates.alltrials_uncued,2)
+for i=1:ceil(size(reachrates.alltrials_uncued,2)/trialBinSize)
     if goAhead==false
         break
     end
@@ -172,16 +191,24 @@ end
 
 function dprimes=calc_dprimes(uncued_events,cued_events)
 
-hit_rates=nansum(cued_events>0,2)./nansum(~isnan(cued_events),2);
-fa_rates=nansum(uncued_events>0,2)./nansum(~isnan(uncued_events),2);
-% closest we can get to 1 or zero is defined by number of trials
-ns=nansum(~isnan(cued_events),2);
-hit_rates(ns<3)=nan;
-fa_rates(ns<3)=nan;
-hit_rates(hit_rates==1)=1-(1./ns(hit_rates==1));
-hit_rates(hit_rates==0)=0+(1./ns(hit_rates==0));
-fa_rates(fa_rates==1)=1-(1./ns(fa_rates==1));
-fa_rates(fa_rates==0)=0+(1./ns(fa_rates==0));
+useBayes=true; % Bayes estimator helps to ameliorate SOME of the shift in d-prime that results from simply having too few trials
+
+if useBayes==true
+    disp('USING BAYES!');
+    hit_rates=(nansum(cued_events>0,2)+1)./(nansum(~isnan(cued_events),2)+2);
+    fa_rates=(nansum(uncued_events>0,2)+1)./(nansum(~isnan(uncued_events),2)+2);
+else
+    hit_rates=nansum(cued_events>0,2)./nansum(~isnan(cued_events),2);
+    fa_rates=nansum(uncued_events>0,2)./nansum(~isnan(uncued_events),2);
+    % closest we can get to 1 or zero is defined by number of trials
+    ns=nansum(~isnan(cued_events),2);
+    hit_rates(ns<3)=nan;
+    fa_rates(ns<3)=nan;
+    hit_rates(hit_rates==1)=1-(1./ns(hit_rates==1));
+    hit_rates(hit_rates==0)=0+(1./ns(hit_rates==0));
+    fa_rates(fa_rates==1)=1-(1./ns(fa_rates==1));
+    fa_rates(fa_rates==0)=0+(1./ns(fa_rates==0));
+end
 dprimes=dprime(hit_rates,fa_rates);
 
 end

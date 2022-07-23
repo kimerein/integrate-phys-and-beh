@@ -467,12 +467,11 @@ sessbysess_trialnplus_cued=nanmean(temp,2);
 % SESSION BY SESSION
 temp1=sessbysess_trialnplus_uncued-sessbysess_trialn_uncued;
 temp2=sessbysess_trialnplus_cued-sessbysess_trialn_cued;
-a=[temp1(~isnan(temp1) & ~isnan(temp2)) temp2(~isnan(temp1) & ~isnan(temp2))];
-for i=1:size(a,1)
-    quiver(0,0,a(i,1),a(i,2),'Color',c);
+
+for i=1:length(u)
+    quiver(0,0,sessbysess_trialnplus_uncued(i)-sessbysess_trialn_uncued(i),sessbysess_trialnplus_cued(i)-sessbysess_trialn_cued(i),'Color',c);
     hold on;
 end
-quiver(0,0,nanmean(a(:,1)),nanmean(a(:,2)),'Color',c,'LineWidth',4);
 
 % mousebymouse_trialn_uncued=nan(1,length(unique(mouseids)));
 % mousebymouse_trialn_cued=nan(1,length(unique(mouseids)));

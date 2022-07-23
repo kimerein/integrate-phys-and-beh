@@ -86,6 +86,12 @@ rpv=count_RPV(spikes, unit_assign);
 total_spikes=countTotalSpikes(spikes, unit_assign);
 
 % Unit waveform
+[~,si]=sort(varAdditionalInputs.trodeChs);
+if size(spikes.waveforms,3)==4 && length(si)==4 
+    if ~isequal(si,[1 2 3 4])
+        spikes.waveforms=spikes.waveforms(:,:,si);
+    end
+end
 wvfms=unitWaveform(spikes, unit_assign);
 ind_into_ha=1;
 ind_into_ha=nextPlot(ha, ind_into_ha);
@@ -106,7 +112,7 @@ plotFiringRate(spikes, unit_assign, 1000); % last argument is binsize in ms for 
 
 % Get some raw data
 s=getUnitSpiketimes(spikes, unit_assign);
-varAdditionalInputs.firstNSpikes=10;
+varAdditionalInputs.firstNSpikes=5;
 varAdditionalInputs.firstNmins=ceil(s(varAdditionalInputs.firstNSpikes)/60); % for WHISPER only
 [HFValues,LFPValues,ADFreq,times,allChsHF]=rawDataFromChannel(raw_data_filename, raw_data_directory, unit_on_channel, varAdditionalInputs);
 
@@ -272,8 +278,8 @@ end
 if endAtTime<startAtTime
     endAtTime=times(end);
 end
-[~,startind]=min(abs(times-startAtTime),[],'all','omitnan');
-[~,endind]=min(abs(times-endAtTime),[],'all','omitnan');
+[~,startind]=min(abs(times-startAtTime),[],'all','linear','omitnan');
+[~,endind]=min(abs(times-endAtTime),[],'all','linear','omitnan');
 
 plot(times(startind:endind),HFValues(:,startind:endind));
 
@@ -312,8 +318,8 @@ end
 if endAtTime<startAtTime
     endAtTime=times(end);
 end
-[~,startind]=min(abs(times-startAtTime),[],'all','omitnan');
-[~,endind]=min(abs(times-endAtTime),[],'all','omitnan');
+[~,startind]=min(abs(times-startAtTime),[],'all','linear','omitnan');
+[~,endind]=min(abs(times-endAtTime),[],'all','linear','omitnan');
 
 plot(times(startind:endind),HFValues(startind:endind),'Color','k');
 
@@ -352,15 +358,15 @@ end
 if endAtTime<startAtTime
     endAtTime=times(end);
 end
-[~,startind]=min(abs(times-startAtTime),[],'all','omitnan');
-[~,endind]=min(abs(times-endAtTime),[],'all','omitnan');
+[~,startind]=min(abs(times-startAtTime),[],'all','linear','omitnan');
+[~,endind]=min(abs(times-endAtTime),[],'all','linear','omitnan');
 
 plot(times(startind:endind),LFPValues(startind:endind),'Color','k');
 
 % Label spike times
 s=spiketimes(spiketimes>startAtTime & spiketimes<endAtTime);
 hold on;
-scatter(s,max(LFPValues(startind:endind),[],'all','omitnan'),50,'r','Marker','*');
+scatter(s,max(LFPValues(startind:endind),[],'all','linear','omitnan'),50,'r','Marker','*');
 axis tight
 xlabel('Time (s)');
 ylabel('LFP');
