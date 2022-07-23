@@ -515,9 +515,10 @@ for i=1:size(photo_tbt.resampPhysTimepoints,1)
     green_times=[green_times photo_tbt.resampPhysTimepoints(i,f)];
     if i<size(photo_tbt.resampPhysTimepoints,1)
         % find next trial's cue
-        nextcue=find(nextSignalCue(i+1,:)>0,5,1,'first');
+        nextcue=find(nextSignalCue(i+1,:)>0.5,1,'first');
         takebegininds=1:nextcue-1;
-        photodata(i,f-length(takebegininds)+1)=photodata(i+1,
+        photodata(i,f(end)-length(takebegininds)+1:f(end))=photodata(i+1,takebegininds);
+    end
     green_ch_data=[green_ch_data photodata(i,f)];
     cue_data=[cue_data nextSignalCue(i,f)];
     lastTimeTaken=photo_tbt.resampPhysTimepoints(i,f(end));
@@ -587,6 +588,10 @@ else
     % times in green_times now match times in signal_cue_times
     % so just get closest value from green_ch for each time in
     % signal_cue_times
+    % note that phys is up-sampled wrt behavior, so need to average to
+    % prevent aliasing issues
+    % resample green_times and green_ch_data
+    green_times=resample(green_times,length(signal_cue_times),length(green_times));
     for i=1:length(signal_cue_times)
         [~,mi]=nanmin(abs(green_times-signal_cue_times(i)));
         sig(i)=green_ch_data(mi);

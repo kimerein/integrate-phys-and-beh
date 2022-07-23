@@ -1,4 +1,4 @@
-function [T,signals,signal_names]=bernardoTrialTable(tbt, bin1, bin2, bin3, signalSpikeFields, spikeFieldsNames, tbt_photo, signalPhotoFields, photoFieldsNames)
+function [T,signals,signal_names,signal_cue_times]=bernardoTrialTable(tbt, bin1, bin2, bin3, signalSpikeFields, spikeFieldsNames, tbt_photo, signalPhotoFields, photoFieldsNames)
 
 % bin1, bin2, bin3 are with respect to cue onset
 % Time delay Arduino to cue onset
@@ -588,6 +588,11 @@ else
     % times in green_times now match times in signal_cue_times
     % so just get closest value from green_ch for each time in
     % signal_cue_times
+    % note that phys is up-sampled wrt behavior, so need to average to
+    % prevent aliasing issues
+    % resample green_times and green_ch_data
+    green_times=downSampAv(green_times,ceil(length(green_times)/length(signal_cue_times)));
+    green_ch_data=downSampAv(green_ch_data,ceil(length(green_ch_data)/length(signal_cue_times)));
     for i=1:length(signal_cue_times)
         [~,mi]=nanmin(abs(green_times-signal_cue_times(i)));
         sig(i)=green_ch_data(mi);
