@@ -597,9 +597,11 @@ if useAlignment==false
 else
     % use alignment
     green_times=green_times-green_times(find(cue_data>0.5,1,'first'))+signal_cue_times(find(signal_cue>0.5,1,'first'));
-    figure(); plot(green_times,cue_data,'Color','k'); 
-    hold on;
-    plot(signal_cue_times,signal_cue,'Color','b');
+    if isempty(mi_inds)
+        figure(); plot(green_times,cue_data,'Color','k');
+        hold on;
+        plot(signal_cue_times,signal_cue,'Color','b');
+    end
     % times in green_times now match times in signal_cue_times
     % so just get closest value from green_ch for each time in
     % signal_cue_times
