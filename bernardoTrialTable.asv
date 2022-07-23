@@ -1,4 +1,4 @@
-function [T,signals]=bernardoTrialTable(tbt, bin1, bin2, bin3, signalSpikeFields, spikeFieldsNames, tbt_photo, signalPhotoFields, photoFieldsNames)
+function [T,signals,signal_names]=bernardoTrialTable(tbt, bin1, bin2, bin3, signalSpikeFields, spikeFieldsNames, tbt_photo, signalPhotoFields, photoFieldsNames)
 
 % bin1, bin2, bin3 are with respect to cue onset
 % Time delay Arduino to cue onset
@@ -80,8 +80,29 @@ for i=1:length(spikeFieldsNames)
     nextSignalTbt=signalSpikeFields.(spikeFieldsNames{i});
     nextSignalTimes=signalSpikeFields.times_wrt_trial_start;
     nextSignalCue=signalSpikeFields.cue;
+    resampledSignalCue=nan(size(nextSignalTbt));
+    resampledPhysTimepoints=nan(size(nextSignalTbt));
+    for j=1:size(nextSignalCue,1)
+        if ~isempty(regexp(spikeFieldsNames{i},'unit'))
+            cti=signalSpikeFields.unitTimes(j,:);
+        else 
+            cti=nextSignalTimes(j,:);
+        end
+        resampledSignalCue(j,:)=fillInFromMatchingTimes(nextSignalCue(j,:), nextSignalTimes(j,:), cti);
+        resampledPhysTimepoints(j,:)=fillInFromMatchingTimes(signalSpikeFields.phys_timepoints(j,:), nextSignalTimes(j,:), cti);
+        temp=resampledPhysTimepoints(j,:);
+        endofgood=find(temp==nanmax(signalSpikeFields.phys_timepoints(j,:)),1,'first');
+        temp(endofgood+1:end)=nan;
+        temp(1:endofgood)=linspace(temp(1),temp(endofgood),endofgood);
+        resampledPhysTimepoints(j,:)=temp;
+    end
     %sig=fillInOtherSignalsSkipCue(nextSignalTbt,nextSignalTimes,signal_times_wrt_thisTrialStart,signal_which_trial);
-    sig=fillInOtherSignals(nextSignalTbt,nextSignalTimes,nextSignalCue,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial);
+    if ~isempty(regexp(spikeFieldsNames{i},'unit'))
+        signalSpikeFields.resampPhysTimepoints=resampledPhysTimepoints;
+        sig=fillInOtherSignalsPhysiology(nextSignalTbt,nextSignalTimes,resampledSignalCue,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial,signalSpikeFields,spikeFieldsNames{i},signal_cue,signal_cue_times);
+    else
+        sig=fillInOtherSignals(nextSignalTbt,nextSignalTimes,nextSignalCue,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial);
+    end
     signal_ind=signal_ind+1;
     signals{signal_ind}=sig;
     signal_names{signal_ind}=spikeFieldsNames{i};
@@ -421,6 +442,103 @@ switch answer
     case ''
         error('Stop script');
 end
+
+sig=nan(size(signal_cue_times_wrt_thisTrialCueStart)); % must be the same size as other signals
+if useAlignment==false
+    % just use nearest neighbor to interpolate or downsample
+    for i=1:size(nextSignalTbt,1)
+        temp=nextSignalTbt(i,:);
+        times=nextSignalTimes(i,:);
+        tempcue=nextSignalCue(i,:);
+        greentimesreference=photo_tbt.green_time(i,:);
+        % relative to the timing of the cue in this trial
+        % resample temp
+        f=find(signal_which_trial==i);
+        timeswrtcuestart=signal_cue_times_wrt_thisTrialCueStart(f);
+        fcue=find(tempcue>0.5,1,'first');
+        timeswrtcuestart_nextsignal=times-times(fcue);
+        if max(timeswrtcuestart,[],'all','omitnan')>max(timeswrtcuestart_nextsignal,[],'all','omitnan')
+            % fill in times
+            tempdiff=diff(timeswrtcuestart_nextsignal);
+            ts=mode(tempdiff(~isnan(tempdiff)));
+            fin=find(~isnan(timeswrtcuestart_nextsignal),1,'last')+1;
+            timeswrtcuestart_nextsignal(fin:end)=timeswrtcuestart_nextsignal(fin-1)+ts:ts:timeswrtcuestart_nextsignal(fin-1)+length(timeswrtcuestart_nextsignal(fin:end))*ts;
+        end
+        for j=1:length(timeswrtcuestart)
+            if isnan(timeswrtcuestart(j))
+                sig(f(j))=nan;
+                continue
+            end
+            % find nearest neighbor
+            [~,mi]=nanmin(abs(timeswrtcuestart_nextsignal-timeswrtcuestart(j)));
+            % mi is index into this row
+            % use green times as reference
+            [~,mi2]=nanmin(abs(green_times-greentimesreference(mi)));
+            %sig(f(j))=temp(mi);
+            sig(f(j))=green_ch_data(mi2);
+        end
+        %if nansum(diff(sig)==0)>50
+        %    a=1;
+        %end
+    end
+else
+    % use alignment
+    green_times=green_times-green_times(find(cue_data>0.5,1,'first'))+signal_cue_times(find(signal_cue>0.5,1,'first'));
+    figure(); plot(green_times,cue_data,'Color','k'); 
+    hold on;
+    plot(signal_cue_times,signal_cue,'Color','b');
+    % times in green_times now match times in signal_cue_times
+    % so just get closest value from green_ch for each time in
+    % signal_cue_times
+    for i=1:length(signal_cue_times)
+        [~,mi]=nanmin(abs(green_times-signal_cue_times(i)));
+        sig(i)=green_ch_data(mi);
+    end
+end
+
+end
+
+function sig=fillInOtherSignalsPhysiology(nextSignalTbt,nextSignalTimes,nextSignalCue,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial,photo_tbt,whichCh,signal_cue,signal_cue_times)
+
+% make single continuous photometry signal out of unique times
+green_times=[];
+green_ch_data=[];
+cue_data=[];
+photodata=photo_tbt.(whichCh);
+for i=1:size(photo_tbt.resampPhysTimepoints,1)
+    f=find(~isnan(photo_tbt.resampPhysTimepoints(i,:)) & photo_tbt.resampPhysTimepoints(i,:)>0);
+    if i~=1
+        [~,mi]=nanmin(abs(photo_tbt.resampPhysTimepoints(i,:)-lastTimeTaken));
+        fend=f(end);
+        f=mi:fend;
+    end
+    green_times=[green_times photo_tbt.resampPhysTimepoints(i,f)];
+    if i<size(photo_tbt.resampPhysTimepoints,1)
+        % find next trial's cue
+        nextcue=find(nextSignalCue(i+1,:)>0,5,1,'first');
+        takebegininds=1:nextcue-1;
+        photodata(i,f-length(takebegininds)+1)=photodata(i+1,
+    green_ch_data=[green_ch_data photodata(i,f)];
+    cue_data=[cue_data nextSignalCue(i,f)];
+    lastTimeTaken=photo_tbt.resampPhysTimepoints(i,f(end));
+end
+
+firstcuephoto=green_times(find(cue_data>0.5,1,'first'));
+firstcuephys=signal_cue_times(find(signal_cue>0.5,1,'first'));
+figure(); plot(green_times-green_times(find(cue_data>0.5,1,'first')),cue_data,'Color','k'); 
+hold on; plot(signal_cue_times-signal_cue_times(find(signal_cue>0.5,1,'first')),signal_cue,'Color','b');
+answer=questdlg('Does alignment look good?');
+switch answer
+    case 'Yes'
+        useAlignment=true;
+    case 'No'
+        useAlignment=false;
+    case 'Cancel'
+        error('Stop script');
+    case ''
+        error('Stop script');
+end
+useAlignment=true;
 
 sig=nan(size(signal_cue_times_wrt_thisTrialCueStart)); % must be the same size as other signals
 if useAlignment==false
