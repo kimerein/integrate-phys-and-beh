@@ -76,6 +76,7 @@ else
     signals{signal_ind}=sig;
     signal_names{signal_ind}='opto';
 end
+didAUnit=false;
 for i=1:length(spikeFieldsNames)
     nextSignalTbt=signalSpikeFields.(spikeFieldsNames{i});
     nextSignalTimes=signalSpikeFields.times_wrt_trial_start;
@@ -98,8 +99,14 @@ for i=1:length(spikeFieldsNames)
     end
     %sig=fillInOtherSignalsSkipCue(nextSignalTbt,nextSignalTimes,signal_times_wrt_thisTrialStart,signal_which_trial);
     if ~isempty(regexp(spikeFieldsNames{i},'unit'))
+        disp(['Filling in ' spikeFieldsNames{i}]);
         signalSpikeFields.resampPhysTimepoints=resampledPhysTimepoints;
-        sig=fillInOtherSignalsPhysiology(nextSignalTbt,nextSignalTimes,resampledSignalCue,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial,signalSpikeFields,spikeFieldsNames{i},signal_cue,signal_cue_times);
+        if didAUnit==false
+            [sig,fs,mi_inds]=fillInOtherSignalsPhysiology(nextSignalTbt,nextSignalTimes,resampledSignalCue,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial,signalSpikeFields,spikeFieldsNames{i},signal_cue,signal_cue_times,[],[]);
+            didAUnit=true;
+        else
+            sig=fillInOtherSignalsPhysiology(nextSignalTbt,nextSignalTimes,resampledSignalCue,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial,signalSpikeFields,spikeFieldsNames{i},signal_cue,signal_cue_times,fs,mi_inds);
+        end
     else
         sig=fillInOtherSignals(nextSignalTbt,nextSignalTimes,nextSignalCue,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial);
     end
@@ -260,6 +267,8 @@ for i=1:size(tbt.all_reachBatch,1)
     elseif tbt.reachBatch_miss_reachStarts(i,firstreachind)>0.5
         % miss
         thisreachtype='miss';
+    elseif tbt.pelletmissingreach_reachStarts(i,firstreachind)>0.5
+        thisreachtype='pelletMissing';
     elseif tbt.reachBatch_success_reachStarts_pawOnWheel(i,firstreachind)>0.5
         thisreachtype='success_pawOnWheel';
     elseif tbt.reachBatch_drop_reachStarts_pawOnWheel(i,firstreachind)>0.5
@@ -498,29 +507,34 @@ end
 
 end
 
-function sig=fillInOtherSignalsPhysiology(nextSignalTbt,nextSignalTimes,nextSignalCue,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial,photo_tbt,whichCh,signal_cue,signal_cue_times)
+function [sig,fs,mi_inds]=fillInOtherSignalsPhysiology(nextSignalTbt,nextSignalTimes,nextSignalCue,signal_cue_times_wrt_thisTrialCueStart,signal_which_trial,photo_tbt,whichCh,signal_cue,signal_cue_times,fs,mi_inds)
 
 % make single continuous photometry signal out of unique times
 green_times=[];
 green_ch_data=[];
 cue_data=[];
 photodata=photo_tbt.(whichCh);
-save_fs=nan(size(photo_tbt.resampPhysTimepoints,1)
+save_fs=cell(1,size(photo_tbt.resampPhysTimepoints,1));
 for i=1:size(photo_tbt.resampPhysTimepoints,1)
-    f=find(~isnan(photo_tbt.resampPhysTimepoints(i,:)) & photo_tbt.resampPhysTimepoints(i,:)>0);
-    if i~=1
-        [~,mi]=nanmin(abs(photo_tbt.resampPhysTimepoints(i,:)-lastTimeTaken));
-        fend=f(end);
-        f=mi:fend;
-    end
-    green_times=[green_times photo_tbt.resampPhysTimepoints(i,f)];
-    if i<size(photo_tbt.resampPhysTimepoints,1)
-        % find next trial's cue
-        nextcue=find(nextSignalCue(i+1,:)>0.5,1,'first');
-        takebegininds=1:nextcue-1;
-        photodata(i,f(end)-length(takebegininds)+1:f(end))=photodata(i+1,takebegininds);
+    if isempty(fs)
+        f=find(~isnan(photo_tbt.resampPhysTimepoints(i,:)) & photo_tbt.resampPhysTimepoints(i,:)>0);
+        if i~=1
+            [~,mi]=nanmin(abs(photo_tbt.resampPhysTimepoints(i,:)-lastTimeTaken));
+            fend=f(end);
+            f=mi:fend;
+        end
+        green_times=[green_times photo_tbt.resampPhysTimepoints(i,f)];
+        if i<size(photo_tbt.resampPhysTimepoints,1)
+            % find next trial's cue
+            nextcue=find(nextSignalCue(i+1,:)>0.5,1,'first');
+            takebegininds=1:nextcue-1;
+            photodata(i,f(end)-length(takebegininds)+1:f(end))=photodata(i+1,takebegininds);
+        end
+    else
+        f=fs{i};
     end
     green_ch_data=[green_ch_data photodata(i,f)];
+    save_fs{i}=f;
     cue_data=[cue_data nextSignalCue(i,f)];
     lastTimeTaken=photo_tbt.resampPhysTimepoints(i,f(end));
 end
@@ -594,9 +608,15 @@ else
     % resample green_times and green_ch_data
     green_times=downSampAv(green_times,ceil(length(green_times)/length(signal_cue_times)));
     green_ch_data=downSampAv(green_ch_data,ceil(length(green_ch_data)/length(signal_cue_times)));
-    for i=1:length(signal_cue_times)
-        [~,mi]=nanmin(abs(green_times-signal_cue_times(i)));
-        sig(i)=green_ch_data(mi);
+    if isempty(mi_inds)
+        mi_inds=nan(1,length(signal_cue_times));
+        for i=1:length(signal_cue_times)
+            [~,mi]=nanmin(abs(green_times-signal_cue_times(i)));
+            sig(i)=green_ch_data(mi);
+            mi_inds(i)=mi;
+        end
+    else
+        sig=green_ch_data(mi_inds);
     end
 end
 

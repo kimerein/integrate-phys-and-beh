@@ -267,6 +267,8 @@ for i=1:size(tbt.all_reachBatch,1)
     elseif tbt.reachBatch_miss_reachStarts(i,firstreachind)>0.5
         % miss
         thisreachtype='miss';
+    elseif tbt.pelletmissingreach_reachStarts(i,firstreachind)>0.5
+        thisreachtype='pelletMissing';
     elseif tbt.reachBatch_success_reachStarts_pawOnWheel(i,firstreachind)>0.5
         thisreachtype='success_pawOnWheel';
     elseif tbt.reachBatch_drop_reachStarts_pawOnWheel(i,firstreachind)>0.5
@@ -539,8 +541,8 @@ end
 
 firstcuephoto=green_times(find(cue_data>0.5,1,'first'));
 firstcuephys=signal_cue_times(find(signal_cue>0.5,1,'first'));
-figure(); plot(green_times-green_times(find(cue_data>0.5,1,'first')),cue_data,'Color','k'); 
-hold on; plot(signal_cue_times-signal_cue_times(find(signal_cue>0.5,1,'first')),signal_cue,'Color','b');
+% figure(); plot(green_times-green_times(find(cue_data>0.5,1,'first')),cue_data,'Color','k'); 
+% hold on; plot(signal_cue_times-signal_cue_times(find(signal_cue>0.5,1,'first')),signal_cue,'Color','b');
 % answer=questdlg('Does alignment look good?');
 % switch answer
 %     case 'Yes'
