@@ -23,8 +23,9 @@ trial2=flankingTrials;
 test.trial2=trial2;
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
-% 
-[dprime_given_reach,dprime_given_reachPLUSsd,dprime_given_reachMINUSsd]=dprimes_given_reach(alltbt,dataset,suppressPlots)
+% playing with an alternate metric: given reach, probability that cue preceded reach
+fracthrubins=0:0.1:1.0001;
+[dprime_given_reach,dprime_given_reachPLUSsd,dprime_given_reachMINUSsd]=dprimes_given_reach(alltbt,dataset,false,fracthrubins);
 % continuing to plot change over all trials within session
 reachratesettings.suppressPlots=false;
 reachratesettings.binTrialsForAvAcrossSess=true;
@@ -62,6 +63,8 @@ test.trial2=trial2;
 alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch');
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch back');
+fracthrubins=0:useFractionThroughSession(1):useFractionThroughSession(2)+0.001;
+[dprime_given_reach_noLED,dprime_given_reachPLUSsd_noLED,dprime_given_reachMINUSsd_noLED]=dprimes_given_reach(alltbt,dataset,false,fracthrubins);
 plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching'); title('No LED');
 plotChangeInReachCDF(dataset.realDistributions,alltbt,plotCDFUpTo); title('No LED');
 reachratesettings.suppressPlots=false;
@@ -82,6 +85,8 @@ test.trial2=trial2;
 alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch');
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch back');
+fracthrubins=0:useFractionThroughSession(1):useFractionThroughSession(2)+0.001;
+[dprime_given_reach_LED,dprime_given_reachPLUSsd_LED,dprime_given_reachMINUSsd_LED]=dprimes_given_reach(alltbt,dataset,false,fracthrubins);
 plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching'); title('LED');
 plotChangeInReachCDF(dataset.realDistributions,alltbt,plotCDFUpTo); title('LED');
 reachratesettings.suppressPlots=false;
@@ -144,16 +149,25 @@ scatter(nanmean(fracs_inThisPartOfSess_dprimeLED(1:end)),mean_dprime_LED,[],'r',
 line([nanmean(fracs_inThisPartOfSess_dprimeNoLED(1:end)) nanmean(fracs_inThisPartOfSess_dprimeNoLED(1:end))],[mean_dprime-se_dprime mean_dprime+se_dprime],'Color','k');
 line([nanmean(fracs_inThisPartOfSess_dprimeLED(1:end)) nanmean(fracs_inThisPartOfSess_dprimeLED(1:end))],[mean_dprime_LED-se_dprime_LED mean_dprime_LED+se_dprime_LED],'Color','r');
 
+% plot output in dprime GIVEN REACH space
+figure();
+scatter(nanmean(fracs_inThisPartOfSess_dprimeNoLED(1:end)),dprime_given_reach_noLED(end),[],'k','filled');
+hold on; 
+scatter(nanmean(fracs_inThisPartOfSess_dprimeLED(1:end)),dprime_given_reach_LED(end),[],'r','filled');
+line([dprime_given_reachMINUSsd_noLED(end) nanmean(fracs_inThisPartOfSess_dprimeNoLED(1:end))],[mean_dprime-se_dprime mean_dprime+se_dprime],'Color','k');
+line([nanmean(fracs_inThisPartOfSess_dprimeLED(1:end)) nanmean(fracs_inThisPartOfSess_dprimeLED(1:end))],[mean_dprime_LED-se_dprime_LED mean_dprime_LED+se_dprime_LED],'Color','r');
+
+
 end
 
-function [dprime_given_reach,dprime_given_reachPLUSsd,dprime_given_reachMINUSsd]=dprimes_given_reach(alltbt,dataset,suppressPlots)
+function [dprime_given_reach,dprime_given_reachPLUSsd,dprime_given_reachMINUSsd]=dprimes_given_reach(alltbt,dataset,suppressPlots,fracthrubins)
 
 % playing with an alternate metric: given reach, probability that cue preceded reach
 temp=nanmean(alltbt.times,1); timestep=mode(diff(temp(~isnan(temp)))); [~,cueAtInd]=nanmax(nanmean(alltbt.cueZone_onVoff,1));
 [was_reach_preceded_by_cue,trial_number,reach_time]=givenReach_probThatWasPrecededByCue(dataset.realDistributions, 'rawReaching_event_trial1InSeq', 1.5, timestep, cueAtInd); % if third arg is negative, will get prob cue AFTER reach
 fracthru_allevs=alltbt.fractionThroughSess_adjusted(dataset.realDistributions.event_isSeq{1}==1);
 fracthru=fracthru_allevs(trial_number);
-fracthrubins=0:0.05:1.0001;
+% fracthrubins=0:0.1:1.0001;
 p_reach_preceded_by_cue=nan(length(fracthrubins)-1,1);
 sample_std_for_binomial=nan(length(fracthrubins)-1,1);
 for i=1:length(fracthrubins)-1

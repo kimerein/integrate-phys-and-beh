@@ -63,6 +63,9 @@ test.trial2=trial2;
 alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch');
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch back');
+fracthrubins=0:useFractionThroughSession(1):useFractionThroughSession(2)+0.001;
+[dprime_given_reach_noLED,dprime_given_reachPLUSsd_noLED,dprime_given_reachMINUSsd_noLED]=dprimes_given_reach(alltbt,dataset,false,fracthrubins);
+title('dprime NO LED given reach');
 plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching'); title('No LED');
 plotChangeInReachCDF(dataset.realDistributions,alltbt,plotCDFUpTo); title('No LED');
 reachratesettings.suppressPlots=false;
@@ -83,6 +86,9 @@ test.trial2=trial2;
 alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch');
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch back');
+fracthrubins=0:useFractionThroughSession(1):useFractionThroughSession(2)+0.001;
+[dprime_given_reach_LED,dprime_given_reachPLUSsd_LED,dprime_given_reachMINUSsd_LED]=dprimes_given_reach(alltbt,dataset,false,fracthrubins);
+title('dprime LED given reach');
 plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching'); title('LED');
 plotChangeInReachCDF(dataset.realDistributions,alltbt,plotCDFUpTo); title('LED');
 reachratesettings.suppressPlots=false;
@@ -144,6 +150,16 @@ hold on;
 scatter(nanmean(fracs_inThisPartOfSess_dprimeLED(1:end)),mean_dprime_LED,[],'r','filled');
 line([nanmean(fracs_inThisPartOfSess_dprimeNoLED(1:end)) nanmean(fracs_inThisPartOfSess_dprimeNoLED(1:end))],[mean_dprime-se_dprime mean_dprime+se_dprime],'Color','k');
 line([nanmean(fracs_inThisPartOfSess_dprimeLED(1:end)) nanmean(fracs_inThisPartOfSess_dprimeLED(1:end))],[mean_dprime_LED-se_dprime_LED mean_dprime_LED+se_dprime_LED],'Color','r');
+
+% plot output in dprime GIVEN REACH space
+figure();
+scatter(nanmean(useFractionThroughSession),dprime_given_reach_noLED(end),[],'k','filled');
+hold on; 
+scatter(nanmean(useFractionThroughSession),dprime_given_reach_LED(end),[],'r','filled');
+line([nanmean(useFractionThroughSession) nanmean(useFractionThroughSession)],[dprime_given_reachMINUSsd_noLED(end) dprime_given_reachPLUSsd_noLED(end)],'Color','k');
+line([nanmean(useFractionThroughSession) nanmean(useFractionThroughSession)],[dprime_given_reachMINUSsd_LED(end) dprime_given_reachPLUSsd_LED(end)],'Color','r');
+title('dprime GIVEN REACH');
+
 
 end
 
