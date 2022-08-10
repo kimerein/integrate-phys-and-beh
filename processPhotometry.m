@@ -69,7 +69,7 @@ settings.chronux.display=false;
 settings.chronux.greenfilter_range=[120 200]; %[120 200]; % band pass range in Hz, green channel
 settings.chronux.redfilter_range=[200 265]; %[200 265]; % band pass range in Hz, red channel
 % baseline calculation or just Z-score
-settings.Zscore_or_dF_F='Zscore'; % either Zscore or dF_F
+settings.Zscore_or_dF_F='Zscore_before_demodulate'; % either Zscore or dF_F or Zscore_before_demodulate
 settings.whichBaseline='percentile'; % can be 'percentile' or 'median'
 settings.prc=10; % if using 'percentile', which prctile
 settings.baselineWindow=30; % in secs, length of baseline window
@@ -122,6 +122,10 @@ end
 % process photometry
 if useGreenCh==true
     % process green_ch
+    switch settings.Zscore_or_dF_F
+        case 'Zscore_before_demodulate'
+            data.green_ch=zscore(data.green_ch);
+    end
     switch settings.keepPhase
         case 'yes'
             data.green_ch=bandPassLFP(data.green_ch.*data.green_mod,Fs,settings.greenfilter_range(1),settings.greenfilter_range(2),0);
@@ -178,6 +182,10 @@ if useGreenCh==true
 end
 if useRedCh==true
     % process red_ch
+    switch settings.Zscore_or_dF_F
+        case 'Zscore_before_demodulate'
+            data.red_ch=zscore(data.red_ch);
+    end
     switch settings.keepPhase
         case 'yes'
             data.red_ch=bandPassLFP(data.red_ch.*data.red_mod,Fs,settings.redfilter_range(1),settings.redfilter_range(2),0);

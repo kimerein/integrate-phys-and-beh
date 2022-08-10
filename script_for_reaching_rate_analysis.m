@@ -102,7 +102,7 @@ trialTypes.sessid=metadata.sessid;
 % tbt_filter.sortField='dprimes';
 % tbt_filter.sortField='opto_enhanced_reach';
 % tbt_filter.sortField='mouseLearned';
-tbt_filter.sortField='initiallyNoLED';
+tbt_filter.sortField='initiallyLowLEDsess';
 % tbt_filter.range_values=[1 6 7 8 10 14 18];
 % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
 tbt_filter.range_values=[0.5 1.5]; % maybe 2,6,7,12
@@ -276,10 +276,15 @@ useFractionThroughSession=[0.4 1];
 plotCDFUpTo=3;
 memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,[],plotCDFUpTo);
 % ANOTHER WAY
-trialTypes.initiallyNoLED=findSeqsWithN_of_condition(trialTypes, 'led', 34, 100, false);
-alltbt.initiallyNoLED=trialTypes.initiallyNoLED;
+trialTypes.lowLEDsequence=findSeqsWithN_of_condition(trialTypes, 'led', 55, 150, false);
+[~,ui]=unique(trialTypes.sessid);
+trialTypes.initiallyLowLED=zeros(size(trialTypes.lowLEDsequence));
+trialTypes.initiallyLowLED(ui)=trialTypes.lowLEDsequence(ui);
+disp(nansum(trialTypes.initiallyLowLED))
+theseAreLowLEDsess=unique(trialTypes.sessid(trialTypes.initiallyLowLED==1));
+trialTypes.initiallyLowLEDsess=ismember(trialTypes.sessid,theseAreLowLEDsess);
 % filter tbt according to initiallyNoLED, then
-nInSeq=2; useFractionThroughSession=[0.4 1]; plotCDFUpTo=3;
+nInSeq=2; useFractionThroughSession=[0.2 0.4]; plotCDFUpTo=3;
 memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,[],plotCDFUpTo);
 
 %% led ongoing reach motor effects

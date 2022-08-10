@@ -25,7 +25,7 @@ test.trial2=trial2;
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
 % playing with an alternate metric: given reach, probability that cue preceded reach
 % fracthrubins=0:0.1:1.0001;
-fracthrubins={[0:0.1:0.9],[0.2:0.1:1.001]};
+fracthrubins={[0:0.05:0.95],[0.1:0.05:1.001]};
 [dprime_given_reach,dprime_given_reachPLUSsd,dprime_given_reachMINUSsd]=dprimes_given_reach(alltbt,dataset,false,fracthrubins,'rawReaching_event_trialiInSeq'); % two formats for fracthrubins, see function
 % continuing to plot change over all trials within session
 reachratesettings.suppressPlots=false;
@@ -55,7 +55,8 @@ reachratesettings=getReachRateSettings();
 % THEN
 % NO LED FIRST
 test.nInSequence=[nInSequence]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
-trial1='trialTypes.led~=1'; 
+trial1='trialTypes.led~=1';
+% trial1=flankingTrials;
 test.trial1=trial1;
 linker=' & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup_1forward~=3'; 
 trial2=['trialTypes.led~=1' linker];
@@ -79,7 +80,8 @@ title('No led sequence');
 % LED SECOND
 test.nInSequence=[nInSequence]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
 linker=' & trialTypes.led_1back~=1'; 
-trial1=['trialTypes.led~=1' linker]; 
+% trial1=['trialTypes.led~=1' linker]; 
+trial1=['trialTypes.led~=1']; 
 test.trial1=trial1;
 trial2=['trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3'];
 test.trial2=trial2;

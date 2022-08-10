@@ -2,8 +2,8 @@ function [cueCD,uncueCD,lateUncueCD]=alignToCompanion(datadir,getCDs,cueCD,uncue
 
 excludeHigherFR=false;
 cutAtTime=3; % stop plotting this many seconds after max of alignment companion
-ds=2; % downsample bin size
-onlyTakeTheseUnits='A2atagged'; % if is not empty, will only take units with this string in filename, e.g., 'D1tagged'
+ds=4; %2; % downsample bin size
+onlyTakeTheseUnits='D1tagged'; % if is not empty, will only take units with this string in filename, e.g., 'D1tagged'
 % or make cutAtTime empty to plot all time points
 % getCDs=true;
 
@@ -92,6 +92,14 @@ if ds~=1
     aligncomp_x=downSampMatrix(aligncomp_x,ds);
     aligncomp_y=downSampMatrix(aligncomp_y,ds);
 end
+
+takeThese=[1 1 1 1 0 1 1 1 0 1 0 0 1 1 0 0 0 0 0 0 0 1 0 1 0 0 1 1 1 1 1 0 1 0 0 1 1 0 0 1];
+% takeThese=[1 1 1 1 0 1 1 1 0 1 0 0 1 0 0 0 0 0 0 0 1 0 1 0 0 1 1 1 1 1 0 1 0 0 1 1 0 0 1];
+% takeThese=takeThese==0;
+unitbyunit_x=unitbyunit_x(takeThese==1,:);
+unitbyunit_y=unitbyunit_y(takeThese==1,:);
+aligncomp_x=aligncomp_x(takeThese==1,:);
+aligncomp_y=aligncomp_y(takeThese==1,:);
 
 figure();
 plot(nanmean(unitbyunit_x,1),unitbyunit_y');

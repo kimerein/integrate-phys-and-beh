@@ -20,9 +20,9 @@ settings.try_delay2=50;
 settings.tryinc=0.02;
 % settings.try_scale1=0.6;
 % settings.try_scale2=1;  
-alignInd=6;
+alignInd=10;
 % downSampData2=true;
-ds=3; %1000;
+ds=10; %1000;
 
 if downSampData2==true
     a=questdlg('Beware will downsample data2 and return downsampled. Do you want to continue? ');

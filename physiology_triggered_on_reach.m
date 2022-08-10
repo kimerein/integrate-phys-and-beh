@@ -138,7 +138,7 @@ close all;
 
 if length(a)>1
     isInBackHalf=false;
-    fractionThru=0.5;
+    fractionThru=0.7;
 %     isInBackHalf=[];
 %     fractionThru=[];
     [discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes,padPhotoTimesAtFront]=alignDistractors(totalalignment.movie_distractor(totalalignment.from_second_video==1),data.distractor,distract_thresh_movie,distract_thresh_photometry,totalalignment.timesfromarduino(totalalignment.from_second_video==1),data.distractor_times,settings,isInBackHalf,fractionThru);
