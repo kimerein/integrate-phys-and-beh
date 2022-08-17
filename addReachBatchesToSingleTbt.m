@@ -277,15 +277,19 @@ for i=1:length(reach_batch.firstreach_type)
                     if isfield(tbt,'maybeDrop_reachStarts')
                         if ~isempty(regexp(newstr,'pawOnWheel','once'))
                             if tbt.maybeDrop_reachStarts_pawOnWheel(row,col)==1 || tbt.maybeDrop_reachStarts_pawOnWheel(row2,col2)==1 % if either is uncertain, propagate uncertainty to batch
-                                tempmaybes=tbt.([newstr '_maybeDrop']);
-                                tempmaybes(row2,col2)=1;
-                                tbt.([newstr '_maybeDrop'])=tempmaybes;
+                                if isfield(tbt, [newstr '_maybeDrop'])
+                                    tempmaybes=tbt.([newstr '_maybeDrop']);
+                                    tempmaybes(row2,col2)=1;
+                                    tbt.([newstr '_maybeDrop'])=tempmaybes;
+                                end
                             end
                         else
                             if tbt.maybeDrop_reachStarts(row,col)==1 || tbt.maybeDrop_reachStarts(row2,col2)==1 % if either is uncertain, propagate uncertainty to batch
-                                tempmaybes=tbt.([newstr '_maybeDrop']);
-                                tempmaybes(row2,col2)=1;
-                                tbt.([newstr '_maybeDrop'])=tempmaybes;
+                                if isfield(tbt, [newstr '_maybeDrop'])
+                                    tempmaybes=tbt.([newstr '_maybeDrop']);
+                                    tempmaybes(row2,col2)=1;
+                                    tbt.([newstr '_maybeDrop'])=tempmaybes;
+                                end
                             end
                         end
                     end                    
@@ -330,15 +334,19 @@ for i=1:length(reach_batch.firstreach_type)
                     if isfield(tbt,'maybeDrop_reachStarts')
                         if ~isempty(regexp(newstr,'pawOnWheel','once'))
                             if tbt.maybeDrop_reachStarts_pawOnWheel(row,col)==1 || tbt.maybeDrop_reachStarts_pawOnWheel(row2,col2)==1 % if either is uncertain, propagate uncertainty to batch
-                                tempmaybes=tbt.([newstr '_maybeDrop']);
-                                tempmaybes(row,col)=1;
-                                tbt.([newstr '_maybeDrop'])=tempmaybes;
+                                if isfield(tbt, [newstr '_maybeDrop'])
+                                    tempmaybes=tbt.([newstr '_maybeDrop']);
+                                    tempmaybes(row,col)=1;
+                                    tbt.([newstr '_maybeDrop'])=tempmaybes;
+                                end
                             end
                         else
                             if tbt.maybeDrop_reachStarts(row,col)==1 || tbt.maybeDrop_reachStarts(row2,col2)==1 % if either is uncertain, propagate uncertainty to batch
-                                tempmaybes=tbt.([newstr '_maybeDrop']);
-                                tempmaybes(row,col)=1;
-                                tbt.([newstr '_maybeDrop'])=tempmaybes;
+                                if isfield(tbt, [newstr '_maybeDrop'])
+                                    tempmaybes=tbt.([newstr '_maybeDrop']);
+                                    tempmaybes(row,col)=1;
+                                    tbt.([newstr '_maybeDrop'])=tempmaybes;
+                                end
                             end
                         end
                     end    

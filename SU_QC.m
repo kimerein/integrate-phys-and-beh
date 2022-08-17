@@ -91,6 +91,9 @@ if size(spikes.waveforms,3)==4 && length(si)==4
     if ~isequal(si,[1 2 3 4])
         spikes.waveforms=spikes.waveforms(:,:,si);
     end
+else
+    [~,si]=sort(varAdditionalInputs.trodeChs(1:size(spikes.waveforms,3)));
+    spikes.waveforms(:,:,1:length(si))=spikes.waveforms(:,:,si);
 end
 wvfms=unitWaveform(spikes, unit_assign);
 ind_into_ha=1;

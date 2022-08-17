@@ -2,8 +2,8 @@ function [cueCD,uncueCD,lateUncueCD]=alignToCompanion(datadir,getCDs,cueCD,uncue
 
 excludeHigherFR=false;
 cutAtTime=3; % stop plotting this many seconds after max of alignment companion
-ds=6; %2; % downsample bin size
-onlyTakeTheseUnits='D1tagged'; % if is not empty, will only take units with this string in filename, e.g., 'D1tagged'
+ds=2; %2; % downsample bin size
+onlyTakeTheseUnits='A2atagged'; % if is not empty, will only take units with this string in filename, e.g., 'D1tagged'
 % or make cutAtTime empty to plot all time points
 % getCDs=true;
 normalizePSTHs=true;
@@ -103,7 +103,6 @@ if normalizePSTHs==true
 end
 
 
-% takeThese=[0 1 1 1 1 0 1 0 0 0 1 0 0 1 0 0 1 1 1]; % D2
 
 takeThese=[1 1 1 1 0 1 1 1 0 1 0 0 1 1 0 0 0 0 0 0 0 1 0 1 0 0 1 1 1 1 1 0 1 0 0 1 1 0 0 1]; % D1
 % takeThese=[1 1 1 1 0 1 1 1 0 1 0 0 1 0 0 0 0 0 0 0 1 0 1 0 0 1 1 1 1 1 0 1 0 0 1 1 0 0 1]; % D1
