@@ -88,7 +88,7 @@ settings.photo_dec=settings.scale_factor-15;
 settings.movie_dec=1;
 settings.minlagForInitialAlign=[]; %-20000; % if these are negative, works differently and will truncate this many frames from front of first movie only
 % if one is negative, the other (positive) value will be the actual maxlagForInitialAlign
-settings.maxlagForInitialAlign=50; %50; % [] is don't want to constrain alignment
+settings.maxlagForInitialAlign=[]; %50; % [] is don't want to constrain alignment
 settings.try_delay1=0;
 settings.try_delay2=0;
 
@@ -139,7 +139,7 @@ close all;
 if length(a)>1
     isInBackHalf=true;
     fractionThru=0.15;
-    settings.maxlagForInitialAlign=100;
+    settings.maxlagForInitialAlign=[];
 %     isInBackHalf=[];
 %     fractionThru=[];
     [discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes,padPhotoTimesAtFront]=alignDistractors(totalalignment.movie_distractor(totalalignment.from_second_video==1),data.distractor,distract_thresh_movie,distract_thresh_photometry,totalalignment.timesfromarduino(totalalignment.from_second_video==1),data.distractor_times,settings,isInBackHalf,fractionThru);
@@ -764,6 +764,8 @@ if ~isempty(settings.minlagForInitialAlign)
         m=abs(settings.maxlagForInitialAlign);
         settings.maxlagForInitialAlign=settings.minlagForInitialAlign;
         settings.minlagForInitialAlign=[];
+    else
+        m=1;
     end
     % truncate before attempting align
     movie_distract=movie_distract(m:end);
