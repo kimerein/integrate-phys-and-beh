@@ -1,6 +1,6 @@
-function [cueCD,uncueCD,lateUncueCD,unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y]=alignToCompanion(datadir,getCDs,cueCD,uncueCD,lateUncueCD,onlyTakeTheseUnits)
+function [cueCD,uncueCD,lateUncueCD,unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,excluded]=alignToCompanion(datadir,getCDs,cueCD,uncueCD,lateUncueCD,onlyTakeTheseUnits)
 
-excludeHigherFR=true;
+excludeHigherFR=false;
 cutAtTime=3; % stop plotting this many seconds after max of alignment companion
 ds=2; % downsample bin size
 % onlyTakeTheseUnits='D1tagged'; % if is not empty, will only take units with this string in filename, e.g., 'D1tagged'
@@ -20,6 +20,7 @@ if iscell(datadir)
 else
     dd=1;
 end
+excluded=[];
 for j=1:length(dd)
     if iscell(dd)
         datadir=dd{j};
@@ -38,7 +39,16 @@ for j=1:length(dd)
         if excludeHigherFR
             if nanmean(nanmean(a.dataout.y,1),2)>4
                 disp(['excluding unit ' ls(i).name ' based on high FR']);
+                excluded=[excluded 1];
                 continue
+            else
+                excluded=[excluded 0];
+            end
+        else
+            if nanmean(nanmean(a.dataout.y,1),2)>4
+                excluded=[excluded 1];
+            else
+                excluded=[excluded 0];
             end
         end
         
