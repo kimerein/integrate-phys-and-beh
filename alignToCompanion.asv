@@ -1,12 +1,12 @@
-function [cueCD,uncueCD,lateUncueCD]=alignToCompanion(datadir,getCDs,cueCD,uncueCD,lateUncueCD)
+function [cueCD,uncueCD,lateUncueCD,unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,excluded]=alignToCompanion(datadir,getCDs,cueCD,uncueCD,lateUncueCD,onlyTakeTheseUnits)
 
 excludeHigherFR=false;
 cutAtTime=3; % stop plotting this many seconds after max of alignment companion
-ds=2; %2; % downsample bin size
-onlyTakeTheseUnits='A2atagged'; % if is not empty, will only take units with this string in filename, e.g., 'D1tagged'
+ds=2; % downsample bin size
+% onlyTakeTheseUnits='D1tagged'; % if is not empty, will only take units with this string in filename, e.g., 'D1tagged'
 % or make cutAtTime empty to plot all time points
 % getCDs=true;
-normalizePSTHs=true;
+normalizePSTHs=false;
 
 unitbyunit_x=[];
 unitbyunit_y=[];
@@ -20,6 +20,7 @@ if iscell(datadir)
 else
     dd=1;
 end
+excluded=[];
 for j=1:length(dd)
     if iscell(dd)
         datadir=dd{j};
@@ -38,7 +39,16 @@ for j=1:length(dd)
         if excludeHigherFR
             if nanmean(nanmean(a.dataout.y,1),2)>4
                 disp(['excluding unit ' ls(i).name ' based on high FR']);
+                excluded=[excluded 1];
                 continue
+            else
+                excluded=[excluded 0];
+            end
+        else
+            if nanmean(nanmean(a.dataout.y,1),2)>4
+                excluded=[excluded 1];
+            else
+                excluded=[excluded 0];
             end
         end
         
@@ -58,6 +68,7 @@ for j=1:length(dd)
             a.dataout.x=a.dataout.x(mi-unitbaseline:end);
             a.dataout.y=a.dataout.y(:,mi-unitbaseline:end);
         end
+        curr_n=size(a.dataout.y,1);
         if ~isempty(unitbyunit_x)
             upTo2=size(aligncomp_x,2);
         else
@@ -82,7 +93,12 @@ for j=1:length(dd)
         end
         unitbyunit_x=[unitbyunit_x; [a.dataout.x(1:upTo)]];
         unitbyunit_y=[unitbyunit_y; [nanmean(a.dataout.y(:,1:upTo),1)]];
-        
+        ns=[ns; curr_n];
+
+        if isempty([nanmean(a.dataout.y(:,1:upTo),1)])
+            disp([ls(i).name ' has no trials']);
+        end
+
         disp(['Added ' ls(i).name]);
     end
 end
@@ -101,16 +117,6 @@ if normalizePSTHs==true
     ma=max(unitbyunit_y(:,1:fi),[],2,'omitnan');
     unitbyunit_y=unitbyunit_y./repmat(ma,1,size(unitbyunit_y,2));
 end
-
-
-
-takeThese=[1 1 1 1 0 1 1 1 0 1 0 0 1 1 0 0 0 0 0 0 0 1 0 1 0 0 1 1 1 1 1 0 1 0 0 1 1 0 0 1]; % D1
-% takeThese=[1 1 1 1 0 1 1 1 0 1 0 0 1 0 0 0 0 0 0 0 1 0 1 0 0 1 1 1 1 1 0 1 0 0 1 1 0 0 1]; % D1
-takeThese=takeThese==0;
-unitbyunit_x=unitbyunit_x(takeThese==1,:);
-unitbyunit_y=unitbyunit_y(takeThese==1,:);
-aligncomp_x=aligncomp_x(takeThese==1,:);
-aligncomp_y=aligncomp_y(takeThese==1,:);
 
 figure();
 plot(nanmean(unitbyunit_x,1),unitbyunit_y');

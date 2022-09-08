@@ -62,10 +62,10 @@ plot(nanmean(activityD2tagged.unitbyunit_x(pvals_D2<pvalcutoff & cueResponseIncr
 hold on; 
 plot(nanmean(activityD2tagged.aligncomp_x(pvals_D2<pvalcutoff & cueResponseIncrease_D2==true,:),1),nanmean(activityD2tagged.aligncomp_y(pvals_D2<pvalcutoff & cueResponseIncrease_D2==true,:),1),'Color','b');
 %title('D2 likes cue');
-c=[0.4660 0.6740 0.1880];
 hold on; %figure();
 plot(nanmean(activityD2tagged.unitbyunit_x(pvals_D2<pvalcutoff & cueResponseIncrease_D2==false,:),1),nanmean(activityD2tagged.unitbyunit_y(pvals_D2<pvalcutoff & cueResponseIncrease_D2==false,:),1),'Color',c);
 hold on; 
+c=[0.4660 0.6740 0.1880];
 plot(nanmean(activityD2tagged.aligncomp_x(pvals_D2<pvalcutoff & cueResponseIncrease_D2==false,:),1),nanmean(activityD2tagged.aligncomp_y(pvals_D2<pvalcutoff & cueResponseIncrease_D2==false,:),1),'Color','b');
 legend({'D1 likes cue','align','D1 does not like cue','align','D2 likes cue','align','D2 does not like cue'});
 
@@ -93,7 +93,7 @@ s=scatter(-temp,zeros(size(temp))+addRand(temp,-0.1,0.1),[],'filled','MarkerFace
 % c='k';
 % s=scatter(zeros(size(temp)),temp,[],'filled','Color',c);
 % s.AlphaData=0.2;
-daspect([1 1 1]);
+% daspect([1 1 1]);
 
 end
 

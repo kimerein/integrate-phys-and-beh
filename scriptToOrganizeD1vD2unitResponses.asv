@@ -18,8 +18,7 @@ for i=1:length(dd)
 end
 [~,~,~,unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,excluded,ns]=alignToCompanion(dd_more,true,[],[],[],'D1tagged');
 [~,ma]=nanmax(nanmean(aligncomp_y,1));
-temp=nanmean(aligncomp_x,1);
-putAlignPeakAt=temp(ma);
+putAlignPeakAt=aligncomp_x(ma);
 D1tagged_cueResponse.unitbyunit_x=unitbyunit_x;
 D1tagged_cueResponse.unitbyunit_y=unitbyunit_y;
 D1tagged_cueResponse.aligncomp_x=aligncomp_x;
@@ -79,14 +78,11 @@ end
 
 function D1tagged_cueResponse=putAlignmentAtTime(putAlignPeakAt,D1tagged_cueResponse)
 
-for i=1:size(D1tagged_cueResponse.aligncomp_y,1)
-    [~,ma]=nanmax(D1tagged_cueResponse.aligncomp_y(i,:));
-    temp=D1tagged_cueResponse.aligncomp_x(i,:);
-    currAlignPeak=temp(ma);
-    shiftByTime=putAlignPeakAt-currAlignPeak;
-    D1tagged_cueResponse.unitbyunit_x(i,:)=D1tagged_cueResponse.unitbyunit_x(i,:)+shiftByTime;
-    D1tagged_cueResponse.aligncomp_x(i,:)=D1tagged_cueResponse.aligncomp_x(i,:)+shiftByTime;
-end
+[~,ma]=nanmax(nanmean(D1tagged_cueResponse.aligncomp_y,1));
+currAlignPeak=D1tagged_cueResponse.aligncomp_x(ma);
+shiftByTime=putAlignPeakAt-currAlignPeak;
+D1tagged_cueResponse.unitbyunit_x=D1tagged_cueResponse.unitbyunit_x+shiftByTime;
+D1tagged_cueResponse.aligncomp_x=D1tagged_cueResponse.aligncomp_x+shiftByTime;
 
 end
 

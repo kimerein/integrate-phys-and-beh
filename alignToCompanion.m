@@ -1,8 +1,8 @@
-function [cueCD,uncueCD,lateUncueCD,unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,excluded]=alignToCompanion(datadir,getCDs,cueCD,uncueCD,lateUncueCD,onlyTakeTheseUnits)
+function [cueCD,uncueCD,lateUncueCD,unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,excluded,ns]=alignToCompanion(datadir,getCDs,cueCD,uncueCD,lateUncueCD,onlyTakeTheseUnits)
 
 excludeHigherFR=false;
 cutAtTime=3; % stop plotting this many seconds after max of alignment companion
-ds=2; % downsample bin size
+ds=1; % downsample bin size
 % onlyTakeTheseUnits='D1tagged'; % if is not empty, will only take units with this string in filename, e.g., 'D1tagged'
 % or make cutAtTime empty to plot all time points
 % getCDs=true;
@@ -10,10 +10,11 @@ normalizePSTHs=false;
 
 unitbyunit_x=[];
 unitbyunit_y=[];
+ns=[];
 aligncomp_x=[];
 aligncomp_y=[];
 padsize=1000;
-testForAlignment=false;
+testForAlignment=true;
 unitbaseline=300; %150;
 if iscell(datadir)
     dd=datadir;
@@ -68,6 +69,7 @@ for j=1:length(dd)
             a.dataout.x=a.dataout.x(mi-unitbaseline:end);
             a.dataout.y=a.dataout.y(:,mi-unitbaseline:end);
         end
+        curr_n=nansum(any(a.dataout.y>0,2));
         if ~isempty(unitbyunit_x)
             upTo2=size(aligncomp_x,2);
         else
@@ -92,11 +94,12 @@ for j=1:length(dd)
         end
         unitbyunit_x=[unitbyunit_x; [a.dataout.x(1:upTo)]];
         unitbyunit_y=[unitbyunit_y; [nanmean(a.dataout.y(:,1:upTo),1)]];
+        ns=[ns; curr_n];
 
         if isempty([nanmean(a.dataout.y(:,1:upTo),1)])
             disp([ls(i).name ' has no trials']);
         end
-        
+
         disp(['Added ' ls(i).name]);
     end
 end
