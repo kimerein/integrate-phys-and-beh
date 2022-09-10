@@ -20,61 +20,125 @@ disp(length(responses_D2));
 disp(length(pvals_D1));
 disp(length(pvals_D2));
 
+% Construct matrix N neurons x T timepoints
+% May need to truncate to match sizes, but have already been aligned
+cueD1tagged=D1tagged_cueResponse.unitbyunit_y; cueD1tagged_aligncomp=makeSameLengthAlignmentCompanion(D1tagged_cueResponse);
+cueD2tagged=D2tagged_cueResponse.unitbyunit_y; cueD2tagged_aligncomp=makeSameLengthAlignmentCompanion(D2tagged_cueResponse);
+beheventD1tagged=activityD1tagged.unitbyunit_y(:,1:126); % truncate after trial end 
+beheventD1tagged_aligncomp=makeSameLengthAlignmentCompanion(activityD1tagged); beheventD1tagged_aligncomp=beheventD1tagged_aligncomp(1:126);
+beheventD2tagged=activityD2tagged.unitbyunit_y(:,1:126); % truncate after trial end
+beheventD2tagged_aligncomp=makeSameLengthAlignmentCompanion(activityD2tagged); beheventD2tagged_aligncomp=beheventD2tagged_aligncomp(1:126);
+smallest=nanmin([size(cueD1tagged,2), size(cueD2tagged,2), size(beheventD1tagged,2), size(beheventD2tagged,2)]);
+cueD1tagged=cueD1tagged(:,1:smallest);
+cueD2tagged=cueD2tagged(:,1:smallest);
+beheventD1tagged=beheventD1tagged(:,1:smallest);
+beheventD2tagged=beheventD2tagged(:,1:smallest);
+cueD1tagged_aligncomp=cueD1tagged_aligncomp(1:smallest);
+cueD2tagged_aligncomp=cueD2tagged_aligncomp(1:smallest);
+beheventD1tagged_aligncomp=beheventD1tagged_aligncomp(1:smallest);
+beheventD2tagged_aligncomp=beheventD2tagged_aligncomp(1:smallest);
+aligncompD1=[cueD1tagged_aligncomp beheventD1tagged_aligncomp];
+aligncompD2=[cueD2tagged_aligncomp beheventD2tagged_aligncomp];
+% no nans
+cueD1tagged(isnan(cueD1tagged))=nanmean(cueD1tagged,'all');
+cueD2tagged(isnan(cueD2tagged))=nanmean(cueD2tagged,'all');
+beheventD1tagged(isnan(beheventD1tagged))=nanmean(beheventD1tagged,'all');
+beheventD2tagged(isnan(beheventD2tagged))=nanmean(beheventD2tagged,'all');
+% normalize
+cueD1tagged=cueD1tagged./nanmax(cueD1tagged);
+cueD2tagged=cueD2tagged./nanmax(cueD2tagged);
+beheventD1tagged=beheventD1tagged./nanmax(beheventD1tagged);
+beheventD2tagged=beheventD2tagged./nanmax(beheventD2tagged);
+A = [cueD1tagged; cueD2tagged];
+A = [A, [beheventD1tagged; beheventD2tagged]];
+% Add opto condition (i.e., A2a or D1 tagging) at the beginning and leave in the opto-driven response
+% A = [[0.5*ones(size(cueD1tagged,1),1); 3*ones(size(cueD2tagged,1),1)], A];
+% A = A(1:36,:); % D1
+A = A(37:100,:); % D2
+% Size of matrix is N neurons X T "timepoints"
+A=A-repmat(nanmean(A,1),size(A,1),1);
+A=A-repmat(nanmean(A,2),1,size(A,2));
+disp('Size of matrix A');
+disp(size(A));
+neurons_by_neurons=A*transpose(A);
+times_by_times=transpose(A)*A;
+% eigenvectors and eigenvalues
+[eigVec_nbyn,eigVal_nbyn]=eig(neurons_by_neurons);
+[sorted_eigVal_nbyn,si]=sort(diag(eigVal_nbyn),'descend');
+eigVec_nbyn=eigVec_nbyn(:,si);
+[eigVec_tbyt,eigVal_tbyt]=eig(times_by_times);
+[sorted_eigVal_tbyt,si]=sort(diag(eigVal_tbyt),'descend');
+eigVec_tbyt=eigVec_tbyt(:,si);
+
+% figure();
+% for i=1:5
+%     plot(1:36,eigVec_nbyn(1:36,i),'Color','r'); hold on; plot(37:100,eigVec_nbyn(37:100,i),'Color','b');
+% end
+i=1; figure(); plot(eigVec_tbyt(:,i)); hold on; plot(aligncompD1.*nanmax(eigVec_tbyt(:,i)),'Color','b'); plot(aligncompD2.*nanmax(eigVec_tbyt(:,i)),'Color','b');
+i=[2 3 4]; figure(); temp=nanmean(eigVec_tbyt(:,i),2); plot(temp); hold on; plot(aligncompD1.*nanmax(temp),'Color','b'); plot(aligncompD2.*nanmax(temp),'Color','b');
+
+grp1=pvals_D1<pvalcutoff(2) & pvals_D1>pvalcutoff(1) & cueResponseIncrease_D1==true;
+grp2=(pvals_D1<pvalcutoff(2) & pvals_D1>pvalcutoff(1) & cueResponseIncrease_D1==false);
+grp3=pvals_D2<pvalcutoff(2) & pvals_D2>pvalcutoff(1) & cueResponseIncrease_D2==true;
+grp4=(pvals_D2<pvalcutoff(2) & pvals_D2>pvalcutoff(1) & cueResponseIncrease_D2==false);
+
 figure(); c=[0.8500 0.3250 0.0980];
-plot(nanmean(D1tagged_cueResponse.unitbyunit_x(pvals_D1<pvalcutoff & cueResponseIncrease_D1==true,:),1),nanmean(D1tagged_cueResponse.unitbyunit_y(pvals_D1<pvalcutoff & cueResponseIncrease_D1==true,:),1),'Color',c);
+plot(nanmean(D1tagged_cueResponse.unitbyunit_x(grp1,:),1),nanmean(D1tagged_cueResponse.unitbyunit_y(grp1,:),1),'Color',c);
 hold on; 
-plot(nanmean(D1tagged_cueResponse.aligncomp_x(pvals_D1<pvalcutoff & cueResponseIncrease_D1==true,:),1),nanmean(D1tagged_cueResponse.aligncomp_y(pvals_D1<pvalcutoff & cueResponseIncrease_D1==true,:),1),'Color','b');
+plot(nanmean(D1tagged_cueResponse.aligncomp_x(grp1,:),1),nanmean(D1tagged_cueResponse.aligncomp_y(grp1,:),1),'Color','b');
 %title('D1 likes cue CUE RESPONSE');
 hold on; %figure();
 c=[0.4940 0.1840 0.5560];
-plot(nanmean(D1tagged_cueResponse.unitbyunit_x(pvals_D1<pvalcutoff & cueResponseIncrease_D1==false,:),1),nanmean(D1tagged_cueResponse.unitbyunit_y(pvals_D1<pvalcutoff & cueResponseIncrease_D1==false,:),1),'Color',c);
+plot(nanmean(D1tagged_cueResponse.unitbyunit_x(grp2,:),1),nanmean(D1tagged_cueResponse.unitbyunit_y(grp2,:),1),'Color',c);
 hold on; 
-plot(nanmean(D1tagged_cueResponse.aligncomp_x(pvals_D1<pvalcutoff & cueResponseIncrease_D1==false,:),1),nanmean(D1tagged_cueResponse.aligncomp_y(pvals_D1<pvalcutoff & cueResponseIncrease_D1==false,:),1),'Color','b');
+plot(nanmean(D1tagged_cueResponse.aligncomp_x(grp2,:),1),nanmean(D1tagged_cueResponse.aligncomp_y(grp2,:),1),'Color','b');
 legend({'D1 likes cue CUE RESPONSE','align','D1 does not like cue CUE RESPONSE','align'});
 
 figure(); c=[0.3010 0.7450 0.9330];
-plot(nanmean(D2tagged_cueResponse.unitbyunit_x(pvals_D2<pvalcutoff & cueResponseIncrease_D2==true,:),1),nanmean(D2tagged_cueResponse.unitbyunit_y(pvals_D2<pvalcutoff & cueResponseIncrease_D2==true,:),1),'Color',c);
+plot(nanmean(D2tagged_cueResponse.unitbyunit_x(grp3,:),1),nanmean(D2tagged_cueResponse.unitbyunit_y(grp3,:),1),'Color',c);
 hold on; 
-plot(nanmean(D2tagged_cueResponse.aligncomp_x(pvals_D2<pvalcutoff & cueResponseIncrease_D2==true,:),1),nanmean(D2tagged_cueResponse.aligncomp_y(pvals_D2<pvalcutoff & cueResponseIncrease_D2==true,:),1),'Color','b');
+plot(nanmean(D2tagged_cueResponse.aligncomp_x(grp3,:),1),nanmean(D2tagged_cueResponse.aligncomp_y(grp3,:),1),'Color','b');
 %title('D2 likes cue CUE RESPONSE');
 hold on; %figure();
 c=[0.4660 0.6740 0.1880];
-plot(nanmean(D2tagged_cueResponse.unitbyunit_x(pvals_D2<pvalcutoff & cueResponseIncrease_D2==false,:),1),nanmean(D2tagged_cueResponse.unitbyunit_y(pvals_D2<pvalcutoff & cueResponseIncrease_D2==false,:),1),'Color',c);
+plot(nanmean(D2tagged_cueResponse.unitbyunit_x(grp4,:),1),nanmean(D2tagged_cueResponse.unitbyunit_y(grp4,:),1),'Color',c);
 hold on; 
-plot(nanmean(D2tagged_cueResponse.aligncomp_x(pvals_D2<pvalcutoff & cueResponseIncrease_D2==false,:),1),nanmean(D2tagged_cueResponse.aligncomp_y(pvals_D2<pvalcutoff & cueResponseIncrease_D2==false,:),1),'Color','b');
+plot(nanmean(D2tagged_cueResponse.aligncomp_x(grp4,:),1),nanmean(D2tagged_cueResponse.aligncomp_y(grp4,:),1),'Color','b');
 legend({'D2 likes cue CUE RESPONSE','align','D2 does not like cue CUE RESPONSE','align'});
 
 figure(); c=[0.8500 0.3250 0.0980];
-plot(nanmean(activityD1tagged.unitbyunit_x(pvals_D1<pvalcutoff & cueResponseIncrease_D1==true,:),1),nanmean(activityD1tagged.unitbyunit_y(pvals_D1<pvalcutoff & cueResponseIncrease_D1==true,:),1),'Color',c);
+plot(nanmean(activityD1tagged.unitbyunit_x(grp1,:),1),nanmean(activityD1tagged.unitbyunit_y(grp1,:),1),'Color',c);
 hold on; 
-plot(nanmean(activityD1tagged.aligncomp_x(pvals_D1<pvalcutoff & cueResponseIncrease_D1==true,:),1),nanmean(activityD1tagged.aligncomp_y(pvals_D1<pvalcutoff & cueResponseIncrease_D1==true,:),1),'Color','b');
+plot(nanmean(activityD1tagged.aligncomp_x(grp1,:),1),nanmean(activityD1tagged.aligncomp_y(grp1,:),1),'Color','b');
 %title('D1 likes cue');
 hold on; %figure(); 
 c=[0.4940 0.1840 0.5560];
-plot(nanmean(activityD1tagged.unitbyunit_x(pvals_D1<pvalcutoff & cueResponseIncrease_D1==false,:),1),nanmean(activityD1tagged.unitbyunit_y(pvals_D1<pvalcutoff & cueResponseIncrease_D1==false,:),1),'Color',c);
+plot(nanmean(activityD1tagged.unitbyunit_x(grp2,:),1),nanmean(activityD1tagged.unitbyunit_y(grp2,:),1),'Color',c);
 hold on; 
-plot(nanmean(activityD1tagged.aligncomp_x(pvals_D1<pvalcutoff & cueResponseIncrease_D1==false,:),1),nanmean(activityD1tagged.aligncomp_y(pvals_D1<pvalcutoff & cueResponseIncrease_D1==false,:),1),'Color','b');
+plot(nanmean(activityD1tagged.aligncomp_x(grp2,:),1),nanmean(activityD1tagged.aligncomp_y(grp2,:),1),'Color','b');
 %legend({'D1 likes cue','align','D1 does not like cue','align'});
 
 c=[0.3010 0.7450 0.9330];
 hold on; %figure();
-plot(nanmean(activityD2tagged.unitbyunit_x(pvals_D2<pvalcutoff & cueResponseIncrease_D2==true,:),1),nanmean(activityD2tagged.unitbyunit_y(pvals_D2<pvalcutoff & cueResponseIncrease_D2==true,:),1),'Color',c);
+plot(nanmean(activityD2tagged.unitbyunit_x(grp3,:),1),nanmean(activityD2tagged.unitbyunit_y(grp3,:),1),'Color',c);
 hold on; 
-plot(nanmean(activityD2tagged.aligncomp_x(pvals_D2<pvalcutoff & cueResponseIncrease_D2==true,:),1),nanmean(activityD2tagged.aligncomp_y(pvals_D2<pvalcutoff & cueResponseIncrease_D2==true,:),1),'Color','b');
+plot(nanmean(activityD2tagged.aligncomp_x(grp3,:),1),nanmean(activityD2tagged.aligncomp_y(grp3,:),1),'Color','b');
 %title('D2 likes cue');
 c=[0.4660 0.6740 0.1880];
 hold on; %figure();
-plot(nanmean(activityD2tagged.unitbyunit_x(pvals_D2<pvalcutoff & cueResponseIncrease_D2==false,:),1),nanmean(activityD2tagged.unitbyunit_y(pvals_D2<pvalcutoff & cueResponseIncrease_D2==false,:),1),'Color',c);
+plot(nanmean(activityD2tagged.unitbyunit_x(grp4,:),1),nanmean(activityD2tagged.unitbyunit_y(grp4,:),1),'Color',c);
 hold on; 
-plot(nanmean(activityD2tagged.aligncomp_x(pvals_D2<pvalcutoff & cueResponseIncrease_D2==false,:),1),nanmean(activityD2tagged.aligncomp_y(pvals_D2<pvalcutoff & cueResponseIncrease_D2==false,:),1),'Color','b');
+plot(nanmean(activityD2tagged.aligncomp_x(grp4,:),1),nanmean(activityD2tagged.aligncomp_y(grp4,:),1),'Color','b');
 legend({'D1 likes cue','align','D1 does not like cue','align','D2 likes cue','align','D2 does not like cue'});
 
 figure();
-temp=responses_D1(pvals_D1<pvalcutoff & cueResponseIncrease_D1==true);
+temp=responses_D1(grp1);
+Y{1}=temp';
 c=[0.8500 0.3250 0.0980];
 s=scatter(zeros(size(temp))+addRand(temp,-0.1,0.1),temp,[],'filled','MarkerFaceColor',c,'MarkerFaceAlpha',0.5);
 hold on; 
-temp=responses_D1(pvals_D1<pvalcutoff & cueResponseIncrease_D1==false);
+temp=responses_D1(grp2);
+Y{2}=temp';
 c=[0.4940 0.1840 0.5560];
 s=scatter(temp,zeros(size(temp))+addRand(temp,-0.1,0.1),[],'filled','MarkerFaceColor',c,'MarkerFaceAlpha',0.5);
 % temp=responses_D1(pvals_D1>=0.1);
@@ -82,18 +146,34 @@ s=scatter(temp,zeros(size(temp))+addRand(temp,-0.1,0.1),[],'filled','MarkerFaceC
 % s=scatter(zeros(size(temp)),temp,[],'filled','Color',c);
 % s.AlphaData=0.2;
 
-temp=responses_D2(pvals_D2<pvalcutoff & cueResponseIncrease_D2==true);
+temp=responses_D2(grp3);
 c=[0.3010 0.7450 0.9330];
+Y{3}=temp';
 s=scatter(zeros(size(temp))+addRand(temp,-0.1,0.1),-temp,[],'filled','MarkerFaceColor',c,'MarkerFaceAlpha',0.5);
 hold on; 
-temp=responses_D2(pvals_D2<pvalcutoff & cueResponseIncrease_D2==false);
+temp=responses_D2(grp4);
 c=[0.4660 0.6740 0.1880];
+Y{4}=temp';
 s=scatter(-temp,zeros(size(temp))+addRand(temp,-0.1,0.1),[],'filled','MarkerFaceColor',c,'MarkerFaceAlpha',0.5);
 % temp=responses_D2(pvals_D2>=0.1);
 % c='k';
 % s=scatter(zeros(size(temp)),temp,[],'filled','Color',c);
 % s.AlphaData=0.2;
 daspect([1 1 1]);
+
+% Plot as violins
+figure();
+[h,L,MX,MED]=violin(Y,'bw',0.3);
+
+end
+
+function cueD1tagged_aligncomp=makeSameLengthAlignmentCompanion(D1tagged_cueResponse)
+
+cueD1tagged_aligncomp=zeros(size(nanmean(D1tagged_cueResponse.unitbyunit_y,1))); 
+[~,ma]=nanmax(nanmean(D1tagged_cueResponse.aligncomp_y,1));
+temp=nanmean(D1tagged_cueResponse.aligncomp_x,1); timeOfalign=temp(ma);
+[~,mi]=nanmin(abs(nanmean(D1tagged_cueResponse.unitbyunit_x,1)-timeOfalign));
+cueD1tagged_aligncomp(mi)=1;
 
 end
 

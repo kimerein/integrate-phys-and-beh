@@ -2,7 +2,7 @@ function [cueCD,uncueCD,lateUncueCD,unitbyunit_x,unitbyunit_y,aligncomp_x,alignc
 
 excludeHigherFR=false;
 cutAtTime=3; % stop plotting this many seconds after max of alignment companion
-ds=1; % downsample bin size
+ds=6; % downsample bin size
 % onlyTakeTheseUnits='D1tagged'; % if is not empty, will only take units with this string in filename, e.g., 'D1tagged'
 % or make cutAtTime empty to plot all time points
 % getCDs=true;
@@ -14,7 +14,7 @@ ns=[];
 aligncomp_x=[];
 aligncomp_y=[];
 padsize=1000;
-testForAlignment=true;
+testForAlignment=false;
 unitbaseline=300; %150;
 if iscell(datadir)
     dd=datadir;

@@ -2,14 +2,14 @@ function scriptToOrganizeD1vD2unitResponses(dd)
 
 % load dd
 
-pvalcutoff=1;
+pvalcutoff=[-0.001 0.2]; %[0.5 1.001];
 
 % choose type of response and time window to analyze
-responseType='cued_success';
-timeWindow=[-0.22 0.5]; %[-0.25 0.3]; % relative to alignment companion onset, in seconds
+responseType='uncued_failure';
+timeWindow=[-0.22 3.32]; %[-0.22 0.5]; %[-0.25 0.3]; % relative to alignment companion onset, in seconds
 responseBaseline=[]; %[-1.05 -0.25];
-cueWindow=[0 0.5];
-beforeCueBaseline=[-1.05 0.2];
+cueWindow=[0 0.5]; %[5 16]; %[0 3]; %[0 0.5];
+beforeCueBaseline=[-1.05 -0.2];
 
 % get cue response of each tagged type
 dd_more=cell(1,length(dd));
