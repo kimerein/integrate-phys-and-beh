@@ -1,4 +1,4 @@
-function [cueCD,uncueCD,lateUncueCD,unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,excluded,ns,D1orD2taggingExpt,firstValNtimesBaseVar,optoFRoverBaseline,indsForAnalysisPerSess]=alignToCompanion(datadir,getCDs,cueCD,uncueCD,lateUncueCD,onlyTakeTheseUnits,settings,indsForAnalysisPerSess)
+function [cueCD,uncueCD,lateUncueCD,unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,excluded,ns,D1orD2taggingExpt,firstValNtimesBaseVar,optoFRoverBaseline]=alignToCompanion(datadir,getCDs,cueCD,uncueCD,lateUncueCD,onlyTakeTheseUnits,settings)
 
 excludeHigherFR=settings.excludeHigherFR;
 cutAtTime=settings.cutAtTime;
@@ -123,13 +123,7 @@ for j=1:length(dd)
     sessCounter=sessCounter+1;
 end
 
-if settings.studyOptoTag==true
-    [firstValNtimesBaseVar,optoFRoverBaseline,indsForAnalysisPerSess]=studyOptoTagging(unitbyunit_y, unitbyunit_x, settings, fromWhichSess, indsForAnalysisPerSess);
-else
-    firstValNtimesBaseVar=[];
-    optoFRoverBaseline=[];
-    indsForAnalysisPerSess=[];
-end
+[firstValNtimesBaseVar,optoFRoverBaseline]=studyOptoTagging(unitbyunit_y, unitbyunit_x, settings, fromWhichSess);
 
 if ds~=1
     unitbyunit_x=downSampMatrix(unitbyunit_x,ds);
@@ -187,18 +181,13 @@ end
 
 end
 
-function [firstValNtimesBaseVar,optoFRoverBaseline,indsForAnalysisPerSess]=studyOptoTagging(unitbyunit_y, unitbyunit_x, settings, fromWhichSess, indsForAnalysisPerSess)
+function [firstValNtimesBaseVar,optoFRoverBaseline]=studyOptoTagging(unitbyunit_y, unitbyunit_x, settings, fromWhichSess)
 
 % find opto onset for these experiments
 uniqueSess=unique(fromWhichSess);
 firstValNtimesBaseVar=[];
 optoFRoverBaseline=[];
-if isempty(indsForAnalysisPerSess)
-    indsForAnalysisPerSess=nan(length(uniqueSess),2);
-    usePassedInInds=false;
-else
-    usePassedInInds=true;
-end
+indsForAnalysisPerSess=nan(length(uniqueSess),2);
 for i=1:length(uniqueSess)
     takeTheseCells=fromWhichSess==uniqueSess(i);
     if takeTheseCells(end)>size(unitbyunit_y,1)
@@ -207,27 +196,17 @@ for i=1:length(uniqueSess)
     temp=nanmean(unitbyunit_y(takeTheseCells,1:settings.unitbaseline),1);
     tempvar=var(temp(1:settings.beforeOptoBaseline));
     tempmean=mean(temp(1:settings.beforeOptoBaseline));
-    if usePassedInInds
-        baselineVariance=var(unitbyunit_y(takeTheseCells,1:indsForAnalysisPerSess(i,1)-1),0,2);
-        baselineMean=mean(unitbyunit_y(takeTheseCells,1:indsForAnalysisPerSess(i,1)-1),2,'omitnan');
-        firstOptoVal=unitbyunit_y(takeTheseCells,indsForAnalysisPerSess(i,1));
-        timestep=nanmean(diff(nanmean(unitbyunit_x,1)));
-        firstValRelativeToBaselineInVar=(firstOptoVal-baselineMean)./baselineVariance;
-        avDuringOpto=mean(unitbyunit_y(takeTheseCells,indsForAnalysisPerSess(i,1):indsForAnalysisPerSess(i,2)),2,'omitnan');
-    else
-        ma=nanmax((temp-tempmean)./tempvar);
-        f1=find(((temp-tempmean)./tempvar)>0.3*ma,1,'first');
-        if isempty(f1)
-            [~,f1]=nanmax((temp-tempmean)./tempvar);
-        end
-        baselineVariance=var(unitbyunit_y(takeTheseCells,1:f1-1),0,2);
-        baselineMean=mean(unitbyunit_y(takeTheseCells,1:f1-1),2,'omitnan');
-        firstOptoVal=unitbyunit_y(takeTheseCells,f1);
-        timestep=nanmean(diff(nanmean(unitbyunit_x,1)));
-        firstValRelativeToBaselineInVar=(firstOptoVal-baselineMean)./baselineVariance;
-        avDuringOpto=mean(unitbyunit_y(takeTheseCells,f1:f1+floor(settings.optoTagDuration/timestep)),2,'omitnan');
-        indsForAnalysisPerSess(i,1)=f1; indsForAnalysisPerSess(i,2)=f1+floor(settings.optoTagDuration/timestep);
+    ma=nanmax((temp-tempmean)./tempvar);
+    f1=find(((temp-tempmean)./tempvar)>0.3*ma,1,'first');
+    if isempty(f1)
+        [~,f1]=nanmax((temp-tempmean)./tempvar);
     end
+    baselineVariance=var(unitbyunit_y(takeTheseCells,1:f1-1),0,2);
+    baselineMean=mean(unitbyunit_y(takeTheseCells,1:f1-1),2,'omitnan');
+    firstOptoVal=unitbyunit_y(takeTheseCells,f1);
+    timestep=nanmean(diff(nanmean(unitbyunit_x,1)));
+    firstValRelativeToBaselineInVar=(firstOptoVal-baselineMean)./baselineVariance;
+    avDuringOpto=mean(unitbyunit_y(takeTheseCells,f1:f1+floor(settings.optoTagDuration/timestep)),2,'omitnan');
     firstValNtimesBaseVar=[firstValNtimesBaseVar; firstValRelativeToBaselineInVar];
     optoFRoverBaseline=[optoFRoverBaseline; avDuringOpto./baselineMean];
 end

@@ -24,7 +24,6 @@ if ~settings.skipCueAlignment
     for i=1:length(dd)
         dd_more{i}=[dd{i} '\cue'];
     end
-    settings.studyOptoTag=true;
     [D1tagged_cueResponse,D1orD2taggingExpt,putAlignPeakAt,firstVal_D1tagged,optoFR_D1tagged,indsForAnalysisPerSess]=getAndSaveResponse(dd_more,'D1tagged',settings,[],[]);
     [D1untagged_cueResponse,~,~,firstVal_D1untagged,optoFR_D1untagged]=getAndSaveResponse(dd_more(D1orD2taggingExpt==1),'__',settings,putAlignPeakAt,indsForAnalysisPerSess);
     [D2tagged_cueResponse,~,~,firstVal_D2tagged,optoFR_D2tagged,indsForAnalysisPerSess]=getAndSaveResponse(dd_more,'A2atagged',settings,putAlignPeakAt,[]);
@@ -42,7 +41,7 @@ if ~settings.skipCueAlignment
     scatter(firstVal_D1tagged(D1tagged_cueResponse.excluded==0),optoFR_D1tagged(D1tagged_cueResponse.excluded==0),[],'k');
     hold on;
     scatter(firstVal_D1untagged,optoFR_D1untagged,[],'r');
-    scatter(firstVal_D2tagged(D2tagged_cueResponse.excluded==0),optoFR_D2tagged(D2tagged_cueResponse.excluded==0),[],'c');
+    scatter(firstVal_D2tagged(D2tagged_cueResponse.excluded==0),optoFR_D2tagged,[],'c');
     scatter(firstVal_D2untagged,optoFR_D2untagged,[],'g');
     legend({'D1tagged','D1untagged','D2tagged','D2untagged'});
     title('After cut');
@@ -52,11 +51,10 @@ end
 for i=1:length(dd)
     dd_more{i}=[dd{i} '\' responseType];
 end
-settings.studyOptoTag=false;
-activityD1tagged=getAndSaveResponse(dd_more,'D1tagged',settings,putAlignPeakAt,[]);
-activityD1untagged=getAndSaveResponse(dd_more(D1orD2taggingExpt==1),'__',settings,putAlignPeakAt,[]);
-activityD2tagged=getAndSaveResponse(dd_more,'A2atagged',settings,putAlignPeakAt,[]);
-activityD2untagged=getAndSaveResponse(dd_more(D1orD2taggingExpt==2),'__',settings,putAlignPeakAt,[]);
+activityD1tagged=getAndSaveResponse(dd_more,'D1tagged',settings,putAlignPeakAt);
+activityD1untagged=getAndSaveResponse(dd_more(D1orD2taggingExpt==1),'__',settings,putAlignPeakAt);
+activityD2tagged=getAndSaveResponse(dd_more,'A2atagged',settings,putAlignPeakAt);
+activityD2untagged=getAndSaveResponse(dd_more(D1orD2taggingExpt==2),'__',settings,putAlignPeakAt);
 
 [D1tagged_cueResponse,activityD1tagged]=cutExcluded(D1tagged_cueResponse,activityD1tagged);
 [D1untagged_cueResponse,activityD1untagged]=cutExcluded(D1untagged_cueResponse,activityD1untagged);
