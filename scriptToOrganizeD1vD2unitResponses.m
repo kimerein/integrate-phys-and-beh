@@ -68,15 +68,15 @@ histogram([activityD1tagged.ns; activityD2tagged.ns; activityD1untagged.ns; acti
 title('Histogram of trial counts across units');
 
 % exclude units with too few trials
-trial_n_cutoff=2; % at least this many trials, else exclude unit
-activityD1tagged.excluded=activityD1tagged.ns'<trial_n_cutoff;
-disp(['excluding ' num2str(nansum(activityD1tagged.excluded==1)) ' D1 units because too few trials']);
-activityD1untagged.excluded=activityD1untagged.ns'<trial_n_cutoff;
-disp(['excluding ' num2str(nansum(activityD1untagged.excluded==1)) ' untagged during D1 units because too few trials']);
-activityD2tagged.excluded=activityD2tagged.ns'<trial_n_cutoff;
-disp(['excluding ' num2str(nansum(activityD2tagged.excluded==1)) ' D2 units because too few trials']);
-activityD2untagged.excluded=activityD2untagged.ns'<trial_n_cutoff;
-disp(['excluding ' num2str(nansum(activityD2untagged.excluded==1)) ' untagged during D2 units because too few trials']);
+% trial_n_cutoff=2; % at least this many trials, else exclude unit
+% activityD1tagged.excluded=activityD1tagged.ns'<trial_n_cutoff;
+% disp(['excluding ' num2str(nansum(activityD1tagged.excluded==1)) ' D1 units because too few trials']);
+% activityD1untagged.excluded=activityD1untagged.ns'<trial_n_cutoff;
+% disp(['excluding ' num2str(nansum(activityD1untagged.excluded==1)) ' untagged during D1 units because too few trials']);
+% activityD2tagged.excluded=activityD2tagged.ns'<trial_n_cutoff;
+% disp(['excluding ' num2str(nansum(activityD2tagged.excluded==1)) ' D2 units because too few trials']);
+% activityD2untagged.excluded=activityD2untagged.ns'<trial_n_cutoff;
+% disp(['excluding ' num2str(nansum(activityD2untagged.excluded==1)) ' untagged during D2 units because too few trials']);
 [D1tagged_cueResponse,activityD1tagged]=cutExcluded(D1tagged_cueResponse,activityD1tagged);
 [D1untagged_cueResponse,activityD1untagged]=cutExcluded(D1untagged_cueResponse,activityD1untagged);
 [D2tagged_cueResponse,activityD2tagged]=cutExcluded(D2tagged_cueResponse,activityD2tagged);

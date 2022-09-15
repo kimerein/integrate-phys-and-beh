@@ -727,8 +727,8 @@ if D>0
     hold on;
     plot(Y,'Color','r');
     anchor=input('Choose index for alignment anchor. ');
-    alignAtPeak_arduino=locs_arduino(anchor);
-    alignAtPeak_movie=locs(anchor+D);
+    alignAtPeak_arduino=locs_arduino(anchor-D);
+    alignAtPeak_movie=locs(anchor);
     photo_LED=[nan(1,(-alignAtPeak_arduino+alignAtPeak_movie)) photo_LED];
     photo_times=[nan(1,(-alignAtPeak_arduino+alignAtPeak_movie)) photo_times];
     tempphot=photo_times(2:end)-photo_times(1:end-1);
