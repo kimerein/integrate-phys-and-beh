@@ -82,6 +82,57 @@ title('Histogram of trial counts across units');
 [D2tagged_cueResponse,activityD2tagged]=cutExcluded(D2tagged_cueResponse,activityD2tagged);
 [D2untagged_cueResponse,activityD2untagged]=cutExcluded(D2untagged_cueResponse,activityD2untagged);
 
+figure(); plot(nanmean(activityD1tagged.unitbyunit_x,1),activityD1tagged.unitbyunit_y'); hold on; plot(nanmean(activityD1tagged.aligncomp_x,1),nanmean(activityD1tagged.aligncomp_y,1),'Color','b'); title('D1');
+figure(); plot(nanmean(activityD2tagged.unitbyunit_x,1),activityD2tagged.unitbyunit_y'); hold on; plot(nanmean(activityD2tagged.aligncomp_x,1),nanmean(activityD2tagged.aligncomp_y,1),'Color','b'); title('D2');
+
+temp=nanmean(activityD1tagged.aligncomp_x,1);
+[~,f]=nanmax(nanmean(activityD1tagged.aligncomp_y,1));
+timesD1=nanmean(activityD1tagged.unitbyunit_x,1)-temp(f);
+figure(); plot(timesD1,activityD1tagged.unitbyunit_y'); title('Check D1 times');
+temp=nanmean(activityD1untagged.aligncomp_x,1);
+[~,f]=nanmax(nanmean(activityD1untagged.aligncomp_y,1));
+timesD1un=nanmean(activityD1untagged.unitbyunit_x,1)-temp(f);
+temp=nanmean(activityD2tagged.aligncomp_x,1);
+[~,f]=nanmax(nanmean(activityD2tagged.aligncomp_y,1));
+timesD2=nanmean(activityD2tagged.unitbyunit_x,1)-temp(f);
+temp=nanmean(activityD2untagged.aligncomp_x,1);
+[~,f]=nanmax(nanmean(activityD2untagged.aligncomp_y,1));
+timesD2un=nanmean(activityD2untagged.unitbyunit_x,1)-temp(f);
+takewin1=[2.25 3.56]-3.2476; % relative to peak of alignment companion
+takewin2=[3.56 8]-3.2476;
+figure(); 
+scatter([nanmean(activityD1tagged.unitbyunit_y(:,timesD1>=takewin1(1) & timesD1<=takewin1(2)),2)./nanmax(activityD1tagged.unitbyunit_y(:,1:200),[],2); nanmean(activityD2untagged.unitbyunit_y(:,timesD2un>=takewin1(1) & timesD2un<=takewin1(2)),2)./nanmax(activityD2untagged.unitbyunit_y(:,1:200),[],2)],[nanmean(activityD1tagged.unitbyunit_y(:,timesD1>takewin2(1) & timesD1<=takewin2(2)),2)./nanmax(activityD1tagged.unitbyunit_y(:,1:200),[],2); nanmean(activityD2untagged.unitbyunit_y(:,timesD2un>takewin2(1) & timesD2un<=takewin2(2)),2)./nanmax(activityD2untagged.unitbyunit_y(:,1:200),[],2)],[],'k');
+title('D1');
+figure(); 
+scatter([nanmean(activityD1untagged.unitbyunit_y(:,timesD1un>=takewin1(1) & timesD1un<=takewin1(2)),2)./nanmax(activityD1untagged.unitbyunit_y(:,1:200),[],2); nanmean(activityD2tagged.unitbyunit_y(:,timesD2>=takewin1(1) & timesD2<=takewin1(2)),2)./nanmax(activityD2tagged.unitbyunit_y(:,1:200),[],2)],[nanmean(activityD1untagged.unitbyunit_y(:,timesD1un>takewin2(1) & timesD1un<=takewin2(2)),2)./nanmax(activityD1untagged.unitbyunit_y(:,1:200),[],2); nanmean(activityD2tagged.unitbyunit_y(:,timesD2>takewin2(1) & timesD2<=takewin2(2)),2)./nanmax(activityD2tagged.unitbyunit_y(:,1:200),[],2)],[],'r');
+title('D2'); 
+figure(); 
+scatter(nanmean(activityD1tagged.unitbyunit_y(:,timesD1>=takewin1(1) & timesD1<=takewin1(2)),2)./nanmax(activityD1tagged.unitbyunit_y(:,1:200),[],2),nanmean(activityD1tagged.unitbyunit_y(:,timesD1>takewin2(1) & timesD1<=takewin2(2)),2)./nanmax(activityD1tagged.unitbyunit_y(:,1:200),[],2),[],'k');
+title('D1 definite'); 
+figure(); 
+scatter(nanmean(activityD2tagged.unitbyunit_y(:,timesD2>=takewin1(1) & timesD2<=takewin1(2)),2)./nanmax(activityD2tagged.unitbyunit_y(:,1:200),[],2),nanmean(activityD2tagged.unitbyunit_y(:,timesD2>takewin2(1) & timesD2<=takewin2(2)),2)./nanmax(activityD2tagged.unitbyunit_y(:,1:200),[],2),[],'r');
+title('D2 definite'); 
+
+figure(); 
+scatter(nanmean(activityD1tagged.unitbyunit_y(:,timesD1>=takewin1(1) & timesD1<=takewin1(2)),2),nanmean(activityD1tagged.unitbyunit_y(:,timesD1>takewin2(1) & timesD1<=takewin2(2)),2),[],'k');
+hold on;
+scatter(nanmean(activityD2tagged.unitbyunit_y(:,timesD2>=takewin1(1) & timesD2<=takewin1(2)),2),nanmean(activityD2tagged.unitbyunit_y(:,timesD2>takewin2(1) & timesD2<=takewin2(2)),2),[],'r');
+title('D1 and D2 definite'); 
+
+D1temp=[nanmean(activityD1tagged.unitbyunit_y(:,timesD1>=takewin1(1) & timesD1<=takewin1(2)),2)];
+D1temp_2ndwin=[nanmean(activityD1tagged.unitbyunit_y(:,timesD1>=takewin2(1) & timesD1<=takewin2(2)),2)];
+D2temp=[nanmean(activityD2tagged.unitbyunit_y(:,timesD2>=takewin1(1) & timesD2<=takewin1(2)),2)];
+D2temp_2ndwin=[nanmean(activityD2tagged.unitbyunit_y(:,timesD2>=takewin2(1) & timesD2<=takewin2(2)),2)];
+D1temp(D1temp<0.0001)=0;
+D1temp_2ndwin(D1temp_2ndwin<0.0001)=0;
+D2temp(D2temp<0.0001)=0;
+D2temp_2ndwin(D2temp_2ndwin<0.0001)=0;
+[n,x]=hist(D1temp_2ndwin./D1temp,0:0.1:10);
+[n_D1,x_D1]=cityscape_hist(n,x);
+[n,x]=hist(D2temp_2ndwin./D2temp,0:0.1:10);
+[n_D2,x_D2]=cityscape_hist(n,x);
+figure(); plot(x_D1,n_D1./nansum(n_D1),'Color','k'); hold on; plot(x_D2,n_D2./nansum(n_D2),'Color','r'); legend({'D1','D2'});
+
 scatterD1vD2_likeCuevDislikeCue(D1tagged_cueResponse, D2tagged_cueResponse, activityD1tagged, activityD2tagged, timeWindow, responseBaseline, cueWindow, beforeCueBaseline, pvalcutoff);
 
 end
