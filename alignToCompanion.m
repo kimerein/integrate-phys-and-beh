@@ -212,6 +212,9 @@ for i=1:length(uniqueSess)
         baselineMean=mean(unitbyunit_y(takeTheseCells,1:indsForAnalysisPerSess(i,1)-1),2,'omitnan');
         firstOptoVal=unitbyunit_y(takeTheseCells,indsForAnalysisPerSess(i,1));
         timestep=nanmean(diff(nanmean(unitbyunit_x,1)));
+        baselineVariance(baselineVariance<0.001)=0;
+        baselineMean(baselineMean<0.001)=0;
+        firstOptoVal(firstOptoVal<0.001)=0;
         firstValRelativeToBaselineInVar=(firstOptoVal-baselineMean)./baselineVariance;
         avDuringOpto=mean(unitbyunit_y(takeTheseCells,indsForAnalysisPerSess(i,1):indsForAnalysisPerSess(i,2)),2,'omitnan');
     else
@@ -224,6 +227,9 @@ for i=1:length(uniqueSess)
         baselineMean=mean(unitbyunit_y(takeTheseCells,1:f1-1),2,'omitnan');
         firstOptoVal=unitbyunit_y(takeTheseCells,f1);
         timestep=nanmean(diff(nanmean(unitbyunit_x,1)));
+        baselineVariance(baselineVariance<0.001)=0;
+        baselineMean(baselineMean<0.001)=0;
+        firstOptoVal(firstOptoVal<0.001)=0;
         firstValRelativeToBaselineInVar=(firstOptoVal-baselineMean)./baselineVariance;
         avDuringOpto=mean(unitbyunit_y(takeTheseCells,f1:f1+floor(settings.optoTagDuration/timestep)),2,'omitnan');
         indsForAnalysisPerSess(i,1)=f1; indsForAnalysisPerSess(i,2)=f1+floor(settings.optoTagDuration/timestep);
