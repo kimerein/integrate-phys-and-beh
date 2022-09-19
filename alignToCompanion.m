@@ -1,4 +1,4 @@
-function [cueCD,uncueCD,lateUncueCD,unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,excluded,ns,D1orD2taggingExpt,firstValNtimesBaseVar,optoFRoverBaseline,indsForAnalysisPerSess]=alignToCompanion(datadir,getCDs,cueCD,uncueCD,lateUncueCD,onlyTakeTheseUnits,settings,indsForAnalysisPerSess)
+function [cueCD,uncueCD,lateUncueCD,unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,excluded,ns,D1orD2taggingExpt,firstValNtimesBaseVar,optoFRoverBaseline,indsForAnalysisPerSess,fromWhichSess]=alignToCompanion(datadir,getCDs,cueCD,uncueCD,lateUncueCD,onlyTakeTheseUnits,settings,indsForAnalysisPerSess)
 
 excludeHigherFR=settings.excludeHigherFR;
 cutAtTime=settings.cutAtTime;
@@ -30,9 +30,8 @@ else
     dd=1;
 end
 excluded=[];
-D1orD2taggingExpt=nan(length(dd)); % will be 1 for D1, 2 for A2a tagging session
+D1orD2taggingExpt=nan(length(dd),1); % will be 1 for D1, 2 for A2a tagging session
 fromWhichSess=[];
-sessCounter=1;
 for j=1:length(dd)
     if iscell(dd)
         datadir=dd{j};
@@ -112,7 +111,7 @@ for j=1:length(dd)
         unitbyunit_x=[unitbyunit_x; [a.dataout.x(1:upTo)]];
         unitbyunit_y=[unitbyunit_y; [nanmean(a.dataout.y(:,1:upTo),1)]];
         ns=[ns; curr_n];
-        fromWhichSess=[fromWhichSess; sessCounter*ones(size(curr_n))];
+        fromWhichSess=[fromWhichSess; j*ones(size(curr_n))];
 
         if isempty([nanmean(a.dataout.y(:,1:upTo),1)])
             disp([ls(i).name ' has no trials']);
@@ -120,7 +119,6 @@ for j=1:length(dd)
 
         disp(['Added ' ls(i).name]);
     end
-    sessCounter=sessCounter+1;
 end
 
 if settings.studyOptoTag==true
@@ -201,13 +199,25 @@ else
 end
 for i=1:length(uniqueSess)
     takeTheseCells=fromWhichSess==uniqueSess(i);
+    if nansum(takeTheseCells)==0
+        continue
+    end
+    if isnan(indsForAnalysisPerSess(i,1))
+        usePassedInIndsLocal=false;
+    else
+        if usePassedInInds==true
+            usePassedInIndsLocal=true;
+        else
+            usePassedInIndsLocal=false;
+        end
+    end
     if takeTheseCells(end)>size(unitbyunit_y,1)
         takeTheseCells=i:size(unitbyunit_y,1);
     end 
     temp=nanmean(unitbyunit_y(takeTheseCells,1:settings.unitbaseline),1);
     tempvar=var(temp(1:settings.beforeOptoBaseline));
     tempmean=mean(temp(1:settings.beforeOptoBaseline));
-    if usePassedInInds
+    if usePassedInIndsLocal
         baselineVariance=var(unitbyunit_y(takeTheseCells,1:indsForAnalysisPerSess(i,1)-1),0,2);
         baselineMean=mean(unitbyunit_y(takeTheseCells,1:indsForAnalysisPerSess(i,1)-1),2,'omitnan');
         firstOptoVal=unitbyunit_y(takeTheseCells,indsForAnalysisPerSess(i,1));
