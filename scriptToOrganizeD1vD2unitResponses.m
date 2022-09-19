@@ -92,6 +92,7 @@ disp(['excluding ' num2str(nansum(activityD2untagged.excluded==1)) ' untagged du
 [D2untagged_cueResponse,activityD2untagged]=cutExcluded(D2untagged_cueResponse,activityD2untagged);
 
 makeSomePlots(activityD1tagged,activityD1untagged,activityD2tagged,activityD2untagged);
+morePlots(activityD1tagged,activityD1untagged,activityD2tagged,activityD2untagged);
 sessionBySessionPlot(activityD1tagged,activityD1untagged,activityD2tagged,activityD2untagged);
 
 scatterD1vD2_likeCuevDislikeCue(D1tagged_cueResponse, D2tagged_cueResponse, activityD1tagged, activityD2tagged, timeWindow, responseBaseline, cueWindow, beforeCueBaseline, pvalcutoff);
@@ -362,6 +363,22 @@ end
 
 function sessionBySessionPlot(activityD1tagged,activityD1untagged,activityD2tagged,activityD2untagged)
 
+uSess=unique(activityD1tagged.fromWhichSess);
+D1sess=true;
+for i=1:length(uSess)
+    sessionBySessionPlot_subFunc(activityD1tagged,activityD1untagged,activityD2tagged,activityD2untagged,uSess(i),D1sess);
+end
+uSess=unique(activityD2tagged.fromWhichSess);
+D1sess=false;
+for i=1:length(uSess)
+    sessionBySessionPlot_subFunc(activityD1tagged,activityD1untagged,activityD2tagged,activityD2untagged,uSess(i),D1sess);
+end
+
+
+end
+
+function sessionBySessionPlot_subFunc(activityD1tagged,activityD1untagged,activityD2tagged,activityD2untagged,whichSess,isD1sess)
+
 temp=nanmean(activityD1tagged.aligncomp_x,1);
 [~,f]=nanmax(nanmean(activityD1tagged.aligncomp_y,1));
 timesD1=nanmean(activityD1tagged.unitbyunit_x,1)-temp(f);
@@ -376,74 +393,315 @@ temp=nanmean(activityD2untagged.aligncomp_x,1);
 timesD2un=nanmean(activityD2untagged.unitbyunit_x,1)-temp(f);
 % For success
 takewin1=[2.25 3.56]-3.2476; % relative to peak of alignment companion
-takewin2=[3.56 5.56]-3.2476;
+takewin2=[3.56 7.56]-3.2476;
 % For failure
 % takewin1=[2.25 3]-3.2476; % relative to peak of alignment companion
 % takewin2=[3 3.88]-3.2476;
 
-% Zscore within each unit, align at time window 1 mean, then plot
-% transition to time window 2
-temp=activityD1tagged.unitbyunit_y;
-temp=temp-mean(temp,2,'omitnan');
-temp=temp./std(temp,0,2,'omitnan');
-Zscored_D1tagged=temp-repmat(mean(temp(:,timesD1>=takewin1(1) & timesD1<=takewin1(2)),2,'omitnan'),1,size(temp,2));
-temp=activityD2tagged.unitbyunit_y;
-temp=temp-mean(temp,2,'omitnan');
-temp=temp./std(temp,0,2,'omitnan');
-Zscored_D2tagged=temp-repmat(mean(temp(:,timesD2>=takewin1(1) & timesD2<=takewin1(2)),2,'omitnan'),1,size(temp,2));
-temp=activityD1untagged.unitbyunit_y;
-temp=temp-mean(temp,2,'omitnan');
-temp=temp./std(temp,0,2,'omitnan');
-Zscored_D1untagged=temp-repmat(mean(temp(:,timesD1un>=takewin1(1) & timesD1un<=takewin1(2)),2,'omitnan'),1,size(temp,2));
-temp=activityD2untagged.unitbyunit_y;
-temp=temp-mean(temp,2,'omitnan');
-temp=temp./std(temp,0,2,'omitnan');
-Zscored_D2untagged=temp-repmat(mean(temp(:,timesD2un>=takewin1(1) & timesD2un<=takewin1(2)),2,'omitnan'),1,size(temp,2));
+% Get units from this sess
+if isD1sess==true
+    useUnits_D1=ismember(activityD1tagged.fromWhichSess,whichSess);
+    useUnits_D1un=ismember(activityD1untagged.fromWhichSess,whichSess);
+else
+    useUnits_D1=ismember(activityD2tagged.fromWhichSess,whichSess);
+    useUnits_D1un=ismember(activityD2untagged.fromWhichSess,whichSess);
+    activityD1tagged=activityD2tagged;
+    activityD1untagged=activityD2untagged;
+    timesD1=timesD2;
+    timesD1un=timesD2un;
+end
 
+D1untemp=[nanmean(activityD1untagged.unitbyunit_y(:,timesD1un>=takewin1(1) & timesD1un<=takewin1(2)),2)];
+D1untemp_2ndwin=[nanmean(activityD1untagged.unitbyunit_y(:,timesD1un>=takewin2(1) & timesD1un<=takewin2(2)),2)];
+D1temp=[nanmean(activityD1tagged.unitbyunit_y(:,timesD1>=takewin1(1) & timesD1<=takewin1(2)),2)];
+D1temp_2ndwin=[nanmean(activityD1tagged.unitbyunit_y(:,timesD1>=takewin2(1) & timesD1<=takewin2(2)),2)];
+D1untemp(D1untemp<0.0001)=0;
+D1untemp_2ndwin(D1untemp_2ndwin<0.0001)=0;
+D1temp(D1temp<0.0001)=0;
+D1temp_2ndwin(D1temp_2ndwin<0.0001)=0;
+
+turnsOn_D1=(D1temp_2ndwin./D1temp)>0.5;
+turnsOn_D1un=(D1untemp_2ndwin./D1untemp)>0.5;
+ZeroAt=takewin1;
+temp=activityD1tagged.unitbyunit_y;
+% temp=temp-mean(temp(:,timesD1<9.5),2,'omitnan');
+temp=temp./std(temp(:,timesD1<9.5),0,2,'omitnan');
+% Zscored_D1untagged=temp-repmat(mean(temp(:,timesD1un>=ZeroAt(1) & timesD1un<=ZeroAt(2)),2,'omitnan'),1,size(temp,2));
+Zscored_D1tagged=temp;
+temp=activityD1untagged.unitbyunit_y;
+% temp=temp-mean(temp(:,timesD1un<9.5),2,'omitnan');
+temp=temp./std(temp(:,timesD1un<9.5),0,2,'omitnan');
+% Zscored_D1untagged=temp-repmat(mean(temp(:,timesD1un>=ZeroAt(1) & timesD1un<=ZeroAt(2)),2,'omitnan'),1,size(temp,2));
+Zscored_D1untagged=temp;
+
+useUnits=useUnits_D1 & nanmean([D1temp D1temp_2ndwin],2)>0.25;
 temp=Zscored_D1tagged;
 for i=1:size(temp,1)
-    Zscored_D1tagged(i,:)=smoothdata(temp(i,:),'gaussian',10);
+    temp(i,:)=smoothdata(temp(i,:),'gaussian',20);
 end
-temp=Zscored_D2tagged;
-for i=1:size(temp,1)
-    Zscored_D2tagged(i,:)=smoothdata(temp(i,:),'gaussian',10);
-end
-temp=Zscored_D1untagged;
-for i=1:size(temp,1)
-    Zscored_D1untagged(i,:)=smoothdata(temp(i,:),'gaussian',10);
-end
-temp=Zscored_D2untagged;
-for i=1:size(temp,1)
-    Zscored_D2untagged(i,:)=smoothdata(temp(i,:),'gaussian',10);
-end
-
-figure();
-uSess=unique(activityD1tagged.fromWhichSess);
-sessOffset=0;
-for i=1:length(uSess)
-    useUnits=activityD1tagged.fromWhichSess==uSess(i);
-    currtoplot=(Zscored_D1tagged(useUnits,:)-repmat(nanmean(Zscored_D1tagged(useUnits,timesD1>=-1.05 & timesD1<-0.9),2),1,size(Zscored_D1tagged,2)))';
-    if nanmean(Zscored_D1tagged(useUnits,timesD1<0))>0
+useUnitss=find(useUnits);
+figure(); 
+popmedian=median(mean(temp(useUnits,timesD1<-1),2,'omitnan'),1,'omitnan');
+for i=1:length(useUnitss)
+    useUnits=useUnitss(i);
+%     currtoplot=(temp(useUnits,:)-repmat(nanmean(temp(useUnits,timesD1un>=0.2 & timesD1un<0.3),2),1,size(temp,2)))';
+    currtoplot=temp(useUnits,:)';
+%     currtoplot=currtoplot./nanmax(abs(currtoplot));
+%     if nanmean(temp(useUnits,timesD1un<-1))>popmedian
+    if turnsOn_D1(useUnits)
         c='k';
     else
         c='r';
     end
-    plot(timesD1,currtoplot+sessOffset,'Color',c); hold on;
-    sessOffset=sessOffset+10;
+    plot(timesD1,currtoplot,'Color',c); hold on;
 end
-sessOffset=0;
-for i=1:length(uSess)
-    useUnits=activityD1untagged.fromWhichSess==uSess(i);
-    currtoplot=(Zscored_D1untagged(useUnits,:)-repmat(nanmean(Zscored_D1untagged(useUnits,timesD1un>=-1.05 & timesD1un<-0.9),2),1,size(Zscored_D1untagged,2)))';
-%     if nanmean(Zscored_D1untagged(useUnits,timesD1un<0))>0
-%         c='k';
-%     else
-%         c='r';
-%     end
-    c='c';
-    plot(timesD1un,currtoplot+sessOffset,'Color',c); hold on;
-    sessOffset=sessOffset+10;
+if isD1sess
+    addToTit='& this is D1 sess';
+else
+    addToTit='actually this is D2 sess';
 end
+title(['D1 ' addToTit]);
+
+useUnits=useUnits_D1un & nanmean([D1untemp D1untemp_2ndwin],2)>0.25;
+temp=Zscored_D1untagged;
+for i=1:size(temp,1)
+    temp(i,:)=smoothdata(temp(i,:),'gaussian',20);
+end
+useUnitss=find(useUnits);
+figure(); 
+popmedian=median(mean(temp(useUnits,timesD1un<-1),2,'omitnan'),1,'omitnan');
+for i=1:length(useUnitss)
+    useUnits=useUnitss(i);
+%     currtoplot=(temp(useUnits,:)-repmat(nanmean(temp(useUnits,timesD2un>=0.2 & timesD2un<0.3),2),1,size(temp,2)))';
+    currtoplot=temp(useUnits,:)';
+%     currtoplot=currtoplot./nanmax(abs(currtoplot));
+%     if nanmean(temp(useUnits,timesD2un<-1))>popmedian
+    if turnsOn_D1un(useUnits)
+        c='k';
+    else
+        c='r';
+    end
+    plot(timesD1un,currtoplot,'Color',c); hold on;
+end
+title(['D1 untagged ' addToTit]);
+
+end
+
+function morePlots(activityD1tagged,activityD1untagged,activityD2tagged,activityD2untagged)
+
+temp=nanmean(activityD1tagged.aligncomp_x,1);
+[~,f]=nanmax(nanmean(activityD1tagged.aligncomp_y,1));
+timesD1=nanmean(activityD1tagged.unitbyunit_x,1)-temp(f);
+temp=nanmean(activityD1untagged.aligncomp_x,1);
+[~,f]=nanmax(nanmean(activityD1untagged.aligncomp_y,1));
+timesD1un=nanmean(activityD1untagged.unitbyunit_x,1)-temp(f);
+temp=nanmean(activityD2tagged.aligncomp_x,1);
+[~,f]=nanmax(nanmean(activityD2tagged.aligncomp_y,1));
+timesD2=nanmean(activityD2tagged.unitbyunit_x,1)-temp(f);
+temp=nanmean(activityD2untagged.aligncomp_x,1);
+[~,f]=nanmax(nanmean(activityD2untagged.aligncomp_y,1));
+timesD2un=nanmean(activityD2untagged.unitbyunit_x,1)-temp(f);
+% For success
+takewin1=[2.25 3.56]-3.2476; % relative to peak of alignment companion
+takewin2=[3.56 7.56]-3.2476;
+% For failure
+% takewin1=[2.25 3]-3.2476; % relative to peak of alignment companion
+% takewin2=[3 3.88]-3.2476;
+
+D1temp=[nanmean(activityD1tagged.unitbyunit_y(:,timesD1>=takewin1(1) & timesD1<=takewin1(2)),2)];
+D1temp_2ndwin=[nanmean(activityD1tagged.unitbyunit_y(:,timesD1>=takewin2(1) & timesD1<=takewin2(2)),2)];
+D2temp=[nanmean(activityD2tagged.unitbyunit_y(:,timesD2>=takewin1(1) & timesD2<=takewin1(2)),2)];
+D2temp_2ndwin=[nanmean(activityD2tagged.unitbyunit_y(:,timesD2>=takewin2(1) & timesD2<=takewin2(2)),2)];
+D1temp(D1temp<0.0001)=0;
+D1temp_2ndwin(D1temp_2ndwin<0.0001)=0;
+D2temp(D2temp<0.0001)=0;
+D2temp_2ndwin(D2temp_2ndwin<0.0001)=0;
+
+D1untemp=[nanmean(activityD1untagged.unitbyunit_y(:,timesD1un>=takewin1(1) & timesD1un<=takewin1(2)),2)];
+D1untemp_2ndwin=[nanmean(activityD1untagged.unitbyunit_y(:,timesD1un>=takewin2(1) & timesD1un<=takewin2(2)),2)];
+D2untemp=[nanmean(activityD2untagged.unitbyunit_y(:,timesD2un>=takewin1(1) & timesD2un<=takewin1(2)),2)];
+D2untemp_2ndwin=[nanmean(activityD2untagged.unitbyunit_y(:,timesD2un>=takewin2(1) & timesD2un<=takewin2(2)),2)];
+D1untemp(D1untemp<0.0001)=0;
+D1untemp_2ndwin(D1untemp_2ndwin<0.0001)=0;
+D2untemp(D2untemp<0.0001)=0;
+D2untemp_2ndwin(D2untemp_2ndwin<0.0001)=0;
+
+[n,x]=hist(D1untemp_2ndwin./D1untemp,0:0.1:10);
+[n_D1,x_D1]=cityscape_hist(n,x);
+[n,x]=hist(D2untemp_2ndwin./D2untemp,0:0.1:10);
+[n_D2,x_D2]=cityscape_hist(n,x);
+figure(); plot(x_D1,n_D1./nansum(n_D1),'Color','k'); hold on; plot(x_D2,n_D2./nansum(n_D2),'Color','r'); legend({'D1','D2'});
+
+turnsOn_D1=(D1temp_2ndwin./D1temp)>0.5;
+turnsOn_D2=(D2temp_2ndwin./D2temp)>0.5;
+ZeroAt=takewin1;
+temp=activityD1tagged.unitbyunit_y;
+% temp=temp-mean(temp(:,timesD1<9.5),2,'omitnan');
+temp=temp./std(temp(:,timesD1<9.5),0,2,'omitnan');
+% Zscored_D1untagged=temp-repmat(mean(temp(:,timesD1un>=ZeroAt(1) & timesD1un<=ZeroAt(2)),2,'omitnan'),1,size(temp,2));
+Zscored_D1tagged=temp;
+temp=activityD2tagged.unitbyunit_y;
+% temp=temp-mean(temp(:,timesD2<9.5),2,'omitnan');
+temp=temp./std(temp(:,timesD2<9.5),0,2,'omitnan');
+% Zscored_D2untagged=temp-repmat(mean(temp(:,timesD2un>=ZeroAt(1) & timesD2un<=ZeroAt(2)),2,'omitnan'),1,size(temp,2));
+Zscored_D2tagged=temp;
+
+useUnits=nanmean([D1temp D1temp_2ndwin],2)>0.25;
+temp=Zscored_D1tagged;
+for i=1:size(temp,1)
+    temp(i,:)=smoothdata(temp(i,:),'gaussian',20);
+end
+useUnitss=find(useUnits);
+figure(); 
+popmedian=median(mean(temp(useUnits,timesD1<-1),2,'omitnan'),1,'omitnan');
+for i=1:length(useUnitss)
+    useUnits=useUnitss(i);
+%     currtoplot=(temp(useUnits,:)-repmat(nanmean(temp(useUnits,timesD1un>=0.2 & timesD1un<0.3),2),1,size(temp,2)))';
+    currtoplot=temp(useUnits,:)';
+%     currtoplot=currtoplot./nanmax(abs(currtoplot));
+%     if nanmean(temp(useUnits,timesD1un<-1))>popmedian
+    if turnsOn_D1(useUnits)
+        c='k';
+    else
+        c='r';
+    end
+    plot(timesD1,currtoplot,'Color',c); hold on;
+end
+title('D1');
+
+useUnits=nanmean([D2temp D2temp_2ndwin],2)>0.25;
+temp=Zscored_D2tagged;
+for i=1:size(temp,1)
+    temp(i,:)=smoothdata(temp(i,:),'gaussian',20);
+end
+useUnitss=find(useUnits);
+figure(); 
+popmedian=median(mean(temp(useUnits,timesD2<-1),2,'omitnan'),1,'omitnan');
+for i=1:length(useUnitss)
+    useUnits=useUnitss(i);
+%     currtoplot=(temp(useUnits,:)-repmat(nanmean(temp(useUnits,timesD2un>=0.2 & timesD2un<0.3),2),1,size(temp,2)))';
+    currtoplot=temp(useUnits,:)';
+%     currtoplot=currtoplot./nanmax(abs(currtoplot));
+%     if nanmean(temp(useUnits,timesD2un<-1))>popmedian
+    if turnsOn_D2(useUnits)
+        c='k';
+    else
+        c='r';
+    end
+    plot(timesD2,currtoplot,'Color',c); hold on;
+end
+title('D2 tagged');
+
+% unit color coding scheme
+turnsOn_D1un=(D1untemp_2ndwin./D1untemp)>0.5;
+turnsOn_D2un=(D2untemp_2ndwin./D2untemp)>0.5;
+
+% Zscore within each unit, then plot
+% transition to time window 2
+ZeroAt=takewin1;
+temp=activityD1untagged.unitbyunit_y;
+% temp=temp-mean(temp,2,'omitnan');
+temp=temp./std(temp,0,2,'omitnan');
+% Zscored_D1untagged=temp-repmat(mean(temp(:,timesD1un>=ZeroAt(1) & timesD1un<=ZeroAt(2)),2,'omitnan'),1,size(temp,2));
+Zscored_D1untagged=temp;
+temp=activityD2untagged.unitbyunit_y;
+% temp=temp-mean(temp,2,'omitnan');
+temp=temp./std(temp,0,2,'omitnan');
+% Zscored_D2untagged=temp-repmat(mean(temp(:,timesD2un>=ZeroAt(1) & timesD2un<=ZeroAt(2)),2,'omitnan'),1,size(temp,2));
+Zscored_D2untagged=temp;
+
+useUnits=nanmean([D1untemp D1untemp_2ndwin],2)>0.25;
+temp=Zscored_D1untagged;
+for i=1:size(temp,1)
+    temp(i,:)=smoothdata(temp(i,:),'gaussian',20);
+end
+useUnitss=find(useUnits);
+figure(); 
+popmedian=median(mean(temp(useUnits,timesD1un<-1),2,'omitnan'),1,'omitnan');
+for i=1:length(useUnitss)
+    useUnits=useUnitss(i);
+%     currtoplot=(temp(useUnits,:)-repmat(nanmean(temp(useUnits,timesD1un>=0.2 & timesD1un<0.3),2),1,size(temp,2)))';
+    currtoplot=temp(useUnits,:)';
+%     currtoplot=currtoplot./nanmax(abs(currtoplot));
+%     if nanmean(temp(useUnits,timesD1un<-1))>popmedian
+    if turnsOn_D1un(useUnits)
+        c='k';
+    else
+        c='r';
+    end
+    plot(timesD1un,currtoplot,'Color',c); hold on;
+end
+title('D1 untagged');
+
+useUnits=nanmean([D2untemp D2untemp_2ndwin],2)>0.25;
+temp=Zscored_D2untagged;
+for i=1:size(temp,1)
+    temp(i,:)=smoothdata(temp(i,:),'gaussian',20);
+end
+useUnitss=find(useUnits);
+figure(); 
+popmedian=median(mean(temp(useUnits,timesD2un<-1),2,'omitnan'),1,'omitnan');
+for i=1:length(useUnitss)
+    useUnits=useUnitss(i);
+%     currtoplot=(temp(useUnits,:)-repmat(nanmean(temp(useUnits,timesD2un>=0.2 & timesD2un<0.3),2),1,size(temp,2)))';
+    currtoplot=temp(useUnits,:)';
+%     currtoplot=currtoplot./nanmax(abs(currtoplot));
+%     if nanmean(temp(useUnits,timesD2un<-1))>popmedian
+    if turnsOn_D2un(useUnits)
+        c='k';
+    else
+        c='r';
+    end
+    plot(timesD2un,currtoplot,'Color',c); hold on;
+end
+title('D2 untagged');
+
+% Population vector after the outcome
+% Which pre-outcome time points correlate best
+timeBinsStep=0.25;
+temp=activityD1tagged.unitbyunit_y;
+temp=temp-mean(temp,2,'omitnan');
+temp=temp./std(temp,0,2,'omitnan');
+Zscored_D1tagged=temp;
+temp=activityD2tagged.unitbyunit_y;
+temp=temp-mean(temp,2,'omitnan');
+temp=temp./std(temp,0,2,'omitnan');
+Zscored_D2tagged=temp;
+
+temp=activityD1untagged.unitbyunit_y;
+temp=temp-mean(temp,2,'omitnan');
+temp=temp./std(temp,0,2,'omitnan');
+Zscored_D1untagged=temp;
+temp=activityD2untagged.unitbyunit_y;
+temp=temp-mean(temp,2,'omitnan');
+temp=temp./std(temp,0,2,'omitnan');
+Zscored_D2untagged=temp;
+
+popD1=mean(Zscored_D1untagged(:,timesD1un>0.3 & timesD1un<4),2,'omitnan');
+popD1(isnan(popD1))=0;
+timeBins=timesD1un(1):timeBinsStep:timesD1un(end);
+Rs=nan(1,length(timeBins)-1);
+for i=1:length(timeBins)-1
+    currpopD1=mean(Zscored_D1untagged(:,timesD1un>timeBins(i) & timesD1un<timeBins(i+1)),2,'omitnan');
+    currpopD1(isnan(currpopD1))=0;
+    R=corrcoef(popD1,currpopD1);
+    Rs(i)=R(1,2);
+end
+figure(); 
+plot(timeBins(1:end-1),Rs,'Color','k'); title('D1 un v D2 untagged corrcoef with post-outcome driven pop vec');
+
+popD2=mean(Zscored_D2untagged(:,timesD2un>0.3 & timesD2un<4),2,'omitnan');
+popD2(isnan(popD2))=0;
+timeBins=timesD2un(1):timeBinsStep:timesD2un(end);
+Rs=nan(1,length(timeBins)-1);
+for i=1:length(timeBins)-1
+    currpopD2=mean(Zscored_D2untagged(:,timesD2un>timeBins(i) & timesD2un<timeBins(i+1)),2,'omitnan');
+    currpopD2(isnan(currpopD2))=0;
+    R=corrcoef(popD2,currpopD2);
+    Rs(i)=R(1,2);
+end
+hold on; 
+plot(timeBins(1:end-1),Rs,'Color','r'); 
 
 end
 
