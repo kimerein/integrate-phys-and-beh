@@ -2,7 +2,7 @@ function scriptToOrganizeD1vD2unitResponses_wrapper(dd)
 
 % settings for scriptToOrganizeD1vD2unitResponses
 settings.pvalcutoff=[-0.001 0.2];
-settings.responseType='cued_success';
+settings.responseType='cued_failure';
 settings.timeWindow=[-0.22 3.32]; % relative to alignment companion onset, in seconds
 settings.responseBaseline=[]; %[-1.05 -0.25]; % empty means don't subtract off baseline
 settings.cueWindow=[0 0.5];

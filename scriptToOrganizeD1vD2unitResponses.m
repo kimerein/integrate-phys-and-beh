@@ -366,12 +366,14 @@ projTimeWindow1=[-1 -0.4];
 projTimeWindow2=[3.56 7.26]-3.2476;
 projTimeWindow3=[-2.21859 -1.46859];
 projTimeWindow4=[0.781415 1.78141];
+winBeforeCue=[6 9.5];
 
 uSess=unique(activityD1tagged.fromWhichSess);
 D1sess=true;
 figure();
 offset=0;
 D1PreOutcome=nan(1,length(uSess));
+D1PreOutcome_winBeforeCue=nan(1,length(uSess));
 D1Random=nan(1,length(uSess));
 D1unPreOutcome=nan(1,length(uSess));
 D1unRandom=nan(1,length(uSess));
@@ -383,6 +385,7 @@ for i=1:length(uSess)
     % for D1, use projection 2 onto projection 1
     % for D1 un, use projection 4 onto projection 3
     D1PreOutcome(i)=nanmean(D1ontoCD.projTimeWindow2.R(D1ontoCD.projTimeWindow2.t>projTimeWindow1(1) & D1ontoCD.projTimeWindow2.t<projTimeWindow1(2)));
+    D1PreOutcome_winBeforeCue(i)=nanmean(D1ontoCD.projTimeWindow4.R(D1ontoCD.projTimeWindow4.t>winBeforeCue(1) & D1ontoCD.projTimeWindow4.t<winBeforeCue(2)));
     D1Random(i)=D1ontoCD.projTimeWindow2.mfr;
     D1_tw1=[D1_tw1; D1ontoCD.projTimeWindow1.R]; D1_tw2=[D1_tw2; D1ontoCD.projTimeWindow2.R]; D1_tw3=[D1_tw3; D1ontoCD.projTimeWindow3.R]; D1_tw4=[D1_tw4; D1ontoCD.projTimeWindow4.R];
     D1unPreOutcome(i)=nanmean(D1unontoCD.projTimeWindow4.R(D1unontoCD.projTimeWindow4.t>projTimeWindow3(1) & D1unontoCD.projTimeWindow4.t<projTimeWindow3(2)));
@@ -395,6 +398,7 @@ D1sess=false;
 offset=0;
 figure();
 D2PreOutcome=nan(1,length(uSess));
+D2PreOutcome_winBeforeCue=nan(1,length(uSess));
 D2Random=nan(1,length(uSess));
 D2unPreOutcome=nan(1,length(uSess));
 D2unRandom=nan(1,length(uSess));
@@ -406,6 +410,7 @@ for i=1:length(uSess)
     % for D2 un, use projection 2 onto projection 1
     % for D2, use projection 4 onto projection 3
     D2PreOutcome(i)=nanmean(D2ontoCD.projTimeWindow4.R(D2ontoCD.projTimeWindow4.t>projTimeWindow3(1) & D2ontoCD.projTimeWindow4.t<projTimeWindow3(2)));
+    D2PreOutcome_winBeforeCue(i)=nanmean(D2ontoCD.projTimeWindow4.R(D2ontoCD.projTimeWindow4.t>winBeforeCue(1) & D2ontoCD.projTimeWindow4.t<winBeforeCue(2)));
     D2Random(i)=D2ontoCD.projTimeWindow4.mfr;
     D2_tw1=[D2_tw1; D2ontoCD.projTimeWindow1.R]; D2_tw2=[D2_tw2; D2ontoCD.projTimeWindow2.R]; D2_tw3=[D2_tw3; D2ontoCD.projTimeWindow3.R]; D2_tw4=[D2_tw4; D2ontoCD.projTimeWindow4.R];
     D2unPreOutcome(i)=nanmean(D2unontoCD.projTimeWindow2.R(D2unontoCD.projTimeWindow2.t>projTimeWindow1(1) & D2unontoCD.projTimeWindow2.t<projTimeWindow1(2)));
@@ -415,24 +420,51 @@ end
 title('D2 experiments');
 
 figure(); 
-scatter(D1Random,-D1PreOutcome,'Color','k');
-hold on; 
-scatter(D2unRandom,-D2unPreOutcome,'Color','g');
-legend({'Tagged D1','Untagged during D2'});
+scatter(-D1PreOutcome_winBeforeCue,-D1PreOutcome,[],'k');
+xlabel('Uncue'); ylabel('Cue');
+% hold on; 
+% scatter(D2unRandom,-D2unPreOutcome,'Color','g');
+% legend({'Tagged D1','Untagged during D2'});
 title('D1 space');
 figure(); 
-scatter(D2Random,-D2PreOutcome,'Color','r');
-hold on; 
-scatter(D1unRandom,-D1unPreOutcome,'Color','g');
-legend({'Tagged D2','Untagged during D1'});
+scatter(-D2PreOutcome_winBeforeCue,-D2PreOutcome,[],'r');
+xlabel('Uncue'); ylabel('Cue');
+% hold on; 
+% scatter(D1unRandom,-D1unPreOutcome,'Color','g');
+% legend({'Tagged D2','Untagged during D1'});
 title('D2 space');
+
+figure(); 
+scatter(-D1PreOutcome_winBeforeCue,-D1PreOutcome,[],'k');
+hold on;
+scatter(D2PreOutcome_winBeforeCue,D2PreOutcome,[],'r');
+xlabel('Uncue'); ylabel('Cue');
+line([-1 1],[0 0]); line([0 0],[-1 1]); daspect([1 1 1]);
+line([0 nanmean([-D1PreOutcome_winBeforeCue D2PreOutcome_winBeforeCue])],[0 nanmean([-D1PreOutcome D2PreOutcome])],'LineWidth',6,'Color','m');
+title('D1 and flipped D2 space');
 
 figure(); plot(D1ontoCD.projTimeWindow2.t,nanmean(D1_tw2,1));
 hold on; plot(D1ontoCD.projTimeWindow2.t,nanmean(D1_tw2,1)-nanstd(D1_tw2,[],1)./sqrt(size(D1_tw2,1)));
 hold on; plot(D1ontoCD.projTimeWindow2.t,nanmean(D1_tw2,1)+nanstd(D1_tw2,[],1)./sqrt(size(D1_tw2,1)));
-figure(); plot(D1unontoCD.projTimeWindow4.t,nanmean(D1un_tw4,1));
-hold on; plot(D1unontoCD.projTimeWindow4.t,nanmean(D1un_tw4,1)-nanstd(D1un_tw4,[],1)./sqrt(size(D1un_tw4,1)));
-hold on; plot(D1unontoCD.projTimeWindow4.t,nanmean(D1un_tw4,1)+nanstd(D1un_tw4,[],1)./sqrt(size(D1un_tw4,1)));
+title('D1 after cue');
+figure(); plot(D1ontoCD.projTimeWindow4.t,nanmean(D1_tw4,1));
+hold on; plot(D1ontoCD.projTimeWindow4.t,nanmean(D1_tw4,1)-nanstd(D1_tw4,[],1)./sqrt(size(D1_tw4,1)));
+hold on; plot(D1ontoCD.projTimeWindow4.t,nanmean(D1_tw4,1)+nanstd(D1_tw4,[],1)./sqrt(size(D1_tw4,1)));
+title('D1 before cue');
+% figure(); plot(D1unontoCD.projTimeWindow4.t,nanmean(D1un_tw4,1));
+% hold on; plot(D1unontoCD.projTimeWindow4.t,nanmean(D1un_tw4,1)-nanstd(D1un_tw4,[],1)./sqrt(size(D1un_tw4,1)));
+% hold on; plot(D1unontoCD.projTimeWindow4.t,nanmean(D1un_tw4,1)+nanstd(D1un_tw4,[],1)./sqrt(size(D1un_tw4,1)));
+figure(); plot(D2ontoCD.projTimeWindow4.t,nanmean(D2_tw4,1));
+hold on; plot(D2ontoCD.projTimeWindow4.t,nanmean(D2_tw4,1)-nanstd(D2_tw4,[],1)./sqrt(size(D2_tw4,1)));
+hold on; plot(D2ontoCD.projTimeWindow4.t,nanmean(D2_tw4,1)+nanstd(D2_tw4,[],1)./sqrt(size(D2_tw4,1)));
+title('D2 before cue');
+figure(); plot(D2ontoCD.projTimeWindow2.t,nanmean(D2_tw2,1));
+hold on; plot(D2ontoCD.projTimeWindow2.t,nanmean(D2_tw2,1)-nanstd(D2_tw2,[],1)./sqrt(size(D2_tw2,1)));
+hold on; plot(D2ontoCD.projTimeWindow2.t,nanmean(D2_tw2,1)+nanstd(D2_tw2,[],1)./sqrt(size(D2_tw2,1)));
+title('D2 after cue');
+% figure(); plot(D2unontoCD.projTimeWindow2.t,nanmean(D2un_tw2,1));
+% hold on; plot(D2unontoCD.projTimeWindow2.t,nanmean(D2un_tw2,1)-nanstd(D2un_tw2,[],1)./sqrt(size(D2un_tw2,1)));
+% hold on; plot(D2unontoCD.projTimeWindow2.t,nanmean(D2un_tw2,1)+nanstd(D2un_tw2,[],1)./sqrt(size(D2un_tw2,1)));
 
 end
 
