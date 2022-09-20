@@ -365,19 +365,26 @@ function sessionBySessionPlot(activityD1tagged,activityD1untagged,activityD2tagg
 
 uSess=unique(activityD1tagged.fromWhichSess);
 D1sess=true;
+figure();
+offset=0;
 for i=1:length(uSess)
-    sessionBySessionPlot_subFunc(activityD1tagged,activityD1untagged,activityD2tagged,activityD2untagged,uSess(i),D1sess);
+    sessionBySessionPlot_subFunc(activityD1tagged,activityD1untagged,activityD2tagged,activityD2untagged,uSess(i),D1sess,offset);
+    offset=offset+5;
 end
+title('D1 experiments');
 uSess=unique(activityD2tagged.fromWhichSess);
 D1sess=false;
+offset=0;
+figure();
 for i=1:length(uSess)
-    sessionBySessionPlot_subFunc(activityD1tagged,activityD1untagged,activityD2tagged,activityD2untagged,uSess(i),D1sess);
+    sessionBySessionPlot_subFunc(activityD1tagged,activityD1untagged,activityD2tagged,activityD2untagged,uSess(i),D1sess,offset);
+    offset=offset+5;
+end
+title('D2 experiments');
+
 end
 
-
-end
-
-function sessionBySessionPlot_subFunc(activityD1tagged,activityD1untagged,activityD2tagged,activityD2untagged,whichSess,isD1sess)
+function sessionBySessionPlot_subFunc(activityD1tagged,activityD1untagged,activityD2tagged,activityD2untagged,whichSess,isD1sess,offset)
 
 temp=nanmean(activityD1tagged.aligncomp_x,1);
 [~,f]=nanmax(nanmean(activityD1tagged.aligncomp_y,1));
@@ -393,7 +400,7 @@ temp=nanmean(activityD2untagged.aligncomp_x,1);
 timesD2un=nanmean(activityD2untagged.unitbyunit_x,1)-temp(f);
 % For success
 takewin1=[2.25 3.56]-3.2476; % relative to peak of alignment companion
-takewin2=[3.56 7.56]-3.2476;
+takewin2=[3.56 7.26]-3.2476;
 % For failure
 % takewin1=[2.25 3]-3.2476; % relative to peak of alignment companion
 % takewin2=[3 3.88]-3.2476;
@@ -434,13 +441,13 @@ temp=temp./std(temp(:,timesD1un<9.5),0,2,'omitnan');
 % Zscored_D1untagged=temp-repmat(mean(temp(:,timesD1un>=ZeroAt(1) & timesD1un<=ZeroAt(2)),2,'omitnan'),1,size(temp,2));
 Zscored_D1untagged=temp;
 
-useUnits=useUnits_D1 & nanmean([D1temp D1temp_2ndwin],2)>0.25;
+useUnits=useUnits_D1 & nanmean([D1temp D1temp_2ndwin],2)>0;
 temp=Zscored_D1tagged;
 for i=1:size(temp,1)
     temp(i,:)=smoothdata(temp(i,:),'gaussian',20);
 end
 useUnitss=find(useUnits);
-figure(); 
+% figure(); 
 popmedian=median(mean(temp(useUnits,timesD1<-1),2,'omitnan'),1,'omitnan');
 for i=1:length(useUnitss)
     useUnits=useUnitss(i);
@@ -453,22 +460,22 @@ for i=1:length(useUnitss)
     else
         c='r';
     end
-    plot(timesD1,currtoplot,'Color',c); hold on;
+    plot(timesD1,currtoplot+offset,'Color',c); hold on;
 end
-if isD1sess
-    addToTit='& this is D1 sess';
-else
-    addToTit='actually this is D2 sess';
-end
-title(['D1 ' addToTit]);
+% if isD1sess
+%     addToTit='& this is D1 sess';
+% else
+%     addToTit='actually this is D2 sess';
+% end
+% title(['D1 ' addToTit]);
 
-useUnits=useUnits_D1un & nanmean([D1untemp D1untemp_2ndwin],2)>0.25;
+useUnits=useUnits_D1un & nanmean([D1untemp D1untemp_2ndwin],2)>0;
 temp=Zscored_D1untagged;
 for i=1:size(temp,1)
     temp(i,:)=smoothdata(temp(i,:),'gaussian',20);
 end
 useUnitss=find(useUnits);
-figure(); 
+% figure(); 
 popmedian=median(mean(temp(useUnits,timesD1un<-1),2,'omitnan'),1,'omitnan');
 for i=1:length(useUnitss)
     useUnits=useUnitss(i);
@@ -477,13 +484,13 @@ for i=1:length(useUnitss)
 %     currtoplot=currtoplot./nanmax(abs(currtoplot));
 %     if nanmean(temp(useUnits,timesD2un<-1))>popmedian
     if turnsOn_D1un(useUnits)
-        c='k';
+        c='c';
     else
-        c='r';
+        c='y';
     end
-    plot(timesD1un,currtoplot,'Color',c); hold on;
+    plot(timesD1un,currtoplot+offset,'Color',c); hold on;
 end
-title(['D1 untagged ' addToTit]);
+% title(['D1 untagged ' addToTit]);
 
 end
 
