@@ -358,33 +358,61 @@ end
 figure(); 
 imagesc(timeBins(timeBins<9.5),timeBins(timeBins<9.5),RsD2(timeBins<9.5,timeBins<9.5)); title('D2 untagged corrcoef matrix');
 
-
 end
 
 function sessionBySessionPlot(activityD1tagged,activityD1untagged,activityD2tagged,activityD2untagged)
+
+% projTimeWindow1=[2.25 3.56]-3.2476;
+% projTimeWindow2=[3.56 7.26]-3.2476;
+% projTimeWindow3=[-2.21859 -1.46859];
+% projTimeWindow4=[0.781415 1.78141];
 
 uSess=unique(activityD1tagged.fromWhichSess);
 D1sess=true;
 figure();
 offset=0;
+D1PreOutcome=nan(1,length(uSess));
+D1Random=nan(1,length(uSess));
+D1unPreOutcome=nan(1,length(uSess));
+D1unRandom=nan(1,length(uSess));
 for i=1:length(uSess)
-    sessionBySessionPlot_subFunc(activityD1tagged,activityD1untagged,activityD2tagged,activityD2untagged,uSess(i),D1sess,offset);
+    [D1ontoCD, D1unontoCD]=sessionBySessionPlot_subFunc(activityD1tagged,activityD1untagged,activityD2tagged,activityD2untagged,uSess(i),D1sess,offset);
     offset=offset+5;
+    % for D1, use projection 2 onto projection 1
+    % for D1 un, use projection 4 onto projection 3
+    temp=corrcoef(D1ontoCD.projTimeWindow2.vec,D1ontoCD.projTimeWindow1.vec);
+    D1PreOutcome(i)=temp(1,2);
+    D1Random(i)=getAverageOfRandomProjections(D1ontoCD.projTimeWindow2.vec);
+    temp=corrcoef(D1unontoCD.projTimeWindow4.vec,D1unontoCD.projTimeWindow3.vec);
+    D1unPreOutcome(i)=temp(1,2);
+    D1unRandom(i)=getAverageOfRandomProjections(D1unontoCD.projTimeWindow4.vec);
 end
 title('D1 experiments');
 uSess=unique(activityD2tagged.fromWhichSess);
 D1sess=false;
 offset=0;
 figure();
+D2PreOutcome=nan(1,length(uSess));
+D2Random=nan(1,length(uSess));
+D2unPreOutcome=nan(1,length(uSess));
+D2unRandom=nan(1,length(uSess));
 for i=1:length(uSess)
-    sessionBySessionPlot_subFunc(activityD1tagged,activityD1untagged,activityD2tagged,activityD2untagged,uSess(i),D1sess,offset);
+    [D2ontoCD, D2unontoCD]=sessionBySessionPlot_subFunc(activityD1tagged,activityD1untagged,activityD2tagged,activityD2untagged,uSess(i),D1sess,offset);
     offset=offset+5;
+    % for D2 un, use projection 2 onto projection 1
+    % for D2, use projection 4 onto projection 3
+    temp=corrcoef(D2ontoCD.projTimeWindow2.vec,D2ontoCD.projTimeWindow1.vec);
+    D2PreOutcome(i)=temp(1,2);
+    D2Random(i)=getAverageOfRandomProjections(D1ontoCD.projTimeWindow2.vec);
+    temp=corrcoef(D2unontoCD.projTimeWindow4.vec,D2unontoCD.projTimeWindow3.vec);
+    D2unPreOutcome(i)=temp(1,2);
+    D2unRandom(i)=getAverageOfRandomProjections(D2unontoCD.projTimeWindow4.vec);
 end
 title('D2 experiments');
 
 end
 
-function sessionBySessionPlot_subFunc(activityD1tagged,activityD1untagged,activityD2tagged,activityD2untagged,whichSess,isD1sess,offset)
+function [D1ontoCD, D1unontoCD]=sessionBySessionPlot_subFunc(activityD1tagged,activityD1untagged,activityD2tagged,activityD2untagged,whichSess,isD1sess,offset)
 
 temp=nanmean(activityD1tagged.aligncomp_x,1);
 [~,f]=nanmax(nanmean(activityD1tagged.aligncomp_y,1));
@@ -401,9 +429,9 @@ timesD2un=nanmean(activityD2untagged.unitbyunit_x,1)-temp(f);
 % For success
 takewin1=[2.25 3.56]-3.2476; % relative to peak of alignment companion
 takewin2=[3.56 7.26]-3.2476;
-% For failure
-% takewin1=[2.25 3]-3.2476; % relative to peak of alignment companion
-% takewin2=[3 3.88]-3.2476;
+% For failure, these windows interesting -- from autocorrelation matrix
+% takewin1=[-2.21859 -1.46859]; % relative to peak of alignment companion
+% takewin2=[0.781415 1.78141];
 
 % Get units from this sess
 if isD1sess==true
@@ -492,6 +520,71 @@ for i=1:length(useUnitss)
 end
 % title(['D1 untagged ' addToTit]);
 
+% Get projections
+
+% For success
+projTimeWindow1=[2.25 3.56]-3.2476;
+projTimeWindow2=[3.56 7.26]-3.2476;
+projTimeWindow3=[-2.21859 -1.46859];
+projTimeWindow4=[0.781415 1.78141];
+timeBinsStep=0.25;
+[Rs,tb,vec]=getProjection(Zscored_D1tagged, timesD1, projTimeWindow1, timeBinsStep);
+D1ontoCD.projTimeWindow1.t=tb;
+D1ontoCD.projTimeWindow1.R=Rs;
+D1ontoCD.projTimeWindow1.vec=vec;
+[Rs,tb,vec]=getProjection(Zscored_D1tagged, timesD1, projTimeWindow2, timeBinsStep);
+D1ontoCD.projTimeWindow2.t=tb;
+D1ontoCD.projTimeWindow2.R=Rs;
+D1ontoCD.projTimeWindow2.vec=vec;
+[Rs,tb,vec]=getProjection(Zscored_D1tagged, timesD1, projTimeWindow3, timeBinsStep);
+D1ontoCD.projTimeWindow3.t=tb;
+D1ontoCD.projTimeWindow3.R=Rs;
+D1ontoCD.projTimeWindow3.vec=vec;
+[Rs,tb,vec]=getProjection(Zscored_D1tagged, timesD1, projTimeWindow4, timeBinsStep);
+D1ontoCD.projTimeWindow4.t=tb;
+D1ontoCD.projTimeWindow4.R=Rs;
+D1ontoCD.projTimeWindow4.vec=vec;
+
+[Rs,tb,vec]=getProjection(Zscored_D1untagged, timesD1un, projTimeWindow1, timeBinsStep);
+D1unontoCD.projTimeWindow1.t=tb;
+D1unontoCD.projTimeWindow1.R=Rs;
+D1unontoCD.projTimeWindow1.vec=vec;
+[Rs,tb,vec]=getProjection(Zscored_D1untagged, timesD1un, projTimeWindow2, timeBinsStep);
+D1unontoCD.projTimeWindow2.t=tb;
+D1unontoCD.projTimeWindow2.R=Rs;
+D1unontoCD.projTimeWindow2.vec=vec;
+[Rs,tb,vec]=getProjection(Zscored_D1untagged, timesD1un, projTimeWindow3, timeBinsStep);
+D1unontoCD.projTimeWindow3.t=tb;
+D1unontoCD.projTimeWindow3.R=Rs;
+D1unontoCD.projTimeWindow3.vec=vec;
+[Rs,tb,vec]=getProjection(Zscored_D1untagged, timesD1un, projTimeWindow4, timeBinsStep);
+D1unontoCD.projTimeWindow4.t=tb;
+D1unontoCD.projTimeWindow4.R=Rs;
+D1unontoCD.projTimeWindow4.vec=vec;
+
+end
+
+function mfr=getAverageOfRandomProjections(vec)
+
+% just make this the mean firing rate across units
+mfr=mean(vec);
+
+end
+
+function [Rs,timeBins,popD1]=getProjection(ZscoredData, times, timeWindow, timeBinsStep)
+
+popD1=mean(ZscoredData(:,times>timeWindow(1) & times<timeWindow(2)),2,'omitnan');
+popD1(isnan(popD1))=0;
+timeBins=times(1):timeBinsStep:times(end);
+Rs=nan(1,length(timeBins)-1);
+for i=1:length(timeBins)-1
+    currpopD1=mean(ZscoredData(:,times>timeBins(i) & times<timeBins(i+1)),2,'omitnan');
+    currpopD1(isnan(currpopD1))=0;
+    R=corrcoef(popD1,currpopD1);
+    Rs(i)=R(1,2);
+end
+% average pop vector in this time window is popD1
+
 end
 
 function morePlots(activityD1tagged,activityD1untagged,activityD2tagged,activityD2untagged)
@@ -511,9 +604,9 @@ timesD2un=nanmean(activityD2untagged.unitbyunit_x,1)-temp(f);
 % For success
 takewin1=[2.25 3.56]-3.2476; % relative to peak of alignment companion
 takewin2=[3.56 7.56]-3.2476;
-% For failure
-% takewin1=[2.25 3]-3.2476; % relative to peak of alignment companion
-% takewin2=[3 3.88]-3.2476;
+% For failure, these windows interesting -- from autocorrelation matrix
+% takewin1=[-2.21859 -1.46859]; % relative to peak of alignment companion
+% takewin2=[0.781415 1.78141];
 
 D1temp=[nanmean(activityD1tagged.unitbyunit_y(:,timesD1>=takewin1(1) & timesD1<=takewin1(2)),2)];
 D1temp_2ndwin=[nanmean(activityD1tagged.unitbyunit_y(:,timesD1>=takewin2(1) & timesD1<=takewin2(2)),2)];
