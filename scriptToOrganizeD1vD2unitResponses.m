@@ -375,17 +375,27 @@ D1PreOutcome=nan(1,length(uSess));
 D1Random=nan(1,length(uSess));
 D1unPreOutcome=nan(1,length(uSess));
 D1unRandom=nan(1,length(uSess));
+D1_tw1=[]; D1_tw2=[]; D1_tw3=[]; D1_tw4=[];
+D1un_tw1=[]; D1un_tw2=[]; D1un_tw3=[]; D1un_tw4=[];
 for i=1:length(uSess)
     [D1ontoCD, D1unontoCD]=sessionBySessionPlot_subFunc(activityD1tagged,activityD1untagged,activityD2tagged,activityD2untagged,uSess(i),D1sess,offset);
     offset=offset+5;
     % for D1, use projection 2 onto projection 1
     % for D1 un, use projection 4 onto projection 3
     temp=corrcoef(D1ontoCD.projTimeWindow2.vec,D1ontoCD.projTimeWindow1.vec);
+    if length(D1ontoCD.projTimeWindow2.vec)==1
+        temp(1,2)=nan;
+    end
     D1PreOutcome(i)=temp(1,2);
-    D1Random(i)=getAverageOfRandomProjections(D1ontoCD.projTimeWindow2.vec);
+    D1Random(i)=getAverageOfRandomProjections(D1ontoCD.projTimeWindow2.vec,activityD1tagged.unitbyunit_y);
+    D1_tw1=[D1_tw1; D1ontoCD.projTimeWindow1.R]; D1_tw2=[D1_tw2; D1ontoCD.projTimeWindow2.R]; D1_tw3=[D1_tw3; D1ontoCD.projTimeWindow3.R]; D1_tw4=[D1_tw4; D1ontoCD.projTimeWindow4.R];
     temp=corrcoef(D1unontoCD.projTimeWindow4.vec,D1unontoCD.projTimeWindow3.vec);
+    if length(D1unontoCD.projTimeWindow4.vec)==1
+        temp(1,2)=nan;
+    end
     D1unPreOutcome(i)=temp(1,2);
-    D1unRandom(i)=getAverageOfRandomProjections(D1unontoCD.projTimeWindow4.vec);
+    D1unRandom(i)=getAverageOfRandomProjections(D1unontoCD.projTimeWindow4.vec,activityD1untagged.unitbyunit_y);
+    D1un_tw1=[D1un_tw1; D1unontoCD.projTimeWindow1.R]; D1un_tw2=[D1un_tw2; D1unontoCD.projTimeWindow2.R]; D1un_tw3=[D1un_tw3; D1unontoCD.projTimeWindow3.R]; D1un_tw4=[D1un_tw4; D1unontoCD.projTimeWindow4.R];
 end
 title('D1 experiments');
 uSess=unique(activityD2tagged.fromWhichSess);
@@ -396,19 +406,49 @@ D2PreOutcome=nan(1,length(uSess));
 D2Random=nan(1,length(uSess));
 D2unPreOutcome=nan(1,length(uSess));
 D2unRandom=nan(1,length(uSess));
+D2_tw1=[]; D2_tw2=[]; D2_tw3=[]; D2_tw4=[];
+D2un_tw1=[]; D2un_tw2=[]; D2un_tw3=[]; D2un_tw4=[];
 for i=1:length(uSess)
     [D2ontoCD, D2unontoCD]=sessionBySessionPlot_subFunc(activityD1tagged,activityD1untagged,activityD2tagged,activityD2untagged,uSess(i),D1sess,offset);
     offset=offset+5;
     % for D2 un, use projection 2 onto projection 1
     % for D2, use projection 4 onto projection 3
-    temp=corrcoef(D2ontoCD.projTimeWindow2.vec,D2ontoCD.projTimeWindow1.vec);
+    temp=corrcoef(D2ontoCD.projTimeWindow4.vec,D2ontoCD.projTimeWindow3.vec);
+    if length(D2ontoCD.projTimeWindow4.vec)==1
+        temp(1,2)=nan;
+    end
     D2PreOutcome(i)=temp(1,2);
-    D2Random(i)=getAverageOfRandomProjections(D1ontoCD.projTimeWindow2.vec);
-    temp=corrcoef(D2unontoCD.projTimeWindow4.vec,D2unontoCD.projTimeWindow3.vec);
+    D2Random(i)=getAverageOfRandomProjections(D2ontoCD.projTimeWindow4.vec,activityD2tagged.unitbyunit_y);
+    D2_tw1=[D2_tw1; D2ontoCD.projTimeWindow1.R]; D2_tw2=[D2_tw2; D2ontoCD.projTimeWindow2.R]; D2_tw3=[D2_tw3; D2ontoCD.projTimeWindow3.R]; D2_tw4=[D2_tw4; D2ontoCD.projTimeWindow4.R];
+    temp=corrcoef(D2unontoCD.projTimeWindow2.vec,D2unontoCD.projTimeWindow1.vec);
+    if length(D2unontoCD.projTimeWindow2.vec)==1
+        temp(1,2)=nan;
+    end
     D2unPreOutcome(i)=temp(1,2);
-    D2unRandom(i)=getAverageOfRandomProjections(D2unontoCD.projTimeWindow4.vec);
+    D2unRandom(i)=getAverageOfRandomProjections(D2unontoCD.projTimeWindow2.vec,activityD2untagged.unitbyunit_y);
+    D2un_tw1=[D2un_tw1; D2unontoCD.projTimeWindow1.R]; D2un_tw2=[D2un_tw2; D2unontoCD.projTimeWindow2.R]; D2un_tw3=[D2un_tw3; D2unontoCD.projTimeWindow3.R]; D2un_tw4=[D2un_tw4; D2unontoCD.projTimeWindow4.R];
 end
 title('D2 experiments');
+
+figure(); 
+scatter(D1Random,-D1PreOutcome,'Color','k');
+hold on; 
+scatter(D2unRandom,-D2unPreOutcome,'Color','g');
+legend({'Tagged D1','Untagged during D2'});
+title('D1 space');
+figure(); 
+scatter(D2Random,-D2PreOutcome,'Color','r');
+hold on; 
+scatter(D1unRandom,-D1unPreOutcome,'Color','g');
+legend({'Tagged D2','Untagged during D1'});
+title('D2 space');
+
+figure(); plot(D1ontoCD.projTimeWindow2.t,nanmean(D1_tw2,1));
+hold on; plot(D1ontoCD.projTimeWindow2.t,nanmean(D1_tw2,1)-nanstd(D1_tw2,[],1)./sqrt(size(D1_tw2,1)));
+hold on; plot(D1ontoCD.projTimeWindow2.t,nanmean(D1_tw2,1)+nanstd(D1_tw2,[],1)./sqrt(size(D1_tw2,1)));
+figure(); plot(D1unontoCD.projTimeWindow4.t,nanmean(D1un_tw4,1));
+hold on; plot(D1unontoCD.projTimeWindow4.t,nanmean(D1un_tw4,1)-nanstd(D1un_tw4,[],1)./sqrt(size(D1un_tw4,1)));
+hold on; plot(D1unontoCD.projTimeWindow4.t,nanmean(D1un_tw4,1)+nanstd(D1un_tw4,[],1)./sqrt(size(D1un_tw4,1)));
 
 end
 
@@ -528,46 +568,62 @@ projTimeWindow2=[3.56 7.26]-3.2476;
 projTimeWindow3=[-2.21859 -1.46859];
 projTimeWindow4=[0.781415 1.78141];
 timeBinsStep=0.25;
-[Rs,tb,vec]=getProjection(Zscored_D1tagged, timesD1, projTimeWindow1, timeBinsStep);
-D1ontoCD.projTimeWindow1.t=tb;
-D1ontoCD.projTimeWindow1.R=Rs;
+takeTimeRange=-4:0.25:9.5;
+useUnits=useUnits_D1 & nanmean([D1temp D1temp_2ndwin],2)>0;
+[Rs,tb,vec]=getProjection(Zscored_D1tagged(useUnits,timesD1<9.5), timesD1(timesD1<9.5), projTimeWindow1, timeBinsStep);
+D1ontoCD.projTimeWindow1.t=takeVecValsAtTimes(tb,tb,takeTimeRange);
+D1ontoCD.projTimeWindow1.R=takeVecValsAtTimes(smoothdata(Rs,'gaussian',20),tb,takeTimeRange);
 D1ontoCD.projTimeWindow1.vec=vec;
-[Rs,tb,vec]=getProjection(Zscored_D1tagged, timesD1, projTimeWindow2, timeBinsStep);
-D1ontoCD.projTimeWindow2.t=tb;
-D1ontoCD.projTimeWindow2.R=Rs;
+[Rs,tb,vec]=getProjection(Zscored_D1tagged(useUnits,timesD1<9.5), timesD1(timesD1<9.5), projTimeWindow2, timeBinsStep);
+D1ontoCD.projTimeWindow2.t=takeVecValsAtTimes(tb,tb,takeTimeRange);
+D1ontoCD.projTimeWindow2.R=takeVecValsAtTimes(smoothdata(Rs,'gaussian',20),tb,takeTimeRange);
 D1ontoCD.projTimeWindow2.vec=vec;
-[Rs,tb,vec]=getProjection(Zscored_D1tagged, timesD1, projTimeWindow3, timeBinsStep);
-D1ontoCD.projTimeWindow3.t=tb;
-D1ontoCD.projTimeWindow3.R=Rs;
+[Rs,tb,vec]=getProjection(Zscored_D1tagged(useUnits,timesD1<9.5), timesD1(timesD1<9.5), projTimeWindow3, timeBinsStep);
+D1ontoCD.projTimeWindow3.t=takeVecValsAtTimes(tb,tb,takeTimeRange);
+D1ontoCD.projTimeWindow3.R=takeVecValsAtTimes(smoothdata(Rs,'gaussian',20),tb,takeTimeRange);
 D1ontoCD.projTimeWindow3.vec=vec;
-[Rs,tb,vec]=getProjection(Zscored_D1tagged, timesD1, projTimeWindow4, timeBinsStep);
-D1ontoCD.projTimeWindow4.t=tb;
-D1ontoCD.projTimeWindow4.R=Rs;
+[Rs,tb,vec]=getProjection(Zscored_D1tagged(useUnits,timesD1<9.5), timesD1(timesD1<9.5), projTimeWindow4, timeBinsStep);
+D1ontoCD.projTimeWindow4.t=takeVecValsAtTimes(tb,tb,takeTimeRange);
+D1ontoCD.projTimeWindow4.R=takeVecValsAtTimes(smoothdata(Rs,'gaussian',20),tb,takeTimeRange);
 D1ontoCD.projTimeWindow4.vec=vec;
 
-[Rs,tb,vec]=getProjection(Zscored_D1untagged, timesD1un, projTimeWindow1, timeBinsStep);
-D1unontoCD.projTimeWindow1.t=tb;
-D1unontoCD.projTimeWindow1.R=Rs;
+useUnits=useUnits_D1un & nanmean([D1untemp D1untemp_2ndwin],2)>0;
+[Rs,tb,vec]=getProjection(Zscored_D1untagged(useUnits,timesD1un<9.5), timesD1un(timesD1un<9.5), projTimeWindow1, timeBinsStep);
+D1unontoCD.projTimeWindow1.t=takeVecValsAtTimes(tb,tb,takeTimeRange);
+D1unontoCD.projTimeWindow1.R=takeVecValsAtTimes(smoothdata(Rs,'gaussian',20),tb,takeTimeRange);
 D1unontoCD.projTimeWindow1.vec=vec;
-[Rs,tb,vec]=getProjection(Zscored_D1untagged, timesD1un, projTimeWindow2, timeBinsStep);
-D1unontoCD.projTimeWindow2.t=tb;
-D1unontoCD.projTimeWindow2.R=Rs;
+[Rs,tb,vec]=getProjection(Zscored_D1untagged(useUnits,timesD1un<9.5), timesD1un(timesD1un<9.5), projTimeWindow2, timeBinsStep);
+D1unontoCD.projTimeWindow2.t=takeVecValsAtTimes(tb,tb,takeTimeRange);
+D1unontoCD.projTimeWindow2.R=takeVecValsAtTimes(smoothdata(Rs,'gaussian',20),tb,takeTimeRange);
 D1unontoCD.projTimeWindow2.vec=vec;
-[Rs,tb,vec]=getProjection(Zscored_D1untagged, timesD1un, projTimeWindow3, timeBinsStep);
-D1unontoCD.projTimeWindow3.t=tb;
-D1unontoCD.projTimeWindow3.R=Rs;
+[Rs,tb,vec]=getProjection(Zscored_D1untagged(useUnits,timesD1un<9.5), timesD1un(timesD1un<9.5), projTimeWindow3, timeBinsStep);
+D1unontoCD.projTimeWindow3.t=takeVecValsAtTimes(tb,tb,takeTimeRange);
+D1unontoCD.projTimeWindow3.R=takeVecValsAtTimes(smoothdata(Rs,'gaussian',20),tb,takeTimeRange);
 D1unontoCD.projTimeWindow3.vec=vec;
-[Rs,tb,vec]=getProjection(Zscored_D1untagged, timesD1un, projTimeWindow4, timeBinsStep);
-D1unontoCD.projTimeWindow4.t=tb;
-D1unontoCD.projTimeWindow4.R=Rs;
+[Rs,tb,vec]=getProjection(Zscored_D1untagged(useUnits,timesD1un<9.5), timesD1un(timesD1un<9.5), projTimeWindow4, timeBinsStep);
+D1unontoCD.projTimeWindow4.t=takeVecValsAtTimes(tb,tb,takeTimeRange);
+D1unontoCD.projTimeWindow4.R=takeVecValsAtTimes(smoothdata(Rs,'gaussian',20),tb,takeTimeRange);
 D1unontoCD.projTimeWindow4.vec=vec;
 
 end
 
-function mfr=getAverageOfRandomProjections(vec)
+function newVec=takeVecValsAtTimes(vec,vecTimes,newTimes)
+
+newVec=nan(1,length(newTimes));
+for i=1:length(newTimes)
+    [~,mi]=nanmin(abs(newTimes(i)-vecTimes));
+    if mi>length(vec)
+        mi=length(vec);
+    end
+    newVec(i)=vec(mi);
+end
+
+end
+
+function mfr=getAverageOfRandomProjections(vec,allunitsalltimes)
 
 % just make this the mean firing rate across units
-mfr=mean(vec);
+mfr=mean(vec)-mean(mean(allunitsalltimes,2,'omitnan'),1,'omitnan');
 
 end
 
@@ -581,7 +637,11 @@ for i=1:length(timeBins)-1
     currpopD1=mean(ZscoredData(:,times>timeBins(i) & times<timeBins(i+1)),2,'omitnan');
     currpopD1(isnan(currpopD1))=0;
     R=corrcoef(popD1,currpopD1);
-    Rs(i)=R(1,2);
+    if length(popD1)==1
+        Rs(i)=nan; % not enough units
+    else
+        Rs(i)=R(1,2);
+    end
 end
 % average pop vector in this time window is popD1
 
