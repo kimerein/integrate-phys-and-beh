@@ -362,7 +362,7 @@ end
 
 function sessionBySessionPlot(activityD1tagged,activityD1untagged,activityD2tagged,activityD2untagged)
 
-projTimeWindow1=[2.25 3.56]-3.2476;
+projTimeWindow1=[-1 -0.4];
 projTimeWindow2=[3.56 7.26]-3.2476;
 projTimeWindow3=[-2.21859 -1.46859];
 projTimeWindow4=[0.781415 1.78141];
@@ -556,46 +556,54 @@ takeTimeRange=-4:0.25:9.5;
 useUnits=useUnits_D1 & nanmean([D1temp D1temp_2ndwin],2)>0;
 [Rs,tb,vec,mfr]=getProjection(Zscored_D1tagged(useUnits,timesD1<9.5), timesD1(timesD1<9.5), projTimeWindow1, timeBinsStep);
 D1ontoCD.projTimeWindow1.t=takeVecValsAtTimes(tb,tb,takeTimeRange);
-D1ontoCD.projTimeWindow1.R=takeVecValsAtTimes(smoothdata(Rs,'gaussian',7),tb,takeTimeRange);
+D1ontoCD.projTimeWindow1.R=normVecMinus1to1(takeVecValsAtTimes(smoothdata(Rs,'gaussian',7),tb,takeTimeRange));
 D1ontoCD.projTimeWindow1.vec=vec;
 D1ontoCD.projTimeWindow1.mfr=mfr;
 [Rs,tb,vec,mfr]=getProjection(Zscored_D1tagged(useUnits,timesD1<9.5), timesD1(timesD1<9.5), projTimeWindow2, timeBinsStep);
 D1ontoCD.projTimeWindow2.t=takeVecValsAtTimes(tb,tb,takeTimeRange);
-D1ontoCD.projTimeWindow2.R=takeVecValsAtTimes(smoothdata(Rs,'gaussian',7),tb,takeTimeRange);
+D1ontoCD.projTimeWindow2.R=normVecMinus1to1(takeVecValsAtTimes(smoothdata(Rs,'gaussian',7),tb,takeTimeRange));
 D1ontoCD.projTimeWindow2.vec=vec;
 D1ontoCD.projTimeWindow2.mfr=mfr;
 [Rs,tb,vec,mfr]=getProjection(Zscored_D1tagged(useUnits,timesD1<9.5), timesD1(timesD1<9.5), projTimeWindow3, timeBinsStep);
 D1ontoCD.projTimeWindow3.t=takeVecValsAtTimes(tb,tb,takeTimeRange);
-D1ontoCD.projTimeWindow3.R=takeVecValsAtTimes(smoothdata(Rs,'gaussian',7),tb,takeTimeRange);
+D1ontoCD.projTimeWindow3.R=normVecMinus1to1(takeVecValsAtTimes(smoothdata(Rs,'gaussian',7),tb,takeTimeRange));
 D1ontoCD.projTimeWindow3.vec=vec;
 D1ontoCD.projTimeWindow3.mfr=mfr;
 [Rs,tb,vec,mfr]=getProjection(Zscored_D1tagged(useUnits,timesD1<9.5), timesD1(timesD1<9.5), projTimeWindow4, timeBinsStep);
 D1ontoCD.projTimeWindow4.t=takeVecValsAtTimes(tb,tb,takeTimeRange);
-D1ontoCD.projTimeWindow4.R=takeVecValsAtTimes(smoothdata(Rs,'gaussian',7),tb,takeTimeRange);
+D1ontoCD.projTimeWindow4.R=normVecMinus1to1(takeVecValsAtTimes(smoothdata(Rs,'gaussian',7),tb,takeTimeRange));
 D1ontoCD.projTimeWindow4.vec=vec;
 D1ontoCD.projTimeWindow4.mfr=mfr;
 
 useUnits=useUnits_D1un & nanmean([D1untemp D1untemp_2ndwin],2)>0;
 [Rs,tb,vec,mfr]=getProjection(Zscored_D1untagged(useUnits,timesD1un<9.5), timesD1un(timesD1un<9.5), projTimeWindow1, timeBinsStep);
 D1unontoCD.projTimeWindow1.t=takeVecValsAtTimes(tb,tb,takeTimeRange);
-D1unontoCD.projTimeWindow1.R=takeVecValsAtTimes(smoothdata(Rs,'gaussian',7),tb,takeTimeRange);
+D1unontoCD.projTimeWindow1.R=normVecMinus1to1(takeVecValsAtTimes(smoothdata(Rs,'gaussian',7),tb,takeTimeRange));
 D1unontoCD.projTimeWindow1.vec=vec;
 D1unontoCD.projTimeWindow1.mfr=mfr;
 [Rs,tb,vec,mfr]=getProjection(Zscored_D1untagged(useUnits,timesD1un<9.5), timesD1un(timesD1un<9.5), projTimeWindow2, timeBinsStep);
 D1unontoCD.projTimeWindow2.t=takeVecValsAtTimes(tb,tb,takeTimeRange);
-D1unontoCD.projTimeWindow2.R=takeVecValsAtTimes(smoothdata(Rs,'gaussian',7),tb,takeTimeRange);
+D1unontoCD.projTimeWindow2.R=normVecMinus1to1(takeVecValsAtTimes(smoothdata(Rs,'gaussian',7),tb,takeTimeRange));
 D1unontoCD.projTimeWindow2.vec=vec;
 D1unontoCD.projTimeWindow2.mfr=mfr;
 [Rs,tb,vec,mfr]=getProjection(Zscored_D1untagged(useUnits,timesD1un<9.5), timesD1un(timesD1un<9.5), projTimeWindow3, timeBinsStep);
 D1unontoCD.projTimeWindow3.t=takeVecValsAtTimes(tb,tb,takeTimeRange);
-D1unontoCD.projTimeWindow3.R=takeVecValsAtTimes(smoothdata(Rs,'gaussian',7),tb,takeTimeRange);
+D1unontoCD.projTimeWindow3.R=normVecMinus1to1(takeVecValsAtTimes(smoothdata(Rs,'gaussian',7),tb,takeTimeRange));
 D1unontoCD.projTimeWindow3.vec=vec;
 D1unontoCD.projTimeWindow3.mfr=mfr;
 [Rs,tb,vec,mfr]=getProjection(Zscored_D1untagged(useUnits,timesD1un<9.5), timesD1un(timesD1un<9.5), projTimeWindow4, timeBinsStep);
 D1unontoCD.projTimeWindow4.t=takeVecValsAtTimes(tb,tb,takeTimeRange);
-D1unontoCD.projTimeWindow4.R=takeVecValsAtTimes(smoothdata(Rs,'gaussian',7),tb,takeTimeRange);
+D1unontoCD.projTimeWindow4.R=normVecMinus1to1(takeVecValsAtTimes(smoothdata(Rs,'gaussian',7),tb,takeTimeRange));
 D1unontoCD.projTimeWindow4.vec=vec;
 D1unontoCD.projTimeWindow4.mfr=mfr;
+
+end
+
+function temp=normVecMinus1to1(temp)
+
+temp=temp-nanmin(temp);
+temp=temp./nanmax(temp);
+temp=(temp.*2)-1;
 
 end
 
