@@ -364,7 +364,7 @@ end
 
 function sessionBySessionPlot(activityD1tagged,activityD1untagged,activityD2tagged,activityD2untagged)
 
-projTimeWindow1=[-2 -0.4]; %[2.25 3.56]-3.2476;
+projTimeWindow1=[-1 0]; %[-2 -0.4]; %[2.25 3.56]-3.2476;
 projTimeWindow2=[1.5 5]; %[3.56 7.26]-3.2476;
 projTimeWindow3=[-2.21859 -1.46859];
 projTimeWindow4=[0.781415 1.78141];
