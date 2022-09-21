@@ -364,11 +364,11 @@ end
 
 function sessionBySessionPlot(activityD1tagged,activityD1untagged,activityD2tagged,activityD2untagged)
 
-projTimeWindow1=[-1 0]; %-0.4];
-projTimeWindow2=[3.56 7.26]-3.2476;
+projTimeWindow1=[-2 -0.4]; %[2.25 3.56]-3.2476;
+projTimeWindow2=[1.5 5]; %[3.56 7.26]-3.2476;
 projTimeWindow3=[-2.21859 -1.46859];
 projTimeWindow4=[0.781415 1.78141];
-winBeforeCue=[-3 -2];
+winBeforeCue=[-3 -2.5];
 
 uSess=unique(activityD1tagged.fromWhichSess);
 D1sess=true;
@@ -387,12 +387,12 @@ for i=1:length(uSess)
     offset=offset+5;
     % for D1, use projection 2 onto projection 1
     % for D1 un, use projection 4 onto projection 3
-    D1PreOutcome(i)=nanmean(D1ontoCD.projTimeWindow2.R(D1ontoCD.projTimeWindow2.t>projTimeWindow1(1) & D1ontoCD.projTimeWindow2.t<projTimeWindow1(2)))-nanmean(D1ontoCD.projTimeWindow2.R(D1ontoCD.projTimeWindow2.t>0 & D1ontoCD.projTimeWindow2.t<2));
-    D1PreOutcome_winBeforeCue(i)=nanmean(D1ontoCD.projTimeWindow2.R(D1ontoCD.projTimeWindow2.t>winBeforeCue(1) & D1ontoCD.projTimeWindow2.t<winBeforeCue(2)))-nanmean(D1ontoCD.projTimeWindow2.R(D1ontoCD.projTimeWindow2.t>0 & D1ontoCD.projTimeWindow2.t<2));
+    D1PreOutcome(i)=nanmean(D1ontoCD.projTimeWindow2.R(D1ontoCD.projTimeWindow2.t>projTimeWindow1(1) & D1ontoCD.projTimeWindow2.t<projTimeWindow1(2)))-nanmean(D1ontoCD.projTimeWindow2.R(D1ontoCD.projTimeWindow2.t>projTimeWindow2(1) & D1ontoCD.projTimeWindow2.t<projTimeWindow2(2)))+1;
+    D1PreOutcome_winBeforeCue(i)=nanmean(D1ontoCD.projTimeWindow2.R(D1ontoCD.projTimeWindow2.t>winBeforeCue(1) & D1ontoCD.projTimeWindow2.t<winBeforeCue(2)))-nanmean(D1ontoCD.projTimeWindow2.R(D1ontoCD.projTimeWindow2.t>projTimeWindow2(1) & D1ontoCD.projTimeWindow2.t<projTimeWindow2(2)))+1;
     D1Random(i)=D1ontoCD.projTimeWindow2.mfr;
     D1_tw1=[D1_tw1; D1ontoCD.projTimeWindow1.R]; D1_tw2=[D1_tw2; D1ontoCD.projTimeWindow2.R]; D1_tw3=[D1_tw3; D1ontoCD.projTimeWindow3.R]; D1_tw4=[D1_tw4; D1ontoCD.projTimeWindow4.R];
-    D1unPreOutcome(i)=nanmean(D1unontoCD.projTimeWindow2.R(D1unontoCD.projTimeWindow2.t>projTimeWindow1(1) & D1unontoCD.projTimeWindow2.t<projTimeWindow1(2)))-nanmean(D1unontoCD.projTimeWindow2.R(D1unontoCD.projTimeWindow2.t>0 & D1unontoCD.projTimeWindow2.t<2));
-    D1unPreOutcome_winBeforeCue(i)=nanmean(D1unontoCD.projTimeWindow2.R(D1unontoCD.projTimeWindow2.t>winBeforeCue(1) & D1unontoCD.projTimeWindow2.t<winBeforeCue(2)))-nanmean(D1unontoCD.projTimeWindow2.R(D1unontoCD.projTimeWindow2.t>0 & D1unontoCD.projTimeWindow2.t<2)); 
+    D1unPreOutcome(i)=nanmean(D1unontoCD.projTimeWindow2.R(D1unontoCD.projTimeWindow2.t>projTimeWindow1(1) & D1unontoCD.projTimeWindow2.t<projTimeWindow1(2)))-nanmean(D1unontoCD.projTimeWindow2.R(D1unontoCD.projTimeWindow2.t>projTimeWindow2(1) & D1unontoCD.projTimeWindow2.t<projTimeWindow2(2)))+1;
+    D1unPreOutcome_winBeforeCue(i)=nanmean(D1unontoCD.projTimeWindow2.R(D1unontoCD.projTimeWindow2.t>winBeforeCue(1) & D1unontoCD.projTimeWindow2.t<winBeforeCue(2)))-nanmean(D1unontoCD.projTimeWindow2.R(D1unontoCD.projTimeWindow2.t>projTimeWindow2(1) & D1unontoCD.projTimeWindow2.t<projTimeWindow2(2)))+1; 
     D1unRandom(i)=D1unontoCD.projTimeWindow2.mfr;
     D1un_tw1=[D1un_tw1; D1unontoCD.projTimeWindow1.R]; D1un_tw2=[D1un_tw2; D1unontoCD.projTimeWindow2.R]; D1un_tw3=[D1un_tw3; D1unontoCD.projTimeWindow3.R]; D1un_tw4=[D1un_tw4; D1unontoCD.projTimeWindow4.R];
 end
@@ -414,33 +414,33 @@ for i=1:length(uSess)
     offset=offset+5;
     % for D2 un, use projection 2 onto projection 1
     % for D2, use projection 4 onto projection 3
-    D2PreOutcome(i)=nanmean(D2ontoCD.projTimeWindow2.R(D2ontoCD.projTimeWindow2.t>projTimeWindow1(1) & D2ontoCD.projTimeWindow2.t<projTimeWindow1(2)))-nanmean(D2ontoCD.projTimeWindow2.R(D2ontoCD.projTimeWindow2.t>0 & D2ontoCD.projTimeWindow2.t<2));
-    D2PreOutcome_winBeforeCue(i)=nanmean(D2ontoCD.projTimeWindow2.R(D2ontoCD.projTimeWindow2.t>winBeforeCue(1) & D2ontoCD.projTimeWindow2.t<winBeforeCue(2)))-nanmean(D2ontoCD.projTimeWindow2.R(D2ontoCD.projTimeWindow2.t>0 & D2ontoCD.projTimeWindow2.t<2));
+    D2PreOutcome(i)=nanmean(D2ontoCD.projTimeWindow2.R(D2ontoCD.projTimeWindow2.t>projTimeWindow1(1) & D2ontoCD.projTimeWindow2.t<projTimeWindow1(2)))-nanmean(D2ontoCD.projTimeWindow2.R(D2ontoCD.projTimeWindow2.t>projTimeWindow2(1) & D2ontoCD.projTimeWindow2.t<projTimeWindow2(2)))+1;
+    D2PreOutcome_winBeforeCue(i)=nanmean(D2ontoCD.projTimeWindow2.R(D2ontoCD.projTimeWindow2.t>winBeforeCue(1) & D2ontoCD.projTimeWindow2.t<winBeforeCue(2)))-nanmean(D2ontoCD.projTimeWindow2.R(D2ontoCD.projTimeWindow2.t>projTimeWindow2(1) & D2ontoCD.projTimeWindow2.t<projTimeWindow2(2)))+1;
     D2Random(i)=D2ontoCD.projTimeWindow2.mfr;
     D2_tw1=[D2_tw1; D2ontoCD.projTimeWindow1.R]; D2_tw2=[D2_tw2; D2ontoCD.projTimeWindow2.R]; D2_tw3=[D2_tw3; D2ontoCD.projTimeWindow3.R]; D2_tw4=[D2_tw4; D2ontoCD.projTimeWindow4.R];
-    D2unPreOutcome(i)=nanmean(D2unontoCD.projTimeWindow2.R(D2unontoCD.projTimeWindow2.t>projTimeWindow1(1) & D2unontoCD.projTimeWindow2.t<projTimeWindow1(2)))-nanmean(D2unontoCD.projTimeWindow2.R(D2unontoCD.projTimeWindow2.t>0 & D2unontoCD.projTimeWindow2.t<2));
-    D2unPreOutcome_winBeforeCue(i)=nanmean(D2unontoCD.projTimeWindow2.R(D2unontoCD.projTimeWindow2.t>winBeforeCue(1) & D2unontoCD.projTimeWindow2.t<winBeforeCue(2)))-nanmean(D2unontoCD.projTimeWindow2.R(D2unontoCD.projTimeWindow2.t>0 & D2unontoCD.projTimeWindow2.t<2));
+    D2unPreOutcome(i)=nanmean(D2unontoCD.projTimeWindow2.R(D2unontoCD.projTimeWindow2.t>projTimeWindow1(1) & D2unontoCD.projTimeWindow2.t<projTimeWindow1(2)))-nanmean(D2unontoCD.projTimeWindow2.R(D2unontoCD.projTimeWindow2.t>projTimeWindow2(1) & D2unontoCD.projTimeWindow2.t<projTimeWindow2(2)))+1;
+    D2unPreOutcome_winBeforeCue(i)=nanmean(D2unontoCD.projTimeWindow2.R(D2unontoCD.projTimeWindow2.t>winBeforeCue(1) & D2unontoCD.projTimeWindow2.t<winBeforeCue(2)))-nanmean(D2unontoCD.projTimeWindow2.R(D2unontoCD.projTimeWindow2.t>projTimeWindow2(1) & D2unontoCD.projTimeWindow2.t<projTimeWindow2(2)))+1;
     D2unRandom(i)=D2unontoCD.projTimeWindow2.mfr;
     D2un_tw1=[D2un_tw1; D2unontoCD.projTimeWindow1.R]; D2un_tw2=[D2un_tw2; D2unontoCD.projTimeWindow2.R]; D2un_tw3=[D2un_tw3; D2unontoCD.projTimeWindow3.R]; D2un_tw4=[D2un_tw4; D2unontoCD.projTimeWindow4.R];
 end
 title('D2 experiments');
 
-figure(); 
-% scatter(-D1PreOutcome_winBeforeCue,-D1PreOutcome,[],'k');
-scatter(D1Random,-D1PreOutcome,[],'k');
-xlabel('Uncue'); ylabel('Cue');
-% hold on; 
-% scatter(D2unRandom,-D2unPreOutcome,'Color','g');
-% legend({'Tagged D1','Untagged during D2'});
-title('D1 space');
-figure(); 
-% scatter(-D2PreOutcome_winBeforeCue,-D2PreOutcome,[],'r');
-scatter(D2Random,-D2PreOutcome,[],'r');
-xlabel('Uncue'); ylabel('Cue');
-% hold on; 
-% scatter(D1unRandom,-D1unPreOutcome,'Color','g');
-% legend({'Tagged D2','Untagged during D1'});
-title('D2 space');
+% figure(); 
+% % scatter(-D1PreOutcome_winBeforeCue,-D1PreOutcome,[],'k');
+% scatter(D1Random,-D1PreOutcome,[],'k');
+% xlabel('Uncue'); ylabel('Cue');
+% % hold on; 
+% % scatter(D2unRandom,-D2unPreOutcome,'Color','g');
+% % legend({'Tagged D1','Untagged during D2'});
+% title('D1 space');
+% figure(); 
+% % scatter(-D2PreOutcome_winBeforeCue,-D2PreOutcome,[],'r');
+% scatter(D2Random,-D2PreOutcome,[],'r');
+% xlabel('Uncue'); ylabel('Cue');
+% % hold on; 
+% % scatter(D1unRandom,-D1unPreOutcome,'Color','g');
+% % legend({'Tagged D2','Untagged during D1'});
+% title('D2 space');
 
 figure(); 
 scatter(-D1PreOutcome_winBeforeCue,-D1PreOutcome,[],'k');
@@ -469,6 +469,13 @@ xmean=nanmean([(-D1PreOutcome_winBeforeCue)-(-D1unPreOutcome_winBeforeCue) (-D2u
 ymean=nanmean([-D1PreOutcome+D1unPreOutcome -D2unPreOutcome+D2PreOutcome]);
 line([0 xmean],[0 ymean],'LineWidth',6,'Color','m');
 title('D1 minus D2 space');
+
+figure();
+temp=[[-D1PreOutcome; -D1unPreOutcome]'; [-D2unPreOutcome; -D2PreOutcome]'];
+tempx=zeros(size(temp));
+tempx(:,2)=1;
+line(tempx', temp');
+
 
 figure(); plot(D1ontoCD.projTimeWindow2.t,nanmean(D1_tw2,1));
 hold on; plot(D1ontoCD.projTimeWindow2.t,nanmean(D1_tw2,1)-nanstd(D1_tw2,[],1)./sqrt(size(D1_tw2,1)));
@@ -606,8 +613,8 @@ end
 % Get projections
 
 % For success
-projTimeWindow1=[2.25 3.56]-3.2476;
-projTimeWindow2=[3.56 7.26]-3.2476;
+projTimeWindow1=[-2 -0.22]; %[2.25 3.56]-3.2476;
+projTimeWindow2=[0 5]; %[3.56 7.26]-3.2476;
 projTimeWindow3=[-2.21859 -1.46859];
 projTimeWindow4=[0.781415 1.78141];
 timecutoff=4;
@@ -619,11 +626,11 @@ temp=activityD1untagged.unitbyunit_y;
 % temp=temp-mean(temp(:,timesD1un<9.5),2,'omitnan');
 temp=temp./std(temp(:,timesD1un<timecutoff),0,2,'omitnan');
 Zscored_D1untagged=temp;
-timeBinsStep=0.25;
+timeBinsStep=0.1;
 takeTimeRange=-4:0.25:9.5;
-gausssmooth=10;
+gausssmooth=1;
 useUnits=useUnits_D1 & nanmean([D1temp D1temp_2ndwin],2)>0;
-atLeastNUnits=2;
+atLeastNUnits=1;
 [Rs,tb,vec,mfr]=getProjection(Zscored_D1tagged(useUnits,timesD1<9.5), timesD1(timesD1<9.5), projTimeWindow1, timeBinsStep, atLeastNUnits);
 D1ontoCD.projTimeWindow1.t=takeVecValsAtTimes(tb,tb,takeTimeRange);
 D1ontoCD.projTimeWindow1.R=normVecMinus1to1(takeVecValsAtTimes(smoothdata(Rs,'gaussian',gausssmooth),tb,takeTimeRange),takeTimeRange<4);
@@ -646,7 +653,7 @@ D1ontoCD.projTimeWindow4.vec=vec;
 D1ontoCD.projTimeWindow4.mfr=mfr;
 
 useUnits=useUnits_D1un & nanmean([D1untemp D1untemp_2ndwin],2)>0;
-atLeastNUnits=2;
+atLeastNUnits=1;
 [Rs,tb,vec,mfr]=getProjection(Zscored_D1untagged(useUnits,timesD1un<9.5), timesD1un(timesD1un<9.5), projTimeWindow1, timeBinsStep, atLeastNUnits);
 D1unontoCD.projTimeWindow1.t=takeVecValsAtTimes(tb,tb,takeTimeRange);
 D1unontoCD.projTimeWindow1.R=normVecMinus1to1(takeVecValsAtTimes(smoothdata(Rs,'gaussian',gausssmooth),tb,takeTimeRange),takeTimeRange<4);
@@ -672,9 +679,9 @@ end
 
 function temp=normVecMinus1to1(temp,useindfornorm)
 
-temp=temp-nanmin(temp(useindfornorm));
-temp=temp./nanmax(temp(useindfornorm));
-temp=(temp.*2)-1;
+% temp=temp-nanmin(temp(useindfornorm));
+% temp=temp./nanmax(temp(useindfornorm));
+% temp=(temp.*2)-1;
 
 end
 
@@ -705,8 +712,9 @@ subtractOffShuffleCorr=false;
 for i=1:size(ZscoredData,1)
     ZscoredData(i,:)=smoothdata(ZscoredData(i,:),'gaussian',20);
 end
-ZscoredData=ZscoredData-repmat(nanmin(ZscoredData(:,times<8),[],2),1,size(ZscoredData,2));
-ZscoredData=ZscoredData./repmat(nanmax(ZscoredData(:,times<8),[],2),1,size(ZscoredData,2));
+% ZscoredData=ZscoredData-repmat(nanmean(ZscoredData(:,times<8),2),1,size(ZscoredData,2));
+% ZscoredData=ZscoredData-repmat(nanmin(ZscoredData(:,times<8),[],2),1,size(ZscoredData,2));
+% ZscoredData=ZscoredData./repmat(nanmax(ZscoredData(:,times<8),[],2),1,size(ZscoredData,2));
 
 popD1=mean(ZscoredData(:,times>timeWindow(1) & times<timeWindow(2)),2,'omitnan');
 popD1(isnan(popD1))=0;
@@ -724,6 +732,8 @@ end
 for i=1:length(timeBins)-1
     currpopD1=mean(ZscoredData(:,times>timeBins(i) & times<timeBins(i+1)),2,'omitnan');
     currpopD1(isnan(currpopD1))=0;
+    currpopD1=currpopD1-nanmin(currpopD1);
+    currpopD1=currpopD1./nanmax(currpopD1);
 %     R=corrcoef(popD1-nanmean(popD1),currpopD1-nanmean(currpopD1));
     [R,P,RL,RU]=corrcoef(popD1,currpopD1,'Alpha',0.05);
     if length(popD1)==1
