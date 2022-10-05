@@ -251,7 +251,10 @@ if getNewDelay==true
             data1_t=data1_t(1:length(data1_LED));
         end
         takeoutnan=isnan(data2_t);
-        if isempty(data2_t(~takeoutnan)) || isempty(data2_LED(~takeoutnan)) || isempty(data1_t)
+        if isempty(data2_t(~takeoutnan)) || isempty(data2_LED(~takeoutnan)) || isempty(data1_t) || all(isnan(data1_t))
+            continue
+        end
+        if length(unique(data2_t(~takeoutnan)))==1
             continue
         end
         y2i=interp1(data2_t(~takeoutnan),data2_LED(~takeoutnan),data1_t);
