@@ -77,10 +77,14 @@ eigVec_tbyt=eigVec_tbyt(:,si);
 i=1; figure(); plot(eigVec_tbyt(:,i)); hold on; plot(aligncompD1.*nanmax(eigVec_tbyt(:,i)),'Color','b'); plot(aligncompD2.*nanmax(eigVec_tbyt(:,i)),'Color','b');
 i=[2 3 4]; figure(); temp=nanmean(eigVec_tbyt(:,i),2); plot(temp); hold on; plot(aligncompD1.*nanmax(temp),'Color','b'); plot(aligncompD2.*nanmax(temp),'Color','b');
 
-grp1=pvals_D1<pvalcutoff(2) & pvals_D1>pvalcutoff(1) & cueResponseIncrease_D1==true;
-grp2=(pvals_D1<pvalcutoff(2) & pvals_D1>pvalcutoff(1) & cueResponseIncrease_D1==false);
-grp3=pvals_D2<pvalcutoff(2) & pvals_D2>pvalcutoff(1) & cueResponseIncrease_D2==true;
-grp4=(pvals_D2<pvalcutoff(2) & pvals_D2>pvalcutoff(1) & cueResponseIncrease_D2==false);
+% grp1=pvals_D1<pvalcutoff(2) & pvals_D1>pvalcutoff(1) & cueResponseIncrease_D1==true;
+grp1=1:size(D1tagged_cueResponse.unitbyunit_y,1);
+% grp2=(pvals_D1<pvalcutoff(2) & pvals_D1>pvalcutoff(1) & cueResponseIncrease_D1==false);
+grp2=1:size(D1tagged_cueResponse.unitbyunit_y,1);
+% grp3=pvals_D2<pvalcutoff(2) & pvals_D2>pvalcutoff(1) & cueResponseIncrease_D2==true;
+grp3=1:size(D2tagged_cueResponse.unitbyunit_y,1);
+% grp4=(pvals_D2<pvalcutoff(2) & pvals_D2>pvalcutoff(1) & cueResponseIncrease_D2==false);
+grp4=1:size(D2tagged_cueResponse.unitbyunit_y,1);
 
 figure(); c=[0.8500 0.3250 0.0980];
 plot(nanmean(D1tagged_cueResponse.unitbyunit_x(grp1,:),1),nanmean(D1tagged_cueResponse.unitbyunit_y(grp1,:),1),'Color',c);

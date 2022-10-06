@@ -99,6 +99,10 @@ sessionBySessionPlot(activityD1tagged,activityD1untagged,activityD2tagged,activi
 
 scatterD1vD2_likeCuevDislikeCue(D1tagged_cueResponse, D2tagged_cueResponse, activityD1tagged, activityD2tagged, timeWindow, responseBaseline, cueWindow, beforeCueBaseline, pvalcutoff);
 
+% Now UNTAGGED
+pause;
+scatterD1vD2_likeCuevDislikeCue(D2untagged_cueResponse, D1untagged_cueResponse, activityD2untagged, activityD1untagged, timeWindow, responseBaseline, cueWindow, beforeCueBaseline, pvalcutoff);
+
 end
 
 function D1tagged_cueResponse=takeOnlyUnitsFromSess(D1tagged_cueResponse,takeTheseSess)
@@ -307,6 +311,7 @@ for i=1:length(timeBins)-1
         Rs(i,j)=R(1,2);
     end
 end
+Rs_D1=Rs;
 figure(); 
 imagesc(timeBins(timeBins<9.5),timeBins(timeBins<9.5),Rs(timeBins<9.5,timeBins<9.5)); title('D1 corrcoef matrix');
 
@@ -322,6 +327,7 @@ for i=1:length(timeBins)-1
         RsD2(i,j)=R(1,2);
     end
 end
+Rs_D2=RsD2;
 figure(); 
 imagesc(timeBins(timeBins<9.5),timeBins(timeBins<9.5),RsD2(timeBins<9.5,timeBins<9.5)); title('D2 corrcoef matrix');
 
@@ -342,6 +348,7 @@ for i=1:length(timeBins)-1
         Rs(i,j)=R(1,2);
     end
 end
+RsD1un=Rs;
 figure(); 
 imagesc(timeBins(timeBins<9.5),timeBins(timeBins<9.5),Rs(timeBins<9.5,timeBins<9.5)); title('D1 untagged corrcoef matrix');
 
@@ -357,18 +364,24 @@ for i=1:length(timeBins)-1
         RsD2(i,j)=R(1,2);
     end
 end
+RsD2un=RsD2;
 figure(); 
 imagesc(timeBins(timeBins<9.5),timeBins(timeBins<9.5),RsD2(timeBins<9.5,timeBins<9.5)); title('D2 untagged corrcoef matrix');
+
+figure();
+l=min([size(Rs_D1,1) size(Rs_D2,1) find(timeBins<9.5,1,'last')]);
+imagesc([Rs_D1(1:l, 1:l) Rs_D2(1:l, 1:l) RsD1un(1:l, 1:l) RsD2un(1:l, 1:l)]);
+title('D1 then D2 then D1un then D2un autocorr matrices');
 
 end
 
 function sessionBySessionPlot(activityD1tagged,activityD1untagged,activityD2tagged,activityD2untagged)
 
-projTimeWindow1=[-1 0.7]; %[-2 -0.4]; %[2.25 3.56]-3.2476;
+projTimeWindow1=[-1 0]; %[-2 -0.4]; %[2.25 3.56]-3.2476;
 projTimeWindow2=[1.5 5]; %[3.56 7.26]-3.2476;
 projTimeWindow3=[-2.21859 -1.46859];
 projTimeWindow4=[0.781415 1.78141];
-winBeforeCue=[-3 -2.5];
+winBeforeCue=[6 7]; %[-3 -2.5];
 
 uSess=unique(activityD1tagged.fromWhichSess);
 D1sess=true;
@@ -477,9 +490,9 @@ tempx(:,2)=1;
 line(tempx', temp');
 
 
-figure(); plot(D1ontoCD.projTimeWindow2.t,nanmean(D1_tw2,1));
-hold on; plot(D1ontoCD.projTimeWindow2.t,nanmean(D1_tw2,1)-nanstd(D1_tw2,[],1)./sqrt(size(D1_tw2,1)));
-hold on; plot(D1ontoCD.projTimeWindow2.t,nanmean(D1_tw2,1)+nanstd(D1_tw2,[],1)./sqrt(size(D1_tw2,1)));
+figure(); plot(D1ontoCD.projTimeWindow1.t,nanmean(D1_tw1,1));
+hold on; plot(D1ontoCD.projTimeWindow1.t,nanmean(D1_tw1,1)-nanstd(D1_tw1,[],1)./sqrt(size(D1_tw1,1)));
+hold on; plot(D1ontoCD.projTimeWindow1.t,nanmean(D1_tw1,1)+nanstd(D1_tw1,[],1)./sqrt(size(D1_tw1,1)));
 title('D1 after cue');
 figure(); plot(D1ontoCD.projTimeWindow4.t,nanmean(D1_tw4,1));
 hold on; plot(D1ontoCD.projTimeWindow4.t,nanmean(D1_tw4,1)-nanstd(D1_tw4,[],1)./sqrt(size(D1_tw4,1)));
