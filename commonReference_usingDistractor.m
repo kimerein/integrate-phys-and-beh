@@ -151,7 +151,9 @@ end
 function checkAlignment(dis1,dis2)
 
 figure();
-offset=0;
+offset=1;
+dis1=dis1./max(dis1(1:end),[],2,'omitnan');
+dis2=dis2./max(dis2(1:end),[],2,'omitnan');
 for i=1:size(dis1,1)
     if i>size(dis1,1)
         disp('skipping end of dis1');
@@ -166,7 +168,8 @@ for i=1:size(dis1,1)
     plot(offset+dis2(i,:),'Color','r');
     if isnan(nanmax([dis1(i,:) dis2(i,:)]))
     else
-        offset=offset+nanmax([dis1(i,:) dis2(i,:)])+0.1;
+%         offset=offset+nanmax([dis1(i,:) dis2(i,:)])+0.1;
+        offset=offset+1;
     end
 end
 

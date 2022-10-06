@@ -20,7 +20,7 @@ settings.try_delay2=50;
 settings.tryinc=0.02;
 % settings.try_scale1=0.6;
 % settings.try_scale2=1;  
-alignInd=6;
+alignInd=8;
 % downSampData2=true;
 ds=10; %1000;
 
@@ -70,12 +70,15 @@ settings.try_scale1=scaleMid-0.2;
 settings.try_scale2=scaleMid+0.2;  
 
 figure();
-offset=0;
+offset=1;
+dis1=dis1./max(dis1(1:end),[],2,'omitnan');
+dis2=dis2./max(dis2(1:end),[],2,'omitnan');
 for i=1:size(data1.(whichTime1),1)
-    plot(t1(i,:),offset+dis1(i,:),'Color','k');
+    plot(t1(i,:),offset+0.9*dis1(i,:),'Color','k');
     hold on;
-    plot(t2(i,:),offset+dis2(i,:),'Color','r');
-    offset=offset+nanmax([dis1(i,:) dis2(i,:)])+0.1;
+    plot(t2(i,:),offset+0.9*dis2(i,:),'Color','r');
+%     offset=offset+nanmax([dis1(i,:) dis2(i,:)])+0.1;
+    offset=offset+1;
 end
 
 % Use distractor to further align
@@ -181,12 +184,15 @@ t1=data1.(whichTime1);
 dis2=data2.(whichField2);
 t2=data2.(whichTime2);
 figure();
-offset=0;
+offset=1;
+dis1=dis1./max(dis1(1:end),[],2,'omitnan');
+dis2=dis2./max(dis2(1:end),[],2,'omitnan');
 for i=1:size(data1.(whichTime1),1)
-    plot(t1(i,:),offset+dis1(i,:),'Color','k');
+    plot(t1(i,:),offset+0.9*dis1(i,:),'Color','k');
     hold on;
-    plot(t2(i,:),offset+dis2(i,:),'Color','r');
-    offset=offset+nanmax([dis1(i,:) dis2(i,:)])+0.1;
+    plot(t2(i,:),offset+0.9*dis2(i,:),'Color','r');
+%     offset=offset+nanmax([dis1(i,:) dis2(i,:)])+0.1;
+    offset=offset+1;
 end
 title('Final alignment of distractor');
 % dis1=data1.(othertimestamp);
