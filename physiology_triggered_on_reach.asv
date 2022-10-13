@@ -90,7 +90,7 @@ pause;
 settings.scale_factor=floor(settings.photo_fs/settings.movie_fs);
 settings.photo_dec=settings.scale_factor-15;
 settings.movie_dec=1;
-settings.minlagForInitialAlign=[]; %-20000; % if these are negative, works differently and will truncate this many frames from front of first movie only
+settings.minlagForInitialAlign=299; %139; %140; %139; %300; %-20000; % if these are negative, works differently and will truncate this many frames from front of first movie only
 % if one is negative, the other (positive) value will be the actual maxlagForInitialAlign
 settings.maxlagForInitialAlign=[]; %50; % [] is don't want to constrain alignment
 settings.try_delay1=0;
@@ -141,9 +141,9 @@ alltbt1=selectRows(alltbt,fromvid);
 close all;
 ds=100; % use this downsample factor for the fields in downsampfields
 downsampfields=fieldnames(tbt_data_vid1);
-%{'cue','cue_times','cuetimes_wrt_trial_start','distractor','from_first_video','from_second_video','from_third_video','opto','phys_inds','phys_timepoints'};
 if ds~=1
     tbt_data_vid1=downSampleData(tbt_data_vid1,ds,downsampfields);
+end
 
 if length(a)>1
     isInBackHalf=false;
@@ -162,6 +162,9 @@ if length(a)>1
         fromvid(find(fromvid==1,1,'first'):find(fromvid==1,1,'first')+(alltbt2.threwOutCuesAtFront-1))=0;
     end
     alltbt2=selectRows(alltbt,fromvid);
+    if ds~=1
+        tbt_data_vid2=downSampleData(tbt_data_vid2,ds,downsampfields);
+    end
     
     if isfield(totalalignment,'from_third_video')
         close all;
@@ -181,6 +184,9 @@ if length(a)>1
             fromvid(find(fromvid==1,1,'first'):find(fromvid==1,1,'first')+(alltbt3.threwOutCuesAtFront-1))=0;
         end
         alltbt3=selectRows(alltbt,fromvid);
+        if ds~=1
+            tbt_data_vid3=downSampleData(tbt_data_vid3,ds,downsampfields);
+        end
     end
 
     if isfield(totalalignment,'from_fourth_video')
@@ -200,24 +206,27 @@ if length(a)>1
             fromvid(find(fromvid==1,1,'first'):find(fromvid==1,1,'first')+(alltbt4.threwOutCuesAtFront-1))=0;
         end
         alltbt4=selectRows(alltbt,fromvid);
-    end
-end
-
-ds=100; % use this downsample factor for the fields in downsampfields
-downsampfields=fieldnames(tbt_data_vid1);
-%{'cue','cue_times','cuetimes_wrt_trial_start','distractor','from_first_video','from_second_video','from_third_video','opto','phys_inds','phys_timepoints'};
-if ds~=1
-    tbt_data_vid1=downSampleData(tbt_data_vid1,ds,downsampfields);
-    if length(a)>1
-        tbt_data_vid2=downSampleData(tbt_data_vid2,ds,downsampfields);
-        if isfield(totalalignment,'from_third_video')
-            tbt_data_vid3=downSampleData(tbt_data_vid3,ds,downsampfields);
-        end
-        if isfield(totalalignment,'from_fourth_video')
+        if ds~=1
             tbt_data_vid4=downSampleData(tbt_data_vid4,ds,downsampfields);
         end
     end
 end
+
+% ds=100; % use this downsample factor for the fields in downsampfields
+% downsampfields=fieldnames(tbt_data_vid1);
+% %{'cue','cue_times','cuetimes_wrt_trial_start','distractor','from_first_video','from_second_video','from_third_video','opto','phys_inds','phys_timepoints'};
+% if ds~=1
+%     tbt_data_vid1=downSampleData(tbt_data_vid1,ds,downsampfields);
+%     if length(a)>1
+%         tbt_data_vid2=downSampleData(tbt_data_vid2,ds,downsampfields);
+%         if isfield(totalalignment,'from_third_video')
+%             tbt_data_vid3=downSampleData(tbt_data_vid3,ds,downsampfields);
+%         end
+%         if isfield(totalalignment,'from_fourth_video')
+%             tbt_data_vid4=downSampleData(tbt_data_vid4,ds,downsampfields);
+%         end
+%     end
+% end
 
 % concatenate tbts from two videos, should match cues in behavior tbt
 if length(a)>1
@@ -810,7 +819,7 @@ global suppressFigs
 
 truncateThisMuchMovie=nan;
 if ~isempty(settings.minlagForInitialAlign)
-    if settings.minlagForInitialAlign<0 && settings.maxlagForInitialAlign<0 
+    if settings.minlagForInitialAlign<0 & settings.maxlagForInitialAlign<0 
         m=max(abs(settings.minlagForInitialAlign),abs(settings.maxlagForInitialAlign));
         settings.minlagForInitialAlign=[];
         settings.maxlagForInitialAlign=[];
@@ -880,6 +889,8 @@ temp2=movie_LED_ITIs./max(movie_LED_ITIs);
 
 if ~isempty(settings.minlagForInitialAlign)
     temp2=[nan(1,settings.minlagForInitialAlign) temp2];
+else
+    settings.minlagForInitialAlign=0;
 end
 
 if isempty(settings.maxlagForInitialAlign) 

@@ -90,7 +90,7 @@ pause;
 settings.scale_factor=floor(settings.photo_fs/settings.movie_fs);
 settings.photo_dec=settings.scale_factor-15;
 settings.movie_dec=1;
-settings.minlagForInitialAlign=[]; %-20000; % if these are negative, works differently and will truncate this many frames from front of first movie only
+settings.minlagForInitialAlign=139; %299; %139; %140; %139; %300; %-20000; % if these are negative, works differently and will truncate this many frames from front of first movie only
 % if one is negative, the other (positive) value will be the actual maxlagForInitialAlign
 settings.maxlagForInitialAlign=[]; %50; % [] is don't want to constrain alignment
 settings.try_delay1=0;
@@ -819,7 +819,7 @@ global suppressFigs
 
 truncateThisMuchMovie=nan;
 if ~isempty(settings.minlagForInitialAlign)
-    if settings.minlagForInitialAlign<0 && settings.maxlagForInitialAlign<0 
+    if settings.minlagForInitialAlign<0 & settings.maxlagForInitialAlign<0 
         m=max(abs(settings.minlagForInitialAlign),abs(settings.maxlagForInitialAlign));
         settings.minlagForInitialAlign=[];
         settings.maxlagForInitialAlign=[];
@@ -889,6 +889,8 @@ temp2=movie_LED_ITIs./max(movie_LED_ITIs);
 
 if ~isempty(settings.minlagForInitialAlign)
     temp2=[nan(1,settings.minlagForInitialAlign) temp2];
+else
+    settings.minlagForInitialAlign=0;
 end
 
 if isempty(settings.maxlagForInitialAlign) 
@@ -920,7 +922,7 @@ if D>0
     plot(Y,'Color','r');
     anchor=input('Choose index for alignment anchor. ');
     alignAtPeak_arduino=locs_arduino(anchor-D);
-    alignAtPeak_movie=locs(anchor);
+    alignAtPeak_movie=locs(anchor-settings.minlagForInitialAlign);
     photo_LED=[nan(1,(-alignAtPeak_arduino+alignAtPeak_movie)) photo_LED];
     photo_times=[nan(1,(-alignAtPeak_arduino+alignAtPeak_movie)) photo_times];
     tempphot=photo_times(2:end)-photo_times(1:end-1);
@@ -938,7 +940,7 @@ else
     anchor=input('Choose index for alignment anchor. ');
     % align at peak
     alignAtPeak_arduino=locs_arduino(anchor);
-    alignAtPeak_movie=locs(anchor+D);
+    alignAtPeak_movie=locs(anchor+D-settings.minlagForInitialAlign);
     % pad movie to align at this peak
     if suppressFigs~=true
         figure();
