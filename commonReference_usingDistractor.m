@@ -46,6 +46,7 @@ elseif D<0
 else
     linedUp_trialinds_Xa=data1_trialinds; linedUp_trialinds_Ya=data2_trialinds;
 end
+disp('First argument is black, second is red');
 figure(); plot(Xa,'Color','k'); hold on; plot(Ya,'Color','r'); title('Initial global alignment'); ylabel('Trial indices');
 checkAlignment(backup_data1*1.5,backup_data2); title('After global alignment');
 

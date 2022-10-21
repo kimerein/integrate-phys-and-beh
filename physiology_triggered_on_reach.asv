@@ -90,7 +90,9 @@ pause;
 settings.scale_factor=floor(settings.photo_fs/settings.movie_fs);
 settings.photo_dec=settings.scale_factor-15;
 settings.movie_dec=1;
-settings.minlagForInitialAlign=299; %139; %140; %139; %300; %-20000; % if these are negative, works differently and will truncate this many frames from front of first movie only
+% NEGATIVES ARE UNITS OF FRAMES
+% POSITIVES ARE UNITS OF INTERVALS BETWEEN DISTRACTORS
+settings.minlagForInitialAlign=-10000; %-20000; % if these are negative, works differently and will truncate this many frames from front of first movie only
 % if one is negative, the other (positive) value will be the actual maxlagForInitialAlign
 settings.maxlagForInitialAlign=[]; %50; % [] is don't want to constrain alignment
 settings.try_delay1=0;
@@ -104,8 +106,8 @@ data.cue_times=0:(1/data.Fs):(length(data.distractor)-1)*(1/data.Fs);
 % frames in each video, align each video separately
 [discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes,padPhotoTimesAtFront,truncateThisMuchMovie]=alignDistractors(totalalignment.movie_distractor(totalalignment.from_first_video==1),data.distractor,distract_thresh_movie,distract_thresh_photometry,totalalignment.timesfromarduino(totalalignment.from_first_video==1),data.distractor_times,settings,[],[]);
 if ~isnan(truncateThisMuchMovie)
-    settings.minlagForInitialAlign=[]; % new values
-    settings.maxlagForInitialAlign=[];
+%     settings.minlagForInitialAlign=422; % new values
+%     settings.maxlagForInitialAlign=424;
     % truncate all fields similarly
     truncateBeforeMovieFrame=totalalignment.movieframeinds(truncateThisMuchMovie);
     f=fieldnames(totalalignment);
@@ -148,7 +150,8 @@ end
 if length(a)>1
     isInBackHalf=false;
     fractionThru=0.15;
-    settings.maxlagForInitialAlign=[];
+    settings.maxlagForInitialAlign=266;
+    settings.minlagForInitialAlign=[];
 %     isInBackHalf=[];
 %     fractionThru=[];
     [discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes,padPhotoTimesAtFront]=alignDistractors(totalalignment.movie_distractor(totalalignment.from_second_video==1),data.distractor,distract_thresh_movie,distract_thresh_photometry,totalalignment.timesfromarduino(totalalignment.from_second_video==1),data.distractor_times,settings,isInBackHalf,fractionThru);
@@ -171,6 +174,7 @@ if length(a)>1
         isInBackHalf=true;
         fractionThru=0.5;
         settings.maxlagForInitialAlign=[];
+        settings.minlagForInitialAlign=[];
 %         isInBackHalf=[];
 %         fractionThru=[];
         [discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes,padPhotoTimesAtFront]=alignDistractors(totalalignment.movie_distractor(totalalignment.from_third_video==1),data.distractor,distract_thresh_movie,distract_thresh_photometry,totalalignment.timesfromarduino(totalalignment.from_third_video==1),data.distractor_times,settings,isInBackHalf,fractionThru);
@@ -452,6 +456,7 @@ figure();
 plot(shifted_data.distractor_times,shifted_data.cue./nanmax(shifted_data.cue),'Color','b'); 
 hold on;
 plot(movie_times,movie_cue,'Color','r');
+ylim([0 1.1]);
 title('Shifted cues - current video');
 xlabel('Time (sec)');
 anchor=input('Choose index for alignment anchor. ');
@@ -461,7 +466,8 @@ temp=temp(temp~=0);
 minSpacingBetweenCues_sig2=floor(minTimeBetweenCues/mode(temp));
 [~,anchor_index_signal1]=nanmin(abs(shifted_data.distractor_times-anchor));
 [~,anchor_index_signal2]=nanmin(abs(movie_times-anchor));
-zo=input('Do you want to zero out any of the blue cues? If yes, enter time start and time end as [start end] to zero out. ');
+% zo=input('Do you want to zero out any of the blue cues? If yes, enter time start and time end as [start end] to zero out. ');
+zo=[];
 if ~isempty(zo)
     shifted_data.cue=zeroOutPartOfOne(shifted_data.cue,shifted_data.distractor_times,zo); disp('zeroing out');
 end
@@ -805,6 +811,7 @@ figure();
 plot(sig1_x,signal1,'Color','k');
 hold on;
 plot(sig2_x,signal2,'Color','b');
+ylim([0 1.1]);
 for i=1:length(mapping_signal1)
     c=rand(1,3);
     scatter(sig1_x(mapping_signal1(i)),nanmax(signal1),10,c,'filled');
@@ -922,7 +929,7 @@ if D>0
     plot(Y,'Color','r');
     anchor=input('Choose index for alignment anchor. ');
     alignAtPeak_arduino=locs_arduino(anchor-D);
-    alignAtPeak_movie=locs(anchor);
+    alignAtPeak_movie=locs(anchor-settings.minlagForInitialAlign);
     photo_LED=[nan(1,(-alignAtPeak_arduino+alignAtPeak_movie)) photo_LED];
     photo_times=[nan(1,(-alignAtPeak_arduino+alignAtPeak_movie)) photo_times];
     tempphot=photo_times(2:end)-photo_times(1:end-1);
@@ -940,7 +947,7 @@ else
     anchor=input('Choose index for alignment anchor. ');
     % align at peak
     alignAtPeak_arduino=locs_arduino(anchor);
-    alignAtPeak_movie=locs(anchor+D);
+    alignAtPeak_movie=locs(anchor+D-settings.minlagForInitialAlign);
     % pad movie to align at this peak
     if suppressFigs~=true
         figure();
@@ -1018,7 +1025,7 @@ fir=find(~isnan(photo_times),1,'first');
 if suppressFigs~=true
     figure(); plot(photo_times,photo_LED,'Color','k'); hold on; plot(movie_times+(photo_times(fir)-movie_times(fir)),movie_LED,'Color','r'); title('Shifted alignment movie to photometry distractors');
 end
-figure(); plot(photo_LED,'Color','k'); hold on; plot(movie_LED,'Color','r');
+figure(); plot(photo_LED,'Color','k'); hold on; plot(movie_LED,'Color','r'); ylim([0 1.1]);
 
 %disp(['scale photometry by ' num2str(scaleBy)]);
 % scale movie_times subtly to match photometry
