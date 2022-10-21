@@ -20,7 +20,7 @@ settings.try_delay2=20;
 settings.tryinc=0.02;
 % settings.try_scale1=0.6;
 % settings.try_scale2=1;  
-alignInd=2;
+alignInd=50;
 % downSampData2=true;
 ds=1; %1000;
 
@@ -42,9 +42,9 @@ end
 switch whichToShift
     case 'data1'
         % resample data 1
-        disp('Red is first argument');
+        disp('Black is first argument');
     case 'data2'
-        disp('Red is fourth argument');
+        disp('Black is fourth argument');
         % switch data 1 and data 2
         temp_data1=data1;
         temp_whichTime1=whichTime1;

@@ -97,6 +97,9 @@ settings.minlagForInitialAlign=[]; %-20000; % if these are negative, works diffe
 settings.maxlagForInitialAlign=[]; %50; % [] is don't want to constrain alignment
 settings.try_delay1=0;
 settings.try_delay2=0;
+if ~isempty(settings.minlagForInitialAlign) || ~isempty(settings.maxlagForInitialAlign)
+    questdlg('Preset min and max lag. Continue?');
+end
 
 % will adjust time subtly (<1%) in the behavior data to match the photometry
 % will not alter the photometry data itself
@@ -150,8 +153,11 @@ end
 if length(a)>1
     isInBackHalf=false;
     fractionThru=0.15;
-    settings.maxlagForInitialAlign=304;
-    settings.minlagForInitialAlign=304;
+    settings.maxlagForInitialAlign=[];
+    settings.minlagForInitialAlign=[];
+    if ~isempty(settings.minlagForInitialAlign) || ~isempty(settings.maxlagForInitialAlign)
+        questdlg('Preset min and max lag. Continue?');
+    end
 %     isInBackHalf=[];
 %     fractionThru=[];
     [discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes,padPhotoTimesAtFront]=alignDistractors(totalalignment.movie_distractor(totalalignment.from_second_video==1),data.distractor,distract_thresh_movie,distract_thresh_photometry,totalalignment.timesfromarduino(totalalignment.from_second_video==1),data.distractor_times,settings,isInBackHalf,fractionThru);
