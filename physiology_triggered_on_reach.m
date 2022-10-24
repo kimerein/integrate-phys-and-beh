@@ -153,8 +153,8 @@ end
 if length(a)>1
     isInBackHalf=false;
     fractionThru=0.15;
-    settings.maxlagForInitialAlign=[];
-    settings.minlagForInitialAlign=[];
+    settings.maxlagForInitialAlign=299;
+    settings.minlagForInitialAlign=301;
     if ~isempty(settings.minlagForInitialAlign) || ~isempty(settings.maxlagForInitialAlign)
         questdlg('Preset min and max lag. Continue?');
     end
