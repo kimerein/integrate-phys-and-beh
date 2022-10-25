@@ -14,10 +14,14 @@ function [data1,data2]=useDistractorAlignment(data1,whichTime1,whichField1,data2
 % settings.try_scale1=0.8;
 % settings.try_scale2=1.2;  
 % for physiology
-settings.try_delay1=0;
+settings.try_delay1=-10;
 settings.delaysteps=1;
-settings.try_delay2=300;
+settings.try_delay2=10;
 settings.tryinc=0.02;
+% this is red before black
+settings.forSearchMinus=-100; % inds around optimal for search for each row
+% this is black before red
+settings.forSearchPlus=200; % inds around optimal for search for each row
 % settings.try_scale1=0.6;
 % settings.try_scale2=1;  
 alignInd=5;
@@ -150,8 +154,7 @@ disp(mi_row);
 
 % [data1_LED,data1_t,timestep]=shiftRow(dis1(alignInd,:),t1(alignInd,:),tryscales,mi_row,trydelays,mi_col,true,[],[]);
 guess_best_delay=trydelays(mi_col); 
-% trydelays=guess_best_delay-50:1:guess_best_delay+50;
-trydelays=guess_best_delay-300:1:guess_best_delay+300;
+trydelays=guess_best_delay+settings.forSearchMinus:1:guess_best_delay+settings.forSearchPlus;
 mi_col=floor(length(trydelays)/2);
 [data1_LED,data1_t,timestep]=shiftRow(dis1(alignInd,:),t1(alignInd,:),tryscales,mi_row,trydelays,mi_col,true,dis2(alignInd,:),t2(alignInd,:));
 figure(); plot(data1_t,data1_LED,'Color','k'); hold on; plot(t2(alignInd,:),dis2(alignInd,:),'Color','r'); title('Alignment of test row');
@@ -159,6 +162,9 @@ pause;
 
 % Scale/shift all rows of time structure similarly
 for i=1:size(t1,1)
+    if all(isnan(t1(i,:)))
+        pause;
+    end
     [~,data1_t]=shiftRow(dis1(i,:),t1(i,:),tryscales,mi_row,trydelays,mi_col,true,dis2(i,:),t2(i,:));
     t1(i,:)=data1_t;
 end

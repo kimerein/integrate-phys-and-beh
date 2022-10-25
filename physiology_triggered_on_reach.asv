@@ -92,7 +92,7 @@ settings.photo_dec=settings.scale_factor-15;
 settings.movie_dec=1;
 % NEGATIVES ARE UNITS OF FRAMES
 % POSITIVES ARE UNITS OF INTERVALS BETWEEN DISTRACTORS
-settings.minlagForInitialAlign=50; %-20000; % if these are negative, works differently and will truncate this many frames from front of first movie only
+settings.minlagForInitialAlign=[]; %-20000; % if these are negative, works differently and will truncate this many frames from front of first movie only
 % if one is negative, the other (positive) value will be the actual maxlagForInitialAlign
 settings.maxlagForInitialAlign=[]; %50; % [] is don't want to constrain alignment
 settings.try_delay1=0;
@@ -153,7 +153,7 @@ end
 if length(a)>1
     isInBackHalf=false;
     fractionThru=0.15;
-    settings.maxlagForInitialAlign=[];
+    settings.maxlagForInitialAlign=265;
     settings.minlagForInitialAlign=[];
     if ~isempty(settings.minlagForInitialAlign) || ~isempty(settings.maxlagForInitialAlign)
         questdlg('Preset min and max lag. Continue?');
@@ -177,10 +177,10 @@ if length(a)>1
     
     if isfield(totalalignment,'from_third_video')
         close all;
-        isInBackHalf=true;
+        isInBackHalf=false;
         fractionThru=0.5;
-        settings.maxlagForInitialAlign=[];
         settings.minlagForInitialAlign=[];
+        settings.maxlagForInitialAlign=[];
 %         isInBackHalf=[];
 %         fractionThru=[];
         [discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes,padPhotoTimesAtFront]=alignDistractors(totalalignment.movie_distractor(totalalignment.from_third_video==1),data.distractor,distract_thresh_movie,distract_thresh_photometry,totalalignment.timesfromarduino(totalalignment.from_third_video==1),data.distractor_times,settings,isInBackHalf,fractionThru);

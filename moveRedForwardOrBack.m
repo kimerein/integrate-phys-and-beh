@@ -22,7 +22,11 @@ switch moveOrDrop
     case 'drop'
         for i=1:size(f)
             temp=red.(f{i});
-            temp=temp(red_start_to_end(1):red_start_to_end(2),:);
+            if length(red_start_to_end)>2
+                temp=temp(red_start_to_end,:);
+            else
+                temp=temp(red_start_to_end(1):red_start_to_end(2),:);
+            end
             red.(f{i})=temp;
         end
 end
