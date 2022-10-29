@@ -84,9 +84,13 @@ settings.scale_factor=floor(settings.photo_fs/settings.movie_fs);
 settings.photo_dec=settings.scale_factor+2;
 settings.movie_dec=1;
 % discard this many frames from beginning
+settings.minlagForInitialAlign=[];
 settings.maxlagForInitialAlign=[]; % [] is don't want to constrain alignment
 settings.try_delay1=0;
 settings.try_delay2=0;
+if ~isempty(settings.minlagForInitialAlign) || ~isempty(settings.maxlagForInitialAlign)
+    questdlg('Preset min and max lag. Continue?');
+end
 
 % will adjust time subtly (<1%) in the behavior data to match the photometry
 % will not alter the photometry data itself
@@ -107,6 +111,11 @@ end
 alltbt1=selectRows(alltbt,fromvid);
 
 if length(a)>1
+    settings.minlagForInitialAlign=287;
+    settings.maxlagForInitialAlign=289;
+    if ~isempty(settings.minlagForInitialAlign) || ~isempty(settings.maxlagForInitialAlign)
+        questdlg('Preset min and max lag. Continue?');
+    end
     [discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes,padPhotoTimesAtFront]=alignDistractors(totalalignment.movie_distractor(totalalignment.from_second_video==1),data.distractor,distract_thresh_movie,distract_thresh_photometry,totalalignment.timesfromarduino(totalalignment.from_second_video==1),data.distractor_times,settings,[],[]);
     alltbt2=scaleMovTimes(alltbt,scaleMovieTimes,addToMovieTimes,alltbt.from_second_video(:,1));
     [tbt_data_vid2,shifted_data_vid2,alltbt2]=shiftPhotometryToBehavior(data,discardedPhotoFrames_time,frontShift_time,movie_LED,movie_times,totalalignment.(useCue),totalalignment,alltbt2,minTimeBetweenCues,totalalignment.from_second_video==1,alltbt.from_second_video(:,1),padPhotoTimesAtFront);
@@ -120,7 +129,13 @@ if length(a)>1
     alltbt2=selectRows(alltbt,fromvid);
     
     if isfield(totalalignment,'from_third_video')
-        [discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes,padPhotoTimesAtFront]=alignDistractors(totalalignment.movie_distractor(totalalignment.from_third_video==1),data.distractor,distract_thresh_movie,distract_thresh_photometry,totalalignment.timesfromarduino(totalalignment.from_third_video==1),data.distractor_times,settings,true,0.8);
+        settings.minlagForInitialAlign=[];
+        settings.maxlagForInitialAlign=[];
+        if ~isempty(settings.maxlagForInitialAlign) || ~isempty(settings.minlagForInitialAlign)
+            [discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes,padPhotoTimesAtFront]=alignDistractors(totalalignment.movie_distractor(totalalignment.from_third_video==1),data.distractor,distract_thresh_movie,distract_thresh_photometry,totalalignment.timesfromarduino(totalalignment.from_third_video==1),data.distractor_times,settings,false,0.8);
+        else
+            [discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes,padPhotoTimesAtFront]=alignDistractors(totalalignment.movie_distractor(totalalignment.from_third_video==1),data.distractor,distract_thresh_movie,distract_thresh_photometry,totalalignment.timesfromarduino(totalalignment.from_third_video==1),data.distractor_times,settings,true,0.8);
+        end
         alltbt3=scaleMovTimes(alltbt,scaleMovieTimes,addToMovieTimes,alltbt.from_third_video(:,1));
         [tbt_data_vid3,shifted_data_vid3,alltbt3]=shiftPhotometryToBehavior(data,discardedPhotoFrames_time,frontShift_time,movie_LED,movie_times,totalalignment.(useCue),totalalignment,alltbt3,minTimeBetweenCues,totalalignment.from_third_video==1,alltbt.from_third_video(:,1),padPhotoTimesAtFront);
         fromvid=alltbt.from_third_video(:,1);
@@ -699,6 +714,12 @@ end
 temp1=arduino_LED_ITIs./max(arduino_LED_ITIs);
 temp2=movie_LED_ITIs./max(movie_LED_ITIs);
 
+if ~isempty(settings.minlagForInitialAlign)
+    temp2=[nan(1,settings.minlagForInitialAlign) temp2];
+else
+    settings.minlagForInitialAlign=0;
+end
+
 if isempty(settings.maxlagForInitialAlign) 
     [X,Y,D]=alignsignals(temp1,temp2); 
 %     [X,Y,D]=alignsignals(photo_LED,movie_LED); 
@@ -728,7 +749,7 @@ if D>0
     plot(Y,'Color','r');
     anchor=input('Choose index for alignment anchor. ');
     alignAtPeak_arduino=locs_arduino(anchor-D);
-    alignAtPeak_movie=locs(anchor);
+    alignAtPeak_movie=locs(anchor-settings.minlagForInitialAlign);
     photo_LED=[nan(1,(-alignAtPeak_arduino+alignAtPeak_movie)) photo_LED];
     photo_times=[nan(1,(-alignAtPeak_arduino+alignAtPeak_movie)) photo_times];
     tempphot=photo_times(2:end)-photo_times(1:end-1);
@@ -746,7 +767,7 @@ else
     anchor=input('Choose index for alignment anchor. ');
     % align at peak
     alignAtPeak_arduino=locs_arduino(anchor);
-    alignAtPeak_movie=locs(anchor+D);
+    alignAtPeak_movie=locs(anchor+D-settings.minlagForInitialAlign);
     % pad movie to align at this peak
     figure();
     plot([nan(1,(alignAtPeak_arduino-alignAtPeak_movie)) movie_LED],'Color','r');

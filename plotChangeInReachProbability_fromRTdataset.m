@@ -900,8 +900,13 @@ if (useRateMethod==1 || useRateMethod==3) && settings.suppressPlots==false
         isout=zeros(size(actual_x));
         lims=[min([actual_x(~isout) ydiff(~isout)],[],'omitnan') max([actual_x(~isout) ydiff(~isout)],[],'omitnan')];
     end
-    xlim([0 lims(2)]);
-    ylim([lims(1) lims(2)]);
+    if ~isempty(lims)
+        if lims(2)==0
+            lims(2)=0.01;
+        end
+        xlim([0 lims(2)]);
+        ylim([lims(1) lims(2)]);
+    end
     tempx=actual_x(~isout);
     tempy=ydiff(~isout);
     firstPart=[mean(tempx(1:floor(nIndsForfirstRates)),'omitnan') mean(tempy(1:floor(nIndsForfirstRates)),'omitnan')];

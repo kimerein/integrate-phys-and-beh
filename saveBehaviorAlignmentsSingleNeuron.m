@@ -4,10 +4,15 @@ binsize=10; % in ms
 bsmooth=false;
 
 % SU QC
+varAdd.onVPN=true;
 varAdd.trodeChs=trodeChs;
 varAdd.furtherProcessData=@furtherProcessWHISPER;
 SU_QC(spikes, assign, unit_on_channel, rawDataBin, rawDataDir, [], varAdd);
 saveas(gcf,[saveDir '\unit' num2str(assign) 'onCh' num2str(unit_on_channel) '_' saveName '_QC.fig']);
+if varAdd.onVPN==true
+    fid=fopen([saveDir '\VPN_too_slow_to_populate_raw_data.txt'],'wt');
+    fclose(fid);
+end
 
 % Add unit
 [~,spikes]=organizeSpikesToMatch_physiology_tbt(spikes,phys_tbt);

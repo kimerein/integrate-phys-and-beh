@@ -1,7 +1,7 @@
 % script for preparing directory structure before combining data across videos and days
 
 % assign mouse and session numbers
-expt_dir='Z:\Kim\Behavior Final Data Sets\Controls for learning curves';
+expt_dir='Z:\MICROSCOPE\Kim\20220824 prelim WHISPER results\Mouse Behavior\mouse beh';
 optoOnHere=1; % 1 if there was opto, else 0
 onlySaveOptoIfDoesNotExist=true;
 startMouseNumberingAt=1; % if want to start mouse numbers at some offset

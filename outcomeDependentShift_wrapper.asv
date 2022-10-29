@@ -25,7 +25,7 @@ trialTypes.reachedAfterCue_1forward=[trialTypes.reachedAfterCue(2:end); 0];
 flankingTrials='(trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1)';
 
 % which to plot
-whichToPlot='success'; % can be 'success','delayed success','drop','cued touch','cued touch and switch color','failed cued reach','false alarm','no reach','basic','wildcard','backward success'
+whichToPlot='failed cued reach'; % can be 'success','delayed success','drop','cued touch','cued touch and switch color','failed cued reach','false alarm','no reach','basic','wildcard','backward success'
 [plotset,trialTypes]=whichToPlotNow(whichToPlot,trialTypes,alltbt);
 
 shuffleTrialOrder=false; % if want to randomly permute trial order to test for ordering effects
@@ -54,6 +54,7 @@ reachratesettings.addSessionLines=false; % for no averaging across sessions plot
 reachratesettings.binThisManyTrials=25; % how many trials to bin within each session
 reachratesettings.nBinsForZones=40; % will be nBinsForZones squared total bins, this is # bins for each x and y axis
 reachratesettings.useRateMethod=3; % 1, 2 or 3 (see explanation below)
+reachratesettings.binTrialsForAvAcrossSess=false; 
 % see script_for_reaching_rate_analysis.m for explanation of rate methods
 dprimes_noLED_lasttrial=[];
 dprimes_LED_lasttrial=[];
@@ -467,11 +468,14 @@ sessbysess_trialnplus_cued=nanmean(temp,2);
 % SESSION BY SESSION
 temp1=sessbysess_trialnplus_uncued-sessbysess_trialn_uncued;
 temp2=sessbysess_trialnplus_cued-sessbysess_trialn_cued;
-
-for i=1:length(u)
-    quiver(0,0,sessbysess_trialnplus_uncued(i)-sessbysess_trialn_uncued(i),sessbysess_trialnplus_cued(i)-sessbysess_trialn_cued(i),'Color',c);
+a=[temp1(~isnan(temp1) & ~isnan(temp2)) temp2(~isnan(temp1) & ~isnan(temp2))];
+for i=1:size(a,1)
+    quiver(0,0,a(i,1),a(i,2),'Color',c);
     hold on;
 end
+me=nanmean(a,1); s=nanstd(a,[],1)./sqrt(size(a,1)); 
+line([me(1) me(1)],[me(2)-s(2) me(2)+s(2)]); line([me(1)-s(1) me(1)+s(1)],[me(2) me(2)]);
+quiver(0,0,nanmean(a(:,1)),nanmean(a(:,2)),'Color',c,'LineWidth',4);
 
 % mousebymouse_trialn_uncued=nan(1,length(unique(mouseids)));
 % mousebymouse_trialn_cued=nan(1,length(unique(mouseids)));
@@ -529,9 +533,9 @@ function [plotset,trialTypes]=whichToPlotNow(whichToPlot,trialTypes,alltbt)
 plotset.cuedtouchcolor=[171 104 87]./255;
 switch whichToPlot
     case 'success'
-%         timeWindow=[];
+        timeWindow=[0 0.5]; % WHISPER mice
         % for opto grc, used time window 0.25 to 1.25
-        timeWindow=[0.1 0.5]; %[0.1 1]; % change this to select only trials with a reach in this window
+%         timeWindow=[0.1 0.5]; %[0.1 1]; % change this to select only trials with a reach in this window
         plotset.wildcard=false;
         plotset.success=true;
         plotset.delayed=false;
@@ -600,7 +604,7 @@ switch whichToPlot
         plotset.cuedtouchcolor='g';
         plotset.backward_success=false;
     case 'failed cued reach'
-        timeWindow=[0 1.5];
+        timeWindow=[1 7.5]; %1.5];
         plotset.wildcard=false;
         plotset.success=false;
         plotset.delayed=false;

@@ -117,16 +117,22 @@ plotFiringRate(spikes, unit_assign, 1000); % last argument is binsize in ms for 
 s=getUnitSpiketimes(spikes, unit_assign);
 varAdditionalInputs.firstNSpikes=5;
 varAdditionalInputs.firstNmins=ceil(s(varAdditionalInputs.firstNSpikes)/60); % for WHISPER only
-[HFValues,LFPValues,ADFreq,times,allChsHF]=rawDataFromChannel(raw_data_filename, raw_data_directory, unit_on_channel, varAdditionalInputs);
-
+if varAdditionalInputs.onVPN==false
+    [HFValues,LFPValues,ADFreq,times,allChsHF]=rawDataFromChannel(raw_data_filename, raw_data_directory, unit_on_channel, varAdditionalInputs);
+end
+    
 % LFP
 ind_into_ha=nextPlot(ha, ind_into_ha);
-plotLFP(LFPValues, times, varAdditionalInputs, s);
+if varAdditionalInputs.onVPN==false
+    plotLFP(LFPValues, times, varAdditionalInputs, s);
+end
 
 % High pass-filtered
 ind_into_ha=nextPlot(ha, ind_into_ha);
-% plotHF(HFValues, times, varAdditionalInputs, s);
-plotAllChsHF(allChsHF, times, varAdditionalInputs, s);
+if varAdditionalInputs.onVPN==false
+    % plotHF(HFValues, times, varAdditionalInputs, s);
+    plotAllChsHF(allChsHF, times, varAdditionalInputs, s);
+end
 
 % PCA space
 switch PC_mode

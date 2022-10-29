@@ -46,6 +46,7 @@ elseif D<0
 else
     linedUp_trialinds_Xa=data1_trialinds; linedUp_trialinds_Ya=data2_trialinds;
 end
+disp('First argument is black, second is red');
 figure(); plot(Xa,'Color','k'); hold on; plot(Ya,'Color','r'); title('Initial global alignment'); ylabel('Trial indices');
 checkAlignment(backup_data1*1.5,backup_data2); title('After global alignment');
 
@@ -151,7 +152,9 @@ end
 function checkAlignment(dis1,dis2)
 
 figure();
-offset=0;
+offset=1;
+dis1=dis1./max(dis1(1:end),[],2,'omitnan');
+dis2=dis2./max(dis2(1:end),[],2,'omitnan');
 for i=1:size(dis1,1)
     if i>size(dis1,1)
         disp('skipping end of dis1');
@@ -166,7 +169,8 @@ for i=1:size(dis1,1)
     plot(offset+dis2(i,:),'Color','r');
     if isnan(nanmax([dis1(i,:) dis2(i,:)]))
     else
-        offset=offset+nanmax([dis1(i,:) dis2(i,:)])+0.1;
+%         offset=offset+nanmax([dis1(i,:) dis2(i,:)])+0.1;
+        offset=offset+1;
     end
 end
 

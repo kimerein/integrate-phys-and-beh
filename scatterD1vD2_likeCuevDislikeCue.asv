@@ -77,10 +77,83 @@ eigVec_tbyt=eigVec_tbyt(:,si);
 i=1; figure(); plot(eigVec_tbyt(:,i)); hold on; plot(aligncompD1.*nanmax(eigVec_tbyt(:,i)),'Color','b'); plot(aligncompD2.*nanmax(eigVec_tbyt(:,i)),'Color','b');
 i=[2 3 4]; figure(); temp=nanmean(eigVec_tbyt(:,i),2); plot(temp); hold on; plot(aligncompD1.*nanmax(temp),'Color','b'); plot(aligncompD2.*nanmax(temp),'Color','b');
 
-grp1=pvals_D1<pvalcutoff(2) & pvals_D1>pvalcutoff(1) & cueResponseIncrease_D1==true;
-grp2=(pvals_D1<pvalcutoff(2) & pvals_D1>pvalcutoff(1) & cueResponseIncrease_D1==false);
-grp3=pvals_D2<pvalcutoff(2) & pvals_D2>pvalcutoff(1) & cueResponseIncrease_D2==true;
-grp4=(pvals_D2<pvalcutoff(2) & pvals_D2>pvalcutoff(1) & cueResponseIncrease_D2==false);
+% grp1=pvals_D1<pvalcutoff(2) & pvals_D1>pvalcutoff(1) & cueResponseIncrease_D1==true;
+grp1=ones(size(cueResponseIncrease_D1));
+% grp2=(pvals_D1<pvalcutoff(2) & pvals_D1>pvalcutoff(1) & cueResponseIncrease_D1==false);
+grp2=ones(size(cueResponseIncrease_D1));
+% grp3=pvals_D2<pvalcutoff(2) & pvals_D2>pvalcutoff(1) & cueResponseIncrease_D2==true;
+grp3=ones(size(cueResponseIncrease_D2));
+% grp4=(pvals_D2<pvalcutoff(2) & pvals_D2>pvalcutoff(1) & cueResponseIncrease_D2==false);
+grp4=ones(size(cueResponseIncrease_D2));
+
+plotPercentiles=true;
+
+if plotPercentiles==true
+    figure(); c=[0.8500 0.3250 0.0980];
+    plot(nanmean(D1tagged_cueResponse.unitbyunit_x(grp1,:),1),nanmean(D1tagged_cueResponse.unitbyunit_y(grp1,:),1),'Color',c);
+    hold on;
+    plot(nanmean(D1tagged_cueResponse.unitbyunit_x(grp1,:),1),prctile(D1tagged_cueResponse.unitbyunit_y(grp1,:),5,1),'Color',c);
+    plot(nanmean(D1tagged_cueResponse.unitbyunit_x(grp1,:),1),prctile(D1tagged_cueResponse.unitbyunit_y(grp1,:),95,1),'Color',c);
+    plot(nanmean(D1tagged_cueResponse.aligncomp_x(grp1,:),1),nanmean(D1tagged_cueResponse.aligncomp_y(grp1,:),1),'Color','b');
+    %title('D1 likes cue CUE RESPONSE');
+    hold on; %figure();
+    c=[0.4940 0.1840 0.5560];
+    plot(nanmean(D1tagged_cueResponse.unitbyunit_x(grp2,:),1),nanmean(D1tagged_cueResponse.unitbyunit_y(grp2,:),1),'Color',c);
+    hold on;
+    plot(nanmean(D1tagged_cueResponse.unitbyunit_x(grp2,:),1),nanmean(D1tagged_cueResponse.unitbyunit_y(grp2,:),1)+nanstd(D1tagged_cueResponse.unitbyunit_y(grp2,:),[],1)./sqrt(length(grp2)),'Color',c);
+    plot(nanmean(D1tagged_cueResponse.unitbyunit_x(grp2,:),1),nanmean(D1tagged_cueResponse.unitbyunit_y(grp2,:),1)-nanstd(D1tagged_cueResponse.unitbyunit_y(grp2,:),[],1)./sqrt(length(grp2)),'Color',c);
+    plot(nanmean(D1tagged_cueResponse.aligncomp_x(grp2,:),1),nanmean(D1tagged_cueResponse.aligncomp_y(grp2,:),1),'Color','b');
+    legend({'D1 likes cue CUE RESPONSE','align','D1 does not like cue CUE RESPONSE','align'});
+
+    figure(); c=[0.3010 0.7450 0.9330];
+    plot(nanmean(D2tagged_cueResponse.unitbyunit_x(grp3,:),1),nanmean(D2tagged_cueResponse.unitbyunit_y(grp3,:),1),'Color',c);
+    hold on;
+    plot(nanmean(D2tagged_cueResponse.unitbyunit_x(grp3,:),1),nanmean(D2tagged_cueResponse.unitbyunit_y(grp3,:),1)-nanstd(D2tagged_cueResponse.unitbyunit_y(grp3,:),[],1)./sqrt(length(grp3)),'Color',c);
+    plot(nanmean(D2tagged_cueResponse.unitbyunit_x(grp3,:),1),nanmean(D2tagged_cueResponse.unitbyunit_y(grp3,:),1)+nanstd(D2tagged_cueResponse.unitbyunit_y(grp3,:),[],1)./sqrt(length(grp3)),'Color',c);
+    plot(nanmean(D2tagged_cueResponse.aligncomp_x(grp3,:),1),nanmean(D2tagged_cueResponse.aligncomp_y(grp3,:),1),'Color','b');
+    %title('D2 likes cue CUE RESPONSE');
+    hold on; %figure();
+    c=[0.4660 0.6740 0.1880];
+    plot(nanmean(D2tagged_cueResponse.unitbyunit_x(grp4,:),1),nanmean(D2tagged_cueResponse.unitbyunit_y(grp4,:),1),'Color',c);
+    hold on;
+    plot(nanmean(D2tagged_cueResponse.unitbyunit_x(grp4,:),1),nanmean(D2tagged_cueResponse.unitbyunit_y(grp4,:),1)-nanstd(D2tagged_cueResponse.unitbyunit_y(grp4,:),[],1)./sqrt(length(grp4)),'Color',c);
+    plot(nanmean(D2tagged_cueResponse.unitbyunit_x(grp4,:),1),nanmean(D2tagged_cueResponse.unitbyunit_y(grp4,:),1)+nanstd(D2tagged_cueResponse.unitbyunit_y(grp4,:),[],1)./sqrt(length(grp4)),'Color',c);
+    plot(nanmean(D2tagged_cueResponse.aligncomp_x(grp4,:),1),nanmean(D2tagged_cueResponse.aligncomp_y(grp4,:),1),'Color','b');
+    legend({'D2 likes cue CUE RESPONSE','align','D2 does not like cue CUE RESPONSE','align'});
+
+    figure(); c=[0.8500 0.3250 0.0980];
+    plot(nanmean(activityD1tagged.unitbyunit_x(grp1,:),1),nanmean(activityD1tagged.unitbyunit_y(grp1,:),1),'Color',c);
+    hold on;
+    plot(nanmean(activityD1tagged.unitbyunit_x(grp1,:),1),nanmean(activityD1tagged.unitbyunit_y(grp1,:),1)-nanstd(activityD1tagged.unitbyunit_y(grp1,:),[],1)./sqrt(length(grp1)),'Color',c);
+    plot(nanmean(activityD1tagged.unitbyunit_x(grp1,:),1),nanmean(activityD1tagged.unitbyunit_y(grp1,:),1)+nanstd(activityD1tagged.unitbyunit_y(grp1,:),[],1)./sqrt(length(grp1)),'Color',c);
+    plot(nanmean(activityD1tagged.aligncomp_x(grp1,:),1),nanmean(activityD1tagged.aligncomp_y(grp1,:),1),'Color','b');
+    %title('D1 likes cue');
+    hold on; %figure();
+    c=[0.4940 0.1840 0.5560];
+    plot(nanmean(activityD1tagged.unitbyunit_x(grp2,:),1),nanmean(activityD1tagged.unitbyunit_y(grp2,:),1),'Color',c);
+    hold on;
+    plot(nanmean(activityD1tagged.unitbyunit_x(grp2,:),1),nanmean(activityD1tagged.unitbyunit_y(grp2,:),1)-nanstd(activityD1tagged.unitbyunit_y(grp2,:),[],1)./sqrt(length(grp2)),'Color',c);
+    plot(nanmean(activityD1tagged.unitbyunit_x(grp2,:),1),nanmean(activityD1tagged.unitbyunit_y(grp2,:),1)+nanstd(activityD1tagged.unitbyunit_y(grp2,:),[],1)./sqrt(length(grp2)),'Color',c);
+    plot(nanmean(activityD1tagged.aligncomp_x(grp2,:),1),nanmean(activityD1tagged.aligncomp_y(grp2,:),1),'Color','b');
+    %legend({'D1 likes cue','align','D1 does not like cue','align'});
+
+    c=[0.3010 0.7450 0.9330];
+    hold on; %figure();
+    plot(nanmean(activityD2tagged.unitbyunit_x(grp3,:),1),nanmean(activityD2tagged.unitbyunit_y(grp3,:),1),'Color',c);
+    hold on;
+    plot(nanmean(activityD2tagged.unitbyunit_x(grp3,:),1),nanmean(activityD2tagged.unitbyunit_y(grp3,:),1)-nanstd(activityD2tagged.unitbyunit_y(grp3,:),[],1)./sqrt(length(grp3)),'Color',c);
+    plot(nanmean(activityD2tagged.unitbyunit_x(grp3,:),1),nanmean(activityD2tagged.unitbyunit_y(grp3,:),1)+nanstd(activityD2tagged.unitbyunit_y(grp3,:),[],1)./sqrt(length(grp3)),'Color',c);
+    plot(nanmean(activityD2tagged.aligncomp_x(grp3,:),1),nanmean(activityD2tagged.aligncomp_y(grp3,:),1),'Color','b');
+    %title('D2 likes cue');
+    c=[0.4660 0.6740 0.1880];
+    hold on; %figure();
+    plot(nanmean(activityD2tagged.unitbyunit_x(grp4,:),1),nanmean(activityD2tagged.unitbyunit_y(grp4,:),1),'Color',c);
+    hold on;
+    plot(nanmean(activityD2tagged.unitbyunit_x(grp4,:),1),nanmean(activityD2tagged.unitbyunit_y(grp4,:),1)-nanstd(activityD2tagged.unitbyunit_y(grp4,:),[],1)./sqrt(length(grp4)),'Color',c);
+    plot(nanmean(activityD2tagged.unitbyunit_x(grp4,:),1),nanmean(activityD2tagged.unitbyunit_y(grp4,:),1)+nanstd(activityD2tagged.unitbyunit_y(grp4,:),[],1)./sqrt(length(grp4)),'Color',c);
+    plot(nanmean(activityD2tagged.aligncomp_x(grp4,:),1),nanmean(activityD2tagged.aligncomp_y(grp4,:),1),'Color','b');
+    legend({'D1 likes cue','align','D1 does not like cue','align','D2 likes cue','align','D2 does not like cue'});
+end
 
 figure(); c=[0.8500 0.3250 0.0980];
 plot(nanmean(D1tagged_cueResponse.unitbyunit_x(grp1,:),1),nanmean(D1tagged_cueResponse.unitbyunit_y(grp1,:),1),'Color',c);
@@ -134,12 +207,16 @@ c=[0.3010 0.7450 0.9330];
 hold on; %figure();
 plot(nanmean(activityD2tagged.unitbyunit_x(grp3,:),1),nanmean(activityD2tagged.unitbyunit_y(grp3,:),1),'Color',c);
 hold on; 
+plot(nanmean(activityD2tagged.unitbyunit_x(grp3,:),1),nanmean(activityD2tagged.unitbyunit_y(grp3,:),1)-nanstd(activityD2tagged.unitbyunit_y(grp3,:),[],1)./sqrt(length(grp3)),'Color',c);
+plot(nanmean(activityD2tagged.unitbyunit_x(grp3,:),1),nanmean(activityD2tagged.unitbyunit_y(grp3,:),1)+nanstd(activityD2tagged.unitbyunit_y(grp3,:),[],1)./sqrt(length(grp3)),'Color',c);
 plot(nanmean(activityD2tagged.aligncomp_x(grp3,:),1),nanmean(activityD2tagged.aligncomp_y(grp3,:),1),'Color','b');
 %title('D2 likes cue');
 c=[0.4660 0.6740 0.1880];
 hold on; %figure();
 plot(nanmean(activityD2tagged.unitbyunit_x(grp4,:),1),nanmean(activityD2tagged.unitbyunit_y(grp4,:),1),'Color',c);
 hold on; 
+plot(nanmean(activityD2tagged.unitbyunit_x(grp4,:),1),nanmean(activityD2tagged.unitbyunit_y(grp4,:),1)-nanstd(activityD2tagged.unitbyunit_y(grp4,:),[],1)./sqrt(length(grp4)),'Color',c);
+plot(nanmean(activityD2tagged.unitbyunit_x(grp4,:),1),nanmean(activityD2tagged.unitbyunit_y(grp4,:),1)+nanstd(activityD2tagged.unitbyunit_y(grp4,:),[],1)./sqrt(length(grp4)),'Color',c);
 plot(nanmean(activityD2tagged.aligncomp_x(grp4,:),1),nanmean(activityD2tagged.aligncomp_y(grp4,:),1),'Color','b');
 legend({'D1 likes cue','align','D1 does not like cue','align','D2 likes cue','align','D2 does not like cue'});
 
