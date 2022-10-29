@@ -22,7 +22,11 @@ if ~settings.skipCueAlignment
     % get cue response of each tagged type
     dd_more=cell(1,length(dd));
     for i=1:length(dd)
-        dd_more{i}=[dd{i} '\cue'];
+        if ismac()
+            dd_more{i}=[dd{i} '/cue'];
+        else
+            dd_more{i}=[dd{i} '\cue'];
+        end
     end
     settings.studyOptoTag=true;
     [D1tagged_cueResponse,D1orD2taggingExpt,putAlignPeakAt,firstVal_D1tagged,optoFR_D1tagged,indsForAnalysisPerSess]=getAndSaveResponse(dd_more,'D1tagged',settings,[],[]);
@@ -57,7 +61,11 @@ end
 
 % get response of each tagged type
 for i=1:length(dd)
-    dd_more{i}=[dd{i} '\' responseType];
+    if ismac()
+        dd_more{i}=[dd{i} '/' responseType];
+    else
+        dd_more{i}=[dd{i} '\' responseType];
+    end
 end
 settings.studyOptoTag=false;
 activityD1tagged=getAndSaveResponse(dd_more,'D1tagged',settings,putAlignPeakAt,[]);

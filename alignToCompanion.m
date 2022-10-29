@@ -38,7 +38,12 @@ for j=1:length(dd)
     end
     ls=dir(datadir);
     for i=3:length(ls)
-        a=load([ls(i).folder '\' ls(i).name]);
+        if ismac()
+            a=load([ls(i).folder '/' ls(i).name]);
+        else
+            a=load([ls(i).folder '\' ls(i).name]);
+        end
+        disp(i);
         
         if ~isempty(regexp(ls(i).name, 'D1tagged'))
             D1orD2taggingExpt(j)=1;
