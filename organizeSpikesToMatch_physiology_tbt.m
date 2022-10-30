@@ -32,7 +32,7 @@ spikes.sweeps.trials=1:size(physiology_tbt.phys_timepoints,1);
 % filter out spikes that occur outside of physiology_tbt
 f=fieldnames(spikes);
 for i=1:length(f)
-    if strcmp(f{i},'params') || strcmp(f{i},'info') || strcmp(f{i},'labels') || strcmp(f{i},'sweeps')
+    if strcmp(f{i},'params') || strcmp(f{i},'info') || strcmp(f{i},'labels') || strcmp(f{i},'sweeps') || strcmp(f{i},'skipQC')
         inTrial_spikes.(f{i})=spikes.(f{i});
     elseif strcmp(f{i},'waveforms')
         temp=spikes.(f{i});

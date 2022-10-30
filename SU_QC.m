@@ -1,4 +1,4 @@
-function SU_QC(spikes, unit_assign, unit_on_channel, raw_data_filename, raw_data_directory, behavior_timepoints, varAdditionalInputs)
+function unit_data=SU_QC(spikes, unit_assign, unit_on_channel, raw_data_filename, raw_data_directory, behavior_timepoints, varAdditionalInputs)
 
 % Creates summary figure for quality control (QC) of single units (SU)
 
@@ -110,8 +110,8 @@ plot_autocorr(spikes, unit_assign);
 
 % Waveform stability and firing rate
 ind_into_ha=nextPlot(ha, ind_into_ha);
-plotWaveformAmplitudeStability(spikes, unit_assign); hold on;
-plotFiringRate(spikes, unit_assign, 1000); % last argument is binsize in ms for histogram of firing rate
+[unit_data.wv_time,unit_data.wv_y]=plotWaveformAmplitudeStability(spikes, unit_assign); hold on;
+[unit_data.fr_time,unit_data.fr_y]=plotFiringRate(spikes, unit_assign, 1000); % last argument is binsize in ms for histogram of firing rate
 
 % Get some raw data
 s=getUnitSpiketimes(spikes, unit_assign);
@@ -169,7 +169,7 @@ end
 
 end
 
-function plotFiringRate(spikes, unit_assign, binsize)
+function [fr_time,fr_y]=plotFiringRate(spikes, unit_assign, binsize)
 
 % binsize in ms
 spiketimes=spikes.spiketimes(ismember(spikes.assigns, unit_assign));
@@ -179,6 +179,8 @@ yyaxis right
 plot(x,n);
 xlabel('Time (s)');
 ylabel('Firing rate (1/s)');
+fr_time=x;
+fr_y=n;
 
 end
 
@@ -199,7 +201,7 @@ end
 
 end
 
-function plotWaveformAmplitudeStability(spikes, unit_assign)
+function [wv_time,wv_y]=plotWaveformAmplitudeStability(spikes, unit_assign)
 
 which=ismember(spikes.assigns, unit_assign);
 onChannel=mode(spikes.info.detect.event_channel(ismember(spikes.assigns, unit_assign)));
@@ -208,6 +210,8 @@ x=spikes.spiketimes(ismember(spikes.assigns, unit_assign));
 scatter(x,y,[],'b','filled','MarkerFaceAlpha',0.05);
 xlabel('Time (s)');
 ylabel('Waveform amp','Color','b');
+wv_time=x;
+wv_y=y;
 
 end
 

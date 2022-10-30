@@ -1,17 +1,28 @@
-function saveBehaviorAlignmentsSingleNeuron(phys_tbt,spikes,assign,behavior_tbt,trodeChs,unit_on_channel,saveDir,saveName,rawDataDir,rawDataBin)
+function unit_data=saveBehaviorAlignmentsSingleNeuron(phys_tbt,spikes,assign,behavior_tbt,trodeChs,unit_on_channel,saveDir,saveName,rawDataDir,rawDataBin)
 
 binsize=10; % in ms
 bsmooth=false;
+unit_data=[];
 
 % SU QC
-varAdd.onVPN=true;
-varAdd.trodeChs=trodeChs;
-varAdd.furtherProcessData=@furtherProcessWHISPER;
-SU_QC(spikes, assign, unit_on_channel, rawDataBin, rawDataDir, [], varAdd);
-saveas(gcf,[saveDir '\unit' num2str(assign) 'onCh' num2str(unit_on_channel) '_' saveName '_QC.fig']);
-if varAdd.onVPN==true
-    fid=fopen([saveDir '\VPN_too_slow_to_populate_raw_data.txt'],'wt');
-    fclose(fid);
+if isfield(spikes, 'skipQC')
+else
+    spikes.skipQC=false; 
+end
+if spikes.skipQC==false
+    if isempty(rawDataBin)
+        varAdd.onVPN=true;
+    else
+        varAdd.onVPN=false;
+    end
+    varAdd.trodeChs=trodeChs;
+    varAdd.furtherProcessData=@furtherProcessWHISPER;
+    unit_data=SU_QC(spikes, assign, unit_on_channel, rawDataBin, rawDataDir, [], varAdd);
+    saveas(gcf,[saveDir sep 'unit' num2str(assign) 'onCh' num2str(unit_on_channel) '_' saveName '_QC.fig']);
+    % if varAdd.onVPN==true
+    %     fid=fopen([saveDir '\VPN_too_slow_to_populate_raw_data.txt'],'wt');
+    %     fclose(fid);
+    % end
 end
 
 % Add unit
@@ -65,9 +76,9 @@ end
 
 function saveStuff(saveDir,subDir,assign,saveName,alignmentName,dataout,alignComp)
 
-if ~exist([saveDir '\' subDir],'dir')
-    mkdir([saveDir '\' subDir]);
+if ~exist([saveDir sep subDir],'dir')
+    mkdir([saveDir sep subDir]);
 end
-save([saveDir '\' subDir '\unit' assign '_' saveName '_' alignmentName '.mat'],'dataout','alignComp');
+save([saveDir sep subDir sep 'unit' assign '_' saveName '_' alignmentName '.mat'],'dataout','alignComp');
 
 end
