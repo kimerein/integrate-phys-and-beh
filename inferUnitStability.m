@@ -1,6 +1,6 @@
 function dontUseTrials=inferUnitStability(f,physiology_tbt,dsinds,percentThresh,timeStretchThresh,plotInference)
 
-if isstring(f)
+if ischar(f)
     % this is a figure
     a=openfig(f);
     %'/Users/kim/Desktop/Example data/20210621 Mar_6/SU aligned to behavior/unit201onCh11__QC.fig'
@@ -52,7 +52,7 @@ timestep=ds_time(2)-ds_time(1);
         
 if plotInference==true
     figure();
-    scatter(ds_time,dropTrials);
+    scatter(ds_time,dropTimes);
     hold on;
     plot(ds_time,normed_ds);
 end
@@ -61,10 +61,10 @@ end
 dontUseTrials=zeros(size(physiology_tbt.phys_timepoints,1),1);
 for i=1:size(physiology_tbt.phys_timepoints,1)
     temp=physiology_tbt.phys_timepoints(i,:);
-    temp=temp(~isnan(temp));
-    isInRange_tempBegin=isWithinTimeRange(temp(1),dropTimes,timestep);
-    isInRange_tempEnd=isWithinTimeRange(temp(end),dropTimes,timestep);
-    if isInRange_tempBegin && isInRange_tempEnd
+    temp=temp(~isnan(temp) & temp~=0);
+    isInRange_tempBegin=isWithinTimeRange(temp(1),ds_time(dropTimes==1),timestep);
+    isInRange_tempEnd=isWithinTimeRange(temp(end),ds_time(dropTimes==1),timestep);
+    if isInRange_tempBegin==1 && isInRange_tempEnd==1
         % drop this trial
         dontUseTrials(i)=1;
     end
@@ -76,7 +76,7 @@ function isInRange=isWithinTimeRange(thisTime,dropTimes,timestep)
 
 isInRange=false;
 for i=1:length(dropTimes)
-    currRange=[dropTimes-timestep/2 dropTimes+timestep/2];
+    currRange=[dropTimes(i)-timestep/2 dropTimes(i)+timestep/2];
     if thisTime>=currRange(1) && thisTime<=currRange(2)
         isInRange=true;
         break
