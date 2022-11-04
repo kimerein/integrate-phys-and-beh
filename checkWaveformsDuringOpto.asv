@@ -1,4 +1,4 @@
-function checkWaveformsDuringOpto(phys_tbt,spikes)
+function phys_tbt=checkWaveformsDuringOpto(phys_tbt,spikes)
 
 goodUnits=[];
 f=fieldnames(phys_tbt);
@@ -46,8 +46,9 @@ for i=1:size(phys_tbt.opto,1)
             if nansum(spikes.unwrapped_times>timewindow_noopto(1) & spikes.unwrapped_times<timewindow_noopto(2) & spikes.assigns==goodUnits(j))>0
                 nooptowvfm=nanmean(spikes.waveforms(spikes.unwrapped_times>timewindow_noopto(1) & spikes.unwrapped_times<timewindow_noopto(2) & spikes.assigns==goodUnits(j),:,:),1);
                 nooptowvfm=reshape(nooptowvfm,1,size(spikes.waveforms,2)*size(spikes.waveforms,3));
-                 nooptowvfms(j,:)=addm(nooptowvfms(j,:),nooptowvfm);
-            nooptowvfms_count(j)=nooptowvfms_count(j)+1;
+                nooptowvfms(j,:)=addm(nooptowvfms(j,:),nooptowvfm);
+                nooptowvfms_count(j)=nooptowvfms_count(j)+1;
+            end
         end
     else
         timewindow_noopto=phys_tbt.phys_timepoints(i,[find(~isnan(phys_tbt.phys_timepoints(i,:)),1,'first') firstafteropto]);
@@ -65,6 +66,8 @@ end
 for j=1:length(goodUnits)
     optowvfms(j,:)=optowvfms(j,:)./optowvfms_count(j);
     nooptowvfms(j,:)=nooptowvfms(j,:)./nooptowvfms_count(j);
+    phys_tbt.(['unit' num2str(goodUnits(j)) '_nooptowvfm'])=nooptowvfms(j,:);
+    phys_tbt.(['unit' num2str(goodUnits(j)) '_optowvfm'])=optowvfms(j,:);
 end
 
 end

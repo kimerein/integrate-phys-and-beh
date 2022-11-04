@@ -94,8 +94,17 @@ for i=1:size(data_loc_array,1)
             end
             % find good units
             gu=find(spikes.labels(:,2)==goodUnitLabel);
-            % unit by unit
             % make opto-tagged alignment
+            [~,tbtspikes]=organizeSpikesToMatch_physiology_tbt(spikes,physiology_tbt);
+            optoAligned_phys_tbt=alignToOpto(addGoodUnitsAsFields(physiology_tbt,tbtspikes,2,1,false,true));
+            optoAligned_phys_tbt=checkWaveformsDuringOpto(optoAligned_phys_tbt,tbtspikes);
+            % save opto alignment
+            if ~exist([data_loc_array{i,8} sep 'opto_aligned'],'dir')
+                mkdir([data_loc_array{i,8} sep 'opto_aligned']);
+            end
+            save([data_loc_array{i,8} sep 'opto_aligned' sep 'phys_tbt_for_' dd(j).name],'optoAligned_phys_tbt');
+            clear tbtspikes
+            % unit by unit
             % and other alignments
             for k=1:length(gu)
                 currU=gu(k);
@@ -108,30 +117,38 @@ for i=1:size(data_loc_array,1)
                 [~,si]=sort(amp);
                 % sort trode chs for units
                 trodeChsForSpikes=trodeChsForSpikes(si);
+                forplot_trodeChs=trodeChsForSpikes;
+                if length(forplot_trodeChs)<4
+                    forplot_trodeChs=[forplot_trodeChs ones(1,4-length(forplot_trodeChs))*forplot_trodeChs(1)];
+                end
                 % check whether QC figure already exists for this unit
                 [sue,qc_fname]=SU_QC_file_exists(data_loc_array{i,8}, currAssign, trodeChsForSpikes(end));
                 if ~sue && onVPN==false
                     % make behavior alignments and single unit QC figs
-                    forplot_trodeChs=trodeChsForSpikes;
-                    if length(forplot_trodeChs)<4
-                        forplot_trodeChs=[forplot_trodeChs ones(1,4-length(forplot_trodeChs))*forplot_trodeChs(1)];
-                    end
                     unit_data=saveBehaviorAlignmentsSingleNeuron(physiology_tbt,spikes,currAssign,beh2_tbt,forplot_trodeChs,trodeChsForSpikes(end),data_loc_array{i,8},'',data_loc_array{i,3},data_loc_array{i,9});
                 else
                     if sue==false
                         % make QC fig without reading in raw data
-                        unit_data=saveBehaviorAlignmentsSingleNeuron(physiology_tbt,spikes,currAssign,beh2_tbt,trodeChsForSpikes,trodeChsForSpikes(end),data_loc_array{i,8},'',data_loc_array{i,3},[]);
+                        unit_data=saveBehaviorAlignmentsSingleNeuron(physiology_tbt,spikes,currAssign,beh2_tbt,forplot_trodeChs,trodeChsForSpikes(end),data_loc_array{i,8},'',data_loc_array{i,3},[]);
                     else
                         % just redo behavior alignments, skipping QC fig
                         spikes.skipQC=true;
-                        saveBehaviorAlignmentsSingleNeuron(physiology_tbt,spikes,currAssign,beh2_tbt,trodeChsForSpikes,trodeChsForSpikes(end),data_loc_array{i,8},'',data_loc_array{i,3},[]);
+                        saveBehaviorAlignmentsSingleNeuron(physiology_tbt,spikes,currAssign,beh2_tbt,forplot_trodeChs,trodeChsForSpikes(end),data_loc_array{i,8},'',data_loc_array{i,3},[]);
                         unit_data=[data_loc_array{i,8} sep qc_fname];
                     end
                 end
                 % discard trials where unit dead or moved away
-                physiology_tbt.dontUseTrials=inferUnitStability(unit_data,physiology_tbt,dsinds,percentThresh,timeStretchThresh,plotInference);
-                
-                
+                [physiology_tbt.(['unit' num2str(currAssign) '_dontUseTrials']),physiology_tbt.(['unit' num2str(currAssign) '_meanFR'])]=inferUnitStability(unit_data,physiology_tbt,dsinds,percentThresh,timeStretchThresh,plotInference);
+                % get depth of unit
+
+                % get waveform features
+                [halfwidth, peakToTrough, amp, avWaveforms]=getWaveformFeatures(filtspikes_without_sweeps(spikes,0,'assigns',currAssign),spikes.params.Fs);
+                physiology_tbt.(['unit' num2str(currAssign) '_dontUseTrials'])
+                % save unit details for these spikes
+                if ~exist([data_loc_array{i,8} sep 'unit_details'],'dir')
+                    mkdir([data_loc_array{i,8} sep 'unit_details']);
+                end
+                save([data_loc_array{i,8} sep 'unit_details' sep 'phys_tbt_for_' dd(j).name],'physiology_tbt');
             end
         end
     end
@@ -142,4 +159,6 @@ end
 %% 4. Sort units by type
 
 %% 5. Identify opto-tagged units
+
+
 

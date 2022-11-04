@@ -1,4 +1,4 @@
-function checkWaveformsDuringOpto(phys_tbt,spikes)
+function phys_tbt=checkWaveformsDuringOpto(phys_tbt,spikes)
 
 goodUnits=[];
 f=fieldnames(phys_tbt);
@@ -66,6 +66,8 @@ end
 for j=1:length(goodUnits)
     optowvfms(j,:)=optowvfms(j,:)./optowvfms_count(j);
     nooptowvfms(j,:)=nooptowvfms(j,:)./nooptowvfms_count(j);
+    phys_tbt.(['unit' num2str(goodUnits(j)) '_nooptowvfm'])=nooptowvfms(j,:);
+    phys_tbt.(['unit' num2str(goodUnits(j)) '_optowvfm'])=optowvfms(j,:);
 end
 
 end

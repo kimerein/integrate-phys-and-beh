@@ -1,4 +1,4 @@
-function dontUseTrials=inferUnitStability(f,physiology_tbt,dsinds,percentThresh,timeStretchThresh,plotInference)
+function [dontUseTrials,averageFiringRate]=inferUnitStability(f,physiology_tbt,dsinds,percentThresh,timeStretchThresh,plotInference)
 
 if ischar(f)
     % this is a figure
@@ -17,6 +17,8 @@ else
     wv_time=f.wv_time;
     wv_y=f.wv_y; % waveform amplitude across experiment
 end
+
+averageFiringRate=mean(fr_y,'all','omitnan');
 
 ds=downSampAv(fr_y,dsinds); ds_time=downSampAv(fr_time,dsinds); 
 normed_ds=ds./max(ds,[],2,'omitnan');
