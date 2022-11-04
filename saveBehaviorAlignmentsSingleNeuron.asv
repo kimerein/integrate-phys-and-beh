@@ -1,7 +1,8 @@
-function saveBehaviorAlignmentsSingleNeuron(phys_tbt,spikes,assign,behavior_tbt,trodeChs,unit_on_channel,saveDir,saveName,rawDataDir,rawDataBin)
+function unit_data=saveBehaviorAlignmentsSingleNeuron(phys_tbt,spikes,assign,behavior_tbt,trodeChs,unit_on_channel,saveDir,saveName,rawDataDir,rawDataBin)
 
 binsize=10; % in ms
 bsmooth=false;
+unit_data=[];
 
 % SU QC
 if isfield(spikes, 'skipQC')
@@ -9,22 +10,29 @@ else
     spikes.skipQC=false; 
 end
 if spikes.skipQC==false
-if isempty(rawDataBin)
-    varAdd.onVPN=true;
-else
-    varAdd.onVPN=false;
+    if isempty(rawDataBin)
+        varAdd.onVPN=true;
+    else
+        varAdd.onVPN=false;
+    end
+    varAdd.trodeChs=trodeChs;
+    varAdd.furtherProcessData=@furtherProcessWHISPER;
+    unit_data=SU_QC(spikes, assign, unit_on_channel, rawDataBin, rawDataDir, [], varAdd);
+    saveas(gcf,[saveDir sep 'unit' num2str(assign) 'onCh' num2str(unit_on_channel) '_' saveName '_QC.fig']);
+    % if varAdd.onVPN==true
+    %     fid=fopen([saveDir '\VPN_too_slow_to_populate_raw_data.txt'],'wt');
+    %     fclose(fid);
+    % end
 end
-varAdd.trodeChs=trodeChs;
-varAdd.furtherProcessData=@furtherProcessWHISPER;
-SU_QC(spikes, assign, unit_on_channel, rawDataBin, rawDataDir, [], varAdd);
-saveas(gcf,[saveDir sep 'unit' num2str(assign) 'onCh' num2str(unit_on_channel) '_' saveName '_QC.fig']);
-% if varAdd.onVPN==true
-%     fid=fopen([saveDir '\VPN_too_slow_to_populate_raw_data.txt'],'wt');
-%     fclose(fid);
-% end
 
 % Add unit
 [~,spikes]=organizeSpikesToMatch_physiology_tbt(spikes,phys_tbt);
+
+% Align to opto
+optoAligned_phys_tbt=alignToOpto(addGoodUnitsAsFields(phys_tbt,spikes,2,1,false,true));
+checkWaveformsDuringOpto(optoAligned_phys_tbt,spikes);
+
+% Bin spikes into PSTHs for behavior alignments
 phys_tbt=addGoodUnitsAsFields(phys_tbt,spikes,2,binsize,bsmooth,true);
 
 % Save various alignments to behavior events

@@ -77,6 +77,8 @@ for i=1:size(data_loc_array,1)
             % find good units
             gu=find(spikes.labels(:,2)==goodUnitLabel);
             % unit by unit
+            % make opto-tagged alignment
+            % and other alignments
             for k=1:length(gu)
                 currU=gu(k);
                 currAssign=spikes.labels(currU,1);
@@ -109,10 +111,7 @@ for i=1:size(data_loc_array,1)
                     end
                 end
                 % discard trials where unit dead or moved away
-                dontUseTrials=inferUnitStability(unit_data,physiology_tbt,dsinds,percentThresh,timeStretchThresh,plotInference);
-                
-                
-                % make opto-tagged alignment
+                physiology_tbt.dontUseTrials=inferUnitStability(unit_data,physiology_tbt,dsinds,percentThresh,timeStretchThresh,plotInference);
                 
                 
             end

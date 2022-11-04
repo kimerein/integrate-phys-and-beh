@@ -27,6 +27,12 @@ end
 
 % Add unit
 [~,spikes]=organizeSpikesToMatch_physiology_tbt(spikes,phys_tbt);
+
+% Align to opto
+optoAligned_phys_tbt=alignToOpto(addGoodUnitsAsFields(phys_tbt,spikes,2,1,false,true));
+checkWaveformsDuringOpto(optoAligned_phys_tbt,spikes);
+
+% Bin spikes into PSTHs for behavior alignments
 phys_tbt=addGoodUnitsAsFields(phys_tbt,spikes,2,binsize,bsmooth,true);
 
 % Save various alignments to behavior events

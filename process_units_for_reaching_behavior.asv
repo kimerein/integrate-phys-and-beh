@@ -89,7 +89,7 @@ for i=1:size(data_loc_array,1)
                 % sort trode chs for units
                 trodeChsForSpikes=trodeChsForSpikes(si);
                 % check whether QC figure already exists for this unit
-                [sue,=SU_QC_file_exists(data_loc_array{i,8}, currAssign, trodeChsForSpikes(end));
+                [sue,qc_fname]=SU_QC_file_exists(data_loc_array{i,8}, currAssign, trodeChsForSpikes(end));
                 if ~sue && onVPN==false
                     % make behavior alignments and single unit QC figs
                     forplot_trodeChs=trodeChsForSpikes;
@@ -105,11 +105,11 @@ for i=1:size(data_loc_array,1)
                         % just redo behavior alignments, skipping QC fig
                         spikes.skipQC=true;
                         saveBehaviorAlignmentsSingleNeuron(physiology_tbt,spikes,currAssign,beh2_tbt,trodeChsForSpikes,trodeChsForSpikes(end),data_loc_array{i,8},'',data_loc_array{i,3},[]);
-                        unit_data=
+                        unit_data=[data_loc_array{i,8} sep qc_fname];
                     end
                 end
                 % discard trials where unit dead or moved away
-                
+                physiology_tbt.dontUseTrials=inferUnitStability(unit_data,physiology_tbt,dsinds,percentThresh,timeStretchThresh,plotInference);
                 % make opto-tagged alignment
                 
                 

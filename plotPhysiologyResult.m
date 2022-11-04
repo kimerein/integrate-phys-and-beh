@@ -39,7 +39,6 @@ end
 cutBeforeNextCue=true; % if is true, will only plot inter-trial interval after first cue
 minITI=9; % in seconds
 alwaysRealignToCue=false;
-minITI=9; % in seconds
 behaviorCue='cueZone_onVoff';
 dosmooth=true;
 % lowPassCutoff=5; % in Hz
