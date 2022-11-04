@@ -69,7 +69,7 @@ settings.chronux.display=false;
 settings.chronux.greenfilter_range=[120 200]; %[120 200]; % band pass range in Hz, green channel
 settings.chronux.redfilter_range=[200 265]; %[200 265]; % band pass range in Hz, red channel
 % baseline calculation or just Z-score
-settings.Zscore_or_dF_F='Zscore_before_demodulate'; % either Zscore or dF_F or Zscore_before_demodulate
+settings.Zscore_or_dF_F='Zscore'; %'Zscore_before_demodulate'; % either Zscore or dF_F or Zscore_before_demodulate
 settings.whichBaseline='percentile'; % can be 'percentile' or 'median'
 settings.prc=10; % if using 'percentile', which prctile
 settings.baselineWindow=30; % in secs, length of baseline window

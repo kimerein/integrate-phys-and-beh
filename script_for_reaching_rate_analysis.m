@@ -100,12 +100,12 @@ trialTypes.sessid=metadata.sessid;
 % tbt_filter.sortField='mouseid';
 % tbt_filter.sortField='fractionThroughSess_adjusted';
 % tbt_filter.sortField='dprimes';
-% tbt_filter.sortField='opto_enhanced_reach';
-tbt_filter.sortField='mouseLearned';
+tbt_filter.sortField='opto_enhanced_reach';
+% tbt_filter.sortField='mouseLearned';
 % tbt_filter.sortField='initiallyLowLEDsess';
 % tbt_filter.range_values=[1 6 7 8 10 14 18];
 % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
-tbt_filter.range_values=[0.5 1.5]; % maybe 2,6,7,12
+tbt_filter.range_values=[-0.5 0.5]; % maybe 2,6,7,12
 % tbt_filter.range_values=[0.5 3]; % maybe 2,6,7,12
 % tbt_filter.range_values=[2 3 4 5 6 7 8 9 10 11 12 14 15 17 18 19]; % which mice start at non-learning 
 % tbt_filter.range_values=[1 2 4 5 6 7 8 9 10 11 12 17 18 19];
@@ -135,7 +135,7 @@ trialTypes.mouseLearned=alltbt.mouseLearned;
 %% build relevant data sets
 
 % settings for paired RT data set
-test.nInSequence=[2]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
+test.nInSequence=[3]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
 % requirement for first trial in pair
 % trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
 trialTypes.isLongITI_1forward=[trialTypes.isLongITI(2:end); 0];
@@ -156,13 +156,13 @@ test.trial1=trial1;
 test.templateSequence2_cond=eval(trial1);
 % trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
 % memory
-trial2='trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3';
+trial2='trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3 & trialTypes.led_1forward==0';
 % trial2='trialTypes.optoGroup~=1 & trialTypes.led==0 & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
 % trial2='trialTypes.optoGroup~=1 & trialTypes.led==0';
 % trial2='trialTypes.led~=1';
 test.trial2=trial2;
 test.templateSequence2_end=eval(trial2);
-test.fillInBetweenWithAnything=true; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1
+test.fillInBetweenWithAnything=false; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1
 test.event_name=['alltrials' tbt_filter.name 'inBetweenAnything' num2str(test.fillInBetweenWithAnything)];
 % test.onlyConsiderReachType='reachBatch_success_reachStarts';
 test.onlyConsiderReachType=[];
@@ -188,20 +188,7 @@ end
 
 %% plot events in session
 
-sess_filt.alltbt=alltbt; sess_filt.metadata=metadata; sess_filt.trialTypes=trialTypes;
-tbt_filter.sortField='sessid'; tbt_filter.range_values=[40.5 41.5]; 
-[sess_filt.alltbt,sess_filt.trialTypes,sess_filt.metadata]=filtTbt(sess_filt.alltbt,sess_filt.trialTypes,tbt_filter.sortField,tbt_filter.range_values,sess_filt.metadata,tbt_filter.clock_progress);
-sess_filt.alltbt.timesfromarduino=sess_filt.alltbt.times;
-sess_filt.settings=plotCueTriggered_settings();
-sess_filt.settings.plotfields={'cueZone_onVoff','optoZone','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts'};
-sess_filt.settings.plotevents=sess_filt.settings.plotfields;
-sess_filt.settings.eventOutlines={'b','m',[0 0.7500 0],'r','c',[0.8 0.8 0.8]};
-sess_filt.settings.eventThresh={[0.5],[26000],[0.5],[0.5],[0.5],[0.5]};
-sess_filt.settings.eventColors={'b','none',[0 0.7500 0],'r','c',[0.8 0.8 0.8]};
-sess_filt.settings.firstN={'all',[5],'all','all','all','all'};
-sess_filt.settings.histoplotfields={'cueZone_onVoff','all_reachBatch'};
-sess_filt.settings.shading_type=[];
-plotBehavior(sess_filt.alltbt,'cueZone_onVoff',false,1:size(sess_filt.alltbt.cueZone_onVoff,1),sess_filt.settings);
+plotBehaviorSessEvents_wrapper(alltbt,metadata,trialTypes,[1500.5 1501.5]); % last arg selects sessid, e.g., 1501
 
 %% plot features in data set
 
@@ -299,9 +286,9 @@ trialTypes.initiallyLowLED=zeros(size(trialTypes.lowLEDsequence));
 trialTypes.initiallyLowLED(ui)=trialTypes.lowLEDsequence(ui);
 disp(nansum(trialTypes.initiallyLowLED))
 theseAreLowLEDsess=unique(trialTypes.sessid(trialTypes.initiallyLowLED==1));
-trialTypes.initiallyLowLEDsess=ismember(trialTypes.sessid,theseAreLowLEDsess);
+trialTypes.initiallyLowLEDsess=ismember(trialTypes.sessid,theseAreLowLEDsess); alltbt.initiallyLowLEDsess=trialTypes.initiallyLowLEDsess;
 % filter tbt according to initiallyNoLED, then
-nInSeq=2; useFractionThroughSession=[0.2 0.4]; plotCDFUpTo=3;
+nInSeq=2; useFractionThroughSession=[0.2 0.4]; plotCDFUpTo=9.5;
 memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,[],plotCDFUpTo);
 
 %% led ongoing reach motor effects

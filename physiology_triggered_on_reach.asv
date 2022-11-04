@@ -153,8 +153,8 @@ end
 if length(a)>1
     isInBackHalf=false;
     fractionThru=0.15;
-    settings.maxlagForInitialAlign=265;
-    settings.minlagForInitialAlign=[];
+    settings.minlagForInitialAlign=297;
+    settings.maxlagForInitialAlign=299;
     if ~isempty(settings.minlagForInitialAlign) || ~isempty(settings.maxlagForInitialAlign)
         questdlg('Preset min and max lag. Continue?');
     end
@@ -179,8 +179,8 @@ if length(a)>1
         close all;
         isInBackHalf=false;
         fractionThru=0.5;
-        settings.minlagForInitialAlign=[];
-        settings.maxlagForInitialAlign=[];
+        settings.minlagForInitialAlign=599;
+        settings.maxlagForInitialAlign=601;
 %         isInBackHalf=[];
 %         fractionThru=[];
         [discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes,padPhotoTimesAtFront]=alignDistractors(totalalignment.movie_distractor(totalalignment.from_third_video==1),data.distractor,distract_thresh_movie,distract_thresh_photometry,totalalignment.timesfromarduino(totalalignment.from_third_video==1),data.distractor_times,settings,isInBackHalf,fractionThru);

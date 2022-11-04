@@ -188,19 +188,7 @@ end
 
 %% plot events in session
 
-sess_filt.alltbt=alltbt; sess_filt.metadata=metadata; sess_filt.trialTypes=trialTypes;
-tbt_filter.sortField='sessid'; tbt_filter.range_values=[40.5 41.5]; 
-[sess_filt.alltbt,sess_filt.trialTypes,sess_filt.metadata]=filtTbt(sess_filt.alltbt,sess_filt.trialTypes,tbt_filter.sortField,tbt_filter.range_values,sess_filt.metadata,tbt_filter.clock_progress);
-sess_filt.alltbt.timesfromarduino=sess_filt.alltbt.times;
-sess_filt.settings=plotCueTriggered_settings();
-sess_filt.settings.plotfields={'cueZone_onVoff','optoOn','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts'};
-sess_filt.settings.plotevents=sess_filt.settings.plotfields;
-sess_filt.settings.eventOutlines={'b','m',[0 0.7500 0],'r','c',[0.8 0.8 0.8]};
-sess_filt.settings.eventThresh={[0.5],[0.5],[0.5],[0.5],[0.5],[0.5]};
-sess_filt.settings.eventColors={'b','none',[0 0.7500 0],'r','c',[0.8 0.8 0.8]};
-sess_filt.settings.histoplotfields={'cueZone_onVoff','all_reachBatch'};
-sess_filt.settings.shading_type=[];
-plotBehavior(sess_filt.alltbt,'cueZone_onVoff',false,1:size(sess_filt.alltbt.cueZone_onVoff,1),sess_filt.settings);
+plotBehaviorSessEvents_wrapper(alltbt,metadata,trialTypes,[1500.5 1501.5]); % last arg selects sessid, e.g., 1501
 
 %% plot features in data set
 
@@ -300,7 +288,8 @@ disp(nansum(trialTypes.initiallyLowLED))
 theseAreLowLEDsess=unique(trialTypes.sessid(trialTypes.initiallyLowLED==1));
 trialTypes.initiallyLowLEDsess=ismember(trialTypes.sessid,theseAreLowLEDsess);
 % filter tbt according to initiallyNoLED, then
-nInSeq=2; useFractionThroughSession=[0.2 0.4]; plotCDFUpTo=3;
+% nInSeq=2; useFractionThroughSession=[0.2 0.4]; plotCDFUpTo=3;
+nInSeq=2; useFractionThroughSession=[0.2 1]; plotCDFUpTo=9.5;
 memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,[],plotCDFUpTo);
 
 %% led ongoing reach motor effects
