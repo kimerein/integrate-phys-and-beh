@@ -18,17 +18,17 @@ plotInference=true;
 % location of SU aligned to behavior, raw data binary name
 data_loc_array=cell(2,6);
 
-i=1; data_loc_array{i,1}='20210621'; data_loc_array{i,2}='Mar_6'; 
-data_loc_array{i,3}=[]; % raw data phys location, or empty
+i=1; data_loc_array{i,1}='20210311'; data_loc_array{i,2}='Oct_B'; 
+data_loc_array{i,3}=[]; %Z:\MICROSCOPE\Kim\WHISPER recs\Oct_B\20210311\phys\OctB2__g0\ % raw data phys location, or empty
 data_loc_array{i,4}=2300; % ventral depth in microns relative to bregma
 data_loc_array{i,5}='pDMS-tail';
-data_loc_array{i,6}='/Users/kim/Desktop/Example data/20210621 Mar_6/tbt';
-data_loc_array{i,7}='/Users/kim/Desktop/Example data/20210621 Mar_6/spike output Mar_6__g1';
-data_loc_array{i,8}='/Users/kim/Desktop/Example data/20210621 Mar_6/SU aligned to behavior';
-data_loc_array{i,9}='Mar_6.bin';
+data_loc_array{i,6}='Z:\MICROSCOPE\Kim\WHISPER recs\Oct_B\20210311\tbt';
+data_loc_array{i,7}='Z:\MICROSCOPE\Kim\WHISPER recs\Oct_B\20210311\spike output';
+data_loc_array{i,8}='Z:\MICROSCOPE\Kim\WHISPER recs\Oct_B\20210311\SU aligned to behavior';
+data_loc_array{i,9}='OctB2__g0_t0.nidq.bin';
 
-i=2; data_loc_array{i,1}='20210302'; data_loc_array{i,2}='dLight1'; 
-data_loc_array{i,3}=[]; % raw data phys location, or empty
+i=2; data_loc_array{i,1}='20210311'; data_loc_array{i,2}='dLight1'; 
+data_loc_array{i,3}=[]; %Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210311\phys\dLight1__g0 % raw data phys location, or empty
 data_loc_array{i,4}=2300; % ventral depth in microns relative to bregma
 data_loc_array{i,5}='pDMS-tail';
 data_loc_array{i,6}='/Users/kim/Desktop/Example data/20210302 dLight1/tbt';
@@ -71,6 +71,24 @@ for i=1:size(data_loc_array,1)
                     trodeChsForSpikes=[23 25 26 27];
                 case 'spikes9.mat'
                     trodeChsForSpikes=[28 29 30 31];
+                case 'spikes_sorted.mat'
+                    trodeChsForSpikes=[1 2 3 4];
+                case 'spikes2_sorted.mat'
+                    trodeChsForSpikes=[5 6 7 8];
+                case 'spikes3_sorted.mat'
+                    trodeChsForSpikes=[9 10 11];
+                case 'spikes4_sorted.mat'
+                    trodeChsForSpikes=[13 14];
+                case 'spikes5_sorted.mat'
+                    trodeChsForSpikes=[15 16 17 18];
+                case 'spikes6_sorted.mat'
+                    trodeChsForSpikes=[19 20];
+                case 'spikes7_sorted.mat'
+                    trodeChsForSpikes=[21 22 23 24];
+                case 'spikes8_sorted.mat'
+                    trodeChsForSpikes=[23 25 26 27];
+                case 'spikes9_sorted.mat'
+                    trodeChsForSpikes=[28 29 30 31];
                 otherwise 
                     error('do not recognize name of spikes mat file');
             end
@@ -85,7 +103,7 @@ for i=1:size(data_loc_array,1)
                 % find ch where waveform biggest
                 amp=nan(1,size(spikes.waveforms,3));
                 for l=1:size(spikes.waveforms,3)
-                    amp(l)=abs(min(reshape(mean(spikes.waveforms(spikes.assigns==3,:,l),1,'omitnan'),1,size(spikes.waveforms,2)),[],2,'omitnan'));
+                    amp(l)=abs(min(reshape(mean(spikes.waveforms(spikes.assigns==currAssign,:,l),1,'omitnan'),1,size(spikes.waveforms,2)),[],2,'omitnan'));
                 end
                 [~,si]=sort(amp);
                 % sort trode chs for units

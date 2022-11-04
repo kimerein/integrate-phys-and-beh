@@ -61,17 +61,19 @@ binsize=binsize/1000; % in sec
 % get index and time of opto onset after have aligned all trials
 maind=find(mean(phys_tbt.opto,1,'omitnan')>0.01,1,'first');
 optoOff=find(mean(phys_tbt.opto(hasOpto==1,maind:end),1,'omitnan')<0.01,1,'first')+maind-1;
-times_wrt_trial_start=mean(phys_tbt.cue_times_wrt_trial_start,1,'omitnan');
+timestep=mode(diff(mean(phys_tbt.cue_times,1,'omitnan')));
+times_wrt_trial_start=0:timestep:(size(phys_tbt.cue_times,2)-1)*timestep;
 optoTime=times_wrt_trial_start(maind);
 optoOffTime=times_wrt_trial_start(optoOff);
-[~,optounitind]=min(abs(mean(phys_tbt.unitTimes_wrt_trial_start,1,'omitnan')-optoTime));
-[~,optooffunitind]=min(abs(mean(phys_tbt.unitTimes_wrt_trial_start,1,'omitnan')-optoOffTime));
-unittimes_wrt_trial_start=mean(phys_tbt.unitTimes_wrt_trial_start,1,'omitnan');
+timestep=mode(diff(mean(phys_tbt.unitTimes_wrt_trial_start,1,'omitnan')));
+unittimes_wrt_trial_start=0:timestep:(size(phys_tbt.unitTimes_wrt_trial_start,2)-1)*timestep;
+[~,optounitind]=min(abs(mean(unittimes_wrt_trial_start,1,'omitnan')-optoTime));
+[~,optooffunitind]=min(abs(mean(unittimes_wrt_trial_start,1,'omitnan')-optoOffTime));
 
 nindsperbin=ceil(binsize/(unittimes_wrt_trial_start(2)-unittimes_wrt_trial_start(1)));
 binsForBaseline=1:nindsperbin:optounitind-1;
 binsDuringOpto=optounitind:nindsperbin:optooffunitind-1;
-for i=1:size(thesePhotoFieldsUseTimeField2)
+for i=1:length(thesePhotoFieldsUseTimeField2)
     if strcmp(thesePhotoFieldsUseTimeField2{i},'unitsum')
         % skip
         continue
