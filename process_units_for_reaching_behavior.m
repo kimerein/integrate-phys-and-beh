@@ -56,34 +56,32 @@ chDepthMapping=[1   21; ...
 % location of SU aligned to behavior, raw data binary name
 
 % ultimately, ingest this from .csv file
-dataTable='C:\Users\sabatini\Downloads\Spike sorting analysis - Data locations on server (2).csv';
-T=readtable(dataTable,'Format','%s%s%s%u%s%s%s%s%s%u%u%s');
+dataTable='C:\Users\sabatini\Downloads\Spike sorting analysis - EXAMPLE data locations on server.csv';
+data_loc_array=table2cell(readtable(dataTable,'Format','%s%s%s%u%s%s%s%s%s%u%u%s'));
 
-data_loc_array=cell(2,6);
-
-i=1; data_loc_array{i,1}='20210311'; data_loc_array{i,2}='Oct_B'; 
-data_loc_array{i,3}='Z:\MICROSCOPE\Kim\WHISPER recs\Oct_B\20210311\phys\OctB2__g0'; % raw data phys location, or empty
-data_loc_array{i,4}=2300; % ventral depth of recording probe tip in microns relative to bregma
-data_loc_array{i,5}='pDMS-tail';
-data_loc_array{i,6}='Z:\MICROSCOPE\Kim\WHISPER recs\Oct_B\20210311\tbt';
-data_loc_array{i,7}='Z:\MICROSCOPE\Kim\WHISPER recs\Oct_B\20210311\spike output';
-data_loc_array{i,8}='Z:\MICROSCOPE\Kim\WHISPER recs\Oct_B\20210311\SU aligned to behavior';
-data_loc_array{i,9}='OctB2__g0_t0.nidq.bin';
-data_loc_array{i,10}=2000; % dorsal-most depth that is posterior striatum
-data_loc_array{i,11}=2600; % ventral-most depth that is posterior striatum
-data_loc_array{i,12}='Nkx2.1'; % if opto-tagging, which tag
-
-i=2; data_loc_array{i,1}='20210311'; data_loc_array{i,2}='dLight1'; 
-data_loc_array{i,3}='Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210311\phys\dLight1__g0'; % raw data phys location, or empty
-data_loc_array{i,4}=2300; % ventral depth in microns relative to bregma
-data_loc_array{i,5}='pDMS-tail';
-data_loc_array{i,6}='Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210311\tbt';
-data_loc_array{i,7}='Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210311\phys\dLight1__g0';
-data_loc_array{i,8}='Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210311\SU aligned to behavior';
-data_loc_array{i,9}='dLight1__g0_t0.nidq.bin';
-data_loc_array{i,10}=2000; % dorsal-most depth that is posterior striatum
-data_loc_array{i,11}=2600; % ventral-most depth that is posterior striatum
-data_loc_array{i,12}='none'; % if opto-tagging, which tag
+% data_loc_array=cell(2,6);
+% i=1; data_loc_array{i,1}='20210311'; data_loc_array{i,2}='Oct_B'; 
+% data_loc_array{i,3}='Z:\MICROSCOPE\Kim\WHISPER recs\Oct_B\20210311\phys\OctB2__g0'; % raw data phys location, or empty
+% data_loc_array{i,4}=2300; % ventral depth of recording probe tip in microns relative to bregma
+% data_loc_array{i,5}='pDMS-tail';
+% data_loc_array{i,6}='Z:\MICROSCOPE\Kim\WHISPER recs\Oct_B\20210311\tbt';
+% data_loc_array{i,7}='Z:\MICROSCOPE\Kim\WHISPER recs\Oct_B\20210311\spike output';
+% data_loc_array{i,8}='Z:\MICROSCOPE\Kim\WHISPER recs\Oct_B\20210311\SU aligned to behavior';
+% data_loc_array{i,9}='OctB2__g0_t0.nidq.bin';
+% data_loc_array{i,10}=2000; % dorsal-most depth that is posterior striatum
+% data_loc_array{i,11}=2600; % ventral-most depth that is posterior striatum
+% data_loc_array{i,12}='Nkx2.1'; % if opto-tagging, which tag
+% i=2; data_loc_array{i,1}='20210311'; data_loc_array{i,2}='dLight1'; 
+% data_loc_array{i,3}='Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210311\phys\dLight1__g0'; % raw data phys location, or empty
+% data_loc_array{i,4}=2300; % ventral depth in microns relative to bregma
+% data_loc_array{i,5}='pDMS-tail';
+% data_loc_array{i,6}='Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210311\tbt';
+% data_loc_array{i,7}='Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210311\phys\dLight1__g0';
+% data_loc_array{i,8}='Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210311\SU aligned to behavior';
+% data_loc_array{i,9}='dLight1__g0_t0.nidq.bin';
+% data_loc_array{i,10}=2000; % dorsal-most depth that is posterior striatum
+% data_loc_array{i,11}=2600; % ventral-most depth that is posterior striatum
+% data_loc_array{i,12}='none'; % if opto-tagging, which tag
 
 %% 2. Auto-populate SU QC and behavior alignments
 % Discarding trials where unit dead or moved away
@@ -93,15 +91,8 @@ for i=1:size(data_loc_array,1)
     % get spikes
     dd=dir(data_loc_array{i,7});
     disp(['Processing ' data_loc_array{i,7}]);
-    didSomeSpikes=false; % just for debugging
     for j=1:length(dd)
         if ~isempty(regexp(dd(j).name,'spikes'))
-
-            % just for debugging
-            if didSomeSpikes==true
-                break
-            end
-
             % load spikes
             a=load([data_loc_array{i,7} sep dd(j).name]);
             if ~isfield(a,'spikes')
@@ -109,10 +100,6 @@ for i=1:size(data_loc_array,1)
                 continue
             end
             spikes=a.spikes;
-
-            % just for debugging
-            didSomeSpikes=true;
-
             switch dd(j).name
                 case 'spikes.mat'
                     trodeChsForSpikes=[1 2 3 4];
