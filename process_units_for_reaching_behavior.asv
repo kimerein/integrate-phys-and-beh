@@ -11,6 +11,7 @@ percentThresh=5;
 timeStretchThresh=60*10; % in seconds
 plotInference=true;
 channelSpacing=20; % in microns
+skipIfBehaviorAlignmentsAlreadyExist=true; % if true, will skip any units for which a behavior alignment already exists in the cue sub-folder
 % second row is Matlab index, first row is depth on probe, where 32 is most
 % dorsall, 1 is most ventral
 % for A1x32Edge
@@ -68,17 +69,19 @@ data_loc_array{i,8}='Z:\MICROSCOPE\Kim\WHISPER recs\Oct_B\20210311\SU aligned to
 data_loc_array{i,9}='OctB2__g0_t0.nidq.bin';
 data_loc_array{i,10}=2000; % dorsal-most depth that is posterior striatum
 data_loc_array{i,11}=2600; % ventral-most depth that is posterior striatum
+data_loc_array{i,12}='Nkx2.1'; % if opto-tagging, which tag
 
 i=2; data_loc_array{i,1}='20210311'; data_loc_array{i,2}='dLight1'; 
 data_loc_array{i,3}='Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210311\phys\dLight1__g0'; % raw data phys location, or empty
 data_loc_array{i,4}=2300; % ventral depth in microns relative to bregma
 data_loc_array{i,5}='pDMS-tail';
-data_loc_array{i,6}='Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210311/tbt';
+data_loc_array{i,6}='Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210311\tbt';
 data_loc_array{i,7}='Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210311\phys\dLight1__g0';
 data_loc_array{i,8}='Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210311\SU aligned to behavior';
 data_loc_array{i,9}='dLight1__g0_t0.nidq.bin';
 data_loc_array{i,10}=2000; % dorsal-most depth that is posterior striatum
 data_loc_array{i,11}=2600; % ventral-most depth that is posterior striatum
+data_loc_array{i,12}='none'; % if opto-tagging, which tag
 
 %% 2. Auto-populate SU QC and behavior alignments
 % Discarding trials where unit dead or moved away
@@ -177,19 +180,26 @@ for i=1:size(data_loc_array,1)
                 if length(forplot_trodeChs)<4
                     forplot_trodeChs=[forplot_trodeChs ones(1,4-length(forplot_trodeChs))*forplot_trodeChs(1)];
                 end
+                % 
+                if skipIfBehaviorAlignmentsAlreadyExist==true
+                    if cue_alignment_file_exists([data_loc_array{i,8} sep 'cue'], currAssign, trodeChsForSpikes(end))
+                        continue
+                    end
+                end
+                addTag=isThisUnitOptoTagged(optoAligned_phys_tbt,currAssign,data_loc_array{i,12});
                 % check whether QC figure already exists for this unit
                 [sue,qc_fname]=SU_QC_file_exists(data_loc_array{i,8}, currAssign, trodeChsForSpikes(end));
                 if ~sue && onVPN==false
                     % make behavior alignments and single unit QC figs
-                    unit_data=saveBehaviorAlignmentsSingleNeuron(physiology_tbt,spikes,currAssign,beh2_tbt,forplot_trodeChs,trodeChsForSpikes(end),data_loc_array{i,8},'',data_loc_array{i,3},data_loc_array{i,9});
+                    unit_data=saveBehaviorAlignmentsSingleNeuron(physiology_tbt,spikes,currAssign,beh2_tbt,forplot_trodeChs,trodeChsForSpikes(end),data_loc_array{i,8},addTag,data_loc_array{i,3},data_loc_array{i,9});
                 else
                     if sue==false
                         % make QC fig without reading in raw data
-                        unit_data=saveBehaviorAlignmentsSingleNeuron(physiology_tbt,spikes,currAssign,beh2_tbt,forplot_trodeChs,trodeChsForSpikes(end),data_loc_array{i,8},'',data_loc_array{i,3},[]);
+                        unit_data=saveBehaviorAlignmentsSingleNeuron(physiology_tbt,spikes,currAssign,beh2_tbt,forplot_trodeChs,trodeChsForSpikes(end),data_loc_array{i,8},addTag,data_loc_array{i,3},[]);
                     else
                         % just redo behavior alignments, skipping QC fig
                         spikes.skipQC=true;
-                        saveBehaviorAlignmentsSingleNeuron(physiology_tbt,spikes,currAssign,beh2_tbt,forplot_trodeChs,trodeChsForSpikes(end),data_loc_array{i,8},'',data_loc_array{i,3},[]);
+                        saveBehaviorAlignmentsSingleNeuron(physiology_tbt,spikes,currAssign,beh2_tbt,forplot_trodeChs,trodeChsForSpikes(end),data_loc_array{i,8},addTag,data_loc_array{i,3},[]);
                         unit_data=[data_loc_array{i,8} sep qc_fname];
                     end
                 end
@@ -212,7 +222,11 @@ for i=1:size(data_loc_array,1)
                 [physiology_tbt.(['unit' num2str(currAssign) '_isFS']),physiology_tbt.(['unit' num2str(currAssign) '_isTAN']),physiology_tbt.(['unit' num2str(currAssign) '_isSPN']),physiology_tbt.(['unit' num2str(currAssign) '_isLowFRThin'])]=classifyStriatumUnits(physiology_tbt.(['unit' num2str(currAssign) '_halfwidth']),physiology_tbt.(['unit' num2str(currAssign) '_meanFR']));
                 % save unit details for this unit only
                 % will be used later to group units
-                saveUnitDets(physiology_tbt,currAssign);
+                if ~exist([data_loc_array{i,8} sep 'unit_details'],'dir')
+                    mkdir([data_loc_array{i,8} sep 'unit_details']);
+                end
+                saveUnitDets([data_loc_array{i,8} sep 'unit_details'],physiology_tbt,currAssign,trodeChsForSpikes(end));
+%                 saveOptoTagDets([data_loc_array{i,8} sep 'opto_aligned'],optoAligned_phys_tbt,currAssign,trodeChsForSpikes(end));
             end
             % save unit details for these spikes
             if ~exist([data_loc_array{i,8} sep 'unit_details'],'dir')
@@ -234,14 +248,14 @@ end
 %% 4. Make figures
 % choose type of response to plot
 response_to_plot='cued_success'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
-% choose how to divide up units, up to 4 groups (e.g., D1 tagged, D1
-% untagged, D2 tagged, D2 untagged)
-% will filter based on the presence of a string in the filename, e.g.,
-% 'D1tagged' in 'unit138onCh6_D1tagged_cuedSuccess.mat'
-unitsGrps=[1 2 3 4];
-unitLabels=['D1tagged' '__' 'D2tagged' '__'];
 
+% doUnitTest.m is used to test whether to include unit in this plot
+% will include unit if unitdets match the following
+% [inStructure isFS isTAN isSPN isLowFRThin]
+plotUnitCriteria=[1 0 0 1 0];
+getCriteriaForUnitsToPlot(plotUnitCriteria);
 
-scriptToOrganizeD1vD2unitResponses_wrapper(dd);
+% D1 v D1 untagged v D2 v D2 untagged
+% scriptToOrganizeD1vD2unitResponses_wrapper(dd);
 
 

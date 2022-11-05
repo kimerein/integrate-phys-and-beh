@@ -27,34 +27,12 @@ if ~settings.skipCueAlignment
         end
     end
     
-    [D1tagged_cueResponse,D1orD2taggingExpt,putAlignPeakAt,firstVal_D1tagged,optoFR_D1tagged,indsForAnalysisPerSess]=getAndSaveResponse(dd_more,'D1tagged',settings,[],[]);
-    indsForAnalysisPerSessForUntag=nan(length(dd_more),2);
-    indsForAnalysisPerSessForUntag(ismember(1:length(dd_more),D1tagged_cueResponse.fromWhichSess),:)=indsForAnalysisPerSess; 
-    % !!!!!!!!!! this inds per sess identifying opto isn't working great
-    [D1untagged_cueResponse,~,~,firstVal_D1untagged,optoFR_D1untagged]=getAndSaveResponse(dd_more,'__',settings,putAlignPeakAt,indsForAnalysisPerSessForUntag);
+    [D1tagged_cueResponse,D1orD2taggingExpt,putAlignPeakAt]=getAndSaveResponse(dd_more,'D1tagged',settings,[],[]);
+    [D1untagged_cueResponse]=getAndSaveResponse(dd_more,'__',settings,putAlignPeakAt,[]);
     D1untagged_cueResponse=takeOnlyUnitsFromSess(D1untagged_cueResponse,unique(D1tagged_cueResponse.fromWhichSess));
-    [D2tagged_cueResponse,~,~,firstVal_D2tagged,optoFR_D2tagged,indsForAnalysisPerSess]=getAndSaveResponse(dd_more,'A2atagged',settings,putAlignPeakAt,[]);
-    indsForAnalysisPerSessForUntag=nan(length(dd_more),2);
-    indsForAnalysisPerSessForUntag(ismember(1:length(dd_more),D2tagged_cueResponse.fromWhichSess),:)=indsForAnalysisPerSess; 
-    [D2untagged_cueResponse,~,~,firstVal_D2untagged,optoFR_D2untagged]=getAndSaveResponse(dd_more,'__',settings,putAlignPeakAt,indsForAnalysisPerSessForUntag);
+    [D2tagged_cueResponse]=getAndSaveResponse(dd_more,'A2atagged',settings,putAlignPeakAt,[]);
+    [D2untagged_cueResponse]=getAndSaveResponse(dd_more,'__',settings,putAlignPeakAt,[]);
     D2untagged_cueResponse=takeOnlyUnitsFromSess(D2untagged_cueResponse,unique(D2tagged_cueResponse.fromWhichSess));
-    figure();
-    scatter(firstVal_D1tagged,optoFR_D1tagged,[],'k');
-    hold on;
-    scatter(firstVal_D1untagged,optoFR_D1untagged,[],'r');
-    scatter(firstVal_D2tagged,optoFR_D2tagged,[],'c');
-    scatter(firstVal_D2untagged,optoFR_D2untagged,[],'g');
-    legend({'D1tagged','D1untagged','D2tagged','D2untagged'});
-    D1tagged_cueResponse.excluded((firstVal_D1tagged<3 & optoFR_D1tagged<5) | firstVal_D1tagged<0)=1;
-    D2tagged_cueResponse.excluded((firstVal_D2tagged<3 & optoFR_D2tagged<5) | firstVal_D2tagged<0)=1;
-    figure();
-    scatter(firstVal_D1tagged(D1tagged_cueResponse.excluded==0),optoFR_D1tagged(D1tagged_cueResponse.excluded==0),[],'k');
-    hold on;
-    scatter(firstVal_D1untagged,optoFR_D1untagged,[],'r');
-    scatter(firstVal_D2tagged(D2tagged_cueResponse.excluded==0),optoFR_D2tagged(D2tagged_cueResponse.excluded==0),[],'c');
-    scatter(firstVal_D2untagged,optoFR_D2untagged,[],'g');
-    legend({'D1tagged','D1untagged','D2tagged','D2untagged'});
-    title('After cut');
 end
 
 % get response of each tagged type

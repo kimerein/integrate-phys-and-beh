@@ -65,13 +65,20 @@ for j=1:length(dd)
             end
         end
 
-        if doUnitTest(a)
+        [unitTest,dontUseTrials]=doUnitTest(ls(i).folder, ls(i).name);
+        if unitTest
         else
             excluded(excluded_count)=1;
             excluded_count=excluded_count+1;
             continue % failed unit test
         end
         excluded_count=excluded_count+1;
+
+        % throw out trials where unit dead or out of range
+        if any(dontUseTrials==1)
+            a.dataout.y=a.dataout.y(dontUseTrials==0,:);
+            a.alignComp.y=a.alignComp.y(dontUseTrials==0,:);
+        end
         
 %         if excludeHigherFR
 %             if nanmean(nanmean(a.dataout.y(:,1:beforeOptoBaseline),1),2)>excludeAboveFR
@@ -105,7 +112,7 @@ for j=1:length(dd)
             a.dataout.x=a.dataout.x(mi-unitbaseline:end);
             a.dataout.y=a.dataout.y(:,mi-unitbaseline:end);
         end
-        curr_n=nansum(any(a.dataout.y>0,2));
+        curr_n=nansum(dontUseTrials==0);
         if ~isempty(unitbyunit_x)
             upTo2=size(aligncomp_x,2);
         else

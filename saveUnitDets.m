@@ -1,4 +1,4 @@
-function saveUnitDets(dir,physiology_tbt,currAssign)
+function saveUnitDets(dir,physiology_tbt,currAssign,onCh)
 
 unitdets.dontUseTrials=physiology_tbt.(['unit' num2str(currAssign) '_dontUseTrials']);
 unitdets.meanFR=physiology_tbt.(['unit' num2str(currAssign) '_meanFR']);
@@ -12,6 +12,6 @@ unitdets.isFS=physiology_tbt.(['unit' num2str(currAssign) '_isFS']);
 unitdets.isTAN=physiology_tbt.(['unit' num2str(currAssign) '_isTAN']);
 unitdets.isSPN=physiology_tbt.(['unit' num2str(currAssign) '_isSPN']);
 unitdets.isLowFRThin=physiology_tbt.(['unit' num2str(currAssign) '_isLowFRThin']);
-save([dir sep 'unit' num2str(currAssign) '_unitdets'],'unitdets');
+save([dir sep 'unit' num2str(currAssign) 'onCh' num2str(onCh) '_unitdets'],'unitdets');
 
 end
