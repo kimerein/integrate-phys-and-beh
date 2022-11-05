@@ -1,10 +1,11 @@
-function [fout,dataout,n_events_in_av,alignmentCompanion,f_heatmap,plotBehFieldOut,su]=plotPhysiologyResult(photometry_tbt,behavior_tbt,outdata,alignTo,plotPhotoField,plotBehField,firstInTrialOrLast,withinRange,hax)
+function [fout,dataout,n_events_in_av,alignmentCompanion,f_heatmap,plotBehFieldOut,su,phys_timepointsCompanion]=plotPhysiologyResult(photometry_tbt,behavior_tbt,outdata,alignTo,plotPhotoField,plotBehField,firstInTrialOrLast,withinRange,hax)
 
 % alignTo can be 'cue','success_reachStarts', etc.
 fout=[];
 dataout=[];
 n_events_in_av=[];
 alignmentCompanion=[];
+phys_timepointsCompanion=[];
 f_heatmap=[];
 plotBehFieldOut=[];
 su=[];
@@ -230,12 +231,14 @@ switch alignTo
         plotWStderr(photometry_tbt.(plotPhotoField),tempphototimes,'k',plotUntilInd,size(photometry_tbt.cue,1));
         dataout.x=tempphototimes;
         dataout.y=photometry_tbt.(plotPhotoField);
+        phys_timepointsCompanion.x=tempphototimes;
+        phys_timepointsCompanion.y=photometry_tbt.phys_timepoints;
         hold on;
         temp=photometry_tbt.(plotPhotoField);
         plotWStderr(nanmean(photometry_tbt.cue,1),f_times,'b',f,size(photometry_tbt.cue,1));
         n_events_in_av=size(photometry_tbt.(plotPhotoField),1);
         alignmentCompanion.x=f_times;
-        alignmentCompanion.y=photometry_tbt.cue.*nanmax(nanmean(photometry_tbt.(plotPhotoField),1));
+        alignmentCompanion.y=photometry_tbt.cue.*nanmax(nanmean(photometry_tbt.(plotPhotoField),1));        
         if ~isempty(plotBehField)
             plotBehFieldOut.x=nanmean(behavior_tbt.times_wrt_trial_start,1);
             plotBehFieldOut.y=behavior_tbt.(plotBehField);
@@ -425,6 +428,7 @@ if typeOfReach==true
     alignTimes=getValsFromRows(behavior_tbt.times_wrt_trial_start,alignInds,fromInputRow);
     indsIntoPhoto=getIndsFromRows(photometry_tbt.(getCorrectTime_wrtTrialStart),alignTimes,fromInputRow);
     [alignedData,alignedAt]=alignRowsToInds(photometry_tbt.(plotPhotoField),indsIntoPhoto,nanmin(indsIntoPhoto),fromInputRow,alignPeaks,indsFromPeak);
+    phys_timepoints_alignedData=alignRowsToInds(photometry_tbt.phys_timepoints,indsIntoPhoto,nanmin(indsIntoPhoto),fromInputRow,alignPeaks,indsFromPeak);
     if doingMultipleUnits==true
         tryforSUfields=fieldnames(photometry_tbt);
         j=1;
@@ -519,6 +523,8 @@ if typeOfReach==true
     plotWStderr(alignedData,phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),'k',[],size(behAligned,1));
     dataout.x=phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax));
     dataout.y=alignedData;
+    phys_timepointsCompanion.x=dataout.x;
+    phys_timepointsCompanion.y=phys_timepoints_alignedData;
     if doingMultipleUnits==true
         dataout.y=su;
     end

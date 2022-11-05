@@ -20,6 +20,8 @@ settings.testForAlignment=false;
 settings.unitbaseline=300; %150;
 settings.beforeOptoBaseline=140;
 settings.optoTagDuration=0.2; % in seconds
+settings.maxUnitsPerSess=300; % can't get more than this many units per session
+% settings.studyOptoTag=true;
 
 [D1tagged_cueResponse,D2tagged_cueResponse,cued_success_D1tagged,cued_success_D2tagged]=scriptToOrganizeD1vD2unitResponses(dd,settings);
 

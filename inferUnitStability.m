@@ -5,11 +5,17 @@ if ischar(f)
     a=openfig(f);
     %'/Users/kim/Desktop/Example data/20210621 Mar_6/SU aligned to behavior/unit201onCh11__QC.fig'
     % load firing rate and waveform amplitude across experiment from Kim's SU QC figure
-    dataObjs = findobj(a,'-property','YData');
-    fr_time=dataObjs(13).XData;
-    fr_y=dataObjs(13).YData; % firing rate across expt
-    wv_time=dataObjs(14).XData;
-    wv_y=dataObjs(14).YData; % waveform amplitude across expt
+    dataObjs = findobj(a,'-property','YData','Type','Line');
+    % works by assuming firing rate is the only right-aligned plot
+    for i=1:length(dataObjs)
+        if strcmp(dataObjs(i).Parent.YAxisLocation,'right')
+                fr_time=dataObjs(i).XData;
+                fr_y=dataObjs(i).YData; % firing rate across expt
+                wv_time=dataObjs(i).XData;
+                wv_y=dataObjs(i).YData; % waveform amplitude across expt
+                break
+        end
+    end
 else
     % pass in data directly to save time opening fig
     fr_time=f.fr_time;
@@ -17,8 +23,6 @@ else
     wv_time=f.wv_time;
     wv_y=f.wv_y; % waveform amplitude across experiment
 end
-
-averageFiringRate=mean(fr_y,'all','omitnan');
 
 ds=downSampAv(fr_y,dsinds); ds_time=downSampAv(fr_time,dsinds); 
 normed_ds=ds./max(ds,[],2,'omitnan');
@@ -58,6 +62,8 @@ if plotInference==true
     hold on;
     plot(ds_time,normed_ds);
 end
+
+averageFiringRate=mean(ds(dropTimes==0),'all','omitnan');
 
 % find trials that correspond to these time periods
 dontUseTrials=zeros(size(physiology_tbt.phys_timepoints,1),1);

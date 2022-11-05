@@ -1,7 +1,5 @@
 function [D1tagged_cueResponse,D2tagged_cueResponse,activityD1tagged,activityD2tagged]=scriptToOrganizeD1vD2unitResponses(dd,settings)
 
-% load dd
-
 pvalcutoff=settings.pvalcutoff;
 responseType=settings.responseType;
 timeWindow=settings.timeWindow;
@@ -28,7 +26,7 @@ if ~settings.skipCueAlignment
             dd_more{i}=[dd{i} '\cue'];
         end
     end
-    settings.studyOptoTag=true;
+    
     [D1tagged_cueResponse,D1orD2taggingExpt,putAlignPeakAt,firstVal_D1tagged,optoFR_D1tagged,indsForAnalysisPerSess]=getAndSaveResponse(dd_more,'D1tagged',settings,[],[]);
     indsForAnalysisPerSessForUntag=nan(length(dd_more),2);
     indsForAnalysisPerSessForUntag(ismember(1:length(dd_more),D1tagged_cueResponse.fromWhichSess),:)=indsForAnalysisPerSess; 

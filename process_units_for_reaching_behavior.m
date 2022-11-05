@@ -3,13 +3,14 @@
 
 clear all
 
-onVPN=true; % if want to skip reading in spikes from raw data
+onVPN=false; %true; % if want to skip reading in spikes from raw data
 goodUnitLabel=2; 
 % for discarding units dead or moved away
 dsinds=225;
 percentThresh=5;
 timeStretchThresh=60*10; % in seconds
 plotInference=true;
+channelSpacing=20; % in microns
 % second row is Matlab index, first row is depth on probe, where 32 is most
 % dorsall, 1 is most ventral
 % for A1x32Edge
@@ -58,7 +59,7 @@ chDepthMapping=[1   21; ...
 data_loc_array=cell(2,6);
 
 i=1; data_loc_array{i,1}='20210311'; data_loc_array{i,2}='Oct_B'; 
-data_loc_array{i,3}=[]; %Z:\MICROSCOPE\Kim\WHISPER recs\Oct_B\20210311\phys\OctB2__g0\ % raw data phys location, or empty
+data_loc_array{i,3}='Z:\MICROSCOPE\Kim\WHISPER recs\Oct_B\20210311\phys\OctB2__g0'; % raw data phys location, or empty
 data_loc_array{i,4}=2300; % ventral depth of recording probe tip in microns relative to bregma
 data_loc_array{i,5}='pDMS-tail';
 data_loc_array{i,6}='Z:\MICROSCOPE\Kim\WHISPER recs\Oct_B\20210311\tbt';
@@ -69,13 +70,13 @@ data_loc_array{i,10}=2000; % dorsal-most depth that is posterior striatum
 data_loc_array{i,11}=2600; % ventral-most depth that is posterior striatum
 
 i=2; data_loc_array{i,1}='20210311'; data_loc_array{i,2}='dLight1'; 
-data_loc_array{i,3}=[]; %Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210311\phys\dLight1__g0 % raw data phys location, or empty
+data_loc_array{i,3}='Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210311\phys\dLight1__g0'; % raw data phys location, or empty
 data_loc_array{i,4}=2300; % ventral depth in microns relative to bregma
 data_loc_array{i,5}='pDMS-tail';
-data_loc_array{i,6}='/Users/kim/Desktop/Example data/20210302 dLight1/tbt';
-data_loc_array{i,7}='/Users/kim/Desktop/Example data/20210302 dLight1/spike output dLight_3__g0';
-data_loc_array{i,8}='/Users/kim/Desktop/Example data/20210302 dLight1/SU aligned to behavior';
-data_loc_array{i,9}='dLight1.bin';
+data_loc_array{i,6}='Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210311\tbt';
+data_loc_array{i,7}='Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210311\phys\dLight1__g0';
+data_loc_array{i,8}='Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210311\SU aligned to behavior';
+data_loc_array{i,9}='dLight1__g0_t0.nidq.bin';
 data_loc_array{i,10}=2000; % dorsal-most depth that is posterior striatum
 data_loc_array{i,11}=2600; % ventral-most depth that is posterior striatum
 
@@ -86,8 +87,16 @@ for i=1:size(data_loc_array,1)
     [physiology_tbt,beh2_tbt,behavior_tbt,photometry_tbt]=loadReachingExptPhysData(data_loc_array(i,:));
     % get spikes
     dd=dir(data_loc_array{i,7});
+    disp(['Processing ' data_loc_array{i,7}]);
+    didSomeSpikes=false; % just for debugging
     for j=1:length(dd)
         if ~isempty(regexp(dd(j).name,'spikes'))
+
+            % just for debugging
+            if didSomeSpikes==true
+                break
+            end
+
             % load spikes
             a=load([data_loc_array{i,7} sep dd(j).name]);
             if ~isfield(a,'spikes')
@@ -95,6 +104,10 @@ for i=1:size(data_loc_array,1)
                 continue
             end
             spikes=a.spikes;
+
+            % just for debugging
+            didSomeSpikes=true;
+
             switch dd(j).name
                 case 'spikes.mat'
                     trodeChsForSpikes=[1 2 3 4];
@@ -183,9 +196,26 @@ for i=1:size(data_loc_array,1)
                 % discard trials where unit dead or moved away
                 [physiology_tbt.(['unit' num2str(currAssign) '_dontUseTrials']),physiology_tbt.(['unit' num2str(currAssign) '_meanFR'])]=inferUnitStability(unit_data,physiology_tbt,dsinds,percentThresh,timeStretchThresh,plotInference);
                 % get depth of unit
-                trodeChsForSpikes(end)
+                physiology_tbt.(['unit' num2str(currAssign) '_depth'])=getUnitDepth_forWHISPER(trodeChsForSpikes(end), chDepthMapping, channelSpacing, data_loc_array{i,4}); 
+                if physiology_tbt.(['unit' num2str(currAssign) '_depth'])>=data_loc_array{i,10} && physiology_tbt.(['unit' num2str(currAssign) '_depth'])<=data_loc_array{i,11}
+                    physiology_tbt.(['unit' num2str(currAssign) '_inStructure'])=true;
+                else
+                    physiology_tbt.(['unit' num2str(currAssign) '_inStructure'])=false;
+                end
                 % get waveform features
-                [physiology_tbt.(['unit' num2str(currAssign) '_halfwidth']), physiology_tbt.(['unit' num2str(currAssign) '_peakToTrough']), physiology_tbt.(['unit' num2str(currAssign) '_amp']), physiology_tbt.(['unit' num2str(currAssign) '_avWaveforms'])]=getWaveformFeatures(filtspikes_without_sweeps(spikes,0,'assigns',currAssign),spikes.params.Fs);
+                % note getWaveformFeatures returns the average spike
+                % amplitude but only on the channel where the unit was
+                % first detected, not the largest spike
+                [physiology_tbt.(['unit' num2str(currAssign) '_halfwidth']), physiology_tbt.(['unit' num2str(currAssign) '_peakToTrough']), ~, physiology_tbt.(['unit' num2str(currAssign) '_avWaveforms'])]=getWaveformFeatures(filtspikes_without_sweeps(spikes,0,'assigns',currAssign),spikes.params.Fs);
+                physiology_tbt.(['unit' num2str(currAssign) '_amp'])=amp(si(end));
+                % use unit details to classify as type of striatum unit
+                [physiology_tbt.(['unit' num2str(currAssign) '_isFS']),physiology_tbt.(['unit' num2str(currAssign) '_isTAN']),physiology_tbt.(['unit' num2str(currAssign) '_isSPN']),physiology_tbt.(['unit' num2str(currAssign) '_isLowFRThin'])]=classifyStriatumUnits(physiology_tbt.(['unit' num2str(currAssign) '_halfwidth']),physiology_tbt.(['unit' num2str(currAssign) '_meanFR']));
+                % save unit details for this unit only
+                % will be used later to group units
+                if ~exist([data_loc_array{i,8} sep 'unit_details'],'dir')
+                    mkdir([data_loc_array{i,8} sep 'unit_details']);
+                end
+                saveUnitDets([data_loc_array{i,8} sep 'unit_details'],physiology_tbt,currAssign);
             end
             % save unit details for these spikes
             if ~exist([data_loc_array{i,8} sep 'unit_details'],'dir')
@@ -196,11 +226,25 @@ for i=1:size(data_loc_array,1)
     end
 end
 
-%% 3. Sort units by depth, discard units not in pDMS-tail
+%% 3. Load data locations
+dd=cell(1,size(data_loc_array,1));
+for i=1:size(data_loc_array,1)
+    % load locations of SU data aligned to behavior
+    % e.g., 'Z:\MICROSCOPE\Kim\WHISPER recs\Mar_3\20210721\SU aligned to behavior';
+    dd{i}=data_loc_array{i,8};
+end
 
-%% 4. Sort units by type
+%% 4. Make figures
+% choose type of response to plot
+response_to_plot='cued_success'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+% choose how to divide up units, up to 4 groups (e.g., D1 tagged, D1
+% untagged, D2 tagged, D2 untagged)
+% will filter based on the presence of a string in the filename, e.g.,
+% 'D1tagged' in 'unit138onCh6_D1tagged_cuedSuccess.mat'
+unitsGrps=[1 2 3 4];
+unitLabels=['D1tagged' '__' 'D2tagged' '__'];
 
-%% 5. Identify opto-tagged units
 
+scriptToOrganizeD1vD2unitResponses_wrapper(dd);
 
 

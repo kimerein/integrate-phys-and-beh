@@ -21,7 +21,7 @@ unitbaseline=settings.unitbaseline;
 % getCDs=true;
 % normalizePSTHs=false;
 
-maxUnitsPerSess=settings.maxUnitsPerSess;
+maxUnitsPerSess=300;
 if iscell(datadir)
     dd=datadir;
 else
@@ -36,7 +36,6 @@ excluded=zeros(1,maxUnitsPerSess*length(dd));
 D1orD2taggingExpt=nan(length(dd),1); % will be 1 for D1, 2 for A2a tagging session
 fromWhichSess=nan(1,maxUnitsPerSess*length(dd));
 excluded_count=1;
-units_count=1;
 for j=1:length(dd)
     if iscell(dd)
         datadir=dd{j};
@@ -71,7 +70,6 @@ for j=1:length(dd)
             excluded_count=excluded_count+1;
             continue % failed unit test
         end
-        excluded_count=excluded_count+1;
         
 %         if excludeHigherFR
 %             if nanmean(nanmean(a.dataout.y(:,1:beforeOptoBaseline),1),2)>excludeAboveFR
@@ -120,8 +118,8 @@ for j=1:length(dd)
             aligncomp_x=nan(maxUnitsPerSess*length(dd),length([nan(1,padsize-ma) a.alignComp.x(1:upTo2-(padsize-ma))]));
             aligncomp_y=nan(maxUnitsPerSess*length(dd),length([nan(1,padsize-ma) nanmean(a.alignComp.y(:,1:upTo2-(padsize-ma)),1)]));
         end
-        aligncomp_x(units_count,:)=[nan(1,padsize-ma) a.alignComp.x(1:upTo2-(padsize-ma))];
-        aligncomp_y(units_count,:)=[nan(1,padsize-ma) nanmean(a.alignComp.y(:,1:upTo2-(padsize-ma)),1)];
+        aligncomp_x(excluded_count,:)=[nan(1,padsize-ma) a.alignComp.x(1:upTo2-(padsize-ma))];
+        aligncomp_y(excluded_count,:)=[nan(1,padsize-ma) nanmean(a.alignComp.y(:,1:upTo2-(padsize-ma)),1)];
         if ~isempty(unitbyunit_x)
             upTo=size(unitbyunit_x,2);
         else
@@ -144,28 +142,24 @@ for j=1:length(dd)
                 error(disp([ls(i).name ' has no trials and cannot initialize']));
             end
             disp([ls(i).name ' has no trials']);
-            unitbyunit_x(units_count,:)=[nan(size(unitbyunit_x(1,:)))];
-            unitbyunit_y(units_count,:)=[nan(size(unitbyunit_x(1,:)))];
+            unitbyunit_x(excluded_count,:)=[nan(size(unitbyunit_x(1,:)))];
+            unitbyunit_y(excluded_count,:)=[nan(size(unitbyunit_x(1,:)))];
         else
-            unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
-            unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(:,1:upTo),1)];
+            unitbyunit_x(excluded_count,:)=[a.dataout.x(1:upTo)];
+            unitbyunit_y(excluded_count,:)=[nanmean(a.dataout.y(:,1:upTo),1)];
         end
-        ns(units_count)=curr_n;
-        fromWhichSess(units_count)=j*ones(size(curr_n));
+        ns(excluded_count)=curr_n;
+        fromWhichSess(excluded_count)=j*ones(size(curr_n));
 
         disp(['Added ' ls(i).name]);
-        units_count=units_count+1;
+        excluded_count=excluded_count+1;
     end
 end
 excluded_count=excluded_count-1;
-units_count=units_count-1;
-ns=ns(1:units_count);
-fromWhichSess=fromWhichSess(1:units_count);
+ns=ns(1:excluded_count);
+fromWhichSess=fromWhichSess(1:excluded_count);
 excluded=excluded(1:excluded_count);
-unitbyunit_x=unitbyunit_x(1:units_count,:);
-unitbyunit_y=unitbyunit_y(1:units_count,:);
-aligncomp_x=aligncomp_x(1:units_count,:);
-aligncomp_y=aligncomp_y(1:units_count,:);
+unitbyunit_x=unitbyunit_x(1:exclu)
 
 % if settings.studyOptoTag==true
 %     [firstValNtimesBaseVar,optoFRoverBaseline,indsForAnalysisPerSess]=studyOptoTagging(unitbyunit_y, unitbyunit_x, settings, fromWhichSess, indsForAnalysisPerSess);
