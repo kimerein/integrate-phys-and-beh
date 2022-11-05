@@ -29,12 +29,12 @@ else
 end
 unitbyunit_x=[];
 unitbyunit_y=[];
-ns=nan(1,maxUnitsPerSess*length(dd));
+ns=nan(maxUnitsPerSess*length(dd),1);
 aligncomp_x=[];
 aligncomp_y=[];
-excluded=zeros(1,maxUnitsPerSess*length(dd));
+excluded=zeros(maxUnitsPerSess*length(dd),1);
 D1orD2taggingExpt=nan(length(dd),1); % will be 1 for D1, 2 for A2a tagging session
-fromWhichSess=nan(1,maxUnitsPerSess*length(dd));
+fromWhichSess=nan(maxUnitsPerSess*length(dd),1);
 excluded_count=1;
 units_count=1;
 for j=1:length(dd)
@@ -48,7 +48,6 @@ for j=1:length(dd)
         else
             a=load([ls(i).folder '\' ls(i).name]);
         end
-        disp(i);
         
         if ~isempty(regexp(ls(i).name, 'D1tagged'))
             D1orD2taggingExpt(j)=1;
@@ -112,7 +111,11 @@ for j=1:length(dd)
             a.dataout.x=a.dataout.x(mi-unitbaseline:end);
             a.dataout.y=a.dataout.y(:,mi-unitbaseline:end);
         end
-        curr_n=nansum(dontUseTrials==0);
+        if ~isempty(dontUseTrials)
+            curr_n=nansum(dontUseTrials==0);
+        else
+            curr_n=nansum(any(a.dataout.y>0,2));
+        end
         if ~isempty(unitbyunit_x)
             upTo2=size(aligncomp_x,2);
         else

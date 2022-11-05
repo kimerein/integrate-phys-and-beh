@@ -3,6 +3,7 @@ function addTag=isThisUnitOptoTagged(optoAligned_phys_tbt,currAssign,ifTaggedWhi
 ds_for_sustained=10; % downsamp bins
 
 pval1=optoAligned_phys_tbt.(['unit' num2str(currAssign) '_pval1']);
+pval2=optoAligned_phys_tbt.(['unit' num2str(currAssign) '_pval2']);
 avAlignedToOpto=optoAligned_phys_tbt.(['unit' num2str(currAssign) '_avAlignedToOpto']);
 optoOnInUnitTimes=optoAligned_phys_tbt.('optoOnInUnitTimes');
 
@@ -10,19 +11,19 @@ switch ifTaggedWhichTag
     case 'none'
         addTag='';
     case 'D1'
-        if earlyIncrease(pval1) && sustainedIncrease(avAlignedToOpto,optoOnInUnitTimes,2,ds_for_sustained)
+        if earlyIncrease(pval1) && earlyIncrease(pval2) && sustainedIncrease(avAlignedToOpto,optoOnInUnitTimes,2,ds_for_sustained)
             addTag='D1tagged';
         else
             addTag='';
         end   
     case 'A2a'
-        if earlyIncrease(pval1) && sustainedIncrease(avAlignedToOpto,optoOnInUnitTimes,2,ds_for_sustained)
+        if earlyIncrease(pval1) && earlyIncrease(pval2) && sustainedIncrease(avAlignedToOpto,optoOnInUnitTimes,2,ds_for_sustained)
             addTag='A2atagged';
         else
             addTag='';
         end
     case 'Nkx2.1'
-        if earlyIncrease(pval1) && sustainedIncrease(avAlignedToOpto,optoOnInUnitTimes,3,ds_for_sustained)
+        if earlyIncrease(pval1) && earlyIncrease(pval2) && sustainedIncrease(avAlignedToOpto,optoOnInUnitTimes,3,ds_for_sustained)
             addTag='Nkxtagged';
         else
             addTag='';

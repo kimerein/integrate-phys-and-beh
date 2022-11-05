@@ -1,5 +1,14 @@
 function [out,dontUseTrials]=doUnitTest(foldername, unitname)
 
+temp=getCriteriaForUnitsToPlot();
+if ischar(temp)
+    if strcmp(temp,'alltrue')
+        out=true;
+        dontUseTrials=[];
+        return
+    end
+end
+
 % find details for this unit
 runit=regexp(unitname,'_');
 unitOnlyName=unitname(1:runit(1)-1);

@@ -144,6 +144,10 @@ for i=1:size(data_loc_array,1)
             gu=find(spikes.labels(:,2)==goodUnitLabel);
             % make opto-tagged alignment
             [~,tbtspikes]=organizeSpikesToMatch_physiology_tbt(spikes,physiology_tbt);
+            % if no good units, just continue
+            if isempty(gu)
+                continue
+            end
             optoAligned_phys_tbt=alignToOpto(addGoodUnitsAsFields(physiology_tbt,tbtspikes,2,1,false,true));
             optoAligned_phys_tbt=checkWaveformsDuringOpto(optoAligned_phys_tbt,tbtspikes);
             % save opto alignment
@@ -215,7 +219,7 @@ for i=1:size(data_loc_array,1)
                     mkdir([data_loc_array{i,8} sep 'unit_details']);
                 end
                 saveUnitDets([data_loc_array{i,8} sep 'unit_details'],physiology_tbt,currAssign,trodeChsForSpikes(end));
-%                 saveOptoTagDets([data_loc_array{i,8} sep 'opto_aligned'],optoAligned_phys_tbt,currAssign,trodeChsForSpikes(end));
+                saveOptoTagDets([data_loc_array{i,8} sep 'opto_aligned'],optoAligned_phys_tbt,currAssign,trodeChsForSpikes(end));
             end
             % save unit details for these spikes
             if ~exist([data_loc_array{i,8} sep 'unit_details'],'dir')
@@ -243,8 +247,10 @@ response_to_plot='cued_success'; % can be any of the directories created in save
 % [inStructure isFS isTAN isSPN isLowFRThin]
 plotUnitCriteria=[1 0 0 1 0];
 getCriteriaForUnitsToPlot(plotUnitCriteria);
+% plot some stuff
 
 % D1 v D1 untagged v D2 v D2 untagged
-% scriptToOrganizeD1vD2unitResponses_wrapper(dd);
+getCriteriaForUnitsToPlot('alltrue');
+scriptToOrganizeD1vD2unitResponses_wrapper(dd);
 
 
