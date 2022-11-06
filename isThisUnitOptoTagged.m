@@ -49,9 +49,9 @@ function out=sustainedIncrease(avAlignedToOpto,optoOnInUnitTimes,nTimesStdevAtBa
 avAlignedToOpto=downSampAv(avAlignedToOpto,ds);
 optoOnInUnitTimes=downSampAv(optoOnInUnitTimes,ds);
 
-meanAtBaseline=mean(avAlignedToOpto(optoOnInUnitTimes==0));
-stdAtBaseline=std(avAlignedToOpto(optoOnInUnitTimes==0));
-meanDuringOpto=mean(avAlignedToOpto(optoOnInUnitTimes==1));
+meanAtBaseline=mean(avAlignedToOpto(optoOnInUnitTimes==0),'all','omitnan');
+stdAtBaseline=std(avAlignedToOpto(optoOnInUnitTimes==0),'all','omitnan');
+meanDuringOpto=mean(avAlignedToOpto(optoOnInUnitTimes==1),'all','omitnan');
 out=meanDuringOpto>meanAtBaseline+(stdAtBaseline*nTimesStdevAtBaseline);
 
 end

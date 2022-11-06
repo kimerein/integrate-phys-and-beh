@@ -1,4 +1,4 @@
-function [cueCD,uncueCD,lateUncueCD,unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,excluded,ns,D1orD2taggingExpt,firstValNtimesBaseVar,optoFRoverBaseline,indsForAnalysisPerSess,fromWhichSess]=alignToCompanion(datadir,getCDs,cueCD,uncueCD,lateUncueCD,onlyTakeTheseUnits,settings,indsForAnalysisPerSess)
+function [cueCD,uncueCD,lateUncueCD,unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,excluded,ns,D1orD2taggingExpt,firstValNtimesBaseVar,optoFRoverBaseline,indsForAnalysisPerSess,fromWhichSess,fromWhichUnit]=alignToCompanion(datadir,getCDs,cueCD,uncueCD,lateUncueCD,onlyTakeTheseUnits,settings,indsForAnalysisPerSess)
 
 firstValNtimesBaseVar=[]; optoFRoverBaseline=[];
 
@@ -12,6 +12,7 @@ padsize=settings.padsize;
 testForAlignment=settings.testForAlignment;
 unitbaseline=settings.unitbaseline;
 % beforeOptoBaseline=settings.beforeOptoBaseline;
+keepAllSingleTrials=settings.keepAllSingleTrials;
 
 % excludeHigherFR=false;
 % cutAtTime=3; % stop plotting this many seconds after max of alignment companion
@@ -22,6 +23,9 @@ unitbaseline=settings.unitbaseline;
 % normalizePSTHs=false;
 
 maxUnitsPerSess=settings.maxUnitsPerSess;
+if keepAllSingleTrials==true
+    maxUnitsPerSess=maxUnitsPerSess*30;
+end
 if iscell(datadir)
     dd=datadir;
 else
@@ -35,8 +39,10 @@ aligncomp_y=[];
 excluded=zeros(maxUnitsPerSess*length(dd),1);
 D1orD2taggingExpt=nan(length(dd),1); % will be 1 for D1, 2 for A2a tagging session
 fromWhichSess=nan(maxUnitsPerSess*length(dd),1);
+fromWhichUnit=nan(maxUnitsPerSess*length(dd),1);
 excluded_count=1;
 units_count=1;
+trials_count=1;
 for j=1:length(dd)
     if iscell(dd)
         datadir=dd{j};
@@ -131,8 +137,13 @@ for j=1:length(dd)
             aligncomp_x=nan(maxUnitsPerSess*length(dd),length([nan(1,padsize-ma) a.alignComp.x(1:upTo2-(padsize-ma))]));
             aligncomp_y=nan(maxUnitsPerSess*length(dd),length([nan(1,padsize-ma) nanmean(a.alignComp.y(:,1:upTo2-(padsize-ma)),1)]));
         end
-        aligncomp_x(units_count,:)=[nan(1,padsize-ma) a.alignComp.x(1:upTo2-(padsize-ma))];
-        aligncomp_y(units_count,:)=[nan(1,padsize-ma) nanmean(a.alignComp.y(:,1:upTo2-(padsize-ma)),1)];
+        if keepAllSingleTrials==false
+            aligncomp_x(units_count,:)=[nan(1,padsize-ma) a.alignComp.x(1:upTo2-(padsize-ma))];
+            aligncomp_y(units_count,:)=[nan(1,padsize-ma) nanmean(a.alignComp.y(:,1:upTo2-(padsize-ma)),1)];
+        else
+            aligncomp_x(trials_count:trials_count+size(a.dataout.y,1)-1,:)=repmat([nan(1,padsize-ma) a.alignComp.x(1:upTo2-(padsize-ma))],size(a.dataout.y,1),1);
+            aligncomp_y(trials_count:trials_count+size(a.dataout.y,1)-1,:)=repmat([nan(1,padsize-ma) nanmean(a.alignComp.y(:,1:upTo2-(padsize-ma)),1)],size(a.dataout.y,1),1);
+        end
         if ~isempty(unitbyunit_x)
             upTo=size(unitbyunit_x,2);
         else
@@ -157,9 +168,18 @@ for j=1:length(dd)
             disp([ls(i).name ' has no trials']);
             unitbyunit_x(units_count,:)=[nan(size(unitbyunit_x(1,:)))];
             unitbyunit_y(units_count,:)=[nan(size(unitbyunit_x(1,:)))];
+            fromWhichUnit(trials_count)=units_count;
+            trials_count=trials_count+1;
         else
-            unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
-            unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(:,1:upTo),1)];
+            if keepAllSingleTrials==false
+                unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
+                unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(:,1:upTo),1)];
+            else
+                unitbyunit_x(trials_count:trials_count+size(a.dataout.y,1)-1,:)=repmat(a.dataout.x(1:upTo),size(a.dataout.y,1),1);
+                unitbyunit_y(trials_count:trials_count+size(a.dataout.y,1)-1,:)=[a.dataout.y(:,1:upTo)];
+            end
+            fromWhichUnit(trials_count:trials_count+size(a.dataout.y,1)-1)=units_count;
+            trials_count=trials_count+size(a.dataout.y,1);
         end
         ns(units_count)=curr_n;
         fromWhichSess(units_count)=j*ones(size(curr_n));
@@ -170,13 +190,24 @@ for j=1:length(dd)
 end
 excluded_count=excluded_count-1;
 units_count=units_count-1;
+trials_count=trials_count-size(a.dataout.y,1);
 ns=ns(1:units_count);
 fromWhichSess=fromWhichSess(1:units_count);
 excluded=excluded(1:excluded_count);
-unitbyunit_x=unitbyunit_x(1:units_count,:);
-unitbyunit_y=unitbyunit_y(1:units_count,:);
-aligncomp_x=aligncomp_x(1:units_count,:);
-aligncomp_y=aligncomp_y(1:units_count,:);
+fromWhichUnit=fromWhichUnit(1:trials_count);
+if keepAllSingleTrials==false
+    unitbyunit_x=unitbyunit_x(1:units_count,:);
+    unitbyunit_y=unitbyunit_y(1:units_count,:);
+    aligncomp_x=aligncomp_x(1:units_count,:);
+    aligncomp_y=aligncomp_y(1:units_count,:);
+else
+    unitbyunit_x=unitbyunit_x(1:trials_count,:);
+    unitbyunit_y=unitbyunit_y(1:trials_count,:);
+    aligncomp_x=aligncomp_x(1:trials_count,:);
+    aligncomp_y=aligncomp_y(1:trials_count,:);
+
+end
+
 
 % if settings.studyOptoTag==true
 %     [firstValNtimesBaseVar,optoFRoverBaseline,indsForAnalysisPerSess]=studyOptoTagging(unitbyunit_y, unitbyunit_x, settings, fromWhichSess, indsForAnalysisPerSess);

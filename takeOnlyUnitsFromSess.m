@@ -1,0 +1,11 @@
+function D1tagged_cueResponse=takeOnlyUnitsFromSess(D1tagged_cueResponse,takeTheseSess)
+
+D1tagged_cueResponse.unitbyunit_x=D1tagged_cueResponse.unitbyunit_x(ismember(D1tagged_cueResponse.fromWhichSess,takeTheseSess),:);
+D1tagged_cueResponse.unitbyunit_y=D1tagged_cueResponse.unitbyunit_y(ismember(D1tagged_cueResponse.fromWhichSess,takeTheseSess),:);
+D1tagged_cueResponse.aligncomp_x=D1tagged_cueResponse.aligncomp_x(ismember(D1tagged_cueResponse.fromWhichSess,takeTheseSess),:);
+D1tagged_cueResponse.aligncomp_y=D1tagged_cueResponse.aligncomp_y(ismember(D1tagged_cueResponse.fromWhichSess,takeTheseSess),:);
+D1tagged_cueResponse.excluded=D1tagged_cueResponse.excluded(ismember(D1tagged_cueResponse.fromWhichSess,takeTheseSess));
+D1tagged_cueResponse.ns=D1tagged_cueResponse.ns(ismember(D1tagged_cueResponse.fromWhichSess,takeTheseSess));
+D1tagged_cueResponse.fromWhichSess=D1tagged_cueResponse.fromWhichSess(ismember(D1tagged_cueResponse.fromWhichSess,takeTheseSess));
+
+end

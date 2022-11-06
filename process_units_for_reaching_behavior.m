@@ -246,7 +246,7 @@ end
 
 %% 4. Make figures
 % choose type of response to plot
-response_to_plot='cued_success'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+response_to_plot='uncued_failure'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 
 % doUnitTest.m is used to test whether to include unit in this plot
 % will include unit if unitdets match the following
@@ -266,9 +266,22 @@ Response=getAndSaveResponse(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlot
 % untagged_Response=takeOnlyUnitsFromSess(untagged_Response,unique(tagged_Response.fromWhichSess));
 
 % plot some stuff
+plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',Response,1); % down sample factor is last arg
+plotVariousSUResponsesAlignedToBeh('scatterInTimeWindows',Response,[-1 0.25],[0.25 4]); % time windows relative to alignment companion peak
+plotVariousSUResponsesAlignedToBeh('ZscoredAndSmoothed',Response,[-1 0.25],[0.25 4]); % time windows relative to alignment companion peak
+plotVariousSUResponsesAlignedToBeh('populationVectorCorrelation',Response,0.25,[0.25 4]); % time bins step, then slice at time window
+plotVariousSUResponsesAlignedToBeh('trialVectorCorrelation',Response,0.25,[0.25 4]); % time bins step, then slice at time window
+
+% For success
+takewin1=[2.25 3.56]-3.2476; % relative to peak of alignment companion
+takewin2=[3.56 7.56]-3.2476;
+% For failure
+% takewin1=[2.25 3]-3.2476; % relative to peak of alignment companion
+% takewin2=[3 3.88]-3.2476;
+sliceAtTimeWindow=[0.3 4]; % relative to peak of alignment companion
 
 
-% D1 v D1 untagged v D2 v D2 untagged
+
 % scriptToOrganizeD1vD2unitResponses is old and probably won't work
 % getCriteriaForUnitsToPlot('alltrue');
 % scriptToOrganizeD1vD2unitResponses_wrapper(dd);

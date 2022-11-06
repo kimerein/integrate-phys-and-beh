@@ -2,7 +2,7 @@ function [isFS,isTAN,isSPN,isLowFRThin]=classifyStriatumUnits(halfmaxWidth,meanF
 
 % modified from Berke, Okatan, Skurski, Eichenbaum. 2004. Neuron.
 
-if halfmaxWidth<2.188*10^-4
+if halfmaxWidth<2*10^-4
     if meanFR>=10^0.1
         % FS
         isFS=true;
@@ -15,8 +15,8 @@ if halfmaxWidth<2.188*10^-4
         isSPN=false;
         isLowFRThin=true;
     end
-elseif halfmaxWidth>3e-4
-    if meanFR>1.5
+elseif halfmaxWidth>3.2e-4
+    if meanFR>3
         % TAN
         isFS=false;
         isTAN=true;
