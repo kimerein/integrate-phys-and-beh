@@ -50,7 +50,7 @@ avAlignedToOpto=downSampAv(avAlignedToOpto,ds);
 optoOnInUnitTimes=downSampAv(optoOnInUnitTimes,ds);
 
 meanAtBaseline=mean(avAlignedToOpto(optoOnInUnitTimes==0),'all','omitnan');
-stdAtBaseline=std(avAlignedToOpto(optoOnInUnitTimes==0),'all','omitnan');
+stdAtBaseline=std(avAlignedToOpto(optoOnInUnitTimes==0),0,'all','omitnan');
 meanDuringOpto=mean(avAlignedToOpto(optoOnInUnitTimes==1),'all','omitnan');
 out=meanDuringOpto>meanAtBaseline+(stdAtBaseline*nTimesStdevAtBaseline);
 

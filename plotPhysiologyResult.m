@@ -343,6 +343,61 @@ switch alignTo
                 end
             end
         end
+    case 'failure_noSuccessBeforeAndNoReachingAfter'
+        typeOfReach=true;
+        useReach='combo';
+        excludeWithinTimeWindow=6; % in sec
+        excludeWithinInds=floor(excludeWithinTimeWindow/mode(diff(nanmean(behavior_tbt.times,1))));
+        excludeAfterTimeWindow=[0.5 4]; % seconds after
+        excludeAfterInds=[floor(excludeAfterTimeWindow/mode(diff(nanmean(behavior_tbt.times,1))))];
+        useCombo=behavior_tbt.reachBatch_miss_reachStarts+behavior_tbt.reachBatch_miss_reachStarts_pawOnWheel+behavior_tbt.pelletmissingreach_reachStarts+behavior_tbt.reachBatch_drop_reachStarts+behavior_tbt.reachBatch_drop_reachStarts_pawOnWheel;
+        for i=1:size(useCombo,1)
+            f=find(useCombo(i,:)>0.05,1,'first');
+            if isempty(f)
+                continue
+            end
+            % exclude if this reach preceded by a success within 6 sec
+            for j=1:length(f)
+                currf=f(j);
+                starter=currf-excludeWithinInds;
+                if starter<1
+                    starter=1;
+                end
+                if any(behavior_tbt.success_reachStarts(i,starter:currf)>0.5 | behavior_tbt.reachBatch_success_reachStarts(i,starter:currf)>0.5 | behavior_tbt.reachBatch_success_reachStarts_pawOnWheel(i,starter:currf)>0.5)
+                    % success before this, exclude
+                    upto=currf+10;
+                    if upto>length(useCombo(i,:))
+                        upto=length(useCombo(i,:));
+                    end
+                    useCombo(i,starter:upto)=0;
+                end
+            end
+            % exclude if this reach followed by any additional reach more than
+            % 0.5 seconds later
+            for j=1:length(f)
+                currf=f(j);
+                starter=currf+excludeAfterInds(1);
+                if starter>size(behavior_tbt.success_reachStarts,2)
+                    starter=size(behavior_tbt.success_reachStarts,2);
+                end
+                ender=currf+excludeAfterInds(2);
+                if ender>size(behavior_tbt.success_reachStarts,2)
+                    ender=size(behavior_tbt.success_reachStarts,2);
+                end
+                if any(behavior_tbt.all_reachBatch(i,starter:ender)>0.5)
+                    % reach after this, exclude
+                    upto=currf+10;
+                    if upto>length(useCombo(i,:))
+                        upto=length(useCombo(i,:));
+                    end
+                    fromto=currf-10;
+                    if fromto<1
+                        fromto=1;
+                    end
+                    useCombo(i,fromto:upto)=0;
+                end
+            end
+        end
     case 'misses_and_pelletMissing_and_drop'
         typeOfReach=true;
         useReach='combo';
