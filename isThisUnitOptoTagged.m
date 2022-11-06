@@ -11,19 +11,19 @@ switch ifTaggedWhichTag
     case 'none'
         addTag='';
     case 'D1'
-        if earlyIncrease(pval1) && earlyIncrease(pval2) && sustainedIncrease(avAlignedToOpto,optoOnInUnitTimes,2,ds_for_sustained)
+        if earlyIncrease(pval1) && earlyIncrease(pval2) && sustainedIncrease(avAlignedToOpto,optoOnInUnitTimes,1.2,ds_for_sustained)
             addTag='D1tagged';
         else
             addTag='';
         end   
     case 'A2a'
-        if earlyIncrease(pval1) && earlyIncrease(pval2) && sustainedIncrease(avAlignedToOpto,optoOnInUnitTimes,2,ds_for_sustained)
+        if earlyIncrease(pval1) && earlyIncrease(pval2) && sustainedIncrease(avAlignedToOpto,optoOnInUnitTimes,1.2,ds_for_sustained)
             addTag='A2atagged';
         else
             addTag='';
         end
     case 'Nkx2.1'
-        if earlyIncrease(pval1) && earlyIncrease(pval2) && sustainedIncrease(avAlignedToOpto,optoOnInUnitTimes,3,ds_for_sustained)
+        if earlyIncrease(pval1) && earlyIncrease(pval2) && sustainedIncrease(avAlignedToOpto,optoOnInUnitTimes,2,ds_for_sustained)
             addTag='Nkxtagged';
         else
             addTag='';
@@ -32,7 +32,7 @@ switch ifTaggedWhichTag
         error('do not recognize ifTaggedWhichTag in isThisUnitOptoTagged.m');
 end
 
-suppressFigs=false;
+suppressFigs=true;
 if suppressFigs==false
     if ~strcmp(addTag,'')
         figure(); 

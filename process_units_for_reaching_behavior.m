@@ -57,7 +57,7 @@ chDepthMapping=[1   21; ...
 % location of SU aligned to behavior, raw data binary name
 
 % ultimately, ingest this from .csv file
-dataTable='C:\Users\sabatini\Downloads\Spike sorting analysis - EXAMPLE data locations on server.csv';
+dataTable='C:\Users\sabatini\Downloads\Spike sorting analysis - EXAMPLE data locations on server (1).csv';
 data_loc_array=table2cell(readtable(dataTable,'Format','%s%s%s%u%s%s%s%s%s%u%u%s'));
 
 % data_loc_array=cell(2,6);
@@ -246,7 +246,7 @@ end
 
 %% 4. Make figures
 % choose type of response to plot
-response_to_plot='cued_failure_then_noReach'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+response_to_plot='uncued_success'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 
 % doUnitTest.m is used to test whether to include unit in this plot
 % will include unit if unitdets match the following
@@ -272,13 +272,6 @@ plotVariousSUResponsesAlignedToBeh('ZscoredAndSmoothed',Response,[-1 0.25],[0.25
 plotVariousSUResponsesAlignedToBeh('populationVectorCorrelation',Response,0.25,[0.25 4]); % time bins step, then slice at time window
 plotVariousSUResponsesAlignedToBeh('trialVectorCorrelation',Response,0.25,[0.25 4]); % time bins step, then slice at time window
 
-% For success
-takewin1=[2.25 3.56]-3.2476; % relative to peak of alignment companion
-takewin2=[3.56 7.56]-3.2476;
-% For failure
-% takewin1=[2.25 3]-3.2476; % relative to peak of alignment companion
-% takewin2=[3 3.88]-3.2476;
-sliceAtTimeWindow=[0.3 4]; % relative to peak of alignment companion
 
 
 

@@ -131,8 +131,8 @@ ZeroAt=takewin1;
 temp=activityD1tagged.unitbyunit_y;
 temp=temp-mean(temp,2,'omitnan');
 temp=temp./std(temp,0,2,'omitnan');
-Zscored_D1tagged=temp-repmat(mean(temp(:,timesD1>=ZeroAt(1) & timesD1<=ZeroAt(2)),2,'omitnan'),1,size(temp,2));
-% Zscored_D1tagged=temp;
+% Zscored_D1tagged=temp-repmat(mean(temp(:,timesD1>=ZeroAt(1) & timesD1<=ZeroAt(2)),2,'omitnan'),1,size(temp,2));
+Zscored_D1tagged=temp;
 
 useUnits=nanmean([D1temp D1temp_2ndwin],2)>0.1;
 temp=Zscored_D1tagged;
