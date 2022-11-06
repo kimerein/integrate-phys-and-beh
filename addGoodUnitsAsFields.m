@@ -1,8 +1,26 @@
-function [physiology_tbt,tbt_unit_phys,strunits]=addGoodUnitsAsFields(physiology_tbt,spikes,goodUnitLabel,binsize,bsmooth,rmExistingUnitFields)
+function [physiology_tbt,tbt_unit_phys,strunits]=addGoodUnitsAsFields(varargin)
 
 % binsize in ms
 
 % rmExistingUnitFields=false;
+
+if length(varargin)==6
+    physiology_tbt=varargin{1};
+    spikes=varargin{2};
+    goodUnitLabel=varargin{3};
+    binsize=varargin{4};
+    bsmooth=varargin{5};
+    rmExistingUnitFields=varargin{6};
+    suppressFigs=false;
+elseif length(varargin)==7
+    physiology_tbt=varargin{1};
+    spikes=varargin{2};
+    goodUnitLabel=varargin{3};
+    binsize=varargin{4};
+    bsmooth=varargin{5};
+    rmExistingUnitFields=varargin{6};
+    suppressFigs=varargin{7};
+end
 
 maxTrialDuration=nanmax(physiology_tbt.cuetimes_wrt_trial_start(1:end));
 
@@ -46,7 +64,9 @@ else
     end
 end
 
-figure();
+if suppressFigs==false
+    figure();
+end
 tbt_unit_phys=cell(1,length(useAssigns));
 for i=1:length(useAssigns)
     if isempty(strunits)
@@ -76,11 +96,15 @@ for i=1:length(useAssigns)
     end
     tmp=cat(3,sumacrossunits,ns); 
     sumacrossunits=nansum(tmp,3);
-    plot(x,y);
-    hold all;
+    if suppressFigs==false
+        plot(x,y);
+        hold all;
+    end
 end
 physiology_tbt.unitTimes=repmat(c,size(ns,1),1);
-plot(nanmean(physiology_tbt.cuetimes_wrt_trial_start,1),nanmean(physiology_tbt.cue,1)*10,'Color','b');
+if suppressFigs==false
+    plot(nanmean(physiology_tbt.cuetimes_wrt_trial_start,1),nanmean(physiology_tbt.cue,1)*10,'Color','b');
+end
 
 
 if isempty(strunits) % didn't reassign any unit names

@@ -173,6 +173,7 @@ cueLikeShiftInds=nan(1,size(tempdata,1));
 otherLikeShiftInds=nan(1,size(tempdata,1));
 hasCue=zeros(1,size(tempdata,1));
 for i=1:size(tempdata,1)
+    tempdata(i,fbeyond:end)=0;
     f=find(tempdata(i,:)>0.01,1,'first');
     if isempty(f)
         continue

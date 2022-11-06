@@ -11,8 +11,7 @@ percentThresh=5;
 timeStretchThresh=60*10; % in seconds
 plotInference=false;
 channelSpacing=20; % in microns
-skipIfBehaviorAlignmentsAlreadyExist=true; % if true, will skip any units for which a behavior alignment already exists in the cue sub-folder
-% BUT NOTE WILL STILL REPOPULATE UNIT DETAILS
+skipIfBehaviorAlignmentsAlreadyExist=false; % if true, will skip any units for which a behavior alignment already exists in the cue sub-folder
 % second row is Matlab index, first row is depth on probe, where 32 is most
 % dorsall, 1 is most ventral
 % for A1x32Edge
@@ -177,33 +176,25 @@ for i=1:size(data_loc_array,1)
                 % 
                 if skipIfBehaviorAlignmentsAlreadyExist==true
                     if cue_alignment_file_exists([data_loc_array{i,8} sep 'cue'], currAssign, trodeChsForSpikes(end))
-                        skipBehAlign=true;
-                    else
-                        skipBehAlign=false;
+                        continue
                     end
-                else
-                    skipBehAlign=false;
                 end
                 addTag=isThisUnitOptoTagged(optoAligned_phys_tbt,currAssign,data_loc_array{i,12});
                 % check whether QC figure already exists for this unit
                 [sue,qc_fname]=SU_QC_file_exists(data_loc_array{i,8}, currAssign, trodeChsForSpikes(end));
-                if skipBehAlign==false
-                    if ~sue && onVPN==false
-                        % make behavior alignments and single unit QC figs
-                        unit_data=saveBehaviorAlignmentsSingleNeuron(physiology_tbt,spikes,currAssign,beh2_tbt,forplot_trodeChs,trodeChsForSpikes(end),data_loc_array{i,8},addTag,data_loc_array{i,3},data_loc_array{i,9});
-                    else
-                        if sue==false
-                            % make QC fig without reading in raw data
-                            unit_data=saveBehaviorAlignmentsSingleNeuron(physiology_tbt,spikes,currAssign,beh2_tbt,forplot_trodeChs,trodeChsForSpikes(end),data_loc_array{i,8},addTag,data_loc_array{i,3},[]);
-                        else
-                            % just redo behavior alignments, skipping QC fig
-                            spikes.skipQC=true;
-                            saveBehaviorAlignmentsSingleNeuron(physiology_tbt,spikes,currAssign,beh2_tbt,forplot_trodeChs,trodeChsForSpikes(end),data_loc_array{i,8},addTag,data_loc_array{i,3},[]);
-                            unit_data=[data_loc_array{i,8} sep qc_fname];
-                        end
-                    end
+                if ~sue && onVPN==false
+                    % make behavior alignments and single unit QC figs
+                    unit_data=saveBehaviorAlignmentsSingleNeuron(physiology_tbt,spikes,currAssign,beh2_tbt,forplot_trodeChs,trodeChsForSpikes(end),data_loc_array{i,8},addTag,data_loc_array{i,3},data_loc_array{i,9});
                 else
-                    unit_data=[data_loc_array{i,8} sep qc_fname];
+                    if sue==false
+                        % make QC fig without reading in raw data
+                        unit_data=saveBehaviorAlignmentsSingleNeuron(physiology_tbt,spikes,currAssign,beh2_tbt,forplot_trodeChs,trodeChsForSpikes(end),data_loc_array{i,8},addTag,data_loc_array{i,3},[]);
+                    else
+                        % just redo behavior alignments, skipping QC fig
+                        spikes.skipQC=true;
+                        saveBehaviorAlignmentsSingleNeuron(physiology_tbt,spikes,currAssign,beh2_tbt,forplot_trodeChs,trodeChsForSpikes(end),data_loc_array{i,8},addTag,data_loc_array{i,3},[]);
+                        unit_data=[data_loc_array{i,8} sep qc_fname];
+                    end
                 end
                 % discard trials where unit dead or moved away
                 [physiology_tbt.(['unit' num2str(currAssign) '_dontUseTrials']),physiology_tbt.(['unit' num2str(currAssign) '_meanFR'])]=inferUnitStability(unit_data,physiology_tbt,dsinds,percentThresh,timeStretchThresh,plotInference);
@@ -215,7 +206,10 @@ for i=1:size(data_loc_array,1)
                     physiology_tbt.(['unit' num2str(currAssign) '_inStructure'])=false;
                 end
                 % get waveform features
-                [physiology_tbt.(['unit' num2str(currAssign) '_halfwidth']), physiology_tbt.(['unit' num2str(currAssign) '_peakToTrough']), ~, physiology_tbt.(['unit' num2str(currAssign) '_avWaveforms'])]=getSUWaveformFeatures(filtspikes_without_sweeps(spikes,0,'assigns',currAssign),spikes.params.Fs);
+                % note getWaveformFeatures returns the average spike
+                % amplitude but only on the channel where the unit was
+                % first detected, not the largest spike
+                [physiology_tbt.(['unit' num2str(currAssign) '_halfwidth']), physiology_tbt.(['unit' num2str(currAssign) '_peakToTrough']), ~, physiology_tbt.(['unit' num2str(currAssign) '_avWaveforms'])]=getWaveformFeatures(filtspikes_without_sweeps(spikes,0,'assigns',currAssign),spikes.params.Fs);
                 physiology_tbt.(['unit' num2str(currAssign) '_amp'])=amp(si(end));
                 % use unit details to classify as type of striatum unit
                 [physiology_tbt.(['unit' num2str(currAssign) '_isFS']),physiology_tbt.(['unit' num2str(currAssign) '_isTAN']),physiology_tbt.(['unit' num2str(currAssign) '_isSPN']),physiology_tbt.(['unit' num2str(currAssign) '_isLowFRThin'])]=classifyStriatumUnits(physiology_tbt.(['unit' num2str(currAssign) '_halfwidth']),physiology_tbt.(['unit' num2str(currAssign) '_meanFR']));
@@ -251,7 +245,7 @@ response_to_plot='cued_success'; % can be any of the directories created in save
 % doUnitTest.m is used to test whether to include unit in this plot
 % will include unit if unitdets match the following
 % [inStructure isFS isTAN isSPN isLowFRThin]
-plotUnitCriteria=[-100 0 0 1 0]; % -100 is a wildcard, else 0 (false) and 1 (true)
+plotUnitCriteria=[1 0 0 1 0];
 getCriteriaForUnitsToPlot(plotUnitCriteria);
 % read in some units
 dd_more=cell(1,length(dd));
@@ -261,15 +255,13 @@ end
 whichUnitsToGrab='_'; % '_' for all units, or can be something like 'D1tagged'
 Response=getAndSaveResponse(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
 % for opto-tagging comparing tagged v untagged
-% [tagged_Response,D1orD2taggingExpt,putAlignPeakAt]=getAndSaveResponse(dd_more,'D1tagged',settings,[],[]);
-% [untagged_Response]=getAndSaveResponse(dd_more,'__',settings,putAlignPeakAt,[]);
-% untagged_Response=takeOnlyUnitsFromSess(untagged_Response,unique(tagged_Response.fromWhichSess));
+% [D1tagged_Response,D1orD2taggingExpt,putAlignPeakAt]=getAndSaveResponse(dd_more,'D1tagged',settings,[],[]);
+% [D1untagged_Response]=getAndSaveResponse(dd_more,'__',settings,putAlignPeakAt,[]);
+% D1untagged_Response=takeOnlyUnitsFromSess(D1untagged_Response,unique(D1tagged_Response.fromWhichSess));
 
 % plot some stuff
 
-
 % D1 v D1 untagged v D2 v D2 untagged
-% scriptToOrganizeD1vD2unitResponses is old and probably won't work
 % getCriteriaForUnitsToPlot('alltrue');
 % scriptToOrganizeD1vD2unitResponses_wrapper(dd);
 

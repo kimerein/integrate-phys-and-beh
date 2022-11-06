@@ -275,6 +275,9 @@ if typeOfReach==true
     else
         [behAligned,alignInds,fromInputRow]=alignToEvent(temp,withinRange_inds,temp,nIndsToTake,90);
     end
+    tempBehAligned=nan(size(temp,1),size(behAligned,2));
+    tempBehAligned(~isnan(alignInds),:)=behAligned;
+    behAligned=tempBehAligned;
     alignTimes=getValsFromRows(behavior_tbt.times_wrt_trial_start,alignInds,fromInputRow);
     indsIntoPhoto=getIndsFromRows(photometry_tbt.(getCorrectTime_wrtTrialStart),alignTimes,fromInputRow);
     [alignedData,alignedAt]=alignRowsToInds(photometry_tbt.(plotPhotoField),indsIntoPhoto,nanmin(indsIntoPhoto),fromInputRow,alignPeaks,indsFromPeak,minBaselineSamples);
@@ -373,8 +376,8 @@ if typeOfReach==true
         alignmentCompanion.x=behTimes;
         alignmentCompanion.y=behAligned;
     end
-    disp([num2str(size(behAligned,1)) ' events averaged']);
-    n_events_in_av=size(behAligned,1);
+    disp([num2str(sum(~all(isnan(behAligned),2),'all','omitnan')) ' events averaged']);
+    n_events_in_av=sum(~all(isnan(behAligned),2),'all','omitnan');
 end
 
 end

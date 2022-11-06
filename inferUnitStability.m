@@ -2,7 +2,7 @@ function [dontUseTrials,averageFiringRate]=inferUnitStability(f,physiology_tbt,d
 
 if ischar(f)
     % this is a figure
-    a=openfig(f);
+    a=openfig(f,'invisible');
     %'/Users/kim/Desktop/Example data/20210621 Mar_6/SU aligned to behavior/unit201onCh11__QC.fig'
     % load firing rate and waveform amplitude across experiment from Kim's SU QC figure
     dataObjs = findobj(a,'-property','YData','Type','Line');
