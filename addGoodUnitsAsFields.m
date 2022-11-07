@@ -79,7 +79,11 @@ for i=1:length(useAssigns)
             strunit=strunits{i};
         end
     end
-    [n,c,edges,x,y,ns]=psth_wStd_trialByTrial(filtspikes(spikes,0,'assigns',useAssigns(i)),binsize,bsmooth,maxTrialDuration,[],[]); % y is smoothed if 3rd arg is true
+    if length(spikes.sweeps.trials)==size(physiology_tbt.phys_timepoints,1)
+        [n,c,edges,x,y,ns]=psth_wStd_trialByTrial(filtspikes(spikes,0,'assigns',useAssigns(i)),binsize,bsmooth,maxTrialDuration,[],spikes.sweeps.trials); % y is smoothed if 3rd arg is true
+    else
+        [n,c,edges,x,y,ns]=psth_wStd_trialByTrial(filtspikes(spikes,0,'assigns',useAssigns(i)),binsize,bsmooth,maxTrialDuration,[],[]); % y is smoothed if 3rd arg is true
+    end
     % nan out everything after trial ends
     for j=1:size(ns,1)-1
         triallength=physiology_tbt.phys_timepoints(j+1,1)-physiology_tbt.phys_timepoints(j,1);
