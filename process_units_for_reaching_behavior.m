@@ -271,7 +271,7 @@ for i=1:size(data_loc_array,1)
     dd{i}=data_loc_array{i,8};
 end
 
-%% 4. Make figures
+%% 4. Make figures -- about 6 min to load 84 sessions of unit data
 % choose type of response to plot
 response_to_plot='cue'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 

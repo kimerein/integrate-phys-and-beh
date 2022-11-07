@@ -36,12 +36,16 @@ end
 
 function meanAcrossUnits(activityD1tagged,downSampFac)
 
-figure(); 
-plot(nanmean(activityD1tagged.unitbyunit_x,1),activityD1tagged.unitbyunit_y'); 
-hold on; plot(nanmean(activityD1tagged.aligncomp_x,1),nanmean(activityD1tagged.aligncomp_y,1),'Color','b'); 
-xlabel('Time (sec)');
-ylabel('Firing rate');
-title('With raw times');
+if size(activityD1tagged.unitbyunit_y,1)>100
+    % skip unit by unit plot because too crowded
+else
+    figure();
+    plot(nanmean(activityD1tagged.unitbyunit_x,1),activityD1tagged.unitbyunit_y');
+    hold on; plot(nanmean(activityD1tagged.aligncomp_x,1),nanmean(activityD1tagged.aligncomp_y,1),'Color','b');
+    xlabel('Time (sec)');
+    ylabel('Firing rate');
+    title('With raw times');
+end
 
 temp=nanmean(activityD1tagged.aligncomp_x,1);
 [~,f]=nanmax(nanmean(activityD1tagged.aligncomp_y,1));
@@ -49,10 +53,14 @@ timesD1=nanmean(activityD1tagged.unitbyunit_x,1)-temp(f);
 if any(isnan(timesD1))
     timesD1=fillmissing(timesD1,'linear');
 end
-figure(); plot(timesD1,activityD1tagged.unitbyunit_y'); 
-title('Align companion at time=0');
-xlabel('Time (sec)');
-ylabel('Firing rate');
+if size(activityD1tagged.unitbyunit_y,1)>100
+    % skip unit by unit plot because too crowded
+else
+    figure(); plot(timesD1,activityD1tagged.unitbyunit_y');
+    title('Align companion at time=0');
+    xlabel('Time (sec)');
+    ylabel('Firing rate');
+end
 
 plotMeanAndSE(downSampMatrix(activityD1tagged.unitbyunit_y,downSampFac),'k',downSampAv(timesD1,downSampFac));
 title('Mean and se across units');
@@ -256,8 +264,17 @@ suppressPlots=true;
 u=unique(Response.fromWhichUnit);
 allRs=[];
 allRs_slice=[];
+% timesD1 is times relative to alignment companion peak
+temp=nanmean(Response.aligncomp_x,1);
+[~,f]=nanmax(nanmean(Response.aligncomp_y,1));
+timesD1=nanmean(Response.unitbyunit_x,1)-temp(f);
+if any(isnan(timesD1))
+    timesD1=fillmissing(timesD1,'linear');
+end
+disp(['averaging this many units: ' num2str(length(u))]);
 for i=1:length(u)
-    [Rs,Rs_slice]=trialVectorCorrelation(filterResponseToOneSU(Response,u(i)),timeBinsStep,sliceAtTimeWindow,suppressPlots);
+    
+    [Rs,Rs_slice]=trialVectorCorrelation(filterResponseToOneSU(Response,u(i)),timeBinsStep,sliceAtTimeWindow,suppressPlots,timesD1);
     if all(isnan(Rs)) | isempty(Rs)
         continue
     end
@@ -272,13 +289,6 @@ end
 allRs=allRs./length(u);
 allRs_slice=allRs_slice./length(u);
 
-% timesD1 is times relative to alignment companion peak
-temp=nanmean(Response.aligncomp_x,1);
-[~,f]=nanmax(nanmean(Response.aligncomp_y,1));
-timesD1=nanmean(Response.unitbyunit_x,1)-temp(f);
-if any(isnan(timesD1))
-    timesD1=fillmissing(timesD1,'linear');
-end
 timeBins=timesD1(1):timeBinsStep:timesD1(end);
 figure();
 imagesc(timeBins(timeBins<9.5),timeBins(timeBins<9.5),allRs(timeBins<9.5,timeBins<9.5));
@@ -289,7 +299,7 @@ title(['Slice at time window ' num2str(sliceAtTimeWindow(1)) ' to ' num2str(slic
 
 end
 
-function [Rs,Rs_slice]=trialVectorCorrelation(activityD1tagged,timeBinsStep,sliceAtTimeWindow,suppressPlots)
+function [Rs,Rs_slice]=trialVectorCorrelation(activityD1tagged,timeBinsStep,sliceAtTimeWindow,suppressPlots,timesD1)
 
 % Zscore using mean within each trial, std across all trials
 % Then show cov(A,B)/(std(A)*std(B))
@@ -306,11 +316,13 @@ if s.keepAllSingleTrials~=true
 end
 
 % timesD1 is times relative to alignment companion peak
-temp=nanmean(activityD1tagged.aligncomp_x,1);
-[~,f]=nanmax(nanmean(activityD1tagged.aligncomp_y,1));
-timesD1=nanmean(activityD1tagged.unitbyunit_x,1)-temp(f);
-if any(isnan(timesD1))
-    timesD1=fillmissing(timesD1,'linear');
+if isempty(timesD1)
+    temp=nanmean(activityD1tagged.aligncomp_x,1);
+    [~,f]=nanmax(nanmean(activityD1tagged.aligncomp_y,1));
+    timesD1=nanmean(activityD1tagged.unitbyunit_x,1)-temp(f);
+    if any(isnan(timesD1))
+        timesD1=fillmissing(timesD1,'linear');
+    end
 end
 
 % Population vector after the outcome (or whatever is in alignment

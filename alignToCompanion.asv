@@ -1,4 +1,4 @@
-function [cueCD,uncueCD,lateUncueCD,unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,excluded,ns,D1orD2taggingExpt,firstValNtimesBaseVar,optoFRoverBaseline,indsForAnalysisPerSess,fromWhichSess,fromWhichUnit]=alignToCompanion(datadir,getCDs,cueCD,uncueCD,lateUncueCD,onlyTakeTheseUnits,settings,indsForAnalysisPerSess)
+function [cueCD,uncueCD,lateUncueCD,unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,excluded,ns,D1orD2taggingExpt,firstValNtimesBaseVar,optoFRoverBaseline,indsForAnalysisPerSess,fromWhichSess,fromWhichUnit,fromWhichSess_forTrials]=alignToCompanion(datadir,getCDs,cueCD,uncueCD,lateUncueCD,onlyTakeTheseUnits,settings,indsForAnalysisPerSess)
 
 firstValNtimesBaseVar=[]; optoFRoverBaseline=[];
 
@@ -9,6 +9,7 @@ normalizePSTHs=settings.normalizePSTHs;
 suppressPlots=settings.suppressPlots;
 % excludeAboveFR=settings.excludeAboveFR; % in spikes / sec, exclude units with average firing rate above this
 padsize=settings.padsize;
+takeAtLeastNIndsAfterAlignComp=settings.takeAtLeastNIndsAfterAlignComp;
 testForAlignment=settings.testForAlignment;
 unitbaseline=settings.unitbaseline;
 % beforeOptoBaseline=settings.beforeOptoBaseline;
@@ -81,6 +82,13 @@ for j=1:length(dd)
         end
         excluded_count=excluded_count+1;
 
+        if isempty(a.dataout)
+            disp([ls(i).folder '\' ls(i).name ' is empty ... skipping']);
+            excluded(excluded_count)=1;
+            excluded_count=excluded_count+1;
+            continue
+        end
+
         % throw out trials where unit dead or out of range
         if any(dontUseTrials==1)
             a.dataout.y=a.dataout.y(dontUseTrials==0,:);
@@ -135,8 +143,8 @@ for j=1:length(dd)
         end
         if isempty(aligncomp_x)
             % initialize
-            aligncomp_x=nan(maxUnitsPerSess*length(dd),length([nan(1,padsize-ma) a.alignComp.x(1:upTo2-(padsize-ma))]));
-            aligncomp_y=nan(maxUnitsPerSess*length(dd),length([nan(1,padsize-ma) nanmean(a.alignComp.y(:,1:upTo2-(padsize-ma)),1)]));
+            aligncomp_x=nan(maxUnitsPerSess*length(dd),length([nan(1,padsize-ma) a.alignComp.x(1:upTo2-(padsize-ma)) takeAtLeastNIndsAfterAlignComp]));
+            aligncomp_y=nan(maxUnitsPerSess*length(dd),length([nan(1,padsize-ma) nanmean(a.alignComp.y(:,1:upTo2-(padsize-ma)),1) takeAtLeastNIndsAfterAlignComp]));
         end
         if keepAllSingleTrials==false
             aligncomp_x(units_count,:)=[nan(1,padsize-ma) a.alignComp.x(1:upTo2-(padsize-ma))];
@@ -170,6 +178,7 @@ for j=1:length(dd)
             unitbyunit_x(units_count,:)=[nan(size(unitbyunit_x(1,:)))];
             unitbyunit_y(units_count,:)=[nan(size(unitbyunit_x(1,:)))];
             fromWhichUnit(trials_count)=units_count;
+            fromWhichSess_forTrials(trials_count)=j*ones(size(curr_n));
             trials_count=trials_count+1;
         else
             if keepAllSingleTrials==false
@@ -180,6 +189,7 @@ for j=1:length(dd)
                 unitbyunit_y(trials_count:trials_count+size(a.dataout.y,1)-1,:)=[a.dataout.y(:,1:upTo)];
             end
             fromWhichUnit(trials_count:trials_count+size(a.dataout.y,1)-1)=units_count;
+            fromWhichSess_forTrials(trials_count:trials_count+size(a.dataout.y,1)-1)=j*ones(size(curr_n));
             trials_count=trials_count+size(a.dataout.y,1);
         end
         ns(units_count)=curr_n;
@@ -196,6 +206,7 @@ ns=ns(1:units_count);
 fromWhichSess=fromWhichSess(1:units_count);
 excluded=excluded(1:excluded_count);
 fromWhichUnit=fromWhichUnit(1:trials_count);
+fromWhichSess_forTrials=fromWhichSess_forTrials(1:trials_count);
 if keepAllSingleTrials==false
     unitbyunit_x=unitbyunit_x(1:units_count,:);
     unitbyunit_y=unitbyunit_y(1:units_count,:);

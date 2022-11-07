@@ -81,6 +81,13 @@ for j=1:length(dd)
         end
         excluded_count=excluded_count+1;
 
+        if isempty(a.dataout)
+            disp([ls(i).folder '\' ls(i).name ' is empty ... skipping']);
+            excluded(excluded_count)=1;
+            excluded_count=excluded_count+1;
+            continue
+        end
+
         % throw out trials where unit dead or out of range
         if any(dontUseTrials==1)
             a.dataout.y=a.dataout.y(dontUseTrials==0,:);
@@ -151,10 +158,13 @@ for j=1:length(dd)
             upTo=length(a.dataout.x);
         end
         if upTo>size(a.dataout.x,2)
+            % pad dataout
+            a.dataout.x=[a.dataout.x nan(size(a.dataout.x,1),upTo-size(a.dataout.x,2))];
+            a.dataout.y=[a.dataout.y nan(size(a.dataout.y,1),upTo-size(a.dataout.y,2))];
             % truncate
-            unitbyunit_x=unitbyunit_x(:,1:size(a.dataout.x,2));
-            unitbyunit_y=unitbyunit_y(:,1:size(a.dataout.x,2));
-            upTo=size(unitbyunit_x,2);
+            % unitbyunit_x=unitbyunit_x(:,1:size(a.dataout.x,2));
+            % unitbyunit_y=unitbyunit_y(:,1:size(a.dataout.x,2));
+            % upTo=size(unitbyunit_x,2);
         end
         if isempty(unitbyunit_x)
             % initialize
