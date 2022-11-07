@@ -75,6 +75,10 @@ dontUseTrials=zeros(size(physiology_tbt.phys_timepoints,1),1);
 for i=1:size(physiology_tbt.phys_timepoints,1)
     temp=physiology_tbt.phys_timepoints(i,:);
     temp=temp(~isnan(temp) & temp~=0);
+    if isempty(temp)
+        dontUseTrials(i)=1;
+        continue
+    end
     isInRange_tempBegin=isWithinTimeRange(temp(1),ds_time(dropTimes==1),timestep);
     isInRange_tempEnd=isWithinTimeRange(temp(end),ds_time(dropTimes==1),timestep);
     if isInRange_tempBegin==1 && isInRange_tempEnd==1

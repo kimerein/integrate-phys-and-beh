@@ -13,9 +13,10 @@ plotInference=false;
 channelSpacing=20; % in microns
 skipIfBehaviorAlignmentsAlreadyExist=true; % if true, will skip any units for which a behavior alignment already exists in the cue sub-folder
 % CAN COMMENT OUT SOME BEHAVIOR ALIGNMENTS IN
-% saveBehaviorAlignmentsSingleNueron.m IF DON'T WANT TO REPOPULATE
+% saveBehaviorAlignmentsSingleNeuron.m IF DON'T WANT TO REPOPULATE
 % EVERYTHING
-skipUnitDetails=true; % if true, will skip populating the unit details
+skipUnitDetails=false; % if true, will skip populating the unit details
+skipUnitDetailsUnlessNoQCfig=true; % skips populating unit details unless QC fig does not yet exist
 % BUT NOTE WILL STILL REPOPULATE UNIT DETAILS
 % second row is Matlab index, first row is depth on probe, where 32 is most
 % dorsall, 1 is most ventral
@@ -229,7 +230,7 @@ for i=1:size(data_loc_array,1)
                 else
                     unit_data=[data_loc_array{i,8} sep qc_fname];
                 end
-                if skipUnitDetails==false
+                if skipUnitDetails==false && (skipUnitDetailsUnlessNoQCfig==false || (skipUnitDetailsUnlessNoQCfig==true && sue==false))
                     % discard trials where unit dead or moved away
                     [physiology_tbt.(['unit' num2str(currAssign) '_dontUseTrials']),physiology_tbt.(['unit' num2str(currAssign) '_meanFR'])]=inferUnitStability(unit_data,physiology_tbt,dsinds,percentThresh,timeStretchThresh,plotInference);
                     % get depth of unit
@@ -298,15 +299,20 @@ untagged_Response=takeOnlyUnitsFromSess(untagged_Response,unique(tagged_Response
 
 % plot some stuff
 plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',Response,1); % down sample factor is last arg
-plotVariousSUResponsesAlignedToBeh('scatterInTimeWindows',Response,[-1 0.25],[0.25 4]); % time windows relative to alignment companion peak
-out=plotVariousSUResponsesAlignedToBeh('modulationIndex',Response,[-1 0.25],[0.25 4]); % time windows relative to alignment companion peak
-modIndex=out.modIndex;
-plotVariousSUResponsesAlignedToBeh('ZscoredAndSmoothed',Response,[-1 0.25],[0.25 4]); % time windows relative to alignment companion peak
+out=plotVariousSUResponsesAlignedToBeh('scatterInTimeWindows',Response,[-3 0.25],[0.25 4]); % time windows relative to alignment companion peak
+out=plotVariousSUResponsesAlignedToBeh('modulationIndex',Response,[-3 0.25],[0.25 4]); % time windows relative to alignment companion peak
+plotVariousSUResponsesAlignedToBeh('ZscoredAndSmoothed',Response,[-3 0.25],[0.25 4]); % time windows relative to alignment companion peak
 plotVariousSUResponsesAlignedToBeh('populationVectorCorrelation',Response,0.25,[0.25 4]); % time bins step, then slice at time window
 plotVariousSUResponsesAlignedToBeh('trialVectorCorrelation',Response,0.25,[0.25 4]); % time bins step, then slice at time window
 
-
-
+% compare same unit responses to different events
+% line up same units using excluded field
+ Response2=varargin{3};
+        typeOfPlot=varargin{4};
+        [Response,Response2]=matchUnitsAcrossResponses(Response,Response2);
+        outResponse1=plotVariousSUResponsesAlignedToBeh({typeOfPlot,Response,varargin{5:end}});
+        outResponse2=plotVariousSUResponsesAlignedToBeh({typeOfPlot,Response2,varargin{5:end}});
+plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',Response1,Response2,'modulationIndex',0.25,[0.25 4]);
 
 % scriptToOrganizeD1vD2unitResponses is old and probably won't work
 % getCriteriaForUnitsToPlot('alltrue');

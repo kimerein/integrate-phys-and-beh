@@ -278,7 +278,7 @@ end
 
 %% 4. Make figures -- about 6 min to load 84 sessions of unit data
 % choose type of response to plot
-response_to_plot='cued_success'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+response_to_plot='cued_failure'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 
 % doUnitTest.m is used to test whether to include unit in this plot
 % will include unit if unitdets match the following
@@ -286,7 +286,7 @@ response_to_plot='cued_success'; % can be any of the directories created in save
 plotUnitCriteria=[-100 0 0 1 0]; % -100 is a wildcard, else 0 (false) and 1 (true)
 getCriteriaForUnitsToPlot(plotUnitCriteria);
 % read in some units
-dd_more=cell(1,length(dd));
+dd_more=cell(1,length(dd)); 
 for i=1:length(dd)
     dd_more{i}=[dd{i} sep response_to_plot];
 end
@@ -299,15 +299,15 @@ untagged_Response=takeOnlyUnitsFromSess(untagged_Response,unique(tagged_Response
 
 % plot some stuff
 plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',Response,1); % down sample factor is last arg
-plotVariousSUResponsesAlignedToBeh('scatterInTimeWindows',Response,[-1 0.25],[0.25 4]); % time windows relative to alignment companion peak
-out=plotVariousSUResponsesAlignedToBeh('modulationIndex',Response,[-1 0.25],[0.25 4]); % time windows relative to alignment companion peak
-modIndex=out.modIndex;
-plotVariousSUResponsesAlignedToBeh('ZscoredAndSmoothed',Response,[-1 0.25],[0.25 4]); % time windows relative to alignment companion peak
+out=plotVariousSUResponsesAlignedToBeh('scatterInTimeWindows',Response,[-3 0.25],[0.25 4]); % time windows relative to alignment companion peak
+out=plotVariousSUResponsesAlignedToBeh('modulationIndex',Response,[-3 0.25],[0.25 4]); % time windows relative to alignment companion peak
+plotVariousSUResponsesAlignedToBeh('ZscoredAndSmoothed',Response,[-3 0.25],[0.25 4]); % time windows relative to alignment companion peak
 plotVariousSUResponsesAlignedToBeh('populationVectorCorrelation',Response,0.25,[0.25 4]); % time bins step, then slice at time window
 plotVariousSUResponsesAlignedToBeh('trialVectorCorrelation',Response,0.25,[0.25 4]); % time bins step, then slice at time window
 
-
-
+% compare same unit responses to different events
+% line up same units using excluded field
+plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',Response1,Response2,'modulationIndex',[-3 0.25],[0.25 4]);
 
 % scriptToOrganizeD1vD2unitResponses is old and probably won't work
 % getCriteriaForUnitsToPlot('alltrue');

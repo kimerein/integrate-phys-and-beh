@@ -15,7 +15,7 @@ switch varargin{1}
     case 'scatterInTimeWindows'
         timeWindow1=varargin{3};
         timeWindow2=varargin{4};
-        scatterInTimeWindows(Response,timeWindow1,timeWindow2);
+        [out.timeWindow1_FR,out.timeWindow2_FR]=scatterInTimeWindows(Response,timeWindow1,timeWindow2);
     case 'modulationIndex'
         timeWindow1=varargin{3};
         timeWindow2=varargin{4};
@@ -34,8 +34,79 @@ switch varargin{1}
         trialVectorCorrelation_wrapper(Response,timeBinsStep,sliceAtTimeWindow);
         % for a single unit
         % trialVectorCorrelation(filterResponseToOneSU(Response,1),timeBinsStep,sliceAtTimeWindow);
+    case 'scatterResponseVsResponse'
+        Response2=varargin{3};
+        typeOfPlot=varargin{4};
+        [Response,Response2]=matchUnitsAcrossResponses(Response,Response2);
+        outResponse1=plotVariousSUResponsesAlignedToBeh(typeOfPlot,Response,varargin{5:end});
+        outResponse2=plotVariousSUResponsesAlignedToBeh(typeOfPlot,Response2,varargin{5:end});
+        switch typeOfPlot
+            case 'scatterInTimeWindows'
+                scatterTwoResponses(outResponse1.timeWindow1_FR,outResponse2.timeWindow1_FR); title('Time window 1 firing rates');
+                scatterTwoResponses(outResponse1.timeWindow2_FR,outResponse2.timeWindow2_FR); title('Time window 2 firing rates');
+                scatterTwoResponses(outResponse1.timeWindow2_FR./outResponse1.timeWindow1_FR,outResponse2.timeWindow2_FR./outResponse2.timeWindow1_FR); title('Time window 2 to 1 ratio');
+            case 'modulationIndex'
+                scatterTwoResponses(outResponse1.modIndex,outResponse2.modIndex); title('Modulation index');
+            case 'populationVectorCorrelation'
+            case 'trialVectorCorrelation'
+            otherwise
+                disp(['do not recognize scatterResponseVsResponse for plot type ' typeOfPlot]);
+        end
     otherwise
         error('Do not recognize first argument value in plotVariousSUResponsesAlignedToBeh.m');
+end
+
+end
+
+function scatterTwoResponses(r1,r2)
+
+figure();
+scatter(r1,r2);
+xlabel('Response 1');
+ylabel('Response 2');
+
+end
+
+function [Response,Response2]=matchUnitsAcrossResponses(Response,Response2)
+
+Response1_indsIntoExcluded=find(Response.excluded==0);
+Response2_indsIntoExcluded=find(Response2.excluded==0);
+useTheseUnitsResponse1=find(ismember(Response1_indsIntoExcluded,Response2_indsIntoExcluded));
+useTheseUnitsResponse2=find(ismember(Response2_indsIntoExcluded,Response1_indsIntoExcluded));
+Response=filterResponseToOneSU(Response,useTheseUnitsResponse1);
+Response2=filterResponseToOneSU(Response2,useTheseUnitsResponse2);
+
+end
+
+function out=filterResponseToOneSU(Response,whichUnitToUse)
+
+f=fieldnames(Response);
+fieldLikeResponseSize=size(Response.unitbyunit_y,1);
+if length(Response.fromWhichUnit)==fieldLikeResponseSize
+    % took all trials
+    whichUnit=Response.fromWhichUnit;
+elseif length(Response.fromWhichSess)==fieldLikeResponseSize
+    % took unit by unit
+    whichUnit=1:fieldLikeResponseSize;
+else
+    error('do not recognize structure of Response in plotVariousSUResponsesAlignedToBeh.m');
+end
+
+for i=1:length(f)
+    temp=Response.(f{i});
+    if size(temp,1)==fieldLikeResponseSize
+        % filter this field
+        if length(size(temp))>1
+            % 2D
+            out.(f{i})=temp(ismember(whichUnit,whichUnitToUse),:);
+        else
+            % 1D
+            out.(f{i})=temp(ismember(whichUnit,whichUnitToUse));
+        end
+    else
+        % don't filter this field
+        out.(f{i})=temp;
+    end
 end
 
 end
@@ -98,7 +169,7 @@ end
 
 end
 
-function scatterInTimeWindows(activityD1tagged,takewin1,takewin2)
+function [D1temp,D1temp_2ndwin]=scatterInTimeWindows(activityD1tagged,takewin1,takewin2)
 
 temp=nanmean(activityD1tagged.aligncomp_x,1);
 [~,f]=nanmax(nanmean(activityD1tagged.aligncomp_y,1));
@@ -238,28 +309,6 @@ end
 figure(); 
 plot(timeBins(1:end-1),Rs,'Color','k'); 
 title(['Slice at time window ' num2str(sliceAtTimeWindow(1)) ' to ' num2str(sliceAtTimeWindow(2)) ' seconds']);
-
-end
-
-function out=filterResponseToOneSU(Response,whichUnit)
-
-f=fieldnames(Response);
-for i=1:length(f)
-    temp=Response.(f{i});
-    if size(Response.(f{i}),1)==size(Response.fromWhichUnit,1)
-        % filter this field
-        if length(size(temp))>1
-            % 2D
-            out.(f{i})=temp(ismember(Response.fromWhichUnit,whichUnit),:);
-        else
-            % 1D
-            out.(f{i})=temp(ismember(Response.fromWhichUnit,whichUnit));
-        end
-    else
-        % don't filter this field
-        out.(f{i})=temp;
-    end
-end
 
 end
 
