@@ -246,7 +246,7 @@ end
 
 %% 4. Make figures
 % choose type of response to plot
-response_to_plot='uncued_success'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+response_to_plot='cued_success'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 
 % doUnitTest.m is used to test whether to include unit in this plot
 % will include unit if unitdets match the following
@@ -258,12 +258,12 @@ dd_more=cell(1,length(dd));
 for i=1:length(dd)
     dd_more{i}=[dd{i} sep response_to_plot];
 end
-whichUnitsToGrab='_'; % '_' for all units, or can be something like 'D1tagged'
-Response=getAndSaveResponse(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
+% whichUnitsToGrab='_'; % '_' for all units, or can be something like 'D1tagged'
+% Response=getAndSaveResponse(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
 % for opto-tagging comparing tagged v untagged
-% [tagged_Response,D1orD2taggingExpt,putAlignPeakAt]=getAndSaveResponse(dd_more,'D1tagged',settings,[],[]);
-% [untagged_Response]=getAndSaveResponse(dd_more,'__',settings,putAlignPeakAt,[]);
-% untagged_Response=takeOnlyUnitsFromSess(untagged_Response,unique(tagged_Response.fromWhichSess));
+[tagged_Response,D1orD2taggingExpt,putAlignPeakAt]=getAndSaveResponse(dd_more,'A2atagged',settingsForStriatumUnitPlots,[]);
+[untagged_Response]=getAndSaveResponse(dd_more,'__',settingsForStriatumUnitPlots,putAlignPeakAt);
+untagged_Response=takeOnlyUnitsFromSess(untagged_Response,unique(tagged_Response.fromWhichSess));
 
 % plot some stuff
 plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',Response,1); % down sample factor is last arg

@@ -46,6 +46,9 @@ title('With raw times');
 temp=nanmean(activityD1tagged.aligncomp_x,1);
 [~,f]=nanmax(nanmean(activityD1tagged.aligncomp_y,1));
 timesD1=nanmean(activityD1tagged.unitbyunit_x,1)-temp(f);
+if any(isnan(timesD1))
+    timesD1=fillmissing(timesD1,'movmean',5);
+end
 figure(); plot(timesD1,activityD1tagged.unitbyunit_y'); 
 title('Align companion at time=0');
 xlabel('Time (sec)');
@@ -86,6 +89,9 @@ function scatterInTimeWindows(activityD1tagged,takewin1,takewin2)
 temp=nanmean(activityD1tagged.aligncomp_x,1);
 [~,f]=nanmax(nanmean(activityD1tagged.aligncomp_y,1));
 timesD1=nanmean(activityD1tagged.unitbyunit_x,1)-temp(f);
+if any(isnan(timesD1))
+    timesD1=fillmissing(timesD1,'movmean',5);
+end
 
 figure(); 
 scatter(nanmean(activityD1tagged.unitbyunit_y(:,timesD1>=takewin1(1) & timesD1<=takewin1(2)),2)./nanmax(activityD1tagged.unitbyunit_y(:,1:200),[],2),nanmean(activityD1tagged.unitbyunit_y(:,timesD1>takewin2(1) & timesD1<=takewin2(2)),2)./nanmax(activityD1tagged.unitbyunit_y(:,1:200),[],2),[],'k');
@@ -120,6 +126,9 @@ function ZscoredAndSmoothed(activityD1tagged,takewin1,takewin2)
 temp=nanmean(activityD1tagged.aligncomp_x,1);
 [~,f]=nanmax(nanmean(activityD1tagged.aligncomp_y,1));
 timesD1=nanmean(activityD1tagged.unitbyunit_x,1)-temp(f);
+if any(isnan(timesD1))
+    timesD1=fillmissing(timesD1,'movmean',5);
+end
 
 D1temp=[nanmean(activityD1tagged.unitbyunit_y(:,timesD1>=takewin1(1) & timesD1<=takewin1(2)),2)];
 D1temp_2ndwin=[nanmean(activityD1tagged.unitbyunit_y(:,timesD1>=takewin2(1) & timesD1<=takewin2(2)),2)];
@@ -171,6 +180,9 @@ function populationVectorCorrelation(activityD1tagged,timeBinsStep,sliceAtTimeWi
 temp=nanmean(activityD1tagged.aligncomp_x,1);
 [~,f]=nanmax(nanmean(activityD1tagged.aligncomp_y,1));
 timesD1=nanmean(activityD1tagged.unitbyunit_x,1)-temp(f);
+if any(isnan(timesD1))
+    timesD1=fillmissing(timesD1,'movmean',5);
+end
 
 % Population vector after the outcome (or whatever is in alignment
 % companion)
@@ -264,6 +276,9 @@ allRs_slice=allRs_slice./length(u);
 temp=nanmean(Response.aligncomp_x,1);
 [~,f]=nanmax(nanmean(Response.aligncomp_y,1));
 timesD1=nanmean(Response.unitbyunit_x,1)-temp(f);
+if any(isnan(timesD1))
+    timesD1=fillmissing(timesD1,'movmean',5);
+end
 timeBins=timesD1(1):timeBinsStep:timesD1(end);
 figure();
 imagesc(timeBins(timeBins<9.5),timeBins(timeBins<9.5),allRs(timeBins<9.5,timeBins<9.5));
@@ -294,6 +309,9 @@ end
 temp=nanmean(activityD1tagged.aligncomp_x,1);
 [~,f]=nanmax(nanmean(activityD1tagged.aligncomp_y,1));
 timesD1=nanmean(activityD1tagged.unitbyunit_x,1)-temp(f);
+if any(isnan(timesD1))
+    timesD1=fillmissing(timesD1,'movmean',5);
+end
 
 % Population vector after the outcome (or whatever is in alignment
 % companion)

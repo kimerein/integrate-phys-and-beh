@@ -39,6 +39,7 @@ aligncomp_y=[];
 excluded=zeros(maxUnitsPerSess*length(dd),1);
 D1orD2taggingExpt=nan(length(dd),1); % will be 1 for D1, 2 for A2a tagging session
 fromWhichSess=nan(maxUnitsPerSess*length(dd),1);
+fromWhichSess_forTrials=nan(maxUnitsPerSess*length(dd),1);
 fromWhichUnit=nan(maxUnitsPerSess*length(dd),1);
 excluded_count=1;
 units_count=1;

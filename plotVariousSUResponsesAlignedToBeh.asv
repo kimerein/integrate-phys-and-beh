@@ -46,6 +46,9 @@ title('With raw times');
 temp=nanmean(activityD1tagged.aligncomp_x,1);
 [~,f]=nanmax(nanmean(activityD1tagged.aligncomp_y,1));
 timesD1=nanmean(activityD1tagged.unitbyunit_x,1)-temp(f);
+if any(isnan(timesD1))
+    timesD1=fillmissing(timesD1,'movmean',5);
+end
 figure(); plot(timesD1,activityD1tagged.unitbyunit_y'); 
 title('Align companion at time=0');
 xlabel('Time (sec)');
@@ -131,8 +134,8 @@ ZeroAt=takewin1;
 temp=activityD1tagged.unitbyunit_y;
 temp=temp-mean(temp,2,'omitnan');
 temp=temp./std(temp,0,2,'omitnan');
-Zscored_D1tagged=temp-repmat(mean(temp(:,timesD1>=ZeroAt(1) & timesD1<=ZeroAt(2)),2,'omitnan'),1,size(temp,2));
-% Zscored_D1tagged=temp;
+% Zscored_D1tagged=temp-repmat(mean(temp(:,timesD1>=ZeroAt(1) & timesD1<=ZeroAt(2)),2,'omitnan'),1,size(temp,2));
+Zscored_D1tagged=temp;
 
 useUnits=nanmean([D1temp D1temp_2ndwin],2)>0.1;
 temp=Zscored_D1tagged;
@@ -171,6 +174,9 @@ function populationVectorCorrelation(activityD1tagged,timeBinsStep,sliceAtTimeWi
 temp=nanmean(activityD1tagged.aligncomp_x,1);
 [~,f]=nanmax(nanmean(activityD1tagged.aligncomp_y,1));
 timesD1=nanmean(activityD1tagged.unitbyunit_x,1)-temp(f);
+if any(isnan(timesD1))
+    timesD1=fillmissing(timesD1,'movmean',5);
+end
 
 % Population vector after the outcome (or whatever is in alignment
 % companion)
@@ -246,7 +252,7 @@ allRs=[];
 allRs_slice=[];
 for i=1:length(u)
     [Rs,Rs_slice]=trialVectorCorrelation(filterResponseToOneSU(Response,u(i)),timeBinsStep,sliceAtTimeWindow,suppressPlots);
-    if all(isnan(Rs)) | i
+    if all(isnan(Rs)) | isempty(Rs)
         continue
     end
     if  isempty(allRs)
@@ -261,9 +267,12 @@ allRs=allRs./length(u);
 allRs_slice=allRs_slice./length(u);
 
 % timesD1 is times relative to alignment companion peak
-temp=nanmean(activityD1tagged.aligncomp_x,1);
-[~,f]=nanmax(nanmean(activityD1tagged.aligncomp_y,1));
-timesD1=nanmean(activityD1tagged.unitbyunit_x,1)-temp(f);
+temp=nanmean(Response.aligncomp_x,1);
+[~,f]=nanmax(nanmean(Response.aligncomp_y,1));
+timesD1=nanmean(Response.unitbyunit_x,1)-temp(f);
+if any(isnan(timesD1))
+    timesD1=fillmissing(timesD1,'movmean',5);
+end
 timeBins=timesD1(1):timeBinsStep:timesD1(end);
 figure();
 imagesc(timeBins(timeBins<9.5),timeBins(timeBins<9.5),allRs(timeBins<9.5,timeBins<9.5));
@@ -281,6 +290,9 @@ function [Rs,Rs_slice]=trialVectorCorrelation(activityD1tagged,timeBinsStep,slic
 % where A and B are vectors of the single unit's activity across trials at
 % time points a and b
 
+Rs=[];
+Rs_slice=[];
+
 s=settingsForStriatumUnitPlots();
 if s.keepAllSingleTrials~=true
     disp('Trial vector correlation requires single trial data ... cannot continue');
@@ -291,6 +303,9 @@ end
 temp=nanmean(activityD1tagged.aligncomp_x,1);
 [~,f]=nanmax(nanmean(activityD1tagged.aligncomp_y,1));
 timesD1=nanmean(activityD1tagged.unitbyunit_x,1)-temp(f);
+if any(isnan(timesD1))
+    timesD1=fillmissing(timesD1,'movmean',5);
+end
 
 % Population vector after the outcome (or whatever is in alignment
 % companion)
@@ -310,9 +325,8 @@ for i=1:length(timeBins)-1
         currpopD1=mean(Zscored_D1tagged(:,timesD1>timeBins(j) & timesD1<timeBins(j+1)),2,'omitnan');
         currpopD1(isnan(currpopD1))=0;
         R=corrcoef(popD1,currpopD1);
-        if all(isnan(R))
-            disp('R is nan, probably not enough trials');
-            return
+        if size(R,1)<2
+            continue
         else
             Rs(i,j)=R(1,2);
         end
@@ -337,7 +351,11 @@ for i=1:length(timeBins)-1
     currpopD1=mean(Zscored_D1tagged(:,timesD1>timeBins(i) & timesD1<timeBins(i+1)),2,'omitnan');
     currpopD1(isnan(currpopD1))=0;
     R=corrcoef(popD1,currpopD1);
-    Rs_slice(i)=R(1,2);
+    if size(R,1)<2
+        continue
+    else
+        Rs_slice(i)=R(1,2);
+    end
 end
 if suppressPlots==false
     figure();

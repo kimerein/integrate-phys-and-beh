@@ -1,6 +1,6 @@
 function [D1tagged_cueResponse,D1orD2taggingExpt,putAlignPeakAt]=getAndSaveResponse(dd_more,getThese,settings,putAlignPeakAtInput)
 
-[~,~,~,unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,excluded,ns,D1orD2taggingExpt,~,~,~,fromWhichSess,fromWhichUnit]=alignToCompanion(dd_more,false,[],[],[],getThese,settings,[]);
+[~,~,~,unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,excluded,ns,D1orD2taggingExpt,~,~,~,fromWhichSess,fromWhichUnit,fromWhichSess_forTrials]=alignToCompanion(dd_more,false,[],[],[],getThese,settings,[]);
 [~,ma]=nanmax(nanmean(aligncomp_y,1));
 temp=nanmean(aligncomp_x,1);
 putAlignPeakAt=temp(ma);
@@ -12,6 +12,7 @@ D1tagged_cueResponse.excluded=excluded;
 D1tagged_cueResponse.ns=ns;
 D1tagged_cueResponse.fromWhichSess=fromWhichSess;
 D1tagged_cueResponse.fromWhichUnit=fromWhichUnit;
+D1tagged_cueResponse.fromWhichSess_forTrials=fromWhichSess_forTrials;
 if ~isempty(putAlignPeakAtInput)
     D1tagged_cueResponse=putAlignmentAtTime(putAlignPeakAtInput,D1tagged_cueResponse);
 else

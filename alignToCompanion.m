@@ -1,4 +1,4 @@
-function [cueCD,uncueCD,lateUncueCD,unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,excluded,ns,D1orD2taggingExpt,firstValNtimesBaseVar,optoFRoverBaseline,indsForAnalysisPerSess,fromWhichSess,fromWhichUnit]=alignToCompanion(datadir,getCDs,cueCD,uncueCD,lateUncueCD,onlyTakeTheseUnits,settings,indsForAnalysisPerSess)
+function [cueCD,uncueCD,lateUncueCD,unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,excluded,ns,D1orD2taggingExpt,firstValNtimesBaseVar,optoFRoverBaseline,indsForAnalysisPerSess,fromWhichSess,fromWhichUnit,fromWhichSess_forTrials]=alignToCompanion(datadir,getCDs,cueCD,uncueCD,lateUncueCD,onlyTakeTheseUnits,settings,indsForAnalysisPerSess)
 
 firstValNtimesBaseVar=[]; optoFRoverBaseline=[];
 
@@ -39,6 +39,7 @@ aligncomp_y=[];
 excluded=zeros(maxUnitsPerSess*length(dd),1);
 D1orD2taggingExpt=nan(length(dd),1); % will be 1 for D1, 2 for A2a tagging session
 fromWhichSess=nan(maxUnitsPerSess*length(dd),1);
+fromWhichSess_forTrials=nan(maxUnitsPerSess*length(dd),1);
 fromWhichUnit=nan(maxUnitsPerSess*length(dd),1);
 excluded_count=1;
 units_count=1;
@@ -169,6 +170,7 @@ for j=1:length(dd)
             unitbyunit_x(units_count,:)=[nan(size(unitbyunit_x(1,:)))];
             unitbyunit_y(units_count,:)=[nan(size(unitbyunit_x(1,:)))];
             fromWhichUnit(trials_count)=units_count;
+            fromWhichSess_forTrials(trials_count)=j*ones(size(curr_n));
             trials_count=trials_count+1;
         else
             if keepAllSingleTrials==false
@@ -179,6 +181,7 @@ for j=1:length(dd)
                 unitbyunit_y(trials_count:trials_count+size(a.dataout.y,1)-1,:)=[a.dataout.y(:,1:upTo)];
             end
             fromWhichUnit(trials_count:trials_count+size(a.dataout.y,1)-1)=units_count;
+            fromWhichSess_forTrials(trials_count:trials_count+size(a.dataout.y,1)-1)=j*ones(size(curr_n));
             trials_count=trials_count+size(a.dataout.y,1);
         end
         ns(units_count)=curr_n;
@@ -195,6 +198,7 @@ ns=ns(1:units_count);
 fromWhichSess=fromWhichSess(1:units_count);
 excluded=excluded(1:excluded_count);
 fromWhichUnit=fromWhichUnit(1:trials_count);
+fromWhichSess_forTrials=fromWhichSess_forTrials(1:trials_count);
 if keepAllSingleTrials==false
     unitbyunit_x=unitbyunit_x(1:units_count,:);
     unitbyunit_y=unitbyunit_y(1:units_count,:);

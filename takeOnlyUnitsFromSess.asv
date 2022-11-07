@@ -17,11 +17,8 @@ Response.aligncomp_y=Response.aligncomp_y(ismember(sessionsMatchingRows,takeThes
 if length(Response.excluded)==length(sessionsMatchingRows)
     Response.excluded=Response.excluded(ismember(sessionsMatchingRows,takeTheseSess));
 end
-if length(Response.ns)==length(sessionsMatchingRows)
+if length(Response.excluded)==length(sessionsMatchingRows)
     Response.ns=Response.ns(ismember(sessionsMatchingRows,takeTheseSess));
-end
-if length(Response.fromWhichSess)==length(sessionsMatchingRows)
-    Response.fromWhichSess=Response.fromWhichSess(ismember(sessionsMatchingRows,takeTheseSess));
-end
+Response.fromWhichSess=Response.fromWhichSess(ismember(sessionsMatchingRows,takeTheseSess));
 
 end
