@@ -32,62 +32,69 @@ end
 % Bin spikes into PSTHs for behavior alignments
 phys_tbt=addGoodUnitsAsFields(phys_tbt,spikes,2,binsize,bsmooth,true,suppressFigs);
 
-% Save various alignments to behavior events
-% Cue
-event='cue';
+% % Save various alignments to behavior events
+% % Cue
+% event='cue';
+% timeWindow=[-1 16]; % in seconds from cue onset
+% subDir='cue';
+% [~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+% saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'cueAligned',dataout,alignComp,phys_timepointsComp);
+
+% All reaches, anytime
+event='all_reachBatch';
 timeWindow=[-1 16]; % in seconds from cue onset
-subDir='cue';
-[~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
-saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'cueAligned',dataout,alignComp,phys_timepointsComp);
+subDir='reach';
+[~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','any',timeWindow,[],suppressFigs); close all;
+saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'reachAligned',dataout,alignComp,phys_timepointsComp);
 
-% Cue followed by success
-event='cue_followedby_success';
-timeWindow=[-1 16]; % in seconds from cue onset
-subDir='cue_followedby_success';
-[~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
-saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'cueFollowedBySuccess',dataout,alignComp,phys_timepointsComp);
-
-% Cued success
-event='success_fromPerchOrWheel';
-timeWindow=[0 3]; % in seconds from cue onset
-subDir='cued_success';
-[~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
-saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'cuedSuccess',dataout,alignComp,phys_timepointsComp);
-
-% Cued failure
-event='misses_and_pelletMissing_and_drop';
-timeWindow=[0 3]; % in seconds from cue onset
-subDir='cued_failure';
-[~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
-saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'cuedFailure',dataout,alignComp,phys_timepointsComp);
-
-% Uncued success
-event='success_fromPerchOrWheel';
-timeWindow=[5 16]; % in seconds from cue onset
-subDir='uncued_success';
-[~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
-saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'uncuedSuccess',dataout,alignComp,phys_timepointsComp);
-
-% Uncued failure
-event='misses_and_pelletMissing_and_drop';
-timeWindow=[5 16]; % in seconds from cue onset
-subDir='uncued_failure';
-[~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
-saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'uncuedFailure',dataout,alignComp,phys_timepointsComp);
-
-% Cued failure and no reaching afterward
-event='failure_noSuccessBeforeAndNoReachingAfter';
-timeWindow=[0 3]; % in seconds from cue onset
-subDir='cued_failure_then_noReach';
-[~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
-saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'cuedFailureThenNoReach',dataout,alignComp,phys_timepointsComp);
-
-% Uncued failure and no reaching afterward
-event='failure_noSuccessBeforeAndNoReachingAfter';
-timeWindow=[5 16]; % in seconds from cue onset
-subDir='uncued_failure_then_noReach';
-[~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
-saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'uncuedFailureThenNoReach',dataout,alignComp,phys_timepointsComp);
+% % Cue followed by success
+% event='cue_followedby_success';
+% timeWindow=[-1 16]; % in seconds from cue onset
+% subDir='cue_followedby_success';
+% [~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+% saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'cueFollowedBySuccess',dataout,alignComp,phys_timepointsComp);
+% 
+% % Cued success
+% event='success_fromPerchOrWheel';
+% timeWindow=[0 3]; % in seconds from cue onset
+% subDir='cued_success';
+% [~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+% saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'cuedSuccess',dataout,alignComp,phys_timepointsComp);
+% 
+% % Cued failure
+% event='misses_and_pelletMissing_and_drop';
+% timeWindow=[0 3]; % in seconds from cue onset
+% subDir='cued_failure';
+% [~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+% saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'cuedFailure',dataout,alignComp,phys_timepointsComp);
+% 
+% % Uncued success
+% event='success_fromPerchOrWheel';
+% timeWindow=[5 16]; % in seconds from cue onset
+% subDir='uncued_success';
+% [~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+% saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'uncuedSuccess',dataout,alignComp,phys_timepointsComp);
+% 
+% % Uncued failure
+% event='misses_and_pelletMissing_and_drop';
+% timeWindow=[5 16]; % in seconds from cue onset
+% subDir='uncued_failure';
+% [~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+% saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'uncuedFailure',dataout,alignComp,phys_timepointsComp);
+% 
+% % Cued failure and no reaching afterward
+% event='failure_noSuccessBeforeAndNoReachingAfter';
+% timeWindow=[0 3]; % in seconds from cue onset
+% subDir='cued_failure_then_noReach';
+% [~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+% saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'cuedFailureThenNoReach',dataout,alignComp,phys_timepointsComp);
+% 
+% % Uncued failure and no reaching afterward
+% event='failure_noSuccessBeforeAndNoReachingAfter';
+% timeWindow=[5 16]; % in seconds from cue onset
+% subDir='uncued_failure_then_noReach';
+% [~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+% saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'uncuedFailureThenNoReach',dataout,alignComp,phys_timepointsComp);
 
 end
 

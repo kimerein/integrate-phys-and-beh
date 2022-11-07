@@ -12,6 +12,10 @@ timeStretchThresh=60*10; % in seconds
 plotInference=false;
 channelSpacing=20; % in microns
 skipIfBehaviorAlignmentsAlreadyExist=false; % if true, will skip any units for which a behavior alignment already exists in the cue sub-folder
+% CAN COMMENT OUT SOME BEHAVIOR ALIGNMENTS IN
+% saveBehaviorAlignmentsSingleNueron.m IF DON'T WANT TO REPOPULATE
+% EVERYTHING
+skipUnitDetails=true; % if true, will skip populating the unit details
 % BUT NOTE WILL STILL REPOPULATE UNIT DETAILS
 % second row is Matlab index, first row is depth on probe, where 32 is most
 % dorsall, 1 is most ventral
@@ -144,19 +148,23 @@ for i=1:size(data_loc_array,1)
             % find good units
             gu=find(spikes.labels(:,2)==goodUnitLabel);
             % make opto-tagged alignment
-            [~,tbtspikes]=organizeSpikesToMatch_physiology_tbt(spikes,physiology_tbt);
+            if skipUnitDetails==false
+                [~,tbtspikes]=organizeSpikesToMatch_physiology_tbt(spikes,physiology_tbt);
+            end
             % if no good units, just continue
             if isempty(gu)
                 continue
             end
-            optoAligned_phys_tbt=alignToOpto(addGoodUnitsAsFields(physiology_tbt,tbtspikes,2,1,false,true,true));
-            optoAligned_phys_tbt=checkWaveformsDuringOpto(optoAligned_phys_tbt,tbtspikes);
-            % save opto alignment
-            if ~exist([data_loc_array{i,8} sep 'opto_aligned'],'dir')
-                mkdir([data_loc_array{i,8} sep 'opto_aligned']);
+            if skipUnitDetails==false
+                optoAligned_phys_tbt=alignToOpto(addGoodUnitsAsFields(physiology_tbt,tbtspikes,2,1,false,true,true));
+                optoAligned_phys_tbt=checkWaveformsDuringOpto(optoAligned_phys_tbt,tbtspikes);
+                % save opto alignment
+                if ~exist([data_loc_array{i,8} sep 'opto_aligned'],'dir')
+                    mkdir([data_loc_array{i,8} sep 'opto_aligned']);
+                end
+                save([data_loc_array{i,8} sep 'opto_aligned' sep 'phys_tbt_for_' dd(j).name],'optoAligned_phys_tbt');
+                clear tbtspikes
             end
-            save([data_loc_array{i,8} sep 'opto_aligned' sep 'phys_tbt_for_' dd(j).name],'optoAligned_phys_tbt');
-            clear tbtspikes
             % unit by unit
             % and other alignments
             for k=1:length(gu)
@@ -184,9 +192,20 @@ for i=1:size(data_loc_array,1)
                 else
                     skipBehAlign=false;
                 end
-                addTag=isThisUnitOptoTagged(optoAligned_phys_tbt,currAssign,data_loc_array{i,12});
+                if skipUnitDetails==false
+                    addTag=isThisUnitOptoTagged(optoAligned_phys_tbt,currAssign,data_loc_array{i,12});
+                end
                 % check whether QC figure already exists for this unit
                 [sue,qc_fname]=SU_QC_file_exists(data_loc_array{i,8}, currAssign, trodeChsForSpikes(end));
+                if skipUnitDetails==true
+                    % need to get addTag from SU_QC fig
+                    if sue==true
+                        r=regexp(qc_fname,'_');
+                        addTag=qc_fname(r(1)+1:r(2)-1);
+                    else
+                        error('Cannot skip unit details if SU_QC file does not yet exist');
+                    end
+                end
                 if skipBehAlign==false
                     if ~sue && onVPN==false
                         % make behavior alignments and single unit QC figs
@@ -205,33 +224,37 @@ for i=1:size(data_loc_array,1)
                 else
                     unit_data=[data_loc_array{i,8} sep qc_fname];
                 end
-                % discard trials where unit dead or moved away
-                [physiology_tbt.(['unit' num2str(currAssign) '_dontUseTrials']),physiology_tbt.(['unit' num2str(currAssign) '_meanFR'])]=inferUnitStability(unit_data,physiology_tbt,dsinds,percentThresh,timeStretchThresh,plotInference);
-                % get depth of unit
-                physiology_tbt.(['unit' num2str(currAssign) '_depth'])=getUnitDepth_forWHISPER(trodeChsForSpikes(end), chDepthMapping, channelSpacing, data_loc_array{i,4}); 
-                if physiology_tbt.(['unit' num2str(currAssign) '_depth'])>=data_loc_array{i,10} && physiology_tbt.(['unit' num2str(currAssign) '_depth'])<=data_loc_array{i,11}
-                    physiology_tbt.(['unit' num2str(currAssign) '_inStructure'])=true;
-                else
-                    physiology_tbt.(['unit' num2str(currAssign) '_inStructure'])=false;
+                if skipUnitDetails==false
+                    % discard trials where unit dead or moved away
+                    [physiology_tbt.(['unit' num2str(currAssign) '_dontUseTrials']),physiology_tbt.(['unit' num2str(currAssign) '_meanFR'])]=inferUnitStability(unit_data,physiology_tbt,dsinds,percentThresh,timeStretchThresh,plotInference);
+                    % get depth of unit
+                    physiology_tbt.(['unit' num2str(currAssign) '_depth'])=getUnitDepth_forWHISPER(trodeChsForSpikes(end), chDepthMapping, channelSpacing, data_loc_array{i,4});
+                    if physiology_tbt.(['unit' num2str(currAssign) '_depth'])>=data_loc_array{i,10} && physiology_tbt.(['unit' num2str(currAssign) '_depth'])<=data_loc_array{i,11}
+                        physiology_tbt.(['unit' num2str(currAssign) '_inStructure'])=true;
+                    else
+                        physiology_tbt.(['unit' num2str(currAssign) '_inStructure'])=false;
+                    end
+                    % get waveform features
+                    [physiology_tbt.(['unit' num2str(currAssign) '_halfwidth']), physiology_tbt.(['unit' num2str(currAssign) '_peakToTrough']), ~, physiology_tbt.(['unit' num2str(currAssign) '_avWaveforms'])]=getSUWaveformFeatures(filtspikes_without_sweeps(spikes,0,'assigns',currAssign),spikes.params.Fs);
+                    physiology_tbt.(['unit' num2str(currAssign) '_amp'])=amp(si(end));
+                    % use unit details to classify as type of striatum unit
+                    [physiology_tbt.(['unit' num2str(currAssign) '_isFS']),physiology_tbt.(['unit' num2str(currAssign) '_isTAN']),physiology_tbt.(['unit' num2str(currAssign) '_isSPN']),physiology_tbt.(['unit' num2str(currAssign) '_isLowFRThin'])]=classifyStriatumUnits(physiology_tbt.(['unit' num2str(currAssign) '_halfwidth']),physiology_tbt.(['unit' num2str(currAssign) '_meanFR']));
+                    % save unit details for this unit only
+                    % will be used later to group units
+                    if ~exist([data_loc_array{i,8} sep 'unit_details'],'dir')
+                        mkdir([data_loc_array{i,8} sep 'unit_details']);
+                    end
+                    saveUnitDets([data_loc_array{i,8} sep 'unit_details'],physiology_tbt,currAssign,trodeChsForSpikes(end));
+                    saveOptoTagDets([data_loc_array{i,8} sep 'opto_aligned'],optoAligned_phys_tbt,currAssign,trodeChsForSpikes(end));
                 end
-                % get waveform features
-                [physiology_tbt.(['unit' num2str(currAssign) '_halfwidth']), physiology_tbt.(['unit' num2str(currAssign) '_peakToTrough']), ~, physiology_tbt.(['unit' num2str(currAssign) '_avWaveforms'])]=getSUWaveformFeatures(filtspikes_without_sweeps(spikes,0,'assigns',currAssign),spikes.params.Fs);
-                physiology_tbt.(['unit' num2str(currAssign) '_amp'])=amp(si(end));
-                % use unit details to classify as type of striatum unit
-                [physiology_tbt.(['unit' num2str(currAssign) '_isFS']),physiology_tbt.(['unit' num2str(currAssign) '_isTAN']),physiology_tbt.(['unit' num2str(currAssign) '_isSPN']),physiology_tbt.(['unit' num2str(currAssign) '_isLowFRThin'])]=classifyStriatumUnits(physiology_tbt.(['unit' num2str(currAssign) '_halfwidth']),physiology_tbt.(['unit' num2str(currAssign) '_meanFR']));
-                % save unit details for this unit only
-                % will be used later to group units
+            end
+            % save unit details for these spikes
+            if skipUnitDetails==false
                 if ~exist([data_loc_array{i,8} sep 'unit_details'],'dir')
                     mkdir([data_loc_array{i,8} sep 'unit_details']);
                 end
-                saveUnitDets([data_loc_array{i,8} sep 'unit_details'],physiology_tbt,currAssign,trodeChsForSpikes(end));
-                saveOptoTagDets([data_loc_array{i,8} sep 'opto_aligned'],optoAligned_phys_tbt,currAssign,trodeChsForSpikes(end));
+                save([data_loc_array{i,8} sep 'unit_details' sep 'phys_tbt_for_' dd(j).name],'physiology_tbt');
             end
-            % save unit details for these spikes
-            if ~exist([data_loc_array{i,8} sep 'unit_details'],'dir')
-                mkdir([data_loc_array{i,8} sep 'unit_details']);
-            end
-            save([data_loc_array{i,8} sep 'unit_details' sep 'phys_tbt_for_' dd(j).name],'physiology_tbt');
         end
     end
 end
