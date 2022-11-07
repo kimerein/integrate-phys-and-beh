@@ -524,6 +524,9 @@ if typeOfReach==true
     behAligned=tempBehAligned;
     alignTimes=getValsFromRows(behavior_tbt.times_wrt_trial_start,alignInds,fromInputRow);
     indsIntoPhoto=getIndsFromRows(photometry_tbt.(getCorrectTime_wrtTrialStart),alignTimes,fromInputRow);
+    if all(isnan(indsIntoPhoto))
+        return
+    end
     [alignedData,alignedAt]=alignRowsToInds(photometry_tbt.(plotPhotoField),indsIntoPhoto,nanmin(indsIntoPhoto),fromInputRow,alignPeaks,indsFromPeak);
     phys_timepoints_alignedData=alignRowsToInds(photometry_tbt.phys_timepoints,indsIntoPhoto,nanmin(indsIntoPhoto),fromInputRow,alignPeaks,indsFromPeak);
     if doingMultipleUnits==true

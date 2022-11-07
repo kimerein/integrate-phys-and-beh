@@ -18,6 +18,11 @@ if ischar(f)
     end
 else
     % pass in data directly to save time opening fig
+    if isempty(f)
+        dontUseTrials=[];
+        averageFiringRate=0;
+        return
+    end
     fr_time=f.fr_time;
     fr_y=f.fr_y; % firing rate across expt
     wv_time=f.wv_time;

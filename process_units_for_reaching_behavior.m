@@ -15,7 +15,7 @@ skipIfBehaviorAlignmentsAlreadyExist=false; % if true, will skip any units for w
 % CAN COMMENT OUT SOME BEHAVIOR ALIGNMENTS IN
 % saveBehaviorAlignmentsSingleNueron.m IF DON'T WANT TO REPOPULATE
 % EVERYTHING
-skipUnitDetails=true; % if true, will skip populating the unit details
+skipUnitDetails=false; % if true, will skip populating the unit details
 % BUT NOTE WILL STILL REPOPULATE UNIT DETAILS
 % second row is Matlab index, first row is depth on probe, where 32 is most
 % dorsall, 1 is most ventral
@@ -61,7 +61,7 @@ chDepthMapping=[1   21; ...
 % location of SU aligned to behavior, raw data binary name
 
 % ultimately, ingest this from .csv file
-dataTable='C:\Users\sabatini\Downloads\Spike sorting analysis - EXAMPLE data locations on server (1).csv';
+dataTable='C:\Users\sabatini\Downloads\Spike sorting analysis - data as of 20221105.csv';
 data_loc_array=table2cell(readtable(dataTable,'Format','%s%s%s%u%s%s%s%s%s%u%u%s'));
 
 % data_loc_array=cell(2,6);
@@ -96,6 +96,7 @@ for i=1:size(data_loc_array,1)
     % get spikes
     dd=dir(data_loc_array{i,7});
     disp(['Processing ' data_loc_array{i,7}]);
+%     try
     for j=1:length(dd)
         if ~isempty(regexp(dd(j).name,'spikes'))
             % load spikes
@@ -257,6 +258,9 @@ for i=1:size(data_loc_array,1)
             end
         end
     end
+%     catch
+%         disp('caught error');
+%     end
 end
 
 %% 3. Load data locations
