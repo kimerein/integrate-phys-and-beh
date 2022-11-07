@@ -20,6 +20,7 @@ optowvfms=zeros(length(goodUnits),size(spikes.waveforms,2)*size(spikes.waveforms
 optowvfms_count=zeros(length(goodUnits),1);
 nooptowvfms=zeros(length(goodUnits),size(spikes.waveforms,2)*size(spikes.waveforms,3));
 nooptowvfms_count=zeros(length(goodUnits),1);
+firstafteropto=[];
 for i=1:size(phys_tbt.opto,1)
     if phys_tbt.hasOpto(i)==1
         % get times in phys when opto was on
@@ -51,7 +52,11 @@ for i=1:size(phys_tbt.opto,1)
             end
         end
     else
-        timewindow_noopto=phys_tbt.phys_timepoints(i,[find(~isnan(phys_tbt.phys_timepoints(i,:)),1,'first') firstafteropto]);
+        if isempty(firstafteropto)
+            timewindow_noopto=phys_tbt.phys_timepoints(i,[find(~isnan(phys_tbt.phys_timepoints(i,:)),1,'first') find(~isnan(phys_tbt.phys_timepoints(i,:)),1,'last')]);
+        else
+            timewindow_noopto=phys_tbt.phys_timepoints(i,[find(~isnan(phys_tbt.phys_timepoints(i,:)),1,'first') firstafteropto]);
+        end
         % get av waveform of spikes occurring in this time range
         for j=1:length(goodUnits)
             if nansum(spikes.unwrapped_times>timewindow_noopto(1) & spikes.unwrapped_times<timewindow_noopto(2) & spikes.assigns==goodUnits(j))>0

@@ -11,11 +11,11 @@ percentThresh=5;
 timeStretchThresh=60*10; % in seconds
 plotInference=false;
 channelSpacing=20; % in microns
-skipIfBehaviorAlignmentsAlreadyExist=false; % if true, will skip any units for which a behavior alignment already exists in the cue sub-folder
+skipIfBehaviorAlignmentsAlreadyExist=true; % if true, will skip any units for which a behavior alignment already exists in the cue sub-folder
 % CAN COMMENT OUT SOME BEHAVIOR ALIGNMENTS IN
 % saveBehaviorAlignmentsSingleNueron.m IF DON'T WANT TO REPOPULATE
 % EVERYTHING
-skipUnitDetails=false; % if true, will skip populating the unit details
+skipUnitDetails=true; % if true, will skip populating the unit details
 % BUT NOTE WILL STILL REPOPULATE UNIT DETAILS
 % second row is Matlab index, first row is depth on probe, where 32 is most
 % dorsall, 1 is most ventral
@@ -88,7 +88,7 @@ data_loc_array=table2cell(readtable(dataTable,'Format','%s%s%s%u%s%s%s%s%s%u%u%s
 % data_loc_array{i,11}=2600; % ventral-most depth that is posterior striatum
 % data_loc_array{i,12}='none'; % if opto-tagging, which tag
 
-%% 2. Auto-populate SU QC and behavior alignments
+%% 2. Auto-populate SU QC and behavior alignments -- for 84 sessions, running all of this takes about 12 hrs
 % Discarding trials where unit dead or moved away
 for i=1:size(data_loc_array,1)
     % load tbt (trial by trial) data
@@ -96,7 +96,7 @@ for i=1:size(data_loc_array,1)
     % get spikes
     dd=dir(data_loc_array{i,7});
     disp(['Processing ' data_loc_array{i,7}]);
-%     try
+    try
     for j=1:length(dd)
         if ~isempty(regexp(dd(j).name,'spikes'))
             % load spikes
@@ -258,9 +258,9 @@ for i=1:size(data_loc_array,1)
             end
         end
     end
-%     catch
-%         disp('caught error');
-%     end
+    catch
+        disp('caught error');
+    end
 end
 
 %% 3. Load data locations
@@ -273,7 +273,7 @@ end
 
 %% 4. Make figures
 % choose type of response to plot
-response_to_plot='cue_noReach'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+response_to_plot='cue'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 
 % doUnitTest.m is used to test whether to include unit in this plot
 % will include unit if unitdets match the following
@@ -285,12 +285,12 @@ dd_more=cell(1,length(dd));
 for i=1:length(dd)
     dd_more{i}=[dd{i} sep response_to_plot];
 end
-% whichUnitsToGrab='_'; % '_' for all units, or can be something like 'D1tagged'
-% Response=getAndSaveResponse(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
+whichUnitsToGrab='_'; % '_' for all units, or can be something like 'D1tagged'
+Response=getAndSaveResponse(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
 % for opto-tagging comparing tagged v untagged
-[tagged_Response,D1orD2taggingExpt,putAlignPeakAt]=getAndSaveResponse(dd_more,'A2atagged',settingsForStriatumUnitPlots,[]);
-[untagged_Response]=getAndSaveResponse(dd_more,'__',settingsForStriatumUnitPlots,putAlignPeakAt);
-untagged_Response=takeOnlyUnitsFromSess(untagged_Response,unique(tagged_Response.fromWhichSess));
+% [tagged_Response,D1orD2taggingExpt,putAlignPeakAt]=getAndSaveResponse(dd_more,'A2atagged',settingsForStriatumUnitPlots,[]);
+% [untagged_Response]=getAndSaveResponse(dd_more,'__',settingsForStriatumUnitPlots,putAlignPeakAt);
+% untagged_Response=takeOnlyUnitsFromSess(untagged_Response,unique(tagged_Response.fromWhichSess));
 
 % plot some stuff
 plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',Response,1); % down sample factor is last arg
