@@ -1,10 +1,12 @@
-function plotVariousSUResponsesAlignedToBeh(varargin)
+function out=plotVariousSUResponsesAlignedToBeh(varargin)
 
 if length(varargin)<2
     error('plotVariousSUResponsesAlignedToBeh takes at least 2 input arguments');
 end
 
 Response=varargin{2};
+
+out=[];
 
 switch varargin{1}
     case 'meanAcrossUnits'
@@ -14,6 +16,10 @@ switch varargin{1}
         timeWindow1=varargin{3};
         timeWindow2=varargin{4};
         scatterInTimeWindows(Response,timeWindow1,timeWindow2);
+    case 'modulationIndex'
+        timeWindow1=varargin{3};
+        timeWindow2=varargin{4};
+        out.modIndex=plotModulationIndex(Response,timeWindow1,timeWindow2);
     case 'ZscoredAndSmoothed'
         timeWindow1=varargin{3};
         timeWindow2=varargin{4};
@@ -301,6 +307,17 @@ timeBins=timesD1(1):timeBinsStep:timesD1(end);
 figure();
 imagesc(timeBins(timeBins<9.5),timeBins(timeBins<9.5),allRs(timeBins<9.5,timeBins<9.5));
 title('corrcoef matrix average across units');
+fillVal=mean(allRs,'all','omitnan');
+for i=1:size(allRs,1)
+    for j=i-2:i+2
+        if j>=1 && j<=size(allRs,1)
+            allRs(i,j)=fillVal;
+        end
+    end
+end
+figure();
+imagesc(timeBins(timeBins<9.5),timeBins(timeBins<9.5),allRs(timeBins<9.5,timeBins<9.5));
+title('corrcoef matrix average across units -- filling in near diagnonal');
 figure();
 plot(timeBins(1:end-1),nanmean(allRs_slice,1),'Color','k');
 title(['Slice at time window ' num2str(sliceAtTimeWindow(1)) ' to ' num2str(sliceAtTimeWindow(2)) ' seconds - av across units']);
@@ -388,5 +405,31 @@ if suppressPlots==false
     plot(timeBins(1:end-1),Rs_slice,'Color','k');
     title(['Slice at time window ' num2str(sliceAtTimeWindow(1)) ' to ' num2str(sliceAtTimeWindow(2)) ' seconds']);
 end
+
+end
+
+function modIndex=plotModulationIndex(activityD1tagged,inWindow1,inWindow2)
+
+% inWindow in seconds relative to alignmentCompanion peak
+
+temp=nanmean(activityD1tagged.aligncomp_x,1);
+[~,f]=nanmax(nanmean(activityD1tagged.aligncomp_y,1));
+timesD1=nanmean(activityD1tagged.unitbyunit_x,1)-temp(f);
+if any(isnan(timesD1))
+    timesD1=fillmissing(timesD1,'linear');
+end
+
+inWindow1=nanmean(activityD1tagged.unitbyunit_y(:,timesD1>=inWindow1(1) & timesD1<=inWindow1(2)),2);
+inWindow2=nanmean(activityD1tagged.unitbyunit_y(:,timesD1>inWindow2(1) & timesD1<=inWindow2(2)),2);
+
+modIndex=(inWindow2-inWindow1)./(inWindow2+inWindow1);
+
+modBins=[-1-0.1:0.1:1]+0.05;
+[N,edges]=histcounts(modIndex,modBins);
+binCenters=edges(1:end-1)+0.05;
+figure();
+bar(binCenters,N,'LineWidth',0.1);
+xlabel('Modulation index');
+ylabel('Count');
 
 end

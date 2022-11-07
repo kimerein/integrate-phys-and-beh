@@ -13,9 +13,10 @@ plotInference=false;
 channelSpacing=20; % in microns
 skipIfBehaviorAlignmentsAlreadyExist=true; % if true, will skip any units for which a behavior alignment already exists in the cue sub-folder
 % CAN COMMENT OUT SOME BEHAVIOR ALIGNMENTS IN
-% saveBehaviorAlignmentsSingleNueron.m IF DON'T WANT TO REPOPULATE
+% saveBehaviorAlignmentsSingleNeuron.m IF DON'T WANT TO REPOPULATE
 % EVERYTHING
-skipUnitDetails=true; % if true, will skip populating the unit details
+skipUnitDetails=false; % if true, will skip populating the unit details
+skipUnitDetailsUnlessNoQCfig=true; % skips populating unit details unless QC fig does not yet exist
 % BUT NOTE WILL STILL REPOPULATE UNIT DETAILS
 % second row is Matlab index, first row is depth on probe, where 32 is most
 % dorsall, 1 is most ventral
@@ -96,7 +97,7 @@ for i=1:size(data_loc_array,1)
     % get spikes
     dd=dir(data_loc_array{i,7});
     disp(['Processing ' data_loc_array{i,7}]);
-    try
+%     try
     for j=1:length(dd)
         if ~isempty(regexp(dd(j).name,'spikes'))
             % load spikes
@@ -178,6 +179,10 @@ for i=1:size(data_loc_array,1)
                 end
                 [~,si]=sort(amp);
                 % sort trode chs for units
+                if any(si>length(trodeChsForSpikes))
+                    disp(['problem indexing spike channel for unit ' num2str(currAssign) ' in ' data_loc_array{i,7} sep dd(j).name]);
+                    si=si(si<=length(trodeChsForSpikes));
+                end
                 trodeChsForSpikes=trodeChsForSpikes(si);
                 forplot_trodeChs=trodeChsForSpikes;
                 if length(forplot_trodeChs)<4
@@ -225,7 +230,7 @@ for i=1:size(data_loc_array,1)
                 else
                     unit_data=[data_loc_array{i,8} sep qc_fname];
                 end
-                if skipUnitDetails==false
+                if skipUnitDetails==false && (skipUnitDetailsUnlessNoQCfig==false || (skipUnitDetailsUnlessNoQCfig==true && sue==false))
                     % discard trials where unit dead or moved away
                     [physiology_tbt.(['unit' num2str(currAssign) '_dontUseTrials']),physiology_tbt.(['unit' num2str(currAssign) '_meanFR'])]=inferUnitStability(unit_data,physiology_tbt,dsinds,percentThresh,timeStretchThresh,plotInference);
                     % get depth of unit
@@ -258,9 +263,9 @@ for i=1:size(data_loc_array,1)
             end
         end
     end
-    catch
-        disp('caught error');
-    end
+%     catch
+%         disp('caught error');
+%     end
 end
 
 %% 3. Load data locations
@@ -273,7 +278,7 @@ end
 
 %% 4. Make figures -- about 6 min to load 84 sessions of unit data
 % choose type of response to plot
-response_to_plot='cue'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+response_to_plot='cued_success'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 
 % doUnitTest.m is used to test whether to include unit in this plot
 % will include unit if unitdets match the following
@@ -285,16 +290,18 @@ dd_more=cell(1,length(dd));
 for i=1:length(dd)
     dd_more{i}=[dd{i} sep response_to_plot];
 end
-whichUnitsToGrab='_'; % '_' for all units, or can be something like 'D1tagged'
-Response=getAndSaveResponse(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
+% whichUnitsToGrab='_'; % '_' for all units, or can be something like 'D1tagged'
+% Response=getAndSaveResponse(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
 % for opto-tagging comparing tagged v untagged
-% [tagged_Response,D1orD2taggingExpt,putAlignPeakAt]=getAndSaveResponse(dd_more,'A2atagged',settingsForStriatumUnitPlots,[]);
-% [untagged_Response]=getAndSaveResponse(dd_more,'__',settingsForStriatumUnitPlots,putAlignPeakAt);
-% untagged_Response=takeOnlyUnitsFromSess(untagged_Response,unique(tagged_Response.fromWhichSess));
+[tagged_Response,D1orD2taggingExpt,putAlignPeakAt]=getAndSaveResponse(dd_more,'D1tagged',settingsForStriatumUnitPlots,[]);
+[untagged_Response]=getAndSaveResponse(dd_more,'__',settingsForStriatumUnitPlots,putAlignPeakAt);
+untagged_Response=takeOnlyUnitsFromSess(untagged_Response,unique(tagged_Response.fromWhichSess));
 
 % plot some stuff
 plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',Response,1); % down sample factor is last arg
 plotVariousSUResponsesAlignedToBeh('scatterInTimeWindows',Response,[-1 0.25],[0.25 4]); % time windows relative to alignment companion peak
+out=plotVariousSUResponsesAlignedToBeh('modulationIndex',Response,[-1 0.25],[0.25 4]); % time windows relative to alignment companion peak
+modIndex=out.modIndex;
 plotVariousSUResponsesAlignedToBeh('ZscoredAndSmoothed',Response,[-1 0.25],[0.25 4]); % time windows relative to alignment companion peak
 plotVariousSUResponsesAlignedToBeh('populationVectorCorrelation',Response,0.25,[0.25 4]); % time bins step, then slice at time window
 plotVariousSUResponsesAlignedToBeh('trialVectorCorrelation',Response,0.25,[0.25 4]); % time bins step, then slice at time window

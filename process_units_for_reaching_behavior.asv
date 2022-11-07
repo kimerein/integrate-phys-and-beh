@@ -11,7 +11,11 @@ percentThresh=5;
 timeStretchThresh=60*10; % in seconds
 plotInference=false;
 channelSpacing=20; % in microns
-skipIfBehaviorAlignmentsAlreadyExist=false; % if true, will skip any units for which a behavior alignment already exists in the cue sub-folder
+skipIfBehaviorAlignmentsAlreadyExist=true; % if true, will skip any units for which a behavior alignment already exists in the cue sub-folder
+% CAN COMMENT OUT SOME BEHAVIOR ALIGNMENTS IN
+% saveBehaviorAlignmentsSingleNueron.m IF DON'T WANT TO REPOPULATE
+% EVERYTHING
+skipUnitDetails=true; % if true, will skip populating the unit details
 % BUT NOTE WILL STILL REPOPULATE UNIT DETAILS
 % second row is Matlab index, first row is depth on probe, where 32 is most
 % dorsall, 1 is most ventral
@@ -57,7 +61,7 @@ chDepthMapping=[1   21; ...
 % location of SU aligned to behavior, raw data binary name
 
 % ultimately, ingest this from .csv file
-dataTable='C:\Users\sabatini\Downloads\Spike sorting analysis - EXAMPLE data locations on server.csv';
+dataTable='C:\Users\sabatini\Downloads\Spike sorting analysis - data as of 20221105.csv';
 data_loc_array=table2cell(readtable(dataTable,'Format','%s%s%s%u%s%s%s%s%s%u%u%s'));
 
 % data_loc_array=cell(2,6);
@@ -84,7 +88,7 @@ data_loc_array=table2cell(readtable(dataTable,'Format','%s%s%s%u%s%s%s%s%s%u%u%s
 % data_loc_array{i,11}=2600; % ventral-most depth that is posterior striatum
 % data_loc_array{i,12}='none'; % if opto-tagging, which tag
 
-%% 2. Auto-populate SU QC and behavior alignments
+%% 2. Auto-populate SU QC and behavior alignments -- for 84 sessions, running all of this takes about 12 hrs
 % Discarding trials where unit dead or moved away
 for i=1:size(data_loc_array,1)
     % load tbt (trial by trial) data
@@ -92,6 +96,7 @@ for i=1:size(data_loc_array,1)
     % get spikes
     dd=dir(data_loc_array{i,7});
     disp(['Processing ' data_loc_array{i,7}]);
+%     try
     for j=1:length(dd)
         if ~isempty(regexp(dd(j).name,'spikes'))
             % load spikes
@@ -144,19 +149,23 @@ for i=1:size(data_loc_array,1)
             % find good units
             gu=find(spikes.labels(:,2)==goodUnitLabel);
             % make opto-tagged alignment
-            [~,tbtspikes]=organizeSpikesToMatch_physiology_tbt(spikes,physiology_tbt);
+            if skipUnitDetails==false
+                [~,tbtspikes]=organizeSpikesToMatch_physiology_tbt(spikes,physiology_tbt);
+            end
             % if no good units, just continue
             if isempty(gu)
                 continue
             end
-            optoAligned_phys_tbt=alignToOpto(addGoodUnitsAsFields(physiology_tbt,tbtspikes,2,1,false,true,true));
-            optoAligned_phys_tbt=checkWaveformsDuringOpto(optoAligned_phys_tbt,tbtspikes);
-            % save opto alignment
-            if ~exist([data_loc_array{i,8} sep 'opto_aligned'],'dir')
-                mkdir([data_loc_array{i,8} sep 'opto_aligned']);
+            if skipUnitDetails==false
+                optoAligned_phys_tbt=alignToOpto(addGoodUnitsAsFields(physiology_tbt,tbtspikes,2,1,false,true,true));
+                optoAligned_phys_tbt=checkWaveformsDuringOpto(optoAligned_phys_tbt,tbtspikes);
+                % save opto alignment
+                if ~exist([data_loc_array{i,8} sep 'opto_aligned'],'dir')
+                    mkdir([data_loc_array{i,8} sep 'opto_aligned']);
+                end
+                save([data_loc_array{i,8} sep 'opto_aligned' sep 'phys_tbt_for_' dd(j).name],'optoAligned_phys_tbt');
+                clear tbtspikes
             end
-            save([data_loc_array{i,8} sep 'opto_aligned' sep 'phys_tbt_for_' dd(j).name],'optoAligned_phys_tbt');
-            clear tbtspikes
             % unit by unit
             % and other alignments
             for k=1:length(gu)
@@ -169,6 +178,10 @@ for i=1:size(data_loc_array,1)
                 end
                 [~,si]=sort(amp);
                 % sort trode chs for units
+                if any(si>length(trodeChsForSpikes))
+                    disp(['problem indexing spike channel for unit ' num2str(currAssign) ' in ' data_loc_array{i,7} sep dd(j).name]);
+                    si=si(si<=length(trodeChsForSpikes));
+                end
                 trodeChsForSpikes=trodeChsForSpikes(si);
                 forplot_trodeChs=trodeChsForSpikes;
                 if length(forplot_trodeChs)<4
@@ -184,9 +197,20 @@ for i=1:size(data_loc_array,1)
                 else
                     skipBehAlign=false;
                 end
-                addTag=isThisUnitOptoTagged(optoAligned_phys_tbt,currAssign,data_loc_array{i,12});
+                if skipUnitDetails==false
+                    addTag=isThisUnitOptoTagged(optoAligned_phys_tbt,currAssign,data_loc_array{i,12});
+                end
                 % check whether QC figure already exists for this unit
                 [sue,qc_fname]=SU_QC_file_exists(data_loc_array{i,8}, currAssign, trodeChsForSpikes(end));
+                if skipUnitDetails==true
+                    % need to get addTag from SU_QC fig
+                    if sue==true
+                        r=regexp(qc_fname,'_');
+                        addTag=qc_fname(r(1)+1:r(2)-1);
+                    else
+                        error('Cannot skip unit details if SU_QC file does not yet exist');
+                    end
+                end
                 if skipBehAlign==false
                     if ~sue && onVPN==false
                         % make behavior alignments and single unit QC figs
@@ -205,35 +229,42 @@ for i=1:size(data_loc_array,1)
                 else
                     unit_data=[data_loc_array{i,8} sep qc_fname];
                 end
-                % discard trials where unit dead or moved away
-                [physiology_tbt.(['unit' num2str(currAssign) '_dontUseTrials']),physiology_tbt.(['unit' num2str(currAssign) '_meanFR'])]=inferUnitStability(unit_data,physiology_tbt,dsinds,percentThresh,timeStretchThresh,plotInference);
-                % get depth of unit
-                physiology_tbt.(['unit' num2str(currAssign) '_depth'])=getUnitDepth_forWHISPER(trodeChsForSpikes(end), chDepthMapping, channelSpacing, data_loc_array{i,4}); 
-                if physiology_tbt.(['unit' num2str(currAssign) '_depth'])>=data_loc_array{i,10} && physiology_tbt.(['unit' num2str(currAssign) '_depth'])<=data_loc_array{i,11}
-                    physiology_tbt.(['unit' num2str(currAssign) '_inStructure'])=true;
-                else
-                    physiology_tbt.(['unit' num2str(currAssign) '_inStructure'])=false;
+                if skipUnitDetails==false
+                    % discard trials where unit dead or moved away
+                    [physiology_tbt.(['unit' num2str(currAssign) '_dontUseTrials']),physiology_tbt.(['unit' num2str(currAssign) '_meanFR'])]=inferUnitStability(unit_data,physiology_tbt,dsinds,percentThresh,timeStretchThresh,plotInference);
+                    % get depth of unit
+                    physiology_tbt.(['unit' num2str(currAssign) '_depth'])=getUnitDepth_forWHISPER(trodeChsForSpikes(end), chDepthMapping, channelSpacing, data_loc_array{i,4});
+                    if physiology_tbt.(['unit' num2str(currAssign) '_depth'])>=data_loc_array{i,10} && physiology_tbt.(['unit' num2str(currAssign) '_depth'])<=data_loc_array{i,11}
+                        physiology_tbt.(['unit' num2str(currAssign) '_inStructure'])=true;
+                    else
+                        physiology_tbt.(['unit' num2str(currAssign) '_inStructure'])=false;
+                    end
+                    % get waveform features
+                    [physiology_tbt.(['unit' num2str(currAssign) '_halfwidth']), physiology_tbt.(['unit' num2str(currAssign) '_peakToTrough']), ~, physiology_tbt.(['unit' num2str(currAssign) '_avWaveforms'])]=getSUWaveformFeatures(filtspikes_without_sweeps(spikes,0,'assigns',currAssign),spikes.params.Fs);
+                    physiology_tbt.(['unit' num2str(currAssign) '_amp'])=amp(si(end));
+                    % use unit details to classify as type of striatum unit
+                    [physiology_tbt.(['unit' num2str(currAssign) '_isFS']),physiology_tbt.(['unit' num2str(currAssign) '_isTAN']),physiology_tbt.(['unit' num2str(currAssign) '_isSPN']),physiology_tbt.(['unit' num2str(currAssign) '_isLowFRThin'])]=classifyStriatumUnits(physiology_tbt.(['unit' num2str(currAssign) '_halfwidth']),physiology_tbt.(['unit' num2str(currAssign) '_meanFR']));
+                    % save unit details for this unit only
+                    % will be used later to group units
+                    if ~exist([data_loc_array{i,8} sep 'unit_details'],'dir')
+                        mkdir([data_loc_array{i,8} sep 'unit_details']);
+                    end
+                    saveUnitDets([data_loc_array{i,8} sep 'unit_details'],physiology_tbt,currAssign,trodeChsForSpikes(end));
+                    saveOptoTagDets([data_loc_array{i,8} sep 'opto_aligned'],optoAligned_phys_tbt,currAssign,trodeChsForSpikes(end));
                 end
-                % get waveform features
-                [physiology_tbt.(['unit' num2str(currAssign) '_halfwidth']), physiology_tbt.(['unit' num2str(currAssign) '_peakToTrough']), ~, physiology_tbt.(['unit' num2str(currAssign) '_avWaveforms'])]=getSUWaveformFeatures(filtspikes_without_sweeps(spikes,0,'assigns',currAssign),spikes.params.Fs);
-                physiology_tbt.(['unit' num2str(currAssign) '_amp'])=amp(si(end));
-                % use unit details to classify as type of striatum unit
-                [physiology_tbt.(['unit' num2str(currAssign) '_isFS']),physiology_tbt.(['unit' num2str(currAssign) '_isTAN']),physiology_tbt.(['unit' num2str(currAssign) '_isSPN']),physiology_tbt.(['unit' num2str(currAssign) '_isLowFRThin'])]=classifyStriatumUnits(physiology_tbt.(['unit' num2str(currAssign) '_halfwidth']),physiology_tbt.(['unit' num2str(currAssign) '_meanFR']));
-                % save unit details for this unit only
-                % will be used later to group units
+            end
+            % save unit details for these spikes
+            if skipUnitDetails==false
                 if ~exist([data_loc_array{i,8} sep 'unit_details'],'dir')
                     mkdir([data_loc_array{i,8} sep 'unit_details']);
                 end
-                saveUnitDets([data_loc_array{i,8} sep 'unit_details'],physiology_tbt,currAssign,trodeChsForSpikes(end));
-                saveOptoTagDets([data_loc_array{i,8} sep 'opto_aligned'],optoAligned_phys_tbt,currAssign,trodeChsForSpikes(end));
+                save([data_loc_array{i,8} sep 'unit_details' sep 'phys_tbt_for_' dd(j).name],'physiology_tbt');
             end
-            % save unit details for these spikes
-            if ~exist([data_loc_array{i,8} sep 'unit_details'],'dir')
-                mkdir([data_loc_array{i,8} sep 'unit_details']);
-            end
-            save([data_loc_array{i,8} sep 'unit_details' sep 'phys_tbt_for_' dd(j).name],'physiology_tbt');
         end
     end
+%     catch
+%         disp('caught error');
+%     end
 end
 
 %% 3. Load data locations
@@ -244,9 +275,9 @@ for i=1:size(data_loc_array,1)
     dd{i}=data_loc_array{i,8};
 end
 
-%% 4. Make figures
+%% 4. Make figures -- about 6 min to load 84 sessions of unit data
 % choose type of response to plot
-response_to_plot='uncued_success'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+response_to_plot='cued_success'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 
 % doUnitTest.m is used to test whether to include unit in this plot
 % will include unit if unitdets match the following
@@ -258,16 +289,18 @@ dd_more=cell(1,length(dd));
 for i=1:length(dd)
     dd_more{i}=[dd{i} sep response_to_plot];
 end
-whichUnitsToGrab='_'; % '_' for all units, or can be something like 'D1tagged'
-Response=getAndSaveResponse(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
+% whichUnitsToGrab='_'; % '_' for all units, or can be something like 'D1tagged'
+% Response=getAndSaveResponse(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
 % for opto-tagging comparing tagged v untagged
-% [tagged_Response,D1orD2taggingExpt,putAlignPeakAt]=getAndSaveResponse(dd_more,'D1tagged',settings,[],[]);
-% [untagged_Response]=getAndSaveResponse(dd_more,'__',settings,putAlignPeakAt,[]);
-% untagged_Response=takeOnlyUnitsFromSess(untagged_Response,unique(tagged_Response.fromWhichSess));
+[tagged_Response,D1orD2taggingExpt,putAlignPeakAt]=getAndSaveResponse(dd_more,'D1tagged',settingsForStriatumUnitPlots,[]);
+[untagged_Response]=getAndSaveResponse(dd_more,'__',settingsForStriatumUnitPlots,putAlignPeakAt);
+untagged_Response=takeOnlyUnitsFromSess(untagged_Response,unique(tagged_Response.fromWhichSess));
 
 % plot some stuff
 plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',Response,1); % down sample factor is last arg
 plotVariousSUResponsesAlignedToBeh('scatterInTimeWindows',Response,[-1 0.25],[0.25 4]); % time windows relative to alignment companion peak
+out=plotVariousSUResponsesAlignedToBeh('modulationIndex',Response,[-1 0.25],[0.25 4]); % time windows relative to alignment companion peak
+modIndex=out.modIndex;
 plotVariousSUResponsesAlignedToBeh('ZscoredAndSmoothed',Response,[-1 0.25],[0.25 4]); % time windows relative to alignment companion peak
 plotVariousSUResponsesAlignedToBeh('populationVectorCorrelation',Response,0.25,[0.25 4]); % time bins step, then slice at time window
 plotVariousSUResponsesAlignedToBeh('trialVectorCorrelation',Response,0.25,[0.25 4]); % time bins step, then slice at time window

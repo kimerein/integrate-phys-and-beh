@@ -14,6 +14,10 @@ switch varargin{1}
         timeWindow1=varargin{3};
         timeWindow2=varargin{4};
         scatterInTimeWindows(Response,timeWindow1,timeWindow2);
+    case 'modulationIndex'
+        timeWindow1=varargin{3};
+        timeWindow2=varargin{4};
+        plotModulationIndex(Response,timeWindow1,timeWindow2);
     case 'ZscoredAndSmoothed'
         timeWindow1=varargin{3};
         timeWindow2=varargin{4};
@@ -257,6 +261,12 @@ end
 
 end
 
+function C=addMatricesIgnoreNans(A,B)
+
+tmp = cat(3,A,B); C = nansum(tmp,3);
+
+end
+
 function trialVectorCorrelation_wrapper(Response,timeBinsStep,sliceAtTimeWindow)
 
 suppressPlots=true;
@@ -273,7 +283,9 @@ if any(isnan(timesD1))
 end
 disp(['averaging this many units: ' num2str(length(u))]);
 for i=1:length(u)
-    
+    if mod(i,50)==0
+        disp(['on unit ' num2str(i)]);
+    end
     [Rs,Rs_slice]=trialVectorCorrelation(filterResponseToOneSU(Response,u(i)),timeBinsStep,sliceAtTimeWindow,suppressPlots,timesD1);
     if all(isnan(Rs)) | isempty(Rs)
         continue
@@ -282,8 +294,8 @@ for i=1:length(u)
         allRs=Rs;
         allRs_slice=Rs_slice;
     else
-        allRs=allRs+Rs;
-        allRs_slice=allRs_slice+Rs_slice;
+        allRs=addMatricesIgnoreNans(allRs,Rs);
+        allRs_slice=addMatricesIgnoreNans(allRs_slice,Rs_slice);
     end
 end
 allRs=allRs./length(u);
@@ -293,6 +305,17 @@ timeBins=timesD1(1):timeBinsStep:timesD1(end);
 figure();
 imagesc(timeBins(timeBins<9.5),timeBins(timeBins<9.5),allRs(timeBins<9.5,timeBins<9.5));
 title('corrcoef matrix average across units');
+fillVal=mean(allRs,'all','omitnan');
+for i=1:size(allRs,1)
+    for j=i-2:i+2
+        if j>=1 && j<=size(allRs,1)
+            allRs(i,j)=fillVal;
+        end
+    end
+end
+figure();
+imagesc(timeBins(timeBins<9.5),timeBins(timeBins<9.5),allRs(timeBins<9.5,timeBins<9.5));
+title('corrcoef matrix average across units -- filling in near diagnonal');
 figure();
 plot(timeBins(1:end-1),nanmean(allRs_slice,1),'Color','k');
 title(['Slice at time window ' num2str(sliceAtTimeWindow(1)) ' to ' num2str(sliceAtTimeWindow(2)) ' seconds - av across units']);
@@ -380,5 +403,30 @@ if suppressPlots==false
     plot(timeBins(1:end-1),Rs_slice,'Color','k');
     title(['Slice at time window ' num2str(sliceAtTimeWindow(1)) ' to ' num2str(sliceAtTimeWindow(2)) ' seconds']);
 end
+
+end
+
+function plotModulationIndex(activityD1tagged,inWindow1,inWindow2)
+
+% inWindow in seconds relative to alignmentCompanion peak
+
+temp=nanmean(activityD1tagged.aligncomp_x,1);
+[~,f]=nanmax(nanmean(activityD1tagged.aligncomp_y,1));
+timesD1=nanmean(activityD1tagged.unitbyunit_x,1)-temp(f);
+if any(isnan(timesD1))
+    timesD1=fillmissing(timesD1,'linear');
+end
+
+inWindow1=nanmean(activityD1tagged.unitbyunit_y(:,timesD1>=inWindow1(1) & timesD1<=inWindow1(2)),2);
+inWindow2=nanmean(activityD1tagged.unitbyunit_y(:,timesD1>inWindow2(1) & timesD1<=inWindow2(2)),2);
+
+modIndex=(inWindow2-inWindow1)./(inWindow2+inWindow1);
+
+modBins=[-1-0.1:0.1:1]+0.05;
+[N,edges]=histcounts(modIndex,modBins);
+figure();
+bar(edges(1:end-1)+0.05,N);
+xlabel('Modulation index');
+ylabel('Count');
 
 end
