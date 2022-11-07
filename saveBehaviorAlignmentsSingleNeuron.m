@@ -40,12 +40,19 @@ subDir='cue';
 [~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
 saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'cueAligned',dataout,alignComp,phys_timepointsComp);
 
-% All reaches, anytime
+% Uncued reach
 event='all_reachBatch';
+timeWindow=[5 16]; % in seconds from cue onset
+subDir='uncued_reach';
+[~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'uncuedReach',dataout,alignComp,phys_timepointsComp);
+
+% Cue preceded by no reach and followed by no reach (for at least 4 sec)
+event='cue_noReach';
 timeWindow=[-1 16]; % in seconds from cue onset
-subDir='reach';
-[~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','any',timeWindow,[],suppressFigs); close all;
-saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'reachAligned',dataout,alignComp,phys_timepointsComp);
+subDir='cue_noReach';
+[~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'cueNoReach',dataout,alignComp,phys_timepointsComp);
 
 % Cue followed by success
 event='cue_followedby_success';
