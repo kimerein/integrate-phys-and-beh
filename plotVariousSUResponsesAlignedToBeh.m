@@ -47,7 +47,7 @@ temp=nanmean(activityD1tagged.aligncomp_x,1);
 [~,f]=nanmax(nanmean(activityD1tagged.aligncomp_y,1));
 timesD1=nanmean(activityD1tagged.unitbyunit_x,1)-temp(f);
 if any(isnan(timesD1))
-    timesD1=fillmissing(timesD1,'movmean',5);
+    timesD1=fillmissing(timesD1,'linear');
 end
 figure(); plot(timesD1,activityD1tagged.unitbyunit_y'); 
 title('Align companion at time=0');
@@ -90,7 +90,7 @@ temp=nanmean(activityD1tagged.aligncomp_x,1);
 [~,f]=nanmax(nanmean(activityD1tagged.aligncomp_y,1));
 timesD1=nanmean(activityD1tagged.unitbyunit_x,1)-temp(f);
 if any(isnan(timesD1))
-    timesD1=fillmissing(timesD1,'movmean',5);
+    timesD1=fillmissing(timesD1,'linear');
 end
 
 figure(); 
@@ -127,7 +127,7 @@ temp=nanmean(activityD1tagged.aligncomp_x,1);
 [~,f]=nanmax(nanmean(activityD1tagged.aligncomp_y,1));
 timesD1=nanmean(activityD1tagged.unitbyunit_x,1)-temp(f);
 if any(isnan(timesD1))
-    timesD1=fillmissing(timesD1,'movmean',5);
+    timesD1=fillmissing(timesD1,'linear');
 end
 
 D1temp=[nanmean(activityD1tagged.unitbyunit_y(:,timesD1>=takewin1(1) & timesD1<=takewin1(2)),2)];
@@ -181,7 +181,7 @@ temp=nanmean(activityD1tagged.aligncomp_x,1);
 [~,f]=nanmax(nanmean(activityD1tagged.aligncomp_y,1));
 timesD1=nanmean(activityD1tagged.unitbyunit_x,1)-temp(f);
 if any(isnan(timesD1))
-    timesD1=fillmissing(timesD1,'movmean',5);
+    timesD1=fillmissing(timesD1,'linear');
 end
 
 % Population vector after the outcome (or whatever is in alignment
@@ -277,7 +277,7 @@ temp=nanmean(Response.aligncomp_x,1);
 [~,f]=nanmax(nanmean(Response.aligncomp_y,1));
 timesD1=nanmean(Response.unitbyunit_x,1)-temp(f);
 if any(isnan(timesD1))
-    timesD1=fillmissing(timesD1,'movmean',5);
+    timesD1=fillmissing(timesD1,'linear');
 end
 timeBins=timesD1(1):timeBinsStep:timesD1(end);
 figure();
@@ -310,7 +310,7 @@ temp=nanmean(activityD1tagged.aligncomp_x,1);
 [~,f]=nanmax(nanmean(activityD1tagged.aligncomp_y,1));
 timesD1=nanmean(activityD1tagged.unitbyunit_x,1)-temp(f);
 if any(isnan(timesD1))
-    timesD1=fillmissing(timesD1,'movmean',5);
+    timesD1=fillmissing(timesD1,'linear');
 end
 
 % Population vector after the outcome (or whatever is in alignment
