@@ -102,7 +102,7 @@ figure();
 if isempty(c)
     scatter(r1,r2);
 else
-    scatter(r1,r2,[],c);
+    scatter(r1,r2,[],c,'LineWidth',1);
 end
 colormap('jet');
 xlabel('Response 1');
@@ -115,7 +115,9 @@ function [Response,Response2]=matchUnitsAcrossResponses(Response,Response2)
 Response1_indsIntoExcluded=find(Response.excluded==0);
 Response2_indsIntoExcluded=find(Response2.excluded==0);
 useTheseUnitsResponse1=find(ismember(Response1_indsIntoExcluded,Response2_indsIntoExcluded));
+Response.excluded(Response1_indsIntoExcluded(~ismember(Response1_indsIntoExcluded,Response2_indsIntoExcluded)))=1;
 useTheseUnitsResponse2=find(ismember(Response2_indsIntoExcluded,Response1_indsIntoExcluded));
+Response2.excluded(Response2_indsIntoExcluded(~ismember(Response2_indsIntoExcluded,Response1_indsIntoExcluded)))=1;
 Response=filterResponseToOneSU(Response,useTheseUnitsResponse1);
 Response2=filterResponseToOneSU(Response2,useTheseUnitsResponse2);
 

@@ -39,7 +39,7 @@ switch varargin{1}
         typeOfPlot=varargin{4};
         [Response,Response2]=matchUnitsAcrossResponses(Response,Response2);
         outResponse3=[];
-        if isfield(varargin,'ColorLabel')
+        if any(strcmp([varargin],'ColorLabel'))
             Response3=varargin{find(strcmp([varargin],'ColorLabel'))+1};
             Response3=matchUnitsAcrossResponses(Response3,Response);
             outResponse1=plotVariousSUResponsesAlignedToBeh(typeOfPlot,Response,varargin{5:find(strcmp([varargin],'ColorLabel'))-1});
@@ -58,14 +58,20 @@ switch varargin{1}
                 overlayPlots(outResponse1,outResponse2);
             case 'scatterInTimeWindows'
                 if ~isempty(outResponse3)
-
+                    col=outResponse3.timeWindow2_FR./outResponse3.timeWindow1_FR;
                 else
-                    co=
-                scatterTwoResponses(outResponse1.timeWindow1_FR,outResponse2.timeWindow1_FR); title('Time window 1 firing rates');
-                scatterTwoResponses(outResponse1.timeWindow2_FR,outResponse2.timeWindow2_FR); title('Time window 2 firing rates');
-                scatterTwoResponses(outResponse1.timeWindow2_FR./outResponse1.timeWindow1_FR,outResponse2.timeWindow2_FR./outResponse2.timeWindow1_FR); title('Time window 2 to 1 ratio');
+                    col=[];
+                end
+                scatterTwoResponses(outResponse1.timeWindow1_FR,outResponse2.timeWindow1_FR,col); title('Time window 1 firing rates');
+                scatterTwoResponses(outResponse1.timeWindow2_FR,outResponse2.timeWindow2_FR,col); title('Time window 2 firing rates');
+                scatterTwoResponses(outResponse1.timeWindow2_FR./outResponse1.timeWindow1_FR,outResponse2.timeWindow2_FR./outResponse2.timeWindow1_FR,col); title('Time window 2 to 1 ratio');
             case 'modulationIndex'
-                scatterTwoResponses(outResponse1.modIndex,outResponse2.modIndex); title('Modulation index');
+                if ~isempty(outResponse3)
+                    col=outResponse3.modIndex;
+                else
+                    col=[];
+                end
+                scatterTwoResponses(outResponse1.modIndex,outResponse2.modIndex,col); title('Modulation index');
             case 'populationVectorCorrelation'
             case 'trialVectorCorrelation'
             otherwise
@@ -90,10 +96,15 @@ plot(r2.t,r2.minusSe,'Color','r');
 
 end
 
-function scatterTwoResponses(r1,r2)
+function scatterTwoResponses(r1,r2,c)
 
 figure();
-scatter(r1,r2);
+if isempty(c)
+    scatter(r1,r2);
+else
+    scatter(r1,r2,[],c,'LineWidth',1);
+end
+colormap('jet');
 xlabel('Response 1');
 ylabel('Response 2');
 
@@ -104,7 +115,9 @@ function [Response,Response2]=matchUnitsAcrossResponses(Response,Response2)
 Response1_indsIntoExcluded=find(Response.excluded==0);
 Response2_indsIntoExcluded=find(Response2.excluded==0);
 useTheseUnitsResponse1=find(ismember(Response1_indsIntoExcluded,Response2_indsIntoExcluded));
+Response.excluded(Response1_indsIntoExcluded(~ismember(Response1_indsIntoExcluded,Response2_indsIntoExcluded))=1;
 useTheseUnitsResponse2=find(ismember(Response2_indsIntoExcluded,Response1_indsIntoExcluded));
+Response2.excluded(~ismember(Response2_indsIntoExcluded,Response1_indsIntoExcluded))=1;
 Response=filterResponseToOneSU(Response,useTheseUnitsResponse1);
 Response2=filterResponseToOneSU(Response2,useTheseUnitsResponse2);
 
@@ -181,6 +194,8 @@ end
 function [me,plusSe,minusSe,t]=plotMeanAndSE(data1,color1,timeBins)
 
 plotAsCityscape=false;
+
+data1=data1(any(~isnan(data1),2),:);
 
 data1_mean=mean(data1,1,'omitnan');
 data1_se=std(data1,0,1,'omitnan')./sqrt(size(data1,1));
@@ -428,6 +443,9 @@ if s.keepAllSingleTrials~=true
     disp('Trial vector correlation requires single trial data ... cannot continue');
     return
 end
+
+% get rid of trials where event did not occur (all nan)
+activityD1tagged.unitbyunit_y=activityD1tagged.unitbyunit_y(any(~isnan(activityD1tagged.unitbyunit_y),2),:);
 
 % timesD1 is times relative to alignment companion peak
 if isempty(timesD1)
