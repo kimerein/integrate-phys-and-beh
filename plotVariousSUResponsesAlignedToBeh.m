@@ -35,19 +35,29 @@ switch varargin{1}
         % for a single unit
         % trialVectorCorrelation(filterResponseToOneSU(Response,1),timeBinsStep,sliceAtTimeWindow);
     case 'scatterResponseVsResponse'
+        grayOutNonResponse=true;
         Response2=varargin{3};
         typeOfPlot=varargin{4};
         [Response,Response2]=matchUnitsAcrossResponses(Response,Response2);
         outResponse3=[];
+        isResp=[];
         if any(strcmp([varargin],'ColorLabel'))
             Response3=varargin{find(strcmp([varargin],'ColorLabel'))+1};
             [Response,Response2,Response3]=matchUnitsAcrossResponses(Response,Response2,Response3);
             outResponse1=plotVariousSUResponsesAlignedToBeh(typeOfPlot,Response,varargin{5:find(strcmp([varargin],'ColorLabel'))-1});
             outResponse2=plotVariousSUResponsesAlignedToBeh(typeOfPlot,Response2,varargin{5:find(strcmp([varargin],'ColorLabel'))-1});
-            if length(varargin)==find(strcmp([varargin],'ColorLabel'))+1
-                outResponse3=plotVariousSUResponsesAlignedToBeh(typeOfPlot,Response3,varargin{5:find(strcmp([varargin],'ColorLabel'))-1});
+            if length(Response.fromWhichUnit)==size(Response.unitbyunit_y,1)
+                % took trial by trial
+                ubyu_Response3=Response3;
             else
-                outResponse3=plotVariousSUResponsesAlignedToBeh(typeOfPlot,Response3,varargin{find(strcmp([varargin],'ColorLabel'))+2:end});
+                ubyu_Response3=collapseToUnitByUnit(Response3);
+            end
+            if length(varargin)==find(strcmp([varargin],'ColorLabel'))+1
+                outResponse3=plotVariousSUResponsesAlignedToBeh(typeOfPlot,ubyu_Response3,varargin{5:find(strcmp([varargin],'ColorLabel'))-1});
+                isResp=isResponsive(Response3,varargin{5:find(strcmp([varargin],'ColorLabel'))-1}); % find responsive for color plot
+            else
+                outResponse3=plotVariousSUResponsesAlignedToBeh(typeOfPlot,ubyu_Response3,varargin{find(strcmp([varargin],'ColorLabel'))+2:end});
+                isResp=isResponsive(Response3,varargin{find(strcmp([varargin],'ColorLabel'))+2:end}); % find responsive for color plot
             end
         else
             outResponse1=plotVariousSUResponsesAlignedToBeh(typeOfPlot,Response,varargin{5:end});
@@ -59,6 +69,9 @@ switch varargin{1}
             case 'scatterInTimeWindows'
                 if ~isempty(outResponse3)
                     temp=outResponse3.timeWindow2_FR./outResponse3.timeWindow1_FR;
+                    if ~isempty(isResp) && grayOutNonResponse==true
+                        temp(isResp.isSig==false)=nan;
+                    end
                     col=temp;
                 else
                     col=[];
@@ -68,7 +81,11 @@ switch varargin{1}
                 scatterTwoResponses(outResponse1.timeWindow2_FR./outResponse1.timeWindow1_FR,outResponse2.timeWindow2_FR./outResponse2.timeWindow1_FR,col); title('Time window 2 to 1 ratio');
             case 'modulationIndex'
                 if ~isempty(outResponse3)
-                    col=outResponse3.modIndex;
+                    temp=outResponse3.modIndex;
+                    if ~isempty(isResp) && grayOutNonResponse==true
+                        temp(isResp.isSig==false)=nan;
+                    end
+                    col=temp;
                 else
                     col=[];
                 end
@@ -81,6 +98,31 @@ switch varargin{1}
         end
     otherwise
         error('Do not recognize first argument value in plotVariousSUResponsesAlignedToBeh.m');
+end
+
+end
+
+function out=collapseToUnitByUnit(Response)
+
+fieldLikeResponseSize=size(Response.unitbyunit_y,1);
+if length(Response.fromWhichUnit)==fieldLikeResponseSize
+    % took all trials
+    whichUnit=Response.fromWhichUnit;
+    u=unique(whichUnit);
+    out=Response;
+    out.unitbyunit_x=nan(length(u),size(Response.unitbyunit_x,2));
+    out.unitbyunit_y=nan(length(u),size(Response.unitbyunit_y,2));
+    out.aligncomp_x=nan(length(u),size(Response.aligncomp_x,2));
+    out.aligncomp_y=nan(length(u),size(Response.aligncomp_y,2));
+    for i=1:length(u)
+        currU=u(i);
+        out.unitbyunit_x(i,:)=mean(Response.unitbyunit_x(whichUnit==currU,:),1,'omitnan');
+        out.unitbyunit_y(i,:)=mean(Response.unitbyunit_y(whichUnit==currU,:),1,'omitnan');
+        out.aligncomp_x(i,:)=mean(Response.aligncomp_x(whichUnit==currU,:),1,'omitnan');
+        out.aligncomp_y(i,:)=mean(Response.aligncomp_y(whichUnit==currU,:),1,'omitnan');
+    end
+elseif length(Response.fromWhichSess)==fieldLikeResponseSize
+    % already took unit by unit
 end
 
 end
@@ -100,22 +142,28 @@ end
 
 function scatterTwoResponses(r1,r2,c)
 
-chopColormap=false;
-if chopColormap==true
-    disp('CHOPPING COLORMAP!!!!!!!!!!!!!!!!!!!');
-    chop_c_lower=-0.2;
-    chop_c_higher=0.2;
-    c(c<chop_c_lower)=chop_c_lower;
-    c(c>chop_c_higher)=chop_c_higher;
+if length(c)~=length(r1)
+    disp('lengths of Response and color vec do not match in scatterTwoResponses in plotVariousSUResponsesAlignedToBeh.m');
+    disp('ignoring the color vec');
+    c=[];
 end
 
-figure();
-if isempty(c)
-    scatter(r1,r2);
+% if nans in c, gray out these
+grayout=isnan(c);
+if any(grayout)
+    figure();
+    scatter(r1(grayout==true),r2(grayout==true),[],[0.9 0.9 0.9],'LineWidth',1); hold on;
+    scatter(r1(grayout==false),r2(grayout==false),[],c(grayout==false),'LineWidth',1);
+    colormap('hsv');
 else
-    scatter(r1,r2,[],c,'LineWidth',1);
+    figure();
+    if isempty(c)
+        scatter(r1,r2);
+    else
+        scatter(r1,r2,[],c,'LineWidth',1);
+    end
+    colormap('hsv');
 end
-colormap('hsv');
 xlabel('Response 1');
 ylabel('Response 2');
 
@@ -593,5 +641,150 @@ figure();
 bar(binCenters,N,'LineWidth',0.1);
 xlabel('Modulation index');
 ylabel('Count');
+
+end
+
+function out=isResponsive(Response,takewin1,takewin2)
+
+% binomial or ranksum stats
+nTimesStdevAtBaseline=1.2; % for sustained test
+ds_for_sustained=10; % downsamp bins
+
+temp=nanmean(Response.aligncomp_x,1);
+[~,f]=nanmax(nanmean(Response.aligncomp_y,1));
+timesD1=nanmean(Response.unitbyunit_x,1)-temp(f);
+if any(isnan(timesD1))
+    timesD1=fillmissing(timesD1,'linear');
+end
+
+fieldLikeResponseSize=size(Response.unitbyunit_y,1);
+if length(Response.fromWhichUnit)==fieldLikeResponseSize
+    % took all trials
+    whichUnit=Response.fromWhichUnit;
+elseif length(Response.fromWhichSess)==fieldLikeResponseSize
+    % took unit by unit
+    whichUnit=1:fieldLikeResponseSize;  
+else
+    error('do not recognize structure of Response in plotVariousSUResponsesAlignedToBeh.m');
+end
+
+u=unique(whichUnit);
+
+indsForWin1=find(timesD1>=takewin1(1) & timesD1<=takewin1(2));
+indsForWin2=find(timesD1>=takewin2(1) & timesD1<=takewin2(2));
+
+binsize=250; % in ms
+binsize=binsize/1000; % in sec
+
+nindsperbin=ceil(binsize/(timesD1(2)-timesD1(1)));
+binsForWin2=indsForWin2(1):nindsperbin:indsForWin2(end);
+isSig=nan(size(u));
+pvals=nan(size(u));
+positiveMod=nan(size(u));
+sustained=nan(size(u));
+for i=1:length(u)
+    currU=u(i);
+    temp=Response.unitbyunit_y;
+    unittemp=temp(whichUnit==currU,:);
+    if length(Response.fromWhichUnit)==fieldLikeResponseSize
+        % took all trials
+        % look for stat across trials
+        unittemp=unittemp(~all(isnan(unittemp),2),:);
+        inWindow1=nanmean(unittemp(:,indsForWin1),2);
+        inWindow2=nanmean(unittemp(:,indsForWin2),2);
+        if all(isnan(inWindow1)) || all(isnan(inWindow2))
+            isSig(i)=false;
+            continue
+        end
+        rank_p=ranksum(inWindow1,inWindow2);
+        bino_p=compareCounts(inWindow1>0,inWindow2>0);
+        p=min([rank_p bino_p]);
+        pvals(i)=p;
+        isSig(i)=p<0.05;
+        positiveMod(i)=mean(inWindow2,'all','omitnan')>mean(inWindow1,'all','omitnan');
+        % also check whether one timepoint in win 2 is modulated 
+        pval_timepoints_win2=nan(1,length(binsForWin2)-1);
+        countsDuringWin1=countEventsInBin(unittemp,indsForWin1);
+        for j=1:length(binsForWin2)-1
+            currbin=binsForWin2(j):binsForWin2(j+1);
+            countsDuringWin2=countEventsInBin(unittemp,currbin);
+            pval_timepoints_win2(j)=compareCounts(countsDuringWin1,countsDuringWin2);
+        end
+        timepoints_pval_thresh=0.2;
+        if any(pval_timepoints_win2<timepoints_pval_thresh)
+            pvals(i)=min(min(pval_timepoints_win2,[],'all','omitnan'),pvals(i));
+            isSig(i)=true;
+        end
+    elseif length(Response.fromWhichSess)==fieldLikeResponseSize
+        % took unit by unit
+        % compare stat in time window 1 to 2
+        if size(unittemp,1)>1
+            error('unittemp size unexpected in plotVariousSUResponsesAlignedToBeh.m');
+        end
+        inWindow1=unittemp(indsForWin1);
+        inWindow2=unittemp(indsForWin2);
+        if all(isnan(inWindow1)) || all(isnan(inWindow2))
+            isSig(i)=false;
+            continue
+        end
+        rank_p=ranksum(inWindow1,inWindow2);
+        bino_p=compareCounts(inWindow1,inWindow2);
+        p=min([rank_p bino_p]);
+        pvals(i)=p;
+        isSig(i)=p<0.05;
+        positiveMod(i)=mean(inWindow2,'all','omitnan')>mean(inWindow1,'all','omitnan');
+    end
+    te=-2*ones(1,size(unittemp,2));
+    te(indsForWin1)=0; % specific win1 inds
+    te(indsForWin2)=1; % specific win2 inds
+    [increase,decrease]=isSustained(nanmean(unittemp,1),te,nTimesStdevAtBaseline,ds_for_sustained);
+    if increase || decrease
+        sustained(i)=true;
+    else
+        sustained(i)=false;
+    end
+end
+
+out.isSig=isSig;
+out.pvals=pvals;
+out.positiveMod=positiveMod;
+out.sustained=sustained;
+
+end
+
+function pval=compareCounts(base,test)
+
+% binomial stats
+% what is the probability of observing the number of spikes during opto 
+% if the real probability of a spike were unchanged from baseline
+% one-sided test that opto spiking is greater than baseline
+
+p=sum(base>0)/length(base);
+k=sum(test>0);
+n=length(test);
+pval=0;
+for i=k:n
+    pval=pval+binopdf(i,n,p);
+end
+
+end
+
+function out=countEventsInBin(dataMatrix,binInInds)
+
+dataMatrix(dataMatrix>0)=1;
+out=sum(dataMatrix(:,binInInds),2,'omitnan');
+
+end
+
+function [increase,decrease]=isSustained(avAlignedToOpto,optoOnInUnitTimes,nTimesStdevAtBaseline,ds)
+
+avAlignedToOpto=downSampAv(avAlignedToOpto,ds);
+optoOnInUnitTimes=downSampAv(optoOnInUnitTimes,ds);
+
+meanAtBaseline=mean(avAlignedToOpto(optoOnInUnitTimes==0),'all','omitnan');
+stdAtBaseline=std(avAlignedToOpto(optoOnInUnitTimes==0),0,'all','omitnan');
+meanDuringOpto=mean(avAlignedToOpto(optoOnInUnitTimes==1),'all','omitnan');
+increase=meanDuringOpto>meanAtBaseline+(stdAtBaseline*nTimesStdevAtBaseline);
+decrease=meanDuringOpto<meanAtBaseline-(stdAtBaseline*nTimesStdevAtBaseline);
 
 end

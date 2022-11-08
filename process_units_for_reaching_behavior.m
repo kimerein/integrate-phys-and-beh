@@ -358,6 +358,9 @@ figure(); scatter(uncued_minus_cued,failure_minus_success);
 line([0 0],[-2 2]); line([-2 2],[0 0]);
 xlabel('uncued minus cued'); ylabel('failure minus success'); title('A2a');
 
+plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',cue_D1tagged,cued_success_D1tagged,'modulationIndex',[-1 -0.5],[-0.4 1],'ColorLabel',cued_failure_D1tagged);
+plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',cue_A2atagged,cued_success_A2atagged,'modulationIndex',[-1 -0.5],[-0.4 1],'ColorLabel',cued_failure_A2atagged);
+
 % scriptToOrganizeD1vD2unitResponses is old and probably won't work
 % getCriteriaForUnitsToPlot('alltrue');
 % scriptToOrganizeD1vD2unitResponses_wrapper(dd);
