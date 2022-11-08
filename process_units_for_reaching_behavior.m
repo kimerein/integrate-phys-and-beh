@@ -149,15 +149,31 @@ for i=1:size(data_loc_array,1)
             end
             % find good units
             gu=find(spikes.labels(:,2)==goodUnitLabel);
+            if skipUnitDetailsUnlessNoQCfig==true
+                % are all SU_QC figs already populated? if yes, continue
+                allsue=zeros(1,length(gu));
+                for k=1:length(gu)
+                    currU=gu(k);
+                    currAssign=spikes.labels(currU,1);
+                    allsue(k)=SU_QC_file_exists(data_loc_array{i,8}, currAssign, trodeChsForSpikes);
+                end
+                if all(allsue==1)
+                    disp(['Already made SU QC figs for this spikes']);
+                else
+                    doBecauseMissing=true;
+                end
+            else
+                doBecauseMissing=true;
+            end
             % make opto-tagged alignment
-            if skipUnitDetails==false
+            if skipUnitDetails==false || doBecauseMissing==true
                 [~,tbtspikes]=organizeSpikesToMatch_physiology_tbt(spikes,physiology_tbt);
             end
             % if no good units, just continue
             if isempty(gu)
                 continue
             end
-            if skipUnitDetails==false
+            if skipUnitDetails==false || doBecauseMissing==true
                 optoAligned_phys_tbt=alignToOpto(addGoodUnitsAsFields(physiology_tbt,tbtspikes,2,1,false,true,true));
                 optoAligned_phys_tbt=checkWaveformsDuringOpto(optoAligned_phys_tbt,tbtspikes);
                 % save opto alignment
@@ -212,7 +228,7 @@ for i=1:size(data_loc_array,1)
                         error('Cannot skip unit details if SU_QC file does not yet exist');
                     end
                 end
-                if skipBehAlign==false
+                if skipBehAlign==false || sue==false
                     if ~sue && onVPN==false
                         % make behavior alignments and single unit QC figs
                         unit_data=saveBehaviorAlignmentsSingleNeuron(physiology_tbt,spikes,currAssign,beh2_tbt,forplot_trodeChs,trodeChsForSpikes(end),data_loc_array{i,8},addTag,data_loc_array{i,3},data_loc_array{i,9});
@@ -230,7 +246,18 @@ for i=1:size(data_loc_array,1)
                 else
                     unit_data=[data_loc_array{i,8} sep qc_fname];
                 end
-                if skipUnitDetails==false && (skipUnitDetailsUnlessNoQCfig==false || (skipUnitDetailsUnlessNoQCfig==true && sue==false))
+                dud=true;
+                if skipUnitDetailsUnlessNoQCfig==true
+                    if sue==true
+                        dud=false;
+                    else
+                        dud=true;
+                    end
+                end
+                if skipUnitDetails==true
+                    dud=false;
+                end
+                if dud==true
                     % discard trials where unit dead or moved away
                     [physiology_tbt.(['unit' num2str(currAssign) '_dontUseTrials']),physiology_tbt.(['unit' num2str(currAssign) '_meanFR'])]=inferUnitStability(unit_data,physiology_tbt,dsinds,percentThresh,timeStretchThresh,plotInference);
                     % get depth of unit
@@ -278,7 +305,7 @@ end
 
 %% 4. Make figures -- about 6 min to load 84 sessions of unit data
 % choose type of response to plot
-response_to_plot='cue'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+response_to_plot='cue_noReach'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 
 % doUnitTest.m is used to test whether to include unit in this plot
 % will include unit if unitdets match the following
@@ -365,4 +392,26 @@ plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',cue_A2atagged,cue
 % getCriteriaForUnitsToPlot('alltrue');
 % scriptToOrganizeD1vD2unitResponses_wrapper(dd);
 
+plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',cued_success_D1tagged,cued_failure_D1tagged,'modulationIndex',[-3 0.25],[0.5 4],'ColorLabel',cue_D1tagged,[-1 -0.5],[0 0.25]);
 
+plotVariousSUResponsesAlignedToBeh('modRatioPSTH',cued_success_Response,cued_failure_Response,cueNoReach_Response,[-3 0.25],[0.5 2.5]);
+
+% D1mods=plotVariousSUResponsesAlignedToBeh('scatter3D',cued_success_D1tagged,cued_failure_D1tagged,cueNoReach_D1tagged,[-3 0.25],[0.5 4]);
+% D1mods_forCue=plotVariousSUResponsesAlignedToBeh('scatter3D',cued_success_D1tagged,cued_failure_D1tagged,cueNoReach_D1tagged,[-1 -0.5],[-0.4 1]);
+% D1mods.modIndex3=D1mods_forCue.modIndex3;
+% % D1meanFR=D1mods_forCue.meanFR3;
+% A2amods=plotVariousSUResponsesAlignedToBeh('scatter3D',cued_success_A2atagged,cued_failure_A2atagged,cueNoReach_A2atagged,[-3 0.25],[0.5 4]);
+% A2amods_forCue=plotVariousSUResponsesAlignedToBeh('scatter3D',cued_success_A2atagged,cued_failure_A2atagged,cueNoReach_A2atagged,[-1 -0.5],[-0.4 1]);
+% A2amods.modIndex3=A2amods_forCue.modIndex3;
+% % A2ameanFR=A2amods_forCue.meanFR3;
+% SVMforD1vA2a(D1mods,A2amods);
+trial_n_cutoff=0;
+D1mods=plotVariousSUResponsesAlignedToBeh('scatter3D',excludeTooFewTrials(cued_success_D1tagged,trial_n_cutoff,true),excludeTooFewTrials(cued_failure_D1tagged,trial_n_cutoff,true),excludeTooFewTrials(cueNoReach_D1tagged,trial_n_cutoff,true),[-3 0.25],[0.5 2.5]);
+D1mods_forCue=plotVariousSUResponsesAlignedToBeh('scatter3D',excludeTooFewTrials(cued_success_D1tagged,trial_n_cutoff,true),excludeTooFewTrials(cued_failure_D1tagged,trial_n_cutoff,true),excludeTooFewTrials(cueNoReach_D1tagged,trial_n_cutoff,true),[-1 -0.5],[-0.4 1]);
+D1mods.modIndex3=D1mods_forCue.modIndex3;
+% D1meanFR=D1mods_forCue.meanFR3;
+A2amods=plotVariousSUResponsesAlignedToBeh('scatter3D',excludeTooFewTrials(cued_success_A2atagged,trial_n_cutoff,true),excludeTooFewTrials(cued_failure_A2atagged,trial_n_cutoff,true),excludeTooFewTrials(cueNoReach_A2atagged,trial_n_cutoff,true),[-3 0.25],[0.5 2.5]);
+A2amods_forCue=plotVariousSUResponsesAlignedToBeh('scatter3D',excludeTooFewTrials(cued_success_A2atagged,trial_n_cutoff,true),excludeTooFewTrials(cued_failure_A2atagged,trial_n_cutoff,true),excludeTooFewTrials(cueNoReach_A2atagged,trial_n_cutoff,true),[-1 -0.5],[-0.4 1]);
+A2amods.modIndex3=A2amods_forCue.modIndex3;
+% A2ameanFR=A2amods_forCue.meanFR3;
+SVMforD1vA2a(D1mods,A2amods);

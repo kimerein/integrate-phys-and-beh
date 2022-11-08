@@ -9,6 +9,19 @@ Response=varargin{2};
 out=[];
 
 switch varargin{1}
+    case 'modRatioPSTH'
+        col=[];
+        Response2=varargin{3};
+        Response3=varargin{4};
+        [Response,Response2,Response3]=matchUnitsAcrossResponses(Response,Response2,Response3);
+        outResponse1=plotVariousSUResponsesAlignedToBeh('modulationIndex',Response,varargin{5:end});
+        outResponse2=plotVariousSUResponsesAlignedToBeh('modulationIndex',Response2,varargin{5:end});
+        outResponse3=plotVariousSUResponsesAlignedToBeh('modulationIndex',Response3,varargin{5:end});
+        % col=outResponse2.modIndex./outResponse1.modIndex;
+        col=outResponse2.modIndex-outResponse1.modIndex;
+        modRatioPSTH(Response,Response2,Response3,col);
+    case 'coloredPSTH'
+        % do not need to process anything
     case 'meanAcrossUnits'
         downSampFac=varargin{3};
         out=meanAcrossUnits(Response,downSampFac);
@@ -35,7 +48,7 @@ switch varargin{1}
         % for a single unit
         % trialVectorCorrelation(filterResponseToOneSU(Response,1),timeBinsStep,sliceAtTimeWindow);
     case 'scatterResponseVsResponse'
-        grayOutNonResponse=true;
+        grayOutNonResponse=true; %true;
         Response2=varargin{3};
         typeOfPlot=varargin{4};
         [Response,Response2]=matchUnitsAcrossResponses(Response,Response2);
@@ -52,11 +65,17 @@ switch varargin{1}
             else
                 ubyu_Response3=collapseToUnitByUnit(Response3);
             end
+            alwaysUseModForColor=true;
+            if alwaysUseModForColor==true
+                tOp='modulationIndex';
+            else
+                tOp=typeOfPlot;
+            end
             if length(varargin)==find(strcmp([varargin],'ColorLabel'))+1
-                outResponse3=plotVariousSUResponsesAlignedToBeh(typeOfPlot,ubyu_Response3,varargin{5:find(strcmp([varargin],'ColorLabel'))-1});
+                outResponse3=plotVariousSUResponsesAlignedToBeh(tOp,ubyu_Response3,varargin{5:find(strcmp([varargin],'ColorLabel'))-1});
                 isResp=isResponsive(Response3,varargin{5:find(strcmp([varargin],'ColorLabel'))-1}); % find responsive for color plot
             else
-                outResponse3=plotVariousSUResponsesAlignedToBeh(typeOfPlot,ubyu_Response3,varargin{find(strcmp([varargin],'ColorLabel'))+2:end});
+                outResponse3=plotVariousSUResponsesAlignedToBeh(tOp,ubyu_Response3,varargin{find(strcmp([varargin],'ColorLabel'))+2:end});
                 isResp=isResponsive(Response3,varargin{find(strcmp([varargin],'ColorLabel'))+2:end}); % find responsive for color plot
             end
         else
@@ -64,11 +83,27 @@ switch varargin{1}
             outResponse2=plotVariousSUResponsesAlignedToBeh(typeOfPlot,Response2,varargin{5:end});
         end
         switch typeOfPlot
+            case 'coloredPSTH'
+                col=[];
+                if ~isempty(outResponse3) 
+                    if alwaysUseModForColor==true
+                        temp=outResponse3.modIndex;
+                        if ~isempty(isResp) && grayOutNonResponse==true
+                            temp(isResp.isSig==0)=nan;
+                        end
+                        col=temp;
+                    end
+                end
+                coloredPSTH(Response,Response2,col);
             case 'meanAcrossUnits'
                 overlayPlots(outResponse1,outResponse2);
             case 'scatterInTimeWindows'
                 if ~isempty(outResponse3)
-                    temp=outResponse3.timeWindow2_FR./outResponse3.timeWindow1_FR;
+                    if alwaysUseModForColor==true
+                        temp=outResponse3.modIndex;
+                    else
+                        temp=outResponse3.timeWindow2_FR./outResponse3.timeWindow1_FR;
+                    end
                     if ~isempty(isResp) && grayOutNonResponse==true
                         temp(isResp.isSig==false)=nan;
                     end
@@ -93,9 +128,29 @@ switch varargin{1}
                 out.response2minus1=outResponse2.modIndex-outResponse1.modIndex;
             case 'populationVectorCorrelation'
             case 'trialVectorCorrelation'
+            case 'scatter3D'
             otherwise
                 disp(['do not recognize scatterResponseVsResponse for plot type ' typeOfPlot]);
         end
+    case 'scatter3D'
+        Response2=varargin{3};
+        Response3=varargin{4};
+        [Response,Response2,Response3]=matchUnitsAcrossResponses(Response,Response2,Response3);
+        typeOfPlot='modulationIndex';
+        outResponse1=plotVariousSUResponsesAlignedToBeh(typeOfPlot,Response,varargin{5:end});
+        outResponse2=plotVariousSUResponsesAlignedToBeh(typeOfPlot,Response2,varargin{5:end});
+        outResponse3=plotVariousSUResponsesAlignedToBeh(typeOfPlot,Response3,varargin{5:end});
+        figure();
+        scatter3(outResponse1.modIndex,outResponse2.modIndex,outResponse3.modIndex);
+        xlabel('Response 1');
+        ylabel('Response 2');
+        zlabel('Response 3');
+        out.modIndex1=outResponse1.modIndex;
+        out.modIndex2=outResponse2.modIndex;
+        out.modIndex3=outResponse3.modIndex;
+        out.meanFR1=nanmean(Response.unitbyunit_y,2);
+        out.meanFR2=nanmean(Response2.unitbyunit_y,2);
+        out.meanFR3=nanmean(Response3.unitbyunit_y,2);
     otherwise
         error('Do not recognize first argument value in plotVariousSUResponsesAlignedToBeh.m');
 end
@@ -105,11 +160,11 @@ end
 function out=collapseToUnitByUnit(Response)
 
 fieldLikeResponseSize=size(Response.unitbyunit_y,1);
+out=Response;
 if length(Response.fromWhichUnit)==fieldLikeResponseSize
     % took all trials
     whichUnit=Response.fromWhichUnit;
     u=unique(whichUnit);
-    out=Response;
     out.unitbyunit_x=nan(length(u),size(Response.unitbyunit_x,2));
     out.unitbyunit_y=nan(length(u),size(Response.unitbyunit_y,2));
     out.aligncomp_x=nan(length(u),size(Response.aligncomp_x,2));
@@ -124,6 +179,152 @@ if length(Response.fromWhichUnit)==fieldLikeResponseSize
 elseif length(Response.fromWhichSess)==fieldLikeResponseSize
     % already took unit by unit
 end
+
+end
+
+function timesD1=getTimesD1(Response1)
+
+temp=nanmean(Response1.aligncomp_x,1);
+[~,f]=nanmax(nanmean(Response1.aligncomp_y,1));
+timesD1=nanmean(Response1.unitbyunit_x,1)-temp(f);
+if any(isnan(timesD1))
+    timesD1=fillmissing(timesD1,'linear');
+end
+
+end
+
+function Response1=ZscoreAndSmooth(Response1)
+
+% Zscore within each unit, then plot transition to time window 2
+temp=Response1.unitbyunit_y;
+temp=temp-mean(temp,2,'omitnan');
+temp=temp./std(temp,0,2,'omitnan');
+Zscored_D1tagged=temp;
+
+temp=Zscored_D1tagged;
+for i=1:size(temp,1)
+    temp(i,:)=smoothdata(temp(i,:),'gaussian',10);
+end
+Response1.unitbyunit_y=temp;
+
+end
+
+function plotResponseLineByLine(timesD1,Response1,cmap,si,col)
+
+figure();
+incColorInd=1;
+for i=1:size(Response1.unitbyunit_y,1)
+    if isnan(col(i))
+        lh=plot(timesD1,Response1.unitbyunit_y(i,:),'Color',[0.9 0.9 0.9]); hold on;
+        lh.Color=[0.9 0.9 0.9 0.2];
+    else
+        lh=plot(timesD1,Response1.unitbyunit_y(i,:),'Color',cmap(si(incColorInd),:)); hold on;
+        lh.Color=[cmap(si(incColorInd),:),0.5];
+        incColorInd=incColorInd+1;
+    end
+end
+
+end
+
+function modRatioPSTH(Response1,Response2,Response3,col)
+
+cmap=jet(length(col(~isnan(col))));
+[~,si]=sort(col(~isnan(col)));
+
+% Response 1
+timesD1=getTimesD1(Response1);
+Response1=ZscoreAndSmooth(Response1);
+plotResponseLineByLine(timesD1,Response1,cmap,si,col); title('Response 1 -- all lines');
+tempcol=col; tempcol(col>1)=nan;
+plotResponseLineByLine(timesD1,Response1,cmap,si,tempcol); title('Response 1 -- only mod ratio > 1');
+tempcol=col; tempcol(col<1)=nan;
+plotResponseLineByLine(timesD1,Response1,cmap,si,tempcol); title('Response 1 -- only mod ratio < 1');
+
+% Response 2
+timesD1=getTimesD1(Response2);
+Response2=ZscoreAndSmooth(Response2);
+plotResponseLineByLine(timesD1,Response2,cmap,si,col); title('Response 2 -- all lines');
+tempcol=col; tempcol(col>1)=nan;
+plotResponseLineByLine(timesD1,Response2,cmap,si,tempcol); title('Response 2 -- only mod ratio > 1');
+tempcol=col; tempcol(col<1)=nan;
+plotResponseLineByLine(timesD1,Response2,cmap,si,tempcol); title('Response 2 -- only mod ratio < 1');
+
+% Response 3
+timesD1=getTimesD1(Response3);
+Response3=ZscoreAndSmooth(Response3);
+plotResponseLineByLine(timesD1,Response3,cmap,si,col); title('Response 3 -- all lines');
+tempcol=col; tempcol(col>1)=nan;
+plotResponseLineByLine(timesD1,Response3,cmap,si,tempcol); title('Response 3 -- only mod ratio > 1');
+tempcol=col; tempcol(col<1)=nan;
+plotResponseLineByLine(timesD1,Response3,cmap,si,tempcol); title('Response 3 -- only mod ratio < 1');
+
+end
+
+function coloredPSTH(Response1,Response2,col)
+
+temp=nanmean(Response1.aligncomp_x,1);
+[~,f]=nanmax(nanmean(Response1.aligncomp_y,1));
+timesD1=nanmean(Response1.unitbyunit_x,1)-temp(f);
+if any(isnan(timesD1))
+    timesD1=fillmissing(timesD1,'linear');
+end
+% Zscore within each unit, then plot transition to time window 2
+temp=Response1.unitbyunit_y;
+temp=temp-mean(temp,2,'omitnan');
+temp=temp./std(temp,0,2,'omitnan');
+Zscored_D1tagged=temp;
+temp=Zscored_D1tagged;
+for i=1:size(temp,1)
+    temp(i,:)=smoothdata(temp(i,:),'gaussian',10);
+end
+Response1.unitbyunit_y=temp;
+cmap=jet(length(col(~isnan(col))));
+[~,si]=sort(col(~isnan(col)));
+figure();
+incColorInd=1;
+for i=1:size(Response1.unitbyunit_y,1)
+    if isnan(col(i))
+        lh=plot(timesD1,Response1.unitbyunit_y(i,:),'Color',[0.9 0.9 0.9]); hold on;
+        lh.Color=[0.9 0.9 0.9 0.2];
+    else
+        lh=plot(timesD1,Response1.unitbyunit_y(i,:),'Color',cmap(si(incColorInd),:)); hold on;
+        lh.Color=[cmap(si(incColorInd),:),0.5];
+        incColorInd=incColorInd+1;
+    end
+end
+title('Response 1');
+
+temp=nanmean(Response2.aligncomp_x,1);
+[~,f]=nanmax(nanmean(Response2.aligncomp_y,1));
+timesD1=nanmean(Response2.unitbyunit_x,1)-temp(f);
+if any(isnan(timesD1))
+    timesD1=fillmissing(timesD1,'linear');
+end
+% Zscore within each unit, then plot transition to time window 2
+temp=Response2.unitbyunit_y;
+temp=temp-mean(temp,2,'omitnan');
+temp=temp./std(temp,0,2,'omitnan');
+Zscored_D1tagged=temp;
+temp=Zscored_D1tagged;
+for i=1:size(temp,1)
+    temp(i,:)=smoothdata(temp(i,:),'gaussian',10);
+end
+Response2.unitbyunit_y=temp;
+cmap=jet(length(col(~isnan(col))));
+[~,si]=sort(col(~isnan(col)));
+figure();
+incColorInd=1;
+for i=1:size(Response2.unitbyunit_y,1)
+    if isnan(col(i))
+        lh=plot(timesD1,Response2.unitbyunit_y(i,:),'Color',[0.9 0.9 0.9]); hold on;
+        lh.Color=[0.9 0.9 0.9 0.2];
+    else
+        lh=plot(timesD1,Response2.unitbyunit_y(i,:),'Color',cmap(si(incColorInd),:)); hold on;
+        lh.Color=[cmap(si(incColorInd),:),0.5];
+        incColorInd=incColorInd+1;
+    end
+end
+title('Response 2');
 
 end
 
@@ -142,6 +343,8 @@ end
 
 function scatterTwoResponses(r1,r2,c)
 
+cmap='jet'; %'hsv';
+
 if length(c)~=length(r1)
     disp('lengths of Response and color vec do not match in scatterTwoResponses in plotVariousSUResponsesAlignedToBeh.m');
     disp('ignoring the color vec');
@@ -154,7 +357,6 @@ if any(grayout)
     figure();
     scatter(r1(grayout==true),r2(grayout==true),[],[0.9 0.9 0.9],'LineWidth',1); hold on;
     scatter(r1(grayout==false),r2(grayout==false),[],c(grayout==false),'LineWidth',1);
-    colormap('hsv');
 else
     figure();
     if isempty(c)
@@ -162,8 +364,8 @@ else
     else
         scatter(r1,r2,[],c,'LineWidth',1);
     end
-    colormap('hsv');
 end
+colormap(cmap);
 xlabel('Response 1');
 ylabel('Response 2');
 
@@ -649,6 +851,7 @@ function out=isResponsive(Response,takewin1,takewin2)
 % binomial or ranksum stats
 nTimesStdevAtBaseline=1.2; % for sustained test
 ds_for_sustained=10; % downsamp bins
+sigThreshold=0.05;
 
 temp=nanmean(Response.aligncomp_x,1);
 [~,f]=nanmax(nanmean(Response.aligncomp_y,1));
@@ -700,21 +903,21 @@ for i=1:length(u)
         bino_p=compareCounts(inWindow1>0,inWindow2>0);
         p=min([rank_p bino_p]);
         pvals(i)=p;
-        isSig(i)=p<0.05;
+        isSig(i)=p<sigThreshold;
         positiveMod(i)=mean(inWindow2,'all','omitnan')>mean(inWindow1,'all','omitnan');
         % also check whether one timepoint in win 2 is modulated 
-        pval_timepoints_win2=nan(1,length(binsForWin2)-1);
-        countsDuringWin1=countEventsInBin(unittemp,indsForWin1);
-        for j=1:length(binsForWin2)-1
-            currbin=binsForWin2(j):binsForWin2(j+1);
-            countsDuringWin2=countEventsInBin(unittemp,currbin);
-            pval_timepoints_win2(j)=compareCounts(countsDuringWin1,countsDuringWin2);
-        end
-        timepoints_pval_thresh=0.2;
-        if any(pval_timepoints_win2<timepoints_pval_thresh)
-            pvals(i)=min(min(pval_timepoints_win2,[],'all','omitnan'),pvals(i));
-            isSig(i)=true;
-        end
+%         pval_timepoints_win2=nan(1,length(binsForWin2)-1);
+%         countsDuringWin1=countEventsInBin(unittemp,indsForWin1);
+%         for j=1:length(binsForWin2)-1
+%             currbin=binsForWin2(j):binsForWin2(j+1);
+%             countsDuringWin2=countEventsInBin(unittemp,currbin);
+%             pval_timepoints_win2(j)=compareCounts(countsDuringWin1,countsDuringWin2);
+%         end
+%         timepoints_pval_thresh=0;
+%         if any(pval_timepoints_win2<timepoints_pval_thresh)
+%             pvals(i)=min(min(pval_timepoints_win2,[],'all','omitnan'),pvals(i));
+%             isSig(i)=true;
+%         end
     elseif length(Response.fromWhichSess)==fieldLikeResponseSize
         % took unit by unit
         % compare stat in time window 1 to 2
@@ -731,7 +934,7 @@ for i=1:length(u)
         bino_p=compareCounts(inWindow1,inWindow2);
         p=min([rank_p bino_p]);
         pvals(i)=p;
-        isSig(i)=p<0.05;
+        isSig(i)=p<sigThreshold;
         positiveMod(i)=mean(inWindow2,'all','omitnan')>mean(inWindow1,'all','omitnan');
     end
     te=-2*ones(1,size(unittemp,2));

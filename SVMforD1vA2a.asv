@@ -1,0 +1,46 @@
+function SVMforD1vA2a(D1,A2a)
+
+
+X=[D1mods.modIndex];
+Y=[ones(size(out.chewingPower)) zeros(size(subsequent_chewingPower))]';
+Mdl=fitcsvm(X,Y,'KernelScale','auto','Standardize',true,'OutlierFraction',0.05);
+sv=Mdl.SupportVectors;
+figure;
+gscatter(X(:,1),X(:,3),Y,'br','xo');
+% hold on;
+% plot(sv(:,1),sv(:,3),'ko','MarkerSize',10);
+title('Input data View 1');
+figure;
+gscatter(X(:,1),X(:,2),Y,'br','xo');
+% hold on;
+% plot(sv(:,1),sv(:,2),'ko','MarkerSize',10);
+title('Input data View 2');
+figure;
+gscatter(X(:,3),X(:,2),Y,'br','xo');
+% hold on;
+% plot(sv(:,3),sv(:,2),'ko','MarkerSize',10);
+title('Input data View 3');
+predictions=predict(Mdl,X);
+figure;
+gscatter(X(:,1),X(:,3),predictions,'rb','ox');
+title('Prediction View 1');
+figure;
+gscatter(X(:,1),X(:,2),predictions,'rb','ox');
+title('Prediction View 2');
+figure;
+gscatter(X(:,3),X(:,2),predictions,'rb','ox');
+title('Prediction View 3');
+
+overlap=nansum(predictions==Y);
+notoverlap=nansum(predictions~=Y);
+if overlap>notoverlap
+    % assume same labels
+    didFlip=false;
+else
+    % flip labels
+    predictions=~predictions;
+    didFlip=true;
+end
+
+
+end
