@@ -58,7 +58,8 @@ switch varargin{1}
                 overlayPlots(outResponse1,outResponse2);
             case 'scatterInTimeWindows'
                 if ~isempty(outResponse3)
-                    col=outResponse3.timeWindow2_FR./outResponse3.timeWindow1_FR;
+                    temp=outResponse3.timeWindow2_FR./outResponse3.timeWindow1_FR;
+                    col=temp;
                 else
                     col=[];
                 end
@@ -72,6 +73,7 @@ switch varargin{1}
                     col=[];
                 end
                 scatterTwoResponses(outResponse1.modIndex,outResponse2.modIndex,col); title('Modulation index');
+                out.response2minus1=outResponse2.modIndex-outResponse1.modIndex;
             case 'populationVectorCorrelation'
             case 'trialVectorCorrelation'
             otherwise
@@ -98,13 +100,22 @@ end
 
 function scatterTwoResponses(r1,r2,c)
 
+chopColormap=false;
+if chopColormap==true
+    disp('CHOPPING COLORMAP!!!!!!!!!!!!!!!!!!!');
+    chop_c_lower=-0.2;
+    chop_c_higher=0.2;
+    c(c<chop_c_lower)=chop_c_lower;
+    c(c>chop_c_higher)=chop_c_higher;
+end
+
 figure();
 if isempty(c)
     scatter(r1,r2);
 else
     scatter(r1,r2,[],c,'LineWidth',1);
 end
-colormap('jet');
+colormap('hsv');
 xlabel('Response 1');
 ylabel('Response 2');
 
@@ -567,8 +578,13 @@ end
 
 inWindow1=nanmean(activityD1tagged.unitbyunit_y(:,timesD1>=inWindow1(1) & timesD1<=inWindow1(2)),2);
 inWindow2=nanmean(activityD1tagged.unitbyunit_y(:,timesD1>inWindow2(1) & timesD1<=inWindow2(2)),2);
+inWindow1(inWindow1<0.0001)=0;
+inWindow2(inWindow2<0.0001)=0;
 
 modIndex=(inWindow2-inWindow1)./(inWindow2+inWindow1);
+if any(modIndex>1,'all') || any(modIndex<-1,'all')
+    pause;
+end
 
 modBins=[-1-0.1:0.1:1]+0.05;
 [N,edges]=histcounts(modIndex,modBins);

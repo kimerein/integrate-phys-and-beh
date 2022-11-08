@@ -278,7 +278,7 @@ end
 
 %% 4. Make figures -- about 6 min to load 84 sessions of unit data
 % choose type of response to plot
-response_to_plot='cued_success'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+response_to_plot='cue'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 
 % doUnitTest.m is used to test whether to include unit in this plot
 % will include unit if unitdets match the following
@@ -311,7 +311,7 @@ plotVariousSUResponsesAlignedToBeh('trialVectorCorrelation',Response,0.25,[0.25 
 
 % compare same unit responses to different events
 % line up same units using excluded field
-plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',Response1,Response2,'modulationIndex',[-3 0.25],[0.25 4],'ColorLabel',Response3,[-1 -0.5],[-0.4 1]); 
+out=plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',Response1,Response2,'modulationIndex',[-3 0.25],[0.25 4],'ColorLabel',Response3,[-1 -0.5],[-0.4 1]); 
 % 'ColorLabel' then Response3 must be after other args for plot type
 % optionally can pass in different windows for Response3 calculation (or
 % don't include those args to use same windows as for Response1 and
@@ -319,6 +319,44 @@ plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',Response1,Respons
 plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',cue_D1tagged,cued_success_D1tagged,'modulationIndex',[-1 -0.5],[0.25 1],'ColorLabel',cued_failure_D1tagged);
 plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',Response1,Response2,'meanAcrossUnits',1);
 plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',cued_success_D1tagged,cued_failure_D1tagged,'scatterInTimeWindows',[-3 0.25],[0.25 4],'ColorLabel',cue_D1tagged,[-1 -0.5],[-0.4 1]);
+
+out=plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',cued_success_Response,cued_failure_Response,'modulationIndex',[-3 0.25],[0.25 4],'ColorLabel',uncued_success_Response);
+failure_minus_success=out.response2minus1;
+out=plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',cued_success_Response,uncued_success_Response,'modulationIndex',[-3 0.25],[0.25 4],'ColorLabel',cued_failure_Response);
+uncued_minus_cued=out.response2minus1;
+
+out=plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',cued_success_D1tagged,cued_failure_D1tagged,'modulationIndex',[-1 -0.5],[0.25 1],'ColorLabel',uncued_success_D1tagged);
+failure_minus_success=out.response2minus1;
+out=plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',cued_success_D1tagged,uncued_success_D1tagged,'modulationIndex',[-1 -0.5],[0.25 1],'ColorLabel',cued_failure_D1tagged);
+uncued_minus_cued=out.response2minus1;
+figure(); scatter(uncued_minus_cued,failure_minus_success);
+line([0 0],[-2 2]); line([-2 2],[0 0]);
+xlabel('uncued minus cued'); ylabel('failure minus success');
+[r,p]=corrcoef(uncued_minus_cued(~isnan(uncued_minus_cued) & ~isnan(failure_minus_success)),failure_minus_success(~isnan(uncued_minus_cued) & ~isnan(failure_minus_success)));
+out=plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',cued_success_A2atagged,cued_failure_A2atagged,'modulationIndex',[-1 -0.5],[0.25 1],'ColorLabel',uncued_success_A2atagged);
+failure_minus_success=out.response2minus1;
+out=plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',cued_success_A2atagged,uncued_success_A2atagged,'modulationIndex',[-1 -0.5],[0.25 1],'ColorLabel',cued_failure_A2atagged);
+uncued_minus_cued=out.response2minus1;
+figure(); scatter(uncued_minus_cued,failure_minus_success);
+line([0 0],[-2 2]); line([-2 2],[0 0]);
+xlabel('uncued minus cued'); ylabel('failure minus success');
+[r,p]=corrcoef(uncued_minus_cued(~isnan(uncued_minus_cued) & ~isnan(failure_minus_success)),failure_minus_success(~isnan(uncued_minus_cued) & ~isnan(failure_minus_success)));
+title('A2a');
+
+out=plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',cued_success_D1tagged,cued_failure_D1tagged,'modulationIndex',[-3 -0.5],[0.25 4],'ColorLabel',uncued_success_D1tagged);
+failure_minus_success=out.response2minus1;
+out=plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',cued_success_D1tagged,uncued_success_D1tagged,'modulationIndex',[-3 -0.5],[0.25 4],'ColorLabel',cued_failure_D1tagged);
+uncued_minus_cued=out.response2minus1;
+figure(); scatter(uncued_minus_cued,failure_minus_success);
+line([0 0],[-2 2]); line([-2 2],[0 0]);
+xlabel('uncued minus cued'); ylabel('failure minus success'); title('D1');
+out=plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',cued_success_A2atagged,cued_failure_A2atagged,'modulationIndex',[-3 -0.5],[0.25 4],'ColorLabel',uncued_success_A2atagged);
+failure_minus_success=out.response2minus1;
+out=plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',cued_success_A2atagged,uncued_success_A2atagged,'modulationIndex',[-3 -0.5],[0.25 4],'ColorLabel',cued_failure_A2atagged);
+uncued_minus_cued=out.response2minus1;
+figure(); scatter(uncued_minus_cued,failure_minus_success);
+line([0 0],[-2 2]); line([-2 2],[0 0]);
+xlabel('uncued minus cued'); ylabel('failure minus success'); title('A2a');
 
 % scriptToOrganizeD1vD2unitResponses is old and probably won't work
 % getCriteriaForUnitsToPlot('alltrue');

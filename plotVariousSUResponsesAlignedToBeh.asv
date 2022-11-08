@@ -58,7 +58,11 @@ switch varargin{1}
                 overlayPlots(outResponse1,outResponse2);
             case 'scatterInTimeWindows'
                 if ~isempty(outResponse3)
-                    col=outResponse3.timeWindow2_FR./outResponse3.timeWindow1_FR;
+                    temp=outResponse3.timeWindow2_FR./outResponse3.timeWindow1_FR;
+                    disp('Chopping outliers for colormap');
+                    temp(temp>5)=5;
+                    temp(temp<0.5)=05;
+                    col=temp;
                 else
                     col=[];
                 end
@@ -77,6 +81,7 @@ switch varargin{1}
             otherwise
                 disp(['do not recognize scatterResponseVsResponse for plot type ' typeOfPlot]);
         end
+    case 'rotateScatters'
     otherwise
         error('Do not recognize first argument value in plotVariousSUResponsesAlignedToBeh.m');
 end
@@ -98,13 +103,22 @@ end
 
 function scatterTwoResponses(r1,r2,c)
 
+chopColormap=false;
+if chopColormap==true
+    disp('CHOPPING COLORMAP!!!!!!!!!!!!!!!!!!!');
+    chop_c_lower=-0.2;
+    chop_c_higher=0.2;
+    c(c<chop_c_lower)=chop_c_lower;
+    c(c>chop_c_higher)=chop_c_higher;
+end
+
 figure();
 if isempty(c)
     scatter(r1,r2);
 else
     scatter(r1,r2,[],c,'LineWidth',1);
 end
-colormap('jet');
+colormap('hsv');
 xlabel('Response 1');
 ylabel('Response 2');
 
@@ -132,23 +146,26 @@ elseif length(varargin)==3
     Response2_indsIntoExcluded=find(Response2.excluded==0);
     Response3_indsIntoExcluded=find(Response3.excluded==0);
 
-    u=unique([Response1_indsIntoExcluded Response2_indsIntoExcluded Response3_indsIntoExcluded]);
+    u=unique([Response1_indsIntoExcluded; Response2_indsIntoExcluded; Response3_indsIntoExcluded]);
     isInAll=zeros(size(u));
     for i=1:length(u)
-        if ismember(u(i),Response1_indsIntoExcluded) & ismember(u(i),Response2_indsIntoExcluded) & ismember(u(i),Response3_indsIntoExcluded)
+        if ismember(u(i),Response1_indsIntoExcluded) && ismember(u(i),Response2_indsIntoExcluded) && ismember(u(i),Response3_indsIntoExcluded)
+            isInAll(i)=1;
+        else
+            isInAll(i)=0;
+        end
+    end
+    inAll=u(isInAll==1);
 
-            
-    inAll=ismember(Response1_indsIntoExcluded(ismember(Response1_indsIntoExcluded,Response2_indsIntoExcluded)),Response3_indsIntoExcluded);
-   
-    temp=ismember(Response1_indsIntoExcluded,Response2_indsIntoExcluded) & ismember(Response1_indsIntoExcluded,Response3_indsIntoExcluded);
+    temp=ismember(Response1_indsIntoExcluded,inAll);
     useTheseUnitsResponse1=find(temp);
     Response.excluded(Response1_indsIntoExcluded(~temp))=1;
 
-    temp=ismember(Response2_indsIntoExcluded,Response1_indsIntoExcluded) & ismember(Response2_indsIntoExcluded,Response3_indsIntoExcluded);
+    temp=ismember(Response2_indsIntoExcluded,inAll);
     useTheseUnitsResponse2=find(temp);
     Response2.excluded(Response2_indsIntoExcluded(~temp))=1;
 
-    temp=ismember(Response3_indsIntoExcluded,Response1_indsIntoExcluded) & ismember(Response3_indsIntoExcluded,Response2_indsIntoExcluded);
+    temp=ismember(Response3_indsIntoExcluded,inAll);
     useTheseUnitsResponse3=find(temp);
     Response3.excluded(Response3_indsIntoExcluded(~temp))=1;
 
@@ -564,8 +581,13 @@ end
 
 inWindow1=nanmean(activityD1tagged.unitbyunit_y(:,timesD1>=inWindow1(1) & timesD1<=inWindow1(2)),2);
 inWindow2=nanmean(activityD1tagged.unitbyunit_y(:,timesD1>inWindow2(1) & timesD1<=inWindow2(2)),2);
+inWindow1(inWindow1<0.0001)=0;
+inWindow2(inWindow2<0.0001)=0;
 
 modIndex=(inWindow2-inWindow1)./(inWindow2+inWindow1);
+if any(modIndex>1,'all') || any(modIndex<-1,'all')
+    pause;
+end
 
 modBins=[-1-0.1:0.1:1]+0.05;
 [N,edges]=histcounts(modIndex,modBins);
