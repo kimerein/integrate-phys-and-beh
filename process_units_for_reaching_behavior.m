@@ -278,7 +278,7 @@ end
 
 %% 4. Make figures -- about 6 min to load 84 sessions of unit data
 % choose type of response to plot
-response_to_plot='cued_failure'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+response_to_plot='cue'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 
 % doUnitTest.m is used to test whether to include unit in this plot
 % will include unit if unitdets match the following
@@ -307,7 +307,12 @@ plotVariousSUResponsesAlignedToBeh('trialVectorCorrelation',Response,0.25,[0.25 
 
 % compare same unit responses to different events
 % line up same units using excluded field
-plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',Response1,Response2,'modulationIndex',[-3 0.25],[0.25 4]);
+plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',Response1,Response2,'modulationIndex',[-3 0.25],[0.25 4],'ColorLabel',Response3,[-1 -0.25],[0 1]); 
+% 'ColorLabel' then Response3 must be after other args for plot type
+% optionally can pass in different windows for Response3 calculation (or
+% don't include those args to use same windows as for Response1 and
+% Response2)
+plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',Response1,Response2,'meanAcrossUnits',1);
 
 % scriptToOrganizeD1vD2unitResponses is old and probably won't work
 % getCriteriaForUnitsToPlot('alltrue');

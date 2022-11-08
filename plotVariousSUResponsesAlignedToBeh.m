@@ -11,7 +11,7 @@ out=[];
 switch varargin{1}
     case 'meanAcrossUnits'
         downSampFac=varargin{3};
-        meanAcrossUnits(Response,downSampFac);
+        out=meanAcrossUnits(Response,downSampFac);
     case 'scatterInTimeWindows'
         timeWindow1=varargin{3};
         timeWindow2=varargin{4};
@@ -38,15 +38,40 @@ switch varargin{1}
         Response2=varargin{3};
         typeOfPlot=varargin{4};
         [Response,Response2]=matchUnitsAcrossResponses(Response,Response2);
-        outResponse1=plotVariousSUResponsesAlignedToBeh(typeOfPlot,Response,varargin{5:end});
-        outResponse2=plotVariousSUResponsesAlignedToBeh(typeOfPlot,Response2,varargin{5:end});
+        outResponse3=[];
+        if any(strcmp([varargin],'ColorLabel'))
+            Response3=varargin{find(strcmp([varargin],'ColorLabel'))+1};
+            Response3=matchUnitsAcrossResponses(Response3,Response);
+            outResponse1=plotVariousSUResponsesAlignedToBeh(typeOfPlot,Response,varargin{5:find(strcmp([varargin],'ColorLabel'))-1});
+            outResponse2=plotVariousSUResponsesAlignedToBeh(typeOfPlot,Response2,varargin{5:find(strcmp([varargin],'ColorLabel'))-1});
+            if length(varargin)==find(strcmp([varargin],'ColorLabel'))+1
+                outResponse3=plotVariousSUResponsesAlignedToBeh(typeOfPlot,Response3,varargin{5:find(strcmp([varargin],'ColorLabel'))-1});
+            else
+                outResponse3=plotVariousSUResponsesAlignedToBeh(typeOfPlot,Response3,varargin{find(strcmp([varargin],'ColorLabel'))+2:end});
+            end
+        else
+            outResponse1=plotVariousSUResponsesAlignedToBeh(typeOfPlot,Response,varargin{5:end});
+            outResponse2=plotVariousSUResponsesAlignedToBeh(typeOfPlot,Response2,varargin{5:end});
+        end
         switch typeOfPlot
+            case 'meanAcrossUnits'
+                overlayPlots(outResponse1,outResponse2);
             case 'scatterInTimeWindows'
-                scatterTwoResponses(outResponse1.timeWindow1_FR,outResponse2.timeWindow1_FR); title('Time window 1 firing rates');
-                scatterTwoResponses(outResponse1.timeWindow2_FR,outResponse2.timeWindow2_FR); title('Time window 2 firing rates');
-                scatterTwoResponses(outResponse1.timeWindow2_FR./outResponse1.timeWindow1_FR,outResponse2.timeWindow2_FR./outResponse2.timeWindow1_FR); title('Time window 2 to 1 ratio');
+                if ~isempty(outResponse3)
+                    col=outResponse3.timeWindow2_FR./outResponse3.timeWindow1_FR;
+                else
+                    col=[];
+                end
+                scatterTwoResponses(outResponse1.timeWindow1_FR,outResponse2.timeWindow1_FR,col); title('Time window 1 firing rates');
+                scatterTwoResponses(outResponse1.timeWindow2_FR,outResponse2.timeWindow2_FR,col); title('Time window 2 firing rates');
+                scatterTwoResponses(outResponse1.timeWindow2_FR./outResponse1.timeWindow1_FR,outResponse2.timeWindow2_FR./outResponse2.timeWindow1_FR,col); title('Time window 2 to 1 ratio');
             case 'modulationIndex'
-                scatterTwoResponses(outResponse1.modIndex,outResponse2.modIndex); title('Modulation index');
+                if ~isempty(outResponse3)
+                    col=outResponse3.modIndex;
+                else
+                    col=[];
+                end
+                scatterTwoResponses(outResponse1.modIndex,outResponse2.modIndex,col); title('Modulation index');
             case 'populationVectorCorrelation'
             case 'trialVectorCorrelation'
             otherwise
@@ -58,10 +83,28 @@ end
 
 end
 
-function scatterTwoResponses(r1,r2)
+function overlayPlots(r1,r2)
 
 figure();
-scatter(r1,r2);
+plot(r1.t,r1.me,'Color','k'); hold on;
+plot(r1.t,r1.plusSe,'Color','k');
+plot(r1.t,r1.minusSe,'Color','k');
+
+plot(r2.t,r2.me,'Color','r'); hold on;
+plot(r2.t,r2.plusSe,'Color','r');
+plot(r2.t,r2.minusSe,'Color','r');
+
+end
+
+function scatterTwoResponses(r1,r2,c)
+
+figure();
+if isempty(c)
+    scatter(r1,r2);
+else
+    scatter(r1,r2,[],c);
+end
+colormap('jet');
 xlabel('Response 1');
 ylabel('Response 2');
 
@@ -111,7 +154,7 @@ end
 
 end
 
-function meanAcrossUnits(activityD1tagged,downSampFac)
+function out=meanAcrossUnits(activityD1tagged,downSampFac)
 
 if size(activityD1tagged.unitbyunit_y,1)>100
     % skip unit by unit plot because too crowded
@@ -139,14 +182,14 @@ else
     ylabel('Firing rate');
 end
 
-plotMeanAndSE(downSampMatrix(activityD1tagged.unitbyunit_y,downSampFac),'k',downSampAv(timesD1,downSampFac));
+[out.me,out.plusSe,out.minusSe,out.t]=plotMeanAndSE(downSampMatrix(activityD1tagged.unitbyunit_y,downSampFac),'k',downSampAv(timesD1,downSampFac));
 title('Mean and se across units');
 xlabel('Time (sec)');
 ylabel('Firing rate');
 
 end
 
-function plotMeanAndSE(data1,color1,timeBins)
+function [me,plusSe,minusSe,t]=plotMeanAndSE(data1,color1,timeBins)
 
 plotAsCityscape=false;
 
@@ -157,14 +200,22 @@ figure();
 if plotAsCityscape==true
     [n,x]=cityscape_hist(data1_mean,timeBins);
     plot(x,n,'Color',color1); hold on;
+    t=x;
+    me=n;
     [n,x]=cityscape_hist(data1_mean+data1_se,timeBins);
     plot(x,n,'Color',color1);
+    plusSe=n;
     [n,x]=cityscape_hist(data1_mean-data1_se,timeBins);
     plot(x,n,'Color',color1);
+    minusSe=n;
 else
     plot(timeBins,data1_mean,'Color',color1); hold on;
     plot(timeBins,data1_mean+data1_se,'Color',color1);
     plot(timeBins,data1_mean-data1_se,'Color',color1);
+    t=timeBins;
+    me=data1_mean;
+    plusSe=data1_mean+data1_se;
+    minusSe=data1_mean-data1_se;
 end
 
 end
