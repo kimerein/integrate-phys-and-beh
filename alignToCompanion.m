@@ -126,11 +126,7 @@ for j=1:length(dd)
             a.dataout.x=a.dataout.x(mi-unitbaseline:end);
             a.dataout.y=a.dataout.y(:,mi-unitbaseline:end);
         end
-        if ~isempty(dontUseTrials)
-            curr_n=nansum(dontUseTrials==0);
-        else
-            curr_n=nansum(any(a.dataout.y>0,2));
-        end
+        curr_n=nansum(any(a.dataout.y>0,2));
         if ~isempty(unitbyunit_x)
             upTo2=size(aligncomp_x,2);
         else

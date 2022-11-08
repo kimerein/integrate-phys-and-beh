@@ -297,6 +297,10 @@ end
 [untagged_Response]=getAndSaveResponse(dd_more,'__',settingsForStriatumUnitPlots,putAlignPeakAt);
 untagged_Response=takeOnlyUnitsFromSess(untagged_Response,unique(tagged_Response.fromWhichSess));
 
+% exclude units with too few trials
+trial_n_cutoff=3;
+Response=excludeTooFewTrials(Response,trial_n_cutoff,true);
+
 % plot some stuff
 plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',Response,1); % down sample factor is last arg
 out=plotVariousSUResponsesAlignedToBeh('scatterInTimeWindows',Response,[-3 0.25],[0.25 4]); % time windows relative to alignment companion peak

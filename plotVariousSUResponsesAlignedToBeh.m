@@ -193,6 +193,8 @@ function [me,plusSe,minusSe,t]=plotMeanAndSE(data1,color1,timeBins)
 
 plotAsCityscape=false;
 
+data1=data1(any(~isnan(data1),2),:);
+
 data1_mean=mean(data1,1,'omitnan');
 data1_se=std(data1,0,1,'omitnan')./sqrt(size(data1,1));
 
@@ -439,6 +441,9 @@ if s.keepAllSingleTrials~=true
     disp('Trial vector correlation requires single trial data ... cannot continue');
     return
 end
+
+% get rid of trials where event did not occur (all nan)
+activityD1tagged.unitbyunit_y=activityD1tagged.unitbyunit_y(any(~isnan(activityD1tagged.unitbyunit_y),2),:);
 
 % timesD1 is times relative to alignment companion peak
 if isempty(timesD1)
