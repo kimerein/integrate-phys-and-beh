@@ -290,12 +290,12 @@ dd_more=cell(1,length(dd));
 for i=1:length(dd)
     dd_more{i}=[dd{i} sep response_to_plot];
 end
-% whichUnitsToGrab='_'; % '_' for all units, or can be something like 'D1tagged'
-% Response=getAndSaveResponse(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
+whichUnitsToGrab='_'; % '_' for all units, or can be something like 'D1tagged'
+Response=getAndSaveResponse(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
 % for opto-tagging comparing tagged v untagged
-[tagged_Response,D1orD2taggingExpt,putAlignPeakAt]=getAndSaveResponse(dd_more,'D1tagged',settingsForStriatumUnitPlots,[]);
-[untagged_Response]=getAndSaveResponse(dd_more,'__',settingsForStriatumUnitPlots,putAlignPeakAt);
-untagged_Response=takeOnlyUnitsFromSess(untagged_Response,unique(tagged_Response.fromWhichSess));
+% [tagged_Response,D1orD2taggingExpt,putAlignPeakAt]=getAndSaveResponse(dd_more,'D1tagged',settingsForStriatumUnitPlots,[]);
+% [untagged_Response]=getAndSaveResponse(dd_more,'__',settingsForStriatumUnitPlots,putAlignPeakAt);
+% untagged_Response=takeOnlyUnitsFromSess(untagged_Response,unique(tagged_Response.fromWhichSess));
 
 % exclude units with too few trials
 trial_n_cutoff=3;
@@ -311,12 +311,14 @@ plotVariousSUResponsesAlignedToBeh('trialVectorCorrelation',Response,0.25,[0.25 
 
 % compare same unit responses to different events
 % line up same units using excluded field
-plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',Response1,Response2,'modulationIndex',[-3 0.25],[0.25 4],'ColorLabel',Response3,[-1 -0.25],[0 1]); 
+plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',Response1,Response2,'modulationIndex',[-3 0.25],[0.25 4],'ColorLabel',Response3,[-1 -0.5],[-0.4 1]); 
 % 'ColorLabel' then Response3 must be after other args for plot type
 % optionally can pass in different windows for Response3 calculation (or
 % don't include those args to use same windows as for Response1 and
 % Response2)
+plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',cue_D1tagged,cued_success_D1tagged,'modulationIndex',[-1 -0.5],[0.25 1],'ColorLabel',cued_failure_D1tagged);
 plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',Response1,Response2,'meanAcrossUnits',1);
+plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',cued_success_D1tagged,cued_failure_D1tagged,'scatterInTimeWindows',[-3 0.25],[0.25 4],'ColorLabel',cue_D1tagged,[-1 -0.5],[-0.4 1]);
 
 % scriptToOrganizeD1vD2unitResponses is old and probably won't work
 % getCriteriaForUnitsToPlot('alltrue');

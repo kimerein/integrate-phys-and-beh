@@ -41,7 +41,7 @@ switch varargin{1}
         outResponse3=[];
         if any(strcmp([varargin],'ColorLabel'))
             Response3=varargin{find(strcmp([varargin],'ColorLabel'))+1};
-            Response3=matchUnitsAcrossResponses(Response3,Response);
+            [Response,Response2,Response3]=matchUnitsAcrossResponses(Response,Response2,Response3);
             outResponse1=plotVariousSUResponsesAlignedToBeh(typeOfPlot,Response,varargin{5:find(strcmp([varargin],'ColorLabel'))-1});
             outResponse2=plotVariousSUResponsesAlignedToBeh(typeOfPlot,Response2,varargin{5:find(strcmp([varargin],'ColorLabel'))-1});
             if length(varargin)==find(strcmp([varargin],'ColorLabel'))+1
@@ -110,16 +110,55 @@ ylabel('Response 2');
 
 end
 
-function [Response,Response2]=matchUnitsAcrossResponses(Response,Response2)
+function [Response,Response2,Response3]=matchUnitsAcrossResponses(varargin)
 
-Response1_indsIntoExcluded=find(Response.excluded==0);
-Response2_indsIntoExcluded=find(Response2.excluded==0);
-useTheseUnitsResponse1=find(ismember(Response1_indsIntoExcluded,Response2_indsIntoExcluded));
-Response.excluded(Response1_indsIntoExcluded(~ismember(Response1_indsIntoExcluded,Response2_indsIntoExcluded)))=1;
-useTheseUnitsResponse2=find(ismember(Response2_indsIntoExcluded,Response1_indsIntoExcluded));
-Response2.excluded(Response2_indsIntoExcluded(~ismember(Response2_indsIntoExcluded,Response1_indsIntoExcluded)))=1;
-Response=filterResponseToOneSU(Response,useTheseUnitsResponse1);
-Response2=filterResponseToOneSU(Response2,useTheseUnitsResponse2);
+if length(varargin)==2
+    Response=varargin{1};
+    Response2=varargin{2};
+    Response3=[];
+    Response1_indsIntoExcluded=find(Response.excluded==0);
+    Response2_indsIntoExcluded=find(Response2.excluded==0);
+    useTheseUnitsResponse1=find(ismember(Response1_indsIntoExcluded,Response2_indsIntoExcluded));
+    Response.excluded(Response1_indsIntoExcluded(~ismember(Response1_indsIntoExcluded,Response2_indsIntoExcluded)))=1;
+    useTheseUnitsResponse2=find(ismember(Response2_indsIntoExcluded,Response1_indsIntoExcluded));
+    Response2.excluded(Response2_indsIntoExcluded(~ismember(Response2_indsIntoExcluded,Response1_indsIntoExcluded)))=1;
+    Response=filterResponseToOneSU(Response,useTheseUnitsResponse1);
+    Response2=filterResponseToOneSU(Response2,useTheseUnitsResponse2);
+elseif length(varargin)==3
+    Response=varargin{1};
+    Response2=varargin{2};
+    Response3=varargin{3};
+    Response1_indsIntoExcluded=find(Response.excluded==0);
+    Response2_indsIntoExcluded=find(Response2.excluded==0);
+    Response3_indsIntoExcluded=find(Response3.excluded==0);
+
+    u=unique([Response1_indsIntoExcluded; Response2_indsIntoExcluded; Response3_indsIntoExcluded]);
+    isInAll=zeros(size(u));
+    for i=1:length(u)
+        if ismember(u(i),Response1_indsIntoExcluded) && ismember(u(i),Response2_indsIntoExcluded) && ismember(u(i),Response3_indsIntoExcluded)
+            isInAll(i)=1;
+        else
+            isInAll(i)=0;
+        end
+    end
+    inAll=u(isInAll==1);
+
+    temp=ismember(Response1_indsIntoExcluded,inAll);
+    useTheseUnitsResponse1=find(temp);
+    Response.excluded(Response1_indsIntoExcluded(~temp))=1;
+
+    temp=ismember(Response2_indsIntoExcluded,inAll);
+    useTheseUnitsResponse2=find(temp);
+    Response2.excluded(Response2_indsIntoExcluded(~temp))=1;
+
+    temp=ismember(Response3_indsIntoExcluded,inAll);
+    useTheseUnitsResponse3=find(temp);
+    Response3.excluded(Response3_indsIntoExcluded(~temp))=1;
+
+    Response=filterResponseToOneSU(Response,useTheseUnitsResponse1);
+    Response2=filterResponseToOneSU(Response2,useTheseUnitsResponse2);
+    Response3=filterResponseToOneSU(Response3,useTheseUnitsResponse3);
+end
 
 end
 
