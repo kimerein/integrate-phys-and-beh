@@ -79,7 +79,6 @@ for j=1:length(dd)
             excluded_count=excluded_count+1;
             continue % failed unit test
         end
-        excluded_count=excluded_count+1;
 
         if isempty(a.dataout)
             disp([ls(i).folder '\' ls(i).name ' is empty ... skipping']);
@@ -87,6 +86,7 @@ for j=1:length(dd)
             excluded_count=excluded_count+1;
             continue
         end
+        excluded_count=excluded_count+1;
 
         % throw out trials where unit dead or out of range
         if any(dontUseTrials==1)
