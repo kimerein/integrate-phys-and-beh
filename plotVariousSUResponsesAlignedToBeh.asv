@@ -246,7 +246,7 @@ cmap=jet(length(newCol(~isnan(newCol))));
 
 end
 
-function plotModScatter(mod1,mod2,cmap,si,col,takeHalf)
+function plotModScatter(varargin)
 
 if length(varargin)==5
     mod1=varargin{1};
@@ -308,7 +308,20 @@ figure();
 incColorInd=1;
 if ~isempty(takeHalf)
     if strcmp(takeHalf,'takeTopHalf')
-        [~,sortedRind]=Response1.unitbyunit_y()
+        takeNotNan=~isnan(col);
+        col=col(takeNotNan);
+        Response1.unitbyunit_y(takeNotNan,:);
+        [~,sortedRind]=sort(col,'descend');
+        Response1.unitbyunit_y=Response1.unitbyunit_y(sortedRind,:);
+        si=si(sortedRind);
+    elseif strcmp(takeHalf,'takeBottomHalf')
+        takeNotNan=~isnan(col);
+        col=col(takeNotNan);
+        Response1.unitbyunit_y(takeNotNan,:);
+        [~,sortedRind]=sort(col,'ascend');
+        Response1.unitbyunit_y=Response1.unitbyunit_y(sortedRind,:);
+        si=si(sortedRind);
+    end
 end
 for i=1:size(Response1.unitbyunit_y,1)
     if isnan(col(i))
@@ -317,8 +330,18 @@ for i=1:size(Response1.unitbyunit_y,1)
             lh.Color=[0.9 0.9 0.9 0.2];
         end
     else
+        if strcmp(takeHalf,'takeTopHalf') && si(incColorInd)<size(cmap,1)/2
+            alph=1;
+        else
+            alph=0.5;
+        end
+        if strcmp(takeHalf,'takeBottomHalf') && si(incColorInd)>size(cmap,1)/2
+            alph=0.7;
+        else
+            alph=0.5;
+        end
         lh=plot(timesD1,Response1.unitbyunit_y(i,:),'Color',cmap(si(incColorInd),:),'LineWidth',LineW); hold on;
-        lh.Color=[cmap(si(incColorInd),:),0.5];
+        lh.Color=[cmap(si(incColorInd),:),alph];
         incColorInd=incColorInd+1;
     end
 end

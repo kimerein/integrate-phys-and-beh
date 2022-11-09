@@ -330,15 +330,20 @@ for i=1:size(Response1.unitbyunit_y,1)
             lh.Color=[0.9 0.9 0.9 0.2];
         end
     else
-        if strcmp(takeHalf,'takeTopHalf') && si(incColorInd)<size(cmap,1)/2
-            alph=1;
-        else
-            alph=0.5;
+        alph=0.5;
+        if strcmp(takeHalf,'takeTopHalf') 
+            if si(incColorInd)<size(cmap,1)/2
+                alph=1;
+            else
+                alph=0.5;
+            end
         end
-        if strcmp(takeHalf,'takeBottomHalf') && si(incColorInd)>size(cmap,1)/2
-            alph=0.7;
-        else
-            alph=0.5;
+        if strcmp(takeHalf,'takeBottomHalf')
+            if si(incColorInd)>size(cmap,1)/2
+                alph=0.7;
+            else
+                alph=0.5;
+            end
         end
         lh=plot(timesD1,Response1.unitbyunit_y(i,:),'Color',cmap(si(incColorInd),:),'LineWidth',LineW); hold on;
         lh.Color=[cmap(si(incColorInd),:),alph];
