@@ -219,21 +219,29 @@ Response1.unitbyunit_y=temp;
 
 end
 
-function [Response,newCol,sinew,cmap,colBins]=binByCol(Response,col,binStep)
+function [Response,newCol,sinew,cmap,colBins,m1,m2]=binByCol(Response,col,binStep,mod1,mod2)
 
 % colBins=min(col,[],'all','omitnan'):binStep:max(col,[],'all','omitnan')+0.01;
 colBins=prctile(col,[0:binStep:100]);
 temp=Response.unitbyunit_y;
 out=nan(length(colBins)-1,size(temp,2));
 newCol=nan(length(colBins)-1,1);
+m1=nan(length(colBins)-1,1);
+m2=nan(length(colBins)-1,1);
 for i=1:length(colBins)-1
     out(i,:)=mean(temp(col>=colBins(i) & col<colBins(i+1),:),1,'omitnan');
     newCol(i)=mean(col(col>=colBins(i) & col<colBins(i+1)),'all','omitnan');
+    m1(i)=mean(mod1(col>=colBins(i) & col<colBins(i+1)),'all','omitnan');
+    m2(i)=mean(mod2(col>=colBins(i) & col<colBins(i+1)),'all','omitnan');
 end
 out=out(~isnan(newCol),:);
 newCol=newCol(~isnan(newCol));
 Response.unitbyunit_y=out;
-[~,sinew]=sort(newCol(~isnan(newCol)));
+[~,sinewp]=sort(newCol(~isnan(newCol)));
+sinew=nan(size(sinewp));
+for i=1:length(sinewp)
+    sinew(i)=find(sinewp==i);
+end
 cmap=jet(length(newCol(~isnan(newCol))));
 
 end
@@ -279,22 +287,36 @@ end
 
 function plotRainbowMaps(Response1,cmap,si,col,colRelativeTo,responseN,binStep,modIndex1,modIndex2)
 
-figure();
 timesD1=getTimesD1(Response1);
 plotResponseLineByLine(timesD1,Response1,cmap,si,col); title(['Response ' num2str(responseN) ' -- all lines']);
 plotModScatter(modIndex1,modIndex2,cmap,si,col);
 
-tempcol=col; tempcol(col>colRelativeTo)=nan;
-plotResponseLineByLine(timesD1,Response1,cmap,si,tempcol); title(['Response ' num2str(responseN) ' -- only mod ratio > 1']);
+tempcol=col; tempcol(col>colRelativeTo)=nan; [sinew,newcmap]=getNewSi(tempcol);
+plotResponseLineByLine(timesD1,Response1,newcmap,sinew,tempcol); title(['Response ' num2str(responseN) ' -- only mod ratio > 1']);
+plotModScatter(modIndex1(~isnan(tempcol)),modIndex2(~isnan(tempcol)),newcmap,sinew,tempcol(~isnan(tempcol)));
 
-[R,newcol,sinew,newcmap,colBins]=binByCol(Response1,tempcol,binStep); 
+[R,newcol,sinew,newcmap,~,m1,m2]=binByCol(Response1,tempcol,binStep,modIndex1,modIndex2); 
 plotResponseLineByLine(timesD1,R,newcmap,sinew,newcol);  title(['Response ' num2str(responseN) ' -- only mod ratio > 1 BINNED']);
+plotModScatter(m1,m2,newcmap,sinew,newcol);
 
-tempcol=col; tempcol(col<colRelativeTo)=nan;
-plotResponseLineByLine(timesD1,Response1,cmap,si,tempcol); title(['Response ' num2str(responseN) ' -- only mod ratio < 1']);
+tempcol=col; tempcol(col<colRelativeTo)=nan; [sinew,newcmap]=getNewSi(tempcol);
+plotResponseLineByLine(timesD1,Response1,newcmap,sinew,tempcol); title(['Response ' num2str(responseN) ' -- only mod ratio < 1']);
+plotModScatter(modIndex1(~isnan(tempcol)),modIndex2(~isnan(tempcol)),newcmap,sinew,tempcol(~isnan(tempcol)));
 
-[R,newcol,sinew,newcmap]=binByCol(Response1,tempcol,binStep); 
+[R,newcol,sinew,newcmap,~,m1,m2]=binByCol(Response1,tempcol,binStep,modIndex1,modIndex2); 
 plotResponseLineByLine(timesD1,R,newcmap,sinew,newcol);  title(['Response ' num2str(responseN) ' -- only mod ratio < 1 BINNED']);
+plotModScatter(m1,m2,newcmap,sinew,newcol);
+
+end
+
+function [si,cmap]=getNewSi(col)
+
+cmap=jet(length(col(~isnan(col))));
+[~,sip]=sort(col(~isnan(col)));
+si=nan(size(sip));
+for i=1:length(sip)
+    si(i)=find(sip==i);
+end
 
 end
 
@@ -303,12 +325,7 @@ function modRatioPSTH(Response1,Response2,Response3,col,colRelativeTo,win1,win2,
 modIndexAfterSmooth=false;
 binStep=5;
 
-cmap=jet(length(col(~isnan(col))));
-[~,sip]=sort(col(~isnan(col)));
-si=nan(size(sip));
-for i=1:length(sip)
-    si(i)=find(sip==i);
-end
+[si,cmap]=getNewSi(col);
 
 timesD1=getTimesD1(Response1);
 Response1=ZscoreAndSmooth(Response1);
