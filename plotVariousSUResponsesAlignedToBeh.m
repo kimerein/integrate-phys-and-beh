@@ -18,7 +18,7 @@ switch varargin{1}
         outResponse2=plotVariousSUResponsesAlignedToBeh('modulationIndex',Response2,varargin{5:end});
         outResponse3=plotVariousSUResponsesAlignedToBeh('modulationIndex',Response3,varargin{5:end});
         % col=outResponse2.modIndex./outResponse1.modIndex;
-        figure(); scatter(outResponse1.modIndex,outResponse2.modIndex);
+        % figure(); scatter(outResponse1.modIndex,outResponse2.modIndex,[],'k');
         div=false;
         if div==true
             disp(['modRatio is y./x']);
@@ -29,7 +29,7 @@ switch varargin{1}
             col=outResponse2.modIndex-outResponse1.modIndex;
             colRelativeTo=0;
         end
-        modRatioPSTH(Response,Response2,Response3,col,colRelativeTo,varargin{5:end});
+        modRatioPSTH(Response,Response2,Response3,col,colRelativeTo,varargin{5:end},outResponse1.modIndex,outResponse2.modIndex);
     case 'coloredPSTH'
         % do not need to process anything
     case 'meanAcrossUnits'
@@ -219,7 +219,7 @@ Response1.unitbyunit_y=temp;
 
 end
 
-function [Response,newCol,sinew,cmap]=binByCol(Response,col,binStep)
+function [Response,newCol,sinew,cmap,colBins]=binByCol(Response,col,binStep)
 
 % colBins=min(col,[],'all','omitnan'):binStep:max(col,[],'all','omitnan')+0.01;
 colBins=prctile(col,[0:binStep:100]);
@@ -235,6 +235,13 @@ newCol=newCol(~isnan(newCol));
 Response.unitbyunit_y=out;
 [~,sinew]=sort(newCol(~isnan(newCol)));
 cmap=jet(length(newCol(~isnan(newCol))));
+
+end
+
+function plotModScatter(mod1,mod2,cmap,si,col)
+
+figure();
+scatter(mod1(~isnan(col)),mod2(~isnan(col)),[],cmap(si,:));
 
 end
 
@@ -270,13 +277,38 @@ modIndex=(inWindow2-inWindow1)./(inWindow2+inWindow1);
 
 end
 
-function modRatioPSTH(Response1,Response2,Response3,col,colRelativeTo,win1,win2)
+function plotRainbowMaps(Response1,cmap,si,col,colRelativeTo,responseN,binStep,modIndex1,modIndex2)
+
+figure();
+timesD1=getTimesD1(Response1);
+plotResponseLineByLine(timesD1,Response1,cmap,si,col); title(['Response ' num2str(responseN) ' -- all lines']);
+plotModScatter(modIndex1,modIndex2,cmap,si,col);
+
+tempcol=col; tempcol(col>colRelativeTo)=nan;
+plotResponseLineByLine(timesD1,Response1,cmap,si,tempcol); title(['Response ' num2str(responseN) ' -- only mod ratio > 1']);
+
+[R,newcol,sinew,newcmap,colBins]=binByCol(Response1,tempcol,binStep); 
+plotResponseLineByLine(timesD1,R,newcmap,sinew,newcol);  title(['Response ' num2str(responseN) ' -- only mod ratio > 1 BINNED']);
+
+tempcol=col; tempcol(col<colRelativeTo)=nan;
+plotResponseLineByLine(timesD1,Response1,cmap,si,tempcol); title(['Response ' num2str(responseN) ' -- only mod ratio < 1']);
+
+[R,newcol,sinew,newcmap]=binByCol(Response1,tempcol,binStep); 
+plotResponseLineByLine(timesD1,R,newcmap,sinew,newcol);  title(['Response ' num2str(responseN) ' -- only mod ratio < 1 BINNED']);
+
+end
+
+function modRatioPSTH(Response1,Response2,Response3,col,colRelativeTo,win1,win2,modIndex1,modIndex2)
 
 modIndexAfterSmooth=false;
-binStep=0.2;
+binStep=5;
 
 cmap=jet(length(col(~isnan(col))));
-[~,si]=sort(col(~isnan(col)));
+[~,sip]=sort(col(~isnan(col)));
+si=nan(size(sip));
+for i=1:length(sip)
+    si(i)=find(sip==i);
+end
 
 timesD1=getTimesD1(Response1);
 Response1=ZscoreAndSmooth(Response1);
@@ -303,32 +335,11 @@ if modIndexAfterSmooth==true
 end
 
 % Response 1
-timesD1=getTimesD1(Response1);
-plotResponseLineByLine(timesD1,Response1,cmap,si,col); title('Response 1 -- all lines');
-tempcol=col; tempcol(col>colRelativeTo)=nan;
-plotResponseLineByLine(timesD1,Response1,cmap,si,tempcol); title('Response 1 -- only mod ratio > 1');
-[R,newcol,sinew,newcmap]=binByCol(Response1,tempcol,binStep); 
-plotResponseLineByLine(timesD1,R,newcmap,sinew,newcol); title('Response 1 -- only mod ratio > 1 BINNED');
-tempcol=col; tempcol(col<colRelativeTo)=nan;
-plotResponseLineByLine(timesD1,Response1,cmap,si,tempcol); title('Response 1 -- only mod ratio < 1');
-
+plotRainbowMaps(Response1,cmap,si,col,colRelativeTo,1,binStep,modIndex1,modIndex2);
 % Response 2
-timesD1=getTimesD1(Response2);
-plotResponseLineByLine(timesD1,Response2,cmap,si,col); title('Response 2 -- all lines');
-tempcol=col; tempcol(col>colRelativeTo)=nan;
-plotResponseLineByLine(timesD1,Response2,cmap,si,tempcol); title('Response 2 -- only mod ratio > 1');
-tempcol=col; tempcol(col<colRelativeTo)=nan;
-plotResponseLineByLine(timesD1,Response2,cmap,si,tempcol); title('Response 2 -- only mod ratio < 1');
-
+plotRainbowMaps(Response2,cmap,si,col,colRelativeTo,2,binStep,modIndex1,modIndex2);
 % Response 3
-timesD1=getTimesD1(Response3);
-plotResponseLineByLine(timesD1,Response3,cmap,si,col); title('Response 3 -- all lines');
-tempcol=col; tempcol(col>colRelativeTo)=nan;
-plotResponseLineByLine(timesD1,Response3,cmap,si,tempcol); title('Response 3 -- only mod ratio > 1');
-tempcol=col; tempcol(col<colRelativeTo)=nan;
-plotResponseLineByLine(timesD1,Response3,cmap,si,tempcol); title('Response 3 -- only mod ratio < 1');
-[R,newcol]=binByCol(Response3,tempcol,binStep);
-plotResponseLineByLine(timesD1,R,cmap,si,newcol); title('Response 3 -- only mod ratio < 1 BINNED');
+plotRainbowMaps(Response3,cmap,si,col,colRelativeTo,3,binStep,modIndex1,modIndex2);
 
 end
 
