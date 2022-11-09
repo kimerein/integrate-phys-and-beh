@@ -13,12 +13,23 @@ switch varargin{1}
         col=[];
         Response2=varargin{3};
         Response3=varargin{4};
+        [Response,Response2,Response3]=matchUnitsAcrossResponses(Response,Response2,Response3);
         outResponse1=plotVariousSUResponsesAlignedToBeh('modulationIndex',Response,varargin{5:end});
         outResponse2=plotVariousSUResponsesAlignedToBeh('modulationIndex',Response2,varargin{5:end});
         outResponse3=plotVariousSUResponsesAlignedToBeh('modulationIndex',Response3,varargin{5:end});
         % col=outResponse2.modIndex./outResponse1.modIndex;
-        col=outResponse2.modIndex-outResponse1.modIndex;
-        modRatioPSTH(Response,Response2,Response3,col);
+        figure(); scatter(outResponse1.modIndex,outResponse2.modIndex);
+        div=false;
+        if div==true
+            disp(['modRatio is y./x']);
+            col=outResponse2.modIndex./outResponse1.modIndex;
+            colRelativeTo=1;
+        else
+            disp(['modRatio is y-x']);
+            col=outResponse2.modIndex-outResponse1.modIndex;
+            colRelativeTo=0;
+        end
+        modRatioPSTH(Response,Response2,Response3,col,colRelativeTo,varargin{5:end});
     case 'coloredPSTH'
         % do not need to process anything
     case 'meanAcrossUnits'
@@ -208,16 +219,39 @@ Response1.unitbyunit_y=temp;
 
 end
 
+function [Response,newCol,sinew,cmap]=binByCol(Response,col,binStep)
+
+% colBins=min(col,[],'all','omitnan'):binStep:max(col,[],'all','omitnan')+0.01;
+colBins=prctile(col,[0:binStep:100]);
+temp=Response.unitbyunit_y;
+out=nan(length(colBins)-1,size(temp,2));
+newCol=nan(length(colBins)-1,1);
+for i=1:length(colBins)-1
+    out(i,:)=mean(temp(col>=colBins(i) & col<colBins(i+1),:),1,'omitnan');
+    newCol(i)=mean(col(col>=colBins(i) & col<colBins(i+1)),'all','omitnan');
+end
+out=out(~isnan(newCol),:);
+newCol=newCol(~isnan(newCol));
+Response.unitbyunit_y=out;
+[~,sinew]=sort(newCol(~isnan(newCol)));
+cmap=jet(length(newCol(~isnan(newCol))));
+
+end
+
 function plotResponseLineByLine(timesD1,Response1,cmap,si,col)
 
+skipGray=true;
+LineW=1.5;
 figure();
 incColorInd=1;
 for i=1:size(Response1.unitbyunit_y,1)
     if isnan(col(i))
-        lh=plot(timesD1,Response1.unitbyunit_y(i,:),'Color',[0.9 0.9 0.9]); hold on;
-        lh.Color=[0.9 0.9 0.9 0.2];
+        if skipGray==false
+            lh=plot(timesD1,Response1.unitbyunit_y(i,:),'Color',[0.9 0.9 0.9]); hold on;
+            lh.Color=[0.9 0.9 0.9 0.2];
+        end
     else
-        lh=plot(timesD1,Response1.unitbyunit_y(i,:),'Color',cmap(si(incColorInd),:)); hold on;
+        lh=plot(timesD1,Response1.unitbyunit_y(i,:),'Color',cmap(si(incColorInd),:),'LineWidth',LineW); hold on;
         lh.Color=[cmap(si(incColorInd),:),0.5];
         incColorInd=incColorInd+1;
     end
@@ -225,37 +259,76 @@ end
 
 end
 
-function modRatioPSTH(Response1,Response2,Response3,col)
+function modIndex=getModIndex(activityD1tagged,timesD1,inWindow1,inWindow2)
+
+inWindow1=nanmean(activityD1tagged.unitbyunit_y(:,timesD1>=inWindow1(1) & timesD1<=inWindow1(2)),2);
+inWindow2=nanmean(activityD1tagged.unitbyunit_y(:,timesD1>inWindow2(1) & timesD1<=inWindow2(2)),2);
+inWindow1(inWindow1<0.0001)=0;
+inWindow2(inWindow2<0.0001)=0;
+
+modIndex=(inWindow2-inWindow1)./(inWindow2+inWindow1);
+
+end
+
+function modRatioPSTH(Response1,Response2,Response3,col,colRelativeTo,win1,win2)
+
+modIndexAfterSmooth=false;
+binStep=0.2;
 
 cmap=jet(length(col(~isnan(col))));
 [~,si]=sort(col(~isnan(col)));
 
-% Response 1
 timesD1=getTimesD1(Response1);
 Response1=ZscoreAndSmooth(Response1);
+timesD1=getTimesD1(Response2);
+Response2=ZscoreAndSmooth(Response2);
+timesD1=getTimesD1(Response3);
+Response3=ZscoreAndSmooth(Response3);
+
+if modIndexAfterSmooth==true
+    timesD1=getTimesD1(Response1);
+    mod1=getModIndex(Response1,timesD1,win1,win2);
+    timesD1=getTimesD1(Response2);
+    mod2=getModIndex(Response2,timesD1,win1,win2);
+    timesD1=getTimesD1(Response3);
+    mod3=getModIndex(Response3,timesD1,win1,win2);
+    if colRelativeTo==1
+        % divide
+         modRat=mod2./mod1;
+    elseif colRelativeTo==0
+        % subtract
+        modRat=mod2-mod1;
+    end
+    col=modRat;
+end
+
+% Response 1
+timesD1=getTimesD1(Response1);
 plotResponseLineByLine(timesD1,Response1,cmap,si,col); title('Response 1 -- all lines');
-tempcol=col; tempcol(col>1)=nan;
+tempcol=col; tempcol(col>colRelativeTo)=nan;
 plotResponseLineByLine(timesD1,Response1,cmap,si,tempcol); title('Response 1 -- only mod ratio > 1');
-tempcol=col; tempcol(col<1)=nan;
+[R,newcol,sinew,newcmap]=binByCol(Response1,tempcol,binStep); 
+plotResponseLineByLine(timesD1,R,newcmap,sinew,newcol); title('Response 1 -- only mod ratio > 1 BINNED');
+tempcol=col; tempcol(col<colRelativeTo)=nan;
 plotResponseLineByLine(timesD1,Response1,cmap,si,tempcol); title('Response 1 -- only mod ratio < 1');
 
 % Response 2
 timesD1=getTimesD1(Response2);
-Response2=ZscoreAndSmooth(Response2);
 plotResponseLineByLine(timesD1,Response2,cmap,si,col); title('Response 2 -- all lines');
-tempcol=col; tempcol(col>1)=nan;
+tempcol=col; tempcol(col>colRelativeTo)=nan;
 plotResponseLineByLine(timesD1,Response2,cmap,si,tempcol); title('Response 2 -- only mod ratio > 1');
-tempcol=col; tempcol(col<1)=nan;
+tempcol=col; tempcol(col<colRelativeTo)=nan;
 plotResponseLineByLine(timesD1,Response2,cmap,si,tempcol); title('Response 2 -- only mod ratio < 1');
 
 % Response 3
 timesD1=getTimesD1(Response3);
-Response3=ZscoreAndSmooth(Response3);
 plotResponseLineByLine(timesD1,Response3,cmap,si,col); title('Response 3 -- all lines');
-tempcol=col; tempcol(col>1)=nan;
+tempcol=col; tempcol(col>colRelativeTo)=nan;
 plotResponseLineByLine(timesD1,Response3,cmap,si,tempcol); title('Response 3 -- only mod ratio > 1');
-tempcol=col; tempcol(col<1)=nan;
+tempcol=col; tempcol(col<colRelativeTo)=nan;
 plotResponseLineByLine(timesD1,Response3,cmap,si,tempcol); title('Response 3 -- only mod ratio < 1');
+[R,newcol]=binByCol(Response3,tempcol,binStep);
+plotResponseLineByLine(timesD1,R,cmap,si,newcol); title('Response 3 -- only mod ratio < 1 BINNED');
 
 end
 
