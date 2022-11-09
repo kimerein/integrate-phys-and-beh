@@ -207,8 +207,8 @@ function Response1=ZscoreAndSmooth(Response1)
 
 % Zscore within each unit, then plot transition to time window 2
 temp=Response1.unitbyunit_y;
-temp=temp-mean(temp,2,'omitnan');
-temp=temp./std(temp,0,2,'omitnan');
+temp=temp-repmat(mean(temp,2,'omitnan'),1,size(temp,2));
+temp=temp./repmat(std(temp(:,1:200),0,2,'omitnan'),1,size(temp,2));
 Zscored_D1tagged=temp;
 
 temp=Zscored_D1tagged;
@@ -246,19 +246,83 @@ cmap=jet(length(newCol(~isnan(newCol))));
 
 end
 
-function plotModScatter(mod1,mod2,cmap,si,col)
+function plotModScatter(varargin)
+
+if length(varargin)==5
+    mod1=varargin{1};
+    mod2=varargin{2};
+    cmap=varargin{3};
+    si=varargin{4};
+    col=varargin{5};
+elseif length(varargin)==6
+    mod1=varargin{1};
+    mod2=varargin{2};
+    cmap=varargin{3};
+    si=varargin{4};
+    col=varargin{5};
+    takeHalf=varargin{6};
+    if strcmp(takeHalf,'takeTopHalf')
+        cmap=jet(2*length(col(~isnan(col))));
+        cmap=cmap(length(col(~isnan(col)))+1:end,:);
+    elseif strcmp(takeHalf,'takeBottomHalf')
+        cmap=jet(2*length(col(~isnan(col))));
+        cmap=cmap(1:length(col(~isnan(col))),:);
+    end
+end
 
 figure();
 scatter(mod1(~isnan(col)),mod2(~isnan(col)),[],cmap(si,:));
 
 end
 
-function plotResponseLineByLine(timesD1,Response1,cmap,si,col)
+function plotResponseLineByLine(varargin)
+
+if length(varargin)==5
+    timesD1=varargin{1};
+    Response1=varargin{2};
+    cmap=varargin{3};
+    si=varargin{4};
+    col=varargin{5};
+    takeHalf=[];
+elseif length(varargin)==6
+    timesD1=varargin{1};
+    Response1=varargin{2};
+    cmap=varargin{3};
+    si=varargin{4};
+    col=varargin{5};
+    takeHalf=varargin{6};
+    if strcmp(takeHalf,'takeTopHalf')
+        cmap=jet(2*length(col(~isnan(col))));
+        cmap=cmap(length(col(~isnan(col)))+1:end,:);
+    elseif strcmp(takeHalf,'takeBottomHalf')
+        cmap=jet(2*length(col(~isnan(col))));
+        cmap=cmap(1:length(col(~isnan(col))),:);
+    end
+else
+    error('incorrect number of args to plotResponseLineByLine in plotVariousSUResponsesAlignedToBeh.m');
+end
 
 skipGray=true;
 LineW=1.5;
 figure();
 incColorInd=1;
+if ~isempty(takeHalf)
+    if strcmp(takeHalf,'takeTopHalf')
+        takeNotNan=~isnan(col);
+        col=col(takeNotNan);
+        Response1.unitbyunit_y(takeNotNan,:);
+        [~,sortedRind]=sort(col,'descend');
+        Response1.unitbyunit_y=Response1.unitbyunit_y(sortedRind,:);
+        si=si(sortedRind);
+    elseif strcmp(takeHalf,'takeBottomHalf')
+        takeNotNan=~isnan(col);
+        col=col(takeNotNan);
+        Response1.unitbyunit_y(takeNotNan,:);
+        [~,sortedRind]=sort(col,'ascend');
+        Response1.unitbyunit_y=Response1.unitbyunit_y(sortedRind,:);
+        si=si(sortedRind);
+    end
+end
 for i=1:size(Response1.unitbyunit_y,1)
     if isnan(col(i))
         if skipGray==false
@@ -266,8 +330,18 @@ for i=1:size(Response1.unitbyunit_y,1)
             lh.Color=[0.9 0.9 0.9 0.2];
         end
     else
+        if strcmp(takeHalf,'takeTopHalf') && si(incColorInd)<size(cmap,1)/2
+            alph=1;
+        else
+            alph=0.5;
+        end
+        if strcmp(takeHalf,'takeBottomHalf') && si(incColorInd)>size(cmap,1)/2
+            alph=0.7;
+        else
+            alph=0.5;
+        end
         lh=plot(timesD1,Response1.unitbyunit_y(i,:),'Color',cmap(si(incColorInd),:),'LineWidth',LineW); hold on;
-        lh.Color=[cmap(si(incColorInd),:),0.5];
+        lh.Color=[cmap(si(incColorInd),:),alph];
         incColorInd=incColorInd+1;
     end
 end
@@ -292,20 +366,20 @@ plotResponseLineByLine(timesD1,Response1,cmap,si,col); title(['Response ' num2st
 plotModScatter(modIndex1,modIndex2,cmap,si,col);
 
 tempcol=col; tempcol(col>colRelativeTo)=nan; [sinew,newcmap]=getNewSi(tempcol);
-plotResponseLineByLine(timesD1,Response1,newcmap,sinew,tempcol); title(['Response ' num2str(responseN) ' -- only mod ratio > 1']);
-plotModScatter(modIndex1(~isnan(tempcol)),modIndex2(~isnan(tempcol)),newcmap,sinew,tempcol(~isnan(tempcol)));
+plotResponseLineByLine(timesD1,Response1,newcmap,sinew,tempcol,'takeTopHalf'); title(['Response ' num2str(responseN) ' -- only mod ratio >']);
+plotModScatter(modIndex1(~isnan(tempcol)),modIndex2(~isnan(tempcol)),newcmap,sinew,tempcol(~isnan(tempcol)),'takeTopHalf');
 
 [R,newcol,sinew,newcmap,~,m1,m2]=binByCol(Response1,tempcol,binStep,modIndex1,modIndex2); 
-plotResponseLineByLine(timesD1,R,newcmap,sinew,newcol);  title(['Response ' num2str(responseN) ' -- only mod ratio > 1 BINNED']);
-plotModScatter(m1,m2,newcmap,sinew,newcol);
+plotResponseLineByLine(timesD1,R,newcmap,sinew,newcol,'takeTopHalf');  title(['Response ' num2str(responseN) ' -- only mod ratio > BINNED']);
+plotModScatter(m1,m2,newcmap,sinew,newcol,'takeTopHalf');
 
 tempcol=col; tempcol(col<colRelativeTo)=nan; [sinew,newcmap]=getNewSi(tempcol);
-plotResponseLineByLine(timesD1,Response1,newcmap,sinew,tempcol); title(['Response ' num2str(responseN) ' -- only mod ratio < 1']);
-plotModScatter(modIndex1(~isnan(tempcol)),modIndex2(~isnan(tempcol)),newcmap,sinew,tempcol(~isnan(tempcol)));
+plotResponseLineByLine(timesD1,Response1,newcmap,sinew,tempcol,'takeBottomHalf'); title(['Response ' num2str(responseN) ' -- only mod ratio <']);
+plotModScatter(modIndex1(~isnan(tempcol)),modIndex2(~isnan(tempcol)),newcmap,sinew,tempcol(~isnan(tempcol)),'takeBottomHalf');
 
 [R,newcol,sinew,newcmap,~,m1,m2]=binByCol(Response1,tempcol,binStep,modIndex1,modIndex2); 
-plotResponseLineByLine(timesD1,R,newcmap,sinew,newcol);  title(['Response ' num2str(responseN) ' -- only mod ratio < 1 BINNED']);
-plotModScatter(m1,m2,newcmap,sinew,newcol);
+plotResponseLineByLine(timesD1,R,newcmap,sinew,newcol,'takeBottomHalf');  title(['Response ' num2str(responseN) ' -- only mod ratio < BINNED']);
+plotModScatter(m1,m2,newcmap,sinew,newcol,'takeBottomHalf');
 
 end
 
@@ -371,7 +445,7 @@ end
 % Zscore within each unit, then plot transition to time window 2
 temp=Response1.unitbyunit_y;
 temp=temp-mean(temp,2,'omitnan');
-temp=temp./std(temp,0,2,'omitnan');
+temp=temp./std(temp(:,1:200),0,2,'omitnan');
 Zscored_D1tagged=temp;
 temp=Zscored_D1tagged;
 for i=1:size(temp,1)
@@ -403,7 +477,7 @@ end
 % Zscore within each unit, then plot transition to time window 2
 temp=Response2.unitbyunit_y;
 temp=temp-mean(temp,2,'omitnan');
-temp=temp./std(temp,0,2,'omitnan');
+temp=temp./std(temp(:,1:200),0,2,'omitnan');
 Zscored_D1tagged=temp;
 temp=Zscored_D1tagged;
 for i=1:size(temp,1)
@@ -679,7 +753,7 @@ D1temp_2ndwin(D1temp_2ndwin<0.0001)=0;
 ZeroAt=takewin1;
 temp=activityD1tagged.unitbyunit_y;
 temp=temp-mean(temp,2,'omitnan');
-temp=temp./std(temp,0,2,'omitnan');
+temp=temp./std(temp(:,1:200),0,2,'omitnan');
 % Zscored_D1tagged=temp-repmat(mean(temp(:,timesD1>=ZeroAt(1) & timesD1<=ZeroAt(2)),2,'omitnan'),1,size(temp,2));
 Zscored_D1tagged=temp;
 
@@ -702,6 +776,9 @@ for i=1:length(useUnitss)
         c='r';
     end
     plot(timesD1,currtoplot,'Color',c); hold on;
+    if max(currtoplot(1:200),[],'all','omitnan')>4
+        pause;
+    end
 end
 xlabel('Time (sec)');
 ylabel('Zscored FR');
@@ -729,7 +806,7 @@ end
 % Which pre-outcome (or pre-alignment companion) time points correlate best
 temp=activityD1tagged.unitbyunit_y;
 temp=temp-mean(temp,2,'omitnan'); % subtract off each unit's own mean
-temp=temp./std(temp,0,2,'omitnan'); % Z-score each unit's own activity
+temp=temp./std(temp(:,1:200),0,2,'omitnan'); % Z-score each unit's own activity
 Zscored_D1tagged=temp;
 
 % Matrix
@@ -743,6 +820,14 @@ for i=1:length(timeBins)-1
         currpopD1(isnan(currpopD1))=0;
         R=corrcoef(popD1,currpopD1);
         Rs(i,j)=R(1,2);
+    end
+end
+fillVal=mean(Rs,'all','omitnan');
+for i=1:size(Rs,1)
+    for j=i-0:i+0
+        if j>=1 && j<=size(Rs,1)
+            Rs(i,j)=fillVal;
+        end
     end
 end
 figure(); 
@@ -800,6 +885,8 @@ for i=1:length(u)
         allRs=Rs;
         allRs_slice=Rs_slice;
     else
+%         Rs(isnan(Rs))=0;
+%         allRs=allRs+Rs;
         allRs=addMatricesIgnoreNans(allRs,Rs);
         allRs_slice=addMatricesIgnoreNans(allRs_slice,Rs_slice);
     end
@@ -810,6 +897,9 @@ allRs_slice=allRs_slice./length(u);
 timeBins=timesD1(1):timeBinsStep:timesD1(end);
 figure();
 imagesc(timeBins(timeBins<9.5),timeBins(timeBins<9.5),allRs(timeBins<9.5,timeBins<9.5));
+title('corrcoef matrix average across units');
+figure();
+imagesc(timeBins(timeBins<4),timeBins(timeBins<4),allRs(timeBins<4,timeBins<4));
 title('corrcoef matrix average across units');
 fillVal=mean(allRs,'all','omitnan');
 for i=1:size(allRs,1)
@@ -862,8 +952,10 @@ end
 % Which pre-outcome (or pre-alignment companion) time points correlate best
 temp=activityD1tagged.unitbyunit_y;
 temp=temp-mean(temp,'all','omitnan'); % subtract off mean across all trials, all timepoints
-temp=temp./std(temp,0,'all','omitnan'); % Z-score using std across all trials, all timepoints
+temp=temp./std(temp(:,1:200),0,'all','omitnan'); % Z-score using std across all trials, all timepoints
 Zscored_D1tagged=temp;
+
+Zscored_D1tagged=Zscored_D1tagged(~all(isnan(Zscored_D1tagged),2),:);
 
 % Matrix
 timeBins=timesD1(1):timeBinsStep:timesD1(end);
