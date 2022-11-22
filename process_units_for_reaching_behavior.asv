@@ -436,20 +436,31 @@ plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',excludeTooFewTria
 
 %% LDA analysis
 % get all units recorded simultaneously from one session
-response_to_plot='cued_success'; plotUnitCriteria=[-100 0 0 1 0]; getCriteriaForUnitsToPlot(plotUnitCriteria);
-dd_more=cell(1,length(dd)); 
-for i=1:length(dd)
-    dd_more{i}=[dd{i} sep response_to_plot];
-end
-whichSess=1;
-whichUnitsToGrab='_'; % '_' for all units, or can be something like 'D1tagged'
-ResponseCued=getAndSaveResponse(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
+whichSess=3;
+takeNPointsAfterEvent=100;
 
-takeNPointsAfterOutcome=100;
-temp=plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',cued_success_Response,1);
-timesAlignedToOutcome=temp.t; 
-[~,zeroind]=nanmin(abs(timesAlignedToOutcome));
-mergedAllData=[cued_success_Response.unitbyunit_y(:,timesAlignedToOutcome:timesAlignedToOutcome+takeNPointsAfterOutcome); ...
+whichUnitsToGrab='_'; plotUnitCriteria=[-100 0 0 1 0]; getCriteriaForUnitsToPlot(plotUnitCriteria);
+setForUn=settingsForStriatumUnitPlots;
+if setForUn.keepAllSingleTrials~=true
+    error('need trial by trial data for LDA analysis');
+end
+response_to_plot='cued_success'; 
+ResponseCued=getAndSaveResponse([dd{whichSess} sep response_to_plot],whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
+response_to_plot='uncued_success'; 
+ResponseUncued=getAndSaveResponse([dd{whichSess} sep response_to_plot],whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
+
+temp=plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',ResponseCued,1); timesAlignedToEvent=temp.t; [~,zeroind]=nanmin(abs(timesAlignedToEvent));
+us=unique(ResponseCued.fromWhichUnit); allTri=unique(ResponseCued.fromWhichTrial);
+mergedData=nan(length(allTri),length(us)*takeNPointsAfterEvent);
+for i=1:length(allTri)
+    currTri=allTri(i);
+    for j=1:length(us)
+        currU=us(j);
+        mergedData(i,(j-1)*takeNPointsAfterEvent+1:j*takeNPointsAfterEvent)=ResponseCued.unitbyunit_y()
+    end
+end
+
+mergedAllData=ResponseCued.unitbyunit_y(:,timesAlignedToOutcome:timesAlignedToOutcome+takeNPointsAfterOutcome); ...
                uncued_success_Response.unitbyunit_y(:,timesAlignedToOutcome:timesAlignedToOutcome+takeNPointsAfterOutcome)];
 labels=[zeros(size(cued_success_Response.unitbyunit_y,1),1); ...
         ones(size(uncued_success_Response.unitbyunit_y,1),1)];

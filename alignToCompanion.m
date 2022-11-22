@@ -1,4 +1,4 @@
-function [cueCD,uncueCD,lateUncueCD,unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,excluded,ns,D1orD2taggingExpt,firstValNtimesBaseVar,optoFRoverBaseline,indsForAnalysisPerSess,fromWhichSess,fromWhichUnit,fromWhichSess_forTrials,fromWhichTrial]=alignToCompanion(datadir,getCDs,cueCD,uncueCD,lateUncueCD,onlyTakeTheseUnits,settings,indsForAnalysisPerSess)
+function [cueCD,uncueCD,lateUncueCD,unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,excluded,ns,D1orD2taggingExpt,firstValNtimesBaseVar,optoFRoverBaseline,indsForAnalysisPerSess,fromWhichSess,fromWhichUnit,fromWhichSess_forTrials,fromWhichTrial,isEventInThisTrial]=alignToCompanion(datadir,getCDs,cueCD,uncueCD,lateUncueCD,onlyTakeTheseUnits,settings,indsForAnalysisPerSess)
 
 firstValNtimesBaseVar=[]; optoFRoverBaseline=[];
 
@@ -42,6 +42,7 @@ fromWhichSess=nan(maxUnitsPerSess*length(dd),1);
 fromWhichSess_forTrials=nan(maxUnitsPerSess*length(dd),1);
 fromWhichUnit=nan(maxUnitsPerSess*length(dd),1);
 fromWhichTrial=nan(maxUnitsPerSess*length(dd),1);
+isEventInThisTrial=nan(maxUnitsPerSess*length(dd),1);
 excluded_count=1;
 units_count=1;
 trials_count=1;
@@ -98,6 +99,9 @@ for j=1:length(dd)
         else
             usingTrialsInds=1:size(a.dataout.y,1);
         end
+
+        % was there an event on each trial
+        eventHappens=any(~isnan(a.alignComp.y),2);
         
 %         if excludeHigherFR
 %             if nanmean(nanmean(a.dataout.y(:,1:beforeOptoBaseline),1),2)>excludeAboveFR
@@ -182,6 +186,7 @@ for j=1:length(dd)
             unitbyunit_y(units_count,:)=[nan(size(unitbyunit_x(1,:)))];
             fromWhichUnit(trials_count)=units_count;
             fromWhichTrial(trials_count)=nan;
+            isEventInThisTrial(trials_count)=nan;
             fromWhichSess_forTrials(trials_count)=j*ones(size(curr_n));
             trials_count=trials_count+1;
         else
@@ -194,6 +199,7 @@ for j=1:length(dd)
             end
             fromWhichUnit(trials_count:trials_count+size(a.dataout.y,1)-1)=units_count;
             fromWhichTrial(trials_count:trials_count+size(a.dataout.y,1)-1)=usingTrialsInds;
+            isEventInThisTrial(trials_count:trials_count+size(a.dataout.y,1)-1)=eventHappens;
             fromWhichSess_forTrials(trials_count:trials_count+size(a.dataout.y,1)-1)=j*ones(size(curr_n));
             trials_count=trials_count+size(a.dataout.y,1);
         end
@@ -212,6 +218,7 @@ fromWhichSess=fromWhichSess(1:units_count);
 excluded=excluded(1:excluded_count);
 fromWhichUnit=fromWhichUnit(1:trials_count);
 fromWhichTrial=fromWhichTrial(1:trials_count);
+isEventInThisTrial=isEventInThisTrial(1:trials_count);
 fromWhichSess_forTrials=fromWhichSess_forTrials(1:trials_count);
 if keepAllSingleTrials==false
     unitbyunit_x=unitbyunit_x(1:units_count,:);

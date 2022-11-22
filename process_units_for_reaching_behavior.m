@@ -435,25 +435,9 @@ plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',excludeTooFewTria
 
 
 %% LDA analysis
-% get all units recorded simultaneously from one session
 whichSess=3;
-takeNPointsAfterOutcome=100;
-
-whichUnitsToGrab='_'; plotUnitCriteria=[-100 0 0 1 0]; getCriteriaForUnitsToPlot(plotUnitCriteria);
-setForUn=settingsForStriatumUnitPlots;
-if setForUn.keepAllSingleTrials~=true
-    error('need trial by trial data for LDA analysis');
-end
-response_to_plot='cued_success'; 
-ResponseCued=getAndSaveResponse([dd{whichSess} sep response_to_plot],whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
-response_to_plot='uncued_success'; 
-ResponseUncued=getAndSaveResponse([dd{whichSess} sep response_to_plot],whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
-
-temp=plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',ResponseCued,1); timesAlignedToOutcome=temp.t; [~,zeroind]=nanmin(abs(timesAlignedToOutcome));
-
-
-mergedAllData=ResponseCued.unitbyunit_y(:,timesAlignedToOutcome:timesAlignedToOutcome+takeNPointsAfterOutcome); ...
-               uncued_success_Response.unitbyunit_y(:,timesAlignedToOutcome:timesAlignedToOutcome+takeNPointsAfterOutcome)];
-labels=[zeros(size(cued_success_Response.unitbyunit_y,1),1); ...
-        ones(size(uncued_success_Response.unitbyunit_y,1),1)];
-LDA_analysis(mergedAllData,labels); % each row is a unit
+downSampBy=2; % downsamp 60 ms bins by this much
+takeNPointsAfterEvent=50;
+response_to_plot1='cued_success';
+response_to_plot2='uncued_success';
+LDA_analysis(whichSess,downSampBy,takeNPointsAfterEvent,response_to_plot1,response_to_plot2,dd);
