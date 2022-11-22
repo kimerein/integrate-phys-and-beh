@@ -16,7 +16,7 @@ switch varargin{1}
         [Response,Response2,Response3]=matchUnitsAcrossResponses(Response,Response2,Response3);
         outResponse1=plotVariousSUResponsesAlignedToBeh('modulationIndex',Response,varargin{5:end});
         outResponse2=plotVariousSUResponsesAlignedToBeh('modulationIndex',Response2,varargin{5:end});
-        outResponse3=plotVariousSUResponsesAlignedToBeh('modulationIndex',Response3,varargin{5:end});
+        outResponse3=plotVariousSUResponsesAlignedToBeh('modulationIndex',Response3,[-1 -0.5],[-0.4 1]);
         % col=outResponse2.modIndex./outResponse1.modIndex;
         % figure(); scatter(outResponse1.modIndex,outResponse2.modIndex,[],'k');
         div=false;
@@ -29,7 +29,7 @@ switch varargin{1}
             col=outResponse2.modIndex-outResponse1.modIndex;
             colRelativeTo=0;
         end
-        modRatioPSTH(Response,Response2,Response3,col,colRelativeTo,varargin{5:end},outResponse1.modIndex,outResponse2.modIndex);
+        modRatioPSTH(Response,Response2,Response3,col,colRelativeTo,varargin{5:end},outResponse1.modIndex,outResponse2.modIndex,outResponse3.modIndex);
     case 'coloredPSTH'
         % do not need to process anything
     case 'meanAcrossUnits'
@@ -57,6 +57,8 @@ switch varargin{1}
         trialVectorCorrelation_wrapper(Response,timeBinsStep,sliceAtTimeWindow);
         % for a single unit
         % trialVectorCorrelation(filterResponseToOneSU(Response,1),timeBinsStep,sliceAtTimeWindow);
+    case 'getResponsive'
+        out.isResponsive=isResponsive(Response,varargin{3},varargin{4});
     case 'scatterResponseVsResponse'
         grayOutNonResponse=true; %true;
         Response2=varargin{3};
@@ -81,6 +83,13 @@ switch varargin{1}
             else
                 tOp=typeOfPlot;
             end
+            ZscoreR3=false;
+            if ZscoreR3==true
+                timesD1=getTimesD1(ubyu_Response3);
+                meanForZscore=mean([Response.unitbyunit_y(:,1:200) Response2.unitbyunit_y(:,1:200) ubyu_Response3.unitbyunit_y(:,ismember(1:200,find(timesD1>-1)))],2,'omitnan');
+                sdForZscore=std([Response.unitbyunit_y(:,1:200) Response2.unitbyunit_y(:,1:200) ubyu_Response3.unitbyunit_y(:,ismember(1:200,find(timesD1>-1)))],0,2,'omitnan');
+                ubyu_Response3=ZscoreDontSmooth(ubyu_Response3,meanForZscore,sdForZscore);
+            end
             if length(varargin)==find(strcmp([varargin],'ColorLabel'))+1
                 outResponse3=plotVariousSUResponsesAlignedToBeh(tOp,ubyu_Response3,varargin{5:find(strcmp([varargin],'ColorLabel'))-1});
                 isResp=isResponsive(Response3,varargin{5:find(strcmp([varargin],'ColorLabel'))-1}); % find responsive for color plot
@@ -89,8 +98,15 @@ switch varargin{1}
                 isResp=isResponsive(Response3,varargin{find(strcmp([varargin],'ColorLabel'))+2:end}); % find responsive for color plot
             end
         else
-            outResponse1=plotVariousSUResponsesAlignedToBeh(typeOfPlot,Response,varargin{5:end});
-            outResponse2=plotVariousSUResponsesAlignedToBeh(typeOfPlot,Response2,varargin{5:end});
+            if any(strcmp(varargin,'timeWindowsForResponse1'))
+                % syntax
+                % plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',cue_Response,cuedSuccess_Response,'scatterInTimeWindows','timeWindowsForResponse1',[-1 -0.5],[0 1],'timeWindowsForResponse2',[-3 0.25],[0.5 4]);
+                outResponse1=plotVariousSUResponsesAlignedToBeh(typeOfPlot,Response,varargin{6:7});
+                outResponse2=plotVariousSUResponsesAlignedToBeh(typeOfPlot,Response2,varargin{9:10});
+            else
+                outResponse1=plotVariousSUResponsesAlignedToBeh(typeOfPlot,Response,varargin{5:end});
+                outResponse2=plotVariousSUResponsesAlignedToBeh(typeOfPlot,Response2,varargin{5:end});
+            end
         end
         switch typeOfPlot
             case 'coloredPSTH'
@@ -112,7 +128,16 @@ switch varargin{1}
                     if alwaysUseModForColor==true
                         temp=outResponse3.modIndex;
                     else
-                        temp=outResponse3.timeWindow2_FR./outResponse3.timeWindow1_FR;
+%                         temp=outResponse3.timeWindow2_FR./outResponse3.timeWindow1_FR;
+%                         temp=outResponse3.timeWindow2_FR-outResponse3.timeWindow1_FR;
+                        temp=log(outResponse3.timeWindow2_FR);
+%                         temp=outResponse3.timeWindow2_FR;
+%                         temp(temp>1)=1;
+
+%                         temp=outResponse1.timeWindow1_FR-outResponse2.timeWindow1_FR;
+%                         temp=temp-mean(temp,'all','omitnan');
+%                         temp=temp./std(temp,1,'all','omitnan');
+%                         temp(temp>1)=1; temp(temp<-1)=-1;
                     end
                     if ~isempty(isResp) && grayOutNonResponse==true
                         temp(isResp.isSig==false)=nan;
@@ -203,17 +228,34 @@ end
 
 end
 
-function Response1=ZscoreAndSmooth(Response1)
+function Response1=ZscoreAndSmooth(varargin)
+
+if length(varargin)==1
+    Response1=varargin{1};
+    meforZ=[];
+    sdforZ=[];
+elseif length(varargin)==3
+    Response1=varargin{1};
+    meforZ=varargin{2};
+    sdforZ=varargin{3};
+end
 
 % Zscore within each unit, then plot transition to time window 2
 temp=Response1.unitbyunit_y;
-temp=temp-repmat(mean(temp,2,'omitnan'),1,size(temp,2));
-temp=temp./repmat(std(temp(:,1:200),0,2,'omitnan'),1,size(temp,2));
+if isempty(meforZ)
+    temp=temp-repmat(mean(temp,2,'omitnan'),1,size(temp,2));
+    temp=temp./repmat(std(temp(:,1:200),0,2,'omitnan'),1,size(temp,2));
+else
+    temp=temp-repmat(meforZ,1,size(temp,2));
+    temp=temp./repmat(sdforZ,1,size(temp,2));
+end
 Zscored_D1tagged=temp;
 
 temp=Zscored_D1tagged;
 for i=1:size(temp,1)
-    temp(i,:)=smoothdata(temp(i,:),'gaussian',10);
+%     temp(i,:)=smoothdata(temp(i,:),'gaussian',2);
+%     temp(i,:)=smoothdata(temp(i,:),'gaussian',10);
+    temp(i,:)=smoothdata(temp(i,:),'gaussian',7);
 end
 Response1.unitbyunit_y=temp;
 
@@ -303,7 +345,7 @@ else
 end
 
 skipGray=true;
-LineW=1.5;
+LineW=1;
 figure();
 incColorInd=1;
 if ~isempty(takeHalf)
@@ -323,31 +365,49 @@ if ~isempty(takeHalf)
         si=si(sortedRind);
     end
 end
+offsetLines=true;
+plotY=0;
+if offsetLines==true
+    takeNotNan=~isnan(col);
+    col=col(takeNotNan);
+    Response1.unitbyunit_y(takeNotNan,:);
+    [~,sortedRind]=sort(col,'ascend');
+    Response1.unitbyunit_y=Response1.unitbyunit_y(sortedRind,:);
+    si=si(sortedRind);
+end
 for i=1:size(Response1.unitbyunit_y,1)
     if isnan(col(i))
         if skipGray==false
-            lh=plot(timesD1,Response1.unitbyunit_y(i,:),'Color',[0.9 0.9 0.9]); hold on;
+            lh=plot(plotY+timesD1,Response1.unitbyunit_y(i,:),'Color',[0.9 0.9 0.9]); hold on;
             lh.Color=[0.9 0.9 0.9 0.2];
+            if offsetLines==true
+                plotY=plotY+max(Response1.unitbyunit_y(i,1:200),[],2,'omitnan')+1;
+            end
         end
     else
-        alph=0.5;
+        alph=1;
         if strcmp(takeHalf,'takeTopHalf') 
             if si(incColorInd)<size(cmap,1)/2
                 alph=1;
+                LineW=2;
             else
                 alph=0.5;
             end
         end
         if strcmp(takeHalf,'takeBottomHalf')
             if si(incColorInd)>size(cmap,1)/2
-                alph=0.7;
+                alph=0.9;
+                LineW=2;
             else
                 alph=0.5;
             end
         end
-        lh=plot(timesD1,Response1.unitbyunit_y(i,:),'Color',cmap(si(incColorInd),:),'LineWidth',LineW); hold on;
+        lh=plot(timesD1,plotY+Response1.unitbyunit_y(i,:),'Color',cmap(si(incColorInd),:),'LineWidth',LineW); hold on;
         lh.Color=[cmap(si(incColorInd),:),alph];
         incColorInd=incColorInd+1;
+        if offsetLines==true
+            plotY=plotY+max(Response1.unitbyunit_y(i,1:200),[],2,'omitnan')+1;
+        end
     end
 end
 
@@ -370,7 +430,11 @@ timesD1=getTimesD1(Response1);
 plotResponseLineByLine(timesD1,Response1,cmap,si,col); title(['Response ' num2str(responseN) ' -- all lines']);
 plotModScatter(modIndex1,modIndex2,cmap,si,col);
 
-tempcol=col; tempcol(col>colRelativeTo)=nan; [sinew,newcmap]=getNewSi(tempcol);
+% [R,newcol,sinew,newcmap,~,m1,m2]=binByCol(Response1,col,binStep,modIndex1,modIndex2); 
+% plotResponseLineByLine(timesD1,R,newcmap,sinew,newcol);  title(['All colormap ' num2str(responseN) ' -- only mod ratio BINNED']);
+% plotModScatter(m1,m2,newcmap,sinew,newcol);
+
+tempcol=col; tempcol(col<colRelativeTo)=nan; [sinew,newcmap]=getNewSi(tempcol);
 plotResponseLineByLine(timesD1,Response1,newcmap,sinew,tempcol,'takeTopHalf'); title(['Response ' num2str(responseN) ' -- only mod ratio >']);
 plotModScatter(modIndex1(~isnan(tempcol)),modIndex2(~isnan(tempcol)),newcmap,sinew,tempcol(~isnan(tempcol)),'takeTopHalf');
 
@@ -378,7 +442,7 @@ plotModScatter(modIndex1(~isnan(tempcol)),modIndex2(~isnan(tempcol)),newcmap,sin
 plotResponseLineByLine(timesD1,R,newcmap,sinew,newcol,'takeTopHalf');  title(['Response ' num2str(responseN) ' -- only mod ratio > BINNED']);
 plotModScatter(m1,m2,newcmap,sinew,newcol,'takeTopHalf');
 
-tempcol=col; tempcol(col<colRelativeTo)=nan; [sinew,newcmap]=getNewSi(tempcol);
+tempcol=col; tempcol(col>colRelativeTo)=nan; [sinew,newcmap]=getNewSi(tempcol);
 plotResponseLineByLine(timesD1,Response1,newcmap,sinew,tempcol,'takeBottomHalf'); title(['Response ' num2str(responseN) ' -- only mod ratio <']);
 plotModScatter(modIndex1(~isnan(tempcol)),modIndex2(~isnan(tempcol)),newcmap,sinew,tempcol(~isnan(tempcol)),'takeBottomHalf');
 
@@ -390,7 +454,18 @@ end
 
 function [si,cmap]=getNewSi(col)
 
-cmap=jet(length(col(~isnan(col))));
+maxOutCmap=false;
+if maxOutCmap==true
+    fullrange=[-2 2]+2;
+    currcolrange=[min(col,[],'all','omitnan') max(col,[],'all','omitnan')]+2;
+    fracThroughCmapRange=[currcolrange(1)./fullrange(2) currcolrange(2)./fullrange(2)];
+    padl=[fracThroughCmapRange(1)*length(col(~isnan(col)))/range(currcolrange) fracThroughCmapRange(2)*length(col(~isnan(col)))/range(currcolrange)];
+    cmap=jet(ceil(padl(1)+length(col(~isnan(col)))+padl(2)));
+    cmap=cmap(ceil(fracThroughCmapRange(1)*length(col(~isnan(col)))/range(currcolrange))+1:ceil(padl(1)+length(col(~isnan(col)))),:);
+else
+    cmap=jet(length(col(~isnan(col))));
+end
+
 [~,sip]=sort(col(~isnan(col)));
 si=nan(size(sip));
 for i=1:length(sip)
@@ -399,19 +474,32 @@ end
 
 end
 
-function modRatioPSTH(Response1,Response2,Response3,col,colRelativeTo,win1,win2,modIndex1,modIndex2)
+function modRatioPSTH(Response1,Response2,Response3,col,colRelativeTo,win1,win2,modIndex1,modIndex2,modIndex3)
 
 modIndexAfterSmooth=false;
-binStep=5;
+% binStep=15;
+% binStep=7;
+binStep=30;
 
 [si,cmap]=getNewSi(col);
 
-timesD1=getTimesD1(Response1);
-Response1=ZscoreAndSmooth(Response1);
-timesD1=getTimesD1(Response2);
-Response2=ZscoreAndSmooth(Response2);
 timesD1=getTimesD1(Response3);
-Response3=ZscoreAndSmooth(Response3);
+meanForZscore=mean([Response1.unitbyunit_y(:,1:200) Response2.unitbyunit_y(:,1:200) Response3.unitbyunit_y(:,ismember(1:200,find(timesD1>-1)))],2,'omitnan');
+sdForZscore=std([Response1.unitbyunit_y(:,1:200) Response2.unitbyunit_y(:,1:200) Response3.unitbyunit_y(:,ismember(1:200,find(timesD1>-1)))],0,2,'omitnan');
+
+timesD1=getTimesD1(Response1);
+% Response1.unitbyunit_y(any(Response1.unitbyunit_y>15,2),:)=nan;
+Response1=ZscoreAndSmooth(Response1,meanForZscore,sdForZscore);
+timesD1=getTimesD1(Response2);
+% Response2.unitbyunit_y(any(Response2.unitbyunit_y>15,2),:)=nan;
+Response2=ZscoreAndSmooth(Response2,meanForZscore,sdForZscore);
+timesD1=getTimesD1(Response3);
+% for Response 3, zero out optotag window
+% and realign after cue
+Response3=ZscoreAndSmooth(Response3,meanForZscore,sdForZscore);
+Response3.unitbyunit_y(:,timesD1<-1)=nan;
+% Response3.unitbyunit_y(any(Response3.unitbyunit_y>15,2),:)=nan;
+% Response3.unitbyunit_y=Response3.unitbyunit_y-repmat(mean(Response3.unitbyunit_y(:,timesD1>-1 & timesD1<-0.5),2,'omitnan'),1,size(Response3.unitbyunit_y,2));
 
 if modIndexAfterSmooth==true
     timesD1=getTimesD1(Response1);
@@ -430,12 +518,53 @@ if modIndexAfterSmooth==true
     col=modRat;
 end
 
+% Plot scatters vs Response3
+plotJustRainbowScatter(modIndex1,modIndex3,cmap,si,col); title('Mod index 3 on y axis, Mod index 1 on x axis');
+plotJustRainbowScatter(modIndex2,modIndex3,cmap,si,col); title('Mod index 3 on y axis, Mod index 2 on x axis');
+
 % Response 1
 plotRainbowMaps(Response1,cmap,si,col,colRelativeTo,1,binStep,modIndex1,modIndex2);
 % Response 2
 plotRainbowMaps(Response2,cmap,si,col,colRelativeTo,2,binStep,modIndex1,modIndex2);
 % Response 3
 plotRainbowMaps(Response3,cmap,si,col,colRelativeTo,3,binStep,modIndex1,modIndex2);
+
+end
+
+function Response1=ZscoreDontSmooth(varargin)
+
+if length(varargin)==1
+    Response1=varargin{1};
+    meforZ=[];
+    sdforZ=[];
+elseif length(varargin)==3
+    Response1=varargin{1};
+    meforZ=varargin{2};
+    sdforZ=varargin{3};
+end
+
+% Zscore within each unit, then plot transition to time window 2
+temp=Response1.unitbyunit_y;
+if isempty(meforZ)
+    temp=temp-repmat(mean(temp,2,'omitnan'),1,size(temp,2));
+    temp=temp./repmat(std(temp(:,1:200),0,2,'omitnan'),1,size(temp,2));
+else
+    temp=temp-repmat(meforZ,1,size(temp,2));
+    temp=temp./repmat(sdforZ,1,size(temp,2));
+end
+Response1.unitbyunit_y=temp;
+
+end
+
+function inWindow1=getRateInWindow(activityD1tagged,timesD1,inWin1)
+
+inWindow1=nanmean(activityD1tagged.unitbyunit_y(:,timesD1>=inWin1(1) & timesD1<=inWin1(2)),2);
+
+end
+
+function plotJustRainbowScatter(modIndex1,modIndex2,cmap,si,col)
+
+plotModScatter(modIndex1,modIndex2,cmap,si,col);
 
 end
 
@@ -636,6 +765,14 @@ end
 end
 
 function out=meanAcrossUnits(activityD1tagged,downSampFac)
+
+temp=activityD1tagged.unitbyunit_y;
+for i=1:size(temp,1)
+    temp(i,:)=smoothdata(temp(i,:),'gaussian',2);
+%     temp(i,:)=smoothdata(temp(i,:),'gaussian',10);
+%     temp(i,:)=smoothdata(temp(i,:),'gaussian',7);
+end
+activityD1tagged.unitbyunit_y=temp;
 
 if size(activityD1tagged.unitbyunit_y,1)>100
     % skip unit by unit plot because too crowded
@@ -1014,6 +1151,8 @@ end
 
 function modIndex=plotModulationIndex(activityD1tagged,inWindow1,inWindow2)
 
+indicateWhichAreSig=true;
+
 % inWindow in seconds relative to alignmentCompanion peak
 
 temp=nanmean(activityD1tagged.aligncomp_x,1);
@@ -1035,11 +1174,22 @@ end
 
 modBins=[-1-0.1:0.1:1]+0.05;
 [N,edges]=histcounts(modIndex,modBins);
-binCenters=edges(1:end-1)+0.05;
+% binCenters=edges(1:end-1)+0.05;
+[n,x]=cityscape_hist(N,edges);
 figure();
-bar(binCenters,N,'LineWidth',0.1);
+plot(x,n,'Color',[0.8 0.8 0.8]); hold on;
+% bar(binCenters,N,'LineWidth',0.1);
 xlabel('Modulation index');
 ylabel('Count');
+
+if indicateWhichAreSig==true
+    if isfield(activityD1tagged,'isSig')
+        modBins=[-1-0.1:0.1:1]+0.05;
+        [N,edges]=histcounts(modIndex(activityD1tagged.isSig==1),modBins);
+        [n,x]=cityscape_hist(N,edges);
+        plot(x,n,'Color','k');
+    end
+end
 
 end
 
@@ -1048,7 +1198,8 @@ function out=isResponsive(Response,takewin1,takewin2)
 % binomial or ranksum stats
 nTimesStdevAtBaseline=1.2; % for sustained test
 ds_for_sustained=10; % downsamp bins
-sigThreshold=0.05;
+% sigThreshold=0.01; 
+sigThreshold=0.2;
 
 temp=nanmean(Response.aligncomp_x,1);
 [~,f]=nanmax(nanmean(Response.aligncomp_y,1));
@@ -1149,6 +1300,8 @@ out.isSig=isSig;
 out.pvals=pvals;
 out.positiveMod=positiveMod;
 out.sustained=sustained;
+
+% out.isSig=(isSig + (positiveMod==0))>1.5;
 
 end
 

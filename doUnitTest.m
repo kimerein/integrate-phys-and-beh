@@ -15,6 +15,7 @@ unitOnlyName=unitname(1:runit(1)-1);
 r=regexp(foldername,sep);
 try
     a=load([foldername(1:r(end)) 'unit_details' sep unitOnlyName '_unitdets.mat']);
+    optoa=load([foldername(1:r(end)) 'opto_aligned' sep unitOnlyName '_optoTag.mat']);
 catch
     disp(['Failed to load ' foldername(1:r(end)) 'unit_details' sep unitOnlyName '_unitdets.mat so skipping']);
     out=false;
