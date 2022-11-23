@@ -435,33 +435,19 @@ plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',excludeTooFewTria
 
 
 %% LDA analysis
-% get all units recorded simultaneously from one session
-whichSess=3;
-takeNPointsAfterEvent=100;
+% whichSess=4;
+whichSess=55;
+% whichSess=10:20;
 
-whichUnitsToGrab='_'; plotUnitCriteria=[-100 0 0 1 0]; getCriteriaForUnitsToPlot(plotUnitCriteria);
-setForUn=settingsForStriatumUnitPlots;
-if setForUn.keepAllSingleTrials~=true
-    error('need trial by trial data for LDA analysis');
-end
-response_to_plot='cued_success'; 
-ResponseCued=getAndSaveResponse([dd{whichSess} sep response_to_plot],whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
-response_to_plot='uncued_success'; 
-ResponseUncued=getAndSaveResponse([dd{whichSess} sep response_to_plot],whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
+% downSampBy=25; % downsamp 60 ms bins by this much
+% takeNPointsAfterEvent=3;
 
-temp=plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',ResponseCued,1); timesAlignedToEvent=temp.t; [~,zeroind]=nanmin(abs(timesAlignedToEvent));
-us=unique(ResponseCued.fromWhichUnit); allTri=unique(ResponseCued.fromWhichTrial);
-mergedData=nan(length(allTri),length(us)*takeNPointsAfterEvent);
-for i=1:length(allTri)
-    currTri=allTri(i);
-    for j=1:length(us)
-        currU=us(j);
-        mergedData(i,(j-1)*takeNPointsAfterEvent+1:j*takeNPointsAfterEvent)=ResponseCued.unitbyunit_y()
-    end
-end
+downSampBy=4; % downsamp 60 ms bins by this much
+takeNPointsAfterEvent=20;
 
-mergedAllData=ResponseCued.unitbyunit_y(:,timesAlignedToOutcome:timesAlignedToOutcome+takeNPointsAfterOutcome); ...
-               uncued_success_Response.unitbyunit_y(:,timesAlignedToOutcome:timesAlignedToOutcome+takeNPointsAfterOutcome)];
-labels=[zeros(size(cued_success_Response.unitbyunit_y,1),1); ...
-        ones(size(uncued_success_Response.unitbyunit_y,1),1)];
-LDA_analysis(mergedAllData,labels); % each row is a unit
+response_to_plot1='cue';
+response_to_plot2='cue_noReach';
+LDA_analysis(whichSess,downSampBy,takeNPointsAfterEvent,response_to_plot1,response_to_plot2,dd);
+
+%% Linear regression
+% trying to fit the firing rate in 
