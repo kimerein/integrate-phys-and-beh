@@ -469,3 +469,5 @@ for i=1:length(responsesForSig) % get sig responses
     end
     isSig(:,i)=out.isResponsive.isSig; pvals(:,i)=out.isResponsive.pvals; positiveMod(:,i)=out.isResponsive.positiveMod; inWindow1Mean(:,i)=out.isResponsive.inWindow1Mean; inWindow2Mean(:,i)=out.isResponsive.inWindow2Mean;
 end
+anyIsSig=any(isSig==1,2);
+
