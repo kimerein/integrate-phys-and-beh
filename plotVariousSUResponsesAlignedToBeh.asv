@@ -59,6 +59,12 @@ switch varargin{1}
         % trialVectorCorrelation(filterResponseToOneSU(Response,1),timeBinsStep,sliceAtTimeWindow);
     case 'getResponsive'
         out.isResponsive=isResponsive(Response,varargin{3},varargin{4});
+    case 'matchUnitsAcrossResponses'
+        Response2=varargin{3};
+        Response3=varargin{4};
+        Response4=varargin{5};
+        Response5=varargin{6};
+        [out.Response1,out.Response2,out.Response3,out.Response4,out.Response5]=matchUnitsAcrossResponses(Response,Response2,Response3,Response4,Response5);
     case 'scatterResponseVsResponse'
         grayOutNonResponse=true; %true;
         Response2=varargin{3};
@@ -77,21 +83,19 @@ switch varargin{1}
             else
                 ubyu_Response3=collapseToUnitByUnit(Response3);
             end
-            alwaysUseModForColor=false;
+            alwaysUseModForColor=true;
             if alwaysUseModForColor==true
                 tOp='modulationIndex';
             else
                 tOp=typeOfPlot;
             end
-            ZscoreR3=true;
+            ZscoreR3=false;
             if ZscoreR3==true
                 timesD1=getTimesD1(ubyu_Response3);
-                meanForZscore=mean([Response1.unitbyunit_y(:,1:200) Response2.unitbyunit_y(:,1:200) ubyu_Response3.unitbyunit_y(:,ismember(1:200,find(timesD1>-1)))],2,'omitnan');
-                sdForZscore=std([Response1.unitbyunit_y(:,1:200) Response2.unitbyunit_y(:,1:200) ubyu_Response3.unitbyunit_y(:,ismember(1:200,find(timesD1>-1)))],0,2,'omitnan');
-                timesD1=getTimesD1(Response1);
-                % Response1.unitbyunit_y(any(Response1.unitbyunit_y>15,2),:)=nan;
-                Response1=ZscoreAndSmooth(Response1,meanForZscore,sdForZscore);
-                ZscoreDontSmooth(ubyu_Response3)
+                meanForZscore=mean([Response.unitbyunit_y(:,1:200) Response2.unitbyunit_y(:,1:200) ubyu_Response3.unitbyunit_y(:,ismember(1:200,find(timesD1>-1)))],2,'omitnan');
+                sdForZscore=std([Response.unitbyunit_y(:,1:200) Response2.unitbyunit_y(:,1:200) ubyu_Response3.unitbyunit_y(:,ismember(1:200,find(timesD1>-1)))],0,2,'omitnan');
+                ubyu_Response3=ZscoreDontSmooth(ubyu_Response3,meanForZscore,sdForZscore);
+            end
             if length(varargin)==find(strcmp([varargin],'ColorLabel'))+1
                 outResponse3=plotVariousSUResponsesAlignedToBeh(tOp,ubyu_Response3,varargin{5:find(strcmp([varargin],'ColorLabel'))-1});
                 isResp=isResponsive(Response3,varargin{5:find(strcmp([varargin],'ColorLabel'))-1}); % find responsive for color plot
@@ -133,7 +137,13 @@ switch varargin{1}
 %                         temp=outResponse3.timeWindow2_FR./outResponse3.timeWindow1_FR;
 %                         temp=outResponse3.timeWindow2_FR-outResponse3.timeWindow1_FR;
                         temp=log(outResponse3.timeWindow2_FR);
-%                         temp(temp>3)=3;
+%                         temp=outResponse3.timeWindow2_FR;
+%                         temp(temp>1)=1;
+
+%                         temp=outResponse1.timeWindow1_FR-outResponse2.timeWindow1_FR;
+%                         temp=temp-mean(temp,'all','omitnan');
+%                         temp=temp./std(temp,1,'all','omitnan');
+%                         temp(temp>1)=1; temp(temp<-1)=-1;
                     end
                     if ~isempty(isResp) && grayOutNonResponse==true
                         temp(isResp.isSig==false)=nan;
@@ -675,8 +685,9 @@ ylabel('Response 2');
 
 end
 
-function [Response,Response2,Response3]=matchUnitsAcrossResponses(varargin)
+function [Response,Response2,Response3,Response4,Response5]=matchUnitsAcrossResponses(varargin)
 
+Response=[]; Response2=[]; Response3=[]; Response4=[]; Response5=[];
 if length(varargin)==2
     Response=varargin{1};
     Response2=varargin{2};
@@ -723,6 +734,111 @@ elseif length(varargin)==3
     Response=filterResponseToOneSU(Response,useTheseUnitsResponse1);
     Response2=filterResponseToOneSU(Response2,useTheseUnitsResponse2);
     Response3=filterResponseToOneSU(Response3,useTheseUnitsResponse3);
+elseif length(varargin)==5
+    Response=varargin{1};
+    Response2=varargin{2};
+    Response3=varargin{3};
+    Response4=varargin{4};
+    Response5=varargin{5};
+    Response1_indsIntoExcluded=find(Response.excluded==0);
+    Response2_indsIntoExcluded=find(Response2.excluded==0);
+    Response3_indsIntoExcluded=find(Response3.excluded==0);
+    Response4_indsIntoExcluded=find(Response4.excluded==0);
+    Response5_indsIntoExcluded=find(Response5.excluded==0);
+
+    u=unique([Response1_indsIntoExcluded; Response2_indsIntoExcluded; Response3_indsIntoExcluded; Response4_indsIntoExcluded; Response5_indsIntoExcluded]);
+    isInAll=zeros(size(u));
+    for i=1:length(u)
+        if ismember(u(i),Response1_indsIntoExcluded) && ismember(u(i),Response2_indsIntoExcluded) && ismember(u(i),Response3_indsIntoExcluded) && ismember(u(i),Response4_indsIntoExcluded) && ismember(u(i),Response5_indsIntoExcluded)
+            isInAll(i)=1;
+        else
+            isInAll(i)=0;
+        end
+    end
+    inAll=u(isInAll==1);
+
+    temp=ismember(Response1_indsIntoExcluded,inAll);
+    useTheseUnitsResponse1=find(temp);
+    Response.excluded(Response1_indsIntoExcluded(~temp))=1;
+
+    temp=ismember(Response2_indsIntoExcluded,inAll);
+    useTheseUnitsResponse2=find(temp);
+    Response2.excluded(Response2_indsIntoExcluded(~temp))=1;
+
+    temp=ismember(Response3_indsIntoExcluded,inAll);
+    useTheseUnitsResponse3=find(temp);
+    Response3.excluded(Response3_indsIntoExcluded(~temp))=1;
+
+    temp=ismember(Response4_indsIntoExcluded,inAll);
+    useTheseUnitsResponse4=find(temp);
+    Response4.excluded(Response4_indsIntoExcluded(~temp))=1;
+
+    temp=ismember(Response5_indsIntoExcluded,inAll);
+    useTheseUnitsResponse5=find(temp);
+    Response5.excluded(Response5_indsIntoExcluded(~temp))=1;
+
+    Response=filterResponseToOneSU(Response,useTheseUnitsResponse1);
+    Response2=filterResponseToOneSU(Response2,useTheseUnitsResponse2);
+    Response3=filterResponseToOneSU(Response3,useTheseUnitsResponse3);
+    Response4=filterResponseToOneSU(Response4,useTheseUnitsResponse4);
+    Response5=filterResponseToOneSU(Response5,useTheseUnitsResponse5);
+
+    Response=checkThatAllUnitsRepresented(Response,useTheseUnitsResponse1);
+    Response2=checkThatAllUnitsRepresented(Response2,useTheseUnitsResponse2);
+    Response3=checkThatAllUnitsRepresented(Response3,useTheseUnitsResponse3);
+    Response4=checkThatAllUnitsRepresented(Response4,useTheseUnitsResponse4);
+    Response5=checkThatAllUnitsRepresented(Response5,useTheseUnitsResponse5);
+end
+
+end
+
+function out=checkThatAllUnitsRepresented(Response,whichUnitToUse)
+
+f=fieldnames(Response);
+fieldLikeResponseSize=size(Response.unitbyunit_y,1);
+if length(Response.fromWhichUnit)==fieldLikeResponseSize
+    % took all trials
+    whichUnit=Response.fromWhichUnit;
+elseif length(Response.fromWhichSess)==fieldLikeResponseSize
+    % took unit by unit
+    whichUnit=1:fieldLikeResponseSize;
+else
+    error('do not recognize structure of Response in plotVariousSUResponsesAlignedToBeh.m');
+end
+
+out=Response;
+if any(~ismember(whichUnitToUse,whichUnit))
+    % Response is missing this unit
+    % add a row for this unit(s)
+    addBack=whichUnitToUse(~ismember(whichUnitToUse,whichUnit));
+    for i=1:length(f)
+        temp=Response.(f{i});
+        if size(temp,1)==fieldLikeResponseSize
+            % add back to this field
+            if all(size(temp)>1)
+                % 2D
+                out.(f{i})=[temp; nan(length(addBack),size(temp,2))];
+            else
+                % 1D
+                if strcmp(f{i},'fromWhichUnit')
+                    out.(f{i})=[temp; addBack];
+                else
+                    out.(f{i})=[temp; nan(length(addBack),1)];
+                end
+            end
+        end
+    end
+
+    % sort according to unit order
+    [~,si]=sort(out.fromWhichUnit);
+    for i=1:length(f)
+        temp=Response.(f{i});
+        if size(temp,1)==fieldLikeResponseSize
+            if all(size(temp)>1)
+                % 2D
+                out.(f{i})=temp(si,:);
+            else
+                
 end
 
 end
@@ -745,7 +861,7 @@ for i=1:length(f)
     temp=Response.(f{i});
     if size(temp,1)==fieldLikeResponseSize
         % filter this field
-        if length(size(temp))>1
+        if all(size(temp)>1)
             % 2D
             out.(f{i})=temp(ismember(whichUnit,whichUnitToUse),:);
         else
@@ -1194,7 +1310,8 @@ function out=isResponsive(Response,takewin1,takewin2)
 % binomial or ranksum stats
 nTimesStdevAtBaseline=1.2; % for sustained test
 ds_for_sustained=10; % downsamp bins
-sigThreshold=0.01; %sigThreshold=0.05;
+% sigThreshold=0.01; 
+sigThreshold=0.2;
 
 temp=nanmean(Response.aligncomp_x,1);
 [~,f]=nanmax(nanmean(Response.aligncomp_y,1));
@@ -1228,6 +1345,8 @@ isSig=nan(size(u));
 pvals=nan(size(u));
 positiveMod=nan(size(u));
 sustained=nan(size(u));
+inWindow1Mean=nan(size(u));
+inWindow2Mean=nan(size(u));
 for i=1:length(u)
     currU=u(i);
     temp=Response.unitbyunit_y;
@@ -1248,6 +1367,8 @@ for i=1:length(u)
         pvals(i)=p;
         isSig(i)=p<sigThreshold;
         positiveMod(i)=mean(inWindow2,'all','omitnan')>mean(inWindow1,'all','omitnan');
+        inWindow1Mean(i)=mean(inWindow1,'all','omitnan');
+        inWindow2Mean(i)=mean(inWindow2,'all','omitnan');
         % also check whether one timepoint in win 2 is modulated 
 %         pval_timepoints_win2=nan(1,length(binsForWin2)-1);
 %         countsDuringWin1=countEventsInBin(unittemp,indsForWin1);
@@ -1279,6 +1400,8 @@ for i=1:length(u)
         pvals(i)=p;
         isSig(i)=p<sigThreshold;
         positiveMod(i)=mean(inWindow2,'all','omitnan')>mean(inWindow1,'all','omitnan');
+        inWindow1Mean(i)=mean(inWindow1,'all','omitnan');
+        inWindow2Mean(i)=mean(inWindow2,'all','omitnan');
     end
     te=-2*ones(1,size(unittemp,2));
     te(indsForWin1)=0; % specific win1 inds
@@ -1295,6 +1418,10 @@ out.isSig=isSig;
 out.pvals=pvals;
 out.positiveMod=positiveMod;
 out.sustained=sustained;
+out.inWindow1Mean=inWindow1Mean;
+out.inWindow2Mean=inWindow2Mean;
+
+% out.isSig=(isSig + (positiveMod==0))>1.5;
 
 end
 

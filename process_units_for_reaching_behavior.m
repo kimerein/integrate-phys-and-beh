@@ -305,7 +305,7 @@ end
 
 %% 4. Make figures -- about 6 min to load 84 sessions of unit data
 % choose type of response to plot
-response_to_plot='cued_failure_then_noReach'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+response_to_plot='uncued_success'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 
 % doUnitTest.m is used to test whether to include unit in this plot
 % will include unit if unitdets match the following
@@ -433,9 +433,8 @@ trial_n_cutoff=3;
 plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',excludeTooFewTrials(cued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_success_Response,trial_n_cutoff,false),'scatterInTimeWindows',[-3 -0.1],[0.5 4],'ColorLabel',excludeTooFewTrials(cue_Response,trial_n_cutoff,false),[-1 -0.3],[-0.3 1]);
 plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false),'scatterInTimeWindows',[-3 -0.1],[0.5 4],'ColorLabel',excludeTooFewTrials(cue_Response,trial_n_cutoff,false),[-1 -0.3],[-0.3 1]);
 
-
 %% LDA analysis
-whichSess=1:20;
+whichSess=2:40;
 
 % downSampBy=25; % downsamp 60 ms bins by this much
 % takeNPointsAfterEvent=3;
@@ -448,5 +447,25 @@ response_to_plot1='cued_success';
 response_to_plot2='uncued_success';
 LDA_analysis(whichSess,downSampBy,takeNPointsAfterEvent,takeNPointsBeforeEvent,response_to_plot1,response_to_plot2,dd);
 
-%% Linear regression
-% trying to fit the firing rate in 
+%% Study only units with a behavior response
+a=load('Z:\MICROSCOPE\Kim\20221107 figures for Sys Club talk\allunits_cueResponse_trialbytrial.mat'); allTrials_cue_Response=a.allTrials_cue_Response;
+a=load('Z:\MICROSCOPE\Kim\20221107 figures for Sys Club talk\allunits_cuedSuccess_trialbytrial.mat'); allTrials_cuedSuccess=a.Response;
+a=load('Z:\MICROSCOPE\Kim\20221107 figures for Sys Club talk\allunits_cuedFailure_trialbytrial.mat'); allTrials_cuedFailure=a.Response;
+a=load('Z:\MICROSCOPE\Kim\20221107 figures for Sys Club talk\allunits_uncuedSuccess_trialbytrial.mat'); allTrials_uncuedSuccess=a.Response;
+a=load('Z:\MICROSCOPE\Kim\20221107 figures for Sys Club talk\allunits_uncuedFailure_trialbytrial.mat'); allTrials_uncuedFailure=a.Response;
+responsesForSig={'allTrials_cue_Response','allTrials_cuedSuccess','allTrials_cuedFailure','allTrials_uncuedSuccess','allTrials_uncuedFailure'}; % responses aligned to various behavior events
+responseTimeWindows={[-1 -0.3 -0.3 1],[-3 0 1 2],[-3 0 2 3],[-3 0 1 2],[-3 0 2 3]};
+out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',allTrials_cue_Response,allTrials_cuedSuccess,allTrials_cuedFailure,allTrials_uncuedSuccess,allTrials_uncuedFailure);
+allTrials_cue_Response=out.Response1; allTrials_cuedSuccess=out.Response2; allTrials_cuedFailure=out.Response3; allTrials_uncuedSuccess=out.Response4; allTrials_uncuedFailure=out.Response5;
+for i=1:length(responsesForSig) % get sig responses
+    temp=responseTimeWindows{i};
+    out=plotVariousSUResponsesAlignedToBeh('getResponsive',eval(responsesForSig{i}),temp(1:2),temp(3:4));
+    if i==1 % init
+        isSig=nan(length(out.isResponsive.isSig),length(responsesForSig));
+        pvals=nan(length(out.isResponsive.isSig),length(responsesForSig));
+        positiveMod=nan(length(out.isResponsive.isSig),length(responsesForSig));
+        inWindow1Mean=nan(length(out.isResponsive.isSig),length(responsesForSig));
+        inWindow2Mean=nan(length(out.isResponsive.isSig),length(responsesForSig));
+    end
+    isSig(:,i)=out.isResponsive.isSig; pvals(:,i)=out.isResponsive.pvals; positiveMod(:,i)=out.isResponsive.positiveMod; inWindow1Mean(:,i)=out.isResponsive.inWindow1Mean; inWindow2Mean(:,i)=out.isResponsive.inWindow2Mean;
+end
