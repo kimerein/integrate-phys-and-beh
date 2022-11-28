@@ -50,6 +50,7 @@ for j=1:length(dd)
     if iscell(dd)
         datadir=dd{j};
     end
+    disp(['reading in from ' datadir]);
     ls=dir(datadir);
     for i=3:length(ls)
         a=[];
@@ -122,7 +123,14 @@ for j=1:length(dd)
         % realign first!
         timestep_for_aligncomp=mode(diff(a.alignComp.x));
         timestep_for_unit=mode(diff(a.dataout.x));
-        [~,ma]=nanmax(nanmean(a.alignComp.y,1));
+        [~,ma]=max(a.alignComp.y,[],2,'omitnan');
+        ma=mode(ma(any(~isnan(a.alignComp.y),2)));
+        if isnan(ma)
+            ma=1; % no behavior event to align to
+            if any(a.dataout.y(~isnan(a.dataout.y(1:end)))~=0)
+                error('in alignToCompanion.m, max of alignment companion is nan but there are behavior alignments');
+            end
+        end
         [~,mi]=nanmin(abs(a.dataout.x-a.alignComp.x(ma)));
         if testForAlignment==true
             a.dataout.y(:,mi)=a.dataout.y(:,mi)+100;
@@ -193,6 +201,9 @@ for j=1:length(dd)
             if keepAllSingleTrials==false
                 unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
                 unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(:,1:upTo),1)];
+                if units_count==160
+                    pause;
+                end
             else
                 unitbyunit_x(trials_count:trials_count+size(a.dataout.y,1)-1,:)=repmat(a.dataout.x(1:upTo),size(a.dataout.y,1),1);
                 unitbyunit_y(trials_count:trials_count+size(a.dataout.y,1)-1,:)=[a.dataout.y(:,1:upTo)];

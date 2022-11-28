@@ -79,6 +79,7 @@ ds=100;
 maxTimeForHeatmap=9;
 nIndsToTake=300; %nIndsToTake=200;
 nIndsBefore=500;
+minBaselineSamples=nIndsBefore; % minimum samples for baseline before event
 
 if downSamp==true
     downSampWhichFields={'cue','opto','cue_times','distractor','cuetimes_wrt_trial_start'};
@@ -527,8 +528,8 @@ if typeOfReach==true
     if all(isnan(indsIntoPhoto))
         return
     end
-    [alignedData,alignedAt]=alignRowsToInds(photometry_tbt.(plotPhotoField),indsIntoPhoto,nanmin(indsIntoPhoto),fromInputRow,alignPeaks,indsFromPeak);
-    phys_timepoints_alignedData=alignRowsToInds(photometry_tbt.phys_timepoints,indsIntoPhoto,nanmin(indsIntoPhoto),fromInputRow,alignPeaks,indsFromPeak);
+    [alignedData,alignedAt]=alignRowsToInds(photometry_tbt.(plotPhotoField),indsIntoPhoto,nanmin(indsIntoPhoto),fromInputRow,alignPeaks,indsFromPeak,minBaselineSamples);
+    phys_timepoints_alignedData=alignRowsToInds(photometry_tbt.phys_timepoints,indsIntoPhoto,nanmin(indsIntoPhoto),fromInputRow,alignPeaks,indsFromPeak,minBaselineSamples);
     if doingMultipleUnits==true
         tryforSUfields=fieldnames(photometry_tbt);
         j=1;
@@ -541,13 +542,13 @@ if typeOfReach==true
         end
         disp('will plot units in this order:');
         for i=1:length(SUfields)
-            [su(i).alignedData,~]=alignRowsToInds(photometry_tbt.(SUfields{i}),indsIntoPhoto,nanmin(indsIntoPhoto),fromInputRow,alignPeaks,indsFromPeak);
+            [su(i).alignedData,~]=alignRowsToInds(photometry_tbt.(SUfields{i}),indsIntoPhoto,nanmin(indsIntoPhoto),fromInputRow,alignPeaks,indsFromPeak,minBaselineSamples);
             disp(SUfields{i});
         end
     end
     
     % check other reaches with respect to this reach type
-    [allReachesAlignedData,allReachesAlignedAt]=alignRowsToInds(behavior_tbt.reachStarts,alignInds,nIndsToTake,fromInputRow,false,indsFromPeak);
+    [allReachesAlignedData,allReachesAlignedAt]=alignRowsToInds(behavior_tbt.reachStarts,alignInds,nIndsToTake,fromInputRow,false,indsFromPeak,minBaselineSamples);
     behTimesAllReaches=nanmean(behavior_tbt.times_wrt_trial_start(:,1:size(allReachesAlignedData,2)),1);
     if size(behAligned,2)>size(behavior_tbt.times_wrt_trial_start,2)
         behTimes=nanmean(behavior_tbt.times_wrt_trial_start,1);
@@ -565,7 +566,7 @@ if typeOfReach==true
 
     if ~isempty(plotBehField)
         % plot another behavior event aligned in same way 
-        [allReachesAlignedData,allReachesAlignedAt]=alignRowsToInds(behavior_tbt.(plotBehField),alignInds,nIndsToTake,fromInputRow,false,indsFromPeak);
+        [allReachesAlignedData,allReachesAlignedAt]=alignRowsToInds(behavior_tbt.(plotBehField),alignInds,nIndsToTake,fromInputRow,false,indsFromPeak,minBaselineSamples);
         if suppressFigs==false
             figure();
             plotWStderr(behAligned,behTimes,'g',[],size(behAligned,1));
@@ -749,7 +750,7 @@ end
 function [newBehavior_tbt,alignedAt]=makeShiftedTbt(behavior_tbt,whichFields,alignInds,nBefore,fromInputRow)
 
 for i=1:length(whichFields)
-    [newBehavior_tbt.(whichFields{i}),alignedAt]=alignRowsToInds(behavior_tbt.(whichFields{i}),alignInds,nBefore,fromInputRow,false,[]);
+    [newBehavior_tbt.(whichFields{i}),alignedAt]=alignRowsToInds(behavior_tbt.(whichFields{i}),alignInds,nBefore,fromInputRow,false,[],minBaselineSamples);
 end
 
 end
@@ -1002,11 +1003,16 @@ end
 
 end
 
-function [alignedData,alignedAt]=alignRowsToInds(data,alignTo,indsBeforeAlign,fromInputRow,alignPeaks,withinInds)
+function [alignedData,alignedAt]=alignRowsToInds(data,alignTo,indsBeforeAlign,fromInputRow,alignPeaks,withinInds,minBaselineSamples)
 
 mi=nanmin(alignTo);
 if indsBeforeAlign>=mi
     indsBeforeAlign=mi-1;
+end
+% but always want a baseline of at least 30 samples
+if mi<minBaselineSamples
+    mi=minBaselineSamples;
+    indsBeforeAlign=minBaselineSamples;
 end
 alignedData=nan(length(alignTo),indsBeforeAlign+size(data,2)-mi);
 for i=1:length(alignTo)
@@ -1020,7 +1026,12 @@ for i=1:length(alignTo)
         %newf=find(peaksAreIn(alignTo(i)-withinInds:alignTo(i)+withinInds)>=pe/2,1,'first');
         alignTo(i)=alignTo(i)-1+newf;
     end
-    alignedData(i,1:length(data(fromInputRow(i),alignTo(i)-indsBeforeAlign:end)))=data(fromInputRow(i),alignTo(i)-indsBeforeAlign:end);
+    if alignTo(i)-indsBeforeAlign<1
+        temp=[nan(1,abs(alignTo(i)-indsBeforeAlign)) data(fromInputRow(i),1:end)];
+        alignedData(i,1:length(temp))=temp;
+    else
+        alignedData(i,1:length(data(fromInputRow(i),alignTo(i)-indsBeforeAlign:end)))=data(fromInputRow(i),alignTo(i)-indsBeforeAlign:end);
+    end
 end
 alignedAt=indsBeforeAlign+1;
 

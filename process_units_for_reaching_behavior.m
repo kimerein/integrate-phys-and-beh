@@ -305,7 +305,7 @@ end
 
 %% 4. Make figures -- about 6 min to load 84 sessions of unit data
 % choose type of response to plot
-response_to_plot='uncued_success'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+response_to_plot='cued_success'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 
 % doUnitTest.m is used to test whether to include unit in this plot
 % will include unit if unitdets match the following
@@ -475,7 +475,7 @@ anyIsSig=any(isSig==1,2);
 %% Set up data matrix
 % Units X conditions (alignments to beh events) X time
 a=load('Z:\MICROSCOPE\Kim\20221107 figures for Sys Club talk\allunits_alignments_cellbycell.mat'); 
-cue_Response=a.cue_Response; cued_success_Response=a.cued_success_Response; cued_failure_Response=a.cued_failure_Response; uncued_success_Response=a.uncued_success_Response; uncued_failure_Response=a.uncued_failure_Response;
+cue_Response=a.cue_Response; cued_success_Response=a.cued_success_Response;  cued_failure_Response=a.cued_failure_Response; uncued_success_Response=a.uncued_success_Response; uncued_failure_Response=a.uncued_failure_Response;
 % a=load('Z:\MICROSCOPE\Kim\20221107 figures for Sys Club talk\allunits_cueNoReachAlignment_cellbycell.mat'); 
 out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',cue_Response,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response);
 cue_Response=out.Response1; cued_success_Response=out.Response2; cued_failure_Response=out.Response3; uncued_success_Response=out.Response4; uncued_failure_Response=out.Response5;
