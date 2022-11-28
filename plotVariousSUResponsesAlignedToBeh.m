@@ -783,11 +783,15 @@ elseif length(varargin)==5
     Response4=filterResponseToOneSU(Response4,useTheseUnitsResponse4);
     Response5=filterResponseToOneSU(Response5,useTheseUnitsResponse5);
 
-    Response=checkThatAllUnitsRepresented(Response,useTheseUnitsResponse1);
-    Response2=checkThatAllUnitsRepresented(Response2,useTheseUnitsResponse2);
-    Response3=checkThatAllUnitsRepresented(Response3,useTheseUnitsResponse3);
-    Response4=checkThatAllUnitsRepresented(Response4,useTheseUnitsResponse4);
-    Response5=checkThatAllUnitsRepresented(Response5,useTheseUnitsResponse5);
+    fieldLikeResponseSize=size(Response.unitbyunit_y,1);
+    if length(Response.fromWhichUnit)==fieldLikeResponseSize
+        % took all trials
+        Response=checkThatAllUnitsRepresented(Response,useTheseUnitsResponse1);
+        Response2=checkThatAllUnitsRepresented(Response2,useTheseUnitsResponse2);
+        Response3=checkThatAllUnitsRepresented(Response3,useTheseUnitsResponse3);
+        Response4=checkThatAllUnitsRepresented(Response4,useTheseUnitsResponse4);
+        Response5=checkThatAllUnitsRepresented(Response5,useTheseUnitsResponse5);
+    end
 end
 
 end

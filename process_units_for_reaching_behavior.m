@@ -447,7 +447,8 @@ response_to_plot1='cued_success';
 response_to_plot2='uncued_success';
 LDA_analysis(whichSess,downSampBy,takeNPointsAfterEvent,takeNPointsBeforeEvent,response_to_plot1,response_to_plot2,dd);
 
-%% Study only units with a behavior response
+%% Get significant responses 
+% Get significance from trial by trial
 a=load('Z:\MICROSCOPE\Kim\20221107 figures for Sys Club talk\allunits_cueResponse_trialbytrial.mat'); allTrials_cue_Response=a.allTrials_cue_Response;
 a=load('Z:\MICROSCOPE\Kim\20221107 figures for Sys Club talk\allunits_cuedSuccess_trialbytrial.mat'); allTrials_cuedSuccess=a.Response;
 a=load('Z:\MICROSCOPE\Kim\20221107 figures for Sys Club talk\allunits_cuedFailure_trialbytrial.mat'); allTrials_cuedFailure=a.Response;
@@ -471,3 +472,19 @@ for i=1:length(responsesForSig) % get sig responses
 end
 anyIsSig=any(isSig==1,2);
 
+%% Set up data matrix
+% Units X conditions (alignments to beh events) X time
+a=load('Z:\MICROSCOPE\Kim\20221107 figures for Sys Club talk\allunits_alignments_cellbycell.mat'); 
+cue_Response=a.cue_Response; cued_success_Response=a.cued_success_Response; cued_failure_Response=a.cued_failure_Response; uncued_success_Response=a.uncued_success_Response; uncued_failure_Response=a.uncued_failure_Response;
+% a=load('Z:\MICROSCOPE\Kim\20221107 figures for Sys Club talk\allunits_cueNoReachAlignment_cellbycell.mat'); 
+out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',cue_Response,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response);
+cue_Response=out.Response1; cued_success_Response=out.Response2; cued_failure_Response=out.Response3; uncued_success_Response=out.Response4; uncued_failure_Response=out.Response5;
+
+takePointsBeforeZero=50;
+takePointsAfterZero=150;
+dataMatrix=setUpDataMatrix(cue_Response,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,takePointsBeforeZero,takePointsAfterZero);
+
+% PCA, CCA, etc.
+% CCA: Find orthogonal dimensions of max covariance between X=[] and Y=[]
+plotN=6;
+principaledCA(dataMatrix,{'units','time','conditions'},plotN);
