@@ -244,7 +244,7 @@ switch alignTo
         if any(isnan(tempphototimes))
             tempphototimes(isnan(tempphototimes))=0;
         end
-        plotTrialsAsHeatmap(photometry_tbt.(plotPhotoField),tempphototimes,photometry_tbt.cue,f_times,10,maxTimeForHeatmap,false);
+        plotTrialsAsHeatmap(photometry_tbt.(plotPhotoField),tempphototimes,photometry_tbt.cue,f_times,10,maxTimeForHeatmap,false,false);
         hold on;
         plotEventsScatter(behavior_tbt,1:size(behavior_tbt.cue,1),'cueZone_onVoff','all_reachBatch','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts',[]);
         if ~isempty(hax)
@@ -549,7 +549,8 @@ if typeOfReach==true
     
     % check other reaches with respect to this reach type
     [allReachesAlignedData,allReachesAlignedAt]=alignRowsToInds(behavior_tbt.reachStarts,alignInds,nIndsToTake,fromInputRow,false,indsFromPeak,minBaselineSamples);
-    behTimesAllReaches=nanmean(behavior_tbt.times_wrt_trial_start(:,1:size(allReachesAlignedData,2)),1);
+    behTimes=nanmean(behavior_tbt.times_wrt_trial_start,1);
+    behTimesAllReaches=0:mode(diff(behTimes)):(size(allReachesAlignedData,2)-1)*mode(diff(behTimes));
     if size(behAligned,2)>size(behavior_tbt.times_wrt_trial_start,2)
         behTimes=nanmean(behavior_tbt.times_wrt_trial_start,1);
         behTimes=0:mode(diff(behTimes)):(size(behAligned,2)-1)*mode(diff(behTimes));
@@ -580,7 +581,10 @@ if typeOfReach==true
     
     if suppressFigs==false
         figure();
-        plotTrialsAsHeatmap(alignedData,phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),behAligned,behTimes,10,maxTimeForHeatmap,true);
+        if size(phototimes,2)<size(alignedData,2)
+            phototimes=[phototimes nan(size(phototimes,1),size(alignedData,2)-size(phototimes,2))];
+        end
+        plotTrialsAsHeatmap(alignedData,phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),behAligned,behTimes,10,maxTimeForHeatmap,true,true);
     end
 
     if ~isempty(hax)
@@ -598,7 +602,10 @@ if typeOfReach==true
         end
     end
     if suppressFigs==false
-        plotTrialsAsHeatmap(alignedData,phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),behAligned,behTimes,10,maxTimeForHeatmap,true);
+        if size(phototimes,2)<size(alignedData,2)
+            phototimes=[phototimes nan(size(phototimes,1),size(alignedData,2)-size(phototimes,2))];
+        end
+        plotTrialsAsHeatmap(alignedData(~isnan(fromInputRow'),:),phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),behAligned(~isnan(fromInputRow'),:),behTimes,10,maxTimeForHeatmap,true,false);
         hold on;
     end
     whichFields={'cueZone_onVoff','all_reachBatch','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts','success_reachStarts_pawOnWheel'};
@@ -608,7 +615,7 @@ if typeOfReach==true
     if isfield(behavior_tbt,'pelletDislodgedAfterSuccess')
         whichFields{length(whichFields)+1}='pelletDislodgedAfterSuccess';
     end
-    [newBehavior_tbt,allbalignedAt]=makeShiftedTbt(behavior_tbt,whichFields,alignInds,nIndsToTake,fromInputRow);
+    [newBehavior_tbt,allbalignedAt]=makeShiftedTbt(behavior_tbt,whichFields,alignInds,nIndsToTake,fromInputRow,minBaselineSamples);
     newBehavior_tbt.times=behTimesAllReaches-(behTimesAllReaches(allbalignedAt)-behTimes(bmax));
     if suppressFigs==false
         plotEventsScatter(newBehavior_tbt,fromInputRow(~isnan(fromInputRow)),'cueZone_onVoff','all_reachBatch','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts','success_reachStarts_pawOnWheel');
@@ -617,7 +624,7 @@ if typeOfReach==true
     if ~isempty(plotBehField)
         if suppressFigs==false
             figure();
-            plotTrialsAsHeatmap(alignedData,phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),behAligned,behTimes,10,maxTimeForHeatmap,true);
+            plotTrialsAsHeatmap(alignedData(~isnan(fromInputRow'),:),phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),behAligned(~isnan(fromInputRow'),:),behTimes,10,maxTimeForHeatmap,true,false);
             hold on;
             plotEventsScatter(newBehavior_tbt,fromInputRow(~isnan(fromInputRow)),'cueZone_onVoff','all_reachBatch','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts',plotBehField);
             title(['Black dots are ' plotBehField]);
@@ -747,7 +754,7 @@ data.(currField)=beforenans;
     
 end
 
-function [newBehavior_tbt,alignedAt]=makeShiftedTbt(behavior_tbt,whichFields,alignInds,nBefore,fromInputRow)
+function [newBehavior_tbt,alignedAt]=makeShiftedTbt(behavior_tbt,whichFields,alignInds,nBefore,fromInputRow,minBaselineSamples)
 
 for i=1:length(whichFields)
     [newBehavior_tbt.(whichFields{i}),alignedAt]=alignRowsToInds(behavior_tbt.(whichFields{i}),alignInds,nBefore,fromInputRow,false,[],minBaselineSamples);
@@ -866,7 +873,7 @@ end
 
 end
 
-function plotTrialsAsHeatmap(alignedData,times,behAligned,behTimes,ceilAbove,maxTimeInSec,plotBehLines)
+function plotTrialsAsHeatmap(alignedData,times,behAligned,behTimes,ceilAbove,maxTimeInSec,plotBehLines,excludeNanTrials)
 
 dormoutlier=true;
 
@@ -874,8 +881,12 @@ if ~isempty(ceilAbove)
     alignedData(alignedData>ceilAbove)=ceilAbove;
 end
 
-useTheseTrials=~(nansum(isnan(alignedData),2)>0.9*size(alignedData,2));
-ft=find(useTheseTrials);
+if excludeNanTrials==true
+    useTheseTrials=nansum(~isnan(alignedData),2)>0.3*size(alignedData,2);
+else
+    useTheseTrials=true(1,size(alignedData,1));
+end
+ft=find(useTheseTrials==1);
 for i=1:length(ft)
     temp=alignedData(ft(i),1:end-floor(size(alignedData,2)/2));
     if any(isnan(temp))

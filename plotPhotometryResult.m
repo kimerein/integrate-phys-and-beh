@@ -288,7 +288,8 @@ if typeOfReach==true
     
     % check other reaches with respect to this reach type
     [allReachesAlignedData,allReachesAlignedAt]=alignRowsToInds(behavior_tbt.reachStarts,alignInds,nIndsToTake,fromInputRow,false,indsFromPeak,minBaselineSamples);
-    behTimesAllReaches=nanmean(behavior_tbt.times_wrt_trial_start(:,1:size(allReachesAlignedData,2)),1);
+    behTimes=nanmean(behavior_tbt.times_wrt_trial_start,1);
+    behTimesAllReaches=0:mode(diff(behTimes)):(size(allReachesAlignedData,2)-1)*mode(diff(behTimes));
     if size(behAligned,2)>size(behavior_tbt.times_wrt_trial_start,2)
         behTimes=nanmean(behavior_tbt.times_wrt_trial_start,1);
         behTimes=0:mode(diff(behTimes)):(size(behAligned,2)-1)*mode(diff(behTimes));
@@ -322,6 +323,9 @@ if typeOfReach==true
         end
     else
         f_heatmap=figure();
+    end
+    if size(phototimes,2)<size(alignedData,2)
+        phototimes=[phototimes nan(size(phototimes,1),size(alignedData,2)-size(phototimes,2))];
     end
     plotTrialsAsHeatmap(alignedData,phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),behAligned,behTimes,10,maxTimeForHeatmap);
     
