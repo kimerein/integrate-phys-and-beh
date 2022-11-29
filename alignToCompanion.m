@@ -220,7 +220,7 @@ for j=1:length(dd)
 end
 excluded_count=excluded_count-1;
 units_count=units_count-1;
-if isempty(a.dataout.y)
+if isempty(a.dataout)
     lastsetoftrialsn=0;
 else
     lastsetoftrialsn=size(a.dataout.y,1);
