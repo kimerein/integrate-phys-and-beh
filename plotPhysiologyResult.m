@@ -271,6 +271,11 @@ switch alignTo
         plotWStderr(nanmean(photometry_tbt.cue,1),f_times,'b',f,size(photometry_tbt.cue,1));
         n_events_in_av=size(photometry_tbt.(plotPhotoField),1);
         alignmentCompanion.x=f_times;
+        for i=1:size(photometry_tbt.cue,1)
+            temp=photometry_tbt.cue(i,:);
+            photometry_tbt.cue(i,:)=zeros(size(temp));
+            photometry_tbt.cue(i,find(temp>0.1,1,'first'))=1;
+        end
         alignmentCompanion.y=photometry_tbt.cue.*nanmax(nanmean(photometry_tbt.(plotPhotoField),1));        
         if ~isempty(plotBehField)
             plotBehFieldOut.x=nanmean(behavior_tbt.times_wrt_trial_start,1);

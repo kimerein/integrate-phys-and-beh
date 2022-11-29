@@ -4,6 +4,7 @@ binsize=10; % in ms
 bsmooth=false;
 unit_data=[];
 suppressFigs=true;
+cueOffset=-1; % in sec
 
 % SU QC
 if isfield(spikes, 'skipQC')
@@ -63,17 +64,31 @@ saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveN
 
 % Cued success
 event='success_fromPerchOrWheel';
-timeWindow=[0 3]; % in seconds from cue onset
+timeWindow=[0+cueOffset 3]; % in seconds from cue onset
 subDir='cued_success';
 [~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
 saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'cuedSuccess',dataout,alignComp,phys_timepointsComp);
 
 % Cued failure
 event='misses_and_pelletMissing_and_drop';
-timeWindow=[0 3]; % in seconds from cue onset
+timeWindow=[0+cueOffset 3]; % in seconds from cue onset
 subDir='cued_failure';
 [~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
 saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'cuedFailure',dataout,alignComp,phys_timepointsComp);
+
+% Cued drop
+event='drop_fromPerchOrWheel';
+timeWindow=[0+cueOffset 3]; % in seconds from cue onset
+subDir='cued_drop';
+[~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'cuedDrop',dataout,alignComp,phys_timepointsComp);
+
+% Cued miss
+event='misses_and_pelletMissing';
+timeWindow=[0+cueOffset 3]; % in seconds from cue onset
+subDir='cued_miss';
+[~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'cuedMiss',dataout,alignComp,phys_timepointsComp);
 
 % Uncued success
 event='success_fromPerchOrWheel';
@@ -89,9 +104,23 @@ subDir='uncued_failure';
 [~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
 saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'uncuedFailure',dataout,alignComp,phys_timepointsComp);
 
+% Uncued drop
+event='drop_fromPerchOrWheel';
+timeWindow=[3 16]; % in seconds from cue onset
+subDir='uncued_drop';
+[~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'uncuedDrop',dataout,alignComp,phys_timepointsComp);
+
+% Uncued miss
+event='misses_and_pelletMissing';
+timeWindow=[3 16]; % in seconds from cue onset
+subDir='uncued_miss';
+[~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'uncuedMiss',dataout,alignComp,phys_timepointsComp);
+
 % Cued failure and no reaching afterward
 event='failure_noSuccessBeforeAndNoReachingAfter';
-timeWindow=[0 3]; % in seconds from cue onset
+timeWindow=[0+cueOffset 3]; % in seconds from cue onset
 subDir='cued_failure_then_noReach';
 [~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
 saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'cuedFailureThenNoReach',dataout,alignComp,phys_timepointsComp);
