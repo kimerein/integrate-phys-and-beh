@@ -29,14 +29,15 @@ bootstrapEigs(flatData,bootstrapNTimes,plotN);
 plotPCA(flatData,plotN);
 plotPCA(flatData',plotN);
 
-% CCA
-% rows are observations and columns are variables
-X=flatten(data,'expand',[2 1])'; X=noNansOrInfs(X);
-Y=[1 2 3 4 5]';
+% just timepoints after outcome
+X=flatten(data(:,50:end,2:5),'mean',2)'; X=noNansOrInfs(X);
+[U,S,V]=svd(X);
+figure(); imagesc(U);
+figure(); imagesc(S(:,1:10));
+figure(); imagesc(V(1:4,:)');
+figure(); imagesc(V(:,1:4));
 
-[A,B,r,U,V,stats]=canoncorr(X,Y);
-[A,B,r,U,V,stats]=canoncorr(flatten(data(:,:,2:5),'expand',[3 2])',[zeros(1,size(data,2)) ones(1,size(data,2)) zeros(1,size(data,2)) ones(1,size(data,2))]');
-[A,B,r,U,V,stats]=canoncorr(flatten(data(:,:,2:5),'expand',[3 2])',[zeros(1,size(data,2)) zeros(1,size(data,2)) ones(1,size(data,2)) ones(1,size(data,2))]');
+
 
 end
 
@@ -278,7 +279,7 @@ if doPlots==true
     for i=1:plotTo
         subplot(plotN,1,i);
         plot(eigVec_tbyt(:,i));
-        text(1,eigVec_nbyn(1,i),num2str(sorted_eigVal_tbyt(i)));
+        text(1,eigVec_tbyt(1,i),num2str(sorted_eigVal_tbyt(i)));
         if i==1
             title('eigs of transposeA * A');
         end

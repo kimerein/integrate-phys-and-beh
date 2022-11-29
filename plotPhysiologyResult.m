@@ -583,12 +583,11 @@ if typeOfReach==true
         plotBehFieldOut.x=behTimesAllReaches-(behTimesAllReaches(allReachesAlignedAt)-behTimes(bmax));
         plotBehFieldOut.y=allReachesAlignedData;
     end
-    
+    if size(phototimes,2)<size(alignedData,2)
+        phototimes=[phototimes nan(size(phototimes,1),size(alignedData,2)-size(phototimes,2))];
+    end
     if suppressFigs==false
         figure();
-        if size(phototimes,2)<size(alignedData,2)
-            phototimes=[phototimes nan(size(phototimes,1),size(alignedData,2)-size(phototimes,2))];
-        end
         plotTrialsAsHeatmap(alignedData,phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),behAligned,behTimes,10,maxTimeForHeatmap,true,true);
     end
 
@@ -607,9 +606,6 @@ if typeOfReach==true
         end
     end
     if suppressFigs==false
-        if size(phototimes,2)<size(alignedData,2)
-            phototimes=[phototimes nan(size(phototimes,1),size(alignedData,2)-size(phototimes,2))];
-        end
         plotTrialsAsHeatmap(alignedData(~isnan(fromInputRow'),:),phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax)),behAligned(~isnan(fromInputRow'),:),behTimes,10,maxTimeForHeatmap,true,false);
         hold on;
     end

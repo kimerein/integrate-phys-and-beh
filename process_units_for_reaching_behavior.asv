@@ -11,11 +11,11 @@ percentThresh=5;
 timeStretchThresh=60*10; % in seconds
 plotInference=false;
 channelSpacing=20; % in microns
-skipIfBehaviorAlignmentsAlreadyExist=true; % if true, will skip any units for which a behavior alignment already exists in the cue sub-folder
+skipIfBehaviorAlignmentsAlreadyExist=false; % if true, will skip any units for which a behavior alignment already exists in the cue sub-folder
 % CAN COMMENT OUT SOME BEHAVIOR ALIGNMENTS IN
 % saveBehaviorAlignmentsSingleNeuron.m IF DON'T WANT TO REPOPULATE
 % EVERYTHING
-skipUnitDetails=false; % if true, will skip populating the unit details
+skipUnitDetails=true; % if true, will skip populating the unit details
 skipUnitDetailsUnlessNoQCfig=true; % skips populating unit details unless QC fig does not yet exist
 % BUT NOTE WILL STILL REPOPULATE UNIT DETAILS
 % second row is Matlab index, first row is depth on probe, where 32 is most
@@ -94,6 +94,7 @@ data_loc_array=table2cell(readtable(dataTable,'Format','%s%s%s%u%s%s%s%s%s%u%u%s
 for i=1:size(data_loc_array,1)
     % load tbt (trial by trial) data
     [physiology_tbt,beh2_tbt,behavior_tbt,photometry_tbt]=loadReachingExptPhysData(data_loc_array(i,:));
+    % save photometry alignments to behavior, if photometry was acquired
     % get spikes
     dd=dir(data_loc_array{i,7});
     disp(['Processing ' data_loc_array{i,7}]);
@@ -159,6 +160,7 @@ for i=1:size(data_loc_array,1)
                 end
                 if all(allsue==1)
                     disp(['Already made SU QC figs for this spikes']);
+                    doBecauseMissing=false;
                 else
                     doBecauseMissing=true;
                 end
@@ -305,7 +307,7 @@ end
 
 %% 4. Make figures -- about 6 min to load 84 sessions of unit data
 % choose type of response to plot
-response_to_plot='uncued_success'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+response_to_plot='cued_success'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 
 % doUnitTest.m is used to test whether to include unit in this plot
 % will include unit if unitdets match the following
@@ -475,15 +477,16 @@ anyIsSig=any(isSig==1,2);
 %% Set up data matrix
 % Units X conditions (alignments to beh events) X time
 a=load('Z:\MICROSCOPE\Kim\20221107 figures for Sys Club talk\allunits_alignments_cellbycell.mat'); 
-cue_Response=a.cue_Response; cued_success_Response=a.cued_success_Response; cued_failure_Response=a.cued_failure_Response; uncued_success_Response=a.uncued_success_Response; uncued_failure_Response=a.uncued_failure_Response;
+cue_Response=a.cue_Response; cued_success_Response=a.cued_success_Response;  cued_failure_Response=a.cued_failure_Response; uncued_success_Response=a.uncued_success_Response; uncued_failure_Response=a.uncued_failure_Response;
 % a=load('Z:\MICROSCOPE\Kim\20221107 figures for Sys Club talk\allunits_cueNoReachAlignment_cellbycell.mat'); 
 out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',cue_Response,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response);
 cue_Response=out.Response1; cued_success_Response=out.Response2; cued_failure_Response=out.Response3; uncued_success_Response=out.Response4; uncued_failure_Response=out.Response5;
 
-takePointsBeforeZero=50;
+takePointsBeforeZero=16;
 takePointsAfterZero=150;
 dataMatrix=setUpDataMatrix(cue_Response,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,takePointsBeforeZero,takePointsAfterZero);
 
 % PCA, CCA, etc.
 % CCA: Find orthogonal dimensions of max covariance between X=[] and Y=[]
-principaledCA(data,dimensionNames,plotN);
+plotN=6;
+principaledCA(dataMatrix,{'units','time','conditions'},plotN);
