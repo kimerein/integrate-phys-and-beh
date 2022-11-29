@@ -4,7 +4,7 @@ binsize=10; % in ms
 bsmooth=false;
 unit_data=[];
 suppressFigs=true;
-cueOffset=-1; % in sec
+cueOffset=-0.16; % in sec
 
 % SU QC
 if isfield(spikes, 'skipQC')

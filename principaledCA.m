@@ -1,4 +1,4 @@
-function principaledCA(data,dimensionNames,plotN)
+function principaledCA(data,dimensionNames,plotN,bootstrapNTimes)
 
 if all(strcmp(dimensionNames,{'units','time','conditions'}))
     disp('Studying units X time X conditions');
@@ -7,12 +7,12 @@ else
 end
 
 % Normalize each unit's PSTH, don't min-subtract here bcz assume 0 is 0
-% data=normalizeData(data,2);
-data=ZscoreData(data,2);
-data=smoothData(data,2);
+data=normalizeData(data,2);
+% data=ZscoreData(data,2);
+% data=smoothData(data,2);
 
 % Flatten
-flatData=flatten(data,'max',2);
+flatData=flatten(data,'mean',3);
 
 % Display flattened data matrix
 figure();
@@ -22,12 +22,87 @@ imagesc(flatData); title('flatData');
 flatData=noNansOrInfs(flatData);
 
 % Eigenvalues and vectors
-plotEigs(flatData,plotN);
+plotEigs(flatData,plotN,true);
+bootstrapEigs(flatData,bootstrapNTimes,plotN);
 
 % PCA
 plotPCA(flatData,plotN);
+plotPCA(flatData',plotN);
 
 % CCA
+
+end
+
+function [eigVec_nbyn,sorted_eigVal_nbyn,eigVec_tbyt,sorted_eigVal_tbyt]=bootstrapEigs(flatData,bootstrapNTimes,plotN)
+
+eigVec_nbyn=[]; sorted_eigVal_nbyn=[]; eigVec_tbyt=[]; sorted_eigVal_tbyt=[];
+if bootstrapNTimes==1
+    return
+end
+
+takeForBoot=0.7;
+k=ceil(takeForBoot*size(flatData,2));
+for i=1:bootstrapNTimes
+    [eigVec,val]=plotEigs(flatData(:,randsample(size(flatData,2),k)),plotN,false);
+    if i==1
+        eigVec_nbyn=nan(size(eigVec,1),size(eigVec,2),bootstrapNTimes);
+        sorted_eigVal_nbyn=nan(length(val),bootstrapNTimes);
+    end
+    eigVec_nbyn(:,:,i)=eigVec;
+    sorted_eigVal_nbyn(:,i)=val;
+end
+k=ceil(takeForBoot*size(flatData,1));
+for i=1:bootstrapNTimes
+    [~,~,eigVec,val]=plotEigs(flatData(randsample(size(flatData,1),k),:),plotN,false);
+    if i==1
+        eigVec_tbyt=nan(size(eigVec,1),size(eigVec,2),bootstrapNTimes);
+        sorted_eigVal_tbyt=nan(length(val),bootstrapNTimes);
+    end
+    eigVec_tbyt(:,:,i)=eigVec;
+    sorted_eigVal_tbyt(:,i)=val;
+end
+
+figure();
+if plotN>size(eigVec_nbyn,2)
+    plotTo=size(eigVec_nbyn,2);
+else
+    plotTo=plotN;
+end
+for i=1:plotTo
+    subplot(plotN,1,i);
+    plot(mean(eigVec_nbyn(:,i,:),3)); hold on;
+    plot(mean(eigVec_nbyn(:,i,:),3)-std(eigVec_nbyn(:,i,:),0,3)); plot(mean(eigVec_nbyn(:,i,:),3)+std(eigVec_nbyn(:,i,:),0,3));
+    text(1,eigVec_nbyn(1,i),num2str(mean(sorted_eigVal_nbyn(i,:))));
+    if i==1
+        title('eigs of A * transposeA');
+    end
+end
+figure(); scatter(1:size(sorted_eigVal_nbyn(1:plotTo,:),1),mean(sorted_eigVal_nbyn(1:plotTo,:),2)); hold on;
+for i=1:plotTo
+    line([i i],[mean(sorted_eigVal_nbyn(i,:))-std(sorted_eigVal_nbyn(i,:)) mean(sorted_eigVal_nbyn(i,:))+std(sorted_eigVal_nbyn(i,:))]);
+end
+title('eig vals of A * transposeA');
+
+figure();
+if plotN>size(eigVec_tbyt,2)
+    plotTo=size(eigVec_tbyt,2);
+else
+    plotTo=plotN;
+end
+for i=1:plotTo
+    subplot(plotN,1,i);
+    plot(mean(eigVec_tbyt(:,i,:),3)); hold on;
+    plot(mean(eigVec_tbyt(:,i,:),3)-std(eigVec_tbyt(:,i,:),0,3)); plot(mean(eigVec_tbyt(:,i,:),3)+std(eigVec_tbyt(:,i,:),0,3));
+    text(1,eigVec_tbyt(1,i),num2str(mean(sorted_eigVal_tbyt(i,:))));
+    if i==1
+        title('eigs of transposeA * A');
+    end
+end
+figure(); scatter(1:size(sorted_eigVal_tbyt(1:plotTo,:),1),mean(sorted_eigVal_tbyt(1:plotTo,:),2)); hold on;
+for i=1:plotTo
+    line([i i],[mean(sorted_eigVal_tbyt(i,:))-std(sorted_eigVal_tbyt(i,:)) mean(sorted_eigVal_tbyt(i,:))+std(sorted_eigVal_tbyt(i,:))]);
+end
+title('eig vals of transposeA * A');
 
 end
 
@@ -117,23 +192,28 @@ else
     plotTo=plotN;
 end
 figure();
-title('PCs');
 for i=1:plotTo
     subplot(plotN,1,i);
     plot(coeff(:,i));
+    if i==1
+        title('PCs');
+    end
+    text(1,coeff(1,i),num2str(latent(i)));
 end
 
 end
 
-function plotEigs(A,plotN)
+function [eigVec_nbyn,sorted_eigVal_nbyn,eigVec_tbyt,sorted_eigVal_tbyt]=plotEigs(A,plotN,doPlots)
 
-disp('Plotting eigenvals and vectors');
+if doPlots==true
+    disp('Plotting eigenvals and vectors');
+    disp('Size of matrix A');
+    disp(size(A));
+end
 % E.g., size of matrix is N neurons X T "timepoints"
 % center data both dims
 A=A-repmat(mean(A,1,'omitnan'),size(A,1),1);
 A=A-repmat(mean(A,2,'omitnan'),1,size(A,2));
-disp('Size of matrix A');
-disp(size(A));
 neurons_by_neurons=A*transpose(A);
 times_by_times=transpose(A)*A;
 % eigenvectors and eigenvalues
@@ -144,26 +224,36 @@ eigVec_nbyn=eigVec_nbyn(:,si);
 [sorted_eigVal_tbyt,si]=sort(diag(eigVal_tbyt),'descend');
 eigVec_tbyt=eigVec_tbyt(:,si);
 
-figure(); title('eigs of A * transposeA');
-if plotN>size(eigVec_nbyn,2)
-    plotTo=size(eigVec_nbyn,2);
-else
-    plotTo=plotN;
-end
-for i=1:plotTo
-    subplot(plotN,1,i);
-    plot(eigVec_nbyn(:,i));
-end
+if doPlots==true
+    figure();
+    if plotN>size(eigVec_nbyn,2)
+        plotTo=size(eigVec_nbyn,2);
+    else
+        plotTo=plotN;
+    end
+    for i=1:plotTo
+        subplot(plotN,1,i);
+        plot(eigVec_nbyn(:,i));
+        text(1,eigVec_nbyn(1,i),num2str(sorted_eigVal_nbyn(i)));
+        if i==1
+            title('eigs of A * transposeA');
+        end
+    end
 
-figure(); title('eigs of transposeA * A');
-if plotN>size(eigVec_tbyt,2)
-    plotTo=size(eigVec_tbyt,2);
-else
-    plotTo=plotN;
-end
-for i=1:plotTo
-    subplot(plotN,1,i);
-    plot(eigVec_tbyt(:,i));
+    figure();
+    if plotN>size(eigVec_tbyt,2)
+        plotTo=size(eigVec_tbyt,2);
+    else
+        plotTo=plotN;
+    end
+    for i=1:plotTo
+        subplot(plotN,1,i);
+        plot(eigVec_tbyt(:,i));
+        text(1,eigVec_nbyn(1,i),num2str(sorted_eigVal_tbyt(i)));
+        if i==1
+            title('eigs of transposeA * A');
+        end
+    end
 end
 
 end
