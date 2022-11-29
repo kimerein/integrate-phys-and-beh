@@ -98,7 +98,7 @@ for i=1:size(data_loc_array,1)
     % get spikes
     dd=dir(data_loc_array{i,7});
     disp(['Processing ' data_loc_array{i,7}]);
-%     try
+    try
     for j=1:length(dd)
         if ~isempty(regexp(dd(j).name,'spikes'))
             % load spikes
@@ -292,9 +292,9 @@ for i=1:size(data_loc_array,1)
             end
         end
     end
-%     catch
-%         disp('caught error');
-%     end
+    catch
+        disp('caught error');
+    end
 end
 
 %% 3. Load data locations
@@ -307,7 +307,7 @@ end
 
 %% 4. Make figures -- about 6 min to load 84 sessions of unit data
 % choose type of response to plot
-response_to_plot='cued_success'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+response_to_plot='cued_drop'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 
 % doUnitTest.m is used to test whether to include unit in this plot
 % will include unit if unitdets match the following
@@ -469,24 +469,32 @@ for i=1:length(responsesForSig) % get sig responses
         positiveMod=nan(length(out.isResponsive.isSig),length(responsesForSig));
         inWindow1Mean=nan(length(out.isResponsive.isSig),length(responsesForSig));
         inWindow2Mean=nan(length(out.isResponsive.isSig),length(responsesForSig));
+        allWindowMean=nan(length(out.isResponsive.isSig),length(responsesForSig));
+        allWindowVar=nan(length(out.isResponsive.isSig),length(responsesForSig));
     end
     isSig(:,i)=out.isResponsive.isSig; pvals(:,i)=out.isResponsive.pvals; positiveMod(:,i)=out.isResponsive.positiveMod; inWindow1Mean(:,i)=out.isResponsive.inWindow1Mean; inWindow2Mean(:,i)=out.isResponsive.inWindow2Mean;
+    allWindowMean(:,i)=out.isResponsive.allWindowMean; allWindowVar(:,i)=out.isResponsive.allWindowVar;
 end
 anyIsSig=any(isSig==1,2);
 
 %% Set up data matrix
 % Units X conditions (alignments to beh events) X time
-a=load('Z:\MICROSCOPE\Kim\20221107 figures for Sys Club talk\allunits_alignments_cellbycell.mat'); 
-cue_Response=a.cue_Response; cued_success_Response=a.cued_success_Response;  cued_failure_Response=a.cued_failure_Response; uncued_success_Response=a.uncued_success_Response; uncued_failure_Response=a.uncued_failure_Response;
-% a=load('Z:\MICROSCOPE\Kim\20221107 figures for Sys Club talk\allunits_cueNoReachAlignment_cellbycell.mat'); 
+a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\cue.mat'); cue_Response=a.Response; 
+a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\cued_success.mat'); cued_success_Response=a.Response;  
+a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\cued_failure.mat'); cued_failure_Response=a.Response; 
+a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\uncued_success.mat'); uncued_success_Response=a.Response; 
+a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\uncued_failure.mat'); uncued_failure_Response=a.Response;
 out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',cue_Response,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response);
 cue_Response=out.Response1; cued_success_Response=out.Response2; cued_failure_Response=out.Response3; uncued_success_Response=out.Response4; uncued_failure_Response=out.Response5;
 
-takePointsBeforeZero=16;
-takePointsAfterZero=150;
+takePointsBeforeZero=15;
+takePointsAfterZero=70;
 dataMatrix=setUpDataMatrix(cue_Response,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,takePointsBeforeZero,takePointsAfterZero);
+% take just outcome alignments
+dataMatrix=dataMatrix(:,:,[3 5]);
 
 % PCA, CCA, etc.
 % CCA: Find orthogonal dimensions of max covariance between X=[] and Y=[]
 plotN=6;
-principaledCA(dataMatrix,{'units','time','conditions'},plotN);
+boot=5; % num iterations for bootstrap
+principaledCA(dataMatrix,{'units','time','conditions'},plotN,boot);

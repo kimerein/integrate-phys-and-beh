@@ -7,12 +7,12 @@ else
 end
 
 % Normalize each unit's PSTH, don't min-subtract here bcz assume 0 is 0
-data=normalizeData(data,2);
-% data=ZscoreData(data,2);
+% data=normalizeData(data,2);
+data=ZscoreData(data,[2 3]);
 % data=smoothData(data,2);
 
 % Flatten
-flatData=flatten(data,'mean',3);
+flatData=flatten(data,'expand',[3 1]); % for temporal factors
 
 % Display flattened data matrix
 figure();
@@ -30,14 +30,12 @@ plotPCA(flatData,plotN);
 plotPCA(flatData',plotN);
 
 % just timepoints after outcome
-X=flatten(data(:,50:end,2:5),'mean',2)'; X=noNansOrInfs(X);
-[U,S,V]=svd(X);
-figure(); imagesc(U);
-figure(); imagesc(S(:,1:10));
-figure(); imagesc(V(1:4,:)');
-figure(); imagesc(V(:,1:4));
-
-
+% X=flatten(data(:,50:end,2:5),'mean',2)'; X=noNansOrInfs(X);
+% [U,S,V]=svd(X);
+% figure(); imagesc(U);
+% figure(); imagesc(S(:,1:10));
+% figure(); imagesc(V(1:4,:)');
+% figure(); imagesc(V(:,1:4));
 
 end
 
@@ -51,6 +49,7 @@ end
 takeForBoot=0.7;
 k=ceil(takeForBoot*size(flatData,2));
 for i=1:bootstrapNTimes
+    disp(i);
     [eigVec,val]=plotEigs(flatData(:,randsample(size(flatData,2),k)),plotN,false);
     if i==1
         eigVec_nbyn=nan(size(eigVec,1),size(eigVec,2),bootstrapNTimes);
@@ -61,6 +60,7 @@ for i=1:bootstrapNTimes
 end
 k=ceil(takeForBoot*size(flatData,1));
 for i=1:bootstrapNTimes
+    disp(i);
     [~,~,eigVec,val]=plotEigs(flatData(randsample(size(flatData,1),k),:),plotN,false);
     if i==1
         eigVec_tbyt=nan(size(eigVec,1),size(eigVec,2),bootstrapNTimes);
@@ -116,17 +116,37 @@ end
 
 function data=ZscoreData(data,whichdim)
 
-if whichdim==1
-    sz=[size(data,1) 1 1];
-elseif whichdim==2
-    sz=[1 size(data,2) 1];
-elseif whichdim==3
-    sz=[1 1 size(data,3)];
+if length(whichdim)>2
+    data=data-repmat(mean(data,'all','omitnan'),[size(data,1) size(data,2) size(data,3)]);
+    data=data./repmat(std(data,0,'all','omitnan'),[size(data,1) size(data,2) size(data,3)]);
+elseif length(whichdim)>1
+    me=mean(mean(data,whichdim(1),'omitnan'),whichdim(2),'omitnan');
+    v=mean(var(data,0,whichdim(1),'omitnan'),whichdim(2),'omitnan');
+    d=[1 2 3]; missingdim=d(~ismember(d,whichdim));
+    if missingdim==1
+        sz=[1 size(data,2) size(data,3)];
+    elseif missingdim==2
+        sz=[size(data,1) 1 size(data,3)];
+    elseif missingdim==3
+        sz=[size(data,1) size(data,2) 1];
+    else
+        error('principaledCA.m works only for 3D data matrices');
+    end
+    data=data-repmat(me,sz);
+    data=data./repmat(sqrt(v),sz);
 else
-    error('principaledCA.m works only for 3D data matrices');
+    if whichdim==1
+        sz=[size(data,1) 1 1];
+    elseif whichdim==2
+        sz=[1 size(data,2) 1];
+    elseif whichdim==3
+        sz=[1 1 size(data,3)];
+    else
+        error('principaledCA.m works only for 3D data matrices');
+    end
+    data=data-repmat(mean(data,whichdim,'omitnan'),sz);
+    data=data./repmat(std(data,0,whichdim,'omitnan'),sz);
 end
-data=data-repmat(mean(data,whichdim,'omitnan'),sz);
-data=data./repmat(std(data,0,whichdim,'omitnan'),sz);
 
 end
 
@@ -242,10 +262,13 @@ if doPlots==true
 end
 % E.g., size of matrix is N neurons X T "timepoints"
 % center data both dims
-A=A-repmat(mean(A,1,'omitnan'),size(A,1),1);
-A=A-repmat(mean(A,2,'omitnan'),1,size(A,2));
+% A=A-repmat(mean(A,1,'omitnan'),size(A,1),1);
+% A=A-repmat(mean(A,2,'omitnan'),1,size(A,2));
 neurons_by_neurons=A*transpose(A);
 times_by_times=transpose(A)*A;
+% center data
+neurons_by_neurons=neurons_by_neurons-mean(neurons_by_neurons,'all','omitnan');
+times_by_times=times_by_times-mean(times_by_times,'all','omitnan');
 % eigenvectors and eigenvalues
 [eigVec_nbyn,eigVal_nbyn]=eig(neurons_by_neurons);
 [sorted_eigVal_nbyn,si]=sort(diag(eigVal_nbyn),'descend');

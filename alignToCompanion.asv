@@ -220,12 +220,7 @@ for j=1:length(dd)
 end
 excluded_count=excluded_count-1;
 units_count=units_count-1;
-if isempty(a.dataout.y)
-    lastsetoftrialsn=0;
-else
-    lastsetoftrialsn=size(a.dataout.y,1);
-end
-trials_count=trials_count-lastsetoftrialsn;
+trials_count=trials_count-size(a.dataout.y,1);
 ns=ns(1:units_count);
 fromWhichSess=fromWhichSess(1:units_count);
 excluded=excluded(1:excluded_count);

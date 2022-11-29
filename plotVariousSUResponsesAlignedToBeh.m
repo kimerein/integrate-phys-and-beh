@@ -1355,6 +1355,8 @@ positiveMod=nan(size(u));
 sustained=nan(size(u));
 inWindow1Mean=nan(size(u));
 inWindow2Mean=nan(size(u));
+allWindowMean=nan(size(u));
+allWindowVar=nan(size(u));
 for i=1:length(u)
     currU=u(i);
     temp=Response.unitbyunit_y;
@@ -1377,6 +1379,8 @@ for i=1:length(u)
         positiveMod(i)=mean(inWindow2,'all','omitnan')>mean(inWindow1,'all','omitnan');
         inWindow1Mean(i)=mean(inWindow1,'all','omitnan');
         inWindow2Mean(i)=mean(inWindow2,'all','omitnan');
+        allWindowMean(i)=mean(unittemp,'all','omitnan');
+        allWindowVar(i)=std(unittemp,'all','omitnan');
         % also check whether one timepoint in win 2 is modulated 
 %         pval_timepoints_win2=nan(1,length(binsForWin2)-1);
 %         countsDuringWin1=countEventsInBin(unittemp,indsForWin1);
@@ -1410,6 +1414,8 @@ for i=1:length(u)
         positiveMod(i)=mean(inWindow2,'all','omitnan')>mean(inWindow1,'all','omitnan');
         inWindow1Mean(i)=mean(inWindow1,'all','omitnan');
         inWindow2Mean(i)=mean(inWindow2,'all','omitnan');
+        allWindowMean(i)=mean(unittemp,'all','omitnan');
+        allWindowVar(i)=std(unittemp,'all','omitnan');
     end
     te=-2*ones(1,size(unittemp,2));
     te(indsForWin1)=0; % specific win1 inds
@@ -1428,6 +1434,8 @@ out.positiveMod=positiveMod;
 out.sustained=sustained;
 out.inWindow1Mean=inWindow1Mean;
 out.inWindow2Mean=inWindow2Mean;
+out.allWindowMean=allWindowMean;
+out.allWindowVar=allWindowVar;
 
 % out.isSig=(isSig + (positiveMod==0))>1.5;
 
