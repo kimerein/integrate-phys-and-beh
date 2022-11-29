@@ -481,7 +481,7 @@ cue_Response=a.cue_Response; cued_success_Response=a.cued_success_Response;  cue
 out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',cue_Response,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response);
 cue_Response=out.Response1; cued_success_Response=out.Response2; cued_failure_Response=out.Response3; uncued_success_Response=out.Response4; uncued_failure_Response=out.Response5;
 
-takePointsBeforeZero=50;
+takePointsBeforeZero=16;
 takePointsAfterZero=150;
 dataMatrix=setUpDataMatrix(cue_Response,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,takePointsBeforeZero,takePointsAfterZero);
 

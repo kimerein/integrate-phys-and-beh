@@ -30,6 +30,13 @@ plotPCA(flatData,plotN);
 plotPCA(flatData',plotN);
 
 % CCA
+% rows are observations and columns are variables
+X=flatten(data,'expand',[2 1])'; X=noNansOrInfs(X);
+Y=[1 2 3 4 5]';
+
+[A,B,r,U,V,stats]=canoncorr(X,Y);
+[A,B,r,U,V,stats]=canoncorr(flatten(data(:,:,2:5),'expand',[3 2])',[zeros(1,size(data,2)) ones(1,size(data,2)) zeros(1,size(data,2)) ones(1,size(data,2))]');
+[A,B,r,U,V,stats]=canoncorr(flatten(data(:,:,2:5),'expand',[3 2])',[zeros(1,size(data,2)) zeros(1,size(data,2)) ones(1,size(data,2)) ones(1,size(data,2))]');
 
 end
 
@@ -151,12 +158,34 @@ function flatData=flatten(data,method,dim)
 switch method
     case 'mean'
         flatData=mean(data,dim,'omitnan');
+        sz=size(flatData);
+        flatData=reshape(flatData,sz(find(sz>1,1,'first')),sz(find(sz>1,1,'last')));
     case 'max'
         flatData=max(data,[],dim,'omitnan');
+        sz=size(flatData);
+        flatData=reshape(flatData,sz(find(sz>1,1,'first')),sz(find(sz>1,1,'last')));
     case 'expand'
+        if dim(1)==1 
+            s=[2 3 1];
+        elseif dim(1)==2
+            s=[1 3 2];
+        elseif dim(1)==3
+            s=[1 2 3];
+        else
+            error('principaledCA.m works only for 3D data matrices');
+        end
+        data=permute(data,s);
+        flatData=[];
+        for i=1:size(data,3)
+            if dim(2)==1
+                flatData=[flatData; data(:,:,i)];
+            elseif dim(2)==2
+                flatData=[flatData data(:,:,i)];
+            else
+                error('failed to flatten');
+            end
+        end        
 end
-sz=size(flatData);
-flatData=reshape(flatData,sz(find(sz>1,1,'first')),sz(find(sz>1,1,'last')));
 
 end
 

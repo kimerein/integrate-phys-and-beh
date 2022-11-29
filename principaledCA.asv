@@ -12,7 +12,7 @@ data=normalizeData(data,2);
 % data=smoothData(data,2);
 
 % Flatten
-flatData=flatten(data,'mean',2);
+flatData=flatten(data,'mean',3);
 
 % Display flattened data matrix
 figure();
@@ -27,8 +27,16 @@ bootstrapEigs(flatData,bootstrapNTimes,plotN);
 
 % PCA
 plotPCA(flatData,plotN);
+plotPCA(flatData',plotN);
 
 % CCA
+% rows are observations and columns are variables
+X=flatten(data,'expand',[2 1])'; X=noNansOrInfs(X);
+Y=[1 2 3 4 5]';
+
+[A,B,r,U,V,stats]=canoncorr(X,Y);
+[A,B,r,U,V,stats]=canoncorr(flatten(data(:,:,2:5),'expand',[3 2])',[zeros(1,size(data,2)) ones(1,size(data,2)) zeros(1,size(data,2)) ones(1,size(data,2))]');
+[A,B,r,U,V,stats]=canoncorr(flatten(data(:,:,2:5),'expand',[3 2])',[zeros(1,size(data,2)) zeros(1,size(data,2)) ones(1,size(data,2)) ones(1,size(data,2))]');
 
 end
 
@@ -44,18 +52,17 @@ k=ceil(takeForBoot*size(flatData,2));
 for i=1:bootstrapNTimes
     [eigVec,val]=plotEigs(flatData(:,randsample(size(flatData,2),k)),plotN,false);
     if i==1
-        eigVec_nbyn=nan(size(eigVec,1),size(eigVec,2),boostrapNTimes);
+        eigVec_nbyn=nan(size(eigVec,1),size(eigVec,2),bootstrapNTimes);
         sorted_eigVal_nbyn=nan(length(val),bootstrapNTimes);
     end
     eigVec_nbyn(:,:,i)=eigVec;
     sorted_eigVal_nbyn(:,i)=val;
 end
 k=ceil(takeForBoot*size(flatData,1));
-
 for i=1:bootstrapNTimes
-    [~,~,eigVec,val]=plotEigs(flatData(randsample(size(flatData,2),k),:),plotN,false);
+    [~,~,eigVec,val]=plotEigs(flatData(randsample(size(flatData,1),k),:),plotN,false);
     if i==1
-        eigVec_tbyt=nan(size(eigVec,1),size(eigVec,2),boostrapNTimes);
+        eigVec_tbyt=nan(size(eigVec,1),size(eigVec,2),bootstrapNTimes);
         sorted_eigVal_tbyt=nan(length(val),bootstrapNTimes);
     end
     eigVec_tbyt(:,:,i)=eigVec;
@@ -77,11 +84,11 @@ for i=1:plotTo
         title('eigs of A * transposeA');
     end
 end
-figure(); scatter(mean(sorted_eigVal_nbyn,2)); hold on;
-for i=1:size(sorted_eigVal_nbyn,1)
+figure(); scatter(1:size(sorted_eigVal_nbyn(1:plotTo,:),1),mean(sorted_eigVal_nbyn(1:plotTo,:),2)); hold on;
+for i=1:plotTo
     line([i i],[mean(sorted_eigVal_nbyn(i,:))-std(sorted_eigVal_nbyn(i,:)) mean(sorted_eigVal_nbyn(i,:))+std(sorted_eigVal_nbyn(i,:))]);
 end
-
+title('eig vals of A * transposeA');
 
 figure();
 if plotN>size(eigVec_tbyt,2)
@@ -98,9 +105,9 @@ for i=1:plotTo
         title('eigs of transposeA * A');
     end
 end
-figure(); scatter(mean(sorted_eigVal_nbyn,2)); hold on;
-for i=1:size(sorted_eigVal_nbyn,1)
-    line([i i],[mean(sorted_eigVal_nbyn(i,:))-std(sorted_eigVal_nbyn(i,:)) mean(sorted_eigVal_nbyn(i,:))+std(sorted_eigVal_nbyn(i,:))]);
+figure(); scatter(1:size(sorted_eigVal_tbyt(1:plotTo,:),1),mean(sorted_eigVal_tbyt(1:plotTo,:),2)); hold on;
+for i=1:plotTo
+    line([i i],[mean(sorted_eigVal_tbyt(i,:))-std(sorted_eigVal_tbyt(i,:)) mean(sorted_eigVal_tbyt(i,:))+std(sorted_eigVal_tbyt(i,:))]);
 end
 title('eig vals of transposeA * A');
 
@@ -151,12 +158,34 @@ function flatData=flatten(data,method,dim)
 switch method
     case 'mean'
         flatData=mean(data,dim,'omitnan');
+        sz=size(flatData);
+        flatData=reshape(flatData,sz(find(sz>1,1,'first')),sz(find(sz>1,1,'last')));
     case 'max'
         flatData=max(data,[],dim,'omitnan');
+        sz=size(flatData);
+        flatData=reshape(flatData,sz(find(sz>1,1,'first')),sz(find(sz>1,1,'last')));
     case 'expand'
+        if dim(1)==1 
+            s=[2 3 1];
+        elseif dim(1)==2
+            s=[1 3 2];
+        elseif dim(1)==3
+            s=[1 2 3];
+        else
+            error('principaledCA.m works only for 3D data matrices');
+        end
+        data=permute(data,s);
+        flatData=[];
+        for i=1:size(data,3)
+            if dim(2)==1
+                flatData=[flatData; data(:,:,i)];
+            elseif dim(2)==2
+                flatData=[flatData data(:,:,i)];
+            else
+                error('failed to flatten');
+            end
+        end        
 end
-sz=size(flatData);
-flatData=reshape(flatData,sz(find(sz>1,1,'first')),sz(find(sz>1,1,'last')));
 
 end
 
