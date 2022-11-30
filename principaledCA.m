@@ -22,12 +22,15 @@ imagesc(flatData); title('flatData');
 flatData=noNansOrInfs(flatData);
 
 % Eigenvalues and vectors
-plotEigs(flatData,plotN,true);
+[eigVec_1,sorted_eigVal_1,eigVec_2,sorted_eigVal_2]=plotEigs(flatData,plotN,true);
 bootstrapEigs(flatData,bootstrapNTimes,plotN);
 
 % PCA
 plotPCA(flatData,plotN);
 plotPCA(flatData',plotN);
+
+% Project onto eig space
+% projectOntoEigSpace(flatData,2,eigVec_2(:,1:plotN),sorted_eigVal_2(1:plotN));
 
 % just timepoints after outcome
 % X=flatten(data(:,50:end,2:5),'mean',2)'; X=noNansOrInfs(X);
@@ -36,6 +39,35 @@ plotPCA(flatData',plotN);
 % figure(); imagesc(S(:,1:10));
 % figure(); imagesc(V(1:4,:)');
 % figure(); imagesc(V(:,1:4));
+
+end
+
+function projectOntoEigSpace(A,whichdim,eigVecs,eigVals)
+
+if whichdim==2
+elseif whichdim==1
+    A=A';
+else
+    error('expected 2D matrix for projectOntoEigSpace in principaledCA.m');
+end
+if size(A,2)~=size(eigVecs,1)
+    error('array passed to projectOntoEigSpace size does not match eigVecs size in principaledCA.m');
+end
+% project row by row onto eig space
+projections=nan(size(A,1),size(eigVecs,2));
+for i=1:size(A,1)
+    for j=1:size(eigVecs,2)
+        projections(i,j)=dot(A(i,:),eigVecs(:,j)/norm(eigVecs(:,j)));
+    end
+end
+scaleByEigVals=true;
+if scaleByEigVals==true
+    projections=projections./repmat(eigVals',size(A,1),1);
+end
+figure(); scatter(projections(:,1),projections(:,2)); xlabel('Project onto eig vec 1'); ylabel('Project onto eig vec 2');
+figure(); scatter(projections(:,1),projections(:,3)); xlabel('Project onto eig vec 1'); ylabel('Project onto eig vec 3');
+figure(); scatter(projections(:,2),projections(:,3)); xlabel('Project onto eig vec 2'); ylabel('Project onto eig vec 3');
+figure(); scatter3(projections(:,1),projections(:,2),projections(:,3)); xlabel('Proj1'); ylabel('Proj2'); zlabel('Proj3');
 
 end
 
@@ -251,6 +283,9 @@ for i=1:plotTo
     text(1,coeff(1,i),num2str(latent(i)));
 end
 
+figure(); scatter3(score(:,1),score(:,2),score(:,4));
+xlabel('Proj1'); ylabel('Proj2'); zlabel('Proj4');
+
 end
 
 function [eigVec_nbyn,sorted_eigVal_nbyn,eigVec_tbyt,sorted_eigVal_tbyt]=plotEigs(A,plotN,doPlots)
@@ -262,7 +297,7 @@ if doPlots==true
 end
 % E.g., size of matrix is N neurons X T "timepoints"
 % center data both dims
-% A=A-repmat(mean(A,1,'omitnan'),size(A,1),1);
+% A=A-repmat(mean(A,1,'omitnan'),size(A,1),1); 
 % A=A-repmat(mean(A,2,'omitnan'),1,size(A,2));
 neurons_by_neurons=A*transpose(A);
 times_by_times=transpose(A)*A;

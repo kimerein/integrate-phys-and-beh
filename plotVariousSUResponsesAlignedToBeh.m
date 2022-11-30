@@ -596,14 +596,22 @@ cmap=jet(length(col(~isnan(col))));
 [~,si]=sort(col(~isnan(col)));
 figure();
 incColorInd=1;
+offsetLines=true;
+lineOff=0;
 for i=1:size(Response1.unitbyunit_y,1)
     if isnan(col(i))
-        lh=plot(timesD1,Response1.unitbyunit_y(i,:),'Color',[0.9 0.9 0.9]); hold on;
+        lh=plot(timesD1,Response1.unitbyunit_y(i,:)+lineOff,'Color',[0.9 0.9 0.9]); hold on;
         lh.Color=[0.9 0.9 0.9 0.2];
     else
-        lh=plot(timesD1,Response1.unitbyunit_y(i,:),'Color',cmap(si(incColorInd),:)); hold on;
+        lh=plot(timesD1,Response1.unitbyunit_y(i,:)+lineOff,'Color',cmap(si(incColorInd),:)); hold on;
         lh.Color=[cmap(si(incColorInd),:),0.5];
         incColorInd=incColorInd+1;
+    end
+    if offsetLines==true
+        if all(isnan(Response1.unitbyunit_y(i,1:200)))
+        else
+            lineOff=lineOff+nanmax(Response1.unitbyunit_y(i,1:200));
+        end
     end
 end
 title('Response 1');
@@ -628,14 +636,21 @@ cmap=jet(length(col(~isnan(col))));
 [~,si]=sort(col(~isnan(col)));
 figure();
 incColorInd=1;
+lineOff=0;
 for i=1:size(Response2.unitbyunit_y,1)
     if isnan(col(i))
-        lh=plot(timesD1,Response2.unitbyunit_y(i,:),'Color',[0.9 0.9 0.9]); hold on;
+        lh=plot(timesD1,Response2.unitbyunit_y(i,:)+lineOff,'Color',[0.9 0.9 0.9]); hold on;
         lh.Color=[0.9 0.9 0.9 0.2];
     else
-        lh=plot(timesD1,Response2.unitbyunit_y(i,:),'Color',cmap(si(incColorInd),:)); hold on;
+        lh=plot(timesD1,Response2.unitbyunit_y(i,:)+lineOff,'Color',cmap(si(incColorInd),:)); hold on;
         lh.Color=[cmap(si(incColorInd),:),0.5];
         incColorInd=incColorInd+1;
+    end
+    if offsetLines==true
+        if all(isnan(Response2.unitbyunit_y(i,1:200)))
+        else
+            lineOff=lineOff+nanmax(Response2.unitbyunit_y(i,1:200));
+        end
     end
 end
 title('Response 2');
@@ -886,6 +901,11 @@ end
 
 function out=meanAcrossUnits(activityD1tagged,downSampFac)
 
+rmOutliers=false;
+if rmOutliers==true
+    [activityD1tagged.unitbyunit_y,Tfrm]=rmoutliers(activityD1tagged.unitbyunit_y,"mean","ThresholdFactor",5);
+    disp(['removed ' num2str(sum(Tfrm)) ' outliers']);
+end
 temp=activityD1tagged.unitbyunit_y;
 for i=1:size(temp,1)
     temp(i,:)=smoothdata(temp(i,:),'gaussian',2);
@@ -894,12 +914,12 @@ for i=1:size(temp,1)
 end
 activityD1tagged.unitbyunit_y=temp;
 
-if size(activityD1tagged.unitbyunit_y,1)>100
+if size(activityD1tagged.unitbyunit_y,1)>1000
     % skip unit by unit plot because too crowded
 else
     figure();
     plot(nanmean(activityD1tagged.unitbyunit_x,1),activityD1tagged.unitbyunit_y');
-    hold on; plot(nanmean(activityD1tagged.aligncomp_x,1),nanmean(activityD1tagged.aligncomp_y,1),'Color','b');
+    hold on; plot(nanmean(activityD1tagged.aligncomp_x,1),nanmean(activityD1tagged.aligncomp_y,1).*max(activityD1tagged.unitbyunit_y,[],'all','omitnan'),'Color','b');
     xlabel('Time (sec)');
     ylabel('Firing rate');
     title('With raw times');
@@ -1380,7 +1400,7 @@ for i=1:length(u)
         inWindow1Mean(i)=mean(inWindow1,'all','omitnan');
         inWindow2Mean(i)=mean(inWindow2,'all','omitnan');
         allWindowMean(i)=mean(unittemp,'all','omitnan');
-        allWindowVar(i)=std(unittemp,'all','omitnan');
+        allWindowVar(i)=var(unittemp,0,'all','omitnan');
         % also check whether one timepoint in win 2 is modulated 
 %         pval_timepoints_win2=nan(1,length(binsForWin2)-1);
 %         countsDuringWin1=countEventsInBin(unittemp,indsForWin1);
@@ -1415,7 +1435,7 @@ for i=1:length(u)
         inWindow1Mean(i)=mean(inWindow1,'all','omitnan');
         inWindow2Mean(i)=mean(inWindow2,'all','omitnan');
         allWindowMean(i)=mean(unittemp,'all','omitnan');
-        allWindowVar(i)=std(unittemp,'all','omitnan');
+        allWindowVar(i)=var(unittemp,0,'all','omitnan');
     end
     te=-2*ones(1,size(unittemp,2));
     te(indsForWin1)=0; % specific win1 inds

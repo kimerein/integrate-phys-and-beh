@@ -307,7 +307,7 @@ end
 
 %% 4. Make figures -- about 6 min to load 84 sessions of unit data
 % choose type of response to plot
-response_to_plot='cued_drop'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+response_to_plot='cued_miss'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 
 % doUnitTest.m is used to test whether to include unit in this plot
 % will include unit if unitdets match the following
@@ -402,7 +402,7 @@ plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',cue_A2atagged,cue
 % scriptToOrganizeD1vD2unitResponses_wrapper(dd);
 
 plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',cued_success_D1tagged,cued_failure_D1tagged,'modulationIndex',[-3 0.25],[0.5 4],'ColorLabel',cue_D1tagged,[-1 -0.5],[0 0.25]);
-
+plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',cued_success,Response,'coloredPSTH',[-3 -0.5],[0 3],'ColorLabel',cue_Response);
 plotVariousSUResponsesAlignedToBeh('modRatioPSTH',cued_success_Response,cued_failure_Response,cueNoReach_Response,[-3 0.25],[0.5 2.5]);
 
 % D1mods=plotVariousSUResponsesAlignedToBeh('scatter3D',cued_success_D1tagged,cued_failure_D1tagged,cueNoReach_D1tagged,[-3 0.25],[0.5 4]);
@@ -491,10 +491,10 @@ takePointsBeforeZero=15;
 takePointsAfterZero=70;
 dataMatrix=setUpDataMatrix(cue_Response,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,takePointsBeforeZero,takePointsAfterZero);
 % take just outcome alignments
-dataMatrix=dataMatrix(:,:,[3 5]);
+dataMatrix=dataMatrix(:,:,[2:5]);
 
 % PCA, CCA, etc.
 % CCA: Find orthogonal dimensions of max covariance between X=[] and Y=[]
 plotN=6;
-boot=5; % num iterations for bootstrap
+boot=1; % num iterations for bootstrap
 principaledCA(dataMatrix,{'units','time','conditions'},plotN,boot);
