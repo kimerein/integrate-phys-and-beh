@@ -487,11 +487,12 @@ a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\uncued_fai
 out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',cue_Response,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response);
 cue_Response=out.Response1; cued_success_Response=out.Response2; cued_failure_Response=out.Response3; uncued_success_Response=out.Response4; uncued_failure_Response=out.Response5;
 
-takePointsBeforeZero=15;
+takePointsBeforeZero=5; %15;
 takePointsAfterZero=70;
 dataMatrix=setUpDataMatrix(cue_Response,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,takePointsBeforeZero,takePointsAfterZero);
+dataMatrix(dataMatrix<0)=0; % no firing rates below 0
 % take just outcome alignments
-dataMatrix=dataMatrix(:,:,[2:5]);
+% dataMatrix=dataMatrix(:,:,[2:5]);
 
 % PCA, CCA, etc.
 % CCA: Find orthogonal dimensions of max covariance between X=[] and Y=[]

@@ -7,9 +7,9 @@ else
 end
 
 % Normalize each unit's PSTH, don't min-subtract here bcz assume 0 is 0
-% data=normalizeData(data,2);
-data=ZscoreData(data,[2 3]);
-% data=smoothData(data,2);
+data=normalizeData(data,[2 3],'sd'); % last argument either 'sd' or 'max'
+% data=ZscoreData(data,[2 3]);
+% data=smoothData(data,2,3);
 
 % Flatten
 flatData=flatten(data,'expand',[3 1]); % for temporal factors
@@ -32,6 +32,20 @@ plotPCA(flatData',plotN);
 % Project onto eig space
 % projectOntoEigSpace(flatData,2,eigVec_2(:,1:plotN),sorted_eigVal_2(1:plotN));
 
+% TCA
+% R_guess=5; % guess matrix rank
+% allconditions_cpmodel=plotTCA(noNansOrInfs(data),10,R_guess);
+R_guess=4; % guess matrix rank
+allconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[2:5])),10,R_guess);
+% successes=flatten(data(:,:,1+[1 3]),'mean',3); failures=flatten(data(:,:,1+[2 4]),'mean',3);
+% da=cat(3,successes,failures);
+% successvfailure_cpmodel=plotTCA(noNansOrInfs(da),10,2); % converges w 2 factors, if data Zscored
+% cued=flatten(data(:,:,1+[1 2]),'mean',3); uncued=flatten(data(:,:,1+[3 4]),'mean',3);
+% da=cat(3,cued,uncued);
+% cuevuncue_cpmodel=plotTCA(noNansOrInfs(da),10,4);
+% plotTCA(noNansOrInfs(smoothData(data,2,10)),10,2);
+% plotTCA(noNansOrInfs(data(:,:,[3:4])),10,2); % actually converges
+
 % just timepoints after outcome
 % X=flatten(data(:,50:end,2:5),'mean',2)'; X=noNansOrInfs(X);
 % [U,S,V]=svd(X);
@@ -39,6 +53,110 @@ plotPCA(flatData',plotN);
 % figure(); imagesc(S(:,1:10));
 % figure(); imagesc(V(1:4,:)');
 % figure(); imagesc(V(:,1:4));
+
+end
+
+function matsum=tensorToMatrix(ktens)
+
+if length(ktens.U)~=3
+    error('current code tensorToMatrix in principaledCA.m expect 3D tensor');
+end
+a=ktens.U{1}; b=ktens.U{2}; c=ktens.U{3};
+matsum=zeros(size(a,1),size(b,1),size(c,1));
+for i=1:length(ktens.lambda)
+    matsum=matsum+ktens.lambda(i)*outerProduct(outerProduct(a(:,i),b(:,i)),c(:,i));
+end
+
+end
+
+function out=outerProduct(vec1,vec2)
+
+if size(vec1,2)==1 && size(vec2,2)==1
+    out=vec1*transpose(vec2);
+    if size(out,1)~=length(vec1) || size(out,2)~=length(vec2)
+        error('problem in outerProduct in principaledCA.m');
+    end
+elseif length(size(vec1))==2 && size(vec2,2)==1
+    out=nan(size(vec1,1),size(vec1,2),length(vec2));
+    for i=1:size(vec1,1)
+        for j=1:size(vec1,2)
+            for k=1:length(vec2)
+                out(i,j,k)=vec1(i,j)*vec2(k);
+            end
+        end
+    end
+    if size(out,1)~=size(vec1,1) || size(out,2)~=size(vec1,2) || size(out,3)~=length(vec2)
+        error('problem in outerProduct in principaledCA.m');
+    end
+else
+    error('outerProduct in principaledCA.m not implemented for inputs of these sizes');
+end
+
+end
+
+function bestmodel=plotTCA(inputdata,n_fits,R)
+
+% Fit CP Tensor Decomposition
+% these commands require that you download Sandia Labs' tensor toolbox:
+% http://www.sandia.gov/~tgkolda/TensorToolbox/index-2.6.html
+% data is neurons x times x trials
+% convert data to a tensor object
+data = tensor(inputdata);
+
+% fit the cp decomposition from random initial guesses
+% n_fits = 30;
+err = zeros(n_fits,1);
+% choose model with lowest error
+bestmodel=[];
+for n = 1:n_fits
+    % fit model
+    disp(n);
+%     est_factors = cp_als(tensor(data),R,'printitn',0,'fixsigns',true,'maxiters',300);
+    est_factors = cp_opt(tensor(data),R,'init','rand','lower',0,'printitn',0,'fixsigns',true,'maxiters',10000);
+    % store error
+    err(n) = norm(full(est_factors) - data)/norm(data);
+    if all(err(1:n-1)>err(n))
+        % best so far
+        bestmodel=est_factors;
+        besterr=err(n);
+        % reconstruct initial matrix
+        data_reconstruct=tensorToMatrix(est_factors);
+    end
+
+    % visualize fit for first several fits
+    if n < 10
+        % plot the estimated factors
+        viz_ktensor(est_factors, ... 
+            'Plottype', {'bar', 'line', 'scatter'}, ...
+            'Modetitles', {'neurons', 'time', 'trials'})
+        set(gcf, 'Name', ['estimated factors - fit #' num2str(n)])
+        text(0.05,0.05,['lambdas ' num2str(est_factors.lambda')]);
+    end
+end
+
+figure(); hold on;
+plot(randn(n_fits,1), err, 'ob');
+xlim([-10,10]);
+ylim([0 1.0]);
+set(gca,'xtick',[]);
+ylabel('model error');
+
+viz_ktensor(bestmodel, ...
+    'Plottype', {'bar', 'line', 'scatter'}, ...
+    'Modetitles', {'neurons', 'time', 'trials'})
+set(gcf, 'Name', ['best fit w err ' num2str(besterr)])
+text(0.05,0.05,['lambdas ' num2str(bestmodel.lambda')])
+
+temp=bestmodel.U{1};
+if size(temp,2)==3
+    figure(); scatter(temp(:,2),temp(:,3));
+    [R,p]=corrcoef(temp(:,2),temp(:,3))
+    figure(); scatter3(temp(:,1),temp(:,2),temp(:,3));
+    xlabel('cue'); ylabel('TC2'); zlabel('TC3');
+elseif size(temp,2)==2
+    figure(); scatter(temp(:,1),temp(:,2));
+    [R,p]=corrcoef(temp(:,1),temp(:,2))
+end
 
 end
 
@@ -182,7 +300,7 @@ end
 
 end
 
-function data=smoothData(data,whichdim)
+function data=smoothData(data,whichdim,gaussBin)
 
 if whichdim==1
     s=[1 2 3];
@@ -198,7 +316,7 @@ data=permute(data,s);
 origdataorder=origdataorder(s);
 for i=1:size(data,2)
     for j=1:size(data,3)
-        data(:,i,j)=smoothdata(data(:,i,j),'gaussian',3);
+        data(:,i,j)=smoothdata(data(:,i,j),'gaussian',gaussBin);
     end
 end
 [~,si]=sort(origdataorder);
@@ -249,18 +367,47 @@ data(isinf(data))=mean(data(isfinite(data)),'all');
 
 end
 
-function data=normalizeData(data,whichdim)
+function data=normalizeData(data,whichdim,bywhat)
 
-if whichdim==1
-    sz=[size(data,1) 1 1];
-elseif whichdim==2
-    sz=[1 size(data,2) 1];
-elseif whichdim==3
-    sz=[1 1 size(data,3)];
+if length(whichdim)>1
+    % expand along dimension whichdim(2)
+    % then max normalize along dimension whichdim(1)
+    ed=flatten(data,'expand',[whichdim(2) whichdim(1)]);
+    switch bywhat
+        case 'max'
+            ma=max(ed,[],whichdim(1),'omitnan');
+        case 'sd'
+            ma=std(ed,0,whichdim(1),'omitnan');
+    end
+    d=[1 2 3]; missingdim=d(~ismember(d,whichdim));
+    if missingdim==1
+        sz=[1 size(data,2) size(data,3)];
+    elseif missingdim==2
+        sz=[size(data,1) 1 size(data,3)];
+    elseif missingdim==3
+        sz=[size(data,1) size(data,2) 1];
+    else
+        error('principaledCA.m works only for 3D data matrices');
+    end
+    data=data./repmat(ma,sz);
 else
-    error('principaledCA.m works only for 3D data matrices');
+    if whichdim==1
+        sz=[size(data,1) 1 1];
+    elseif whichdim==2
+        sz=[1 size(data,2) 1];
+    elseif whichdim==3
+        sz=[1 1 size(data,3)];
+    else
+        error('principaledCA.m works only for 3D data matrices');
+    end
+    switch bywhat
+        case 'max'
+           ma=max(data,[],whichdim,'omitnan');
+        case 'sd'
+           ma=std(data,0,whichdim,'omitnan');
+    end
+    data=data./repmat(ma,sz);
 end
-data=data./repmat(max(data,[],whichdim,'omitnan'),sz);
 
 end
 
@@ -283,8 +430,8 @@ for i=1:plotTo
     text(1,coeff(1,i),num2str(latent(i)));
 end
 
-figure(); scatter3(score(:,1),score(:,2),score(:,4));
-xlabel('Proj1'); ylabel('Proj2'); zlabel('Proj4');
+figure(); scatter3(score(:,1),score(:,2),score(:,3));
+xlabel('Proj1'); ylabel('Proj2'); zlabel('Proj3');
 
 end
 
