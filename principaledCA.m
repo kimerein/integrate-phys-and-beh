@@ -37,14 +37,19 @@ plotPCA(flatData',plotN);
 % allconditions_cpmodel=plotTCA(noNansOrInfs(data),10,R_guess);
 R_guess=4; % guess matrix rank
 allconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[2:5])),10,R_guess);
-allcell_PCs=studyCPmodel(allconditions_cpmodel);
+[allcell_PCs,allcell_archetypeCells,dimOrdering]=studyCPmodel(allconditions_cpmodel);
 % get cue responses
 [~,cuescores]=plotPCA(data(:,:,1),4);
-cueweights=cuescores(:,1);
 % cueweights=ones(size(data,1),1);
-projectDirectionOntoCPmodel(cueweights,allconditions_cpmodel,allcell_PCs); 
+cuePC1_archetypeCells=projectDirectionOntoCPmodel(cuescores(:,1),allconditions_cpmodel,allcell_PCs); 
 % cueweights should be a vector, same length as units, with each unit's
 % degree of cue responsiveness (or loading to cue factor)
+cuePC2_archetypeCells=projectDirectionOntoCPmodel(cuescores(:,2),allconditions_cpmodel,allcell_PCs); 
+tits={'cueSuccGrp1','cueFailGrp1','uncueSuccGrp1','uncueFailGrp1',...
+      'cueSuccGrp2','cueFailGrp2','uncueSuccGrp2','uncueFailGrp2',...
+      'cueSuccGrp3','cueFailGrp3','uncueSuccGrp3','uncueFailGrp3',...
+      'cueSuccGrp4','cueFailGrp4','uncueSuccGrp4','uncueFailGrp4'};
+plotArchetypeCells(cat(4,allcell_archetypeCells,cuePC1_archetypeCells,cuePC2_archetypeCells),{'all','cuePC1','cuePC2'},tits);
 % uncuedconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[4:5])),10,R_guess);
 
 % just timepoints after outcome
@@ -57,7 +62,31 @@ projectDirectionOntoCPmodel(cueweights,allconditions_cpmodel,allcell_PCs);
 
 end
 
-function projectDirectionOntoCPmodel(cueweights,allconditions_cpmodel,allcell_PCs)
+function plotArchetypeCells(acells,leg1,tits)
+
+% expects dimensions of acells to be 
+% temporal factors x trial factors x unit loadings PCs x cell groups
+% dimension 4 is cell groups
+
+figure(); set(gcf, 'Name', ['Sum of weighted tfs comparing cell group archetypes']);
+cmap=colormap('jet');
+colororder(cmap(1:floor((size(cmap,1)-1)/(size(acells,4))):size(cmap,1),:));
+k=1;
+for i=1:size(acells,3)
+    for j=1:size(acells,2)
+        subplot(size(acells,3),size(acells,2),k);
+        plot(reshape(acells(:,j,i,:),size(acells,1),size(acells,4)));
+        if k==1
+            legend(leg1);
+        end
+        title(tits{i,j});
+        k=k+1;
+    end
+end
+
+end
+
+function [TFsForUnitsAndTrialTypes,dimOrdering]=projectDirectionOntoCPmodel(cueweights,allconditions_cpmodel,allcell_PCs)
 
 unitweights=allconditions_cpmodel.U{1}; tf=allconditions_cpmodel.U{2}; trialfactors=allconditions_cpmodel.U{3};
 
@@ -65,12 +94,13 @@ unitweights=allconditions_cpmodel.U{1}; tf=allconditions_cpmodel.U{2}; trialfact
 % from PCA of all neuron factors
 inputToPCspace=repmat(cueweights,1,size(unitweights,2)).*unitweights;
 newscore=(inputToPCspace-repmat(allcell_PCs.mu,size(allcell_PCs.score,1),1))*allcell_PCs.coeff;
-figure(); scatter3(newscore(:,1),newscore(:,2),newscore(:,3)); title('cueweights-transformed PC space');
+figure(); scatter3(newscore(:,1),newscore(:,2),newscore(:,3)); set(gcf, 'Name', 'cueweights-transformed PC space');
 
 % then do new PCA to get directions describing cue neuron responses
 [pcaout.coeff,pcaout.score,pcaout.latent,pcaout.tsquared,pcaout.explained,pcaout.mu]=plotPCA(repmat(cueweights,1,size(unitweights,2)).*unitweights,size(unitweights,2));
 coeff=pcaout.coeff;
-figure(); title(['Sum of weighted temporal factors describing unit PCA -- CUE WEIGHTS']);
+figure(); set(gcf, 'Name', ['Sum of weighted temporal factors describing unit PCA -- CUE WEIGHTS']);
+colororder([0 204 0; 255 153 153; 0 102 0; 255 0 127]./255);
 for i=1:size(coeff,2)
     weightedTFforUnit=zeros(size(tf(:,1)));
     for j=1:size(tf,2)
@@ -80,17 +110,18 @@ for i=1:size(coeff,2)
 end
 
 % for each trial type, get how archetypal neuron responses expected to change
-archetypal_neuron_by_neuron(coeff,tf,trialfactors,allconditions_cpmodel);
+[TFsForUnitsAndTrialTypes,dimOrdering]=archetypal_neuron_by_neuron(coeff,tf,trialfactors,allconditions_cpmodel);
 
 end
 
-function pcaout=studyCPmodel(allconditions_cpmodel)
+function [pcaout,TFsForUnitsAndTrialTypes,dimOrdering]=studyCPmodel(allconditions_cpmodel)
 
 % pca unit loadings and reconstruct top unit responses
 unitweights=allconditions_cpmodel.U{1}; tf=allconditions_cpmodel.U{2};
 [pcaout.coeff,pcaout.score,pcaout.latent,pcaout.tsquared,pcaout.explained,pcaout.mu]=plotPCA(unitweights,size(unitweights,2));
 coeff=pcaout.coeff;
-figure(); title(['Sum of weighted temporal factors describing unit PCA']);
+figure(); set(gcf, 'Name', ['Sum of weighted temporal factors describing unit PCA']);
+colororder([0 204 0; 255 153 153; 0 102 0; 255 0 127]./255);
 for i=1:size(coeff,2)
     weightedTFforUnit=zeros(size(tf(:,1)));
     for j=1:size(tf,2)
@@ -101,7 +132,8 @@ end
 
 % for each trial type, get average temporal factor
 trialfactors=allconditions_cpmodel.U{3};
-figure(); title(['Sum of weighted temporal factors describing each trial type averaged across neurons']);
+figure(); set(gcf, 'Name', ['Sum of weighted temporal factors describing each trial type averaged across neurons']);
+colororder([0 204 0; 255 153 153; 0 102 0; 255 0 127]./255);
 for i=1:size(trialfactors,1)
     weightedTFforTrialtype=zeros(size(tf(:,1)));
     for j=1:size(tf,2)
@@ -111,13 +143,14 @@ for i=1:size(trialfactors,1)
 end
  
 % for each trial type, get how archetypal neuron responses expected to change
-archetypal_neuron_by_neuron(coeff,tf,trialfactors,allconditions_cpmodel);
+[TFsForUnitsAndTrialTypes,dimOrdering]=archetypal_neuron_by_neuron(coeff,tf,trialfactors,allconditions_cpmodel);
 
 end
 
-function archetypal_neuron_by_neuron(coeff,tf,trialfactors,allconditions_cpmodel)
+function [TFsForUnitsAndTrialTypes,dimOrdering]=archetypal_neuron_by_neuron(coeff,tf,trialfactors,allconditions_cpmodel)
 
 TFsForUnitsAndTrialTypes=nan(length(tf(:,1)),size(trialfactors,1),size(coeff,2));
+dimOrdering='temporal factors x trial factors x unit loadings PCs';
 for k=1:size(trialfactors,1)
     for i=1:size(coeff,2)
         weightedTFforUnit=zeros(size(tf(:,1)));
@@ -127,7 +160,8 @@ for k=1:size(trialfactors,1)
         TFsForUnitsAndTrialTypes(:,k,i)=weightedTFforUnit; 
     end
 end
-figure(); title(['Sum of weighted temporal factors describing each trial type archetypal neuron by neuron']);
+figure(); set(gcf, 'Name', ['Sum of weighted temporal factors describing each trial type archetypal neuron by neuron']);
+colororder([0 204 0; 255 153 153; 0 102 0; 255 0 127]./255);
 for i=1:size(coeff,2)
     subplot(size(coeff,2),1,i);
     plot(reshape(TFsForUnitsAndTrialTypes(:,:,i),length(tf(:,1)),size(trialfactors,1)));
