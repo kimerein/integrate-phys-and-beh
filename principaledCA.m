@@ -9,7 +9,7 @@ end
 % Normalize each unit's PSTH, don't min-subtract here bcz assume 0 is 0
 data=normalizeData(data,[2 3],'sd'); % last argument either 'sd' or 'max'
 % data=ZscoreData(data,[2 3]);
-% data=smoothData(data,2,3);
+% data=smoothData(data,2,3); % last arg is gaussian smooth bin
 
 % Flatten
 flatData=flatten(data,'expand',[3 1]); % for temporal factors
@@ -37,14 +37,8 @@ plotPCA(flatData',plotN);
 % allconditions_cpmodel=plotTCA(noNansOrInfs(data),10,R_guess);
 R_guess=4; % guess matrix rank
 allconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[2:5])),10,R_guess);
-% successes=flatten(data(:,:,1+[1 3]),'mean',3); failures=flatten(data(:,:,1+[2 4]),'mean',3);
-% da=cat(3,successes,failures);
-% successvfailure_cpmodel=plotTCA(noNansOrInfs(da),10,2); % converges w 2 factors, if data Zscored
-% cued=flatten(data(:,:,1+[1 2]),'mean',3); uncued=flatten(data(:,:,1+[3 4]),'mean',3);
-% da=cat(3,cued,uncued);
-% cuevuncue_cpmodel=plotTCA(noNansOrInfs(da),10,4);
-% plotTCA(noNansOrInfs(smoothData(data,2,10)),10,2);
-% plotTCA(noNansOrInfs(data(:,:,[3:4])),10,2); % actually converges
+studyCPmodel(allconditions_cpmodel);
+% uncuedconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[4:5])),10,R_guess);
 
 % just timepoints after outcome
 % X=flatten(data(:,50:end,2:5),'mean',2)'; X=noNansOrInfs(X);
@@ -53,6 +47,37 @@ allconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[2:5])),10,R_guess);
 % figure(); imagesc(S(:,1:10));
 % figure(); imagesc(V(1:4,:)');
 % figure(); imagesc(V(:,1:4));
+
+end
+
+function studyCPmodel(allconditions_cpmodel)
+
+% pca unit loadings and reconstruct top unit responses
+unitweights=allconditions_cpmodel.U{1}; tf=allconditions_cpmodel.U{2};
+[coeff,score,latent,tsquared,explained,mu]=plotPCA(unitweights,size(unitweights,2));
+figure(); title(['Sum of weighted temporal factors describing unit PCA']);
+for i=1:size(coeff,2)
+    weightedTFforUnit=zeros(size(tf(:,1)));
+    for j=1:size(tf,2)
+        weightedTFforUnit=weightedTFforUnit+coeff(j,i)*tf(:,j)*allconditions_cpmodel.lambda(j);
+    end
+    plot(weightedTFforUnit); hold all;  
+end
+
+% for each trial type, get average temporal factor
+trialfactors=allconditions_cpmodel.U{3};
+figure(); title(['Sum of weighted temporal factors describing each trial type']);
+for i=1:size(trialfactors,1)
+    weightedTFforTrialtype=zeros(size(tf(:,1)));
+    for j=1:size(tf,2)
+        weightedTFforTrialtype=weightedTFforTrialtype+trialfactors(i,j)*tf(:,j)*allconditions_cpmodel.lambda(j);
+    end
+    plot(weightedTFforTrialtype); hold all; 
+end
+ 
+
+% for each trial type, get how archetypal neuron response expected to change
+
 
 end
 
@@ -147,16 +172,8 @@ viz_ktensor(bestmodel, ...
 set(gcf, 'Name', ['best fit w err ' num2str(besterr)])
 text(0.05,0.05,['lambdas ' num2str(bestmodel.lambda')])
 
-temp=bestmodel.U{1};
-if size(temp,2)==3
-    figure(); scatter(temp(:,2),temp(:,3));
-    [R,p]=corrcoef(temp(:,2),temp(:,3))
-    figure(); scatter3(temp(:,1),temp(:,2),temp(:,3));
-    xlabel('cue'); ylabel('TC2'); zlabel('TC3');
-elseif size(temp,2)==2
-    figure(); scatter(temp(:,1),temp(:,2));
-    [R,p]=corrcoef(temp(:,1),temp(:,2))
-end
+% temp=bestmodel.U{1};
+% tsnetemp=tsne(temp,'Algorithm','exact','Distance','chebychev'); figure(); scatter(tsnetemp(:,1),tsnetemp(:,2));
 
 end
 
@@ -411,7 +428,7 @@ end
 
 end
 
-function plotPCA(A,plotN)
+function [coeff,score,latent,tsquared,explained,mu]=plotPCA(A,plotN)
 
 [coeff,score,latent,tsquared,explained,mu]=pca(A);
 % plot

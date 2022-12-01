@@ -484,7 +484,8 @@ a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\cued_succe
 a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\cued_failure.mat'); cued_failure_Response=a.Response; 
 a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\uncued_success.mat'); uncued_success_Response=a.Response; 
 a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\uncued_failure.mat'); uncued_failure_Response=a.Response;
-out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',cue_Response,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response);
+trial_n_cutoff=0;
+out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',excludeTooFewTrials(cue_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false));
 cue_Response=out.Response1; cued_success_Response=out.Response2; cued_failure_Response=out.Response3; uncued_success_Response=out.Response4; uncued_failure_Response=out.Response5;
 
 takePointsBeforeZero=5; %15;
