@@ -66,7 +66,7 @@ end
 
 % for each trial type, get average temporal factor
 trialfactors=allconditions_cpmodel.U{3};
-figure(); title(['Sum of weighted temporal factors describing each trial type']);
+figure(); title(['Sum of weighted temporal factors describing each trial type averaged across neurons']);
 for i=1:size(trialfactors,1)
     weightedTFforTrialtype=zeros(size(tf(:,1)));
     for j=1:size(tf,2)
@@ -75,9 +75,22 @@ for i=1:size(trialfactors,1)
     plot(weightedTFforTrialtype); hold all; 
 end
  
-
-% for each trial type, get how archetypal neuron response expected to change
-
+% for each trial type, get how archetypal neuron responses expected to change
+TFsForUnitsAndTrialTypes=nan(length(tf(:,1)),size(trialfactors,1),size(coeff,2));
+for k=1:size(trialfactors,1)
+    for i=1:size(coeff,2)
+        weightedTFforUnit=zeros(size(tf(:,1)));
+        for j=1:size(tf,2)
+            weightedTFforUnit=weightedTFforUnit+coeff(j,i)*tf(:,j)*trialfactors(k,j)*allconditions_cpmodel.lambda(j);
+        end
+        TFsForUnitsAndTrialTypes(:,k,i)=weightedTFforUnit; 
+    end
+end
+figure(); title(['Sum of weighted temporal factors describing each trial type archetypal neuron by neuron']);
+for i=1:size(coeff,2)
+    subplot(size(coeff,2),1,i);
+    plot(reshape(TFsForUnitsAndTrialTypes(:,:,i),length(tf(:,1)),size(trialfactors,1)));
+end
 
 end
 

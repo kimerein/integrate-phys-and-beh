@@ -55,29 +55,41 @@ function studyCPmodel(allconditions_cpmodel)
 % pca unit loadings and reconstruct top unit responses
 unitweights=allconditions_cpmodel.U{1}; tf=allconditions_cpmodel.U{2};
 [coeff,score,latent,tsquared,explained,mu]=plotPCA(unitweights,size(unitweights,2));
+figure(); title(['Sum of weighted temporal factors describing unit PCA']);
 for i=1:size(coeff,2)
-    figure();
     weightedTFforUnit=zeros(size(tf(:,1)));
     for j=1:size(tf,2)
         weightedTFforUnit=weightedTFforUnit+coeff(j,i)*tf(:,j)*allconditions_cpmodel.lambda(j);
     end
-    plot(weightedTFforUnit); title(['Sum of weighted temporal factors describing unit PCA ' num2str(i)]);
+    plot(weightedTFforUnit); hold all;  
 end
 
 % for each trial type, get average temporal factor
 trialfactors=allconditions_cpmodel.U{3};
+figure(); title(['Sum of weighted temporal factors describing each trial type']);
 for i=1:size(trialfactors,1)
-    figure();
     weightedTFforTrialtype=zeros(size(tf(:,1)));
     for j=1:size(tf,2)
         weightedTFforTrialtype=weightedTFforTrialtype+trialfactors(i,j)*tf(:,j)*allconditions_cpmodel.lambda(j);
     end
-    plot(weightedTFforTrialtype); title(['Sum of weighted temporal factors describing each trial type ' num2str(i)]);
+    plot(weightedTFforTrialtype); hold all; 
 end
  
-
-% for each trial type, get how archetypal neuron response expected to change
-
+% for each trial type, get how archetypal neuron responses expected to change
+TFsForUnitsAndTrialTypes=nan(length(tf(:,1)),size(trialfactors,1),size(coeff,2));
+for k=1:size(trialfactors,1)
+    for i=1:size(coeff,2)
+        weightedTFforUnit=zeros(size(tf(:,1)));
+        for j=1:size(tf,2)
+            weightedTFforUnit=weightedTFforUnit+coeff(j,i)*tf(:,j)*trialfactors(k,j)*allconditions_cpmodel.lambda(j);
+        end
+        TFsForUnitsAndTrialTypes(:,k,i)=weightedTFforUnit; 
+    end
+end
+figure();
+for i=1:size(coeff,2)
+    subplot(size(coeff,2),1,i);
+    plot(TFsForUnitsAndTrialTypes(:,:))
 
 end
 
