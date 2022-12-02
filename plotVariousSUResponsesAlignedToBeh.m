@@ -903,13 +903,13 @@ function out=meanAcrossUnits(activityD1tagged,downSampFac)
 
 rmOutliers=false;
 if rmOutliers==true
-    [activityD1tagged.unitbyunit_y,Tfrm]=rmoutliers(activityD1tagged.unitbyunit_y,"mean","ThresholdFactor",5);
+    [activityD1tagged.unitbyunit_y,Tfrm]=rmoutliers(activityD1tagged.unitbyunit_y,"mean","ThresholdFactor",15);
     disp(['removed ' num2str(sum(Tfrm)) ' outliers']);
 end
 temp=activityD1tagged.unitbyunit_y;
 for i=1:size(temp,1)
-    temp(i,:)=smoothdata(temp(i,:),'gaussian',2);
-%     temp(i,:)=smoothdata(temp(i,:),'gaussian',10);
+%     temp(i,:)=smoothdata(temp(i,:),'gaussian',2);
+    temp(i,:)=smoothdata(temp(i,:),'gaussian',10);
 %     temp(i,:)=smoothdata(temp(i,:),'gaussian',7);
 end
 activityD1tagged.unitbyunit_y=temp;
@@ -935,6 +935,19 @@ if size(activityD1tagged.unitbyunit_y,1)>100
     % skip unit by unit plot because too crowded
 else
     figure(); plot(timesD1,activityD1tagged.unitbyunit_y');
+    title('Align companion at time=0');
+    xlabel('Time (sec)');
+    ylabel('Firing rate');
+
+    figure();                          
+    unitoffset=0;
+    for i=1:size(activityD1tagged.unitbyunit_y,1)
+        plot(timesD1,activityD1tagged.unitbyunit_y(i,:)+unitoffset,'Color','k'); hold on;
+        if isnan(max(activityD1tagged.unitbyunit_y(i,:),[],'all','omitnan'))
+            continue
+        end
+        unitoffset=unitoffset+max(activityD1tagged.unitbyunit_y(i,:),[],'all','omitnan');
+    end
     title('Align companion at time=0');
     xlabel('Time (sec)');
     ylabel('Firing rate');
