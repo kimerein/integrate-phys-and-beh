@@ -1,4 +1,4 @@
-function [cueCD,uncueCD,lateUncueCD,unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,excluded,ns,D1orD2taggingExpt,firstValNtimesBaseVar,optoFRoverBaseline,indsForAnalysisPerSess,fromWhichSess,fromWhichUnit,fromWhichSess_forTrials,fromWhichTrial,isEventInThisTrial]=alignToCompanion(datadir,getCDs,cueCD,uncueCD,lateUncueCD,onlyTakeTheseUnits,settings,indsForAnalysisPerSess)
+function [cueCD,uncueCD,lateUncueCD,unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,excluded,ns,D1orD2taggingExpt,firstValNtimesBaseVar,optoFRoverBaseline,indsForAnalysisPerSess,fromWhichSess,fromWhichUnit,fromWhichSess_forTrials,fromWhichTrial,isEventInThisTrial,D1taggedCells,A2ataggedCells]=alignToCompanion(datadir,getCDs,cueCD,uncueCD,lateUncueCD,onlyTakeTheseUnits,settings,indsForAnalysisPerSess)
 
 firstValNtimesBaseVar=[]; optoFRoverBaseline=[];
 
@@ -43,6 +43,8 @@ fromWhichSess_forTrials=nan(maxUnitsPerSess*length(dd),1);
 fromWhichUnit=nan(maxUnitsPerSess*length(dd),1);
 fromWhichTrial=nan(maxUnitsPerSess*length(dd),1);
 isEventInThisTrial=nan(maxUnitsPerSess*length(dd),1);
+D1taggedCells=zeros(maxUnitsPerSess*length(dd),1);
+A2ataggedCells=zeros(maxUnitsPerSess*length(dd),1);
 excluded_count=1;
 units_count=1;
 trials_count=1;
@@ -62,8 +64,10 @@ for j=1:length(dd)
         
         if ~isempty(regexp(ls(i).name, 'D1tagged'))
             D1orD2taggingExpt(j)=1;
+            D1taggedCells(excluded_count)=1;
         elseif ~isempty(regexp(ls(i).name, 'A2atagged'))
             D1orD2taggingExpt(j)=2;
+            A2ataggedCells(excluded_count)=1;
         end
 
         if ~isempty(onlyTakeTheseUnits)
@@ -229,6 +233,8 @@ trials_count=trials_count-lastsetoftrialsn;
 ns=ns(1:units_count);
 fromWhichSess=fromWhichSess(1:units_count);
 excluded=excluded(1:excluded_count);
+D1taggedCells=D1taggedCells(1:excluded_count);
+A2ataggedCells=A2ataggedCells(1:excluded_count);
 fromWhichUnit=fromWhichUnit(1:trials_count);
 fromWhichTrial=fromWhichTrial(1:trials_count);
 isEventInThisTrial=isEventInThisTrial(1:trials_count);

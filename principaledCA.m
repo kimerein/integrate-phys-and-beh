@@ -33,8 +33,6 @@ plotPCA(flatData',plotN);
 % projectOntoEigSpace(flatData,2,eigVec_2(:,1:plotN),sorted_eigVal_2(1:plotN));
 
 % TCA
-% R_guess=5; % guess matrix rank
-% allconditions_cpmodel=plotTCA(noNansOrInfs(data),10,R_guess);
 R_guess=4; % guess matrix rank
 allconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[2:5])),10,R_guess);
 [allcell_PCs,allcell_archetypeCells,dimOrdering]=studyCPmodel(allconditions_cpmodel);
@@ -50,7 +48,22 @@ tits={'cueSuccGrp1','cueFailGrp1','uncueSuccGrp1','uncueFailGrp1';...
       'cueSuccGrp3','cueFailGrp3','uncueSuccGrp3','uncueFailGrp3';...
       'cueSuccGrp4','cueFailGrp4','uncueSuccGrp4','uncueFailGrp4'};
 plotArchetypeCells(cat(4,allcell_archetypeCells,cuePC1_archetypeCells,cuePC2_archetypeCells),{'all','cuePC1','cuePC2'},tits);
-% uncuedconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[4:5])),10,R_guess);
+% study neurons x trial type factors -- do cells group?
+
+% higher rank decomposition to study cue coding after outcome
+R_guess=8; % rank 8 grabs the cue v uncue specific components
+allconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[2:5])),10,R_guess);
+[allcell_PCs,allcell_archetypeCells,dimOrdering]=studyCPmodel(allconditions_cpmodel);
+contextscores=mean(mean(data(:,1:5,2:3),3,'omitnan'),2,'omitnan')-mean(mean(data(:,1:5,4:5),3,'omitnan'),2,'omitnan');
+projectDirectionOntoCPmodel(cuescores(:,2),allconditions_cpmodel,allcell_PCs); % cue direction
+projectDirectionOntoCPmodel(contextscores,allconditions_cpmodel,allcell_PCs); % context direction
+
+% uncued trying for cell type classification
+R_guess=6; % guess matrix rank
+uncuedconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[2:5])),10,R_guess);
+us=uncuedconditions_cpmodel.U{1};
+figure(); scatter(mean(us(:,2:3),2),mean(us(:,4:5),2));
+[uncuedconditions_PCs,uncuedconditions_archetypeCells]=studyCPmodel(uncuedconditions_cpmodel);
 
 % just timepoints after outcome
 % X=flatten(data(:,50:end,2:5),'mean',2)'; X=noNansOrInfs(X);
@@ -59,6 +72,13 @@ plotArchetypeCells(cat(4,allcell_archetypeCells,cuePC1_archetypeCells,cuePC2_arc
 % figure(); imagesc(S(:,1:10));
 % figure(); imagesc(V(1:4,:)');
 % figure(); imagesc(V(:,1:4));
+
+end
+
+function studyNeuronsByTrialFactors(cpmodel)
+
+unitweights=cpmodel.U{1}; tf=cpmodel.U{2}; trialfactors=cpmodel.U{3};
+
 
 end
 
@@ -79,7 +99,7 @@ for i=1:size(acells,3)
         if k==1
             legend(leg1);
         end
-        title(tits{i,j});
+%         title(tits{i,j});
         k=k+1;
     end
 end

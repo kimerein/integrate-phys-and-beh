@@ -307,7 +307,7 @@ end
 
 %% 4. Make figures -- about 6 min to load 84 sessions of unit data
 % choose type of response to plot
-response_to_plot='cued_miss'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+response_to_plot='cue_noReach'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 
 % doUnitTest.m is used to test whether to include unit in this plot
 % will include unit if unitdets match the following
@@ -484,9 +484,12 @@ a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\cued_succe
 a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\cued_failure.mat'); cued_failure_Response=a.Response; 
 a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\uncued_success.mat'); uncued_success_Response=a.Response; 
 a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\uncued_failure.mat'); uncued_failure_Response=a.Response;
+a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\cue_noReach.mat'); cue_noReach_Response=a.Response;
 trial_n_cutoff=0;
 out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',excludeTooFewTrials(cue_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false));
 cue_Response=out.Response1; cued_success_Response=out.Response2; cued_failure_Response=out.Response3; uncued_success_Response=out.Response4; uncued_failure_Response=out.Response5;
+% out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',excludeTooFewTrials(cue_noReach_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false));
+% cue_noReach_Response=out.Response1;
 
 takePointsBeforeZero=5; %15;
 takePointsAfterZero=70;
@@ -494,6 +497,8 @@ dataMatrix=setUpDataMatrix(cue_Response,cued_success_Response,cued_failure_Respo
 dataMatrix(dataMatrix<0)=0; % no firing rates below 0
 % take just outcome alignments
 % dataMatrix=dataMatrix(:,:,[2:5]);
+% dataMatrix_cueNoReach=setUpDataMatrix(cue_noReach_Response,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,takePointsBeforeZero,takePointsAfterZero);
+% dataMatrix_cueNoReach(dataMatrix_cueNoReach<0)=0; % no firing rates below 0
 
 % PCA, CCA, etc.
 % CCA: Find orthogonal dimensions of max covariance between X=[] and Y=[]
