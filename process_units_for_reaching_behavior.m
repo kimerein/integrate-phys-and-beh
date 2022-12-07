@@ -307,7 +307,7 @@ end
 
 %% 4. Make figures -- about 6 min to load 84 sessions of unit data
 % choose type of response to plot
-response_to_plot='cue_noReach'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+response_to_plot='uncued_reach'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 
 % doUnitTest.m is used to test whether to include unit in this plot
 % will include unit if unitdets match the following
@@ -436,18 +436,18 @@ plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',excludeTooFewTria
 plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false),'scatterInTimeWindows',[-3 -0.1],[0.5 4],'ColorLabel',excludeTooFewTrials(cue_Response,trial_n_cutoff,false),[-1 -0.3],[-0.3 1]);
 
 %% LDA analysis
-whichSess=2:40;
+whichSess=42:48;
 
 % downSampBy=25; % downsamp 60 ms bins by this much
 % takeNPointsAfterEvent=3;
 
-downSampBy=2; % downsamp 60 ms bins by this much
-takeNPointsAfterEvent=16;
+downSampBy=4; % downsamp 60 ms bins by this much
+takeNPointsAfterEvent=15;
 takeNPointsBeforeEvent=0;
 
 response_to_plot1='cued_success';
 response_to_plot2='uncued_success';
-LDA_analysis(whichSess,downSampBy,takeNPointsAfterEvent,takeNPointsBeforeEvent,response_to_plot1,response_to_plot2,dd);
+LDA_analysis(whichSess,downSampBy,takeNPointsAfterEvent,takeNPointsBeforeEvent,response_to_plot1,response_to_plot2,dd,'SVM');
 
 %% Get significant responses 
 % Get significance from trial by trial

@@ -12,4 +12,4 @@ settings.padsize=1000;
 settings.testForAlignment=false;
 settings.unitbaseline=300; %150;
 settings.maxUnitsPerSess=300; % can't get more than this many units per session
-settings.keepAllSingleTrials=false;
+settings.keepAllSingleTrials=true;

@@ -944,10 +944,14 @@ figure();
 unitoffset=0;
 for i=1:size(activityD1tagged.unitbyunit_y,1)
     plot(timesD1,activityD1tagged.unitbyunit_y(i,:)+unitoffset,'Color','k'); hold on;
-    if isnan(max(activityD1tagged.unitbyunit_y(i,1:200),[],'all','omitnan'))
+    uptooo=200; 
+    if uptooo>size(activityD1tagged.unitbyunit_y,2)
+        uptooo=size(activityD1tagged.unitbyunit_y,2);
+    end
+    if isnan(max(activityD1tagged.unitbyunit_y(i,1:uptooo),[],'all','omitnan'))
         continue
     end
-    unitoffset=unitoffset+max(activityD1tagged.unitbyunit_y(i,1:200),[],'all','omitnan');
+    unitoffset=unitoffset+max(activityD1tagged.unitbyunit_y(i,1:uptooo),[],'all','omitnan');
 end
 title('Align companion at time=0');
 xlabel('Time (sec)');
