@@ -1,4 +1,4 @@
-function [cueCD,uncueCD,lateUncueCD,unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,excluded,ns,D1orD2taggingExpt,firstValNtimesBaseVar,optoFRoverBaseline,indsForAnalysisPerSess,fromWhichSess,fromWhichUnit,fromWhichSess_forTrials,fromWhichTrial,isEventInThisTrial]=alignToCompanion(datadir,getCDs,cueCD,uncueCD,lateUncueCD,onlyTakeTheseUnits,settings,indsForAnalysisPerSess)
+function [cueCD,uncueCD,lateUncueCD,unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,excluded,ns,D1orD2taggingExpt,firstValNtimesBaseVar,optoFRoverBaseline,indsForAnalysisPerSess,fromWhichSess,fromWhichUnit,fromWhichSess_forTrials,fromWhichTrial,isEventInThisTrial,D1taggedCells,A2ataggedCells]=alignToCompanion(datadir,getCDs,cueCD,uncueCD,lateUncueCD,onlyTakeTheseUnits,settings,indsForAnalysisPerSess)
 
 firstValNtimesBaseVar=[]; optoFRoverBaseline=[];
 
@@ -13,6 +13,10 @@ testForAlignment=settings.testForAlignment;
 unitbaseline=settings.unitbaseline;
 % beforeOptoBaseline=settings.beforeOptoBaseline;
 keepAllSingleTrials=settings.keepAllSingleTrials;
+keepAllTypesOfBehaviorEvents=settings.keepAllTypesOfBehaviorEvents;
+if keepAllTypesOfBehaviorEvents==true && keepAllSingleTrials==false
+    error('alignToCompanion.m can only keep all behavior events, i.e., keepAllTypesOfBehaviorEvents==true, if keepAllSingleTrials==true in settingsForStriatumUnitPlots.m');
+end
 
 % excludeHigherFR=false;
 % cutAtTime=3; % stop plotting this many seconds after max of alignment companion
@@ -43,6 +47,7 @@ fromWhichSess_forTrials=nan(maxUnitsPerSess*length(dd),1);
 fromWhichUnit=nan(maxUnitsPerSess*length(dd),1);
 fromWhichTrial=nan(maxUnitsPerSess*length(dd),1);
 isEventInThisTrial=nan(maxUnitsPerSess*length(dd),1);
+allBehEvents=nan(maxUnitsPerSess*length(dd),1);
 D1taggedCells=zeros(maxUnitsPerSess*length(dd),1);
 A2ataggedCells=zeros(maxUnitsPerSess*length(dd),1);
 excluded_count=1;
@@ -166,6 +171,9 @@ for j=1:length(dd)
             aligncomp_x(units_count,:)=[nan(1,padsize-ma) a.alignComp.x(1:upTo2-(padsize-ma))];
             aligncomp_y(units_count,:)=[nan(1,padsize-ma) nanmean(a.alignComp.y(:,1:upTo2-(padsize-ma)),1)];
         else
+            if keepAllTypesOfBehaviorEvents==true
+                aligncomp_y(trials_count:trials_count+size(a.dataout.y,1)-1,:)=repmat([nan(1,padsize-ma) nanmean(a.alignComp.y(:,1:upTo2-(padsize-ma)),1)],size(a.dataout.y,1),1);
+            end
             aligncomp_x(trials_count:trials_count+size(a.dataout.y,1)-1,:)=repmat([nan(1,padsize-ma) a.alignComp.x(1:upTo2-(padsize-ma))],size(a.dataout.y,1),1);
             aligncomp_y(trials_count:trials_count+size(a.dataout.y,1)-1,:)=repmat([nan(1,padsize-ma) nanmean(a.alignComp.y(:,1:upTo2-(padsize-ma)),1)],size(a.dataout.y,1),1);
         end
@@ -234,7 +242,7 @@ ns=ns(1:units_count);
 fromWhichSess=fromWhichSess(1:units_count);
 excluded=excluded(1:excluded_count);
 D1taggedCells=D1taggedCells(1:excluded_count);
-A2ataggedCells=A2ataggedC
+A2ataggedCells=A2ataggedCells(1:excluded_count);
 fromWhichUnit=fromWhichUnit(1:trials_count);
 fromWhichTrial=fromWhichTrial(1:trials_count);
 isEventInThisTrial=isEventInThisTrial(1:trials_count);

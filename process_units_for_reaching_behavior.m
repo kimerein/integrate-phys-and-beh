@@ -436,7 +436,7 @@ plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',excludeTooFewTria
 plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false),'scatterInTimeWindows',[-3 -0.1],[0.5 4],'ColorLabel',excludeTooFewTrials(cue_Response,trial_n_cutoff,false),[-1 -0.3],[-0.3 1]);
 
 %% LDA analysis
-whichSess=42:48;
+whichSess=81; % 81 has a fair number of cells
 
 % downSampBy=25; % downsamp 60 ms bins by this much
 % takeNPointsAfterEvent=3;
@@ -448,6 +448,8 @@ takeNPointsBeforeEvent=0;
 response_to_plot1='cued_success';
 response_to_plot2='uncued_success';
 LDA_analysis(whichSess,downSampBy,takeNPointsAfterEvent,takeNPointsBeforeEvent,response_to_plot1,response_to_plot2,dd,'SVM');
+
+%% GLM analysis
 
 %% Get significant responses 
 % Get significance from trial by trial
