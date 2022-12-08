@@ -307,12 +307,14 @@ end
 
 %% 3.5 For Mac, change pointers to files on server
 % /Volumes/Neurobio/MICROSCOPE/Kim/WHISPER recs
-for i=1:length(dd)
-    temp=dd{i};
-    temp=['/Volumes/Neurobio/' temp(4:end)];
-    f=regexp(temp,'\');
-    temp(f)=sep;
-    dd{i}=temp;
+if ismac()
+    for i=1:length(dd)
+        temp=dd{i};
+        temp=['/Volumes/Neurobio/' temp(4:end)];
+        f=regexp(temp,'\');
+        temp(f)=sep;
+        dd{i}=temp;
+    end
 end
 
 %% 4. Make figures -- about 6 min to load 84 sessions of unit data

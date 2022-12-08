@@ -1,4 +1,4 @@
-function GLM_analysis(whichSess,dd)
+function GLM_analysis(whichSess,dd,downSampBy)
 % wrapper for first pass at GLM, calls B's poissModel
 
 if length(whichSess)>1
@@ -32,10 +32,141 @@ ResponseCued.unitbyunit_x=downSampMatrix(ResponseCued.unitbyunit_x,downSampBy);
 ResponseCued.unitbyunit_y=downSampMatrix(ResponseCued.unitbyunit_y,downSampBy);
 ResponseCued=makeUnitsUnique(ResponseCued);
 
-temp=Response.unitbyunit_y; temp(isnan(temp))=0;
-behEvents=zeros(size(temp));
-behEvents(:,50)=1;
-poissModel(temp,0:0.04:(size(temp,2)-1)*0.04,behEvents);
+% get one neuron's activity pattern across all trials
+whichNeuron=1; 
+dataMat=ResponseCued.unitbyunit_y(ResponseCued.fromWhichUnit==whichNeuron,:);
+whichTrialsForThisCell=ResponseCued.fromWhichTrial(ResponseCued.fromWhichUnit==whichNeuron);
+whichSessForThisCell=ResponseCued.fromWhichSess_forTrials(ResponseCued.fromWhichUnit==whichNeuron);
+behEvents=assembleBehEvents(phystbtout,behtbtout,fromwhichday,whichTrialsForThisCell,whichSessForThisCell);
+
+timestep=mode(abs(diff(mean(ResponseCued.unitbyunit_x,1,'omitnan'))));
+do_glm(dataMat,0:timestep:(size(behEvents,2)-1)*timestep,behEvents);
+
+end
+
+function behEvents=assembleBehEvents(phystbtout,behtbtout,fromwhichday,whichTrialsForThisCell,whichSessForThisCell)
+
+behEvents=[];
+f=fieldnames(phystbtout);
+countEvType=1;
+for i=1:length(f)
+    temp=phystbtout.(f{i}); % structure is row by row trials, col by col timepoints
+    % want to concatenate trials where unit present
+    % first take day with this unit
+    % take trials for which this unit present
+    temp=temp(fromwhichday==mode(whichSessForThisCell),:);
+    temp=temp(ismember(1:size(temp,1),whichTrialsForThisCell),:);
+    temp=temp';
+    temp=temp(1:end);
+    if i==1
+        % initialize
+        % concatenate all trials
+        behEvents=nan(length(fieldnames(phystbtout))+length(fieldnames(behtbtout)),length(temp));
+    end 
+    behEvents(countEvType,:)=temp;
+    countEvType=countEvType+1;
+end
+f=fieldnames(behtbtout);
+for i=1:length(f)
+    temp=behtbtout.(f{i}); 
+    temp=temp(fromwhichday==mode(whichSessForThisCell),:);
+    temp=temp(ismember(1:size(temp,1),whichTrialsForThisCell),:);
+    temp=temp';
+    temp=temp(1:end);
+    behEvents(countEvType,:)=temp;
+    countEvType=countEvType+1;
+end
+
+end
+
+function do_glm(dataMatrix,tRange,events)
+
+% each row of events is a different type of behavior event
+neuronFiring=dataMatrix; % rows are neurons, cols are timepoints
+neuronFiring(neuronFiring<0)=0;
+nNeurons=size(dataMatrix,1);
+nEventTypes=size(events,1);
+bins=length(tRange);
+
+% prepare time shift matrix of events for the glm
+maxShifts=100; % how many +/- bins to consider for glm
+shifts=-maxShifts:maxShifts;
+nShifts=length(shifts);
+allEvents=zeros(nEventTypes*length(shifts), bins);
+for counter=1:nShifts
+    e2=circshift(events, shifts(counter), 2);
+    allEvents(nShifts*((1:nEventTypes)-1)+counter, :)=e2;
+end
+
+% setup for doing glms
+testNeuron=1:nNeurons;
+% a small gaussian filter used below to test how good the coefficients are
+
+b = normpdf(shifts/gaussStretch);
+b=b/max(b);
+
+% do glms 
+% we fit the spiking rate but look at the reconstruction of the 
+% underlying time varying rates.  I guess we really model the lambdas, but
+% same thing here
+
+for neuronIndex=testNeuron
+    figure('NumberTitle','off', 'Name', ['neuron ' num2str(neuronIndex)])
+    set(gcf, 'Position', [  99         549        1386         317])
+
+    % run model with time shifted events. This is what we would do
+    mdl=fitglm(allEvents', neuronFiring(neuronIndex,:)', 'linear', 'Link', 'identity'); 
+    % You can add 'Distribution', 'poisson' but I find that I get identical
+    % results and without it, it runs much faster and converges better
+    % Maybe it gets the right answer with a linear link  
+    % because of the smearing and summing across multiple poisson
+    % processes?
+
+    subplot(1, 5, 2)
+    plot(mdl.Coefficients.Estimate(2:end)', 'DisplayName', 'model coeffs')
+    hold on
+    ll=b'*linkStrength(neuronIndex,:);
+    ll=reshape(ll, [1 numel(ll)]);
+    plot(maxShifts-1+(1:length(ll)), ll, 'DisplayName', 'underlying')
+    legend
+    title('shifts')
+
+    % reconstruct the underlying rates, not the spiking!
+    yy=predict(mdl, allEvents');
+
+    subplot(1, 5, 3:5)
+    plot(yy, 'DisplayName','recon rate')
+    hold on
+    plot(neuronFiring(neuronIndex, :), 'DisplayName','underlying')
+    legend
+    title('reconstruction')
+end
+
+end
+
+function Response=makeUnitsUnique(Response)
+
+uSess=unique(Response.fromWhichSess_forTrials);
+sessUOffset=0;
+triOffset=0;
+backupSess=Response.fromWhichSess_forTrials;
+backupUs=Response.fromWhichUnit;
+backupTrials=Response.fromWhichTrial;
+for i=1:length(uSess)
+    currSess=uSess(i);
+    whichUs=unique(Response.fromWhichUnit(backupSess==currSess));
+    for j=1:length(whichUs)
+        currU=whichUs(j);
+        Response.fromWhichUnit(backupSess==currSess & backupUs==currU)=currU+sessUOffset;
+    end
+    currTris=unique(backupTrials(backupSess==currSess));
+    for j=1:length(currTris)
+        currT=currTris(j);
+        Response.fromWhichTrial(backupSess==currSess & backupTrials==currT)=currT+triOffset;
+    end
+    sessUOffset=sessUOffset+max(whichUs,[],'all','omitnan')+1;
+    triOffset=triOffset+max(currTris,[],'all','omitnan')+1;
+end
 
 end
 
@@ -43,8 +174,7 @@ function [phystbtout,behtbtout,fromwhichday]=grabOtherBehaviorEvents(datadir,uni
 
 getEventsFromPhysTbt={'opto','distractor'};
 getEventsFromBehTbt={'all_reachBatch','isFidgeting','success_fromPerchOrWheel',...
-    'drop_fromPerchOrWheel','misses_and_pelletMissing','misses_and_pelletMissing_and_drop',...
-    'success_dislodged','drop_dislodged','isChewing'};
+    'drop_fromPerchOrWheel','misses_and_pelletMissing','misses_and_pelletMissing_and_drop','isChewing'};
 
 if iscell(datadir)
     dd=datadir;
@@ -110,7 +240,7 @@ for j=1:length(dd)
             phystbtout.(getEventsFromPhysTbt{i})=[phystbtout.(getEventsFromPhysTbt{i}); tempinunittimes];
         end
     end
-    fromwhichday=[fromwhichday; j*size(tempinunittimes,1)];
+    fromwhichday=[fromwhichday; j*ones(size(tempinunittimes,1),1)];
 end
 
 end
@@ -225,6 +355,7 @@ end
 [vidnames,si]=sort(vidnames);
 foldnames=foldnames(si);
 
+beh2_tbt=fixMissingVideos(beh2_tbt);
 % for each, load autoReachSettings and fidget
 for i=1:length(vidnames)
     a=load([direc sep vidnames{i} '_autoReachSettings.mat']);
@@ -232,6 +363,38 @@ for i=1:length(vidnames)
     a=load([direc sep vidnames{i} '_fidget.mat']);
     fidget=a.fidget;
     beh2_tbt=addBackFidgets(beh2_tbt,settings,fidget,i);
+end
+
+end
+
+function beh2_tbt=fixMissingVideos(beh2_tbt)
+
+% there was a bug in physiology_triggered_on_reach.m, it seems,
+% where second video not being populated
+% if first and third videos, intervening trials must be second video
+if isfield(beh2_tbt,'from_first_video') && isfield(beh2_tbt,'from_third_video')
+    fromfirst=mean(beh2_tbt.from_first_video,2,'omitnan');
+    fromthird=mean(beh2_tbt.from_third_video,2,'omitnan');
+    if all(beh2_tbt.from_second_video==0,'all')
+        beh2_tbt.from_second_video(~fromfirst & ~fromthird,:)=1;
+        figure();
+        imagesc([beh2_tbt.from_first_video beh2_tbt.from_second_video beh2_tbt.from_third_video]);
+        title('Checking fix for missing values in field from_second_video in GLM_analysis');
+    end
+end
+
+end
+
+function tbt=fixDropOrSuccess(tbt)
+
+% only one drop or success per trial -- take first
+% just sometimes gets stuck at 1, interp failure
+for i=1:size(tbt)
+    temp=tbt(i,:);
+    f=find(temp>0.5,1,'first');
+    tempie=zeros(size(temp));
+    tempie(f)=1;
+    tbt(i,:)=tempie;
 end
 
 end
@@ -250,6 +413,11 @@ end
 end
 
 function out=getEventsOfType(evT,behavior_tbt)
+
+% behavior_tbt.reachBatch_drop_reachStarts=fixDropOrSuccess(behavior_tbt.reachBatch_drop_reachStarts);
+% behavior_tbt.reachBatch_drop_reachStarts_pawOnWheel=fixDropOrSuccess(behavior_tbt.reachBatch_drop_reachStarts_pawOnWheel);
+% behavior_tbt.reachBatch_success_reachStarts=fixDropOrSuccess(behavior_tbt.reachBatch_success_reachStarts);
+% behavior_tbt.reachBatch_success_reachStarts_pawOnWheel=fixDropOrSuccess(behavior_tbt.reachBatch_success_reachStarts_pawOnWheel);
 
 useCombo=false;
 switch evT
@@ -425,16 +593,20 @@ switch evT
         behavior_tbt=findPelletDislodgedAfterSuccess(behavior_tbt,'reachBatch_drop_reachStarts','pelletPresent');
     case 'success_dislodged'
         useReach='combo';
-        behavior_tbt=findPelletDislodgedAfterSuccess(behavior_tbt,'reachBatch_success_reachStarts','pelletPresent');
+        behavior_tbt.temp=behavior_tbt.reachBatch_success_reachStarts+behavior_tbt.reachBatch_success_reachStarts_pawOnWheel;
+        behavior_tbt=findPelletDislodgedAfterSuccess(behavior_tbt,'temp','pelletPresent');
         useCombo=behavior_tbt.pelletDislodgedAfterSuccess;
+        behavior_tbt=rmfield(behavior_tbt,'temp');
     case 'success batch av reach and pellet dislodged'
         useReach='combo';
         behavior_tbt=findPelletDislodgedAvWithSuccess(behavior_tbt,'reachBatch_success_reachStarts','pelletPresent');
         useCombo=behavior_tbt.pelletDislodgedAfterSuccess;
     case 'drop_dislodged'
         useReach='combo';
-        behavior_tbt=findPelletDislodgedAfterSuccess(behavior_tbt,'reachBatch_drop_reachStarts','pelletPresent');
+        behavior_tbt.temp=behavior_tbt.reachBatch_drop_reachStarts+behavior_tbt.reachBatch_drop_reachStarts_pawOnWheel;
+        behavior_tbt=findPelletDislodgedAfterSuccess(behavior_tbt,'temp','pelletPresent');
         useCombo=behavior_tbt.pelletDislodgedAfterSuccess;
+        behavior_tbt=rmfield(behavior_tbt,'temp');
     case 'drop batch av reach and pellet dislodged'
         useReach='combo';
         behavior_tbt=findPelletDislodgedAvWithSuccess(behavior_tbt,'reachBatch_drop_reachStarts','pelletPresent');

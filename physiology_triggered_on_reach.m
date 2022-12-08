@@ -326,16 +326,21 @@ elseif ~isfield(tbt1,'from_third_video') && isfield(tbt1,'from_second_video')
     alltbt.from_first_video=zeros(size(alltbt.(f{1})));
     alltbt.from_first_video(1:nansum(tbt1.from_first_video(:,1)),:)=repmat(tbt1.from_first_video(1:nansum(tbt1.from_first_video(:,1)),1),1,size(alltbt.from_first_video,2));
     alltbt.from_second_video=zeros(size(alltbt.(f{1})));
-    alltbt.from_second_video(nansum(tbt1.from_first_video(:,1))+1:nansum(tbt1.from_first_video(:,1))+nansum(tbt1.from_second_video(:,1)),:)=repmat(tbt1.from_second_video(nansum(tbt1.from_first_video(:,1))+1:nansum(tbt1.from_first_video(:,1))+nansum(tbt1.from_second_video(:,1)),1),1,size(alltbt.from_second_video,2));
+    % trying this as fix for bug where from_second_video not being
+    % correctly populated
+    alltbt.from_second_video(nansum(tbt1.from_first_video(:,1))+1:nansum(tbt1.from_first_video(:,1))+nansum(tbt1.from_second_video(:,1)),:)=1;
+    %repmat(tbt1.from_second_video(nansum(tbt1.from_first_video(:,1))+1:nansum(tbt1.from_first_video(:,1))+nansum(tbt1.from_second_video(:,1)),1),1,size(alltbt.from_second_video,2));
     alltbt.from_third_video=zeros(size(alltbt.(f{1})));
     alltbt.from_third_video(size(tbt1.(f{1}),1)+1:end,:)=1;
 elseif ~isfield(tbt1,'from_fourth_video') && isfield(tbt1,'from_third_video')
     alltbt.from_first_video=zeros(size(alltbt.(f{1})));
     alltbt.from_first_video(1:nansum(tbt1.from_first_video(:,1)),:)=repmat(tbt1.from_first_video(1:nansum(tbt1.from_first_video(:,1)),1),1,size(alltbt.from_first_video,2));
     alltbt.from_second_video=zeros(size(alltbt.(f{1})));
-    alltbt.from_second_video(nansum(tbt1.from_first_video(:,1))+1:nansum(tbt1.from_first_video(:,1))+nansum(tbt1.from_second_video(:,1)),:)=repmat(tbt1.from_second_video(nansum(tbt1.from_first_video(:,1))+1:nansum(tbt1.from_first_video(:,1))+nansum(tbt1.from_second_video(:,1)),1),1,size(alltbt.from_second_video,2));
+    alltbt.from_second_video(nansum(tbt1.from_first_video(:,1))+1:nansum(tbt1.from_first_video(:,1))+nansum(tbt1.from_second_video(:,1)),:)=1;
+    %repmat(tbt1.from_second_video(nansum(tbt1.from_first_video(:,1))+1:nansum(tbt1.from_first_video(:,1))+nansum(tbt1.from_second_video(:,1)),1),1,size(alltbt.from_second_video,2));
     alltbt.from_third_video=zeros(size(alltbt.(f{1})));
-    alltbt.from_third_video(nansum(tbt1.from_second_video(:,1))+1:nansum(tbt1.from_second_video(:,1))+nansum(tbt1.from_third_video(:,1)),:)=repmat(tbt1.from_third_video(nansum(tbt1.from_second_video(:,1))+1:nansum(tbt1.from_second_video(:,1))+nansum(tbt1.from_third_video(:,1)),1),1,size(alltbt.from_third_video,2));
+    alltbt.from_third_video(nansum(tbt1.from_second_video(:,1))+1:nansum(tbt1.from_second_video(:,1))+nansum(tbt1.from_third_video(:,1)),:)=1;
+    %repmat(tbt1.from_third_video(nansum(tbt1.from_second_video(:,1))+1:nansum(tbt1.from_second_video(:,1))+nansum(tbt1.from_third_video(:,1)),1),1,size(alltbt.from_third_video,2));
     alltbt.from_fourth_video=zeros(size(alltbt.(f{1})));
     alltbt.from_fourth_video(size(tbt1.(f{1}),1)+1:end,:)=1;
 end
