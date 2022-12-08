@@ -21,33 +21,30 @@ if length(whichSess)>1
     ResponseCued=getAndSaveResponse(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
     [~,ma]=max(mean(ResponseCued.aligncomp_y,1,'omitnan'),[],2,'omitnan');
     temp=mean(ResponseCued.aligncomp_x,1,'omitnan');
-    [phystbtout,behtbtout]=grabOtherBehaviorEvents(dd_m,mean(ResponseCued.unitbyunit_x,1,'omitnan')-temp(ma));
+    [phystbtout,behtbtout,fromwhichday]=grabOtherBehaviorEvents(dd_m,mean(ResponseCued.unitbyunit_x,1,'omitnan')-temp(ma));
 else
     ResponseCued=getAndSaveResponse([dd{whichSess} sep response_to_plot],whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
     [~,ma]=max(mean(ResponseCued.aligncomp_y,1,'omitnan'),[],2,'omitnan');
     temp=mean(ResponseCued.aligncomp_x,1,'omitnan');
-    [phystbtout,behtbtout]=grabOtherBehaviorEvents(dd{whichSess},mean(ResponseCued.unitbyunit_x,1,'omitnan')-temp(ma));
+    [phystbtout,behtbtout,fromwhichday]=grabOtherBehaviorEvents(dd{whichSess},mean(ResponseCued.unitbyunit_x,1,'omitnan')-temp(ma));
 end
 ResponseCued.unitbyunit_x=downSampMatrix(ResponseCued.unitbyunit_x,downSampBy);
 ResponseCued.unitbyunit_y=downSampMatrix(ResponseCued.unitbyunit_y,downSampBy);
 ResponseCued=makeUnitsUnique(ResponseCued);
 
-
-
-
-% temp=Response.unitbyunit_y; temp(isnan(temp))=0;
-% behEvents=zeros(size(temp));
-% behEvents(:,50)=1;
-% poissModel(temp,0:0.04:(size(temp,2)-1)*0.04,behEvents);
+temp=Response.unitbyunit_y; temp(isnan(temp))=0;
+behEvents=zeros(size(temp));
+behEvents(:,50)=1;
+poissModel(temp,0:0.04:(size(temp,2)-1)*0.04,behEvents);
 
 end
 
-function [phystbtout,behtbtout]=grabOtherBehaviorEvents(datadir,unitTimes)
+function [phystbtout,behtbtout,fromwhichday]=grabOtherBehaviorEvents(datadir,unitTimes)
 
 getEventsFromPhysTbt={'opto','distractor'};
 getEventsFromBehTbt={'all_reachBatch','isFidgeting','success_fromPerchOrWheel',...
     'drop_fromPerchOrWheel','misses_and_pelletMissing','misses_and_pelletMissing_and_drop',...
-    'success batch when pellet dislodged','drop batch when pellet dislodged','isChewing'};
+    'success_dislodged','drop_dislodged','isChewing'};
 
 if iscell(datadir)
     dd=datadir;
@@ -56,6 +53,7 @@ else
 end
 phystbtout.(getEventsFromPhysTbt{1})=[];
 behtbtout.(getEventsFromBehTbt{1})=[];
+fromwhichday=[];
 for j=1:length(dd)
     if iscell(dd)
         datadir=dd{j};
@@ -112,6 +110,7 @@ for j=1:length(dd)
             phystbtout.(getEventsFromPhysTbt{i})=[phystbtout.(getEventsFromPhysTbt{i}); tempinunittimes];
         end
     end
+    fromwhichday=[fromwhichday; j*size(tempinunittimes,1)];
 end
 
 end
@@ -424,7 +423,7 @@ switch evT
     case 'reachBatch_drop_reachStarts'
         useReach=alignTo;
         behavior_tbt=findPelletDislodgedAfterSuccess(behavior_tbt,'reachBatch_drop_reachStarts','pelletPresent');
-    case 'success batch when pellet dislodged'
+    case 'success_dislodged'
         useReach='combo';
         behavior_tbt=findPelletDislodgedAfterSuccess(behavior_tbt,'reachBatch_success_reachStarts','pelletPresent');
         useCombo=behavior_tbt.pelletDislodgedAfterSuccess;
@@ -432,7 +431,7 @@ switch evT
         useReach='combo';
         behavior_tbt=findPelletDislodgedAvWithSuccess(behavior_tbt,'reachBatch_success_reachStarts','pelletPresent');
         useCombo=behavior_tbt.pelletDislodgedAfterSuccess;
-    case 'drop batch when pellet dislodged'
+    case 'drop_dislodged'
         useReach='combo';
         behavior_tbt=findPelletDislodgedAfterSuccess(behavior_tbt,'reachBatch_drop_reachStarts','pelletPresent');
         useCombo=behavior_tbt.pelletDislodgedAfterSuccess;
