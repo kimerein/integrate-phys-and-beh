@@ -26,7 +26,7 @@ else
     ResponseCued=getAndSaveResponse([dd{whichSess} sep response_to_plot],whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
     [~,ma]=max(mean(ResponseCued.aligncomp_y,1,'omitnan'),[],2,'omitnan');
     temp=mean(ResponseCued.aligncomp_x,1,'omitnan');
-    grabOtherBehaviorEvents(dd{whichSess},nanmean(ResponseCued.unitbyunit_x,1));
+    grabOtherBehaviorEvents(dd{whichSess},mean(ResponseCued.unitbyunit_x,1,'omitnan')-temp(ma));
 end
 ResponseCued.unitbyunit_x=downSampMatrix(ResponseCued.unitbyunit_x,downSampBy);
 ResponseCued.unitbyunit_y=downSampMatrix(ResponseCued.unitbyunit_y,downSampBy);
@@ -47,13 +47,15 @@ function grabOtherBehaviorEvents(datadir,unitTimes)
 getEventsFromPhysTbt={'opto','distractor'};
 getEventsFromBehTbt={'all_reachBatch','isFidgeting','success_fromPerchOrWheel',...
     'drop_fromPerchOrWheel','misses_and_pelletMissing','misses_and_pelletMissing_and_drop',...
-    'success batch when pellet dislodged','drop batch when pellet dislodged'};
+    'success batch when pellet dislodged','drop batch when pellet dislodged','isChewing'};
 
 if iscell(datadir)
     dd=datadir;
 else
     dd=1;
 end
+phystbtout.(getEventsFromPhysTbt{1})=[];
+behtbtout.(getEventsFromBehTbt{1})=[];
 for j=1:length(dd)
     if iscell(dd)
         datadir=dd{j};
@@ -90,6 +92,12 @@ for j=1:length(dd)
         temp=getEventsOfType(getEventsFromBehTbt{i},beh2_tbt);
         % map to unit times
         tempinunittimes=mapToUnitTimes(temp,true,indsIntoBeh_step1,indsIntoBeh_step2,fromPhystbtTimes,unitTimes);
+        if ~isfield(behtbtout,getEventsFromBehTbt{i})
+            phystbtout.(getEventsFromBehTbt{i})=tempinunittimes;
+        elseif isempty(phystbtout.(getEventsFromBehTbt{i}))
+            phystbtout.(getEventsFromBehTbt{i})=tempinunittimes;
+        else
+            phystbtout.(getEventsFromBehTbt{i})=[phystbtout.(getEventsFromBehTbt{i}); tempinunittimes];
     end
     for i=1:length(getEventsFromPhysTbt)
         temp=phys_tbt.(getEventsFromPhysTbt{i});
@@ -104,26 +112,26 @@ function step2=mapToUnitTimes(behVals,isBeh,indsStep1,indsStep2,fromPhystbtTimes
 if isBeh==true
     % behavior tbt
     step1=zeros(size(fromPhystbtTimes));
-    step2=zeros(size(unitTimes));
+    step2=zeros(size(fromPhystbtTimes,1),size(unitTimes,2));
     for i=1:size(step1,1)
         % gives inds into fromPhystbtTimes but of length of behtimes
         for j=1:length(behVals(i,:))
-            step1(i,indsStep1(j))=step1(i,indsStep1(j))+behVals(i,j);
+            step1(i,indsStep1(i,j))=step1(i,indsStep1(i,j))+behVals(i,j);
         end
         % gives inds into unitTimes but of length of fromPhystbtTimes
         for j=1:length(step1(i,:))
-            step2(i,indsStep2(j))=step2(i,indsStep2(j))+step1(i,j);
+            step2(i,indsStep2(i,j))=step2(i,indsStep2(i,j))+step1(i,j);
         end
     end
     step2=step2>0.5;
 else
     % physiology tbt
     % skip step 1
-    step2=zeros(size(unitTimes));
+    step2=zeros(size(fromPhystbtTimes,1),size(unitTimes,2));
     for i=1:size(step2,1)
         % gives inds into unitTimes but of length of fromPhystbtTimes
         for j=1:length(behVals(i,:))
-            step2(i,indsStep2(j))=step2(i,indsStep2(j))+behVals(i,j);
+            step2(i,indsStep2(i,j))=step2(i,indsStep2(i,j))+behVals(i,j);
         end
     end
     step2=step2>0.5;
@@ -430,6 +438,56 @@ if strcmp(useReach,'combo')
     out=useCombo;
 else
     out=behavior_tbt.(useReach);
+end
+
+end
+
+function behavior_tbt=findPelletDislodgedAvWithSuccess(behavior_tbt,successField,pelletPresent)
+
+successes=behavior_tbt.(successField);
+pellet=behavior_tbt.(pelletPresent);
+behavior_tbt.pelletDislodgedAfterSuccess=nan(size(successes));
+for i=1:size(successes,1)
+    f=find(successes(i,:)>0.5);
+    pelletGoneInds=nan(1,length(f));
+    currpellet=pellet(i,:);
+    for j=1:length(f)
+        % find first index when pellet dislodged after success
+        temp=f(j)-1+find(currpellet(f(j):end)<0.5,1,'first');
+        if isempty(temp)
+            continue
+        end
+        pelletGoneInds(j)=round(nanmean([temp f(j)],2));
+    end
+    behavior_tbt.pelletDislodgedAfterSuccess(i,:)=zeros(size(behavior_tbt.pelletDislodgedAfterSuccess(i,:)));
+    behavior_tbt.pelletDislodgedAfterSuccess(i,pelletGoneInds)=1;
+end
+
+end
+
+function behavior_tbt=findPelletDislodgedAfterSuccess(behavior_tbt,successField,pelletPresent)
+
+successes=behavior_tbt.(successField);
+pellet=behavior_tbt.(pelletPresent);
+behavior_tbt.pelletDislodgedAfterSuccess=nan(size(successes));
+for i=1:size(successes,1)
+    f=find(successes(i,:)>0.5);
+    pelletGoneInds=nan(1,length(f));
+    currpellet=pellet(i,:);
+    for j=1:length(f)
+        % find first index when pellet dislodged after success
+        temp=f(j)-1+find(currpellet(f(j):end)<0.5,1,'first');
+        if isempty(temp)
+            continue
+        end
+        pelletGoneInds(j)=temp;
+    end
+    behavior_tbt.pelletDislodgedAfterSuccess(i,:)=zeros(size(behavior_tbt.pelletDislodgedAfterSuccess(i,:)));
+    if isnan(pelletGoneInds)
+        behavior_tbt.pelletDislodgedAfterSuccess(i,end)=1;
+    else
+        behavior_tbt.pelletDislodgedAfterSuccess(i,pelletGoneInds)=1;
+    end
 end
 
 end
