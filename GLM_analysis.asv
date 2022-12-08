@@ -19,10 +19,14 @@ if length(whichSess)>1
         dd_m{i}=[dd{i}];
     end
     ResponseCued=getAndSaveResponse(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
-    grabOtherBehaviorEvents(dd_m);
+    [~,ma]=max(mean(ResponseCued.aligncomp_y,1,'omitnan'),[],2,'omitnan');
+    temp=mean(ResponseCued.aligncomp_x,1,'omitnan');
+    grabOtherBehaviorEvents(dd_m,mean(ResponseCued.unitbyunit_x,1,'omitnan')-temp(ma));
 else
     ResponseCued=getAndSaveResponse([dd{whichSess} sep response_to_plot],whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
-    grabOtherBehaviorEvents(dd{whichSess});
+    [~,ma]=max(mean(ResponseCued.aligncomp_y,1,'omitnan'),[],2,'omitnan');
+    temp=mean(ResponseCued.aligncomp_x,1,'omitnan');
+    grabOtherBehaviorEvents(dd{whichSess},nanmean(ResponseCued.unitbyunit_x,1));
 end
 ResponseCued.unitbyunit_x=downSampMatrix(ResponseCued.unitbyunit_x,downSampBy);
 ResponseCued.unitbyunit_y=downSampMatrix(ResponseCued.unitbyunit_y,downSampBy);
@@ -38,10 +42,12 @@ ResponseCued=makeUnitsUnique(ResponseCued);
 
 end
 
-function grabOtherBehaviorEvents(datadir)
+function grabOtherBehaviorEvents(datadir,unitTimes)
 
-getEventsFromPhysTbt={};
-getEventsFromBehTbt={};
+getEventsFromPhysTbt={'opto','distractor'};
+getEventsFromBehTbt={'all_reachBatch','isFidgeting','success_fromPerchOrWheel',...
+    'drop_fromPerchOrWheel','misses_and_pelletMissing','misses_and_pelletMissing_and_drop',...
+    'success batch when pellet dislodged','drop batch when pellet dislodged'};
 
 if iscell(datadir)
     dd=datadir;
@@ -69,14 +75,98 @@ for j=1:length(dd)
         end
     end
     beh2_tbt=addFidgeting(datadir(1:f(end)-1), beh2_tbt);
-    % get behavior events
-    for i=1:length(getEventsFromPhysTbt)
-        out=getEventsOfType(evT);
+    if ~all(size(beh2_tbt.isFidgeting)==size(beh2_tbt.cue))
+        % problem with isFidgeting size
+        disp(['problem with fidgets size for ' datadir(1:f(end))]);
+        beh2_tbt.isFidgeting=nan(size(beh2_tbt.cue));
     end
-    for i=1:length()
-        out=getEventsOfType(evT);
+    % get behavior events
+    fromPhystbtTimes=phys_tbt.('cuetimes_wrt_trial_start');
+    cuePhystbt=phys_tbt.('cue');
+    behtimes=getEventsOfType('times_wrt_trial_start',beh2_tbt);
+    % how to map to unit times
+    [indsIntoBeh_step1,indsIntoBeh_step2]=mapToPhysTimes(behtimes,fromPhystbtTimes,cuePhystbt,unitTimes);
+    for i=1:length(getEventsFromBehTbt)
+        temp=getEventsOfType(getEventsFromBehTbt{i},beh2_tbt);
+        % map to unit times
+        tempinunittimes=mapToUnitTimes(temp,true,indsIntoBeh_step1,indsIntoBeh_step2,fromPhystbtTimes,unitTimes);
+    end
+    for i=1:length(getEventsFromPhysTbt)
+        temp=phys_tbt.(getEventsFromPhysTbt{i});
+        % map to unit times
+        tempinunittimes=mapToUnitTimes(temp,false,[],indsIntoBeh_step2,fromPhystbtTimes,unitTimes);
     end
 end
+end
+
+function step2=mapToUnitTimes(behVals,isBeh,indsStep1,indsStep2,fromPhystbtTimes,unitTimes)
+
+if isBeh==true
+    % behavior tbt
+    step1=zeros(size(fromPhystbtTimes));
+    step2=zeros(size(unitTimes));
+    for i=1:size(step1,1)
+        % gives inds into fromPhystbtTimes but of length of behtimes
+        for j=1:length(behVals(i,:))
+            step1(i,indsStep1(j))=step1(i,indsStep1(j))+behVals(i,j);
+        end
+        % gives inds into unitTimes but of length of fromPhystbtTimes
+        for j=1:length(step1(i,:))
+            step2(i,indsStep2(j))=step2(i,indsStep2(j))+step1(i,j);
+        end
+    end
+    step2=step2>0.5;
+else
+    % physiology tbt
+    % skip step 1
+    step2=zeros(size(unitTimes));
+    for i=1:size(step2,1)
+        % gives inds into unitTimes but of length of fromPhystbtTimes
+        for j=1:length(behVals(i,:))
+            step2(i,indsStep2(j))=step2(i,indsStep2(j))+behVals(i,j);
+        end
+    end
+    step2=step2>0.5;
+end
+
+end
+
+function [indsIntoBeh_step1,indsIntoBeh_step2]=mapToPhysTimes(behtimes,fromPhystbtTimes,cuePhystbt,unitTimes)
+
+if size(behtimes,1)~=size(fromPhystbtTimes,1)
+    error('behtimes and fromPhystbtTimes must have same number rows in GLM_analysis.m');
+end
+
+% behtimes and fromPhystbtTimes should be the same times
+% just different sized arrays
+% unitTimes is the matrix from Response.unitbyunit_x, i.e., aligned to cue
+indsIntoBeh_step1=nan(size(behtimes));
+indsIntoBeh_step2=nan(size(fromPhystbtTimes));
+% every behavior timepoint goes to a phys timepoint
+for i=1:size(fromPhystbtTimes,1)
+    % do it this way because cue detection in physiology is more precise
+    % find closest to behtimes in fromPhystbtTimes  
+    % gives inds into fromPhystbtTimes but of length of behtimes
+    closest=findClosest(behtimes(i,:),fromPhystbtTimes(i,:));
+    % also realigned at cue
+    fcue=find(cuePhystbt(i,:)>0.5,1,'first');
+    cuetime=fromPhystbtTimes(i,fcue);
+    % find closest in unitTimes
+    % gives inds into unitTimes but of length of fromPhystbtTimes
+    nextstep=findClosest(fromPhystbtTimes(i,:)-cuetime,unitTimes);
+    indsIntoBeh_step1(i,:)=closest;
+    indsIntoBeh_step2(i,:)=nextstep;
+end
+
+end
+
+function closest=findClosest(a,in_b)
+
+closest=nan(size(a));
+for i=1:length(a)
+    [~,closest(i)]=min(abs(a(i)-in_b));
+end
+
 end
 
 function beh2_tbt=addFidgeting(direc, beh2_tbt)
@@ -96,8 +186,15 @@ for i=3:length(ls)
     r=regexp(ls(i).name,'processed_data');
     if ~isempty(r)
         % check whether this data was humanchecked
+        dontuse=false;
         for check=1:length(mustcontain)
-            
+            if dircontains([direc sep ls(i).name],mustcontain{check})==false
+                dontuse=true;
+                break
+            end
+        end
+        if dontuse==true
+            continue
         end
         foldnames{k}=ls(i).name;
         f=regexp(ls(i).name,'_processed_data');
@@ -123,12 +220,20 @@ end
 
 end
 
-function dircontains()
+function out=dircontains(d,fn)
 
+ls=dir(d);
+out=false;
+for i=3:length(ls)
+    if ~isempty(regexp(ls(i).name,fn))
+        out=true;
+        break
+    end
+end
 
 end
 
-function out=getEventsOfType(evT)
+function out=getEventsOfType(evT,behavior_tbt)
 
 useCombo=false;
 switch evT
@@ -319,7 +424,7 @@ switch evT
         behavior_tbt=findPelletDislodgedAvWithSuccess(behavior_tbt,'reachBatch_drop_reachStarts','pelletPresent');
         useCombo=behavior_tbt.pelletDislodgedAfterSuccess;
     otherwise 
-        useReach=alignTo;
+        useReach=evT;
 end
 if strcmp(useReach,'combo')
     out=useCombo;
