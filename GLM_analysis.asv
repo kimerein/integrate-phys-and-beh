@@ -40,9 +40,8 @@ end
 
 function grabOtherBehaviorEvents(datadir)
 
-% which behavior events to take for GLM
-whichToTake_fromPhys={'cue','opto','distractor'};
-whichToTake_fromBeh={'isChewing','success_fromPerchOrWheel','drop_fromPerchOrWheel','misses_and_pelletMissing_and_drop','pelletmissingreach_reachStarts','miss_fromPerchOrWheel'};
+getEventsFromPhysTbt={};
+getEventsFromBehTbt={};
 
 if iscell(datadir)
     dd=datadir;
@@ -53,32 +52,86 @@ for j=1:length(dd)
     if iscell(dd)
         datadir=dd{j};
     end
-    disp(['reading in beh events from ' datadir]);
-    lastslash=regexp(datadir,sep);
-    lastslash=lastslash(end);
-    tbtin=[datadir(1:lastslash-1) sep 'tbt'];
+    f=regexp(datadir,sep);
+    tbtin=[datadir(1:f(end)) 'tbt'];
+    disp(['reading in beh events from ' tbtin]);
     ls=dir(tbtin);
     for i=3:length(ls)
-        if strcmp('beh2_tbt.mat',ls(i).name)
+        a=[];
+        if strcmp(ls(i).name,'beh2_tbt.mat')
             a=load([ls(i).folder sep ls(i).name]);
             beh2_tbt=a.beh2_tbt;
-        elseif strcmp('physiology_tbt.mat',ls(i).name)
+        elseif strcmp(ls(i).name,'physiology_tbt.mat')
             a=load([ls(i).folder sep ls(i).name]);
             phys_tbt=a.physiology_tbt;
         else
             continue
         end
     end
-
-        
-
+    beh2_tbt=addFidgeting(datadir(1:f(end)-1), beh2_tbt);
+    % get behavior events
+    for i=1:length(getEventsFromPhysTbt)
+        out=getEventsOfType(evT);
+    end
+    for i=1:length()
+        out=getEventsOfType(evT);
+    end
 end
 end
 
-function out=getBehaviorEventsOfType(behavior_tbt,alignTo)
+function beh2_tbt=addFidgeting(direc, beh2_tbt)
+% processed_data directory must contain
+mustcontain={'humanchecked.txt','fixed_tbt_success_v_drop.txt','fixed_miss_v_grab.txt'};
+
+% go into O2 output directory
+% load autoReachSettings.mat and fidget.mat for each video
+
+% first find processed_data folders and associated names
+direc=[direc sep 'O2 output'];
+ls=dir(direc);
+vidnames={};
+foldnames={};
+k=1;
+for i=3:length(ls)
+    r=regexp(ls(i).name,'processed_data');
+    if ~isempty(r)
+        % check whether this data was humanchecked
+        for check=1:length(mustcontain)
+            
+        end
+        foldnames{k}=ls(i).name;
+        f=regexp(ls(i).name,'_processed_data');
+        vidnames{k}=ls(i).name(1:f-1);
+        k=k+1;
+    else
+        continue
+    end
+end
+    
+% then order names
+[vidnames,si]=sort(vidnames);
+foldnames=foldnames(si);
+
+% for each, load autoReachSettings and fidget
+for i=1:length(vidnames)
+    a=load([direc sep vidnames{i} '_autoReachSettings.mat']);
+    settings=a.settings;
+    a=load([direc sep vidnames{i} '_fidget.mat']);
+    fidget=a.fidget;
+    beh2_tbt=addBackFidgets(beh2_tbt,settings,fidget,i);
+end
+
+end
+
+function dircontains()
+
+
+end
+
+function out=getEventsOfType(evT)
 
 useCombo=false;
-switch alignTo
+switch evT
     case 'cue_followedby_success'
         useReach='combo';
         [~,f]=nanmax(nanmean(behavior_tbt.cueZone_onVoff,1));
@@ -205,7 +258,7 @@ switch alignTo
                     end
                     if any(behavior_tbt.success_reachStarts(i,starter:currf)>0.5 | behavior_tbt.reachBatch_success_reachStarts(i,starter:currf)>0.5 | behavior_tbt.reachBatch_success_reachStarts_pawOnWheel(i,starter:currf)>0.5)
                         % success before this, exclude
-                        upto=currf+10;
+                        upto=currf+10; 
                         if upto>length(useCombo(i,:))
                             upto=length(useCombo(i,:));
                         end
@@ -234,7 +287,7 @@ switch alignTo
                     end
                     if any(behavior_tbt.success_reachStarts(i,starter:currf)>0.5 | behavior_tbt.reachBatch_success_reachStarts(i,starter:currf)>0.5 | behavior_tbt.reachBatch_success_reachStarts_pawOnWheel(i,starter:currf)>0.5)
                         % success before this, exclude
-                        upto=currf+10;
+                        upto=currf+10; 
                         if upto>length(useCombo(i,:))
                             upto=length(useCombo(i,:));
                         end
@@ -265,7 +318,7 @@ switch alignTo
         useReach='combo';
         behavior_tbt=findPelletDislodgedAvWithSuccess(behavior_tbt,'reachBatch_drop_reachStarts','pelletPresent');
         useCombo=behavior_tbt.pelletDislodgedAfterSuccess;
-    otherwise
+    otherwise 
         useReach=alignTo;
 end
 if strcmp(useReach,'combo')

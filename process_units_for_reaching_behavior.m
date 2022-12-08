@@ -62,7 +62,7 @@ chDepthMapping=[1   21; ...
 % location of SU aligned to behavior, raw data binary name
 
 % ultimately, ingest this from .csv file
-dataTable='C:\Users\sabatini\Downloads\Spike sorting analysis - data as of 20221105.csv';
+dataTable='/Users/kim/Downloads/Spike sorting analysis - data as of 20221105.csv';
 data_loc_array=table2cell(readtable(dataTable,'Format','%s%s%s%u%s%s%s%s%s%u%u%s'));
 
 % data_loc_array=cell(2,6);
@@ -303,6 +303,16 @@ for i=1:size(data_loc_array,1)
     % load locations of SU data aligned to behavior
     % e.g., 'Z:\MICROSCOPE\Kim\WHISPER recs\Mar_3\20210721\SU aligned to behavior';
     dd{i}=data_loc_array{i,8};
+end
+
+%% 3.5 For Mac, change pointers to files on server
+% /Volumes/Neurobio/MICROSCOPE/Kim/WHISPER recs
+for i=1:length(dd)
+    temp=dd{i};
+    temp=['/Volumes/Neurobio/' temp(4:end)];
+    f=regexp(temp,'\');
+    temp(f)=sep;
+    dd{i}=temp;
 end
 
 %% 4. Make figures -- about 6 min to load 84 sessions of unit data
