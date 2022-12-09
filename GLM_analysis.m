@@ -1,13 +1,20 @@
 function GLM_analysis(whichSess,dd,downSampBy)
 % wrapper for first pass at GLM, calls B's poissModel
 
+% if want to put in more than one session, will need to debug this code
+
 cutAllTrialsAtThisTime=10.5; % trial length in seconds
 
 if length(whichSess)>1
     dd=dd(whichSess);
 end
 
-whichUnitsToGrab='_'; plotUnitCriteria=[-100 0 0 1 0]; getCriteriaForUnitsToPlot(plotUnitCriteria);
+whichUnitsToGrab='_'; 
+% will include unit if unitdets match the following
+% [inStructure isFS isTAN isSPN isLowFRThin]
+plotUnitCriteria=[-100 -100 -100 -100 -100]; 
+% plotUnitCriteria=[-100 0 0 1 0]; % -100 is a wildcard, else 0 (false) and 1 (true)
+getCriteriaForUnitsToPlot(plotUnitCriteria);
 setForUn=settingsForStriatumUnitPlots;
 if setForUn.keepAllSingleTrials~=true
     error('need trial by trial data for GLM analysis');
@@ -36,6 +43,16 @@ ResponseCued=makeUnitsUnique(ResponseCued);
 % cut all trials at this time
 [phystbtout,behtbtout,ResponseCued]=cutAllTrialsToLength(phystbtout,behtbtout,ResponseCued,cutAllTrialsAtThisTime);
 
+% figure(); plot(nanmean(ResponseCued.unitbyunit_y(ResponseCued.fromWhichUnit==7,:),1));
+% hold on; plot(nanmean(phystbtout.cue,1),'Color','b');
+% zero out artifact in behtbtout at the beginning of trial
+fie=fieldnames(behtbtout);
+for i=1:length(fie)
+    temp=behtbtout.(fie{i});
+    temp(:,7)=0;
+    behtbtout.(fie{i})=temp;
+end
+
 u=unique(ResponseCued.fromWhichUnit);
 neuron_data_matrix=[];
 neuron_disappears=zeros(length(u),1);
@@ -43,16 +60,27 @@ gotBehEvents=false;
 for i=1:length(u)
     % get one neuron's activity pattern across all trials
     whichNeuron=u(i);
-    if nansum(ResponseCued.fromWhichUnit==i)~=size(phystbtout.cue,1)
-        % throw out any neuron that doesn't last the full session
+    whichTrialsForThisCell=ResponseCued.fromWhichTrial(ResponseCued.fromWhichUnit==whichNeuron);
+    dataMat=ResponseCued.unitbyunit_y(ResponseCued.fromWhichUnit==whichNeuron,:);
+    whichSessForThisCell=ResponseCued.fromWhichSess_forTrials(ResponseCued.fromWhichUnit==whichNeuron);
+    if nansum(ResponseCued.fromWhichUnit==i)<0.8*size(phystbtout.cue,1) 
+        % throw out any neuron that is present for less than 80% of the
+        % full session
         neuron_disappears(i)=1;
         continue
+    elseif nansum(ResponseCued.fromWhichUnit==i)~=size(phystbtout.cue,1) 
+        % fill in missing trials with zero spiking
+        % find missing trials
+        alltri=1:size(phystbtout.cue,1); 
+        misstri=alltri(~ismember(alltri,whichTrialsForThisCell));
+        newDataMat=nan(length(alltri),size(dataMat,2));
+        newDataMat(whichTrialsForThisCell,:)=dataMat;
+        newDataMat(misstri,:)=zeros(size(newDataMat(misstri,:)));
+        dataMat=newDataMat;
     end
-    dataMat=ResponseCued.unitbyunit_y(ResponseCued.fromWhichUnit==whichNeuron,:);
-    whichTrialsForThisCell=ResponseCued.fromWhichTrial(ResponseCued.fromWhichUnit==whichNeuron);
-    whichSessForThisCell=ResponseCued.fromWhichSess_forTrials(ResponseCued.fromWhichUnit==whichNeuron);
     if gotBehEvents==false
-        behEvents=assembleBehEvents(phystbtout,behtbtout,fromwhichday,whichTrialsForThisCell,whichSessForThisCell);
+%         behEvents=assembleBehEvents(phystbtout,behtbtout,fromwhichday,whichTrialsForThisCell,whichSessForThisCell);
+        behEvents=assembleBehEvents(phystbtout,behtbtout,fromwhichday,1:size(phystbtout.cue,1),mode(whichSessForThisCell)*ones(size(1:size(phystbtout.cue,1))));
         gotBehEvents=true;
     end
     dataMat=dataMat';
