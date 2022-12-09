@@ -1,6 +1,8 @@
 function GLM_analysis(whichSess,dd,downSampBy)
 % wrapper for first pass at GLM, calls B's poissModel
 
+cutAllTrialsAtThisTime=10.5; % trial length in seconds
+
 if length(whichSess)>1
     dd=dd(whichSess);
 end
@@ -28,19 +30,80 @@ else
     temp=mean(ResponseCued.aligncomp_x,1,'omitnan');
     [phystbtout,behtbtout,fromwhichday]=grabOtherBehaviorEvents(dd{whichSess},mean(ResponseCued.unitbyunit_x,1,'omitnan')-temp(ma));
 end
-ResponseCued.unitbyunit_x=downSampMatrix(ResponseCued.unitbyunit_x,downSampBy);
-ResponseCued.unitbyunit_y=downSampMatrix(ResponseCued.unitbyunit_y,downSampBy);
+phystbtout.cue=shiftCueBack(phystbtout.cue);
 ResponseCued=makeUnitsUnique(ResponseCued);
 
-% get one neuron's activity pattern across all trials
-whichNeuron=1; 
-dataMat=ResponseCued.unitbyunit_y(ResponseCued.fromWhichUnit==whichNeuron,:);
-whichTrialsForThisCell=ResponseCued.fromWhichTrial(ResponseCued.fromWhichUnit==whichNeuron);
-whichSessForThisCell=ResponseCued.fromWhichSess_forTrials(ResponseCued.fromWhichUnit==whichNeuron);
-behEvents=assembleBehEvents(phystbtout,behtbtout,fromwhichday,whichTrialsForThisCell,whichSessForThisCell);
+% cut all trials at this time
+[phystbtout,behtbtout,ResponseCued]=cutAllTrialsToLength(phystbtout,behtbtout,ResponseCued,cutAllTrialsAtThisTime);
+
+u=unique(ResponseCued.fromWhichUnit);
+neuron_data_matrix=[];
+neuron_disappears=zeros(length(u),1);
+gotBehEvents=false;
+for i=1:length(u)
+    % get one neuron's activity pattern across all trials
+    whichNeuron=u(i);
+    if nansum(ResponseCued.fromWhichUnit==i)~=size(phystbtout.cue,1)
+        % throw out any neuron that doesn't last the full session
+        neuron_disappears(i)=1;
+        continue
+    end
+    dataMat=ResponseCued.unitbyunit_y(ResponseCued.fromWhichUnit==whichNeuron,:);
+    whichTrialsForThisCell=ResponseCued.fromWhichTrial(ResponseCued.fromWhichUnit==whichNeuron);
+    whichSessForThisCell=ResponseCued.fromWhichSess_forTrials(ResponseCued.fromWhichUnit==whichNeuron);
+    if gotBehEvents==false
+        behEvents=assembleBehEvents(phystbtout,behtbtout,fromwhichday,whichTrialsForThisCell,whichSessForThisCell);
+        gotBehEvents=true;
+    end
+    dataMat=dataMat';
+    dataMat=dataMat(1:end);
+    if i==1
+        neuron_data_matrix=nan(length(u),length(dataMat));
+    end
+    neuron_data_matrix(i,:)=dataMat;
+end
+neuron_data_matrix=neuron_data_matrix(neuron_disappears==0,:);
 
 timestep=mode(abs(diff(mean(ResponseCued.unitbyunit_x,1,'omitnan'))));
-do_glm(dataMat,0:timestep:(size(behEvents,2)-1)*timestep,behEvents);
+neuron_data_matrix=downSampMatrix(neuron_data_matrix,downSampBy);
+timepoints=downSampMatrix(0:timestep:(size(behEvents,2)-1)*timestep,downSampBy);
+behEvents=downSampMatrix(behEvents,downSampBy);
+behEvents(behEvents~=0)=1;
+disp('behEvents rows are');
+disp(phystbtout);
+disp(behtbtout);
+do_glm(neuron_data_matrix,timepoints,behEvents);
+
+end
+
+function [phystbtout,behtbtout,ResponseCued]=cutAllTrialsToLength(phystbtout,behtbtout,ResponseCued,cutAllTrialsAtThisTime)
+
+timepoints=mean(ResponseCued.unitbyunit_x,1,'omitnan');
+timepoints=timepoints-min(timepoints,[],'all','omitnan');
+figure(); plot(timepoints); title('Trial timepoints'); ylabel('sec');
+f=find(timepoints>cutAllTrialsAtThisTime,1,'first');
+if isempty(f)
+    return
+end
+ResponseCued.unitbyunit_x=ResponseCued.unitbyunit_x(:,1:f);
+ResponseCued.unitbyunit_y=ResponseCued.unitbyunit_y(:,1:f);
+fnames=fieldnames(phystbtout);
+for i=1:length(fnames)
+    temp=phystbtout.(fnames{i});
+    phystbtout.(fnames{i})=temp(:,1:f);
+end
+fnames=fieldnames(behtbtout);
+for i=1:length(fnames)
+    temp=behtbtout.(fnames{i});
+    behtbtout.(fnames{i})=temp(:,1:f);
+end
+
+end
+
+function cue=shiftCueBack(cue)
+
+% have to do this because small capacitance to IR LED only on WHISPER rig
+cue=[cue(:,2:end) zeros(size(cue,1),1)];
 
 end
 
@@ -89,7 +152,8 @@ nEventTypes=size(events,1);
 bins=length(tRange);
 
 % prepare time shift matrix of events for the glm
-maxShifts=100; % how many +/- bins to consider for glm
+% maxShifts=100; % how many +/- bins to consider for glm
+maxShifts=15;
 shifts=-maxShifts:maxShifts;
 nShifts=length(shifts);
 allEvents=zeros(nEventTypes*length(shifts), bins);
@@ -101,9 +165,6 @@ end
 % setup for doing glms
 testNeuron=1:nNeurons;
 % a small gaussian filter used below to test how good the coefficients are
-
-b = normpdf(shifts/gaussStretch);
-b=b/max(b);
 
 % do glms 
 % we fit the spiking rate but look at the reconstruction of the 
@@ -122,24 +183,48 @@ for neuronIndex=testNeuron
     % because of the smearing and summing across multiple poisson
     % processes?
 
-    subplot(1, 5, 2)
-    plot(mdl.Coefficients.Estimate(2:end)', 'DisplayName', 'model coeffs')
-    hold on
-    ll=b'*linkStrength(neuronIndex,:);
-    ll=reshape(ll, [1 numel(ll)]);
-    plot(maxShifts-1+(1:length(ll)), ll, 'DisplayName', 'underlying')
-    legend
-    title('shifts')
+    subplot(1, 4, 1)
+    pva=mdl.Coefficients.pValue(2:end);
+    coef=mdl.Coefficients.Estimate(2:end);
+    whichcoef=1:length(coef);
+    scatter(whichcoef(pva<0.2),coef(pva<0.2),[],'k');
+    hold on; 
+    scatter(whichcoef(pva>=0.2),coef(pva>=0.2),[],[0.5 0.5 0.5]);
+    cm=colormap('jet');
+    colstep=floor(size(cm,1)/size(events,1));
+    cols=1:colstep:size(cm,1);
+    for i=1:size(events,1)
+        line([(i-1)*nShifts+1 (i-1)*nShifts+nShifts],[0 0],'Color',cm(cols(i),:),'LineWidth',5);
+        hold on;
+    end
+    title('model coeffs');
 
     % reconstruct the underlying rates, not the spiking!
     yy=predict(mdl, allEvents');
 
-    subplot(1, 5, 3:5)
+    subplot(1, 4, 2)
     plot(yy, 'DisplayName','recon rate')
     hold on
-    plot(neuronFiring(neuronIndex, :), 'DisplayName','underlying')
+    plot(neuronFiring(neuronIndex, :), 'DisplayName','real neuron')
     legend
     title('reconstruction')
+
+    subplot(1, 4, 3)
+    % very smoothed
+    plot(smoothdata(yy, 'gaussian', 30), 'DisplayName','recon rate')
+    hold on
+    plot(smoothdata(neuronFiring(neuronIndex, :), 'gaussian', 30), 'DisplayName','real neuron')
+    legend
+    title('very smoothed')
+
+    subplot(1, 4, 4)
+    pvalbins=0:0.01:1;
+    for i=1:length(pvalbins)
+        fracBelow(i)=nansum(mdl.Coefficients.pValue<pvalbins(i))/length(mdl.Coefficients.pValue);
+    end
+    scatter(pvalbins,fracBelow);
+    xlabel('pval bins'); ylabel('fraction below this pval');
+    line([0 1],[0 1]);
 end
 
 end
@@ -172,7 +257,7 @@ end
 
 function [phystbtout,behtbtout,fromwhichday]=grabOtherBehaviorEvents(datadir,unitTimes)
 
-getEventsFromPhysTbt={'opto','distractor'};
+getEventsFromPhysTbt={'cue','opto','distractor'};
 getEventsFromBehTbt={'all_reachBatch','isFidgeting','success_fromPerchOrWheel',...
     'drop_fromPerchOrWheel','misses_and_pelletMissing','misses_and_pelletMissing_and_drop','isChewing'};
 
