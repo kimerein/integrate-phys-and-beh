@@ -1,4 +1,4 @@
-function LDA_analysis(whichSess,downSampBy,takeNPointsAfterEvent,nPointsBeforeEvent,response_to_plot1,response_to_plot2,dd)
+function LDA_analysis(whichSess,downSampBy,takeNPointsAfterEvent,nPointsBeforeEvent,response_to_plot1,response_to_plot2,dd,typMod)
 % wrapper for code from B
 
 % get all units recorded simultaneously from one session
@@ -54,7 +54,9 @@ for i=1:length(allTri)
             % unit was not active on this trial, fill w nans
             mergedData(i,(j-1)*(takeNPointsAfterEvent+nPointsBeforeEvent)+1:j*(takeNPointsAfterEvent+nPointsBeforeEvent))=nan;
         else
-            mergedData(i,(j-1)*(takeNPointsAfterEvent+nPointsBeforeEvent)+1:j*(takeNPointsAfterEvent+nPointsBeforeEvent))=ResponseCued.unitbyunit_y(ResponseCued.fromWhichTrial==currTri & ResponseCued.fromWhichUnit==currU,zeroind-nPointsBeforeEvent:zeroind+takeNPointsAfterEvent-1);
+            temp=ResponseCued.unitbyunit_y(ResponseCued.fromWhichTrial==currTri & ResponseCued.fromWhichUnit==currU,zeroind-nPointsBeforeEvent:zeroind+takeNPointsAfterEvent-1);
+            temp=smoothdata(temp(i,:),'gaussian',7);
+            mergedData(i,(j-1)*(takeNPointsAfterEvent+nPointsBeforeEvent)+1:j*(takeNPointsAfterEvent+nPointsBeforeEvent))=
         end
     end
 end
@@ -83,6 +85,7 @@ for i=1:length(allTri)
         end
     end
 end
+disp(['format of mergedAllData is ' num2str(nPointsBeforeEvent) ' before event and ' num2str(takeNPointsAfterEvent) ' from each unit, trial by trial']);
 % take only trials where event occurred
 mergedData=mergedData(didEventOccur==1,:);
 % fill in nans with zeros, because no spiking
@@ -106,7 +109,7 @@ xlim([0 size(mergedAllData,2)+10]);
 
 % figure(); imagesc(isnan(mergedAllData));
 
-LDA_analysis_sub(mergedAllData,labels+1); % in B code, group labels start at 1, not 0
+LDA_analysis_sub(mergedAllData,labels+1,typMod); % in B code, group labels start at 1, not 0
 
 end
 
@@ -136,7 +139,7 @@ end
 
 end
 
-function LDA_analysis_sub(mergedAllData,mergedDataLabels)
+function LDA_analysis_sub(mergedAllData,mergedDataLabels,typMod)
 
 % each row of mergedAllData is a different observation (e.g., trial)
 % and each column is a predictor variable, e.g., firing rate at a different
@@ -302,68 +305,111 @@ for conditionCounter=1:length(conditionSets)
                 mergedTrainData(isnan(mergedTrainData))=0; 
                 mergedTestData(isnan(mergedTestData))=0; 
 
-%                 % run LDA model
-%                 % with default - may overfit and reduce fit quality on test data
-% %                 try
-% %                     modelType='quadratic'; % linear may be better for the means (vs. all)
-% %                     Mdl = fitcdiscr(mergedTrainData, mergedTrainLabels, 'DiscrimType', modelType);
-% %                 catch
-%                 try
-%                     modelType='pseudoQuadratic'; % linear may be better for the means (vs. all)
-%                     stilltakenonan=~any(isnan(mergedTrainData),2);
-%                     mergedTrainData=mergedTrainData(stilltakenonan,:);
-%                     mergedTrainLabels=mergedTrainLabels(stilltakenonan);
-%                     if size(mergedTrainData,1)<2
-%                         continue
-%                     else
-%                         Mdl = fitcdiscr(mergedTrainData, mergedTrainLabels, 'DiscrimType', modelType);
-%                     end
-%                 catch
-%                     continue
-%                 end
+                switch typMod
+                    case 'LDA'
+                        % run LDA model
+                        % with default - may overfit and reduce fit quality on test data
+                        %                 try
+                        %                     modelType='quadratic'; % linear may be better for the means (vs. all)
+                        %                     Mdl = fitcdiscr(mergedTrainData, mergedTrainLabels, 'DiscrimType', modelType);
+                        %                 catch
+                        try
+                            modelType='pseudoQuadratic'; % linear may be better for the means (vs. all)
+                            stilltakenonan=~any(isnan(mergedTrainData),2);
+                            mergedTrainData=mergedTrainData(stilltakenonan,:);
+                            mergedTrainLabels=mergedTrainLabels(stilltakenonan);
+                            if size(mergedTrainData,1)<2
+                                continue
+                            else
+                                Mdl = fitcdiscr(mergedTrainData, mergedTrainLabels, 'DiscrimType', modelType);
+                            end
+                        catch
+                            continue
+                        end
 
-                % do linear regression instead
-                Mdl=fitlm(mergedTrainData,mergedTrainLabels,'constant');
-                
-
-                yy=predict(Mdl, mergedTrainData);
-                trainPred(mCounter)=mean((mergedTrainLabels==yy));
-                yy=predict(Mdl, mergedTestData);
-                testPred(mCounter)=mean((mergedTestLabels==yy));
+                        yy=predict(Mdl, mergedTrainData);
+                        trainPred(mCounter)=mean((mergedTrainLabels==yy));
+                        yy=predict(Mdl, mergedTestData);
+                        testPred(mCounter)=mean((mergedTestLabels==yy));
+                    case 'linearRegression'
+                        % do linear regression instead
+                        Mdl=fitlm(mergedTrainData,mergedTrainLabels,'constant');
+                    case 'SVM'
+                        % SVM
+                        X=mergedTrainData;
+                        Y=mergedTrainLabels;
+                        Mdl=fitcsvm(X,Y,'KernelScale','auto','Standardize',true,'OutlierFraction',0.05);
+                        sv=Mdl.SupportVectors;
+%                         figure;
+%                         gscatter(X(:,1),X(:,3),Y,'br','xo');
+                        predict_trainData=predict(Mdl,X);
+%                         figure;
+%                         gscatter(X(:,1),X(:,3),predictions,'rb','ox');
+%                         title('Prediction of Training Data View 1');
+                        predictions=predict(Mdl,mergedTestData);
+%                         figure;
+%                         gscatter(X(:,1),X(:,3),predictions,'rb','ox');
+%                         title('Prediction of Test Data View 1');
+                        modelType='SVM';
+                end
 
                 % comparisons to means and calc moments
                 for sCounter=1:nConditions
                     cTrainData=mergedTrainData(mergedTrainLabels==sCounter, :);
                     cTestData=mergedTestData(originalTestLabels==sCounter, :); %mergedTestLabels==sCounter,:);
 
-                    testMSE_Train(sCounter, mCounter)=...
-                        mean(mean((cTestData-mean(cTrainData, 1)).^2, 1).^0.5);
+                    switch typMod
+                        case 'LDA'
+                            testMSE_Train(sCounter, mCounter)=...
+                                mean(mean((cTestData-mean(cTrainData, 1)).^2, 1).^0.5);
 
-                    testMSE_Test(sCounter, mCounter)=...
-                        mean(mean((cTestData-mean(cTestData, 1)).^2, 1).^0.5);
+                            testMSE_Test(sCounter, mCounter)=...
+                                mean(mean((cTestData-mean(cTestData, 1)).^2, 1).^0.5);
+                            % moments
+                            cTrainData=reshape(cTrainData, 1, numel(cTrainData));
+                            trainMoments(sCounter, 1, mCounter)=mean(cTrainData);
+                            trainMoments(sCounter, 2, mCounter)=var(cTrainData);
+                            trainMoments(sCounter, 3, mCounter)=skewness(cTrainData);
+                            trainMoments(sCounter, 4, mCounter)=kurtosis(cTrainData);
+                        case 'SVM'
+                            testMSE_Train(sCounter, mCounter)=...
+                                sum(predict_trainData==mergedTrainLabels)/length(mergedTrainLabels); % fraction correct
 
-                    % moments
-                    cTrainData=reshape(cTrainData, 1, numel(cTrainData));
-                    trainMoments(sCounter, 1, mCounter)=mean(cTrainData);
-                    trainMoments(sCounter, 2, mCounter)=var(cTrainData);
-                    trainMoments(sCounter, 3, mCounter)=skewness(cTrainData);
-                    trainMoments(sCounter, 4, mCounter)=kurtosis(cTrainData);
+                            testMSE_Test(sCounter, mCounter)=...
+                                sum(predictions==mergedTestLabels)/length(mergedTestLabels); % fraction correct
+                            % moments
+                            cTrainData=reshape(cTrainData, 1, numel(cTrainData));
+                            trainMoments(sCounter, 1, mCounter)=mean(cTrainData);
+                            trainMoments(sCounter, 2, mCounter)=var(cTrainData);
+                            trainMoments(sCounter, 3, mCounter)=skewness(cTrainData);
+                            trainMoments(sCounter, 4, mCounter)=kurtosis(cTrainData);
+                    end
                 end
             end
 
-            %   with hyper parameter sweep and cross-validation - better fits
-            Mdl = fitcdiscr(mergedTrainData,mergedTrainLabels, ...
-                'OptimizeHyperparameters', 'auto',...
-                'discrimType','pseudoLinear',...
-                'HyperparameterOptimizationOptions', ...
-                struct('ShowPlots', false, 'Verbose', 0, ...
-                'Repartition', true, ...
-                'AcquisitionFunctionName','expected-improvement-plus'));
-            %    close all
-            yy=predict(Mdl, mergedTestData);
-            testPredHyp=mean((mergedTestLabels==yy));
-            yy=predict(Mdl, mergedTrainData);
-            trainPredHyp=mean((mergedTrainLabels==yy));
+            switch typMod
+                    case 'LDA'
+                        %   with hyper parameter sweep and cross-validation - better fits
+                        Mdl = fitcdiscr(mergedTrainData,mergedTrainLabels, ...
+                            'OptimizeHyperparameters', 'auto',...
+                            'discrimType','pseudoLinear',...
+                            'HyperparameterOptimizationOptions', ...
+                            struct('ShowPlots', false, 'Verbose', 0, ...
+                            'Repartition', true, ...
+                            'AcquisitionFunctionName','expected-improvement-plus'));
+                        %    close all
+                        yy=predict(Mdl, mergedTestData);
+                        testPredHyp=mean((mergedTestLabels==yy));
+                        yy=predict(Mdl, mergedTrainData);
+                        trainPredHyp=mean((mergedTrainLabels==yy));
+
+%                         disp(['OVERALL hyp test set accuracy: '  num2str(testPredHyp) ' train ' num2str(trainPredHyp)])
+%                         statsTable.LDA_hyp_trainPred(tableCounter)=trainPredHyp;
+%                         statsTable.LDA_hyp_testPred(tableCounter)=testPredHyp;
+                case 'SVM'
+                    disp('for SVM, look at, for example, MSE_train_cond1_avg or MSE_test_cond1_avg for average accuray');
+            end
+
 
             statsTable.modelType(tableCounter)=modelType;
             statsTable.LDA_trainPred_avg(tableCounter)=mean(trainPred);
@@ -378,10 +424,7 @@ for conditionCounter=1:length(conditionSets)
                 num2str(statsTable.LDA_testPred_avg(tableCounter))...
                 ' +/- ' num2str(statsTable.LDA_testPred_sd(tableCounter)) ])
 
-            disp(['OVERALL hyp test set accuracy: '  num2str(testPredHyp) ' train ' num2str(trainPredHyp)])
-            statsTable.LDA_hyp_trainPred(tableCounter)=trainPredHyp;
-            statsTable.LDA_hyp_testPred(tableCounter)=testPredHyp;
-
+            
             for sCounter=1:nConditions
 %                 statsTable.(['cond' num2str(sCounter)])(tableCounter)=conditionStrings{sCounter};
 

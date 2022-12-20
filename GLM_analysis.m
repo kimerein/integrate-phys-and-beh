@@ -37,7 +37,7 @@ else
     temp=mean(ResponseCued.aligncomp_x,1,'omitnan');
     [phystbtout,behtbtout,fromwhichday]=grabOtherBehaviorEvents(dd{whichSess},mean(ResponseCued.unitbyunit_x,1,'omitnan')-temp(ma));
 end
-phystbtout.cue=shiftCueBack(phystbtout.cue);
+% phystbtout.cue=shiftCueBack(phystbtout.cue);
 ResponseCued=makeUnitsUnique(ResponseCued);
 
 % cut all trials at this time
@@ -46,12 +46,12 @@ ResponseCued=makeUnitsUnique(ResponseCued);
 % figure(); plot(nanmean(ResponseCued.unitbyunit_y(ResponseCued.fromWhichUnit==7,:),1));
 % hold on; plot(nanmean(phystbtout.cue,1),'Color','b');
 % zero out artifact in behtbtout at the beginning of trial
-fie=fieldnames(behtbtout);
-for i=1:length(fie)
-    temp=behtbtout.(fie{i});
-    temp(:,7)=0;
-    behtbtout.(fie{i})=temp;
-end
+% fie=fieldnames(behtbtout);
+% for i=1:length(fie)
+%     temp=behtbtout.(fie{i});
+%     temp(:,7)=0;
+%     behtbtout.(fie{i})=temp;
+% end
 
 u=unique(ResponseCued.fromWhichUnit);
 neuron_data_matrix=[];

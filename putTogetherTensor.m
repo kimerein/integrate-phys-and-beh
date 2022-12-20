@@ -1,4 +1,4 @@
-function LDA_analysis(whichSess,downSampBy,takeNPointsAfterEvent,nPointsBeforeEvent,response_to_plot1,response_to_plot2,dd,typMod)
+function putTogetherTensor(whichSess,downSampBy,takeNPointsAfterEvent,nPointsBeforeEvent,response_to_plot1,response_to_plot2,dd,saveDir)
 % wrapper for code from B
 
 % get all units recorded simultaneously from one session
@@ -97,11 +97,11 @@ mergedAllData=[mergedAllData; mergedData];
 labels=[labels; ones(size(mergedData,1),1)];
 
 % drop columns that are all nan
-mergedAllData=mergedAllData(:,~all(isnan(mergedAllData),1));
-% drop rows that are all nan
-allnanrows=all(isnan(mergedAllData),2);
-mergedAllData=mergedAllData(~allnanrows,:);
-labels=labels(~allnanrows);
+% mergedAllData=mergedAllData(:,~all(isnan(mergedAllData),1));
+% % drop rows that are all nan
+% allnanrows=all(isnan(mergedAllData),2);
+% mergedAllData=mergedAllData(~allnanrows,:);
+% labels=labels(~allnanrows);
 
 % close all;
 
@@ -111,7 +111,9 @@ xlim([0 size(mergedAllData,2)+10]);
 
 % figure(); imagesc(isnan(mergedAllData));
 
-LDA_analysis_sub(mergedAllData,labels+1,typMod); % in B code, group labels start at 1, not 0
+[tens,labels]=reshapeIntoTensor(mergedAllData,labels,nPointsBeforeEvent,takeNPointsAfterEvent);
+save([saveDir '_tensor.mat'],'tens');
+save([saveDir '_labels.mat'],'labels');
 
 end
 

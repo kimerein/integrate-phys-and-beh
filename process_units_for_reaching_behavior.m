@@ -62,7 +62,7 @@ chDepthMapping=[1   21; ...
 % location of SU aligned to behavior, raw data binary name
 
 % ultimately, ingest this from .csv file
-dataTable='/Users/kim/Downloads/Spike sorting analysis - data as of 20221105.csv';
+dataTable='C:\Users\sabatini\Downloads\Spike sorting analysis - data as of 20221105.csv';
 data_loc_array=table2cell(readtable(dataTable,'Format','%s%s%s%u%s%s%s%s%s%u%u%s'));
 
 % data_loc_array=cell(2,6);
@@ -448,7 +448,7 @@ plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',excludeTooFewTria
 plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false),'scatterInTimeWindows',[-3 -0.1],[0.5 4],'ColorLabel',excludeTooFewTrials(cue_Response,trial_n_cutoff,false),[-1 -0.3],[-0.3 1]);
 
 %% LDA analysis
-whichSess=16; % 81 has a fair number of cells
+whichSess=5; % 81 has a fair number of cells
 
 % downSampBy=25; % downsamp 60 ms bins by this much
 % takeNPointsAfterEvent=3;
@@ -461,7 +461,27 @@ response_to_plot1='cued_success';
 response_to_plot2='uncued_success';
 LDA_analysis(whichSess,downSampBy,takeNPointsAfterEvent,takeNPointsBeforeEvent,response_to_plot1,response_to_plot2,dd,'SVM');
 
+%% Put together tensors
+whichSess=[81 60 75 5];
+downSampBy=4; % downsamp 60 ms bins by this much
+takeNPointsAfterEvent=15;
+takeNPointsBeforeEvent=0;
+tensor1=[]; allLabels1=[];
+for i=1:length(whichSess)
+    [tensor, allLabels, timepoints_for_tensor]=getTensorsForOneSession(whichSess(i), downSampBy, takeNPointsAfterEvent, takeNPointsBeforeEvent, dd);
+    if ~isempty(tensor1)
+        [tensor,allLabels]=catAndExpandTensor(tensor1, tensor, allLabels1, allLabels);
+    end
+    tensor1=tensor; allLabels1=allLabels;
+    close all;
+end
+disp(size(tensor))
+save(['C:\Users\sabatini\Documents\tensor.mat'],'tensor');
+save(['C:\Users\sabatini\Documents\allLabels.mat'],'allLabels');
+save(['C:\Users\sabatini\Documents\timepoints_for_tensor.mat'],'timepoints_for_tensor');
+
 %% GLM analysis
+GLM_analysis(48,dd,4);
 
 %% Get significant responses 
 % Get significance from trial by trial
