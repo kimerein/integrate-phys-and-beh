@@ -33,12 +33,30 @@ plotPCA(flatData',plotN);
 % projectOntoEigSpace(flatData,2,eigVec_2(:,1:plotN),sorted_eigVal_2(1:plotN));
 
 % TCA
-R_guess=4; % guess matrix rank
+R_guess=6; % guess matrix rank
 allconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[2:5])),10,R_guess);
 [allcell_PCs,allcell_archetypeCells,dimOrdering]=studyCPmodel(allconditions_cpmodel);
 % get cue responses
-[~,cuescores]=plotPCA(data(:,:,1),4);
+[~,cuescores]=plotPCA(data(:,:,1),6);
 % cueweights=ones(size(data,1),1);
+% drop first PC because represents DC offset?
+temp=allcell_PCs.score(:,2:end);
+% throw out cells with very low weights on all PCs
+dontshow=sum(allcell_PCs.score,2,'omitnan')<-0.053 & sum(allcell_PCs.score,2,'omitnan')>-0.054;
+tsnetemp=tsne(temp,'Algorithm','exact','Distance','chebychev','Exaggeration',5,'NumDimensions',2,'Perplexity',60,'Standardize',false);
+currcuescore=cuescores(:,2);
+cuecolsfortsne=currcuescore-min(currcuescore,[],'all','omitnan'); cuecolsfortsne=cuecolsfortsne./max(cuecolsfortsne,[],'all','omitnan'); cuecolsfortsne=cuecolsfortsne*255;
+cuecolsfortsne=ceil(cuecolsfortsne); cuecolsfortsne(cuecolsfortsne==0)=1; dontshow(isnan(cuecolsfortsne))=true;  cuecolsfortsne(isnan(cuecolsfortsne))=1;
+cmap=colormap('jet');
+ccft=cmap(cuecolsfortsne,:); ccft(dontshow==true,:)=repmat([1 1 1],sum(dontshow==true),1);
+figure(); scatter(tsnetemp(:,1),tsnetemp(:,2),[],ccft); title('cue responsive');
+currcuescore=mean(cuescores(:,[1 2 3 4 5 6]),2,'omitnan');;
+cuecolsfortsne=currcuescore-min(currcuescore,[],'all','omitnan'); cuecolsfortsne=cuecolsfortsne./max(cuecolsfortsne,[],'all','omitnan'); cuecolsfortsne=cuecolsfortsne*255;
+cuecolsfortsne=ceil(cuecolsfortsne); cuecolsfortsne(cuecolsfortsne==0)=1; dontshow(isnan(cuecolsfortsne))=true;  cuecolsfortsne(isnan(cuecolsfortsne))=1;
+cmap=colormap('jet');
+ccft=cmap(cuecolsfortsne,:); ccft(dontshow==true,:)=repmat([1 1 1],sum(dontshow==true),1);
+figure(); scatter(tsnetemp(:,1),tsnetemp(:,2),[],ccft); title('pc 1 2 3 4 5 6 responsive');
+
 cuePC1_archetypeCells=projectDirectionOntoCPmodel(cuescores(:,1),allconditions_cpmodel,allcell_PCs); 
 % cueweights should be a vector, same length as units, with each unit's
 % degree of cue responsiveness (or loading to cue factor)
@@ -46,13 +64,13 @@ cuePC2_archetypeCells=projectDirectionOntoCPmodel(cuescores(:,2),allconditions_c
 tits={'cueSuccGrp1','cueFailGrp1','uncueSuccGrp1','uncueFailGrp1';...
       'cueSuccGrp2','cueFailGrp2','uncueSuccGrp2','uncueFailGrp2';...
       'cueSuccGrp3','cueFailGrp3','uncueSuccGrp3','uncueFailGrp3';...
-      'cueSuccGrp4','cueFailGrp4','uncueSuccGrp4','uncueFailGrp4';...
-      'cueSuccGrp4','cueFailGrp4','uncueSuccGrp4','uncueFailGrp4';...
-      'cueSuccGrp4','cueFailGrp4','uncueSuccGrp4','uncueFailGrp4';...
-      'cueSuccGrp4','cueFailGrp4','uncueSuccGrp4','uncueFailGrp4';...
       'cueSuccGrp4','cueFailGrp4','uncueSuccGrp4','uncueFailGrp4'};
+%       'cueSuccGrp4','cueFailGrp4','uncueSuccGrp4','uncueFailGrp4';...
+%       'cueSuccGrp4','cueFailGrp4','uncueSuccGrp4','uncueFailGrp4';...
+%       'cueSuccGrp4','cueFailGrp4','uncueSuccGrp4','uncueFailGrp4';...
+%       'cueSuccGrp4','cueFailGrp4','uncueSuccGrp4','uncueFailGrp4'};
 plotArchetypeCells(cat(4,allcell_archetypeCells,cuePC1_archetypeCells,cuePC2_archetypeCells),{'all','cuePC1','cuePC2'},tits);
-% study neurons x trial type factors -- do cells group?
+%TCAneuronloadings(allconditions_cpmodel, data);
 
 % higher rank decomposition to study cue coding after outcome
 R_guess=8; % rank 8 grabs the cue v uncue specific components
@@ -79,10 +97,49 @@ figure(); scatter(mean(us(:,2:3),2),mean(us(:,4:5),2));
 
 end
 
-function studyNeuronsByTrialFactors(cpmodel)
+function TCAneuronloadings(allconditions_cpmodel, data)
 
-unitweights=cpmodel.U{1}; tf=cpmodel.U{2}; trialfactors=cpmodel.U{3};
-
+% study neurons x trial type factors -- do cells group?
+nld = allconditions_cpmodel.U{1} ./ repmat(sum(allconditions_cpmodel.U{1},2,'omitnan'),1,size(allconditions_cpmodel.U{1},2));
+est_factors = cp_opt(tensor(nld),2,'init','rand','lower',0,'printitn',0,'fixsigns',true,'maxiters',10000);
+figure(); temp=est_factors.U{2}; plot(temp(:,1),'Color','r'); hold on; plot(temp(:,2),'Color','b'); legend({'fac1','fac2'})
+ttf=allconditions_cpmodel.U{3}; tf=allconditions_cpmodel.U{2};
+%neuron_classifications=sum(nld.*repmat(temp(:,1)',size(nld,1),1).*repmat(allconditions_cpmodel.lambda',size(nld,1),1),2)>sum(nld.*repmat(temp(:,2)',size(nld,1),1).*repmat(allconditions_cpmodel.lambda',size(nld,1),1),2);
+neuron_classifications=max(nld.*repmat(temp(:,1)',size(nld,1),1).*repmat(allconditions_cpmodel.lambda',size(nld,1),1),[],2)>max(nld.*repmat(temp(:,2)',size(nld,1),1).*repmat(allconditions_cpmodel.lambda',size(nld,1),1),[],2);
+figure(); 
+colororder([0 204 0; 255 153 153; 0 102 0; 255 0 127]./255);
+for i=1:size(data(:,:,2:5),3)
+    plot(reshape(mean(data(neuron_classifications,:,i),1,'omitnan'),1,size(data,2)));
+    hold all;
+end
+title('Classified neurons average first factor');
+figure(); 
+colororder([0 204 0; 255 153 153; 0 102 0; 255 0 127]./255);
+for i=1:size(data(:,:,2:5),3)
+    plot(reshape(mean(data(~neuron_classifications,:,i),1,'omitnan'),1,size(data,2)));
+    hold all;
+end
+title('Classified neurons average second factor');
+figure(); 
+colororder([0 204 0; 255 153 153; 0 102 0; 255 0 127]./255);
+for i=1:size(ttf,1)
+    sumfortt=zeros(size(tf(:,1)));
+    for j=1:size(ttf,2)
+        sumfortt=sumfortt+ttf(i,j)*tf(:,j)*temp(j,1)*allconditions_cpmodel.lambda(j);
+    end
+    plot(sumfortt); hold all;
+end
+title('First neuron loadings factor');
+figure(); 
+colororder([0 204 0; 255 153 153; 0 102 0; 255 0 127]./255);
+for i=1:size(ttf,1)
+    sumfortt=zeros(size(tf(:,1)));
+    for j=1:size(ttf,2)
+        sumfortt=sumfortt+ttf(i,j)*tf(:,j)*temp(j,2)*allconditions_cpmodel.lambda(j);
+    end
+    plot(sumfortt); hold all;
+end
+title('Second neuron loadings factor');
 
 end
 
@@ -124,7 +181,7 @@ figure(); scatter3(newscore(:,1),newscore(:,2),newscore(:,3)); set(gcf, 'Name', 
 [pcaout.coeff,pcaout.score,pcaout.latent,pcaout.tsquared,pcaout.explained,pcaout.mu]=plotPCA(repmat(cueweights,1,size(unitweights,2)).*unitweights,size(unitweights,2));
 coeff=pcaout.coeff;
 figure(); set(gcf, 'Name', ['Sum of weighted temporal factors describing unit PCA -- CUE WEIGHTS']);
-colororder([0 204 0; 255 153 153; 0 102 0; 255 0 127]./255);
+colororder([0 204 0; 255 153 153; 0 102 0; 255 0 127; 50 120 70; 100 100 100]./255);
 for i=1:size(coeff,2)
     weightedTFforUnit=zeros(size(tf(:,1)));
     for j=1:size(tf,2)
@@ -143,6 +200,11 @@ function [pcaout,TFsForUnitsAndTrialTypes,dimOrdering]=studyCPmodel(allcondition
 % pca unit loadings and reconstruct top unit responses
 unitweights=allconditions_cpmodel.U{1}; tf=allconditions_cpmodel.U{2};
 [pcaout.coeff,pcaout.score,pcaout.latent,pcaout.tsquared,pcaout.explained,pcaout.mu]=plotPCA(unitweights,size(unitweights,2));
+
+% drop first PC because represents DC offset?
+% temp=pcaout.score(:,2:end);
+% tsnetemp=tsne(temp,'Algorithm','exact','Distance','chebychev'); figure(); scatter(tsnetemp(:,1),tsnetemp(:,2));
+
 coeff=pcaout.coeff;
 figure(); set(gcf, 'Name', ['Sum of weighted temporal factors describing unit PCA']);
 colororder([0 204 0; 255 153 153; 0 102 0; 255 0 127]./255);

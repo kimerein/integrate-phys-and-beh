@@ -448,23 +448,25 @@ plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',excludeTooFewTria
 plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false),'scatterInTimeWindows',[-3 -0.1],[0.5 4],'ColorLabel',excludeTooFewTrials(cue_Response,trial_n_cutoff,false),[-1 -0.3],[-0.3 1]);
 
 %% LDA analysis
-whichSess=5; % 81 has a fair number of cells
+whichSess=82; % 81 has a fair number of cells
 
 % downSampBy=25; % downsamp 60 ms bins by this much
 % takeNPointsAfterEvent=3;
 
 downSampBy=4; % downsamp 60 ms bins by this much
 takeNPointsAfterEvent=15;
-takeNPointsBeforeEvent=0;
+takeNPointsBeforeEvent=7;
 
 response_to_plot1='cued_success';
 response_to_plot2='uncued_success';
 LDA_analysis(whichSess,downSampBy,takeNPointsAfterEvent,takeNPointsBeforeEvent,response_to_plot1,response_to_plot2,dd,'SVM');
 
 %% Put together tensors
-whichSess=[81 60 75 5];
-downSampBy=4; % downsamp 60 ms bins by this much
-takeNPointsAfterEvent=15;
+whichSess=[81 60 75 5 11 22 31 47 62 63 65 66 67 68 70 82];
+whichSess=[81 75 11 22 47 62 63 65 67 82]; % with some cue responsive neuron(s), e.g., 47
+whichSess=[81 75];
+downSampBy=5; % downsamp 60 ms bins by this much
+takeNPointsAfterEvent=12;
 takeNPointsBeforeEvent=0;
 tensor1=[]; allLabels1=[];
 for i=1:length(whichSess)
@@ -533,6 +535,11 @@ dataMatrix(dataMatrix<0)=0; % no firing rates below 0
 % dataMatrix=dataMatrix(:,:,[2:5]);
 % dataMatrix_cueNoReach=setUpDataMatrix(cue_noReach_Response,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,takePointsBeforeZero,takePointsAfterZero);
 % dataMatrix_cueNoReach(dataMatrix_cueNoReach<0)=0; % no firing rates below 0
+
+load('Z:\MICROSCOPE\Kim\20221129 lab meeting\dataMatrix.mat')
+dataMatrix=dataMatrix(:,6:end-35,:);
+dataMatrix(:,1:end-6,3)=dataMatrix(:,7:end,3);
+dataMatrix(:,1:end-6,5)=dataMatrix(:,7:end,5);
 
 % PCA, CCA, etc.
 % CCA: Find orthogonal dimensions of max covariance between X=[] and Y=[]

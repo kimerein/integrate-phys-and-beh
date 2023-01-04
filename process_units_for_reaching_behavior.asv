@@ -448,7 +448,7 @@ plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',excludeTooFewTria
 plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false),'scatterInTimeWindows',[-3 -0.1],[0.5 4],'ColorLabel',excludeTooFewTrials(cue_Response,trial_n_cutoff,false),[-1 -0.3],[-0.3 1]);
 
 %% LDA analysis
-whichSess=53; % 81 has a fair number of cells
+whichSess=82; % 81 has a fair number of cells
 
 % downSampBy=25; % downsamp 60 ms bins by this much
 % takeNPointsAfterEvent=3;
@@ -462,18 +462,20 @@ response_to_plot2='uncued_success';
 LDA_analysis(whichSess,downSampBy,takeNPointsAfterEvent,takeNPointsBeforeEvent,response_to_plot1,response_to_plot2,dd,'SVM');
 
 %% Put together tensors
-whichSess=[81 60 75 53];
-downSampBy=4; % downsamp 60 ms bins by this much
-takeNPointsAfterEvent=15;
+whichSess=[81 60 75 5 11 22 31 47 62 63 65 66 67 68 70 82];
+downSampBy=3; % downsamp 60 ms bins by this much
+takeNPointsAfterEvent=20;
 takeNPointsBeforeEvent=0;
 tensor1=[]; allLabels1=[];
 for i=1:length(whichSess)
-    [tensor, allLabels, timepoints_for_tensor]=getTensorsForOneSession(whichSess(i), downSampBy, takeNPointsAfterEvent, takeNPointsBeforeEvent);
+    [tensor, allLabels, timepoints_for_tensor]=getTensorsForOneSession(whichSess(i), downSampBy, takeNPointsAfterEvent, takeNPointsBeforeEvent, dd);
     if ~isempty(tensor1)
         [tensor,allLabels]=catAndExpandTensor(tensor1, tensor, allLabels1, allLabels);
     end
     tensor1=tensor; allLabels1=allLabels;
+    close all;
 end
+disp(size(tensor))
 save(['C:\Users\sabatini\Documents\tensor.mat'],'tensor');
 save(['C:\Users\sabatini\Documents\allLabels.mat'],'allLabels');
 save(['C:\Users\sabatini\Documents\timepoints_for_tensor.mat'],'timepoints_for_tensor');
