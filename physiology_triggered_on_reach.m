@@ -94,7 +94,7 @@ settings.movie_dec=1;
 % POSITIVES ARE UNITS OF INTERVALS BETWEEN DISTRACTORS
 settings.minlagForInitialAlign=[]; %-20000; % if these are negative, works differently and will truncate this many frames from front of first movie only
 % if one is negative, the other (positive) value will be the actual maxlagForInitialAlign
-settings.maxlagForInitialAlign=[]; %50; % [] is don't want to constrain alignment
+settings.maxlagForInitialAlign=50; %50; % [] is don't want to constrain alignment
 settings.try_delay1=0;
 settings.try_delay2=0;
 if ~isempty(settings.minlagForInitialAlign) || ~isempty(settings.maxlagForInitialAlign)
@@ -153,8 +153,8 @@ end
 if length(a)>1
     isInBackHalf=false;
     fractionThru=0.15;
-    settings.minlagForInitialAlign=285;
-    settings.maxlagForInitialAlign=287;
+    settings.minlagForInitialAlign=[];
+    settings.maxlagForInitialAlign=[];
     if ~isempty(settings.minlagForInitialAlign) || ~isempty(settings.maxlagForInitialAlign)
         questdlg('Preset min and max lag. Continue?');
     end
@@ -179,7 +179,7 @@ if length(a)>1
         close all;
         isInBackHalf=false;
         fractionThru=0.5;
-        settings.minlagForInitialAlign=[];
+        settings.minlagForInitialAlign=600;
         settings.maxlagForInitialAlign=[];
 %         isInBackHalf=[];
 %         fractionThru=[];
