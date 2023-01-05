@@ -521,22 +521,26 @@ a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\cued_failu
 a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\uncued_success.mat'); uncued_success_Response=a.Response; 
 a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\uncued_failure.mat'); uncued_failure_Response=a.Response;
 a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\cue_noReach.mat'); cue_noReach_Response=a.Response;
+a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\uncued_reach.mat'); uncued_reach_Response=a.Response;
 trial_n_cutoff=0;
-out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',excludeTooFewTrials(cue_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false));
-cue_Response=out.Response1; cued_success_Response=out.Response2; cued_failure_Response=out.Response3; uncued_success_Response=out.Response4; uncued_failure_Response=out.Response5;
-% out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',excludeTooFewTrials(cue_noReach_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false));
-% cue_noReach_Response=out.Response1;
+% out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',excludeTooFewTrials(cue_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false));
+% cue_Response=out.Response1; cued_success_Response=out.Response2; cued_failure_Response=out.Response3; uncued_success_Response=out.Response4; uncued_failure_Response=out.Response5;
+out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',excludeTooFewTrials(cue_noReach_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false));
+cue_noReach_Response=out.Response1;  cued_success_Response=out.Response2; cued_failure_Response=out.Response3; uncued_success_Response=out.Response4; uncued_failure_Response=out.Response5;
+D1tag=uncued_reach_Response.D1tag(cued_success_Response.excluded==0); A2atag=uncued_reach_Response.A2atag(cued_success_Response.excluded==0); 
+save('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\for_data_matrix_D1vA2a.mat','D1tag','A2atag');
 
 takePointsBeforeZero=5; %15;
 takePointsAfterZero=70;
-dataMatrix=setUpDataMatrix(cue_Response,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,takePointsBeforeZero,takePointsAfterZero);
+% dataMatrix=setUpDataMatrix(cue_Response,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,takePointsBeforeZero,takePointsAfterZero);
+dataMatrix=setUpDataMatrix(cue_noReach_Response,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,takePointsBeforeZero,takePointsAfterZero);
 dataMatrix(dataMatrix<0)=0; % no firing rates below 0
 % take just outcome alignments
 % dataMatrix=dataMatrix(:,:,[2:5]);
 % dataMatrix_cueNoReach=setUpDataMatrix(cue_noReach_Response,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,takePointsBeforeZero,takePointsAfterZero);
 % dataMatrix_cueNoReach(dataMatrix_cueNoReach<0)=0; % no firing rates below 0
 
-load('Z:\MICROSCOPE\Kim\20221129 lab meeting\dataMatrix.mat')
+% load('Z:\MICROSCOPE\Kim\20221129 lab meeting\dataMatrix.mat')
 dataMatrix=dataMatrix(:,6:end-35,:);
 dataMatrix(:,1:end-6,3)=dataMatrix(:,7:end,3);
 dataMatrix(:,1:end-6,5)=dataMatrix(:,7:end,5);

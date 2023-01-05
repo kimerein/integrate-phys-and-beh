@@ -40,22 +40,27 @@ allconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[2:5])),10,R_guess);
 [~,cuescores]=plotPCA(data(:,:,1),6);
 % cueweights=ones(size(data,1),1);
 % drop first PC because represents DC offset?
-temp=allcell_PCs.score(:,2:end);
+temp=allcell_PCs.score(:,1:5);
 % throw out cells with very low weights on all PCs
-dontshow=sum(allcell_PCs.score,2,'omitnan')<-0.053 & sum(allcell_PCs.score,2,'omitnan')>-0.054;
-tsnetemp=tsne(temp,'Algorithm','exact','Distance','chebychev','Exaggeration',5,'NumDimensions',2,'Perplexity',60,'Standardize',false);
+dontshow=zeros(size(allcell_PCs.score,1),1); 
+% dontshow=sum(allcell_PCs.score,2,'omitnan')<-0.055 & sum(allcell_PCs.score,2,'omitnan')>-0.065;
+tsnetemp=tsne(temp,'Algorithm','exact','Distance','chebychev','Exaggeration',10,'NumDimensions',2,'Perplexity',60,'Standardize',false);
 currcuescore=cuescores(:,2);
 cuecolsfortsne=currcuescore-min(currcuescore,[],'all','omitnan'); cuecolsfortsne=cuecolsfortsne./max(cuecolsfortsne,[],'all','omitnan'); cuecolsfortsne=cuecolsfortsne*255;
 cuecolsfortsne=ceil(cuecolsfortsne); cuecolsfortsne(cuecolsfortsne==0)=1; dontshow(isnan(cuecolsfortsne))=true;  cuecolsfortsne(isnan(cuecolsfortsne))=1;
 cmap=colormap('jet');
 ccft=cmap(cuecolsfortsne,:); ccft(dontshow==true,:)=repmat([1 1 1],sum(dontshow==true),1);
 figure(); scatter(tsnetemp(:,1),tsnetemp(:,2),[],ccft); title('cue responsive');
-currcuescore=mean(cuescores(:,[1 2 3 4 5 6]),2,'omitnan');;
+currcuescore=mean(cuescores(:,[1 2 3]),2,'omitnan');
 cuecolsfortsne=currcuescore-min(currcuescore,[],'all','omitnan'); cuecolsfortsne=cuecolsfortsne./max(cuecolsfortsne,[],'all','omitnan'); cuecolsfortsne=cuecolsfortsne*255;
 cuecolsfortsne=ceil(cuecolsfortsne); cuecolsfortsne(cuecolsfortsne==0)=1; dontshow(isnan(cuecolsfortsne))=true;  cuecolsfortsne(isnan(cuecolsfortsne))=1;
 cmap=colormap('jet');
 ccft=cmap(cuecolsfortsne,:); ccft(dontshow==true,:)=repmat([1 1 1],sum(dontshow==true),1);
-figure(); scatter(tsnetemp(:,1),tsnetemp(:,2),[],ccft); title('pc 1 2 3 4 5 6 responsive');
+figure(); scatter(tsnetemp(:,1),tsnetemp(:,2),[],ccft); title('pc 1 2 3 responsive');
+% ccft=ones(size(D1tag,1),3)*0.9;
+% ccft(A2atag==1,:)=repmat([0 0 1],sum(A2atag==1),1);
+% ccft(D1tag==1,:)=repmat([1 0 0],sum(D1tag==1),1);
+% figure(); scatter(tsnetemp(:,1),tsnetemp(:,2),[],ccft);
 
 cuePC1_archetypeCells=projectDirectionOntoCPmodel(cuescores(:,1),allconditions_cpmodel,allcell_PCs); 
 % cueweights should be a vector, same length as units, with each unit's
