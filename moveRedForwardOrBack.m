@@ -20,6 +20,7 @@ switch moveOrDrop
             red.(f{i})=temp;
         end
     case 'drop'
+        disp('Dropping all BUT the specified index range');
         for i=1:size(f)
             temp=red.(f{i});
             if length(red_start_to_end)>2

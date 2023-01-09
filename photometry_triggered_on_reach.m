@@ -111,8 +111,8 @@ end
 alltbt1=selectRows(alltbt,fromvid);
 
 if length(a)>1
-    settings.minlagForInitialAlign=287;
-    settings.maxlagForInitialAlign=289;
+    settings.minlagForInitialAlign=[];
+    settings.maxlagForInitialAlign=[];
     if ~isempty(settings.minlagForInitialAlign) || ~isempty(settings.maxlagForInitialAlign)
         questdlg('Preset min and max lag. Continue?');
     end
@@ -129,7 +129,7 @@ if length(a)>1
     alltbt2=selectRows(alltbt,fromvid);
     
     if isfield(totalalignment,'from_third_video')
-        settings.minlagForInitialAlign=[];
+        settings.minlagForInitialAlign=609;
         settings.maxlagForInitialAlign=[];
         if ~isempty(settings.maxlagForInitialAlign) || ~isempty(settings.minlagForInitialAlign)
             [discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes,padPhotoTimesAtFront]=alignDistractors(totalalignment.movie_distractor(totalalignment.from_third_video==1),data.distractor,distract_thresh_movie,distract_thresh_photometry,totalalignment.timesfromarduino(totalalignment.from_third_video==1),data.distractor_times,settings,false,0.8);

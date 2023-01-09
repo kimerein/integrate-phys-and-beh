@@ -21,10 +21,10 @@ settings.tryinc=0.02;
 % this is red before black
 settings.forSearchMinus=-100; %100; % inds around optimal for search for each row
 % this is black before red
-settings.forSearchPlus=100; %200; % inds around optimal for search for each row
+settings.forSearchPlus=200; %200; % inds around optimal for search for each row
 % settings.try_scale1=0.6;
 % settings.try_scale2=1;  
-alignInd=9;
+alignInd=8;
 % downSampData2=true;
 ds=1; %1000;
 

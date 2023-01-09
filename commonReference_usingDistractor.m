@@ -6,7 +6,7 @@ function [beh1_tbt,beh2_tbt]=commonReference_usingDistractor(beh1_tbt,beh2_tbt,f
 % HOWEVER, movie_distractor should be the same in both behavior_tbt's
 % Thus, need to align trial indices
 
-maxTrialsLag=20; % should not be more than this many trials missing in the middle
+maxTrialsLag=0; % 20; % should not be more than this many trials missing in the middle, 0 if don't want to shift
 R_thresh=0.95; % threshold for correlation coefficient, if this is the right trial alignment
 % note that beh1_tbt and beh2_tbt were originally derived from the same
 % array, thus should be exactly matching when correctly aligned
@@ -54,51 +54,54 @@ checkAlignment(backup_data1*1.5,backup_data2); title('After global alignment');
 % So then proceed to check for best aligned trial for each trial
 % individually
 correct_backup_data2_trialinds=backup_data2_trialinds;
-for i=1:size(backup_data1,1)
-    if i>size(backup_data1,1)
-        break
-    end
-    if i>size(backup_data2,1)
-        break
-    end
-    R=corrcoef(backup_data1(i,:),backup_data2(i,:));
-    if isnan(R(1,2)) || R(1,2)<R_thresh
-        % if R is nan or less than R_thresh, find correct trial
-        test_R=nan(1,length(i-maxTrialsLag:i+maxTrialsLag));
-        k=1;
-        for j=i-maxTrialsLag:i+maxTrialsLag
-            if j<1 || j>size(backup_data2,1)
+skip_trialbytrial_alignment=false;
+if skip_trialbytrial_alignment==false
+    for i=1:size(backup_data1,1)
+        if i>size(backup_data1,1)
+            break
+        end
+        if i>size(backup_data2,1)
+            break
+        end
+        R=corrcoef(backup_data1(i,:),backup_data2(i,:));
+        if isnan(R(1,2)) || R(1,2)<R_thresh
+            % if R is nan or less than R_thresh, find correct trial
+            test_R=nan(1,length(i-maxTrialsLag:i+maxTrialsLag));
+            k=1;
+            for j=i-maxTrialsLag:i+maxTrialsLag
+                if j<1 || j>size(backup_data2,1)
+                    k=k+1;
+                    continue
+                end
+                tempd1=backup_data1(i,:);
+                tempd1(isnan(tempd1))=0;
+                tempd2=backup_data2(j,:);
+                tempd2(isnan(tempd2))=0;
+                temp=corrcoef(tempd1,tempd2);
+                test_R(k)=temp(1,2);
                 k=k+1;
-                continue
             end
-            tempd1=backup_data1(i,:);
-            tempd1(isnan(tempd1))=0;
-            tempd2=backup_data2(j,:);
-            tempd2(isnan(tempd2))=0;
-            temp=corrcoef(tempd1,tempd2);
-            test_R(k)=temp(1,2);
-            k=k+1;
+            % find best alignment
+            [maxie,bestalign]=nanmax(test_R);
+            if maxie>R_thresh
+                correct_backup_data2_trialinds(i,:)=ones(size(correct_backup_data2_trialinds(i,:))).*(i-maxTrialsLag+(bestalign-1));
+            else
+                % trial likely does not exist in data2
+                correct_backup_data2_trialinds(i,:)=nan;
+            end
         end
-        % find best alignment
-        [maxie,bestalign]=nanmax(test_R);
-        if maxie>R_thresh
-            correct_backup_data2_trialinds(i,:)=ones(size(correct_backup_data2_trialinds(i,:))).*(i-maxTrialsLag+(bestalign-1));
+    end
+    % Adjust backup_data1 and backup_data2 according to correct trial-by-trial
+    % alignment
+    for i=1:size(backup_data1,1)
+        if i>size(correct_backup_data2_trialinds,1)
+            break
+        end
+        if isnan(mode(correct_backup_data2_trialinds(i,:)))
+            backup_data2(i,:)=nan;
         else
-            % trial likely does not exist in data2
-            correct_backup_data2_trialinds(i,:)=nan;
+            backup_data2(i,:)=backup_data2(mode(correct_backup_data2_trialinds(i,:)),:);
         end
-    end
-end
-% Adjust backup_data1 and backup_data2 according to correct trial-by-trial
-% alignment
-for i=1:size(backup_data1,1)
-    if i>size(correct_backup_data2_trialinds,1)
-        break
-    end
-    if isnan(mode(correct_backup_data2_trialinds(i,:)))
-        backup_data2(i,:)=nan;
-    else
-        backup_data2(i,:)=backup_data2(mode(correct_backup_data2_trialinds(i,:)),:);
     end
 end
 checkAlignment(backup_data1*1.5,backup_data2); title('After trial-by-trial alignment');
