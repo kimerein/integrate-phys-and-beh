@@ -22,7 +22,7 @@ function plotRecSiteLocs()
 % make a colored point on grid for any channel in structure
 
 % ultimately, ingest this from .csv file
-dataTable='C:\Users\sabatini\Downloads\rec_site_locs.csv';
+dataTable='C:\Users\sabatini\Downloads\Spike sorting analysis - Sheet9.csv';
 data_loc_array=table2cell(readtable(dataTable,'Format','%s%s%s%s%u%u%u%u%u%u%s%u%u%u'));
 
 [a,b,c]=unique(data_loc_array{:,4});
@@ -57,6 +57,11 @@ siteMLpositions=data_loc_array{:,10}+data_loc_array{:,7};
 siteDVpositions=data_loc_array{:,9}+data_loc_array{:,6};
 didnotuse=data_loc_array{:,6}==1; 
 allSites=[siteAPpositions siteMLpositions siteDVpositions whichMouse didnotuse data_loc_array{:,12} data_loc_array{:,13} data_loc_array{:,14}]; % fifth column is whether used this recording
+% change whichMouse to index into colormap
+cmap=colormap('hsv');
+totalMice=length(unique(whichMouse));
+cmapstep=floor(254/totalMice)+1;
+allSites(:,4)=allSites(:,4)*cmapstep;
 
 allChs=[];
 for j=1:size(allSites,1)
@@ -77,17 +82,15 @@ end
 % Only plot sites in str
 stepsForFigs=1:-0.12:-3; % A-P wrt bregma, in mm
 stepsForFigs=stepsForFigs*1000; % convert to microns
-for i=1:length(stepsForFigs)
+for i=1:length(stepsForFigs)-1
     currAPstep=stepsForFigs(i);
     % plot all channels that were not thrown out based on anatomy that are
     % in this slice
-    whichToPlot=allChs(:,)
+    whichToPlot=allChs(:,5)==0 & (allChs(:,1)>=currAPstep & allChs(:,1)<stepsForFigs(i+1));
     figure();
     grid on
-    
+    scatter(allChs(whichToPlot,2),allChs(whichToPlot,3),[],cmap(allChs(whichToPlot,4),:));
+    title(num2str(currAPstep));
 end
-
-
-
 
 end

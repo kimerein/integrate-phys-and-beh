@@ -32,7 +32,7 @@ whichMouse=c;
 errorAllowance=0; % in microns, expand structure to allow for error in anatomy
 data_loc_array(:,13)=data_loc_array(:,13)-errorAllowance;
 data_loc_array(:,14)=data_loc_array(:,14)+errorAllowance;
-siteSpacing=20; % in microns
+chSpacing=20; % in microns
 entry_X=-2277;
 final_X=-3857;
 entry_Y=7902;
@@ -45,9 +45,11 @@ phi=asind(abs(entry_X-final_X)/abs(entry_Z-final_Z)); % in degrees, angle of pro
 
 % site 32 is most dorsall, 1 is most ventral
 % Calculate all site locations
-chOffsets=([1:32]-1)*siteSpacing; % ventral tip minus this
+chOffsets=([1:32]-1)*chSpacing; % ventral tip minus this
 % account for angle of probe (not straight down)
-siteOffsets=siteOffsets*cosd(phi);
+chOffsets=chOffsets*cosd(phi);
+chOffsetsAP=chOffsets*sind(phi)*cosd(theta);
+chOffsetsML=chOffsets*sind(phi)*sind(theta);
 % Get A-P positions of all sites
 % already accounted for theta in google sheet
 siteAPpositions=data_loc_array{:,8}-data_loc_array{:,5};
@@ -55,11 +57,18 @@ siteMLpositions=data_loc_array{:,10}+data_loc_array{:,7};
 siteDVpositions=data_loc_array{:,9}+data_loc_array{:,6};
 didnotuse=data_loc_array{:,6}==1; 
 allSites=[siteAPpositions siteMLpositions siteDVpositions whichMouse didnotuse data_loc_array{:,12} data_loc_array{:,13} data_loc_array{:,14}]; % fifth column is whether used this recording
+% change whichMouse to index into colormap
+cmap=colormap('hsv');
+totalMice=length(unique(whichMouse));
+cmapstep=floor(255/totalMice);
+
 
 allChs=[];
 for j=1:size(allSites,1)
-    for i=1:length(siteOffsets)
-        currZoffset=siteOffsets(i);
+    for i=1:length(chOffsets)
+        currZoffset=chOffsets(i);
+        currMLoffset=chOffsetsML(i);
+        currAPoffset=chOffsetsAP(i);
         temp=allSites(j,:);
         temp(3)=temp(3)-currZoffset;
         temp(2)=temp(2)-currMLoffset;
@@ -73,11 +82,11 @@ end
 % Only plot sites in str
 stepsForFigs=1:-0.12:-3; % A-P wrt bregma, in mm
 stepsForFigs=stepsForFigs*1000; % convert to microns
-for i=1:length(stepsForFigs)
+for i=1:length(stepsForFigs)-1
     currAPstep=stepsForFigs(i);
     % plot all channels that were not thrown out based on anatomy that are
     % in this slice
-    whichToPlot=allChs(:,)
+    whichToPlot=allChs(:,5)==0 & (allChs(:,1)>=currAPstep & allChs(:,1)<stepsForFigs(i+1));
     figure();
     grid on
     
