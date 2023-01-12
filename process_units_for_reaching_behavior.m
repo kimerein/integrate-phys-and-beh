@@ -88,6 +88,7 @@ data_loc_array=table2cell(readtable(dataTable,'Format','%s%s%s%u%s%s%s%s%s%u%u%s
 % data_loc_array{i,10}=2000; % dorsal-most depth that is posterior striatum
 % data_loc_array{i,11}=2600; % ventral-most depth that is posterior striatum
 % data_loc_array{i,12}='none'; % if opto-tagging, which tag
+% data_loc_array{i,13}=false; % flag if penetration was not through str
 
 %% 2. Auto-populate SU QC and behavior alignments -- for 84 sessions, running all of this takes about 12 hrs
 % Discarding trials where unit dead or moved away

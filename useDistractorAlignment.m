@@ -19,12 +19,12 @@ settings.delaysteps=1;
 settings.try_delay2=5; %10;
 settings.tryinc=0.02;
 % this is red before black
-settings.forSearchMinus=-100; %100; % inds around optimal for search for each row
+settings.forSearchMinus=-10; %100; % inds around optimal for search for each row
 % this is black before red
-settings.forSearchPlus=200; %200; % inds around optimal for search for each row
+settings.forSearchPlus=10; %200; % inds around optimal for search for each row
 % settings.try_scale1=0.6;
 % settings.try_scale2=1;  
-alignInd=8;
+alignInd=10;
 % downSampData2=true;
 ds=1; %1000;
 

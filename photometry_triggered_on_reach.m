@@ -129,8 +129,8 @@ if length(a)>1
     alltbt2=selectRows(alltbt,fromvid);
     
     if isfield(totalalignment,'from_third_video')
-        settings.minlagForInitialAlign=609;
-        settings.maxlagForInitialAlign=[];
+        settings.minlagForInitialAlign=590;
+        settings.maxlagForInitialAlign=609;
         if ~isempty(settings.maxlagForInitialAlign) || ~isempty(settings.minlagForInitialAlign)
             [discardedPhotoFrames_time,frontShift_time,scaleBy,movie_LED,movie_times,scaleMovieTimes,addToMovieTimes,padPhotoTimesAtFront]=alignDistractors(totalalignment.movie_distractor(totalalignment.from_third_video==1),data.distractor,distract_thresh_movie,distract_thresh_photometry,totalalignment.timesfromarduino(totalalignment.from_third_video==1),data.distractor_times,settings,false,0.8);
         else
