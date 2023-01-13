@@ -20,18 +20,24 @@ function plotRecSiteLocs()
 % column 14 is bottom_of_structure passed to process_units
 % e.g., data_loc_array{i,11}=2600;
 % make a colored point on grid for any channel in structure
+% last column 15 is whichMouse number
 
 % ultimately, ingest this from .csv file
-dataTable='C:\Users\sabatini\Downloads\rec_site_locs.csv';
-data_loc_array=table2cell(readtable(dataTable,'Format','%s%s%s%s%u%u%u%u%u%u%s%u%u%u'));
+dataTable='C:\Users\sabatini\Downloads\Spike sorting analysis - Sheet9.csv';
+data_loc_array=table2cell(readtable(dataTable,'Format','%s%s%s%s%u%u%u%u%u%u%u%u%u%u%u'));
 
-[a,b,c]=unique(data_loc_array{:,4});
-whichMouse=c;
+newarray=nan(size(data_loc_array,1),size(data_loc_array,2));
+for i=1:size(data_loc_array,1)
+    for j=5:size(data_loc_array,2)
+        newarray(i,j)=data_loc_array{i,j};
+    end
+end
+whichMouse=newarray(:,end);
 
 % First, calculate probe track angle for Kim's Floor 1 WHISPER rig striatum physiology data
 errorAllowance=0; % in microns, expand structure to allow for error in anatomy
-data_loc_array(:,13)=data_loc_array(:,13)-errorAllowance;
-data_loc_array(:,14)=data_loc_array(:,14)+errorAllowance;
+newarray(:,13)=newarray(:,13)-errorAllowance;
+newarray(:,14)=newarray(:,14)+errorAllowance;
 chSpacing=20; % in microns
 entry_X=-2277;
 final_X=-3857;
@@ -52,16 +58,16 @@ chOffsetsAP=chOffsets*sind(phi)*cosd(theta);
 chOffsetsML=chOffsets*sind(phi)*sind(theta);
 % Get A-P positions of all sites
 % already accounted for theta in google sheet
-siteAPpositions=data_loc_array{:,8}-data_loc_array{:,5};
-siteMLpositions=data_loc_array{:,10}+data_loc_array{:,7};
-siteDVpositions=data_loc_array{:,9}+data_loc_array{:,6};
-didnotuse=data_loc_array{:,6}==1; 
-allSites=[siteAPpositions siteMLpositions siteDVpositions whichMouse didnotuse data_loc_array{:,12} data_loc_array{:,13} data_loc_array{:,14}]; % fifth column is whether used this recording
+siteAPpositions=newarray(:,8)-newarray(:,5);
+siteMLpositions=newarray(:,10)+newarray(:,7);
+siteDVpositions=newarray(:,9)+newarray(:,6);
+didnotuse=newarray(:,11)==1; 
+allSites=[siteAPpositions siteMLpositions siteDVpositions whichMouse didnotuse newarray(:,12) newarray(:,13) newarray(:,14)]; % fifth column is whether used this recording
 % change whichMouse to index into colormap
 cmap=colormap('hsv');
 totalMice=length(unique(whichMouse));
-cmapstep=floor(255/totalMice);
-
+cmapstep=floor(254/totalMice)+1;
+allSites(:,4)=allSites(:,4)*cmapstep;
 
 allChs=[];
 for j=1:size(allSites,1)
@@ -72,7 +78,7 @@ for j=1:size(allSites,1)
         temp=allSites(j,:);
         temp(3)=temp(3)-currZoffset;
         temp(2)=temp(2)-currMLoffset;
-        temp(1)=temp(1)-currAPoffset;
+        temp(1)=temp(1)+currAPoffset;
         threwout=temp(5)==1;
         temp(5)=threwout || temp(3)<temp(7) || temp(3)>temp(8);
         allChs=[allChs; temp];
@@ -80,19 +86,21 @@ for j=1:size(allSites,1)
 end
 
 % Only plot sites in str
-stepsForFigs=1:-0.12:-3; % A-P wrt bregma, in mm
+stepsForFigs=fliplr(1:-0.12:-3); % A-P wrt bregma, in mm
 stepsForFigs=stepsForFigs*1000; % convert to microns
 for i=1:length(stepsForFigs)-1
     currAPstep=stepsForFigs(i);
     % plot all channels that were not thrown out based on anatomy that are
     % in this slice
     whichToPlot=allChs(:,5)==0 & (allChs(:,1)>=currAPstep & allChs(:,1)<stepsForFigs(i+1));
+    if sum(whichToPlot)<1
+        continue
+    end
     figure();
+    scatter(allChs(whichToPlot==1,2),allChs(whichToPlot==1,3),[],cmap(allChs(whichToPlot==1,4),:));
+    set(gca, 'YDir','reverse')
     grid on
-    
+    title(num2str(currAPstep));
 end
-
-
-
 
 end
