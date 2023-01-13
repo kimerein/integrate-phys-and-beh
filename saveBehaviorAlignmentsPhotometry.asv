@@ -13,7 +13,7 @@ timeWindow=[-1 16]; % in seconds from cue onset
 subDir='cue';
 plotPhotometryResult(photometry_tbt,behavior_tbt,[],'all_reachBatch','green_ch','cueZone_onVoff','first');
 plotPhotometryResult(photometry_tbt,behavior_tbt,outdata,alignTo,plotPhotoField,plotBehField,firstInTrialOrLast,withinRange,hax)
-[~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhotometryResult(phys_tbt,behavior_tbt,[],event,'green_ch','cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+[~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,'green_ch','cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
 saveStuff(saveDir,subDir,'',saveName,'cueAligned',dataout,alignComp,phys_timepointsComp);
 
 % Uncued reach
