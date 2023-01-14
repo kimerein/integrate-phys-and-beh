@@ -88,6 +88,11 @@ data_loc_array=table2cell(readtable(dataTable,'Format','%s%s%s%u%s%s%s%s%s%u%u%s
 % data_loc_array{i,10}=2000; % dorsal-most depth that is posterior striatum
 % data_loc_array{i,11}=2600; % ventral-most depth that is posterior striatum
 % data_loc_array{i,12}='none'; % if opto-tagging, which tag
+% data_loc_array{i,13}=false; % flag if penetration was not through str
+% data_loc_array{i,14}='green_ch'; % which photo ch to use for photometry
+% data_loc_array{i,15}='Z:\MICROSCOPE\Kim\WHISPER
+% recs\dLight1\20210311\photometry aligned to beh'; % where to save
+% beh-aligned photomet
 
 %% 2. Auto-populate SU QC and behavior alignments -- for 84 sessions, running all of this takes about 12 hrs
 % Discarding trials where unit dead or moved away
@@ -95,6 +100,7 @@ for i=1:size(data_loc_array,1)
     % load tbt (trial by trial) data
     [physiology_tbt,beh2_tbt,behavior_tbt,photometry_tbt]=loadReachingExptPhysData(data_loc_array(i,:));
     % save photometry alignments to behavior, if photometry was acquired
+    saveBehaviorAlignmentsPhotometry(photometry_tbt,behavior_tbt,data_loc_array{i,15},'',data_loc_array{i,14}); 
     % get spikes
     dd=dir(data_loc_array{i,7});
     disp(['Processing ' data_loc_array{i,7}]);
@@ -522,12 +528,13 @@ a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\uncued_suc
 a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\uncued_failure.mat'); uncued_failure_Response=a.Response;
 a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\cue_noReach.mat'); cue_noReach_Response=a.Response;
 a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\uncued_reach.mat'); uncued_reach_Response=a.Response;
-trial_n_cutoff=2;
+trial_n_cutoff=0;
 % out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',excludeTooFewTrials(cue_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false));
 % cue_Response=out.Response1; cued_success_Response=out.Response2; cued_failure_Response=out.Response3; uncued_success_Response=out.Response4; uncued_failure_Response=out.Response5;
 out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',excludeTooFewTrials(cue_noReach_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false));
 cue_noReach_Response=out.Response1;  cued_success_Response=out.Response2; cued_failure_Response=out.Response3; uncued_success_Response=out.Response4; uncued_failure_Response=out.Response5;
-isD1=
+D1tag=uncued_reach_Response.D1tag(cued_success_Response.excluded==0); A2atag=uncued_reach_Response.A2atag(cued_success_Response.excluded==0); 
+save('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\for_data_matrix_D1vA2a.mat','D1tag','A2atag');
 
 takePointsBeforeZero=5; %15;
 takePointsAfterZero=70;
