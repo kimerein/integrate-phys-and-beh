@@ -1,14 +1,15 @@
 function recodeMissVGrab
 
-currentVid='Z:\MICROSCOPE\Kim\WHISPER recs\Oct_D\20210402\O2 output\2021-04-02 17-11-50-C_processed_data';
-datestr='20210402';
-mousename='Oct_D';
+currentVid='Z:\MICROSCOPE\Kim\Behavior Final Data Sets\Learning curves w interleaved silencing\Dec_d\2020-03-02 17-05-45-C_processed_data';
+datestr='20200302';
+mousename='Dec_d';
 timeForDislodged=0.4;
 
 f_pr=regexp(currentVid,'_processed_data');
 fslash=regexp(currentVid,'\');
 aviName=currentVid(fslash(end)+1:f_pr-1);
-placeForO2data=['Z:\MICROSCOPE\Kim\WHISPER recs\' mousename '\' datestr '\O2 output\' aviName];
+placeForO2data=['Z:\MICROSCOPE\Kim\KER Behavior\By date\Low speed\' datestr '\' mousename '\O2 output\' aviName];
+% placeForO2data=['Z:\MICROSCOPE\Kim\WHISPER recs\' mousename '\' datestr '\O2 output\' aviName];
 
 load([currentVid '\tbt.mat'])
 backuptbt=tbt;

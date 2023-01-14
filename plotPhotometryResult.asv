@@ -392,9 +392,6 @@ if typeOfReach==true
         hold on;
         plotEventsScatter(behavior_tbt,fromInputRow(~isnan(fromInputRow)),'cueZone_onVoff','all_reachBatch','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts','success_reachStarts_pawOnWheel');
     end
-    if suppressAllButLastFig==true
-        suppressFigs=false;
-    end
     if ~isempty(hax)
         if ~isnumeric(hax{2})
             axes(hax{2});

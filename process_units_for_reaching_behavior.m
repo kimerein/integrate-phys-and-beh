@@ -89,6 +89,7 @@ data_loc_array=table2cell(readtable(dataTable,'Format','%s%s%s%u%s%s%s%s%s%u%u%s
 % data_loc_array{i,11}=2600; % ventral-most depth that is posterior striatum
 % data_loc_array{i,12}='none'; % if opto-tagging, which tag
 % data_loc_array{i,13}=false; % flag if penetration was not through str
+% data_loc_array{i,14}='green_ch'; % which photo ch to use for photometry
 
 %% 2. Auto-populate SU QC and behavior alignments -- for 84 sessions, running all of this takes about 12 hrs
 % Discarding trials where unit dead or moved away
@@ -96,6 +97,7 @@ for i=1:size(data_loc_array,1)
     % load tbt (trial by trial) data
     [physiology_tbt,beh2_tbt,behavior_tbt,photometry_tbt]=loadReachingExptPhysData(data_loc_array(i,:));
     % save photometry alignments to behavior, if photometry was acquired
+    saveBehaviorAlignmentsPhotometry(photometry_tbt,behavior_tbt,data_loc_array{i,8},'',data_loc_array{i,14}); 
     % get spikes
     dd=dir(data_loc_array{i,7});
     disp(['Processing ' data_loc_array{i,7}]);
