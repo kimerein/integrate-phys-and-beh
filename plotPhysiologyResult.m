@@ -1103,7 +1103,7 @@ eventInds=eventInds+withinRange_inds(1)-1;
 
 j=1;
 mi=nanmin(eventInds);
-if indsBeforeEvent>mi
+if indsBeforeEvent>=mi
     indsBeforeEvent=mi-1;
 end
 alignedOut=nan(sum(~isnan(eventInds)),length(mi-indsBeforeEvent:mi+howMuchToTake-1));
