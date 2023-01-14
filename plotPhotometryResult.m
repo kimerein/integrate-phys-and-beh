@@ -1,10 +1,11 @@
-function [fout,dataout,n_events_in_av,alignmentCompanion,f_heatmap,plotBehFieldOut]=plotPhotometryResult(photometry_tbt,behavior_tbt,outdata,alignTo,plotPhotoField,plotBehField,firstInTrialOrLast,withinRange,hax,suppressFigs)
+function [fout,dataout,n_events_in_av,alignmentCompanion,f_heatmap,plotBehFieldOut,phys_timepointsCompanion]=plotPhotometryResult(photometry_tbt,behavior_tbt,outdata,alignTo,plotPhotoField,plotBehField,firstInTrialOrLast,withinRange,hax,suppressFigs)
 
 % alignTo can be 'cue','success_reachStarts', etc.
 fout=[];
 dataout=[];
 n_events_in_av=[];
 alignmentCompanion=[];
+phys_timepointsCompanion=[];
 f_heatmap=[];
 plotBehFieldOut=[];
 suppressAllButLastFig=true;
@@ -192,6 +193,8 @@ switch alignTo
         end
         dataout.x=phototimes;
         dataout.y=photometry_tbt.(plotPhotoField);
+        phys_timepointsCompanion.x=tempphototimes;
+        phys_timepointsCompanion.y=photometry_tbt.phys_timepoints;
         temp=photometry_tbt.(plotPhotoField);
         if suppressFigs==false
             plotWStderr(nanmean(photometry_tbt.cue,1)*(nanmax(nanmean(temp(:,1:plotUntilInd),1))/nanmax(nanmean(photometry_tbt.cue,1))),f_times,'b',f,size(photometry_tbt.cue,1));
@@ -301,6 +304,7 @@ if typeOfReach==true
     alignTimes=getValsFromRows(behavior_tbt.times_wrt_trial_start,alignInds,fromInputRow);
     indsIntoPhoto=getIndsFromRows(photometry_tbt.(getCorrectTime_wrtTrialStart),alignTimes,fromInputRow);
     [alignedData,alignedAt]=alignRowsToInds(photometry_tbt.(plotPhotoField),indsIntoPhoto,nanmin(indsIntoPhoto),fromInputRow,alignPeaks,indsFromPeak,minBaselineSamples);
+    phys_timepoints_alignedData=alignRowsToInds(photometry_tbt.green_time,indsIntoPhoto,nanmin(indsIntoPhoto),fromInputRow,alignPeaks,indsFromPeak,minBaselineSamples);
     % pad phototimes if alignedData is bigger
     if size(alignedData,2)>size(phototimes,2)
         phototimes=[phototimes nan(size(phototimes,1),size(alignedData,2)-size(phototimes,2))];
@@ -414,6 +418,8 @@ if typeOfReach==true
     end
     dataout.x=phototimes(1:size(alignedData,2))-(phototimes(alignedAt)-behTimes(bmax));
     dataout.y=alignedData;
+    phys_timepointsCompanion.x=dataout.x;
+    phys_timepointsCompanion.y=phys_timepoints_alignedData;
     te=nanmean(alignedData,1);
     te=te(~isnan(te));
     if nansum(te<=0)<length(te)*0.9

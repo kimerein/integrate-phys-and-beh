@@ -244,9 +244,11 @@ switch alignTo
         if any(isnan(tempphototimes))
             tempphototimes(isnan(tempphototimes))=0;
         end
-        plotTrialsAsHeatmap(photometry_tbt.(plotPhotoField),tempphototimes,photometry_tbt.cue,f_times,10,maxTimeForHeatmap,false,false);
-        hold on;
-        plotEventsScatter(behavior_tbt,1:size(behavior_tbt.cue,1),'cueZone_onVoff','all_reachBatch','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts',[]);
+        if suppressFigs==false
+            plotTrialsAsHeatmap(photometry_tbt.(plotPhotoField),tempphototimes,photometry_tbt.cue,f_times,10,maxTimeForHeatmap,false,false);
+            hold on;
+            plotEventsScatter(behavior_tbt,1:size(behavior_tbt.cue,1),'cueZone_onVoff','all_reachBatch','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts',[]);
+        end
         if ~isempty(hax)
             if ~isnumeric(hax{2})
                 axes(hax{2});
@@ -261,14 +263,18 @@ switch alignTo
                 fout=figure();
             end
         end
-        plotWStderr(photometry_tbt.(plotPhotoField),tempphototimes,'k',plotUntilInd,size(photometry_tbt.cue,1));
+        if suppressFigs==false
+            plotWStderr(photometry_tbt.(plotPhotoField),tempphototimes,'k',plotUntilInd,size(photometry_tbt.cue,1));
+        end
         dataout.x=tempphototimes;
         dataout.y=photometry_tbt.(plotPhotoField);
         phys_timepointsCompanion.x=tempphototimes;
         phys_timepointsCompanion.y=photometry_tbt.phys_timepoints;
         hold on;
         temp=photometry_tbt.(plotPhotoField);
-        plotWStderr(nanmean(photometry_tbt.cue,1),f_times,'b',f,size(photometry_tbt.cue,1));
+        if suppressFigs==false
+            plotWStderr(nanmean(photometry_tbt.cue,1),f_times,'b',f,size(photometry_tbt.cue,1));
+        end
         n_events_in_av=size(photometry_tbt.(plotPhotoField),1);
         alignmentCompanion.x=f_times;
         for i=1:size(photometry_tbt.cue,1)
