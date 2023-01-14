@@ -193,8 +193,8 @@ switch alignTo
         end
         dataout.x=phototimes;
         dataout.y=photometry_tbt.(plotPhotoField);
-        phys_timepointsCompanion.x=tempphototimes;
-        phys_timepointsCompanion.y=photometry_tbt.phys_timepoints;
+        phys_timepointsCompanion.x=phototimes;
+        phys_timepointsCompanion.y=photometry_tbt.green_time;
         temp=photometry_tbt.(plotPhotoField);
         if suppressFigs==false
             plotWStderr(nanmean(photometry_tbt.cue,1)*(nanmax(nanmean(temp(:,1:plotUntilInd),1))/nanmax(nanmean(photometry_tbt.cue,1))),f_times,'b',f,size(photometry_tbt.cue,1));
@@ -206,6 +206,27 @@ switch alignTo
             plotBehFieldOut.x=nanmean(behavior_tbt.times_wrt_trial_start,1);
             plotBehFieldOut.y=behavior_tbt.(plotBehField);
         end
+    case 'cue_followedby_success'
+        typeOfReach=true;
+        useReach='combo';
+        [~,f]=nanmax(nanmean(behavior_tbt.cueZone_onVoff,1));
+        temp=behavior_tbt.cueZone_onVoff;
+        temp(~any(behavior_tbt.reachBatch_success_reachStarts(:,f:end)>0.5,2),:)=0;
+        useCombo=temp;
+    case 'cue_followedby_late_success'
+        typeOfReach=true;
+        useReach='combo';
+        [~,f]=nanmax(nanmean(behavior_tbt.cueZone_onVoff,1));
+        temp=behavior_tbt.cueZone_onVoff;
+        temp(~any(behavior_tbt.reachBatch_success_reachStarts(:,f+75:end)>0.5,2),:)=0;
+        useCombo=temp;
+    case 'cue_noReach'
+        typeOfReach=true;
+        useReach='combo';
+        [~,f]=nanmax(nanmean(behavior_tbt.cueZone_onVoff,1));
+        temp=behavior_tbt.cueZone_onVoff;
+        temp(any(behavior_tbt.reachStarts(:,1:f+115)>0.5,2),:)=0;
+        useCombo=temp;
     case 'distractor'
         temp=behavior_tbt.movie_distractor;
         temp=diff(temp,1,2);
@@ -244,6 +265,36 @@ switch alignTo
                 if any(behavior_tbt.success_reachStarts(i,starter:f)>0.5)
                     % success before this, exclude
                     useCombo(i,~isnan(useCombo(i,:)))=0;
+                end
+            end
+        end
+    case 'misses_and_pelletMissing_and_drop'
+        typeOfReach=true;
+        useReach='combo';
+        excludeAfterSuccess=true;
+        excludeWithinTimeWindow=6; % in sec
+        excludeWithinInds=floor(excludeWithinTimeWindow/mode(diff(nanmean(behavior_tbt.times,1))));
+        useCombo=behavior_tbt.reachBatch_miss_reachStarts+behavior_tbt.reachBatch_miss_reachStarts_pawOnWheel+behavior_tbt.pelletmissingreach_reachStarts+behavior_tbt.reachBatch_drop_reachStarts+behavior_tbt.reachBatch_drop_reachStarts_pawOnWheel;
+        if excludeAfterSuccess==true
+            for i=1:size(useCombo,1)
+                f=find(useCombo(i,:)>0.05,1,'first');
+                if isempty(f)
+                    continue
+                end
+                for j=1:length(f)
+                    currf=f(j);
+                    starter=currf-excludeWithinInds;
+                    if starter<1
+                        starter=1;
+                    end
+                    if any(behavior_tbt.success_reachStarts(i,starter:currf)>0.5 | behavior_tbt.reachBatch_success_reachStarts(i,starter:currf)>0.5 | behavior_tbt.reachBatch_success_reachStarts_pawOnWheel(i,starter:currf)>0.5)
+                        % success before this, exclude
+                        upto=currf+10; 
+                        if upto>length(useCombo(i,:))
+                            upto=length(useCombo(i,:));
+                        end
+                        useCombo(i,starter:upto)=0;
+                    end
                 end
             end
         end
