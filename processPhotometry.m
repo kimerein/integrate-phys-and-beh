@@ -64,6 +64,7 @@ settings.chronux.movingwin=[0.1 0.01]; % dLight1.1, used this recently
 params.tapers=[3 2]; % dLight1.1
 params.Fs=Fs;
 params.trialave=0;
+settings.chronux.location='C:\Users\sabatini\Documents\GitHub\chronux_2_11';
 settings.chronux.params=params;
 settings.chronux.display=false;
 settings.chronux.greenfilter_range=[120 200]; %[120 200]; % band pass range in Hz, green channel
@@ -75,7 +76,7 @@ settings.prc=10; % if using 'percentile', which prctile
 settings.baselineWindow=30; % in secs, length of baseline window
 settings.firstSubtractDCbaseline=true; % first subtract off DC baseline across whole trace, then get dF_F
 
-
+addpath(genpath(settings.chronux.location));
 
 dd=dir(datadir);
 %dd=dd(1:50);
@@ -242,7 +243,7 @@ if useRedCh==true
 end
 
 
-
+rmpath(genpath(settings.chronux.location));
 
 end
 

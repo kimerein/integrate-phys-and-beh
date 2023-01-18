@@ -5,7 +5,7 @@ function [photometry_tbt,behavior_tbt,data]=photometry_triggered_on_reach(datadi
 distract_thresh_photometry=0.5;
 minTimeBetweenCues=2; % in seconds, include some slop in alignment
 useCue='cueZone_onVoff';
-chronuxPathWFindpeaks='C:\Users\sabatini\Documents\MATLAB\chronux_2_11\spectral_analysis\continuous';
+chronuxPathWFindpeaks='C:\Users\sabatini\Documents\GitHub\chronux_2_11';
 askUserIfFixedDrops=true;
 
 if askUserIfFixedDrops==true
@@ -15,7 +15,7 @@ if askUserIfFixedDrops==true
     end
 end
 
-rmpath(chronuxPathWFindpeaks);
+rmpath(genpath(chronuxPathWFindpeaks));
 
 % other settings
 distract_thresh_movie=0.5; % from alignment
