@@ -24,7 +24,7 @@ settings.forSearchMinus=-10; %100; % inds around optimal for search for each row
 settings.forSearchPlus=10; %200; % inds around optimal for search for each row
 % settings.try_scale1=0.6;
 % settings.try_scale2=1;  
-alignInd=12;
+alignInd=11;
 % downSampData2=true;
 ds=1; %1000;
 

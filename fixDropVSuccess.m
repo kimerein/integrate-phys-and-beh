@@ -3,9 +3,9 @@ function fixDropVSuccess(varargin)
 % script for fixing drop vs success classifications
 
 if isempty(varargin)
-    currentVid='Z:\MICROSCOPE\Kim\KER Behavior\By date\Low speed\20220427\dLight_181\O2 output\VID_20130606_180514_processed_data';
-    datestr='20220427';
-    mousename='dLight_181';
+    currentVid='Z:\MICROSCOPE\Kim\KER Behavior\By date\Low speed\20220504\dLight_171\O2 output\VID_20130613_200807_processed_data';
+    datestr='20220504';
+    mousename='dLight_171';
     f_pr=regexp(currentVid,'_processed_data');
     fslash=regexp(currentVid,'\');
     aviName=currentVid(fslash(end)+1:f_pr-1);
