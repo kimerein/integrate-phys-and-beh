@@ -87,13 +87,17 @@ end
 
 function maxy=plotit(dataout,alignComp,c)
 
+gaussmooth=80;
+
 [~,ma]=nanmax(nanmean(alignComp.y,1));
 alignmentTime=alignComp.x(ma);
-temp=smoothdata(nanmean(dataout.y,1),'gaussian',40);
+temp=smoothdata(nanmean(dataout.y,1),'gaussian',gaussmooth);
 plot(dataout.x-alignmentTime,temp,'Color',c);
-maxy=max(temp(dataout.x-alignmentTime>-3 & dataout.x-alignmentTime<+10),[],'omitnan');
+% maxy=max(temp(dataout.x-alignmentTime>-3 & dataout.x-alignmentTime<+10),[],'omitnan');
+maxy=max(temp(dataout.x-alignmentTime>-1 & dataout.x-alignmentTime<+4),[],'omitnan');
 hold on; 
 line([alignComp.x(ma)-alignmentTime alignComp.x(ma)-alignmentTime],[0 1],'Color','b');
-xlim([-3 +10]);
+% xlim([-3 +10]);
+xlim([-1 +4]);
 
 end
