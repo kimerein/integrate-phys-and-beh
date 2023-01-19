@@ -1,0 +1,22 @@
+function plotSU_contextAndOutcome(loc,un)
+
+a=load([loc '\cued_success\' un '__cuedSuccess.mat']);
+cuedSuccess.dataout=a.dataout;
+cuedSuccess.alignComp=a.alignComp;
+a=load([loc '\cued_drop\' un '__cuedDrop.mat']);
+cuedFailure.dataout=a.dataout;
+cuedFailure.alignComp=a.alignComp;
+a=load([loc '\uncued_success\' un '__uncuedSuccess.mat']);
+uncuedSuccess.dataout=a.dataout;
+uncuedSuccess.alignComp=a.alignComp;
+a=load([loc '\uncued_drop\' un '__uncuedDrop.mat']);
+uncuedFailure.dataout=a.dataout;
+uncuedFailure.alignComp=a.alignComp;
+
+figure(); 
+subplot(4,1,1);
+dataout=
+plot(dataout.x,smoothdata(nanmean(dataout.y,1),'gaussian',40));
+hold on; 
+[~,ma]=nanmax(nanmean(alignComp.y,1)); 
+line([alignComp.x(ma) alignComp.x(ma)],[0 1],'Color','b');

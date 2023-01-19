@@ -3,9 +3,9 @@ function fixDropVSuccess(varargin)
 % script for fixing drop vs success classifications
 
 if isempty(varargin)
-    currentVid='Z:\MICROSCOPE\Kim\KER Behavior\By date\Low speed\20220420\dLight_153\O2 output\VID_20130530_215535_processed_data';
-    datestr='20220420';
-    mousename='dLight_153';
+    currentVid='Z:\MICROSCOPE\Kim\KER Behavior\By date\Low speed\20220427\dLight_181\O2 output\VID_20130606_180514_processed_data';
+    datestr='20220427';
+    mousename='dLight_181';
     f_pr=regexp(currentVid,'_processed_data');
     fslash=regexp(currentVid,'\');
     aviName=currentVid(fslash(end)+1:f_pr-1);
@@ -29,6 +29,8 @@ else
     end
 end
 
+addpath(genpath('C:\Users\sabatini\Documents\GitHub\chronux_2_11'));
+
 load([currentVid '\tbt.mat'])
 backuptbt=tbt;
 if isempty(alignment)
@@ -46,3 +48,5 @@ save([currentVid '\tbt.mat'],'tbt');
 
 fid=fopen([currentVid '\fixed_tbt_success_v_drop.txt'],'wt');
 fclose(fid);
+
+rmpath(genpath('C:\Users\sabatini\Documents\GitHub\chronux_2_11'));
