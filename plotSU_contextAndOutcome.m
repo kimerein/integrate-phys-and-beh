@@ -133,6 +133,23 @@ if dodprime==true
 
     subplot(2,2,4);
     plot(linspace(-3,10,size(resp_h4_cyan,2)),dprime(resp_h4_cyan,resp_h4_black)); line([0 0],[0 1],'Color','b'); xlim([-3 +10]);
+
+    figure();
+    subplot(2,2,1);
+    plot(linspace(-3,10,size(resp_h1_green,2)),mean(resp_h1_green,1,'omitnan'),'Color','g'); hold on; 
+    plot(linspace(-3,10,size(resp_h1_red,2)),mean(resp_h1_red,1,'omitnan'),'Color','r'); line([0 0],[0 1],'Color','b'); xlim([-3 +10]);
+
+    subplot(2,2,2);
+    plot(linspace(-3,10,size(resp_h2_green,2)),mean(resp_h2_green,1,'omitnan'),'Color','g'); hold on; 
+    plot(linspace(-3,10,size(resp_h2_red,2)),mean(resp_h2_red,1,'omitnan'),'Color','r'); line([0 0],[0 1],'Color','b'); xlim([-3 +10]);
+
+    subplot(2,2,3);
+    plot(linspace(-3,10,size(resp_h3_cyan,2)),mean(resp_h3_cyan,1,'omitnan'),'Color','c'); hold on; 
+    plot(linspace(-3,10,size(resp_h3_black,2)),mean(resp_h3_black,1,'omitnan'),'Color','k'); line([0 0],[0 1],'Color','b'); xlim([-3 +10]);
+
+    subplot(2,2,4);
+    plot(linspace(-3,10,size(resp_h4_cyan,2)),mean(resp_h4_cyan,1,'omitnan'),'Color','c'); hold on; 
+    plot(linspace(-3,10,size(resp_h4_black,2)),mean(resp_h4_black,1,'omitnan'),'Color','k'); line([0 0],[0 1],'Color','b'); xlim([-3 +10]);
 end
 
 end
