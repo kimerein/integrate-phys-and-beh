@@ -2,6 +2,7 @@ function plotSU_contextAndOutcome(loc,un)
 
 plotDerivativeInstead=false;
 gaussmooth=80;
+dropZeros=true;
 
 if iscell(un)
     units=un;
@@ -123,38 +124,70 @@ dodprime=true;
 if dodprime==true
     figure();
     subplot(2,2,1);
-    plot(linspace(-3,10,size(resp_h1_green,2)),dprime(resp_h1_green,resp_h1_red)); line([0 0],[0 1],'Color','b'); xlim([-3 +10]);
+    plot(linspace(-3,10,size(resp_h1_green,2)),dprime(resp_h1_green,resp_h1_red,dropZeros)); line([0 0],[0 1],'Color','b'); xlim([-3 +10]);
 
     subplot(2,2,2);
-    plot(linspace(-3,10,size(resp_h2_green,2)),dprime(resp_h2_green,resp_h2_red)); line([0 0],[0 1],'Color','b'); xlim([-3 +10]);
+    plot(linspace(-3,10,size(resp_h2_green,2)),dprime(resp_h2_green,resp_h2_red,dropZeros)); line([0 0],[0 1],'Color','b'); xlim([-3 +10]);
 
     subplot(2,2,3);
-    plot(linspace(-3,10,size(resp_h3_cyan,2)),dprime(resp_h3_cyan,resp_h3_black)); line([0 0],[0 1],'Color','b'); xlim([-3 +10]);
+    plot(linspace(-3,10,size(resp_h3_cyan,2)),dprime(resp_h3_cyan,resp_h3_black,dropZeros)); line([0 0],[0 1],'Color','b'); xlim([-3 +10]);
 
     subplot(2,2,4);
-    plot(linspace(-3,10,size(resp_h4_cyan,2)),dprime(resp_h4_cyan,resp_h4_black)); line([0 0],[0 1],'Color','b'); xlim([-3 +10]);
+    plot(linspace(-3,10,size(resp_h4_cyan,2)),dprime(resp_h4_cyan,resp_h4_black,dropZeros)); line([0 0],[0 1],'Color','b'); xlim([-3 +10]);
 
     figure();
     subplot(2,2,1);
+    if dropZeros==true
+        include1=~(abs(resp_h1_green)<0.0001);
+        include2=~(abs(resp_h1_red)<0.0001);
+        resp_h1_green(include1~=1)=nan;
+        resp_h1_red(include2~=1)=nan;
+    else
+        include1=ones(size(resp_h1_green)); include2=ones(size(resp_h1_red));
+    end
     plot(linspace(-3,10,size(resp_h1_green,2)),mean(resp_h1_green,1,'omitnan'),'Color','g'); hold on; 
     plot(linspace(-3,10,size(resp_h1_red,2)),mean(resp_h1_red,1,'omitnan'),'Color','r'); line([0 0],[0 1],'Color','b'); xlim([-3 +10]);
 
     subplot(2,2,2);
+    if dropZeros==true
+        include1=~(abs(resp_h2_green)<0.0001);
+        include2=~(abs(resp_h2_red)<0.0001);
+        resp_h2_green(include1~=1)=nan;
+        resp_h2_red(include2~=1)=nan;
+    else
+        include1=ones(size(resp_h2_green)); include2=ones(size(resp_h2_red));
+    end
     plot(linspace(-3,10,size(resp_h2_green,2)),mean(resp_h2_green,1,'omitnan'),'Color','g'); hold on; 
     plot(linspace(-3,10,size(resp_h2_red,2)),mean(resp_h2_red,1,'omitnan'),'Color','r'); line([0 0],[0 1],'Color','b'); xlim([-3 +10]);
 
     subplot(2,2,3);
+    if dropZeros==true
+        include1=~(abs(resp_h3_cyan)<0.0001);
+        include2=~(abs(resp_h3_black)<0.0001);
+        resp_h3_cyan(include1~=1)=nan;
+        resp_h3_black(include2~=1)=nan;
+    else
+        include1=ones(size(resp_h3_cyan)); include2=ones(size(resp_h3_black));
+    end
     plot(linspace(-3,10,size(resp_h3_cyan,2)),mean(resp_h3_cyan,1,'omitnan'),'Color','c'); hold on; 
     plot(linspace(-3,10,size(resp_h3_black,2)),mean(resp_h3_black,1,'omitnan'),'Color','k'); line([0 0],[0 1],'Color','b'); xlim([-3 +10]);
 
     subplot(2,2,4);
+    if dropZeros==true
+        include1=~(abs(resp_h4_cyan)<0.0001);
+        include2=~(abs(resp_h4_black)<0.0001);
+        resp_h4_cyan(include1~=1)=nan;
+        resp_h4_black(include2~=1)=nan;
+    else
+        include1=ones(size(resp_h4_cyan)); include2=ones(size(resp_h4_black));
+    end
     plot(linspace(-3,10,size(resp_h4_cyan,2)),mean(resp_h4_cyan,1,'omitnan'),'Color','c'); hold on; 
     plot(linspace(-3,10,size(resp_h4_black,2)),mean(resp_h4_black,1,'omitnan'),'Color','k'); line([0 0],[0 1],'Color','b'); xlim([-3 +10]);
 end
 
 end
 
-function dprimes=dprime(resp1,resp2)
+function dprimes=dprime(resp1,resp2,dropZeros)
 
 accuracies=nan(1,size(resp1,2));
 dprimes=nan(1,size(resp1,2));
@@ -166,9 +199,16 @@ for tp=1:length(accuracies)
     for i=1:length(trythresh)
         grp1=resp1(:,tp); grp2=resp2(:,tp);
         grp1_guess=grp1<trythresh(i); grp2_guess=grp2>=trythresh(i);
-        a1(i)=(sum(grp1_guess==1)+sum(grp2_guess==1))/(length(grp1)+length(grp2));
+        if dropZeros==true
+            isZero_gp1=abs(grp1)<0.0001;
+            isZero_gp2=abs(grp2)<0.0001;
+        else
+            isZero_gp1=zeros(size(grp1));
+            isZero_gp2=zeros(size(grp2));
+        end
+        a1(i)=(sum(grp1_guess(isZero_gp1~=1)==1)+sum(grp2_guess(isZero_gp2~=1)==1))/(length(grp1(isZero_gp1~=1))+length(grp2(isZero_gp2~=1)));
         grp1_guess=grp1>=trythresh(i); grp2_guess=grp2<trythresh(i);
-        a2(i)=(sum(grp1_guess==1)+sum(grp2_guess==1))/(length(grp1)+length(grp2));
+        a2(i)=(sum(grp1_guess(isZero_gp1~=1)==1)+sum(grp2_guess(isZero_gp2~=1)==1))/(length(grp1(isZero_gp1~=1))+length(grp2(isZero_gp2~=1)));
     end
     accuracies(tp)=max([a1; a2],[],'all','omitnan');
     dprimes(tp)=2*norminv(accuracies(tp));
