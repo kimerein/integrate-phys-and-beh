@@ -2,7 +2,9 @@ function plotSU_contextAndOutcome(loc,un)
 
 plotDerivativeInstead=false;
 gaussmooth=80;
-dropZeros=true;
+dropZeros=false;
+takeWhichUnits='cueTuned'; % can be 'cueTuned','noncueTuned' or 'all'
+cueStartCutoff=-0.189;
 
 if iscell(un)
     units=un;
@@ -11,6 +13,12 @@ else
     units=[];
 end
 
+a=load([loc '\cue\' un '_cueAligned.mat']);
+cue.dataout=a.dataout;
+cue.alignComp=a.alignComp;
+a=load([loc '\uncued_reach\' un '_uncuedReach.mat']);
+uncuedReach.dataout=a.dataout;
+uncuedReach.alignComp=a.alignComp;
 a=load([loc '\cued_success\' un '_cuedSuccess.mat']);
 cuedSuccess.dataout=a.dataout;
 cuedSuccess.alignComp=a.alignComp;
@@ -24,6 +32,8 @@ a=load([loc '\uncued_drop\' un '_uncuedDrop.mat']);
 uncuedFailure.dataout=a.dataout;
 uncuedFailure.alignComp=a.alignComp;
 
+resp_cue=[];
+resp_uncued_reach=[];
 resp_h1_green=[];
 resp_h1_red=[];
 resp_h2_green=[];
@@ -33,6 +43,35 @@ resp_h3_black=[];
 resp_h4_cyan=[];
 resp_h4_black=[];
 
+% Get cue tuning
+f=figure(); 
+dataout=cue.dataout; alignComp=cue.alignComp; [maxy1,r]=plotit(dataout,alignComp,'c',plotDerivativeInstead,gaussmooth); resp_cue=[resp_cue; r];
+dataout=uncuedReach.dataout; alignComp=uncuedReach.alignComp; [maxy2,r]=plotit(dataout,alignComp,'k',plotDerivativeInstead,gaussmooth); resp_uncued_reach=[resp_uncued_reach; r];
+t=linspace(-3,10,size(resp_cue,2)); beforecue=max(resp_cue(:,t>-0.9 & t<cueStartCutoff),[],'omitnan'); duringcue=max(resp_cue(:,t>cueStartCutoff & t<0.8),[],'omitnan'); cuer=duringcue-beforecue;
+beforereach=max(resp_uncued_reach(:,t<-1),[],'omitnan'); duringreach=max(resp_uncued_reach(:,t>-1 & t<1),[],'omitnan'); reachr=duringreach-beforereach;
+h1max=max(maxy1,maxy2); 
+if plotDerivativeInstead==false 
+    ylim([0, h1max]);
+end
+switch takeWhichUnits
+    case 'cueTuned'
+        if (cuer-reachr)/(cuer+reachr)>0.5
+        else
+            close(f); figure();
+            resp_cue=[]; resp_uncued_reach=[];
+        end
+    case 'noncueTuned'
+        if (cuer-reachr)/(cuer+reachr)>0.5
+            close(f); figure();
+            resp_cue=[]; resp_uncued_reach=[];
+        else
+        end
+    case 'all'
+end
+cuetune_hax=gca;
+text(3,0,'cue aligned v uncued reach');
+
+% Plot other conditions
 figure(); 
 h1=subplot(2,2,1);
 dataout=cuedSuccess.dataout; alignComp=cuedSuccess.alignComp; [maxy1,r]=plotit(dataout,alignComp,'g',plotDerivativeInstead,gaussmooth); resp_h1_green=[resp_h1_green; r];
@@ -73,6 +112,30 @@ text(3,0,'failure');
 if ~isempty(units)
     for i=1:length(units)
         un=units{i};
+        a=load([loc '\cue\' un '_cueAligned.mat']);
+        cue.dataout=a.dataout;
+        cue.alignComp=a.alignComp;
+        a=load([loc '\uncued_reach\' un '_uncuedReach.mat']);
+        uncuedReach.dataout=a.dataout;
+        uncuedReach.alignComp=a.alignComp;
+        dataout=cue.dataout; alignComp=cue.alignComp; [~,rcue]=calcit(dataout,alignComp,'c',plotDerivativeInstead,gaussmooth); 
+        dataout=uncuedReach.dataout; alignComp=uncuedReach.alignComp; [~,runcuedreach]=calcit(dataout,alignComp,'k',plotDerivativeInstead,gaussmooth); 
+        t=linspace(-3,10,size(rcue,2)); beforecue=max(rcue(:,t>-0.9 & t<cueStartCutoff),[],'omitnan'); duringcue=max(rcue(:,t>cueStartCutoff & t<0.8),[],'omitnan'); cuer=duringcue-beforecue;
+        beforereach=max(runcuedreach(:,t<-1),[],'omitnan'); duringreach=max(runcuedreach(:,t>-1 & t<1),[],'omitnan'); reachr=duringreach-beforereach;
+        switch takeWhichUnits
+            case 'cueTuned'
+                if (cuer-reachr)/(cuer+reachr)>0.5
+                else
+                    continue % skip this unit
+                end
+            case 'noncueTuned'
+                if (cuer-reachr)/(cuer+reachr)>0.5
+                    continue % skip this unit
+                else
+                end
+            case 'all'
+        end
+
         a=load([loc '\cued_success\' un '_cuedSuccess.mat']);
         cuedSuccess.dataout=a.dataout;
         cuedSuccess.alignComp=a.alignComp;
@@ -85,6 +148,14 @@ if ~isempty(units)
         a=load([loc '\uncued_drop\' un '_uncuedDrop.mat']);
         uncuedFailure.dataout=a.dataout;
         uncuedFailure.alignComp=a.alignComp;
+
+        axes(cuetune_hax);
+        dataout=cue.dataout; alignComp=cue.alignComp; [maxy1,r]=plotit(dataout,alignComp,'c',plotDerivativeInstead,gaussmooth); resp_cue=[resp_cue; r];
+        dataout=uncuedReach.dataout; alignComp=uncuedReach.alignComp; [maxy2,r]=plotit(dataout,alignComp,'k',plotDerivativeInstead,gaussmooth); resp_uncued_reach=[resp_uncued_reach; r];
+        h1max=max(h1max,max(maxy1,maxy2)); 
+        if plotDerivativeInstead==false 
+            ylim([0, h1max]);
+        end
 
         axes(h1);
         dataout=cuedSuccess.dataout; alignComp=cuedSuccess.alignComp; [maxy1,r]=plotit(dataout,alignComp,'g',plotDerivativeInstead,gaussmooth); resp_h1_green=[resp_h1_green; r];
@@ -122,6 +193,10 @@ end
 
 dodprime=true;
 if dodprime==true
+%     figure();
+%     plot(linspace(-3,10,size(resp_cue,2)),dprime(resp_cue,resp_uncued_reach,dropZeros)); line([0 0],[0 1],'Color','b'); xlim([-3 +10]);
+%     title('cue aligned v uncued reach');
+
     figure();
     subplot(2,2,1);
     plot(linspace(-3,10,size(resp_h1_green,2)),dprime(resp_h1_green,resp_h1_red,dropZeros)); line([0 0],[0 1],'Color','b'); xlim([-3 +10]);
@@ -194,6 +269,9 @@ dprimes=nan(1,size(resp1,2));
 for tp=1:length(accuracies)
     % for each timepoint
     trythresh=0:0.01:max(max(resp1(:,tp),[],1,'omitnan'),max(resp2(:,tp),[],1,'omitnan'));
+    if length(trythresh)==0
+        continue
+    end
     a1=nan(size(trythresh));
     a2=nan(size(trythresh));
     for i=1:length(trythresh)
@@ -233,6 +311,22 @@ hold on;
 line([alignComp.x(ma)-alignmentTime alignComp.x(ma)-alignmentTime],[0 1],'Color','b');
 xlim([-3 +10]);
 % xlim([-1 +4]);
+yout=temp(dataout.x-alignmentTime>-3 & dataout.x-alignmentTime<+10);
+
+end
+
+function [maxy,yout]=calcit(dataout,alignComp,c,plotDerivativeInstead,gaussmooth)
+
+[~,ma]=nanmax(nanmean(alignComp.y,1));
+alignmentTime=alignComp.x(ma);
+temp=nanmean(dataout.y,1);
+if plotDerivativeInstead==true
+    temp=diff(temp);
+    temp=[temp temp(end)];
+end
+temp=smoothdata(temp,'gaussian',gaussmooth);
+maxy=max(temp(dataout.x-alignmentTime>-3 & dataout.x-alignmentTime<+10),[],'omitnan');
+% maxy=max(temp(dataout.x-alignmentTime>-1 & dataout.x-alignmentTime<+4),[],'omitnan');
 yout=temp(dataout.x-alignmentTime>-3 & dataout.x-alignmentTime<+10);
 
 end
