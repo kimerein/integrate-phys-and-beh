@@ -2,8 +2,8 @@ function plotSU_contextAndOutcome(loc,un)
 
 plotDerivativeInstead=false;
 gaussmooth=80;
-dropZeros=false;
-takeWhichUnits='cueTuned'; % can be 'cueTuned','noncueTuned' or 'all'
+dropZeros=true;
+takeWhichUnits='all'; % can be 'cueTuned','noncueTuned' or 'all'
 cueStartCutoff=-0.189;
 
 if iscell(un)
