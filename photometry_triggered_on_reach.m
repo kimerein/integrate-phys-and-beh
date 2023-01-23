@@ -366,7 +366,13 @@ minSpacingBetweenCues_sig2=floor(minTimeBetweenCues/mode(temp));
 [~,anchor_index_signal2]=nanmin(abs(movie_times-anchor));
 zo=input('Do you want to zero out any of the blue cues? If yes, enter time start and time end as [start end] to zero out. ');
 if ~isempty(zo)
-    shifted_data.cue=zeroOutPartOfOne(shifted_data.cue,shifted_data.distractor_times,zo); disp('zeroing out');
+    if length(zo)>2
+        for whichZeroPeriod=1:floor(length(zo)/2)
+            shifted_data.cue=zeroOutPartOfOne(shifted_data.cue,shifted_data.distractor_times,zo((whichZeroPeriod-1)*2+1:(whichZeroPeriod-1)*2+2)); disp('zeroing out');
+        end
+    else
+        shifted_data.cue=zeroOutPartOfOne(shifted_data.cue,shifted_data.distractor_times,zo); disp('zeroing out');
+    end
 end
 [mapping_signal1,mapping_signal2]=countCues(shifted_data.cue./nanmax(shifted_data.cue),shifted_data.distractor_times,movie_cue,movie_times,0.5,anchor_index_signal1,anchor_index_signal2,minSpacingBetweenCues_sig1,minSpacingBetweenCues_sig2);
 % signal2 is movie, signal1 is data.distractor

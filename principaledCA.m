@@ -317,6 +317,7 @@ for n = 1:n_fits
     disp(n);
 %     est_factors = cp_als(tensor(data),R,'printitn',0,'fixsigns',true,'maxiters',300);
     est_factors = cp_opt(tensor(data),R,'init','rand','lower',0,'printitn',0,'fixsigns',true,'maxiters',10000);
+%     est_factors = cp_apr(tensor(data),R,'init','rand','lower',0,'printitn',0,'fixsigns',true,'maxiters',10000);
     % store error
     err(n) = norm(full(est_factors) - data)/norm(data);
     if all(err(1:n-1)>err(n))

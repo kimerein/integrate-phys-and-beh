@@ -4,7 +4,7 @@ plotDerivativeInstead=false;
 gaussmooth=80;
 dropZeros=true;
 takeWhichUnits='all'; % can be 'cueTuned','noncueTuned' or 'all'
-cueStartCutoff=-0.189;
+cueStartCutoff=-0.25;
 
 if iscell(un)
     units=un;
