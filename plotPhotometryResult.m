@@ -9,7 +9,7 @@ phys_timepointsCompanion=[];
 f_heatmap=[];
 plotBehFieldOut=[];
 suppressAllButLastFig=true;
-doRealignToCue=false;
+doRealignToCue=true;
 if suppressAllButLastFig==true
     suppressFigs=true;
 end
@@ -67,19 +67,23 @@ temp=photometry_tbt.(timeField2);
 photometry_tbt.([timeField2 '_wrt_trial_start'])=temp-repmat(temp(:,1),1,size(temp,2));
 
 if doRealignToCue==true
-    [photometry_tbt,alignedCueTo]=realignToCue(photometry_tbt,'cue',thesePhotoFieldsUseTimeField1,timeField1,timeField2,minITI);
-    [~,fpe]=nanmax(nanmean(behavior_tbt.cueZone_onVoff,1));
-    temp=nanmean(behavior_tbt.times_wrt_trial_start,1);
-    beh_cue=temp(fpe);
-    ma=nanmax(nanmean(photometry_tbt.cue,1));
-    fpe=find(nanmean(photometry_tbt.cue,1)>ma*0.75,1,'first');
-    temp=nanmean(photometry_tbt.cue_times_wrt_trial_start,1);
-    photo_cue=temp(fpe);
-    f=fieldnames(photometry_tbt);
-    for i=1:length(f)
-        if ~isempty(regexp(f{i},'time'))
-            photometry_tbt.(f{i})=photometry_tbt.(f{i})+(beh_cue-photo_cue);
+    try
+        [photometry_tbt,alignedCueTo]=realignToCue(photometry_tbt,'cue',thesePhotoFieldsUseTimeField1,timeField1,timeField2,minITI);
+        [~,fpe]=nanmax(nanmean(behavior_tbt.cueZone_onVoff,1));
+        temp=nanmean(behavior_tbt.times_wrt_trial_start,1);
+        beh_cue=temp(fpe);
+        ma=nanmax(nanmean(photometry_tbt.cue,1));
+        fpe=find(nanmean(photometry_tbt.cue,1)>ma*0.75,1,'first');
+        temp=nanmean(photometry_tbt.cue_times_wrt_trial_start,1);
+        photo_cue=temp(fpe);
+        f=fieldnames(photometry_tbt);
+        for i=1:length(f)
+            if ~isempty(regexp(f{i},'time'))
+                photometry_tbt.(f{i})=photometry_tbt.(f{i})+(beh_cue-photo_cue);
+            end
         end
+    catch
+        disp('Error was thrown in lines 71 to 84 of plotPhotometryResult.m');
     end
 end
 if suppressFigs==false
@@ -856,11 +860,7 @@ for i=1:length(f)
             end
             if otherLikeShiftInds(j)<0
                 temprow=temp(j,:);
-                if abs(otherLikeShiftInds(j))+1>=length(temprow)
-                    temprow=nan(size(temprow));
-                else
-                    temprow=[temprow(abs(otherLikeShiftInds(j))+1:end) nan(1,abs(otherLikeShiftInds(j)))];
-                end
+                temprow=[temprow(abs(otherLikeShiftInds(j))+1:end) nan(1,abs(otherLikeShiftInds(j)))];
                 temp(j,:)=temprow;
             elseif otherLikeShiftInds(j)>0
                 temprow=temp(j,:);
