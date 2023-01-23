@@ -853,7 +853,11 @@ for i=1:length(f)
             end
             if otherLikeShiftInds(j)<0
                 temprow=temp(j,:);
-                temprow=[temprow(abs(otherLikeShiftInds(j))+1:end) nan(1,abs(otherLikeShiftInds(j)))];
+                if abs(otherLikeShiftInds(j))+1>=length(temprow)
+                    temprow=nan(size(temprow));
+                else
+                    temprow=[temprow(abs(otherLikeShiftInds(j))+1:end) nan(1,abs(otherLikeShiftInds(j)))];
+                end
                 temp(j,:)=temprow;
             elseif otherLikeShiftInds(j)>0
                 temprow=temp(j,:);
