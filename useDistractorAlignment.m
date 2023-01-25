@@ -15,18 +15,18 @@ function [data1,data2]=useDistractorAlignment(data1,whichTime1,whichField1,data2
 % settings.try_scale2=1.2;  
 % for physiology
 % INITIAL ALIGNMENT
-settings.try_delay1=0; %50; %-10;
+settings.try_delay1=-10; %50; %-10;
 settings.delaysteps=1;
 settings.try_delay2=10; %70; %10;
-settings.tryinc=0.02;
+settings.tryinc=0.01;
 % ROW BY ROW
 % this is red before black
-settings.forSearchMinus=-50; %100; % inds around optimal for search for each row
+settings.forSearchMinus=-20; %100; % inds around optimal for search for each row
 % this is black before red
-settings.forSearchPlus=50; %200; % inds around optimal for search for each row
+settings.forSearchPlus=20; %200; % inds around optimal for search for each row
 % settings.try_scale1=0.6;
 % settings.try_scale2=1;  
-alignInd=11;
+alignInd=10;
 % downSampData2=true;
 ds=1; %1000;
 
@@ -305,6 +305,9 @@ if getNewDelay==true
             data1_t=data1_t(1:length(data1_LED));
         elseif currdelay<0
             data1_t=[data1_t(abs(currdelay):end) nanmax(data1_t)+timestep:timestep:nanmax(data1_t)+abs(currdelay)*timestep];
+            if length(data1_t)<length(data1_LED)
+                continue
+            end
             data1_t=data1_t(1:length(data1_LED));
         end
         takeoutnan=isnan(data2_t);
@@ -337,6 +340,9 @@ if getNewDelay==true
         data1_t=data1_t(1:length(data1_LED));
     elseif currdelay<0
         data1_t=[data1_t(abs(currdelay):end) nanmax(data1_t)+timestep:timestep:nanmax(data1_t)+abs(currdelay)*timestep];
+        if length(data1_t)<length(data1_LED)
+            data1_t=[data1_t nan(1,length(data1_LED)-length(data1_t))];
+        end
         data1_t=data1_t(1:length(data1_LED));
     end
 else
