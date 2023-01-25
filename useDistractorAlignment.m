@@ -26,7 +26,7 @@ settings.forSearchMinus=-50; %100; % inds around optimal for search for each row
 settings.forSearchPlus=50; %200; % inds around optimal for search for each row
 % settings.try_scale1=0.6;
 % settings.try_scale2=1;  
-alignInd=9;
+alignInd=11;
 % downSampData2=true;
 ds=1; %1000;
 
@@ -76,16 +76,16 @@ t2=data2.(whichTime2);
 
 if ~isempty(alignmentAnchor_data1)
     anchordata1=mean(data1.(alignmentAnchor_data1),1,'omitnan');
-    [~,anchor1]=max(anchordata1,[],'all','omitnan');
+    [~,anchor1]=find(anchordata1>0.5,1,'first');
     anchordata2=mean(data2.(alignmentAnchor_data2),1,'omitnan');
-    [~,anchor2]=max(anchordata2,[],'all','omitnan');
-%     for i=1:size(t1,1)
-%         % anchor 1 and anchor 2 are same time
-%         temp1=t1(i,anchor1);
-%         temp2=t2(i,anchor2);
-%         t1(i,:)=t1(i,:)-(temp1-temp2);
-%     end
-%     data1.(whichTime1)=t1;
+    [~,anchor2]=find(anchordata2>0.5,1,'first');
+    for i=1:size(t1,1)
+        % anchor 1 and anchor 2 are same time
+        temp1=t1(i,anchor1);
+        temp2=t2(i,anchor2);
+        t1(i,:)=t1(i,:)-(temp1-temp2);
+    end
+    data1.(whichTime1)=t1;
 end
 
 figure(); plot(t2(alignInd,:),dis2(alignInd,:),'Color','r'); 
@@ -121,9 +121,9 @@ data1_t=t1(alignInd,:);
 data2_LED=dis2(alignInd,:);
 data2_t=t2(alignInd,:);
 data1_t_backup=data1_t;
-if ~isempty(alignmentAnchor_data1)
-    trydelays=0;
-end
+% if ~isempty(alignmentAnchor_data1)
+%     trydelays=0;
+% end
 for j=1:length(tryscales)
     if mod(j,100)==0
         disp('Processing ...');
@@ -292,7 +292,7 @@ if ~isempty(anchor1)
     temp1=data1_t(anchor1);
     temp2=data2_t(anchor2);
     data1_t=data1_t-(temp1-temp2);
-    getNewDelay=false;
+    % getNewDelay=false;
     currdelay=0;
 end
 if getNewDelay==true
