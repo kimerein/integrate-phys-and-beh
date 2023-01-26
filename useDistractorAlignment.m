@@ -19,11 +19,13 @@ settings.try_delay1=-10; %50; %-10;
 settings.delaysteps=1;
 settings.try_delay2=10; %70; %10;
 settings.tryinc=0.01;
+settings.tryscale_from=-2.5;
+settings.tryscale_to=2.5;
 % ROW BY ROW
 % this is red before black
-settings.forSearchMinus=-10; %100; % inds around optimal for search for each row
+settings.forSearchMinus=-200; %100; % inds around optimal for search for each row
 % this is black before red
-settings.forSearchPlus=10; %200; % inds around optimal for search for each row
+settings.forSearchPlus=200; %200; % inds around optimal for search for each row
 % settings.try_scale1=0.6;
 % settings.try_scale2=1;  
 alignInd=11;
@@ -109,8 +111,8 @@ end
 figure(); plot(t2(alignInd,:),dis2(alignInd,:),'Color','r'); 
 figure(); plot(t1(alignInd,:),dis1(alignInd,:),'Color','k');
 scaleMid=input('What is scaling of red divided by black time duration? ');
-settings.try_scale1=scaleMid-0.2;
-settings.try_scale2=scaleMid+0.2;  
+settings.try_scale1=scaleMid-0.2; %settings.tryscale_from;
+settings.try_scale2=scaleMid+0.2; %settings.tryscale_to;  
 
 figure();
 offset=1;
@@ -212,6 +214,8 @@ mi_col=floor(length(trydelays)/2);
 figure(); plot(data1_t,data1_LED,'Color','k'); hold on; plot(t2(alignInd,:),dis2(alignInd,:),'Color','r'); title('Alignment of test row');
 pause;
 
+settings.try_scale1=scaleMid-settings.tryscale_from;
+settings.try_scale2=scaleMid+settings.tryscale_to;  
 % Scale/shift all rows of time structure similarly
 for i=1:size(t1,1)
     if all(isnan(t1(i,:)))
