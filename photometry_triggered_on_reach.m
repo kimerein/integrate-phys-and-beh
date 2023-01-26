@@ -368,7 +368,14 @@ minSpacingBetweenCues_sig2=floor(minTimeBetweenCues/mode(temp));
 zo=input('Do you want to zero out any of the blue cues? If yes, enter time start and time end as [start end] to zero out. ');
 if ~isempty(zo)
     if length(zo)>2
-        for whichZeroPeriod=1:floor(length(zo)/2)
+        figure();
+        for whichZeroPeriod=1:floor(length(zo)/2) 
+            subplot(1,length(1:floor(length(zo)/2)),whichZeroPeriod);
+            zonetozero=zo((whichZeroPeriod-1)*2+1:(whichZeroPeriod-1)*2+2);
+            plot(shifted_data.distractor_times(shifted_data.distractor_times>zonetozero(1) & shifted_data.distractor_times<zonetozero(end)),shifted_data.cue(shifted_data.distractor_times>zonetozero(1) & shifted_data.distractor_times<zonetozero(end))./nanmax(shifted_data.cue),'Color','b');
+            hold on;
+            plot(movie_times(movie_times>zonetozero(1) & movie_times<zonetozero(end)),movie_cue(movie_times>zonetozero(1) & movie_times<zonetozero(end)),'Color','r');
+            plot(zo((whichZeroPeriod-1)*2+1:(whichZeroPeriod-1)*2+2),0.6*ones(size(zo((whichZeroPeriod-1)*2+1:(whichZeroPeriod-1)*2+2))),'Color','g','LineWidth',6);
             shifted_data.cue=zeroOutPartOfOne(shifted_data.cue,shifted_data.distractor_times,zo((whichZeroPeriod-1)*2+1:(whichZeroPeriod-1)*2+2)); disp('zeroing out');
         end
     else

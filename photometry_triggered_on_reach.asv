@@ -355,6 +355,7 @@ figure();
 plot(shifted_data.distractor_times,shifted_data.cue./nanmax(shifted_data.cue),'Color','b'); 
 hold on;
 plot(movie_times,movie_cue,'Color','r');
+scatter(movie_times(isnan(movie_cue)),0.8*ones(size(movie_times(isnan(movie_cue)))),20,'k');
 title('Shifted cues - current video');
 xlabel('Time (sec)');
 anchor=input('Choose index for alignment anchor. ');
@@ -369,11 +370,17 @@ if ~isempty(zo)
     if length(zo)>2
         for whichZeroPeriod=1:floor(length(zo)/2)
             shifted_data.cue=zeroOutPartOfOne(shifted_data.cue,shifted_data.distractor_times,zo((whichZeroPeriod-1)*2+1:(whichZeroPeriod-1)*2+2)); disp('zeroing out');
+            figure();
+            plot(shifted_data.distractor_times(,shifted_data.cue./nanmax(shifted_data.cue),'Color','b');
+            hold on;
+            plot(movie_times,movie_cue,'Color','r');
+            plot(zo((whichZeroPeriod-1)*2+1:(whichZeroPeriod-1)*2+2),0.6*ones(size(zo((whichZeroPeriod-1)*2+1:(whichZeroPeriod-1)*2+2))),'Color','g','LineWidth',6);
         end
     else
         shifted_data.cue=zeroOutPartOfOne(shifted_data.cue,shifted_data.distractor_times,zo); disp('zeroing out');
     end
 end
+movie_cue(isnan(movie_cue))=0;
 [mapping_signal1,mapping_signal2]=countCues(shifted_data.cue./nanmax(shifted_data.cue),shifted_data.distractor_times,movie_cue,movie_times,0.5,anchor_index_signal1,anchor_index_signal2,minSpacingBetweenCues_sig1,minSpacingBetweenCues_sig2);
 % signal2 is movie, signal1 is data.distractor
 mapping_signal3=getPhotoCueMapping(mapping_signal1,shifted_data.distractor_times,shifted_data.green_time);
