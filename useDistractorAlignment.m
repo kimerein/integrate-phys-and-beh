@@ -28,7 +28,7 @@ settings.forSearchMinus=-200; %100; % inds around optimal for search for each ro
 settings.forSearchPlus=200; %200; % inds around optimal for search for each row
 % settings.try_scale1=0.6;
 % settings.try_scale2=1;  
-alignInd=11;
+alignInd=9;
 % downSampData2=true;
 ds=1; %1000;
 
@@ -403,6 +403,9 @@ if getNewDelay==true
         dontuse=isnan(y2i);
 %         [c,lags]=xcorr(data1_LED(~dontuse),y2i(~dontuse),0,'normalized');
         R=corrcoef(data1_LED(~dontuse),y2i(~dontuse));
+        if length(data1_LED(~dontuse))==1
+            continue
+        end
         if isnan(R)
             c=0;
         else
