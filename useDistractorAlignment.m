@@ -21,12 +21,12 @@ settings.try_delay2=10; %70; %10;
 settings.tryinc=0.01;
 % ROW BY ROW
 % this is red before black
-settings.forSearchMinus=-20; %100; % inds around optimal for search for each row
+settings.forSearchMinus=-10; %100; % inds around optimal for search for each row
 % this is black before red
-settings.forSearchPlus=20; %200; % inds around optimal for search for each row
+settings.forSearchPlus=10; %200; % inds around optimal for search for each row
 % settings.try_scale1=0.6;
 % settings.try_scale2=1;  
-alignInd=10;
+alignInd=11;
 % downSampData2=true;
 ds=1; %1000;
 
@@ -44,6 +44,24 @@ if downSampData2==true
         data2.(f{i})=downSampMatrix(temp,ds);
     end
 end
+
+% Note that slow video DVR drops frames
+% Thus, passage of time in behavior_tbt is not uniform
+% Need to fix this before aligning to photometry or physiology, which do
+% not drop times
+% if strcmp(whichField1,'movie_distractor')
+%     % fix data1
+%     data1=makeTimeUniform(data1,'timesfromarduino',whichTime1,'cueZone_onVoff');
+% %     timestep=mode(diff(nanmean(data1.(whichTime1),1)));
+% %     data1.(whichTime1)=repmat(0:timestep:(size(data1.(whichTime1),2)-1)*timestep,size(data1.(whichTime1),1),1);
+%     data1.(whichTime1)=data1.uniformtime-repmat(min(data1.uniformtime,[],2,'omitnan'),1,size(data1.uniformtime,2));
+% elseif strcmp(whichField2,'movie_distractor')
+%     % fix data2
+%     data2=makeTimeUniform(data2,'timesfromarduino',whichTime2,'cueZone_onVoff');
+% %     timestep=mode(diff(nanmean(data2.(whichTime2),1)));
+% %     data2.(whichTime2)=repmat(0:timestep:(size(data2.(whichTime2),2)-1)*timestep,size(data2.(whichTime2),1),1);
+%     data2.(whichTime2)=data2.uniformtime-repmat(min(data2.uniformtime,[],2,'omitnan'),1,size(data2.uniformtime,2));
+% end
 
 switch whichToShift
     case 'data1'
@@ -267,6 +285,66 @@ switch whichToShift
         whichField2=temp_whichField1;
     otherwise
         error('Unrecognized value passed in as whichToShift');
+end
+
+end
+
+function data=makeTimeUniform(data,timefield,reset_timefield,anchorfield)
+
+anchorthresh=0.4;
+if ~isempty(anchorfield)
+    anchordata=mean(data.(anchorfield),1,'omitnan');
+    anchorind=find(anchordata>anchorthresh,1,'first');
+    % location of this anchorind doesn't move
+else
+    anchorind=[];
+end
+
+timesFromArduino=data.(timefield);
+data.uniformtime=nan(size(timesFromArduino));
+for i=1:size(timesFromArduino,1)
+    currtime=timesFromArduino(i,:);
+    uniformtime=linspace(min(currtime,[],'all','omitnan'),max(currtime,[],'all','omitnan'),sum(~isnan(currtime)));
+    if ~isempty(anchorind)
+        curranchortime=currtime(anchorind);
+        fillintime=nan(size(currtime));
+        [~,mi]=nanmin(abs(uniformtime-curranchortime));
+        fillintime(mi-(length(uniformtime(1:mi))-1):mi+(length(uniformtime(mi:end))-1))=uniformtime;
+    else
+        fillintime(~isnan(currtime))=uniformtime;
+    end
+    temp=data.uniformtime;
+    temp(i,:)=fillintime;
+    data.uniformtime=temp;
+end
+% resample other fields in data to match uniformtime
+newdata_inds=resampleToMatchTimes(timesFromArduino,data.uniformtime);
+f=fieldnames(data);
+for i=1:length(f)
+    temp=data.(f{i});
+    if all(size(temp)==size(newdata_inds))
+        newtemp=nan(1,length(temp(i,:)));
+        for j=1:length(temp(i,:))
+            newtemp(j)=temp(i,newdata_inds(i,j));
+        end
+        temp(i,:)=newtemp;
+        data.(f{i})=temp;
+    end
+end
+data.(reset_timefield)=data.uniformtime;
+
+end
+
+function newdata_inds=resampleToMatchTimes(datatimes,newdatatimes)
+
+newdata_inds=nan(size(datatimes));
+for i=1:size(datatimes,1)
+    curr_datatimes=datatimes(i,:);
+    curr_newdatatimes=newdatatimes(i,:);
+    for j=1:length(curr_newdatatimes)
+        [~,mi]=nanmin(abs(curr_newdatatimes(j)-curr_datatimes));
+        newdata_inds(i,j)=mi;
+    end
 end
 
 end
