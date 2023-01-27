@@ -8,7 +8,7 @@ doOr=false;
 % useThreshFromNoPawOnWheel=true; % if true, apply threshold from no paw on wheel reaches to paw on wheel reaches
 removeZscore=true;
 userSetsThresh=false;
-userThresh=8.5*10^5;
+userThresh=6.8*10^5;
 if userSetsThresh==true
     ans=questdlg('User sets thresh ... continue?');
     if ~strcmp(ans,'Yes')

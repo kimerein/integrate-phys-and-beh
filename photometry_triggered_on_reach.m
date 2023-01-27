@@ -490,7 +490,7 @@ if size(temp(fromCurrVid==1,:),1)~=length(cue_mapping_data_distract)
 end
 
 % get size of baseline in behavior tbt
-cueInd=find(nanmean(alltbt.(useCue),1)>0.5,1,'first');
+cueInd=find(nanmean(alltbt.(useCue),1)>0.1,1,'first');
 secBeforeCue=nanmean(alltbt.times_wrt_trial_start(:,cueInd));
 distractorIndsBeforeCue=floor(secBeforeCue/mode(data.distractor_times(2:end)-data.distractor_times(1:end-1)));
 maxDistractorIndsAfterCue=nanmax(diff(cue_mapping_data_distract));
