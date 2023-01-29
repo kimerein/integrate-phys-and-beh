@@ -185,16 +185,16 @@ switch alignTo
                 axes(hax{2});
                 fout=nan;
             else
-                if suppressFigs==false
+                if suppressFigs==false  || suppressAllButLastFig==true
                     fout=figure();
                 end
             end
         else
-            if suppressFigs==false
+            if suppressFigs==false || suppressAllButLastFig==true
                 fout=figure();
             end
         end
-        if suppressFigs==false
+        if suppressFigs==false || suppressAllButLastFig==true
             plotWStderr(photometry_tbt.(plotPhotoField),phototimes,'k',plotUntilInd,size(photometry_tbt.cue,1));
             hold on;
         end
@@ -203,7 +203,7 @@ switch alignTo
         phys_timepointsCompanion.x=phototimes;
         phys_timepointsCompanion.y=photometry_tbt.green_time;
         temp=photometry_tbt.(plotPhotoField);
-        if suppressFigs==false
+        if suppressFigs==false || suppressAllButLastFig==true
             plotWStderr(nanmean(photometry_tbt.cue,1)*(nanmax(nanmean(temp(:,1:plotUntilInd),1))/nanmax(nanmean(photometry_tbt.cue,1))),f_times,'b',f,size(photometry_tbt.cue,1));
         end
         n_events_in_av=size(photometry_tbt.(plotPhotoField),1);

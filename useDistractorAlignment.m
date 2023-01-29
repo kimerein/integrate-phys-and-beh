@@ -15,9 +15,9 @@ function [data1,data2]=useDistractorAlignment(data1,whichTime1,whichField1,data2
 % settings.try_scale2=1.2;  
 % for physiology
 % INITIAL ALIGNMENT
-settings.try_delay1=-50; %50; %-10;
+settings.try_delay1=-10; %50; %-10;
 settings.delaysteps=1;
-settings.try_delay2=50; %70; %10;
+settings.try_delay2=10; %70; %10;
 settings.tryinc=0.01;
 settings.tryscale_from=-2.5;
 settings.tryscale_to=2.5;
@@ -28,7 +28,7 @@ settings.forSearchMinus=-50; %100; % inds around optimal for search for each row
 settings.forSearchPlus=50; %200; % inds around optimal for search for each row
 % settings.try_scale1=0.6;
 % settings.try_scale2=1;  
-alignInd=9;
+alignInd=11;
 % downSampData2=true;
 ds=1; %1000;
 
@@ -95,6 +95,12 @@ dis2=data2.(whichField2);
 t2=data2.(whichTime2);
 
 if ~isempty(alignmentAnchor_data1)
+    temp=data1.(alignmentAnchor_data1);
+    temp(temp>0.0001)=1;
+    data1.(alignmentAnchor_data1)=temp;
+    temp=data2.(alignmentAnchor_data2);
+    temp(temp>0.0001)=1;
+    data2.(alignmentAnchor_data2)=temp;
     anchordata1=mean(data1.(alignmentAnchor_data1),1,'omitnan');
     [~,anchor1]=find(anchordata1>0.5,1,'first');
     anchordata2=mean(data2.(alignmentAnchor_data2),1,'omitnan');
