@@ -132,6 +132,20 @@ subDir='uncued_failure_then_noReach';
 [~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
 saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'uncuedFailureThenNoReach',dataout,alignComp,phys_timepointsComp);
 
+% Cued reach when pellet missing
+event='pelletmissingreach_reachStarts';
+timeWindow=[0+cueOffset 3]; % in seconds from cue onset
+subDir='cued_pelletMissing';
+[~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'cuedReachPelletMissing',dataout,alignComp,phys_timepointsComp);
+
+% Uncued reach when pellet missing
+event='pelletmissingreach_reachStarts';
+timeWindow=[3 16]; % in seconds from cue onset
+subDir='uncued_pelletMissing';
+[~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'uncuedReachPelletMissing',dataout,alignComp,phys_timepointsComp);
+
 end
 
 function saveStuff(saveDir,subDir,assign,saveName,alignmentName,dataout,alignComp,phys_timepointsComp)

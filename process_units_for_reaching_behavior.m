@@ -77,17 +77,6 @@ data_loc_array=table2cell(readtable(dataTable,'Format','%s%s%s%u%s%s%s%s%s%u%u%s
 % data_loc_array{i,10}=2000; % dorsal-most depth that is posterior striatum
 % data_loc_array{i,11}=2600; % ventral-most depth that is posterior striatum
 % data_loc_array{i,12}='Nkx2.1'; % if opto-tagging, which tag
-% i=2; data_loc_array{i,1}='20210311'; data_loc_array{i,2}='dLight1'; 
-% data_loc_array{i,3}='Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210311\phys\dLight1__g0'; % raw data phys location, or empty
-% data_loc_array{i,4}=2300; % ventral depth in microns relative to bregma
-% data_loc_array{i,5}='pDMS-tail';
-% data_loc_array{i,6}='Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210311\tbt';
-% data_loc_array{i,7}='Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210311\phys\dLight1__g0';
-% data_loc_array{i,8}='Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210311\SU aligned to behavior';
-% data_loc_array{i,9}='dLight1__g0_t0.nidq.bin';
-% data_loc_array{i,10}=2000; % dorsal-most depth that is posterior striatum
-% data_loc_array{i,11}=2600; % ventral-most depth that is posterior striatum
-% data_loc_array{i,12}='none'; % if opto-tagging, which tag
 % data_loc_array{i,13}=false; % flag if penetration was not through str
 % data_loc_array{i,14}='green_ch'; % which photo ch to use for photometry
 % data_loc_array{i,15}='Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210311\photometry aligned to beh'; % where to save beh-aligned photometry data
@@ -102,7 +91,11 @@ for i=1:size(data_loc_array,1)
         mkdir(data_loc_array{i,15});
         saveBehaviorAlignmentsPhotometry(photometry_tbt,behavior_tbt,data_loc_array{i,15},'',data_loc_array{i,14}); 
     end
-    % get spikes
+    if strcmp(data_loc_array{i,7},'no spikes')
+        % no spikes recorded
+        continue
+    end
+    % get spikes if recorded physiology
     dd=dir(data_loc_array{i,7});
     disp(['Processing ' data_loc_array{i,7}]);
     try

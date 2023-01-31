@@ -23,12 +23,12 @@ settings.tryscale_from=-2.5;
 settings.tryscale_to=2.5;
 % ROW BY ROW
 % this is red before black
-settings.forSearchMinus=-20; %300; %100; % inds around optimal for search for each row
+settings.forSearchMinus=-25; %300; %100; % inds around optimal for search for each row
 % this is black before red
-settings.forSearchPlus=20; %300; %200; % inds around optimal for search for each row
+settings.forSearchPlus=25; %300; %200; % inds around optimal for search for each row
 % settings.try_scale1=0.6;
 % settings.try_scale2=1;  
-alignInd=10;
+alignInd=15;
 % downSampData2=true;
 ds=1; %1000;
 
