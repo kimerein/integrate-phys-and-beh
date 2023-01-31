@@ -63,7 +63,7 @@ chDepthMapping=[1   21; ...
 
 % ultimately, ingest this from .csv file
 dataTable='C:\Users\sabatini\Downloads\Spike sorting analysis - data as of 20221105.csv';
-data_loc_array=table2cell(readtable(dataTable,'Format','%s%s%s%u%s%s%s%s%s%u%u%s'));
+data_loc_array=table2cell(readtable(dataTable,'Format','%s%s%s%u%s%s%s%s%s%u%u%s%d%s%s'));
 
 % data_loc_array=cell(2,6);
 % i=1; data_loc_array{i,1}='20210311'; data_loc_array{i,2}='Oct_B'; 
@@ -84,14 +84,17 @@ data_loc_array=table2cell(readtable(dataTable,'Format','%s%s%s%u%s%s%s%s%s%u%u%s
 %% 2. Auto-populate SU QC and behavior alignments -- for 84 sessions, running all of this takes about 12 hrs
 % Discarding trials where unit dead or moved away
 for i=1:size(data_loc_array,1)
+    if strcmp(data_loc_array{i,6},'no_tbt')
+        continue
+    end
     % load tbt (trial by trial) data
     [physiology_tbt,beh2_tbt,behavior_tbt,photometry_tbt]=loadReachingExptPhysData(data_loc_array(i,:));
     % save photometry alignments to behavior, if photometry was acquired
-    if ~isempty(photometry_tbt)
+    if ~isempty(photometry_tbt) && ~strcmp(data_loc_array{i,14},'photo_not_working') && ~strcmp(data_loc_array{i,14},'not_finished')
         mkdir(data_loc_array{i,15});
         saveBehaviorAlignmentsPhotometry(photometry_tbt,behavior_tbt,data_loc_array{i,15},'',data_loc_array{i,14}); 
     end
-    if strcmp(data_loc_array{i,7},'no spikes')
+    if strcmp(data_loc_array{i,7},'no_spikes')
         % no spikes recorded
         continue
     end
@@ -293,7 +296,7 @@ for i=1:size(data_loc_array,1)
         end
     end
     catch
-        disp('caught error');
+        disp(['caught error while processing ' data_loc_array{i,6}]);
     end
 end
 
