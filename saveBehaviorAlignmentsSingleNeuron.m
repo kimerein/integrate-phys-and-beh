@@ -41,6 +41,13 @@ subDir='cue';
 [~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
 saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'cueAligned',dataout,alignComp,phys_timepointsComp);
 
+% Cued reach
+event='all_reachBatch';
+timeWindow=[0+cueOffset 3]; % in seconds from cue onset
+subDir='cued_reach';
+[~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'cuedReach',dataout,alignComp,phys_timepointsComp);
+
 % Uncued reach
 event='all_reachBatch';
 timeWindow=[5 16]; % in seconds from cue onset
@@ -145,6 +152,49 @@ timeWindow=[3 16]; % in seconds from cue onset
 subDir='uncued_pelletMissing';
 [~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
 saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'uncuedReachPelletMissing',dataout,alignComp,phys_timepointsComp);
+
+% Distractor
+event='movie_distractor';
+behavior_tbt.movie_distractor=behavior_tbt.movie_distractor>0.5;
+timeWindow=[-1 16]; % in seconds from cue onset
+subDir='distractor';
+[~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'distractorAligned',dataout,alignComp,phys_timepointsComp);
+
+% All success
+event='success_fromPerchOrWheel';
+timeWindow=[-1 16]; % in seconds from cue onset
+subDir='all_success';
+[~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'allSuccess',dataout,alignComp,phys_timepointsComp);
+
+% All failure
+event='misses_and_pelletMissing_and_drop';
+timeWindow=[-1 16]; % in seconds from cue onset
+subDir='all_failure';
+[~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'allFailure',dataout,alignComp,phys_timepointsComp);
+
+% All drop
+event='drop_fromPerchOrWheel';
+timeWindow=[-1 16]; % in seconds from cue onset
+subDir='all_drop';
+[~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'allDrop',dataout,alignComp,phys_timepointsComp);
+
+% All miss
+event='misses_and_pelletMissing';
+timeWindow=[-1 16]; % in seconds from cue onset
+subDir='all_miss';
+[~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'allMiss',dataout,alignComp,phys_timepointsComp);
+
+% All reach when pellet missing
+event='pelletmissingreach_reachStarts';
+timeWindow=[-1 16]; % in seconds from cue onset
+subDir='all_pelletMissing';
+[~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+saveStuff(saveDir,subDir,[num2str(assign) 'onCh' num2str(unit_on_channel)],saveName,'allReachPelletMissing',dataout,alignComp,phys_timepointsComp);
 
 end
 

@@ -3,6 +3,13 @@ function saveBehaviorAlignmentsPhotometry(phys_tbt,behavior_tbt,saveDir,saveName
 suppressFigs=true;
 cueOffset=-0.16; % in sec
 
+if strcmp(which_photoch,'green')
+    which_photoch='green_ch';
+end
+if strcmp(which_photoch,'red')
+    which_photoch='red_ch';
+end
+
 % Save various alignments to behavior events
 % Cue
 event='cue';
@@ -10,6 +17,13 @@ timeWindow=[-1 16]; % in seconds from cue onset
 subDir='cue';
 [~,dataout,~,alignComp,~,~,phys_timepointsComp]=plotPhotometryResult(phys_tbt,behavior_tbt,[],event,which_photoch,'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
 saveStuff(saveDir,subDir,'',saveName,'cueAligned',dataout,alignComp,phys_timepointsComp);
+
+% Cued reach
+event='all_reachBatch';
+timeWindow=[0+cueOffset 3]; % in seconds from cue onset
+subDir='cued_reach';
+[~,dataout,~,alignComp,~,~,phys_timepointsComp]=plotPhotometryResult(phys_tbt,behavior_tbt,[],event,which_photoch,'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+saveStuff(saveDir,subDir,'',saveName,'cuedReach',dataout,alignComp,phys_timepointsComp);
 
 % Uncued reach
 event='all_reachBatch';
@@ -115,6 +129,49 @@ timeWindow=[3 16]; % in seconds from cue onset
 subDir='uncued_pelletMissing';
 [~,dataout,~,alignComp,~,~,phys_timepointsComp]=plotPhotometryResult(phys_tbt,behavior_tbt,[],event,which_photoch,'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
 saveStuff(saveDir,subDir,'',saveName,'uncuedReachPelletMissing',dataout,alignComp,phys_timepointsComp);
+
+% Distractor
+event='movie_distractor';
+behavior_tbt.movie_distractor=behavior_tbt.movie_distractor>0.5;
+timeWindow=[-1 16]; % in seconds from cue onset
+subDir='distractor';
+[~,dataout,~,alignComp,~,~,phys_timepointsComp]=plotPhotometryResult(phys_tbt,behavior_tbt,[],event,which_photoch,'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+saveStuff(saveDir,subDir,'',saveName,'distractorAligned',dataout,alignComp,phys_timepointsComp);
+
+% All success
+event='success_fromPerchOrWheel';
+timeWindow=[-1 16]; % in seconds from cue onset
+subDir='all_success';
+[~,dataout,~,alignComp,~,~,phys_timepointsComp]=plotPhotometryResult(phys_tbt,behavior_tbt,[],event,which_photoch,'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+saveStuff(saveDir,subDir,'',saveName,'allSuccess',dataout,alignComp,phys_timepointsComp);
+
+% All failure
+event='misses_and_pelletMissing_and_drop';
+timeWindow=[-1 16]; % in seconds from cue onset
+subDir='all_failure';
+[~,dataout,~,alignComp,~,~,phys_timepointsComp]=plotPhotometryResult(phys_tbt,behavior_tbt,[],event,which_photoch,'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+saveStuff(saveDir,subDir,'',saveName,'allFailure',dataout,alignComp,phys_timepointsComp);
+
+% All drop
+event='drop_fromPerchOrWheel';
+timeWindow=[-1 16]; % in seconds from cue onset
+subDir='all_drop';
+[~,dataout,~,alignComp,~,~,phys_timepointsComp]=plotPhotometryResult(phys_tbt,behavior_tbt,[],event,which_photoch,'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+saveStuff(saveDir,subDir,'',saveName,'allDrop',dataout,alignComp,phys_timepointsComp);
+
+% All miss
+event='misses_and_pelletMissing';
+timeWindow=[-1 16]; % in seconds from cue onset
+subDir='all_miss';
+[~,dataout,~,alignComp,~,~,phys_timepointsComp]=plotPhotometryResult(phys_tbt,behavior_tbt,[],event,which_photoch,'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+saveStuff(saveDir,subDir,'',saveName,'allMiss',dataout,alignComp,phys_timepointsComp);
+
+% All reach when pellet missing
+event='pelletmissingreach_reachStarts';
+timeWindow=[-1 16]; % in seconds from cue onset
+subDir='all_pelletMissing';
+[~,dataout,~,alignComp,~,~,phys_timepointsComp]=plotPhotometryResult(phys_tbt,behavior_tbt,[],event,which_photoch,'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
+saveStuff(saveDir,subDir,'',saveName,'allReachPelletMissing',dataout,alignComp,phys_timepointsComp);
 
 end
 

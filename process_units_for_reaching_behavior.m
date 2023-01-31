@@ -83,7 +83,7 @@ data_loc_array=table2cell(readtable(dataTable,'Format','%s%s%s%u%s%s%s%s%s%u%u%s
 
 %% 2. Auto-populate SU QC and behavior alignments -- for 84 sessions, running all of this takes about 12 hrs
 % Discarding trials where unit dead or moved away
-for i=1:size(data_loc_array,1)
+for i=344:size(data_loc_array,1)
     if strcmp(data_loc_array{i,6},'no_tbt')
         continue
     end
@@ -93,6 +93,7 @@ for i=1:size(data_loc_array,1)
     if ~isempty(photometry_tbt) && ~strcmp(data_loc_array{i,14},'photo_not_working') && ~strcmp(data_loc_array{i,14},'not_finished')
         mkdir(data_loc_array{i,15});
         saveBehaviorAlignmentsPhotometry(photometry_tbt,behavior_tbt,data_loc_array{i,15},'',data_loc_array{i,14}); 
+        disp(['Photometry for ' data_loc_array{i,6} ': Done']);
     end
     if strcmp(data_loc_array{i,7},'no_spikes')
         % no spikes recorded
@@ -100,6 +101,7 @@ for i=1:size(data_loc_array,1)
     end
     if data_loc_array{i,13}==1
         % recording is not in structure
+        disp(['Skipping  ' data_loc_array{i,6} ' because not in structure']);
         continue
     end
     % get spikes if recorded physiology
@@ -299,6 +301,7 @@ for i=1:size(data_loc_array,1)
             end
         end
     end
+    disp(['Physiology for ' data_loc_array{i,7} ': Done']);
     catch
         disp(['caught error while processing ' data_loc_array{i,6}]);
     end
