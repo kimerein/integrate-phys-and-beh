@@ -1,5 +1,5 @@
 % function process_units_for_reaching_behavior()
-% for processing unit alignments to behavior
+%% for processing unit alignments to behavior
 
 clear all
 
@@ -15,8 +15,8 @@ skipIfBehaviorAlignmentsAlreadyExist=false; % if true, will skip any units for w
 % CAN COMMENT OUT SOME BEHAVIOR ALIGNMENTS IN
 % saveBehaviorAlignmentsSingleNeuron.m IF DON'T WANT TO REPOPULATE
 % EVERYTHING
-skipUnitDetails=true; % if true, will skip populating the unit details
-skipUnitDetailsUnlessNoQCfig=true; % skips populating unit details unless QC fig does not yet exist
+skipUnitDetails=false; % if true, will skip populating the unit details
+skipUnitDetailsUnlessNoQCfig=false; % skips populating unit details unless QC fig does not yet exist
 % BUT NOTE WILL STILL REPOPULATE UNIT DETAILS
 % second row is Matlab index, first row is depth on probe, where 32 is most
 % dorsall, 1 is most ventral
@@ -62,8 +62,8 @@ chDepthMapping=[1   21; ...
 % location of SU aligned to behavior, raw data binary name
 
 % ultimately, ingest this from .csv file
-dataTable='C:\Users\sabatini\Downloads\Spike sorting analysis - data as of 20221105.csv';
-data_loc_array=table2cell(readtable(dataTable,'Format','%s%s%s%u%s%s%s%s%s%u%u%s%d%s%s'));
+dataTable='C:\Users\sabatini\Downloads\Spike sorting analysis - Combined phys and photo.csv';
+data_loc_array=table2cell(readtable(dataTable,'Format','%s%s%s%u%s%s%s%s%s%u%u%s%u%s%s','Delimiter', ',', 'HeaderLines', 0, 'ReadVariableNames', true));
 
 % data_loc_array=cell(2,6);
 % i=1; data_loc_array{i,1}='20210311'; data_loc_array{i,2}='Oct_B'; 
@@ -96,6 +96,10 @@ for i=1:size(data_loc_array,1)
     end
     if strcmp(data_loc_array{i,7},'no_spikes')
         % no spikes recorded
+        continue
+    end
+    if data_loc_array{i,13}==1
+        % recording is not in structure
         continue
     end
     % get spikes if recorded physiology
