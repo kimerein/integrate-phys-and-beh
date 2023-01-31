@@ -83,6 +83,7 @@ data_loc_array=table2cell(readtable(dataTable,'Format','%s%s%s%u%s%s%s%s%s%u%u%s
 
 %% 2. Auto-populate SU QC and behavior alignments -- for 84 sessions, running all of this takes about 12 hrs
 % Discarding trials where unit dead or moved away
+errorInDirectories={};
 for i=344:size(data_loc_array,1)
     if strcmp(data_loc_array{i,6},'no_tbt')
         continue
@@ -304,6 +305,7 @@ for i=344:size(data_loc_array,1)
     disp(['Physiology for ' data_loc_array{i,7} ': Done']);
     catch
         disp(['caught error while processing ' data_loc_array{i,6}]);
+        errorInDirectories{length(errorInDirectories)+1}=data_loc_array{i,6};
     end
 end
 
