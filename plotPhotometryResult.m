@@ -416,6 +416,10 @@ if typeOfReach==true
     behAligned=tempBehAligned;
     alignTimes=getValsFromRows(behavior_tbt.times_wrt_trial_start,alignInds,fromInputRow);
     indsIntoPhoto=getIndsFromRows(photometry_tbt.(getCorrectTime_wrtTrialStart),alignTimes,fromInputRow);
+    if all(isnan(indsIntoPhoto))
+        disp('No such behavior events, line 420 in plotPhotometryResult.m');
+        return
+    end
     [alignedData,alignedAt]=alignRowsToInds(photometry_tbt.(plotPhotoField),indsIntoPhoto,nanmin(indsIntoPhoto),fromInputRow,alignPeaks,indsFromPeak,minBaselineSamples);
     phys_timepoints_alignedData=alignRowsToInds(photometry_tbt.green_time,indsIntoPhoto,nanmin(indsIntoPhoto),fromInputRow,alignPeaks,indsFromPeak,minBaselineSamples);
     % pad phototimes if alignedData is bigger

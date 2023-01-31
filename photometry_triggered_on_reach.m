@@ -366,6 +366,10 @@ minSpacingBetweenCues_sig2=floor(minTimeBetweenCues/mode(temp));
 [~,anchor_index_signal1]=nanmin(abs(shifted_data.distractor_times-anchor));
 [~,anchor_index_signal2]=nanmin(abs(movie_times-anchor));
 zo=input('Do you want to zero out any of the blue cues? If yes, enter time start and time end as [start end] to zero out. ');
+% keep track of which blue cues zeroed because may need to remove them from
+% behavior_tbt
+% this is a fix for the LabJack fucking up on Marci's rig
+countDiscardedBehCues=[];
 if ~isempty(zo)
     if length(zo)>2
         figure();
@@ -376,10 +380,12 @@ if ~isempty(zo)
             hold on;
             plot(movie_times(movie_times>zonetozero(1) & movie_times<zonetozero(end)),movie_cue(movie_times>zonetozero(1) & movie_times<zonetozero(end)),'Color','r');
             plot(zo((whichZeroPeriod-1)*2+1:(whichZeroPeriod-1)*2+2),0.6*ones(size(zo((whichZeroPeriod-1)*2+1:(whichZeroPeriod-1)*2+2))),'Color','g','LineWidth',6);
-            shifted_data.cue=zeroOutPartOfOne(shifted_data.cue,shifted_data.distractor_times,zo((whichZeroPeriod-1)*2+1:(whichZeroPeriod-1)*2+2)); disp('zeroing out');
+            [shifted_data.cue,discard]=zeroOutPartOfOne(shifted_data.cue,shifted_data.distractor_times,zo((whichZeroPeriod-1)*2+1:(whichZeroPeriod-1)*2+2)); disp('zeroing out');
+            countDiscardedBehCues=[countDiscardedBehCues discard];
         end
     else
-        shifted_data.cue=zeroOutPartOfOne(shifted_data.cue,shifted_data.distractor_times,zo); disp('zeroing out');
+        [shifted_data.cue,discard]=zeroOutPartOfOne(shifted_data.cue,shifted_data.distractor_times,zo); disp('zeroing out');
+        countDiscardedBehCues=[countDiscardedBehCues discard];
     end
 end
 movie_cue(isnan(movie_cue))=0;
@@ -392,13 +398,31 @@ mapping_signal2=mapping_signal2(si);
 mapping_signal1=mapping_signal1(si);
 mapping_signal3=mapping_signal3(si);
 
+% which behavior_tbt cues were discarded because of LabJack issue
+% afterTheseCues=nan(1,length(1:floor(length(zo)/2)));
+% k=1;
+% for whichZeroPeriod=1:floor(length(zo)/2) 
+%     startzeroperiod=zo((whichZeroPeriod-1)*2+1); 
+%     [~,mi]=min(abs(shifted_data.distractor_times-startzeroperiod));
+%     afterTheseCues(k)=find(mapping_signal1<mi,1,'last');
+%     k=k+1;
+% end
+% whichtodiscard=[];
+% for i=1:length(afterTheseCues)
+%     whichtodiscard=[whichtodiscard afterTheseCues(i)+1:afterTheseCues(i)+countDiscardedBehCues(i)];
+% end
+% tempn=1:length(fromCurrVid_tbt);
+% alltbt=moveRedForwardOrBack(alltbt,tempn(~ismember(tempn,whichtodiscard)),[],'drop');
+% fromCurrVid_tbt=fromCurrVid_tbt(tempn(~ismember(tempn,whichtodiscard)));
+
 fields_like_distractor{length(fields_like_distractor)+1}='distractor';
 [tbt_data,alltbt]=makeTbtData(shifted_data,alltbt,fromCurrVid_tbt,mapping_signal1,mapping_signal2,mapping_signal3,'cueZone_onVoff',fields_like_distractor,fields_like_photometry);
 
 end
 
-function data=zeroOutPartOfOne(data,datatimes,zeroOutTime)
+function [data,countDiscarded]=zeroOutPartOfOne(data,datatimes,zeroOutTime)
 
+countDiscarded=sum(diff(data(datatimes>zeroOutTime(1) & datatimes<zeroOutTime(2)))>0.5);
 data(datatimes>zeroOutTime(1) & datatimes<zeroOutTime(2))=0;
 
 end
