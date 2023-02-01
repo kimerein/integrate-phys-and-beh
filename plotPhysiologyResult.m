@@ -125,7 +125,11 @@ temp=photometry_tbt.(timeField2);
 photometry_tbt.([timeField2 '_wrt_trial_start'])=temp-repmat(temp(:,1),1,size(temp,2));
 
 if strcmp(alignTo,'cue') || alwaysRealignToCue==true
-    [photometry_tbt,alignedCueTo]=realignToCue(photometry_tbt,'cue',thesePhotoFieldsUseTimeField1,timeField1,timeField2,minITI);
+    try
+        [photometry_tbt,alignedCueTo]=realignToCue(photometry_tbt,'cue',thesePhotoFieldsUseTimeField1,timeField1,timeField2,minITI);
+    catch
+        disp('Error was thrown in line 129 of plotPhysiologyResult.m');
+    end
 end
 [~,fpe]=nanmax(nanmean(behavior_tbt.cueZone_onVoff,1));
 temp=nanmean(behavior_tbt.times_wrt_trial_start,1);
@@ -537,6 +541,7 @@ if typeOfReach==true
     alignTimes=getValsFromRows(behavior_tbt.times_wrt_trial_start,alignInds,fromInputRow);
     indsIntoPhoto=getIndsFromRows(photometry_tbt.(getCorrectTime_wrtTrialStart),alignTimes,fromInputRow);
     if all(isnan(indsIntoPhoto))
+        disp('No such behavior events, line 544 in plotPhysiologyResult.m');
         return
     end
     [alignedData,alignedAt]=alignRowsToInds(photometry_tbt.(plotPhotoField),indsIntoPhoto,nanmin(indsIntoPhoto),fromInputRow,alignPeaks,indsFromPeak,minBaselineSamples);
