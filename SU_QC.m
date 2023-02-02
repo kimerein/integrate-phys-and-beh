@@ -224,7 +224,12 @@ end
 function distance=findUniquePCs(spikes, unit_assign)
 
 % subsample other spikes
-which_other=randsample(find(~ismember(spikes.assigns, unit_assign)),sum(ismember(spikes.assigns, unit_assign)));
+fisi=find(~ismember(spikes.assigns, unit_assign));
+if sum(ismember(spikes.assigns, unit_assign))>length(fisi)
+    which_other=randsample(fisi,length(fisi));
+else
+    which_other=randsample(fisi,sum(ismember(spikes.assigns, unit_assign)));
+end
 % spikes in unit
 which=ismember(spikes.assigns, unit_assign);
 
@@ -240,7 +245,12 @@ end
 function plotPCspace(spikes, unit_assign, pc_dim1, pc_dim2)
 
 % subsample other spikes
-which=randsample(find(~ismember(spikes.assigns, unit_assign)),sum(ismember(spikes.assigns, unit_assign)));
+fisi=find(~ismember(spikes.assigns, unit_assign));
+if sum(ismember(spikes.assigns, unit_assign))>length(fisi)
+    which=randsample(fisi,length(fisi));
+else
+    which=randsample(fisi,sum(ismember(spikes.assigns, unit_assign)));
+end
 plotUnitInPCspace(spikes, which, pc_dim1, pc_dim2, 'c'); hold on;
 
 % plot spikes in unit

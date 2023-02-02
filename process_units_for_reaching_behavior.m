@@ -108,7 +108,7 @@ for i=1:size(data_loc_array,1)
     % get spikes if recorded physiology
     dd=dir(data_loc_array{i,7});
     disp(['Processing ' data_loc_array{i,7}]);
-    try
+    %try
     for j=1:length(dd)
         if ~isempty(regexp(dd(j).name,'spikes'))
             % load spikes
@@ -303,10 +303,10 @@ for i=1:size(data_loc_array,1)
         end
     end
     disp(['Physiology for ' data_loc_array{i,7} ': Done']);
-    catch
-        disp(['caught error while processing ' data_loc_array{i,6}]);
-        errorInDirectories{length(errorInDirectories)+1}=data_loc_array{i,6};
-    end
+%     catch
+%         disp(['caught error while processing ' data_loc_array{i,6}]);
+%         errorInDirectories{length(errorInDirectories)+1}=data_loc_array{i,6};
+%     end
 end
 
 %% 3. Load data locations
