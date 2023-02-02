@@ -58,6 +58,10 @@ for i=1:size(phys_tbt.opto,1)
             timewindow_noopto=phys_tbt.phys_timepoints(i,[find(~isnan(phys_tbt.phys_timepoints(i,:)),1,'first') firstafteropto]);
         end
         % get av waveform of spikes occurring in this time range
+        if length(timewindow_noopto)<2
+            % just don't add this waveform
+            continue
+        end
         for j=1:length(goodUnits)
             if nansum(spikes.unwrapped_times>timewindow_noopto(1) & spikes.unwrapped_times<timewindow_noopto(2) & spikes.assigns==goodUnits(j))>0
                 nooptowvfm=nanmean(spikes.waveforms(spikes.unwrapped_times>timewindow_noopto(1) & spikes.unwrapped_times<timewindow_noopto(2) & spikes.assigns==goodUnits(j),:,:),1);

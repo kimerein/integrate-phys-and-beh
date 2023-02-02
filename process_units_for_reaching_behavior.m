@@ -11,12 +11,12 @@ percentThresh=5;
 timeStretchThresh=60*10; % in seconds
 plotInference=false;
 channelSpacing=20; % in microns
-skipIfBehaviorAlignmentsAlreadyExist=false; % if true, will skip any units for which a behavior alignment already exists in the cue sub-folder
+skipIfBehaviorAlignmentsAlreadyExist=true; % if true, will skip any units for which a behavior alignment already exists in the cue sub-folder
 % CAN COMMENT OUT SOME BEHAVIOR ALIGNMENTS IN
 % saveBehaviorAlignmentsSingleNeuron.m IF DON'T WANT TO REPOPULATE
 % EVERYTHING
 skipUnitDetails=false; % if true, will skip populating the unit details
-skipUnitDetailsUnlessNoQCfig=false; % skips populating unit details unless QC fig does not yet exist
+skipUnitDetailsUnlessNoQCfig=true; % skips populating unit details unless QC fig does not yet exist
 % BUT NOTE WILL STILL REPOPULATE UNIT DETAILS
 % second row is Matlab index, first row is depth on probe, where 32 is most
 % dorsall, 1 is most ventral
