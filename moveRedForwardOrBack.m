@@ -23,6 +23,10 @@ switch moveOrDrop
         disp('Dropping all BUT the specified index range');
         for i=1:size(f)
             temp=red.(f{i});
+            if length(temp)==1
+                red.(f{i})=temp;
+                continue
+            end
             if length(red_start_to_end)>2
                 temp=temp(red_start_to_end,:);
             else

@@ -28,7 +28,7 @@ settings.forSearchMinus=-25; %300; %100; % inds around optimal for search for ea
 settings.forSearchPlus=25; %300; %200; % inds around optimal for search for each row
 % settings.try_scale1=0.6;
 % settings.try_scale2=1;  
-alignInd=15;
+alignInd=6;
 % downSampData2=true;
 ds=1; %1000;
 
@@ -93,6 +93,18 @@ dis1=data1.(whichField1);
 t1=data1.(whichTime1);
 dis2=data2.(whichField2);
 t2=data2.(whichTime2);
+
+figure(); title('Alignment before anything');
+offset=1;
+dis1=dis1./max(dis1(1:end),[],2,'omitnan');
+dis2=dis2./max(dis2(1:end),[],2,'omitnan');
+for i=1:size(data1.(whichTime1),1)
+    plot(t1(i,:),offset+0.9*dis1(i,:),'Color','k');
+    hold on;
+    plot(t2(i,:),offset+0.9*dis2(i,:),'Color','r');
+%     offset=offset+nanmax([dis1(i,:) dis2(i,:)])+0.1;
+    offset=offset+1;
+end
 
 if ~isempty(alignmentAnchor_data1)
     temp=data1.(alignmentAnchor_data1);
