@@ -87,6 +87,13 @@ for j=1:length(dd)
             continue % failed unit test
         end
 
+        if length(dontUseTrials)~=size(a.dataout.y,1)
+            disp('dontUseTrials length does not match size of a.dataout.y in line 91 of alignToCompanion.m, so skipping this unit');
+            excluded(excluded_count)=1;
+            excluded_count=excluded_count+1;
+            continue
+        end
+
         if isempty(a.dataout)
             disp([ls(i).folder '\' ls(i).name ' is empty ... skipping']);
             excluded(excluded_count)=1;

@@ -15,20 +15,20 @@ function [data1,data2]=useDistractorAlignment(data1,whichTime1,whichField1,data2
 % settings.try_scale2=1.2;  
 % for physiology
 % INITIAL ALIGNMENT
-settings.try_delay1=-20; %50; %-10;
+settings.try_delay1=-10; %50; %-10;
 settings.delaysteps=1;
-settings.try_delay2=20; %70; %10;
+settings.try_delay2=10; %70; %10;
 settings.tryinc=0.01;
 settings.tryscale_from=-2.5;
 settings.tryscale_to=2.5;
 % ROW BY ROW
 % this is red before black
-settings.forSearchMinus=-25; %300; %100; % inds around optimal for search for each row
+settings.forSearchMinus=-20; %300; %100; % inds around optimal for search for each row
 % this is black before red
-settings.forSearchPlus=25; %300; %200; % inds around optimal for search for each row
+settings.forSearchPlus=20; %300; %200; % inds around optimal for search for each row
 % settings.try_scale1=0.6;
 % settings.try_scale2=1;  
-alignInd=6;
+alignInd=9;
 % downSampData2=true;
 ds=1; %1000;
 

@@ -11,7 +11,7 @@ percentThresh=5;
 timeStretchThresh=60*10; % in seconds
 plotInference=false;
 channelSpacing=20; % in microns
-skipIfBehaviorAlignmentsAlreadyExist=false; % if true, will skip any units for which a behavior alignment already exists in the cue sub-folder
+skipIfBehaviorAlignmentsAlreadyExist=true; % if true, will skip any units for which a behavior alignment already exists in the cue sub-folder
 % CAN COMMENT OUT SOME BEHAVIOR ALIGNMENTS IN
 % saveBehaviorAlignmentsSingleNeuron.m IF DON'T WANT TO REPOPULATE
 % EVERYTHING
@@ -331,12 +331,12 @@ end
 
 %% 4. Make figures -- about 6 min to load 84 sessions of unit data
 % choose type of response to plot
-response_to_plot='uncued_reach'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+response_to_plot='cued_success'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 
 % doUnitTest.m is used to test whether to include unit in this plot
 % will include unit if unitdets match the following
 % [inStructure isFS isTAN isSPN isLowFRThin]
-plotUnitCriteria=[-100 0 0 1 0]; % -100 is a wildcard, else 0 (false) and 1 (true)
+plotUnitCriteria=[1 0 0 1 0]; % -100 is a wildcard, else 0 (false) and 1 (true)
 getCriteriaForUnitsToPlot(plotUnitCriteria);
 % read in some units
 dd_more=cell(1,length(dd)); 
