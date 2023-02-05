@@ -95,10 +95,12 @@ for j=1:length(dd)
         end
 
         if length(dontUseTrials)~=size(a.dataout.y,1)
-            disp('dontUseTrials length does not match size of a.dataout.y in line 91 of alignToCompanion.m, so skipping this unit');
-            excluded(excluded_count)=1;
-            excluded_count=excluded_count+1;
-            continue
+            % as a default, take all trials
+            % but I might want to modify this behavior later
+            % sometimes dontUseTrials is empty if figure opening failed,
+            % or other
+            disp('dontUseTrials length does not match size of a.dataout.y in line 91 of alignToCompanion.m, but taking all trials');
+            dontUseTrials=ones(size(a.dataout.y,1),1);
         end
         excluded_count=excluded_count+1;
 
