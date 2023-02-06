@@ -5,12 +5,8 @@ Created on Mon Jan 24 10:48:54 2022
 """
 
 import os
-import numpy as np
-import cv2
-from tqdm import tqdm
+import pandas as pd
 from scipy.io import savemat
-from deeplabcut.utils import auxiliaryfunctions
-from pathlib import Path
 
 def twoD_to_threeD(
 ):
@@ -29,7 +25,8 @@ def twoD_to_threeD(
     directory=r'Z:\MICROSCOPE\Kim\for_orchestra\DLC_testvids\March_C_2019-05-30'
     for filename in sorted(os.listdir(directory)):
         if filename.endswith(".h5"):
-            print(['Now processing ' os.path.join(directory, filename)])
+            print('Now processing ')
+            print(os.path.join(directory, filename))
             df = pd.read_hdf(os.path.join(directory, filename))
 
             # Rename columns
