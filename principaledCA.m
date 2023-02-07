@@ -300,7 +300,7 @@ end
 
 function bestmodel=plotTCA(inputdata,n_fits,R)
 
-userChooseDecomp=true;
+userChooseDecomp=false;
 
 % Fit CP Tensor Decomposition
 % these commands require that you download Sandia Labs' tensor toolbox:

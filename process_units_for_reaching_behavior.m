@@ -354,7 +354,7 @@ Response_beh=getAndSaveBeh(data_loc_array(:,6),settingsForBeh);
 sub=subResponse(Response_photo,'fromWhichSess',find(Response_beh.dprimes<0.5));
 plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',sub,1);
 % Get photo peaks
-photolocs=getPhotoPeaks(sub,'peak',[0 3]);
+photolocs=getPhotoPeaks(sub,'dip',[0 3]);
 figure(); histogram(photolocs,25);
 
 %% 4. Make figures -- about 6 min to load 84 sessions of unit data
@@ -589,9 +589,11 @@ dataMatrix(dataMatrix<0)=0; % no firing rates below 0
 % dataMatrix(:,1:end-6,3)=dataMatrix(:,7:end,3);
 % dataMatrix(:,1:end-6,5)=dataMatrix(:,7:end,5);
 
+% Peak dopamine at 0.83 sec
+% Dopamine dip at 1.5685 sec
 dataMatrix=dataMatrix(:,31:end-30,:);
-dataMatrix(:,1:end-113,3)=dataMatrix(:,114:end,3);
-dataMatrix(:,1:end-113,5)=dataMatrix(:,114:end,5);
+dataMatrix(:,1:end-73,3)=dataMatrix(:,74:end,3);
+dataMatrix(:,1:end-73,5)=dataMatrix(:,74:end,5);
 
 clear newDataMatrix
 for i=1:size(dataMatrix,3)
