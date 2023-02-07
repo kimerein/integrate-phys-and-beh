@@ -337,7 +337,7 @@ for i=1:size(data_loc_array,1)
     dd_photo{i}=data_loc_array{i,15};
 end
 % choose type of response to plot
-response_to_plot='cued_drop'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+response_to_plot='uncued_pelletMissing'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 dd_photo_more=cell(1,length(dd_photo)); 
 for i=1:length(dd_photo)
     dd_photo_more{i}=[dd_photo{i} sep response_to_plot];
@@ -349,6 +349,13 @@ settingsForBeh=reachExpt_analysis_settings('display settings');
 % override some of these settings
 settingsForBeh.check_for_human=0; settingsForBeh.tryForFiles={};
 Response_beh=getAndSaveBeh(data_loc_array(:,6),settingsForBeh);
+
+%% 4.03 Plot some photometry results
+sub=subResponse(Response_photo,'fromWhichSess',find(Response_beh.dprimes<0.5));
+plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',sub,1);
+% Get photo peaks
+photolocs=getPhotoPeaks(sub,'peak',[0 3]);
+figure(); histogram(photolocs,25);
 
 %% 4. Make figures -- about 6 min to load 84 sessions of unit data
 % choose type of response to plot
@@ -548,25 +555,29 @@ anyIsSig=any(isSig==1,2);
 
 %% Set up data matrix
 % Units X conditions (alignments to beh events) X time
-%a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\cue.mat'); cue_Response=a.Response; 
-a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged\cued_success.mat'); cued_success_Response=a.Response;  
-a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged\cued_drop.mat'); cued_failure_Response=a.Response; 
-a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged\uncued_success.mat'); uncued_success_Response=a.Response; 
-a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged\uncued_drop.mat'); uncued_failure_Response=a.Response;
-a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged\cue_noReach.mat'); cue_noReach_Response=a.Response;
+a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\cue.mat'); cue_Response=a.Response; 
+a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\cued_success.mat'); cued_success_Response=a.Response;  
+a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\cued_failure.mat'); cued_failure_Response=a.Response; 
+a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\uncued_success.mat'); uncued_success_Response=a.Response; 
+a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\uncued_failure.mat'); uncued_failure_Response=a.Response;
+% a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\cue_noReach.mat'); cue_noReach_Response=a.Response;
 %a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\uncued_reach.mat'); uncued_reach_Response=a.Response;
 trial_n_cutoff=0;
-% out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',excludeTooFewTrials(cue_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false));
-% cue_Response=out.Response1; cued_success_Response=out.Response2; cued_failure_Response=out.Response3; uncued_success_Response=out.Response4; uncued_failure_Response=out.Response5;
-out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',excludeTooFewTrials(cue_noReach_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false));
-cue_noReach_Response=out.Response1;  cued_success_Response=out.Response2; cued_failure_Response=out.Response3; uncued_success_Response=out.Response4; uncued_failure_Response=out.Response5;
+out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',excludeTooFewTrials(cue_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false));
+cue_Response=out.Response1; cued_success_Response=out.Response2; cued_failure_Response=out.Response3; uncued_success_Response=out.Response4; uncued_failure_Response=out.Response5;
+% out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',excludeTooFewTrials(cue_noReach_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false));
+% cue_noReach_Response=out.Response1;  cued_success_Response=out.Response2; cued_failure_Response=out.Response3; uncued_success_Response=out.Response4; uncued_failure_Response=out.Response5;
 D1tag=cued_success_Response.D1tag(cued_success_Response.excluded==0); A2atag=cued_success_Response.A2atag(cued_success_Response.excluded==0); 
 save('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\for_data_matrix_D1vA2a.mat','D1tag','A2atag');
 
-takePointsBeforeZero=5; %15;
-takePointsAfterZero=70;
-% dataMatrix=setUpDataMatrix(cue_Response,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,takePointsBeforeZero,takePointsAfterZero);
-dataMatrix=setUpDataMatrix(cue_noReach_Response,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,takePointsBeforeZero,takePointsAfterZero);
+% takePointsBeforeZero=5; %15;
+% takePointsAfterZero=70;
+
+takePointsBeforeZero=30; %15;
+takePointsAfterZero=420;
+
+dataMatrix=setUpDataMatrix(cue_Response,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,takePointsBeforeZero,takePointsAfterZero);
+% dataMatrix=setUpDataMatrix(cue_noReach_Response,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,takePointsBeforeZero,takePointsAfterZero);
 dataMatrix(dataMatrix<0)=0; % no firing rates below 0
 % take just outcome alignments
 % dataMatrix=dataMatrix(:,:,[2:5]);
@@ -574,12 +585,27 @@ dataMatrix(dataMatrix<0)=0; % no firing rates below 0
 % dataMatrix_cueNoReach(dataMatrix_cueNoReach<0)=0; % no firing rates below 0
 
 % load('Z:\MICROSCOPE\Kim\20221129 lab meeting\dataMatrix.mat')
-dataMatrix=dataMatrix(:,6:end-35,:);
-dataMatrix(:,1:end-6,3)=dataMatrix(:,7:end,3);
-dataMatrix(:,1:end-6,5)=dataMatrix(:,7:end,5);
+% dataMatrix=dataMatrix(:,6:end-35,:);
+% dataMatrix(:,1:end-6,3)=dataMatrix(:,7:end,3);
+% dataMatrix(:,1:end-6,5)=dataMatrix(:,7:end,5);
+
+dataMatrix=dataMatrix(:,31:end-30,:);
+dataMatrix(:,1:end-113,3)=dataMatrix(:,114:end,3);
+dataMatrix(:,1:end-113,5)=dataMatrix(:,114:end,5);
+
+clear newDataMatrix
+for i=1:size(dataMatrix,3)
+    temp=reshape(dataMatrix(:,:,i),size(dataMatrix(:,:,i),1),size(dataMatrix(:,:,i),2));
+    %temp=downSampMatrix(reshape(dataMatrix(:,:,i),size(dataMatrix(:,:,i),1),size(dataMatrix(:,:,i),2)),10);
+    for j=1:size(temp,1)
+        temp(j,:)=smoothdata(temp(j,:),'gaussian',42);
+    end
+%     newDataMatrix(:,:,i)=abs(diff(temp,1,2)); 
+    newDataMatrix(:,:,i)=temp; 
+end
 
 % PCA, CCA, etc.
 % CCA: Find orthogonal dimensions of max covariance between X=[] and Y=[]
 plotN=6;
 boot=1; % num iterations for bootstrap
-principaledCA(dataMatrix,{'units','time','conditions'},plotN,boot);
+principaledCA(newDataMatrix,{'units','time','conditions'},plotN,boot);

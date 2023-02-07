@@ -93,6 +93,10 @@ def getPawPosition(
             # Set x limits
             plt.xlim(0, 350)
             plt.ylim(0, 350)
+
+            plt.xlim(0, 1500)
+            plt.ylim(0, 1500)
+
             # plt.xlim(-500, 500)
             # plt.ylim(-500, 500)
             plt.colorbar()
