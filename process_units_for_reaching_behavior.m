@@ -337,16 +337,22 @@ for i=1:size(data_loc_array,1)
     dd_photo{i}=data_loc_array{i,15};
 end
 % choose type of response to plot
-response_to_plot='uncued_drop'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+response_to_plot='uncued_success'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 dd_photo_more=cell(1,length(dd_photo)); 
 for i=1:length(dd_photo)
     dd_photo_more{i}=[dd_photo{i} sep response_to_plot];
 end
 Response_photo=getAndSaveResponse(dd_photo_more,'_',settingsForStriatumPhotometryPlots,[]);
 
+%% 4.02 Get behavior d-primes for these days
+settingsForBeh=reachExpt_analysis_settings('display settings');
+% override some of these settings
+settingsForBeh.check_for_human=0; settingsForBeh.tryForFiles={};
+Response_beh=getAndSaveBeh(data_loc_array(:,6),settingsForBeh);
+
 %% 4. Make figures -- about 6 min to load 84 sessions of unit data
 % choose type of response to plot
-response_to_plot='uncued_drop'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+response_to_plot='cue_noReach'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 
 % doUnitTest.m is used to test whether to include unit in this plot
 % will include unit if unitdets match the following
@@ -544,9 +550,9 @@ anyIsSig=any(isSig==1,2);
 % Units X conditions (alignments to beh events) X time
 %a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\cue.mat'); cue_Response=a.Response; 
 a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged\cued_success.mat'); cued_success_Response=a.Response;  
-a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged\cued_pelletMissing.mat'); cued_failure_Response=a.Response; 
+a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged\cued_drop.mat'); cued_failure_Response=a.Response; 
 a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged\uncued_success.mat'); uncued_success_Response=a.Response; 
-a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged\uncued_pelletMissing.mat'); uncued_failure_Response=a.Response;
+a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged\uncued_drop.mat'); uncued_failure_Response=a.Response;
 a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged\cue_noReach.mat'); cue_noReach_Response=a.Response;
 %a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\uncued_reach.mat'); uncued_reach_Response=a.Response;
 trial_n_cutoff=0;

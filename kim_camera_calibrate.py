@@ -10,7 +10,7 @@ Script stereo calibrates a pair of mirrors (or views) imaged by a single camera,
     Relative positions of mirrors and camera are similar to Kim's rig (this pertains only to the final reference frame rotations)
     Fixed camera focal length around 13-16 mm, imaged fov around 4x4x4 cm, and/or changing camera focal length creates minimal distortion (small enough fov)
     Known relationship between real paw length in world and number of pixels in camera image
-    Known approximate prinicipal points for the two mirror views
+    Known approximate principal points for the two mirror views
     Essentially, these assumptions are required to construct the camera matrix, distortion coefficients and principal points for each view
 """
 
@@ -26,7 +26,7 @@ from deeplabcut.utils import auxiliaryfunctions_3d
 
 def main():
     config=r'C:\Users\sabatini\Documents\DLC_3D\Test2022-Kim-2022-01-04-3d\config.yaml'
-    testimg=r'C:\Users\sabatini\Documents\test_vid_july3.jpg'
+    testimg=r'C:\Users\sabatini\Documents\MarchC_testimage.jpg'
      
     # this code is only for one camera/mirror/view pair, called for example 'sidecam' and 'undercam'
     # can rerun this calibration for a different camera pair

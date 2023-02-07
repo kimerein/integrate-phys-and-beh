@@ -300,6 +300,8 @@ end
 
 function bestmodel=plotTCA(inputdata,n_fits,R)
 
+userChooseDecomp=true;
+
 % Fit CP Tensor Decomposition
 % these commands require that you download Sandia Labs' tensor toolbox:
 % http://www.sandia.gov/~tgkolda/TensorToolbox/index-2.6.html
@@ -336,6 +338,17 @@ for n = 1:n_fits
             'Modetitles', {'neurons', 'time', 'trials'})
         set(gcf, 'Name', ['estimated factors - fit #' num2str(n)])
         text(0.05,0.05,['lambdas ' num2str(est_factors.lambda')]);
+    end
+    if userChooseDecomp==true
+        answer=questdlg('Use this decomp?');
+        switch answer
+            case 'Yes'
+                bestmodel=est_factors;
+                besterr=err(n);
+                return
+            case 'No'
+            case 'Cancel'
+        end
     end
 end
 
