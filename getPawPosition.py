@@ -14,10 +14,11 @@ def getPawPosition(
     bodyparts = ['palm','thumb_tip','wrist']
     # bodyparts = ['palm']
     # Add Bottom to all bodyparts
-    bodyparts_under = [b+'Bottom' for b in bodyparts]
+    # bodyparts_under = [b+'Bottom' for b in bodyparts]
+    bodyparts_under = bodyparts
     # Add Side to all bodyparts
     bodyparts_side = [b+'Side' for b in bodyparts]
-    p_cutoff=0.08
+    p_cutoff=0.04
 
     # For each .h5 file, get horizontal and vertical position of each bodypart
     directory=r'Z:\MICROSCOPE\Kim\for_orchestra\DLC_testvids\curr'
@@ -26,6 +27,8 @@ def getPawPosition(
             print('Now processing ')
             print(os.path.join(directory, filename))
             df = pd.read_hdf(os.path.join(directory, filename))
+
+            print(df.head())
 
             # For each bodypart
             for b in bodyparts_under:
@@ -70,8 +73,8 @@ def getPawPosition(
             pawPos_y_change = pawPos_y_change/len(bodyparts_under)
 
             # Integrate pawPos_x_change and pawPos_y_change to get pawPos_x and pawPos_y
-            pawPos_x = np.cumsum(pawPos_x_change,0)
-            pawPos_y = np.cumsum(pawPos_y_change,0)
+            # pawPos_x = np.cumsum(pawPos_x_change,0)
+            # pawPos_y = np.cumsum(pawPos_y_change,0)
             
             # Plot paw position x and y with color changing as function of index
             plt.figure()
@@ -88,10 +91,10 @@ def getPawPosition(
             plt.plot(pawPos_x,pawPos_y)
             # plt.plot(pawPos_x_change,pawPos_y_change)
             # Set x limits
-            # plt.xlim(0, 700)
-            # plt.ylim(0, 700)
-            plt.xlim(-500, 500)
-            plt.ylim(-500, 500)
+            plt.xlim(0, 350)
+            plt.ylim(0, 350)
+            # plt.xlim(-500, 500)
+            # plt.ylim(-500, 500)
             plt.colorbar()
             plt.show()
 

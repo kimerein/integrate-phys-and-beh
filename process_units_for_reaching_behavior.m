@@ -337,7 +337,7 @@ for i=1:size(data_loc_array,1)
     dd_photo{i}=data_loc_array{i,15};
 end
 % choose type of response to plot
-response_to_plot='uncued_success'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+response_to_plot='cued_drop'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 dd_photo_more=cell(1,length(dd_photo)); 
 for i=1:length(dd_photo)
     dd_photo_more{i}=[dd_photo{i} sep response_to_plot];
