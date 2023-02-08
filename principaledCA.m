@@ -36,6 +36,9 @@ plotPCA(flatData',plotN);
 R_guess=6; % guess matrix rank
 allconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[2:5])),10,R_guess);
 [allcell_PCs,allcell_archetypeCells,dimOrdering]=studyCPmodel(allconditions_cpmodel);
+temp=allcell_PCs.score(:,1); figure(); histogram(temp,400);
+response_forThisArchetype(allconditions_cpmodel,temp<-0.01532);
+response_forThisArchetype(allconditions_cpmodel,temp>=-0.01532);
 % get cue responses
 [~,cuescores]=plotPCA(data(:,:,1),6);
 % cueweights=ones(size(data,1),1);
@@ -235,6 +238,31 @@ end
  
 % for each trial type, get how archetypal neuron responses expected to change
 [TFsForUnitsAndTrialTypes,dimOrdering]=archetypal_neuron_by_neuron(coeff,tf,trialfactors,allconditions_cpmodel);
+
+end
+
+function response_forThisArchetype(allconditions_cpmodel,useTheseCells)
+
+unitweights=allconditions_cpmodel.U{1}; tf=allconditions_cpmodel.U{2};
+trialfactors=allconditions_cpmodel.U{3};
+TFsForUnitsAndTrialTypes=nan(length(tf(:,1)),size(trialfactors,1),size(unitweights,1));
+for k=1:size(trialfactors,1)
+    for i=1:size(unitweights,2)
+        weightedTFforUnit=zeros(size(tf(:,1)));
+        for j=1:size(tf,2)
+            weightedTFforUnit=weightedTFforUnit+unitweights(i,j)*tf(:,j)*trialfactors(k,j)*allconditions_cpmodel.lambda(j);
+        end
+        TFsForUnitsAndTrialTypes(:,k,i)=weightedTFforUnit; 
+    end
+end
+TFsForUnitsAndTrialTypes=TFsForUnitsAndTrialTypes(:,:,useTheseCells==1);
+figure();
+me=reshape(mean(TFsForUnitsAndTrialTypes,3,'omitnan'),length(tf(:,1)),size(trialfactors,1));
+plot(me);
+hold on; 
+se=reshape(std(TFsForUnitsAndTrialTypes,[],3,'omitnan'),length(tf(:,1)),size(trialfactors,1))./sqrt(sum(useTheseCells==1));
+plot(me+se);
+plot(me-se);
 
 end
 

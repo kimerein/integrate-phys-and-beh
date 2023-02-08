@@ -36,6 +36,8 @@ plotPCA(flatData',plotN);
 R_guess=6; % guess matrix rank
 allconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[2:5])),10,R_guess);
 [allcell_PCs,allcell_archetypeCells,dimOrdering]=studyCPmodel(allconditions_cpmodel);
+temp=allcell_PCs.score(:,1); figure(); histogram(temp,400);
+
 % get cue responses
 [~,cuescores]=plotPCA(data(:,:,1),6);
 % cueweights=ones(size(data,1),1);
@@ -238,6 +240,36 @@ end
 
 end
 
+function response_forThisArchetype(allconditions_cpmodel,useTheseCells)
+
+unitweights=allconditions_cpmodel.U{1}; tf=allconditions_cpmodel.U{2};
+trialfactors=allconditions_cpmodel.U{3};
+TFsForUnitsAndTrialTypes=nan(length(tf(:,1)),size(trialfactors,1),size(unitweights,1));
+for k=1:size(trialfactors,1)
+    for i=1:size(unitweights,2)
+        weightedTFforUnit=zeros(size(tf(:,1)));
+        for j=1:size(tf,2)
+            weightedTFforUnit=weightedTFforUnit+unitweights(i,j)*tf(:,j)*trialfactors(k,j)*allconditions_cpmodel.lambda(j);
+        end
+        TFsForUnitsAndTrialTypes(:,k,i)=weightedTFforUnit; 
+    end
+end
+TFsForUnitsAndTrialTypes=TFsForUnitsAndTrialTypes(:,:,useTheseCells==1);
+figure();
+me=
+plot(reshape(mean(TFsForUnitsAndTrialTypes,3,'omitnan'),length(tf(:,1)),size(trialfactors,1)));
+hold on; 
+se=reshape(std(TFsForUnitsAndTrialTypes,[],3,'omitnan'),length(tf(:,1)),size(trialfactors,1))./sqrt(sum(useTheseCells==1));
+plot(reshape(mean(TFsForUnitsAndTrialTypes,3,'omitnan'),length(tf(:,1)),size(trialfactors,1)));
+plot(reshape(mean(TFsForUnitsAndTrialTypes,3,'omitnan'),length(tf(:,1)),size(trialfactors,1)));
+figure(); set(gcf, 'Name', ['Sum of weighted temporal factors describing each trial type archetypal neuron by neuron']);
+for i=1:size(coeff,2)
+    subplot(size(coeff,2),1,i);
+    plot(reshape(TFsForUnitsAndTrialTypes(:,:,i),length(tf(:,1)),size(trialfactors,1)));
+end
+
+end
+
 function [TFsForUnitsAndTrialTypes,dimOrdering]=archetypal_neuron_by_neuron(coeff,tf,trialfactors,allconditions_cpmodel)
 
 TFsForUnitsAndTrialTypes=nan(length(tf(:,1)),size(trialfactors,1),size(coeff,2));
@@ -300,7 +332,7 @@ end
 
 function bestmodel=plotTCA(inputdata,n_fits,R)
 
-userChooseDecomp=true;
+userChooseDecomp=false;
 
 % Fit CP Tensor Decomposition
 % these commands require that you download Sandia Labs' tensor toolbox:
