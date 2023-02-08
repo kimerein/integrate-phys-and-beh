@@ -2,7 +2,7 @@ function [object_points,side_image_points,under_image_points,mirror_vs]=getCheck
 
 framesPerChunk=1500;
 ds=10;
-maxPoints=20;
+maxPoints=75;
 
 disp(['Progress through labeling in this order:' newline ...
       'Choose frame (near paw reach)' newline ...

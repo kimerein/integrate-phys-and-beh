@@ -359,7 +359,7 @@ figure(); histogram(photolocs,25);
 
 %% 4. Make figures -- about 6 min to load 84 sessions of unit data
 % choose type of response to plot
-response_to_plot='cue_noReach'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+response_to_plot='cued_pelletMissing'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 
 % doUnitTest.m is used to test whether to include unit in this plot
 % will include unit if unitdets match the following
@@ -574,7 +574,7 @@ save('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\for_data_mat
 % takePointsAfterZero=70;
 
 takePointsBeforeZero=30; %15;
-takePointsAfterZero=420;
+takePointsAfterZero=450;
 
 dataMatrix=setUpDataMatrix(cue_Response,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,takePointsBeforeZero,takePointsAfterZero);
 % dataMatrix=setUpDataMatrix(cue_noReach_Response,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,takePointsBeforeZero,takePointsAfterZero);
@@ -591,23 +591,23 @@ dataMatrix(dataMatrix<0)=0; % no firing rates below 0
 
 % Peak dopamine at 0.83 sec
 % Dopamine dip at 1.5685 sec
-dataMatrix=dataMatrix(:,31:end-30,:);
+dataMatrix=dataMatrix(:,31:end,:);
 dataMatrix(:,1:end-73,3)=dataMatrix(:,74:end,3);
 dataMatrix(:,1:end-73,5)=dataMatrix(:,74:end,5);
 
-clear newDataMatrix
-for i=1:size(dataMatrix,3)
-    temp=reshape(dataMatrix(:,:,i),size(dataMatrix(:,:,i),1),size(dataMatrix(:,:,i),2));
-    %temp=downSampMatrix(reshape(dataMatrix(:,:,i),size(dataMatrix(:,:,i),1),size(dataMatrix(:,:,i),2)),10);
-    for j=1:size(temp,1)
-        temp(j,:)=smoothdata(temp(j,:),'gaussian',42);
-    end
-%     newDataMatrix(:,:,i)=abs(diff(temp,1,2)); 
-    newDataMatrix(:,:,i)=temp; 
-end
+% clear newDataMatrix
+% for i=1:size(dataMatrix,3)
+%     temp=reshape(dataMatrix(:,:,i),size(dataMatrix(:,:,i),1),size(dataMatrix(:,:,i),2));
+%     %temp=downSampMatrix(reshape(dataMatrix(:,:,i),size(dataMatrix(:,:,i),1),size(dataMatrix(:,:,i),2)),10);
+%     for j=1:size(temp,1)
+%         temp(j,:)=smoothdata(temp(j,:),'gaussian',10); %42);
+%     end
+% %     newDataMatrix(:,:,i)=abs(diff(temp,1,2)); 
+%     newDataMatrix(:,:,i)=temp; 
+% end
 
 % PCA, CCA, etc.
 % CCA: Find orthogonal dimensions of max covariance between X=[] and Y=[]
 plotN=6;
 boot=1; % num iterations for bootstrap
-principaledCA(newDataMatrix,{'units','time','conditions'},plotN,boot);
+principaledCA(dataMatrix,{'units','time','conditions'},plotN,boot);

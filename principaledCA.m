@@ -7,7 +7,9 @@ else
 end
 
 % Normalize each unit's PSTH, don't min-subtract here bcz assume 0 is 0
-data=normalizeData(data,[2 3],'sd'); % last argument either 'sd' or 'max'
+data=normalizeData(data,[2 3],'sd'); % last argument either 'sd', 'max' or 'mean'
+% Remove outliers, only necessary if norm by the mean
+% data=rmOutliersFromNormedPSTH(data);
 % data=ZscoreData(data,[2 3]);
 % data=smoothData(data,2,3); % last arg is gaussian smooth bin
 
@@ -102,6 +104,19 @@ figure(); scatter(mean(us(:,2:3),2),mean(us(:,4:5),2));
 % figure(); imagesc(S(:,1:10));
 % figure(); imagesc(V(1:4,:)');
 % figure(); imagesc(V(:,1:4));
+
+end
+
+function data=rmOutliersFromNormedPSTH(data)
+
+for i=1:size(data,3)
+    temp=reshape(data(:,:,i),size(data,1),size(data,2));
+    for j=1:size(temp,1)
+        rmd=temp(j,:)>10*mean(temp(j,:),2,'omitnan');
+        temp(j,rmd)=mean(temp(j,~rmd),2,'omitnan');
+    end
+    data(:,:,i)=temp;
+end
 
 end
 
@@ -257,12 +272,15 @@ for k=1:size(trialfactors,1)
 end
 TFsForUnitsAndTrialTypes=TFsForUnitsAndTrialTypes(:,:,useTheseCells==1);
 figure();
-me=reshape(mean(TFsForUnitsAndTrialTypes,3,'omitnan'),length(tf(:,1)),size(trialfactors,1));
-plot(me);
-hold on; 
-se=reshape(std(TFsForUnitsAndTrialTypes,[],3,'omitnan'),length(tf(:,1)),size(trialfactors,1))./sqrt(sum(useTheseCells==1));
-plot(me+se);
-plot(me-se);
+cs=[0 204 0; 255 153 153; 0 102 0; 255 0 127]./255;
+for i=1:size(TFsForUnitsAndTrialTypes,2)
+    me=reshape(mean(TFsForUnitsAndTrialTypes(:,i,:),3,'omitnan'),length(tf(:,1)),1);
+    plot(me,'Color',cs(i,:),'LineWidth',2);
+    hold on;
+    se=reshape(std(TFsForUnitsAndTrialTypes(:,i,:),[],3,'omitnan'),length(tf(:,1)),1)./sqrt(sum(useTheseCells==1));
+    plot(me+se,'Color',cs(i,:));
+    plot(me-se,'Color',cs(i,:));
+end
 
 end
 
@@ -368,6 +386,35 @@ for n = 1:n_fits
         text(0.05,0.05,['lambdas ' num2str(est_factors.lambda')]);
     end
     if userChooseDecomp==true
+%         temp=est_factors.U{1};
+%         D=0; fd1=find(D1tag==1); fd2=find(A2atag==1);
+%         for d1=1:length(fd1)
+%             for d2=1:length(fd2)
+%                 D=D+pdist([temp(fd1(d1),:); temp(fd2(d2),:)]);
+%             end
+%         end
+%         disp(D);
+
+%         temp=est_factors.U{1};
+%         meanMinusTemp=temp-repmat(nanmean(temp,2),1,size(temp,2));
+%         [~,si]=sort(meanMinusTemp(:,6));
+%         ngroups=2;
+%         currc={'k','r','c','g','b'};
+%         %Y=pdist(meanMinusTemp);
+%         %Z=linkage(Y);
+%         %idx=cluster(Z,'maxclust',3);
+%         idx=kmeans(meanMinusTemp,ngroups);
+%         figure();
+%         for i=1:size(meanMinusTemp,2)
+%             subplot(1,size(meanMinusTemp,2),i);
+%             bar(meanMinusTemp(si,i));
+%             thesevals=meanMinusTemp(si,i);
+%             hold on; 
+%             for j=1:ngroups
+%                 scatter(find(idx==j),thesevals(idx==j),2,currc{j});
+%             end
+%         end
+        
         answer=questdlg('Use this decomp?');
         switch answer
             case 'Yes'
@@ -616,6 +663,8 @@ if length(whichdim)>1
             ma=max(ed,[],whichdim(1),'omitnan');
         case 'sd'
             ma=std(ed,0,whichdim(1),'omitnan');
+        case 'mean'
+            ma=mean(ed,whichdim(1),'omitnan');
     end
     d=[1 2 3]; missingdim=d(~ismember(d,whichdim));
     if missingdim==1
@@ -643,6 +692,8 @@ else
            ma=max(data,[],whichdim,'omitnan');
         case 'sd'
            ma=std(data,0,whichdim,'omitnan');
+        case 'mean'
+           ma=mean(data,whichdim,'omitnan');
     end
     data=data./repmat(ma,sz);
 end
