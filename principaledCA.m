@@ -247,7 +247,7 @@ unitweights=allconditions_cpmodel.U{1}; tf=allconditions_cpmodel.U{2};
 trialfactors=allconditions_cpmodel.U{3};
 TFsForUnitsAndTrialTypes=nan(length(tf(:,1)),size(trialfactors,1),size(unitweights,1));
 for k=1:size(trialfactors,1)
-    for i=1:size(unitweights,2)
+    for i=1:size(unitweights,1)
         weightedTFforUnit=zeros(size(tf(:,1)));
         for j=1:size(tf,2)
             weightedTFforUnit=weightedTFforUnit+unitweights(i,j)*tf(:,j)*trialfactors(k,j)*allconditions_cpmodel.lambda(j);

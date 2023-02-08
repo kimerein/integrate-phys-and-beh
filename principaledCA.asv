@@ -37,7 +37,8 @@ R_guess=6; % guess matrix rank
 allconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[2:5])),10,R_guess);
 [allcell_PCs,allcell_archetypeCells,dimOrdering]=studyCPmodel(allconditions_cpmodel);
 temp=allcell_PCs.score(:,1); figure(); histogram(temp,400);
-
+response_forThisArchetype(allconditions_cpmodel,temp<-0.01532);
+response_forThisArchetype(allconditions_cpmodel,temp>=-0.01532);
 % get cue responses
 [~,cuescores]=plotPCA(data(:,:,1),6);
 % cueweights=ones(size(data,1),1);
@@ -254,19 +255,14 @@ for k=1:size(trialfactors,1)
         TFsForUnitsAndTrialTypes(:,k,i)=weightedTFforUnit; 
     end
 end
-TFsForUnitsAndTrialTypes=TFsForUnitsAndTrialTypes(:,:,useTheseCells==1);
+newdata=TFsForUnitsAndTrialTypes(:,:,useTheseCells==1);
 figure();
-me=
-plot(reshape(mean(TFsForUnitsAndTrialTypes,3,'omitnan'),length(tf(:,1)),size(trialfactors,1)));
+me=reshape(mean(TFsForUnitsAndTrialTypes,3,'omitnan'),length(tf(:,1)),size(trialfactors,1));
+plot(me);
 hold on; 
 se=reshape(std(TFsForUnitsAndTrialTypes,[],3,'omitnan'),length(tf(:,1)),size(trialfactors,1))./sqrt(sum(useTheseCells==1));
-plot(reshape(mean(TFsForUnitsAndTrialTypes,3,'omitnan'),length(tf(:,1)),size(trialfactors,1)));
-plot(reshape(mean(TFsForUnitsAndTrialTypes,3,'omitnan'),length(tf(:,1)),size(trialfactors,1)));
-figure(); set(gcf, 'Name', ['Sum of weighted temporal factors describing each trial type archetypal neuron by neuron']);
-for i=1:size(coeff,2)
-    subplot(size(coeff,2),1,i);
-    plot(reshape(TFsForUnitsAndTrialTypes(:,:,i),length(tf(:,1)),size(trialfactors,1)));
-end
+plot(me+se);
+plot(me-se);
 
 end
 
