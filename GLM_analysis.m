@@ -4,6 +4,7 @@ function GLM_analysis(whichSess,dd,downSampBy)
 % if want to put in more than one session, will need to debug this code
 
 cutAllTrialsAtThisTime=10.5; % trial length in seconds
+percentNeuronPresentThresh=0.7; % min fraction of time neuron is present, or else exclude
 
 if length(whichSess)>1
     dd=dd(whichSess);
@@ -12,8 +13,8 @@ end
 whichUnitsToGrab='_'; 
 % will include unit if unitdets match the following
 % [inStructure isFS isTAN isSPN isLowFRThin]
-plotUnitCriteria=[-100 -100 -100 -100 -100]; 
-% plotUnitCriteria=[-100 0 0 1 0]; % -100 is a wildcard, else 0 (false) and 1 (true)
+% plotUnitCriteria=[-100 -100 -100 -100 -100]; 
+plotUnitCriteria=[1 0 0 1 0]; % -100 is a wildcard, else 0 (false) and 1 (true)
 getCriteriaForUnitsToPlot(plotUnitCriteria);
 setForUn=settingsForStriatumUnitPlots;
 if setForUn.keepAllSingleTrials~=true
@@ -31,13 +32,32 @@ if length(whichSess)>1
     [~,ma]=max(mean(ResponseCued.aligncomp_y,1,'omitnan'),[],2,'omitnan');
     temp=mean(ResponseCued.aligncomp_x,1,'omitnan');
     [phystbtout,behtbtout,fromwhichday]=grabOtherBehaviorEvents(dd_m,mean(ResponseCued.unitbyunit_x,1,'omitnan')-temp(ma));
+    unitnames=getUnitNames(dd_more);
 else
     ResponseCued=getAndSaveResponse([dd{whichSess} sep response_to_plot],whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
     [~,ma]=max(mean(ResponseCued.aligncomp_y,1,'omitnan'),[],2,'omitnan');
     temp=mean(ResponseCued.aligncomp_x,1,'omitnan');
     [phystbtout,behtbtout,fromwhichday]=grabOtherBehaviorEvents(dd{whichSess},mean(ResponseCued.unitbyunit_x,1,'omitnan')-temp(ma));
+    unitnames=getUnitNames({[dd{whichSess} sep response_to_plot]});
 end
-% phystbtout.cue=shiftCueBack(phystbtout.cue);
+% When do time alignment, cue ends up getting turned into non-step
+phystbtout=fixCueAfterResample(phystbtout,'cue',0.25,mean(ResponseCued.unitbyunit_x,1,'omitnan'));
+phystbtout=fixCueAfterResample(phystbtout,'opto',0.5,mean(ResponseCued.unitbyunit_x,1,'omitnan'));
+phystbtout=fixCueAfterResample(phystbtout,'distractor',0.25,mean(ResponseCued.unitbyunit_x,1,'omitnan'));
+askUserAboutCue=false;
+if askUserAboutCue==true
+    s=questdlg('Shift cue back?');
+    switch s
+        case 'Yes'
+            phystbtout.cue=shiftCueBack(phystbtout.cue);
+        case 'No'
+    end
+else
+    dontshift=true;
+    if dontshift==false
+        phystbtout.cue=shiftCueBack(phystbtout.cue);
+    end
+end
 ResponseCued=makeUnitsUnique(ResponseCued);
 
 % cut all trials at this time
@@ -63,8 +83,8 @@ for i=1:length(u)
     whichTrialsForThisCell=ResponseCued.fromWhichTrial(ResponseCued.fromWhichUnit==whichNeuron);
     dataMat=ResponseCued.unitbyunit_y(ResponseCued.fromWhichUnit==whichNeuron,:);
     whichSessForThisCell=ResponseCued.fromWhichSess_forTrials(ResponseCued.fromWhichUnit==whichNeuron);
-    if nansum(ResponseCued.fromWhichUnit==i)<0.8*size(phystbtout.cue,1) 
-        % throw out any neuron that is present for less than 80% of the
+    if nansum(ResponseCued.fromWhichUnit==i)<percentNeuronPresentThresh*size(phystbtout.cue,1) 
+        % throw out any neuron that is present for less than 70% of the
         % full session
         neuron_disappears(i)=1;
         continue
@@ -91,16 +111,72 @@ for i=1:length(u)
     neuron_data_matrix(i,:)=dataMat;
 end
 neuron_data_matrix=neuron_data_matrix(neuron_disappears==0,:);
+unitnames=unitnames(neuron_disappears==0);
 
 timestep=mode(abs(diff(mean(ResponseCued.unitbyunit_x,1,'omitnan'))));
 neuron_data_matrix=downSampMatrix(neuron_data_matrix,downSampBy);
 timepoints=downSampMatrix(0:timestep:(size(behEvents,2)-1)*timestep,downSampBy);
+trialsRow=behEvents(end,:);
 behEvents=downSampMatrix(behEvents,downSampBy);
 behEvents(behEvents~=0)=1;
+behEvents(end,:)=trialsRow(1:downSampBy:end);
 disp('behEvents rows are');
 disp(phystbtout);
 disp(behtbtout);
-do_glm(neuron_data_matrix,timepoints,behEvents);
+neuron_data_matrix(isnan(neuron_data_matrix))=0;
+doOrSaveGLM='save';
+if strcmp(doOrSaveGLM,'save')
+    saveTo=[dd{whichSess} sep 'forglm'];
+    if ~exist(saveTo, 'dir')
+       mkdir(saveTo);
+    end
+    save([saveTo sep 'neuron_data_matrix.mat'],'neuron_data_matrix');
+    save([saveTo sep 'timepoints.mat'],'timepoints');
+    save([saveTo sep 'behEvents.mat'],'behEvents');
+    save([saveTo sep 'unitnames.mat'],'unitnames');
+elseif strcmp(doOrSaveGLM,'do')
+    % last row of behEvents is just the trial number, so discard
+    behEvents=behEvents(1:end-1,:);
+    do_glm(neuron_data_matrix,timepoints,behEvents);
+end
+
+end
+
+function phystbtout=fixCueAfterResample(phystbtout,whichfield,cueLengthInSeconds,times)
+
+cueLengthInInds=ceil(cueLengthInSeconds./mode(diff(times)));
+ptbt=phystbtout.(whichfield);
+for i=1:size(ptbt,1)
+    temp=ptbt(i,:);
+    % rejoin any 1's separated by less than cueLengthInInds
+    f=find(temp>0.5);
+    df=diff(f);
+    for j=1:length(df)
+        if df(j)<cueLengthInInds
+            temp(f(j):f(j+1))=1;
+        end
+    end
+    ptbt(i,:)=temp;
+end
+phystbtout.(whichfield)=ptbt;
+
+end
+
+function names=getUnitNames(dd)
+
+unit_count=1;
+names={};
+for j=1:length(dd)
+    if iscell(dd)
+        datadir=dd{j};
+    end
+    ls=dir(datadir);
+    for i=3:length(ls)
+        names{unit_count}=ls(i).name;
+        unit_count=unit_count+1;
+    end
+end
+unit_count=unit_count-1;
 
 end
 
@@ -157,7 +233,10 @@ for i=1:length(f)
     behEvents(countEvType,:)=temp;
     countEvType=countEvType+1;
 end
+% add trials as last field of behtbtout
 f=fieldnames(behtbtout);
+behtbtout.trials=ones(size(behtbtout.(f{1}))).*repmat([1:size(behtbtout.(f{1}),1)]',1,size(behtbtout.(f{1}),2));
+f{end+1}='trials';
 for i=1:length(f)
     temp=behtbtout.(f{i}); 
     temp=temp(fromwhichday==mode(whichSessForThisCell),:);

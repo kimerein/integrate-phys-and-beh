@@ -6,6 +6,7 @@ else
     error('principaledCA.m currently requires data matrix structured as units X time X conditions');
 end
 
+backupdata=data;
 % Normalize each unit's PSTH, don't min-subtract here bcz assume 0 is 0
 data=normalizeData(data,[2 3],'sd'); % last argument either 'sd', 'max' or 'mean'
 % Remove outliers, only necessary if norm by the mean
@@ -36,13 +37,55 @@ plotPCA(flatData',plotN);
 
 % TCA
 R_guess=6; % guess matrix rank
-allconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[2:5])),10,R_guess);
+allconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[2:5])),50,R_guess);
 [allcell_PCs,allcell_archetypeCells,dimOrdering]=studyCPmodel(allconditions_cpmodel);
+
+temp=allconditions_cpmodel.U{1}; meanMinusTemp=temp-repmat(nanmean(temp,2),1,size(temp,2));
+[~,si]=sort(meanMinusTemp(:,3));
+ngroups=2;
+currc={'k','r','c','g','b'};
+%Y=pdist(meanMinusTemp);
+%Z=linkage(Y);
+%idx=cluster(Z,'maxclust',3);
+idx=kmeans(meanMinusTemp,ngroups,'Replicates',10);
+figure();
+for i=1:size(meanMinusTemp,2)
+subplot(1,size(meanMinusTemp,2),i);
+bar(meanMinusTemp(si,i));
+thesevals=meanMinusTemp(si,i);
+hold on;
+for j=1:ngroups
+scatter(find(idx(si)==j),thesevals(idx(si)==j),2,currc{j});
+end
+end
+
+load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\for_data_matrix_D1vA2a.mat')
+figure();
+for i=1:size(meanMinusTemp,2)
+    subplot(1,size(meanMinusTemp,2),i);
+    bar(meanMinusTemp(si,i));
+    thesevals=meanMinusTemp(si,i);
+    hold on;
+    scatter(find(D1tag(si)==1),thesevals(find(D1tag(si)==1)),2,'r');
+    scatter(find(A2atag(si)==1),thesevals(find(A2atag(si)==1)),2,'b');
+end
+
+response_forThisArchetype(allconditions_cpmodel,idx==1);
+response_forThisArchetype(allconditions_cpmodel,idx==2);
+% Subdivide along cue dimension
+% response_forThisArchetype(allconditions_cpmodel,idx==2 & (meanMinusTemp(:,5)>meanMinusTemp(:,6))); % cued
+% response_forThisArchetype(allconditions_cpmodel,idx==2 & (meanMinusTemp(:,6)>meanMinusTemp(:,5))); % uncued
+% response_forThisArchetype(allconditions_cpmodel,idx==1 & (meanMinusTemp(:,2)>meanMinusTemp(:,3))); % cued
+% response_forThisArchetype(allconditions_cpmodel,idx==1 & (meanMinusTemp(:,3)>meanMinusTemp(:,2))); % uncued
+
+
 temp=allcell_PCs.score(:,1); figure(); histogram(temp,400);
 response_forThisArchetype(allconditions_cpmodel,temp<-0.01532);
 response_forThisArchetype(allconditions_cpmodel,temp>=-0.01532);
-% get cue responses
+% get cue responses, need to dump first cue PC, because just picks up cells
+% that spike a lot generally, second cue PC is better
 [~,cuescores]=plotPCA(data(:,:,1),6);
+cuescores=cuescores-repmat(nanmean(cuescores(:,1:6),2),1,size(cuescores,2));
 % cueweights=ones(size(data,1),1);
 % drop first PC because represents DC offset?
 temp=allcell_PCs.score(:,1:5);
@@ -348,7 +391,7 @@ end
 
 function bestmodel=plotTCA(inputdata,n_fits,R)
 
-userChooseDecomp=false;
+userChooseDecomp=true;
 
 % Fit CP Tensor Decomposition
 % these commands require that you download Sandia Labs' tensor toolbox:
@@ -399,13 +442,13 @@ for n = 1:n_fits
 
 %         temp=est_factors.U{1};
 %         meanMinusTemp=temp-repmat(nanmean(temp,2),1,size(temp,2));
-%         [~,si]=sort(meanMinusTemp(:,6));
+%         [~,si]=sort(meanMinusTemp(:,3));
 %         ngroups=2;
 %         currc={'k','r','c','g','b'};
 %         %Y=pdist(meanMinusTemp);
 %         %Z=linkage(Y);
 %         %idx=cluster(Z,'maxclust',3);
-%         idx=kmeans(meanMinusTemp,ngroups);
+%         idx=kmeans(meanMinusTemp,ngroups,'Replicates',100);
 %         figure();
 %         for i=1:size(meanMinusTemp,2)
 %             subplot(1,size(meanMinusTemp,2),i);
