@@ -244,14 +244,14 @@ for j=1:length(dd)
         units_count=units_count+1;
     end
 end
-excluded_count=excluded_count-1;
-units_count=units_count-1;
-if isempty(a.dataout)
-    lastsetoftrialsn=1;
-else
-    lastsetoftrialsn=size(a.dataout.y,1);
-end
-trials_count=trials_count-lastsetoftrialsn;
+% excluded_count=excluded_count-1;
+% units_count=units_count-1;
+% if isempty(a.dataout)
+%     lastsetoftrialsn=1;
+% else
+%     lastsetoftrialsn=size(a.dataout.y,1);
+% end
+% trials_count=trials_count-lastsetoftrialsn;
 ns=ns(1:units_count);
 fromWhichSess=fromWhichSess(1:units_count);
 excluded=excluded(1:excluded_count);
