@@ -4,7 +4,7 @@ function GLM_analysis(whichSess,dd,downSampBy)
 % if want to put in more than one session, will need to debug this code
 
 cutAllTrialsAtThisTime=10.5; % trial length in seconds
-percentNeuronPresentThresh=0.7; % min fraction of time neuron is present, or else exclude
+percentNeuronPresentThresh=0.0; % min fraction of time neuron is present, or else exclude
 
 if length(whichSess)>1
     dd=dd(whichSess);
@@ -172,8 +172,11 @@ for j=1:length(dd)
     end
     ls=dir(datadir);
     for i=3:length(ls)
-        names{unit_count}=ls(i).name;
-        unit_count=unit_count+1;
+        unitTest=doUnitTest(ls(i).folder, ls(i).name);
+        if unitTest
+            names{unit_count}=ls(i).name;
+            unit_count=unit_count+1;
+        end
     end
 end
 unit_count=unit_count-1;

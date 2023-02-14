@@ -31,6 +31,7 @@ for i=1:length(event_types)
     xlim([ts(1) ts(end)]);
     hold on;
     line([0 0],[-0.1 0.5],'Color',[0.3 0.3 0.3]);
+    line([ts(1) ts(end)],[0 0],'Color',[0.3 0.3 0.3]);
     xlabel(event_types{i});
     ylim([nanmin(allcoef(1:end)) nanmax(allcoef(1:end))]);
 end
