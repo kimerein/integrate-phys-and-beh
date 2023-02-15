@@ -1,15 +1,33 @@
-function recodeMissVGrab
+function recodeMissVGrab(varargin)
 
-currentVid='Z:\MICROSCOPE\Kim\WHISPER recs\Mar_3\20210714\O2 output\2012-02-10 23-21-33-C_processed_data';
-datestr='20210714';
-mousename='Mar_3';
+if isempty(varargin)
+    currentVid='Z:\MICROSCOPE\Kim\KER Behavior\By date\Low speed\20220616\dLight_172\O2 output\VID_20130726_234313_processed_data';
+    datestr='20220616';
+    mousename='dLight_172';
+    f_pr=regexp(currentVid,'_processed_data');
+    fslash=regexp(currentVid,'\');
+    aviName=currentVid(fslash(end)+1:f_pr-1);
+    % placeForO2data=['Z:\MICROSCOPE\Kim\WHISPER recs\' mousename '\' datestr '\O2 output\' aviName];
+    placeForO2data=['Z:\MICROSCOPE\Kim\KER Behavior\By date\Low speed\' datestr '\' mousename '\O2 output\' aviName];
+    alignment=[];
+else
+    if length(varargin)==3
+        currentVid=varargin{1};
+        placeForO2data=varargin{2};
+        alignment=varargin{3};
+    end 
+end
+
+%currentVid='Z:\MICROSCOPE\Kim\WHISPER recs\Mar_3\20210714\O2 output\2012-02-10 23-21-33-C_processed_data';
+%datestr='20210714';
+%mousename='Mar_3';
 timeForDislodged=0.4;
 
-f_pr=regexp(currentVid,'_processed_data');
-fslash=regexp(currentVid,'\');
-aviName=currentVid(fslash(end)+1:f_pr-1);
-placeForO2data=['Z:\MICROSCOPE\Kim\KER Behavior\By date\Low speed\' datestr '\' mousename '\O2 output\' aviName];
-% placeForO2data=['Z:\MICROSCOPE\Kim\WHISPER recs\' mousename '\' datestr '\O2 output\' aviName];
+% f_pr=regexp(currentVid,'_processed_data');
+% fslash=regexp(currentVid,'\');
+% aviName=currentVid(fslash(end)+1:f_pr-1);
+% placeForO2data=['Z:\MICROSCOPE\Kim\KER Behavior\By date\Low speed\' datestr '\' mousename '\O2 output\' aviName];
+% % placeForO2data=['Z:\MICROSCOPE\Kim\WHISPER recs\' mousename '\' datestr '\O2 output\' aviName];
 
 load([currentVid '\tbt.mat'])
 backuptbt=tbt;

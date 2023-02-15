@@ -3,8 +3,17 @@ function GLM_analysis(whichSess,dd,downSampBy)
 
 % if want to put in more than one session, will need to debug this code
 
+% Next section specific to Kim's table format
+if size(dd,2)>1 && size(dd,1)>1
+    whereIsTbt=dd{whichSess,6};
+    dd=dd(:,8);
+else
+    whereIsTbt=[];
+end
+
 cutAllTrialsAtThisTime=10.5; % trial length in seconds
-percentNeuronPresentThresh=0.0; % min fraction of time neuron is present, or else exclude
+percentNeuronPresentThresh=0; % min fraction of time neuron is present, or else exclude
+percentNeuronPresentThreshForPython=0.7; % min fraction of time neuron is present, or else exclude
 
 if length(whichSess)>1
     dd=dd(whichSess);
@@ -31,13 +40,13 @@ if length(whichSess)>1
     ResponseCued=getAndSaveResponse(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
     [~,ma]=max(mean(ResponseCued.aligncomp_y,1,'omitnan'),[],2,'omitnan');
     temp=mean(ResponseCued.aligncomp_x,1,'omitnan');
-    [phystbtout,behtbtout,fromwhichday]=grabOtherBehaviorEvents(dd_m,mean(ResponseCued.unitbyunit_x,1,'omitnan')-temp(ma));
+    [phystbtout,behtbtout,fromwhichday,evsGrabbed]=grabOtherBehaviorEvents(dd_m,mean(ResponseCued.unitbyunit_x,1,'omitnan')-temp(ma),whereIsTbt);
     unitnames=getUnitNames(dd_more);
 else
     ResponseCued=getAndSaveResponse([dd{whichSess} sep response_to_plot],whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
     [~,ma]=max(mean(ResponseCued.aligncomp_y,1,'omitnan'),[],2,'omitnan');
     temp=mean(ResponseCued.aligncomp_x,1,'omitnan');
-    [phystbtout,behtbtout,fromwhichday]=grabOtherBehaviorEvents(dd{whichSess},mean(ResponseCued.unitbyunit_x,1,'omitnan')-temp(ma));
+    [phystbtout,behtbtout,fromwhichday,evsGrabbed]=grabOtherBehaviorEvents(dd{whichSess},mean(ResponseCued.unitbyunit_x,1,'omitnan')-temp(ma),whereIsTbt);
     unitnames=getUnitNames({[dd{whichSess} sep response_to_plot]});
 end
 % When do time alignment, cue ends up getting turned into non-step
@@ -124,8 +133,21 @@ disp('behEvents rows are');
 disp(phystbtout);
 disp(behtbtout);
 neuron_data_matrix(isnan(neuron_data_matrix))=0;
-doOrSaveGLM='save';
+% doOrSaveGLM='save';
+doOrSaveGLM='doAndSave';
 if strcmp(doOrSaveGLM,'save')
+    if percentNeuronPresentThresh==0 && percentNeuronPresentThreshForPython~=0
+        u=unique(ResponseCued.fromWhichUnit);
+        neuron_disappears=zeros(length(u),1);
+        for i=1:length(u)
+            if nansum(ResponseCued.fromWhichUnit==i)<percentNeuronPresentThreshForPython*size(phystbtout.cue,1)
+                neuron_disappears(i)=1;
+                continue
+            end
+        end
+        neuron_data_matrix=neuron_data_matrix(neuron_disappears==0,:);
+        unitnames=unitnames(neuron_disappears==0);
+    end
     saveTo=[dd{whichSess} sep 'forglm'];
     if ~exist(saveTo, 'dir')
        mkdir(saveTo);
@@ -134,10 +156,42 @@ if strcmp(doOrSaveGLM,'save')
     save([saveTo sep 'timepoints.mat'],'timepoints');
     save([saveTo sep 'behEvents.mat'],'behEvents');
     save([saveTo sep 'unitnames.mat'],'unitnames');
-elseif strcmp(doOrSaveGLM,'do')
+end
+if strcmp(doOrSaveGLM,'do') || strcmp(doOrSaveGLM,'doAndSave')
+    saveTo=[dd{whichSess} sep 'matglm'];
+    if ~exist(saveTo, 'dir')
+       mkdir(saveTo);
+    end
     % last row of behEvents is just the trial number, so discard
     behEvents=behEvents(1:end-1,:);
-    do_glm(neuron_data_matrix,timepoints,behEvents);
+    if ~isempty(saveTo)
+        save([saveTo sep 'features_for_glm.mat'],'evsGrabbed');
+        save([saveTo sep 'unitnames.mat'],'unitnames');
+    end
+    do_glm(neuron_data_matrix,timepoints,behEvents,saveTo);
+end
+if strcmp(doOrSaveGLM,'doAndSave')
+    % save after do
+    if percentNeuronPresentThresh==0 && percentNeuronPresentThreshForPython~=0
+        u=unique(ResponseCued.fromWhichUnit);
+        neuron_disappears=zeros(length(u),1);
+        for i=1:length(u)
+            if nansum(ResponseCued.fromWhichUnit==i)<percentNeuronPresentThreshForPython*size(phystbtout.cue,1)
+                neuron_disappears(i)=1;
+                continue
+            end
+        end
+        neuron_data_matrix=neuron_data_matrix(neuron_disappears==0,:);
+        unitnames=unitnames(neuron_disappears==0);
+    end
+    saveTo=[dd{whichSess} sep 'forglm'];
+    if ~exist(saveTo, 'dir')
+       mkdir(saveTo);
+    end
+    save([saveTo sep 'neuron_data_matrix.mat'],'neuron_data_matrix');
+    save([saveTo sep 'timepoints.mat'],'timepoints');
+    save([saveTo sep 'behEvents.mat'],'behEvents');
+    save([saveTo sep 'unitnames.mat'],'unitnames');
 end
 
 end
@@ -252,7 +306,7 @@ end
 
 end
 
-function do_glm(dataMatrix,tRange,events)
+function do_glm(dataMatrix,tRange,events,saveDir)
 
 % each row of events is a different type of behavior event
 neuronFiring=dataMatrix; % rows are neurons, cols are timepoints
@@ -263,8 +317,12 @@ bins=length(tRange);
 
 % prepare time shift matrix of events for the glm
 % maxShifts=100; % how many +/- bins to consider for glm
-maxShifts=15;
-shifts=-maxShifts:maxShifts;
+maxShiftsPos=30;
+maxShiftsNeg=4;
+shifts=-maxShiftsNeg:maxShiftsPos;
+if ~isempty(saveDir)
+    save([saveDir sep 'shifts.mat'],'shifts');
+end
 nShifts=length(shifts);
 allEvents=zeros(nEventTypes*length(shifts), bins);
 for counter=1:nShifts
@@ -296,6 +354,10 @@ for neuronIndex=testNeuron
     subplot(1, 4, 1)
     pva=mdl.Coefficients.pValue(2:end);
     coef=mdl.Coefficients.Estimate(2:end);
+    if ~isempty(saveDir)
+        save([saveDir sep 'neuron' num2str(neuronIndex) '_glm_coef.mat'],'coef');
+        save([saveDir sep 'neuron' num2str(neuronIndex) '_glm_p.mat'],'pva');
+    end
     whichcoef=1:length(coef);
     scatter(whichcoef(pva<0.2),coef(pva<0.2),[],'k');
     hold on; 
@@ -365,11 +427,13 @@ end
 
 end
 
-function [phystbtout,behtbtout,fromwhichday]=grabOtherBehaviorEvents(datadir,unitTimes)
+function [phystbtout,behtbtout,fromwhichday,evsGrabbed]=grabOtherBehaviorEvents(datadir,unitTimes,whereIsTbt)
 
 getEventsFromPhysTbt={'cue','opto','distractor'};
-getEventsFromBehTbt={'all_reachBatch','isFidgeting','success_fromPerchOrWheel',...
-    'drop_fromPerchOrWheel','misses_and_pelletMissing','misses_and_pelletMissing_and_drop','isChewing'};
+getEventsFromBehTbt={'all_reachBatch','success_fromPerchOrWheel',...
+    'drop_fromPerchOrWheel','misses_and_pelletMissing'};
+% getEventsFromBehTbt={'all_reachBatch','isFidgeting','success_fromPerchOrWheel',...
+%     'drop_fromPerchOrWheel','misses_and_pelletMissing','misses_and_pelletMissing_and_drop','isChewing'};
 
 if iscell(datadir)
     dd=datadir;
@@ -379,12 +443,17 @@ end
 phystbtout.(getEventsFromPhysTbt{1})=[];
 behtbtout.(getEventsFromBehTbt{1})=[];
 fromwhichday=[];
+evgrabcount=1;
 for j=1:length(dd)
     if iscell(dd)
         datadir=dd{j};
     end
     f=regexp(datadir,sep);
-    tbtin=[datadir(1:f(end)) 'tbt'];
+    if isempty(whereIsTbt)
+        tbtin=[datadir(1:f(end)) 'tbt'];
+    else
+        tbtin=whereIsTbt;
+    end
     disp(['reading in beh events from ' tbtin]);
     ls=dir(tbtin);
     for i=3:length(ls)
@@ -410,9 +479,14 @@ for j=1:length(dd)
     cuePhystbt=phys_tbt.('cue');
     behtimes=getEventsOfType('times_wrt_trial_start',beh2_tbt);
     % how to map to unit times
+    if isempty(unitTimes)
+        error('No units that match settingsForStriatumUnits');
+    end
     [indsIntoBeh_step1,indsIntoBeh_step2]=mapToPhysTimes(behtimes,fromPhystbtTimes,cuePhystbt,unitTimes);
     for i=1:length(getEventsFromBehTbt)
         temp=getEventsOfType(getEventsFromBehTbt{i},beh2_tbt);
+        evsGrabbed{evgrabcount}=getEventsFromBehTbt{i};
+        evgrabcount=evgrabcount+1;
         % map to unit times
         tempinunittimes=mapToUnitTimes(temp,true,indsIntoBeh_step1,indsIntoBeh_step2,fromPhystbtTimes,unitTimes);
         if ~isfield(behtbtout,getEventsFromBehTbt{i})
@@ -425,6 +499,8 @@ for j=1:length(dd)
     end
     for i=1:length(getEventsFromPhysTbt)
         temp=phys_tbt.(getEventsFromPhysTbt{i});
+        evsGrabbed{evgrabcount}=getEventsFromPhysTbt{i};
+        evgrabcount=evgrabcount+1;
         % map to unit times
         tempinunittimes=mapToUnitTimes(temp,false,[],indsIntoBeh_step2,fromPhystbtTimes,unitTimes);
         if ~isfield(phystbtout,getEventsFromPhysTbt{i})
