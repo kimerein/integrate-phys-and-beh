@@ -162,13 +162,12 @@ if strcmp(doOrSaveGLM,'do') || strcmp(doOrSaveGLM,'doAndSave')
     if ~exist(saveTo, 'dir')
        mkdir(saveTo);
     end
-    % last row of behEvents is just the trial number, so discard
-    behEvents=behEvents(1:end-1,:);
     if ~isempty(saveTo)
         save([saveTo sep 'features_for_glm.mat'],'evsGrabbed');
         save([saveTo sep 'unitnames.mat'],'unitnames');
     end
-    do_glm(neuron_data_matrix,timepoints,behEvents,saveTo);
+    % last row of behEvents is just the trial number, so discard
+    do_glm(neuron_data_matrix,timepoints,behEvents(1:end-1,:),saveTo);
 end
 if strcmp(doOrSaveGLM,'doAndSave')
     % save after do
@@ -485,7 +484,7 @@ for j=1:length(dd)
     [indsIntoBeh_step1,indsIntoBeh_step2]=mapToPhysTimes(behtimes,fromPhystbtTimes,cuePhystbt,unitTimes);
     for i=1:length(getEventsFromBehTbt)
         temp=getEventsOfType(getEventsFromBehTbt{i},beh2_tbt);
-        evsGrabbed{evgrabcount}=getEventsFromBehTbt{i};
+        evsGrabbed_beh{evgrabcount}=getEventsFromBehTbt{i};
         evgrabcount=evgrabcount+1;
         % map to unit times
         tempinunittimes=mapToUnitTimes(temp,true,indsIntoBeh_step1,indsIntoBeh_step2,fromPhystbtTimes,unitTimes);
@@ -497,6 +496,7 @@ for j=1:length(dd)
             behtbtout.(getEventsFromBehTbt{i})=[behtbtout.(getEventsFromBehTbt{i}); tempinunittimes];
         end
     end
+    evgrabcount=1;
     for i=1:length(getEventsFromPhysTbt)
         temp=phys_tbt.(getEventsFromPhysTbt{i});
         evsGrabbed{evgrabcount}=getEventsFromPhysTbt{i};
@@ -513,6 +513,7 @@ for j=1:length(dd)
     end
     fromwhichday=[fromwhichday; j*ones(size(tempinunittimes,1),1)];
 end
+evsGrabbed(length(evsGrabbed)+1:length(evsGrabbed)+length(evsGrabbed_beh))=evsGrabbed_beh;
 
 end
 

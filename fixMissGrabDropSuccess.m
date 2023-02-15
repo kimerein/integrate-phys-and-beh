@@ -7,12 +7,14 @@ for mousen=3:length(ls_base)
     end
     ls=dir([ls_base(mousen).folder sep ls_base(mousen).name]);
     mousename=ls_base(mousen).name;
+    disp(['Processing ' mousename]);
     for i=3:length(ls)
         if isfolder([ls(i).folder sep ls(i).name])
             proc_data_folder=[ls(i).folder sep ls(i).name];
             f_pr=regexp(proc_data_folder,'_processed_data');
             fslash=regexp(proc_data_folder,'\');
             aviName=proc_data_folder(fslash(end)+1:f_pr-1);
+            lsfilesinfolder=dir([ls(i).folder sep ls(i).name]);
             
             placeForO2data=getPlaceOfO2data(mousename,aviName,datestr);
             recodeMissVGrab(proc_data_folder,placeForO2data,[]);
@@ -21,6 +23,12 @@ for mousen=3:length(ls_base)
     end
 end
  
+end
+
+function getDatestr(foldername)
+
+lsfilesinfolder=dir([ls(i).folder sep ls(i).name]);
+
 end
 
 function placeForO2data=getPlaceOfO2data(mousename,aviName,datestr)
