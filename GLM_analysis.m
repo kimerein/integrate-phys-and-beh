@@ -162,12 +162,13 @@ if strcmp(doOrSaveGLM,'do') || strcmp(doOrSaveGLM,'doAndSave')
     if ~exist(saveTo, 'dir')
        mkdir(saveTo);
     end
+    % last row of behEvents is just the trial number, so discard
+    shifts=do_glm(neuron_data_matrix,timepoints,behEvents(1:end-1,:),saveTo);
     if ~isempty(saveTo)
-        save([saveTo sep 'features_for_glm.mat'],'evsGrabbed');
+        fnames=makeFeatureNames(evsGrabbed,shifts);
+        save([saveTo sep 'features_for_glm.mat'],'fnames');
         save([saveTo sep 'unitnames.mat'],'unitnames');
     end
-    % last row of behEvents is just the trial number, so discard
-    do_glm(neuron_data_matrix,timepoints,behEvents(1:end-1,:),saveTo);
 end
 if strcmp(doOrSaveGLM,'doAndSave')
     % save after do
@@ -191,6 +192,19 @@ if strcmp(doOrSaveGLM,'doAndSave')
     save([saveTo sep 'timepoints.mat'],'timepoints');
     save([saveTo sep 'behEvents.mat'],'behEvents');
     save([saveTo sep 'unitnames.mat'],'unitnames');
+end
+
+end
+
+function fnames=makeFeatureNames(evsGrabbed,shifts)
+
+fnames=cell(length(evsGrabbed)*length(shifts),1);
+namecount=1;
+for i=1:length(evsGrabbed)
+    for j=1:length(shifts)
+        fnames{namecount}=[evsGrabbed{i} '_' num2str(shifts(j))];
+        namecount=namecount+1;
+    end
 end
 
 end
@@ -305,7 +319,7 @@ end
 
 end
 
-function do_glm(dataMatrix,tRange,events,saveDir)
+function shifts=do_glm(dataMatrix,tRange,events,saveDir)
 
 % each row of events is a different type of behavior event
 neuronFiring=dataMatrix; % rows are neurons, cols are timepoints

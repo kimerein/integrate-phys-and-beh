@@ -14,8 +14,7 @@ for mousen=3:length(ls_base)
             f_pr=regexp(proc_data_folder,'_processed_data');
             fslash=regexp(proc_data_folder,'\');
             aviName=proc_data_folder(fslash(end)+1:f_pr-1);
-            lsfilesinfolder=dir([ls(i).folder sep ls(i).name]);
-            
+            datestr=getDatestr([ls(i).folder sep ls(i).name]);
             placeForO2data=getPlaceOfO2data(mousename,aviName,datestr);
             recodeMissVGrab(proc_data_folder,placeForO2data,[]);
             fixDropVSuccess(proc_data_folder,placeForO2data,[]);
@@ -27,7 +26,24 @@ end
 
 function getDatestr(foldername)
 
-lsfilesinfolder=dir([ls(i).folder sep ls(i).name]);
+lsfilesinfolder=dir(foldername);
+for i=3:length(lsfilesinfolder)
+    if ~isempty(regexp(lsfilesinfolder(i).name,'.txt', 'once'))
+        if isfile(lsfilesinfolder(i).name)
+            if ~isempty(regexp(lsfilesinfolder(i).name,'2016', 'once')) || ...
+               ~isempty(regexp(lsfilesinfolder(i).name,'2017', 'once')) || ...
+               ~isempty(regexp(lsfilesinfolder(i).name,'2018', 'once')) || ...
+               ~isempty(regexp(lsfilesinfolder(i).name,'2019', 'once')) || ...
+               ~isempty(regexp(lsfilesinfolder(i).name,'2020', 'once')) || ...
+               ~isempty(regexp(lsfilesinfolder(i).name,'2021', 'once')) || ...
+               ~isempty(regexp(lsfilesinfolder(i).name,'2022', 'once')) || ...
+               ~isempty(regexp(lsfilesinfolder(i).name,'2023', 'once'))
+                    
+            end
+        end
+
+    end
+end
 
 end
 
