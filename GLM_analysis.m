@@ -13,7 +13,7 @@ end
 
 cutAllTrialsAtThisTime=10.5; % trial length in seconds
 percentNeuronPresentThresh=0; % min fraction of time neuron is present, or else exclude
-percentNeuronPresentThreshForPython=0.7; % min fraction of time neuron is present, or else exclude
+percentNeuronPresentThreshForPython=0; % min fraction of time neuron is present, or else exclude
 
 if length(whichSess)>1
     dd=dd(whichSess);
@@ -331,7 +331,7 @@ bins=length(tRange);
 % prepare time shift matrix of events for the glm
 % maxShifts=100; % how many +/- bins to consider for glm
 maxShiftsPos=30;
-maxShiftsNeg=4;
+maxShiftsNeg=9;
 shifts=-maxShiftsNeg:maxShiftsPos;
 if ~isempty(saveDir)
     save([saveDir sep 'shifts.mat'],'shifts');
@@ -443,8 +443,7 @@ end
 function [phystbtout,behtbtout,fromwhichday,evsGrabbed]=grabOtherBehaviorEvents(datadir,unitTimes,whereIsTbt)
 
 getEventsFromPhysTbt={'cue','opto','distractor'};
-getEventsFromBehTbt={'all_reachBatch','success_fromPerchOrWheel',...
-    'drop_fromPerchOrWheel','misses_and_pelletMissing'};
+getEventsFromBehTbt={'success_fromPerchOrWheel','drop_fromPerchOrWheel','misses_and_pelletMissing'};
 % getEventsFromBehTbt={'all_reachBatch','isFidgeting','success_fromPerchOrWheel',...
 %     'drop_fromPerchOrWheel','misses_and_pelletMissing','misses_and_pelletMissing_and_drop','isChewing'};
 

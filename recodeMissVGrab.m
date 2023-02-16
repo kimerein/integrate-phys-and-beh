@@ -11,10 +11,13 @@ if isempty(varargin)
     placeForO2data=['Z:\MICROSCOPE\Kim\KER Behavior\By date\Low speed\' datestr '\' mousename '\O2 output\' aviName];
     alignment=[];
 else
-    if length(varargin)==3
+    if length(varargin)==3 || length(varargin)==4
         currentVid=varargin{1};
         placeForO2data=varargin{2};
         alignment=varargin{3};
+    end 
+    if length(varargin)==4
+        usePrevThresh=varargin{4};
     end 
 end
 
@@ -52,7 +55,7 @@ fclose(fid);
 
 % if have already fixed success v drop, recode all reaches using success v
 % drop threshold
-fixDropVSuccess(currentVid,placeForO2data,alignment);
+fixDropVSuccess(currentVid,placeForO2data,alignment,usePrevThresh);
 
 end
 

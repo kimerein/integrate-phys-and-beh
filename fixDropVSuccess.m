@@ -14,7 +14,7 @@ if isempty(varargin)
     usePreviousChewingThresh=true;
     alignment=[];
 else
-    if length(varargin)==3
+    if length(varargin)==3 || length(varargin)==4
         currentVid=varargin{1};
         placeForO2data=varargin{2};
         usePreviousChewingThresh=true;
@@ -27,6 +27,10 @@ else
     else
         usePreviousChewingThresh=false;
     end
+
+    if length(varargin)==4
+        usePreviousChewingThresh=varargin{4};
+    end 
 end
 
 addpath(genpath('C:\Users\sabatini\Documents\GitHub\chronux_2_11'));

@@ -523,7 +523,13 @@ save(['C:\Users\sabatini\Documents\allLabels.mat'],'allLabels');
 save(['C:\Users\sabatini\Documents\timepoints_for_tensor.mat'],'timepoints_for_tensor');
 
 %% GLM analysis
-GLM_analysis(48,dd,4);
+for i=293:297
+    if data_loc_array{i,13}==1
+        continue
+    end
+    GLM_analysis(i,data_loc_array,10);
+    close all;
+end
 
 %% Get significant responses 
 % Get significance from trial by trial

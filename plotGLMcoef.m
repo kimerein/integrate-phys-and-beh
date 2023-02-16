@@ -1,9 +1,9 @@
 function plotGLMcoef(glm_coef,glm_intercept,feature_names,timestep,nShiftsBefore)
 
 % GLM python
-% plotGLMcoef(glm_coef,glm_intercept,feature_names,10*0.01,4);
+% plotGLMcoef(glm_coef,glm_intercept,feature_names,10*0.01,9);
 % GLM matlab
-% plotGLMcoef(coef,[],evsGrabbed,10*0.01,4);
+% plotGLMcoef(coef,[],fnames,10*0.01,9);
 
 
 smoobin=1;
