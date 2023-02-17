@@ -589,6 +589,9 @@ for i=1:size(fromPhystbtTimes,1)
     % also realigned at cue
     fcue=find(cuePhystbt(i,:)>0.5,1,'first');
     cuetime=fromPhystbtTimes(i,fcue);
+    if isempty(fcue)
+        fcue=find(nanmean(cuePhystbt,1)>0.5,1,'first');
+    end
     % find closest in unitTimes
     % gives inds into unitTimes but of length of fromPhystbtTimes
     nextstep=findClosest(fromPhystbtTimes(i,:)-cuetime,unitTimes);
