@@ -484,7 +484,11 @@ for j=1:length(dd)
         end
     end
     beh2_tbt=addFidgeting(datadir(1:f(end)-1), beh2_tbt);
-    if ~all(size(beh2_tbt.isFidgeting)==size(beh2_tbt.cue))
+    if ~isfield(beh2_tbt,'isFidgeting') 
+        % problem with isFidgeting size
+        disp(['problem with fidgets size for ' datadir(1:f(end))]);
+        beh2_tbt.isFidgeting=nan(size(beh2_tbt.cue));
+    elseif ~all(size(beh2_tbt.isFidgeting)==size(beh2_tbt.cue))
         % problem with isFidgeting size
         disp(['problem with fidgets size for ' datadir(1:f(end))]);
         beh2_tbt.isFidgeting=nan(size(beh2_tbt.cue));
