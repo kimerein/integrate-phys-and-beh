@@ -97,6 +97,9 @@ for i=1:length(u)
         % full session
         neuron_disappears(i)=1;
         continue
+    elseif isnan(whichTrialsForThisCell)
+        neuron_disappears(i)=1;
+        continue
     elseif nansum(ResponseCued.fromWhichUnit==i)~=size(phystbtout.cue,1) 
         % fill in missing trials with zero spiking
         % find missing trials
