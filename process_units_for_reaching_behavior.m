@@ -523,7 +523,7 @@ save(['C:\Users\sabatini\Documents\allLabels.mat'],'allLabels');
 save(['C:\Users\sabatini\Documents\timepoints_for_tensor.mat'],'timepoints_for_tensor');
 
 %% GLM analysis
-for i=411:418
+for i=441:450
     if data_loc_array{i,13}==1
         continue
     end
@@ -533,6 +533,16 @@ for i=411:418
     GLM_analysis(i,data_loc_array,10);
     close all;
 end
+
+% Read in unit names
+plotUnitCriteria=[1 0 0 1 0]; % -100 is a wildcard, else 0 (false) and 1 (true)
+getCriteriaForUnitsToPlot(plotUnitCriteria);
+dd_more=cell(1,length(dd)); 
+for i=1:length(dd)
+    dd_more{i}=[dd{i} sep 'cue']; % just a placeholder to read in names
+end
+whichUnitsToGrab='_'; % '_' for all units, or can be something like 'D1tagged'
+[unitbyunit_names.names,unitbyunit_names.excluded,unitbyunit_names.D1orD2taggingExpt,unitbyunit_names.D1taggedCells,unitbyunit_names.A2ataggedCells,unitbyunit_names.fromWhichSess,unitbyunit_names.fromWhichUnit]=alignToReadInUnitNames(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlots);
 
 %% Get significant responses 
 % Get significance from trial by trial
