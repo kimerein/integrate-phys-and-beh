@@ -535,14 +535,18 @@ for i=441:450
 end
 
 % Read in unit names
-plotUnitCriteria=[1 0 0 1 0]; % -100 is a wildcard, else 0 (false) and 1 (true)
-getCriteriaForUnitsToPlot(plotUnitCriteria);
-dd_more=cell(1,length(dd)); 
+plotUnitCriteria=[1 0 0 1 0]; getCriteriaForUnitsToPlot(plotUnitCriteria); dd_more=cell(1,length(dd)); 
 for i=1:length(dd)
     dd_more{i}=[dd{i} sep 'cue']; % just a placeholder to read in names
 end
-whichUnitsToGrab='_'; % '_' for all units, or can be something like 'D1tagged'
+whichUnitsToGrab='_'; 
 [unitbyunit_names.names,unitbyunit_names.excluded,unitbyunit_names.D1orD2taggingExpt,unitbyunit_names.D1taggedCells,unitbyunit_names.A2ataggedCells,unitbyunit_names.fromWhichSess,unitbyunit_names.fromWhichUnit]=alignToReadInUnitNames(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlots);
+% Read in GLM coefficients
+for i=1:length(dd)
+    dd_more{i}=[dd{i} sep 'matglm']; % just a placeholder to read in names
+end
+[all_glm_coef,unitnames_glm,fromWhichSess_glm]=readInGLMCoefs(dd_more,settingsForStriatumUnitPlots);
+
 
 %% Get significant responses 
 % Get significance from trial by trial
