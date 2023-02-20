@@ -543,10 +543,15 @@ whichUnitsToGrab='_';
 [unitbyunit_names.names,unitbyunit_names.excluded,unitbyunit_names.D1orD2taggingExpt,unitbyunit_names.D1taggedCells,unitbyunit_names.A2ataggedCells,unitbyunit_names.fromWhichSess,unitbyunit_names.fromWhichUnit]=alignToReadInUnitNames(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlots);
 % Read in GLM coefficients
 for i=1:length(dd)
-    dd_more{i}=[dd{i} sep 'matglm']; % just a placeholder to read in names
+    dd_more{i}=[dd{i} sep 'forglm']; % just a placeholder to read in names
 end
 [all_glm_coef,unitnames_glm,fromWhichSess_glm]=readInGLMCoefs(dd_more,settingsForStriatumUnitPlots);
-
+indexGLMcellsIntoUnitNames=getNamesIndexIntoNamesList(unitnames_glm,unitbyunit_names);
+load('Z:\MICROSCOPE\Kim\WHISPER recs\Mar_6\20210625\SU aligned to behavior\forglm\output\neuron1_glm.mat')
+[ts,allco]=plotGLMcoef(all_glm_coef,0,feature_names,10*0.01,9,'mean'); title('python glm');
+load('Z:\MICROSCOPE\Kim\WHISPER recs\Mar_6\20210625\SU aligned to behavior\matglm\features_for_glm.mat');
+[ts,allco]=plotGLMcoef(all_glm_coef,[],fnames,10*0.01,9,'mean'); title('mat glm');
+whichCoefToUse=[4 5 6]; studyGLMcoef(all_glm_coef,ts,whichCoefToUse);
 
 %% Get significant responses 
 % Get significance from trial by trial

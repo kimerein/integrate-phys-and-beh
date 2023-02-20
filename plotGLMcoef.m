@@ -1,10 +1,11 @@
-function plotGLMcoef(glm_coef,glm_intercept,feature_names,timestep,nShiftsBefore)
+function [ts,allcoef]=plotGLMcoef(glm_coef,glm_intercept,feature_names,timestep,nShiftsBefore,putTog)
 
 % GLM python
 % plotGLMcoef(glm_coef,glm_intercept,feature_names,10*0.01,9);
 % GLM matlab
 % plotGLMcoef(coef,[],fnames,10*0.01,9);
 
+% putTog can be 'mean','median','me+se','me-se'
 
 smoobin=1;
 
@@ -28,13 +29,21 @@ for i=1:length(event_types)
     for j=1:size(feature_names,1)
         if iscell(feature_names)
             if ~isempty(regexp(feature_names{j},currev))
-                coef(k)=glm_coef(l);
+                if size(glm_coef,1)>1 && size(glm_coef,2)>1
+                    coef(k)=putTogether(glm_coef(:,l),putTog);
+                else
+                    coef(k)=glm_coef(l);
+                end
                 k=k+1;
                 l=l+1;
             end
         else
             if ~isempty(regexp(feature_names(j,:),currev))
-                coef(k)=glm_coef(l);
+                if size(glm_coef,1)>1 && size(glm_coef,2)>1
+                    coef(k)=putTogether(glm_coef(:,l),putTog);
+                else
+                    coef(k)=glm_coef(l);
+                end
                 k=k+1;
                 l=l+1;
             end
@@ -63,6 +72,25 @@ for i=1:length(event_types)
     ylim([nanmin(allcoef(1:end)) nanmax(allcoef(1:end))]);
 end
 set(gcf,'Position',[20 20 1300 400]);
+
+end
+
+function out=putTogether(co,method)
+
+% method can be 'mean','median','me+se','me-se'
+switch method
+    case 'mean'
+        out=mean(co,'all','omitnan');
+    case 'median'
+        out=median(co,'all','omitnan');
+    case 'me+se'
+        out=mean(co,'all','omitnan')+std(co,[],'all','omitnan')./sqrt(length(co));
+    case 'me-se'
+        out=mean(co,'all','omitnan')-std(co,[],'all','omitnan')./sqrt(length(co));
+    otherwise
+        disp('Averaging as default');
+        out=mean(co,'all','omitnan');
+end
 
 end
 

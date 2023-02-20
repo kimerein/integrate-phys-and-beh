@@ -31,12 +31,16 @@ for j=1:length(dd)
         datadir=dd{j};
     end
     if isMatGLM==false
-        a=load([datadir sep 'unitnames.mat']);
-        una=a.unitnames;
-        unitnames(units_count:units_count+length(una)-1)=una;
-        fromWhichSess(units_count:units_count+length(una)-1)=j;
-        units_count=units_count+length(una);
-        datadir=[datadir sep 'output'];
+        if exist([datadir sep 'unitnames.mat'],'file')
+            a=load([datadir sep 'unitnames.mat']);
+            una=a.unitnames;
+            unitnames(units_count:units_count+length(una)-1)=una;
+            fromWhichSess(units_count:units_count+length(una)-1)=j;
+            units_count=units_count+length(una);
+            datadir=[datadir sep 'output'];
+        else
+            continue
+        end
     end
     disp(['reading in from ' datadir]);
     ls=dir(datadir);
