@@ -774,6 +774,15 @@ elseif length(varargin)==5
     end
 
     u=unique([Response1_indsIntoExcluded; Response2_indsIntoExcluded; Response3_indsIntoExcluded; Response4_indsIntoExcluded; Response5_indsIntoExcluded]);
+    if isempty(Response3)
+        Response3_indsIntoExcluded=u;
+    end
+    if isempty(Response4)
+        Response4_indsIntoExcluded=u;
+    end
+    if isempty(Response5)
+        Response5_indsIntoExcluded=u;
+    end
     isInAll=zeros(size(u));
     for i=1:length(u)
         if ismember(u(i),Response1_indsIntoExcluded) && ismember(u(i),Response2_indsIntoExcluded) && ismember(u(i),Response3_indsIntoExcluded) && ismember(u(i),Response4_indsIntoExcluded) && ismember(u(i),Response5_indsIntoExcluded)

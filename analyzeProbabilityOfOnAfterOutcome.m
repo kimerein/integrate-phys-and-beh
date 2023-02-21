@@ -101,6 +101,7 @@ imagesc(flipud(heatmap_p'));
 ylabel('p failure SHUFFLE');
 xlabel('p success SHUFFLE');
 
+backup_success_Response=success_Response; backup_failure_Response=failure_Response;
 out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',excludeTooFewTrials(success_Response,6,false),excludeTooFewTrials(failure_Response,6,false),[],[],[]);
 success_Response=out.Response1; failure_Response=out.Response2;
 unitfr_success=sum(success_Response.unitbyunit_y(:,successRange(1):successRange(2)),2,'omitnan');
