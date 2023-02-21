@@ -27,7 +27,7 @@ end
 % temp is currently neurons by coef times
 % to study temporal factors, get times by times matrix
 A=temp'*temp;
-[coeff,score,latent,tsquared,explained,mu]=plotPCA(A,6);
+[coeff,score,latent,tsquared,explained,mu]=plotPCA(A,10);
 
 whichPC=7;
 figure();
@@ -42,6 +42,26 @@ for i=1:size(temp,1)
 end
 figure();
 histogram(projectionsOntoPC,1000);
+
+load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\GLM coeffs\indexGLMcellsIntoUnitNames.mat')
+load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\GLM coeffs\cue_Response.mat')
+labeltemp=cue_Response.D1tag(cue_Response.excluded==0); toplotr=projectionsOntoPC(labeltemp(indexGLMcellsIntoUnitNames)==1);
+labeltemp=cue_Response.A2atag(cue_Response.excluded==0); toplotb=projectionsOntoPC(labeltemp(indexGLMcellsIntoUnitNames)==1);
+
+[n,x]=histcounts(toplotr,200);
+[n,x]=cityscape_hist(n,x);
+figure(); plot(x,n,'Color','r');
+hold on;
+[n,x]=histcounts(toplotb,200);
+[n,x]=cityscape_hist(n,x);
+plot(x,n,'Color','b');
+
+labeltempr=cue_Response.D1tag(cue_Response.excluded==0); figure(); plot(nanmean(coef(labeltempr(indexGLMcellsIntoUnitNames)==1,:),1),'Color','r');
+labeltempb=cue_Response.A2atag(cue_Response.excluded==0); hold on; plot(nanmean(coef(labeltempb(indexGLMcellsIntoUnitNames)==1,:),1),'Color','b');
+
+figure(); histogram(mean(coef(:,122:142),2,'omitnan')-mean(coef(:,162:182),2,'omitnan'),1000);
+cuer=nanmax(all_glm_coef(:,10:40)-repmat(mean(all_glm_coef(1:9,:),'all','omitnan'),1,size(all_glm_coef(:,10:40),2)),[],2);
+
 
 end
 

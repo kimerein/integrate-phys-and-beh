@@ -543,9 +543,12 @@ whichUnitsToGrab='_';
 [unitbyunit_names.names,unitbyunit_names.excluded,unitbyunit_names.D1orD2taggingExpt,unitbyunit_names.D1taggedCells,unitbyunit_names.A2ataggedCells,unitbyunit_names.fromWhichSess,unitbyunit_names.fromWhichUnit]=alignToReadInUnitNames(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlots);
 % Read in GLM coefficients
 for i=1:length(dd)
-    dd_more{i}=[dd{i} sep 'forglm']; % just a placeholder to read in names
+    dd_more{i}=[dd{i} sep 'matglm']; % just a placeholder to read in names
 end
 [all_glm_coef,unitnames_glm,fromWhichSess_glm]=readInGLMCoefs(dd_more,settingsForStriatumUnitPlots);
+% Outliers for matlab glm
+outli=[312 313 319 320 322 324 374 376 377 378 379 380 381 382 383 386 387 388 389];
+all_glm_coef=all_glm_coef(~ismember(1:size(all_glm_coef,1),outli),:); unitnames_glm=unitnames_glm(~ismember(1:length(unitnames_glm),outli)); fromWhichSess_glm=fromWhichSess_glm(~ismember(1:length(fromWhichSess_glm),outli));
 indexGLMcellsIntoUnitNames=getNamesIndexIntoNamesList(unitnames_glm,unitbyunit_names);
 load('Z:\MICROSCOPE\Kim\WHISPER recs\Mar_6\20210625\SU aligned to behavior\forglm\output\neuron1_glm.mat')
 [ts,allco]=plotGLMcoef(all_glm_coef,0,feature_names,10*0.01,9,'mean'); title('python glm');

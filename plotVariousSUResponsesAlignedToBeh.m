@@ -757,9 +757,21 @@ elseif length(varargin)==5
     Response5=varargin{5};
     Response1_indsIntoExcluded=find(Response.excluded==0);
     Response2_indsIntoExcluded=find(Response2.excluded==0);
-    Response3_indsIntoExcluded=find(Response3.excluded==0);
-    Response4_indsIntoExcluded=find(Response4.excluded==0);
-    Response5_indsIntoExcluded=find(Response5.excluded==0);
+    if ~isempty(Response3)
+        Response3_indsIntoExcluded=find(Response3.excluded==0);
+    else
+        Response3_indsIntoExcluded=[];
+    end
+    if ~isempty(Response4)
+        Response4_indsIntoExcluded=find(Response4.excluded==0);
+    else
+        Response4_indsIntoExcluded=[];
+    end
+    if ~isempty(Response5)
+        Response5_indsIntoExcluded=find(Response5.excluded==0);
+    else
+        Response5_indsIntoExcluded=[];
+    end
 
     u=unique([Response1_indsIntoExcluded; Response2_indsIntoExcluded; Response3_indsIntoExcluded; Response4_indsIntoExcluded; Response5_indsIntoExcluded]);
     isInAll=zeros(size(u));
@@ -780,17 +792,29 @@ elseif length(varargin)==5
     useTheseUnitsResponse2=find(temp);
     Response2.excluded(Response2_indsIntoExcluded(~temp))=1;
 
-    temp=ismember(Response3_indsIntoExcluded,inAll);
-    useTheseUnitsResponse3=find(temp);
-    Response3.excluded(Response3_indsIntoExcluded(~temp))=1;
+    if ~isempty(Response3)
+        temp=ismember(Response3_indsIntoExcluded,inAll);
+        useTheseUnitsResponse3=find(temp);
+        Response3.excluded(Response3_indsIntoExcluded(~temp))=1;
+    else
+        useTheseUnitsResponse3=[];
+    end
 
-    temp=ismember(Response4_indsIntoExcluded,inAll);
-    useTheseUnitsResponse4=find(temp);
-    Response4.excluded(Response4_indsIntoExcluded(~temp))=1;
+    if ~isempty(Response4)
+        temp=ismember(Response4_indsIntoExcluded,inAll);
+        useTheseUnitsResponse4=find(temp);
+        Response4.excluded(Response4_indsIntoExcluded(~temp))=1;
+    else
+        useTheseUnitsResponse4=[];
+    end
 
-    temp=ismember(Response5_indsIntoExcluded,inAll);
-    useTheseUnitsResponse5=find(temp);
-    Response5.excluded(Response5_indsIntoExcluded(~temp))=1;
+    if ~isempty(Response5)
+        temp=ismember(Response5_indsIntoExcluded,inAll);
+        useTheseUnitsResponse5=find(temp);
+        Response5.excluded(Response5_indsIntoExcluded(~temp))=1;
+    else
+        useTheseUnitsResponse5=[];
+    end
 
     Response=filterResponseToOneSU(Response,useTheseUnitsResponse1);
     Response2=filterResponseToOneSU(Response2,useTheseUnitsResponse2);
@@ -812,6 +836,11 @@ end
 end
 
 function out=checkThatAllUnitsRepresented(Response,whichUnitToUse)
+
+if isempty(Response)
+    out=[];
+    return
+end
 
 f=fieldnames(Response);
 fieldLikeResponseSize=size(Response.unitbyunit_y,1);
@@ -851,7 +880,8 @@ if any(~ismember(whichUnitToUse,whichUnit))
     % sort according to unit order
     [~,si]=sort(out.fromWhichUnit);
     for i=1:length(f)
-        temp=Response.(f{i});
+%         temp=Response.(f{i});
+        temp=out.(f{i});
         if size(temp,1)==fieldLikeResponseSize
             if all(size(temp)>1)
                 % 2D
@@ -867,6 +897,11 @@ end
 end
 
 function out=filterResponseToOneSU(Response,whichUnitToUse)
+
+if isempty(Response)
+    out=[];
+    return
+end
 
 f=fieldnames(Response);
 fieldLikeResponseSize=size(Response.unitbyunit_y,1);
