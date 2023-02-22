@@ -101,6 +101,8 @@ end
 function placeForO2data=getPlaceOfO2data(mousename,aviName,datestr)
 
 switch mousename
+    case 'bi_agouti'
+        placeForO2data=['Z:\MICROSCOPE\Kim\JuliaG\Behavior Expts\' mousename '\' datestr '\O2 output\' aviName];
     case 'mitch_right'
 %         placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\O2 output\' aviName];
         placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\' aviName];
