@@ -70,6 +70,24 @@ xlabel('PC2'); ylabel('PC3'); zlabel('PC4'); % PC2 separates clusters
 % 2. But is there a way to get the trial type-dependent component for each
 % cell? How about subtracting the averaged across all cells, averaged across all trials, 
 % Z-scored rate, and then only consider deviations from this average?
+score=allcell_PCs.score;
+figure(); scatter3(score(:,1),score(:,2),score(:,3),[],[0.5 0.5 0.5]); hold on; scatter3(score(D1tag==1,1),score(D1tag==1,2),score(D1tag==1,3),[],'r','filled');
+scatter3(score(A2atag==1,1),score(A2atag==1,2),score(A2atag==1,3),[],'b','filled');
+xlabel('Proj1'); ylabel('Proj2'); zlabel('Proj3');
+% tsnetemp=tsne(score,'Algorithm','exact','Distance','chebychev','Exaggeration',10,'NumDimensions',2,'Perplexity',60,'Standardize',false);
+tsnetemp=tsne(score,'Algorithm','exact','Distance','chebychev','Exaggeration',10,'NumDimensions',2,'Perplexity',500,'Standardize',false);
+cmap=colormap('jet');
+ccft=cmap((idx-1)*100+1,:);
+figure(); scatter(tsnetemp(:,1),tsnetemp(:,2),[],ccft);
+figure(); scatter(tsnetemp(D1tag==1,1),tsnetemp(D1tag==1,2),[],repmat(cmap(1,:),nansum(D1tag==1),1)); hold on;
+scatter(tsnetemp(A2atag==1,1),tsnetemp(A2atag==1,2),[],repmat(cmap(100,:),nansum(A2atag==1),1));
+tempiedata=normalizeData(backupdata,[2 3],'sd'); currcuescore=reshape(max(tempiedata(:,1:150,1),[],2,'omitnan'),size(backupdata,1),1);
+currcuescore=log(currcuescore); currcuescore(currcuescore<-2)=-2; figure(); histogram(currcuescore,200); 
+cuecolsfortsne=currcuescore-min(currcuescore,[],'all','omitnan'); cuecolsfortsne=cuecolsfortsne./max(cuecolsfortsne,[],'all','omitnan'); cuecolsfortsne=cuecolsfortsne*255;
+cuecolsfortsne=ceil(cuecolsfortsne); cuecolsfortsne(cuecolsfortsne==0)=1; dontshow(isnan(cuecolsfortsne))=true;  cuecolsfortsne(isnan(cuecolsfortsne))=1;
+cmap=colormap('jet');
+ccft=cmap(cuecolsfortsne,:); ccft(dontshow==true,:)=repmat([1 1 1],sum(dontshow==true),1);
+figure(); scatter(tsnetemp(:,1),tsnetemp(:,2),[],ccft); title('cue responsive');
 
 
 load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\for_data_matrix_D1vA2a.mat')
