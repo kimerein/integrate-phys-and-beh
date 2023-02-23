@@ -626,22 +626,22 @@ dataMatrix=dataMatrix(:,31:end,:);
 dataMatrix(:,1:end-73,3)=dataMatrix(:,74:end,3);
 dataMatrix(:,1:end-73,5)=dataMatrix(:,74:end,5);
 
-% clear newDataMatrix
-% for i=1:size(dataMatrix,3)
-%     temp=reshape(dataMatrix(:,:,i),size(dataMatrix(:,:,i),1),size(dataMatrix(:,:,i),2));
-%     %temp=downSampMatrix(reshape(dataMatrix(:,:,i),size(dataMatrix(:,:,i),1),size(dataMatrix(:,:,i),2)),10);
-%     for j=1:size(temp,1)
-%         temp(j,:)=smoothdata(temp(j,:),'gaussian',10); %42);
-%     end
-% %     newDataMatrix(:,:,i)=abs(diff(temp,1,2)); 
-%     newDataMatrix(:,:,i)=temp; 
-% end
+clear newDataMatrix
+for i=1:size(dataMatrix,3)
+    temp=reshape(dataMatrix(:,:,i),size(dataMatrix(:,:,i),1),size(dataMatrix(:,:,i),2));
+    %temp=downSampMatrix(reshape(dataMatrix(:,:,i),size(dataMatrix(:,:,i),1),size(dataMatrix(:,:,i),2)),10);
+    for j=1:size(temp,1)
+        temp(j,:)=smoothdata(temp(j,:),'gaussian',42);%10);
+    end
+%     newDataMatrix(:,:,i)=abs(diff(temp,1,2)); 
+    newDataMatrix(:,:,i)=temp; 
+end
 
 % PCA, CCA, etc.
 % CCA: Find orthogonal dimensions of max covariance between X=[] and Y=[]
 plotN=6;
 boot=1; % num iterations for bootstrap
-principaledCA(dataMatrix,{'units','time','conditions'},plotN,boot);
+principaledCA(newDataMatrix,{'units','time','conditions'},plotN,boot);
 
 % zscore_cueR=cue_Response.unitbyunit_y; zscore_cueR(zscore_cueR<0.0001)=0;
 % zscore_cueR=(zscore_cueR)./repmat(std(zscore_cueR(:,500:1000),[],2,'omitnan'),1,size(zscore_cueR,2));
@@ -649,15 +649,16 @@ principaledCA(dataMatrix,{'units','time','conditions'},plotN,boot);
 % cuedcellresponse=nanmean(zscore_cueR(:,286:328),2)-nanmean(zscore_cueR(:,210:282),2);
 % cuedcellresponse(cuedcellresponse>35)=35;
 % figure(); histogram(cuedcellresponse,500);
-figure(); plot(nanmean(cued_failure_Response.unitbyunit_x,1),nanmean(cued_failure_Response.unitbyunit_y(idx==2 & cuedcellresponse>0.5,:),1),'Color','b');
-hold on; plot(nanmean(cued_failure_Response.aligncomp_x,1),nanmean(cued_failure_Response.aligncomp_y(idx==2 & cuedcellresponse>0.5,:),1),'Color','c'); title('failure cued');
-figure(); plot(nanmean(cued_success_Response.unitbyunit_x,1),nanmean(cued_success_Response.unitbyunit_y(idx==2 & cuedcellresponse>0.5,:),1),'Color','b');
-hold on; plot(nanmean(cued_success_Response.aligncomp_x,1),nanmean(cued_success_Response.aligncomp_y(idx==2 & cuedcellresponse>0.5,:),1),'Color','c'); title('success cued');
-figure(); plot(nanmean(cued_failure_Response.unitbyunit_x,1),nanmean(cued_failure_Response.unitbyunit_y(idx==2 & cuedcellresponse<0.5,:),1),'Color','b');
-hold on; plot(nanmean(cued_failure_Response.aligncomp_x,1),nanmean(cued_failure_Response.aligncomp_y(idx==2 & cuedcellresponse<0.5,:),1),'Color','c'); title('failure medium');
-figure(); plot(nanmean(cued_success_Response.unitbyunit_x,1),nanmean(cued_success_Response.unitbyunit_y(idx==2 & cuedcellresponse<0.5,:),1),'Color','b');
-hold on; plot(nanmean(cued_success_Response.aligncomp_x,1),nanmean(cued_success_Response.aligncomp_y(idx==2 & cuedcellresponse<0.5,:),1),'Color','c'); title('success medium');
-figure(); plot(nanmean(cued_failure_Response.unitbyunit_x,1),nanmean(cued_failure_Response.unitbyunit_y(idx==2 & cuedcellresponse<0,:),1),'Color','b');
-hold on; plot(nanmean(cued_failure_Response.aligncomp_x,1),nanmean(cued_failure_Response.aligncomp_y(idx==2 & cuedcellresponse<0,:),1),'Color','c'); title('failure uncued');
-figure(); plot(nanmean(cued_success_Response.unitbyunit_x,1),nanmean(cued_success_Response.unitbyunit_y(idx==2 & cuedcellresponse<0,:),1),'Color','b');
-hold on; plot(nanmean(cued_success_Response.aligncomp_x,1),nanmean(cued_success_Response.aligncomp_y(idx==2 & cuedcellresponse<0,:),1),'Color','c'); title('success uncued');
+
+% figure(); plot(nanmean(cued_failure_Response.unitbyunit_x,1),nanmean(cued_failure_Response.unitbyunit_y(idx==2 & cuedcellresponse>0.5,:),1),'Color','b');
+% hold on; plot(nanmean(cued_failure_Response.aligncomp_x,1),nanmean(cued_failure_Response.aligncomp_y(idx==2 & cuedcellresponse>0.5,:),1),'Color','c'); title('failure cued');
+% figure(); plot(nanmean(cued_success_Response.unitbyunit_x,1),nanmean(cued_success_Response.unitbyunit_y(idx==2 & cuedcellresponse>0.5,:),1),'Color','b');
+% hold on; plot(nanmean(cued_success_Response.aligncomp_x,1),nanmean(cued_success_Response.aligncomp_y(idx==2 & cuedcellresponse>0.5,:),1),'Color','c'); title('success cued');
+% figure(); plot(nanmean(cued_failure_Response.unitbyunit_x,1),nanmean(cued_failure_Response.unitbyunit_y(idx==2 & cuedcellresponse<0.5,:),1),'Color','b');
+% hold on; plot(nanmean(cued_failure_Response.aligncomp_x,1),nanmean(cued_failure_Response.aligncomp_y(idx==2 & cuedcellresponse<0.5,:),1),'Color','c'); title('failure medium');
+% figure(); plot(nanmean(cued_success_Response.unitbyunit_x,1),nanmean(cued_success_Response.unitbyunit_y(idx==2 & cuedcellresponse<0.5,:),1),'Color','b');
+% hold on; plot(nanmean(cued_success_Response.aligncomp_x,1),nanmean(cued_success_Response.aligncomp_y(idx==2 & cuedcellresponse<0.5,:),1),'Color','c'); title('success medium');
+% figure(); plot(nanmean(cued_failure_Response.unitbyunit_x,1),nanmean(cued_failure_Response.unitbyunit_y(idx==2 & cuedcellresponse<0,:),1),'Color','b');
+% hold on; plot(nanmean(cued_failure_Response.aligncomp_x,1),nanmean(cued_failure_Response.aligncomp_y(idx==2 & cuedcellresponse<0,:),1),'Color','c'); title('failure uncued');
+% figure(); plot(nanmean(cued_success_Response.unitbyunit_x,1),nanmean(cued_success_Response.unitbyunit_y(idx==2 & cuedcellresponse<0,:),1),'Color','b');
+% hold on; plot(nanmean(cued_success_Response.aligncomp_x,1),nanmean(cued_success_Response.aligncomp_y(idx==2 & cuedcellresponse<0,:),1),'Color','c'); title('success uncued');

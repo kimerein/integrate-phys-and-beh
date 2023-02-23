@@ -7,12 +7,13 @@ else
 end
 
 backupdata=data;
+data=getTrialTypeDependentResidual(data);
 % Normalize each unit's PSTH, don't min-subtract here bcz assume 0 is 0
 data=normalizeData(data,[2 3],'sd'); % last argument either 'sd', 'max' or 'mean'
 % Remove outliers, only necessary if norm by the mean
 % data=rmOutliersFromNormedPSTH(data);
 % data=ZscoreData(data,[2 3]);
-% data=smoothData(data,2,3); % last arg is gaussian smooth bin
+% data=smoothData(data,2,10); % last arg is gaussian smooth bin
 
 % Flatten
 flatData=flatten(data,'expand',[3 1]); % for temporal factors
@@ -37,7 +38,7 @@ plotPCA(flatData',plotN);
 
 % TCA
 R_guess=6; % guess matrix rank
-allconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[2:5])),50,R_guess);
+allconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[2:5])),20,R_guess);
 [allcell_PCs,allcell_archetypeCells,dimOrdering]=studyCPmodel(allconditions_cpmodel);
 
 temp=allconditions_cpmodel.U{1}; meanMinusTemp=temp-repmat(nanmean(temp,2),1,size(temp,2));
@@ -58,6 +59,18 @@ for j=1:ngroups
 scatter(find(idx(si)==j),thesevals(idx(si)==j),2,currc{j});
 end
 end
+figure(); scatter3(allcell_PCs.score(idx==1,2),allcell_PCs.score(idx==1,3),allcell_PCs.score(idx==1,4),[],'k'); hold on;
+scatter3(allcell_PCs.score(idx==2,2),allcell_PCs.score(idx==2,3),allcell_PCs.score(idx==2,4),[],'r');
+xlabel('PC2'); ylabel('PC3'); zlabel('PC4'); % PC2 separates clusters
+
+% Is there a way to regress off the trial type-independent turning off
+% after the reach? 
+% 1. Could choose only cells that significantly represent the success v
+% failure or cued v uncued
+% 2. But is there a way to get the trial type-dependent component for each
+% cell? How about subtracting the averaged across all cells, averaged across all trials, 
+% Z-scored rate, and then only consider deviations from this average?
+
 
 load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\for_data_matrix_D1vA2a.mat')
 figure();
@@ -147,6 +160,19 @@ figure(); scatter(mean(us(:,2:3),2),mean(us(:,4:5),2));
 % figure(); imagesc(S(:,1:10));
 % figure(); imagesc(V(1:4,:)');
 % figure(); imagesc(V(:,1:4));
+
+end
+
+function data=getTrialTypeDependentResidual(data)
+
+nonspecific=reshape(min(noNansOrInfs(data(:,:,2:5)),[],3,'omitnan'),size(data,1),size(data,2));
+% Subtract off average across all neurons, all trial types
+% nonspecific=repmat(reshape(mean(mean(noNansOrInfs(data(:,:,2:5)),3,'omitnan'),1,'omitnan'),1,size(data,2)),size(data,1),1);
+% Subtract off from each neuron its average time course across trial types
+% nonspecific=noNansOrInfs(reshape(mean(data(:,:,2:5),3,'omitnan'),size(data,1),size(data,2)));
+for i=1:5
+    data(:,:,i)=data(:,:,i)-nonspecific;
+end
 
 end
 
@@ -422,7 +448,7 @@ for n = 1:n_fits
     end
 
     % visualize fit for first several fits
-    if n < 10
+    if n < 20
         % plot the estimated factors
         viz_ktensor(est_factors, ... 
             'Plottype', {'bar', 'line', 'scatter'}, ...
