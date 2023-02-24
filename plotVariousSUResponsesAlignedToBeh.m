@@ -991,6 +991,8 @@ timesD1=nanmean(activityD1tagged.unitbyunit_x,1)-temp(f);
 if any(isnan(timesD1))
     timesD1=fillmissing(timesD1,'linear');
 end
+out.unittimes=timesD1;
+out.unitbyunit=activityD1tagged.unitbyunit_y;
 if suppressPlots~=1
     if size(activityD1tagged.unitbyunit_y,1)>100
         % skip unit by unit plot because too crowded

@@ -667,6 +667,8 @@ boot=1; % num iterations for bootstrap
 if ~exist('cuez','var')
     temp=normalizeDataMatrix(newDataMatrix,[2 3],'sd'); cuez=reshape(max(temp(:,1:150,1),[],2,'omitnan'),size(newDataMatrix,1),1);
     cuez=log(cuez); cuez(cuez<-2)=-2; figure(); histogram(cuez,200); 
+
+    
 end
 plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response);
 
