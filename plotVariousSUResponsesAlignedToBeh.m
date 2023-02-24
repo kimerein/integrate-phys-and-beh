@@ -37,7 +37,7 @@ switch varargin{1}
         if length(varargin)==4
             suppressPlots=varargin{4};
         else
-            suppressPlots=false;
+            suppressPlots=0;
         end
         out=meanAcrossUnits(Response,downSampFac,suppressPlots);
     case 'scatterInTimeWindows'
@@ -963,7 +963,7 @@ for i=1:size(temp,1)
 end
 activityD1tagged.unitbyunit_y=temp;
 
-if suppressPlots~=false
+if suppressPlots~=1
     if size(activityD1tagged.unitbyunit_y,1)>1000
         % skip unit by unit plot because too crowded
     else
@@ -982,7 +982,7 @@ timesD1=nanmean(activityD1tagged.unitbyunit_x,1)-temp(f);
 if any(isnan(timesD1))
     timesD1=fillmissing(timesD1,'linear');
 end
-if suppressPlots~=false
+if suppressPlots~=1
     if size(activityD1tagged.unitbyunit_y,1)>100
         % skip unit by unit plot because too crowded
     else
@@ -993,7 +993,7 @@ if suppressPlots~=false
     end
 end
 
-if suppressPlots~=false
+if suppressPlots~=1
     figure();
     unitoffset=0;
     for i=1:size(activityD1tagged.unitbyunit_y,1)
@@ -1028,26 +1028,28 @@ data1=data1(any(~isnan(data1),2),:);
 data1_mean=mean(data1,1,'omitnan');
 data1_se=std(data1,0,1,'omitnan')./sqrt(size(data1,1));
 
-figure();
+if suppressPlots~=1
+    figure();
+end
 if plotAsCityscape==true
     [n,x]=cityscape_hist(data1_mean,timeBins);
-    if suppressPlots~=false
+    if suppressPlots~=1
         plot(x,n,'Color',color1); hold on;
     end
     t=x;
     me=n;
     [n,x]=cityscape_hist(data1_mean+data1_se,timeBins);
-    if suppressPlots~=false
+    if suppressPlots~=1
         plot(x,n,'Color',color1);
     end
     plusSe=n;
     [n,x]=cityscape_hist(data1_mean-data1_se,timeBins);
-    if suppressPlots~=false
+    if suppressPlots~=1
         plot(x,n,'Color',color1);
     end
     minusSe=n;
 else
-    if suppressPlots~=false
+    if suppressPlots~=1
         plot(timeBins,data1_mean,'Color',color1); hold on;
         plot(timeBins,data1_mean+data1_se,'Color',color1);
         plot(timeBins,data1_mean-data1_se,'Color',color1);
