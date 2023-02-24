@@ -641,7 +641,7 @@ end
 % CCA: Find orthogonal dimensions of max covariance between X=[] and Y=[]
 plotN=6;
 boot=1; % num iterations for bootstrap
-principaledCA(newDataMatrix,{'units','time','conditions'},plotN,boot);
+groupLabelsFromTCA=principaledCA(newDataMatrix,{'units','time','conditions'},plotN,boot);
 
 % zscore_cueR=cue_Response.unitbyunit_y; zscore_cueR(zscore_cueR<0.0001)=0;
 % zscore_cueR=(zscore_cueR)./repmat(std(zscore_cueR(:,500:1000),[],2,'omitnan'),1,size(zscore_cueR,2));
@@ -662,3 +662,19 @@ principaledCA(newDataMatrix,{'units','time','conditions'},plotN,boot);
 % hold on; plot(nanmean(cued_failure_Response.aligncomp_x,1),nanmean(cued_failure_Response.aligncomp_y(idx==2 & cuedcellresponse<0,:),1),'Color','c'); title('failure uncued');
 % figure(); plot(nanmean(cued_success_Response.unitbyunit_x,1),nanmean(cued_success_Response.unitbyunit_y(idx==2 & cuedcellresponse<0,:),1),'Color','b');
 % hold on; plot(nanmean(cued_success_Response.aligncomp_x,1),nanmean(cued_success_Response.aligncomp_y(idx==2 & cuedcellresponse<0,:),1),'Color','c'); title('success uncued');
+
+%% Plot unit summaries according to groupLabelsFromTCA
+cued_success_Response.idx=groupLabelsFromTCA; plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',subResponse(cued_success_Response,'idx',1),1); plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',subResponse(cued_success_Response,'idx',2),1);
+
+%% colormaps
+% SUCCESS V FAILURE 
+% or consider figure(); imagesc(1:100); colormap(brewermap(100,"PiYG")); to
+% deconflict with opto
+% [figure(); imagesc(1:100); colormap(brewermap(10,"RdYlGn"));] 
+% OPTO red 'r'
+% CUE blue [50 136 189]./255
+% learning 'cool'
+% CUE TUNING
+% figure(); imagesc(1:100); colormap(brewermap(100,"Purples"));
+% TRIAL IS CUED OR UNCUED
+% cued jet(1), uncued jet(100,:)

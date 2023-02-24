@@ -1,4 +1,4 @@
-function principaledCA(data,dimensionNames,plotN,bootstrapNTimes)
+function idx=principaledCA(data,dimensionNames,plotN,bootstrapNTimes)
 
 if all(strcmp(dimensionNames,{'units','time','conditions'}))
     disp('Studying units X time X conditions');
@@ -63,6 +63,17 @@ figure(); scatter3(allcell_PCs.score(idx==1,2),allcell_PCs.score(idx==1,3),allce
 scatter3(allcell_PCs.score(idx==2,2),allcell_PCs.score(idx==2,3),allcell_PCs.score(idx==2,4),[],'r');
 xlabel('PC2'); ylabel('PC3'); zlabel('PC4'); % PC2 separates clusters
 
+load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\for_data_matrix_D1vA2a.mat')
+figure();
+for i=1:size(meanMinusTemp,2)
+    subplot(1,size(meanMinusTemp,2),i);
+    bar(meanMinusTemp(si,i));
+    thesevals=meanMinusTemp(si,i);
+    hold on;
+    scatter(find(D1tag(si)==1),thesevals(find(D1tag(si)==1)),2,'r');
+    scatter(find(A2atag(si)==1),thesevals(find(A2atag(si)==1)),2,'b');
+end
+
 % Is there a way to regress off the trial type-independent turning off
 % after the reach? 
 % 1. Could choose only cells that significantly represent the success v
@@ -89,17 +100,7 @@ cmap=colormap('jet');
 ccft=cmap(cuecolsfortsne,:); ccft(dontshow==true,:)=repmat([1 1 1],sum(dontshow==true),1);
 figure(); scatter(tsnetemp(:,1),tsnetemp(:,2),[],ccft); title('cue responsive');
 
-
-load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\for_data_matrix_D1vA2a.mat')
-figure();
-for i=1:size(meanMinusTemp,2)
-    subplot(1,size(meanMinusTemp,2),i);
-    bar(meanMinusTemp(si,i));
-    thesevals=meanMinusTemp(si,i);
-    hold on;
-    scatter(find(D1tag(si)==1),thesevals(find(D1tag(si)==1)),2,'r');
-    scatter(find(A2atag(si)==1),thesevals(find(A2atag(si)==1)),2,'b');
-end
+return
 
 response_forThisArchetype(allconditions_cpmodel,idx==1);
 response_forThisArchetype(allconditions_cpmodel,idx==2);
