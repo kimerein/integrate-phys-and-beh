@@ -34,12 +34,12 @@ for i=1:length(cuezbins)-1
     temp.idx=groupLabelsFromTCA; exclu=temp.excluded;
     incuezrange=cuez>cuezbins(i) & cuez<=cuezbins(i+1);
     sub1=subResponse(temp,'idx',1); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=1))=0;
-    sub1.incuezrange=incuezrange; sub1=subResponse(sub1,'incuezrange',1); f=find(exclu~=0); sub1.excluded(f(incuezrange~=1))=0;
+    sub1.incuezrange=incuezrange(temp.idx==1); sub1=subResponse(sub1,'incuezrange',1); f=find(exclu~=0); sub1.excluded(f(incuezrange~=1))=0;
     out=plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',sub1,1,true);
     bycuez{i}=out.me;
 end
-cmap=colormap(brewermap((length(cuezbins)-1)*2,"Purples"));
 figure();
+cmap=colormap(brewermap((length(cuezbins)-1)*2,"Purples"));
 for i=1:length(cuezbins)-1
     plot(bycuez{i},'Color',cmap(i+(length(cuezbins)-1),:)); hold on;
 end
@@ -51,12 +51,12 @@ for i=1:length(cuezbins)-1
     temp.idx=groupLabelsFromTCA; exclu=temp.excluded;
     incuezrange=cuez>cuezbins(i) & cuez<=cuezbins(i+1);
     sub1=subResponse(temp,'idx',2); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=2))=0;
-    sub1.incuezrange=incuezrange; sub1=subResponse(sub1,'incuezrange',1); f=find(exclu~=0); sub1.excluded(f(incuezrange~=1))=0;
+    sub1.incuezrange=incuezrange(temp.idx==2); sub1=subResponse(sub1,'incuezrange',1); f=find(exclu~=0); sub1.excluded(f(incuezrange~=1))=0;
     out=plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',sub1,1,true);
     bycuez{i}=out.me;
 end
-cmap=colormap(brewermap((length(cuezbins)-1)*2,"Purples"));
 figure();
+cmap=colormap(brewermap((length(cuezbins)-1)*2,"Purples"));
 for i=1:length(cuezbins)-1
     plot(bycuez{i},'Color',cmap(i+(length(cuezbins)-1),:)); hold on;
 end
