@@ -59,11 +59,16 @@ for i=1:length(event_types)
         allcoef(i,:)=coef;
     end
 end
+slopes=nan(1,length(event_types));
 for i=1:length(event_types)
     subplot(1,length(event_types),i);
     ts=0:timestep:(size(allcoef,2)-1)*timestep;
     ts=ts-nShiftsBefore*timestep;
     plot(ts,allcoef(i,:),'Color',cm(i,:));
+    P=polyfit(ts,allcoef(i,:),1);
+    yfit=P(1)*ts+P(2);
+    hold on; plot(ts,yfit,'Color','m');
+    slopes(i)=P(1);
     xlim([ts(1) ts(end)]);
     hold on;
     line([0 0],[-0.1 0.5],'Color',[0.3 0.3 0.3]);
