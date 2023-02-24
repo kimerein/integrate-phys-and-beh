@@ -31,7 +31,7 @@ ds=1;
 smoo=42;
 % cuezbins=-2:0.5:3;
 % cuezbins(1)=-2.0001; cuezbins(end)=3.0001;
-cuezbins=prctile(cuez,0:5:100);
+cuezbins=prctile(cuez,0:7:100);
 cuezbins(1)=cuezbins(1)-0.0001; cuezbins(end)=cuezbins(end)+0.0001; 
 plotByCuez(cued_success_Response,cuez,groupLabelsFromTCA,'cued success',ds,smoo,'jet',cuezbins,basesubtract,basetimewindow); 
 plotByCuez(cued_failure_Response,cuez,groupLabelsFromTCA,'cued failure',ds,smoo,'jet',cuezbins,basesubtract,basetimewindow);

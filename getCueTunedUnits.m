@@ -1,12 +1,12 @@
 function [cuetuningindex,isCueTuned]=getCueTunedUnits(cueR,uncuedReachR,method,meanormax)
 
 ds=1;
-smoo=42; %80;
+smoo=100; %80; %42; 
 Zscore=true;
-cuebaserange=[5 9]; %[-3 -2]; %[-0.75 -0.54];
+cuebaserange=[-3 -2]; %[-0.75 -0.54];
 cueonrange=[-0.25 0.8];
-reachbaserange=[5 9]; %[-3 -2];
-reachonrange=[-1 0];
+reachbaserange=[-3 -2];
+reachonrange=[-1.5 -0.5];
 
 % match which units and get responses unit by unit
 r=plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',cueR,uncuedReachR,'meanAcrossUnits',ds,true);
@@ -62,6 +62,8 @@ switch method
         cuetuningindex=(cuer-reachr)./(cuer+reachr);
     case 'cue_vs_baseline'
         cuetuningindex=(duringcue-beforecue)./(duringcue+beforecue);
+    case 'justcue'
+        cuetuningindex=duringcue;
 end
 isCueTuned=cuetuningindex>0;
 
