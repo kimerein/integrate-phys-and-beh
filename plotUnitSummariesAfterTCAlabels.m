@@ -3,6 +3,26 @@ function plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Re
 % for cue tuned plots
 basesubtract=false;
 basetimewindow=[-3 -2];
+Zscore=true;
+
+if Zscore==true
+    sdwindow=[4 9]; % in sec wrt cue
+    t=nanmean(cued_success_Response.unitbyunit_x,1);
+    [~,cueind]=nanmax(nanmean(cued_success_Response.aligncomp_y,1));
+    talign=nanmean(cued_success_Response.aligncomp_x,1);
+    cuetime=talign(cueind);
+    t=t-cuetime;
+    sd=std([cued_success_Response.unitbyunit_y(:,t>sdwindow(1) & t<sdwindow(2)) cued_failure_Response.unitbyunit_y(:,t>sdwindow(1) & t<sdwindow(2)) uncued_success_Response.unitbyunit_y(:,t>sdwindow(1) & t<sdwindow(2)) uncued_failure_Response.unitbyunit_y(:,t>sdwindow(1) & t<sdwindow(2))],[],2,'omitnan');
+    sd(sd<0.1)=0.1;
+    cued_success_Response.unitbyunit_y=cued_success_Response.unitbyunit_y./repmat(sd,1,size(cued_success_Response.unitbyunit_y,2));
+    cued_success_Response.unitbyunit_y(cued_success_Response.unitbyunit_y>60)=60;
+    cued_failure_Response.unitbyunit_y=cued_failure_Response.unitbyunit_y./repmat(sd,1,size(cued_failure_Response.unitbyunit_y,2));
+    cued_failure_Response.unitbyunit_y(cued_failure_Response.unitbyunit_y>60)=60;
+    uncued_success_Response.unitbyunit_y=uncued_success_Response.unitbyunit_y./repmat(sd,1,size(uncued_success_Response.unitbyunit_y,2));
+    uncued_success_Response.unitbyunit_y(uncued_success_Response.unitbyunit_y>60)=60;
+    uncued_failure_Response.unitbyunit_y=uncued_failure_Response.unitbyunit_y./repmat(sd,1,size(uncued_failure_Response.unitbyunit_y,2));
+    uncued_failure_Response.unitbyunit_y(uncued_failure_Response.unitbyunit_y>60)=60;
+end
 
 ds=6;
 cued_success_Response.idx=groupLabelsFromTCA; exclu=cued_success_Response.excluded;
@@ -31,7 +51,7 @@ ds=1;
 smoo=42;
 % cuezbins=-2:0.5:3;
 % cuezbins(1)=-2.0001; cuezbins(end)=3.0001;
-cuezbins=prctile(cuez,0:7:100);
+cuezbins=prctile(cuez,0:10:100);
 cuezbins(1)=cuezbins(1)-0.0001; cuezbins(end)=cuezbins(end)+0.0001; 
 plotByCuez(cued_success_Response,cuez,groupLabelsFromTCA,'cued success',ds,smoo,'jet',cuezbins,basesubtract,basetimewindow); 
 plotByCuez(cued_failure_Response,cuez,groupLabelsFromTCA,'cued failure',ds,smoo,'jet',cuezbins,basesubtract,basetimewindow);

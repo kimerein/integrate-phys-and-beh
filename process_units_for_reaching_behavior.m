@@ -669,7 +669,11 @@ boot=1; % num iterations for bootstrap
 %     cuez=log(cuez); cuez(cuez<-2)=-2; figure(); histogram(cuez,200); 
 % end
 a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\uncued_reach.mat'); uncuedReach_Response=a.Response;  
-cuez=getCueTunedUnits(cue_Response,uncuedReach_Response,'cue_vs_baseline','max'); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
+a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\cue_noReach.mat'); cue_noReach_Response=a.Response;
+out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',cue_noReach_Response,cue_Response,[],[],[]);
+cue_noReach_Response=out.Response1;  
+% cuez=getCueTunedUnits(cue_noReach_Response,uncuedReach_Response,'vs_uncued_reach','max'); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
+cuez=getCueTunedUnits(cue_Response,uncuedReach_Response,'cue_vs_baseline','mean'); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
 plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response);
 
 %% colormaps

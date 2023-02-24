@@ -1,18 +1,18 @@
 function [cuetuningindex,isCueTuned]=getCueTunedUnits(cueR,uncuedReachR,method,meanormax)
 
 ds=1;
-smoo=100; %80; %42; 
+smoo=100; %100; %80; %42; % NOTHING ABOVE 100 BCZ WILL SMEAR IN OPTO RESPONSE
 Zscore=true;
 cuebaserange=[-3 -2]; %[-0.75 -0.54];
-cueonrange=[-0.25 0.8];
+cueonrange=[-0.25 1.25]; %[-0.25 0.8];
 reachbaserange=[-3 -2];
-reachonrange=[-1.5 -0.5];
+reachonrange=[-1.5 0];
 
 % match which units and get responses unit by unit
 r=plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',cueR,uncuedReachR,'meanAcrossUnits',ds,true);
 cueresp=r.response1; uncuedreachresp=r.response2;
 if Zscore==true
-    sd=std([cueresp.unitbyunit(:,cueresp.t>=5 & cueresp.t<9) uncuedreachresp.unitbyunit(:,uncuedreachresp.t>=5 & uncuedreachresp.t<9)],[],2,'omitnan');
+    sd=std([cueresp.unitbyunit(:,cueresp.t>=4 & cueresp.t<9) uncuedreachresp.unitbyunit(:,uncuedreachresp.t>=4 & uncuedreachresp.t<9)],[],2,'omitnan');
     sd(sd<1/30)=1/30;
     cueresp.unitbyunit=cueresp.unitbyunit./repmat(sd,1,size(cueresp.unitbyunit,2));
     cueresp.unitbyunit(isinf(cueresp.unitbyunit))=nan;
