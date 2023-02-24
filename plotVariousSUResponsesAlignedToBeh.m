@@ -133,7 +133,16 @@ switch varargin{1}
                 end
                 coloredPSTH(Response,Response2,col);
             case 'meanAcrossUnits'
-                overlayPlots(outResponse1,outResponse2);
+                out.response1=outResponse1;
+                out.response2=outResponse2;
+                if length(varargin)==6
+                    suppressPlots=varargin{6};
+                else
+                    suppressPlots=0;
+                end
+                if suppressPlots==0
+                    overlayPlots(outResponse1,outResponse2);
+                end
             case 'scatterInTimeWindows'
                 if ~isempty(outResponse3)
                     if alwaysUseModForColor==true
@@ -1013,9 +1022,11 @@ if suppressPlots~=1
 end
 
 [out.me,out.plusSe,out.minusSe,out.t]=plotMeanAndSE(downSampMatrix(activityD1tagged.unitbyunit_y,downSampFac),'k',downSampAv(timesD1,downSampFac),suppressPlots);
-title('Mean and se across units');
-xlabel('Time (sec)');
-ylabel('Firing rate');
+if suppressPlots~=1
+    title('Mean and se across units');
+    xlabel('Time (sec)');
+    ylabel('Firing rate');
+end
 
 end
 

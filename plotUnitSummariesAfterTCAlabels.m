@@ -2,25 +2,35 @@ function plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Re
 
 cued_success_Response.idx=groupLabelsFromTCA; exclu=cued_success_Response.excluded;
 sub1=subResponse(cued_success_Response,'idx',1); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=1))=0; sub2=subResponse(cued_success_Response,'idx',2); f=find(exclu~=0); sub2.excluded(f(groupLabelsFromTCA~=1))=0;
-plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',sub1,sub2,'meanAcrossUnits',1); title('Cued success');
+plotOverlayedResponses(plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',sub1,sub2,'meanAcrossUnits',1,true)); title('Cued success');
 cued_failure_Response.idx=groupLabelsFromTCA; exclu=cued_failure_Response.excluded;
 sub1=subResponse(cued_failure_Response,'idx',1); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=1))=0; sub2=subResponse(cued_failure_Response,'idx',2); f=find(exclu~=0); sub2.excluded(f(groupLabelsFromTCA~=1))=0;
-plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',sub1,sub2,'meanAcrossUnits',1); title('Cued failure');
+plotOverlayedResponses(plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',sub1,sub2,'meanAcrossUnits',1,true)); title('Cued failure');
 uncued_success_Response.idx=groupLabelsFromTCA; exclu=uncued_success_Response.excluded;
 sub1=subResponse(uncued_success_Response,'idx',1); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=1))=0; sub2=subResponse(uncued_success_Response,'idx',2); f=find(exclu~=0); sub2.excluded(f(groupLabelsFromTCA~=1))=0;
-plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',sub1,sub2,'meanAcrossUnits',1); title('Uncued success');
+plotOverlayedResponses(plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',sub1,sub2,'meanAcrossUnits',1,true)); title('Uncued success');
 uncued_failure_Response.idx=groupLabelsFromTCA; exclu=uncued_failure_Response.excluded;
 sub1=subResponse(uncued_failure_Response,'idx',1); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=1))=0; sub2=subResponse(uncued_failure_Response,'idx',2); f=find(exclu~=0); sub2.excluded(f(groupLabelsFromTCA~=1))=0;
-plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',sub1,sub2,'meanAcrossUnits',1); title('Uncued failure');
+plotOverlayedResponses(plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',sub1,sub2,'meanAcrossUnits',1,true)); title('Uncued failure');
 % failure_off={'unit91onCh1_A2atagged','unit97onCh28_A2atagged','unit98onCh31_A2atagged','unit99onCh28_A2atagged','unit147onCh22_A2atagged','unit159onCh27_A2atagged','unit160onCh27_A2atagged','unit162onCh27_A2atagged','unit163onCh27_A2atagged','unit208onCh23_A2atagged','unit208onCh25_A2atagged','unit209onCh21_A2atagged','unit209onCh23_A2atagged','unit215onCh27_A2atagged','unit217onCh27_A2atagged','unit227onCh30_A2atagged','unit233onCh30_A2atagged'};
 % plotSU_contextAndOutcome('Z:\MICROSCOPE\Kim\WHISPER recs\Mar_1\20210803\SU aligned to behavior',failure_off);
 
-pause;
+% pause;
 
 plotByCuez(cued_success_Response,cuez,groupLabelsFromTCA);
 plotByCuez(cued_failure_Response,cuez,groupLabelsFromTCA);
 plotByCuez(uncued_success_Response,cuez,groupLabelsFromTCA);
 plotByCuez(uncued_failure_Response,cuez,groupLabelsFromTCA);
+
+end
+
+function plotOverlayedResponses(out)
+
+figure();
+plot(out.response1.t,out.response1.me,'Color','k'); hold on; 
+plot(out.response1.t,out.response1.plusSe,'Color','k'); plot(out.response1.t,out.response1.minusSe,'Color','k');
+plot(out.response2.t,out.response2.me,'Color','r'); hold on; 
+plot(out.response2.t,out.response2.plusSe,'Color','r'); plot(out.response2.t,out.response2.minusSe,'Color','r');
 
 end
 
