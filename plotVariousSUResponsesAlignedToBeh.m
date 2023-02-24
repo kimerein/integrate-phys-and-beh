@@ -965,6 +965,7 @@ if rmOutliers==true
     disp(['removed ' num2str(sum(Tfrm)) ' outliers']);
 end
 temp=activityD1tagged.unitbyunit_y;
+out.unitbyunit=activityD1tagged.unitbyunit_y;
 for i=1:size(temp,1)
 %     temp(i,:)=smoothdata(temp(i,:),'gaussian',2);
 %     temp(i,:)=smoothdata(temp(i,:),'gaussian',10);
@@ -992,7 +993,7 @@ if any(isnan(timesD1))
     timesD1=fillmissing(timesD1,'linear');
 end
 out.unittimes=timesD1;
-out.unitbyunit=activityD1tagged.unitbyunit_y;
+
 if suppressPlots~=1
     if size(activityD1tagged.unitbyunit_y,1)>100
         % skip unit by unit plot because too crowded

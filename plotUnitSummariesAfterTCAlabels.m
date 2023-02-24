@@ -1,5 +1,9 @@
 function plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response)
 
+% for cue tuned plots
+basesubtract=false;
+basetimewindow=[-3 -2];
+
 ds=6;
 cued_success_Response.idx=groupLabelsFromTCA; exclu=cued_success_Response.excluded;
 sub1=subResponse(cued_success_Response,'idx',1); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=1))=0; sub2=subResponse(cued_success_Response,'idx',2); f=find(exclu~=0); sub2.excluded(f(groupLabelsFromTCA~=1))=0;
@@ -27,12 +31,12 @@ ds=1;
 smoo=42;
 % cuezbins=-2:0.5:3;
 % cuezbins(1)=-2.0001; cuezbins(end)=3.0001;
-cuezbins=prctile(cuez,0:10:100);
+cuezbins=prctile(cuez,0:5:100);
 cuezbins(1)=cuezbins(1)-0.0001; cuezbins(end)=cuezbins(end)+0.0001; 
-plotByCuez(cued_success_Response,cuez,groupLabelsFromTCA,'cued success',ds,smoo,'jet',cuezbins); 
-plotByCuez(cued_failure_Response,cuez,groupLabelsFromTCA,'cued failure',ds,smoo,'jet',cuezbins);
-plotByCuez(uncued_success_Response,cuez,groupLabelsFromTCA,'uncued success',ds,smoo,'jet',cuezbins);
-plotByCuez(uncued_failure_Response,cuez,groupLabelsFromTCA,'uncued failure',ds,smoo,'jet',cuezbins);
+plotByCuez(cued_success_Response,cuez,groupLabelsFromTCA,'cued success',ds,smoo,'jet',cuezbins,basesubtract,basetimewindow); 
+plotByCuez(cued_failure_Response,cuez,groupLabelsFromTCA,'cued failure',ds,smoo,'jet',cuezbins,basesubtract,basetimewindow);
+plotByCuez(uncued_success_Response,cuez,groupLabelsFromTCA,'uncued success',ds,smoo,'jet',cuezbins,basesubtract,basetimewindow);
+plotByCuez(uncued_failure_Response,cuez,groupLabelsFromTCA,'uncued failure',ds,smoo,'jet',cuezbins,basesubtract,basetimewindow);
 
 end
 
@@ -46,7 +50,7 @@ plot(out.response2.t,out.response2.plusSe,'Color',c2); plot(out.response2.t,out.
 
 end
 
-function plotByCuez(cued_success_Response,cuez,groupLabelsFromTCA,addToTit,ds,smoo,cmapname,cuezbins)
+function plotByCuez(cued_success_Response,cuez,groupLabelsFromTCA,addToTit,ds,smoo,cmapname,cuezbins,basesubtract,basetimewindow)
 
 temp=cued_success_Response;
 bycuez=cell(length(cuezbins)-1,1);
@@ -59,6 +63,9 @@ for i=1:length(cuezbins)-1
     out=plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',sub1,ds,true);
     if ~isempty(smoo)
         out.me=smoothdata(out.me,'gaussian',smoo); out.plusSe=smoothdata(out.plusSe,'gaussian',smoo); out.minusSe=smoothdata(out.minusSe,'gaussian',smoo); 
+    end
+    if basesubtract==true
+        out.me=out.me-nanmean(out.me(out.t>=basetimewindow(1) & out.t<=basetimewindow(2)));
     end
     bycuez{i}=out.me;
     time{i}=out.t;
@@ -85,6 +92,9 @@ for i=1:length(cuezbins)-1
     out=plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',sub1,ds,true);
     if ~isempty(smoo)
         out.me=smoothdata(out.me,'gaussian',smoo); out.plusSe=smoothdata(out.plusSe,'gaussian',smoo); out.minusSe=smoothdata(out.minusSe,'gaussian',smoo); 
+    end
+    if basesubtract==true
+        out.me=out.me-nanmean(out.me(out.t>=basetimewindow(1) & out.t<=basetimewindow(2)));
     end
     bycuez{i}=out.me;
     time{i}=out.t;

@@ -359,7 +359,7 @@ figure(); histogram(photolocs,25);
 
 %% 4. Make figures -- about 6 min to load 84 sessions of unit data
 % choose type of response to plot
-response_to_plot='cued_pelletMissing'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+response_to_plot='cued_reach'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 
 % doUnitTest.m is used to test whether to include unit in this plot
 % will include unit if unitdets match the following
@@ -664,12 +664,12 @@ boot=1; % num iterations for bootstrap
 % hold on; plot(nanmean(cued_success_Response.aligncomp_x,1),nanmean(cued_success_Response.aligncomp_y(idx==2 & cuedcellresponse<0,:),1),'Color','c'); title('success uncued');
 
 %% Plot unit summaries according to groupLabelsFromTCA
-if ~exist('cuez','var')
-    temp=normalizeDataMatrix(newDataMatrix,[2 3],'sd'); cuez=reshape(max(temp(:,1:150,1),[],2,'omitnan'),size(newDataMatrix,1),1);
-    cuez=log(cuez); cuez(cuez<-2)=-2; figure(); histogram(cuez,200); 
-
-    
-end
+% if ~exist('cuez','var')
+%     temp=normalizeDataMatrix(newDataMatrix,[2 3],'sd'); cuez=reshape(max(temp(:,1:150,1),[],2,'omitnan'),size(newDataMatrix,1),1);
+%     cuez=log(cuez); cuez(cuez<-2)=-2; figure(); histogram(cuez,200); 
+% end
+a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\uncued_reach.mat'); uncuedReach_Response=a.Response;  
+cuez=getCueTunedUnits(cue_Response,uncuedReach_Response,'cue_vs_baseline','max'); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline'
 plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response);
 
 %% colormaps
