@@ -34,7 +34,12 @@ switch varargin{1}
         % do not need to process anything
     case 'meanAcrossUnits'
         downSampFac=varargin{3};
-        out=meanAcrossUnits(Response,downSampFac);
+        if length(varargin)==4
+            suppressPlots=varargin{4};
+        else
+            suppressPlots=false;
+        end
+        out=meanAcrossUnits(Response,downSampFac,suppressPlots);
     case 'scatterInTimeWindows'
         timeWindow1=varargin{3};
         timeWindow2=varargin{4};
@@ -943,7 +948,7 @@ end
 
 end
 
-function out=meanAcrossUnits(activityD1tagged,downSampFac)
+function out=meanAcrossUnits(activityD1tagged,downSampFac,suppressPlots)
 
 rmOutliers=false;
 if rmOutliers==true
@@ -958,15 +963,17 @@ for i=1:size(temp,1)
 end
 activityD1tagged.unitbyunit_y=temp;
 
-if size(activityD1tagged.unitbyunit_y,1)>1000
-    % skip unit by unit plot because too crowded
-else
-    figure();
-    plot(nanmean(activityD1tagged.unitbyunit_x,1),activityD1tagged.unitbyunit_y');
-    hold on; plot(nanmean(activityD1tagged.aligncomp_x,1),nanmean(activityD1tagged.aligncomp_y,1).*max(activityD1tagged.unitbyunit_y,[],'all','omitnan'),'Color','b');
-    xlabel('Time (sec)');
-    ylabel('Firing rate');
-    title('With raw times');
+if suppressPlots~=false
+    if size(activityD1tagged.unitbyunit_y,1)>1000
+        % skip unit by unit plot because too crowded
+    else
+        figure();
+        plot(nanmean(activityD1tagged.unitbyunit_x,1),activityD1tagged.unitbyunit_y');
+        hold on; plot(nanmean(activityD1tagged.aligncomp_x,1),nanmean(activityD1tagged.aligncomp_y,1).*max(activityD1tagged.unitbyunit_y,[],'all','omitnan'),'Color','b');
+        xlabel('Time (sec)');
+        ylabel('Firing rate');
+        title('With raw times');
+    end
 end
 
 temp=nanmean(activityD1tagged.aligncomp_x,1);
@@ -975,40 +982,44 @@ timesD1=nanmean(activityD1tagged.unitbyunit_x,1)-temp(f);
 if any(isnan(timesD1))
     timesD1=fillmissing(timesD1,'linear');
 end
-if size(activityD1tagged.unitbyunit_y,1)>100
-    % skip unit by unit plot because too crowded
-else
-    figure(); plot(timesD1,activityD1tagged.unitbyunit_y');
+if suppressPlots~=false
+    if size(activityD1tagged.unitbyunit_y,1)>100
+        % skip unit by unit plot because too crowded
+    else
+        figure(); plot(timesD1,activityD1tagged.unitbyunit_y');
+        title('Align companion at time=0');
+        xlabel('Time (sec)');
+        ylabel('Firing rate');
+    end
+end
+
+if suppressPlots~=false
+    figure();
+    unitoffset=0;
+    for i=1:size(activityD1tagged.unitbyunit_y,1)
+        plot(timesD1,activityD1tagged.unitbyunit_y(i,:)+unitoffset,'Color','k'); hold on;
+        uptooo=200;
+        if uptooo>size(activityD1tagged.unitbyunit_y,2)
+            uptooo=size(activityD1tagged.unitbyunit_y,2);
+        end
+        if isnan(max(activityD1tagged.unitbyunit_y(i,1:uptooo),[],'all','omitnan'))
+            continue
+        end
+        unitoffset=unitoffset+max(activityD1tagged.unitbyunit_y(i,1:uptooo),[],'all','omitnan');
+    end
     title('Align companion at time=0');
     xlabel('Time (sec)');
     ylabel('Firing rate');
 end
 
-figure();
-unitoffset=0;
-for i=1:size(activityD1tagged.unitbyunit_y,1)
-    plot(timesD1,activityD1tagged.unitbyunit_y(i,:)+unitoffset,'Color','k'); hold on;
-    uptooo=200; 
-    if uptooo>size(activityD1tagged.unitbyunit_y,2)
-        uptooo=size(activityD1tagged.unitbyunit_y,2);
-    end
-    if isnan(max(activityD1tagged.unitbyunit_y(i,1:uptooo),[],'all','omitnan'))
-        continue
-    end
-    unitoffset=unitoffset+max(activityD1tagged.unitbyunit_y(i,1:uptooo),[],'all','omitnan');
-end
-title('Align companion at time=0');
-xlabel('Time (sec)');
-ylabel('Firing rate');
-
-[out.me,out.plusSe,out.minusSe,out.t]=plotMeanAndSE(downSampMatrix(activityD1tagged.unitbyunit_y,downSampFac),'k',downSampAv(timesD1,downSampFac));
+[out.me,out.plusSe,out.minusSe,out.t]=plotMeanAndSE(downSampMatrix(activityD1tagged.unitbyunit_y,downSampFac),'k',downSampAv(timesD1,downSampFac),suppressPlots);
 title('Mean and se across units');
 xlabel('Time (sec)');
 ylabel('Firing rate');
 
 end
 
-function [me,plusSe,minusSe,t]=plotMeanAndSE(data1,color1,timeBins)
+function [me,plusSe,minusSe,t]=plotMeanAndSE(data1,color1,timeBins,suppressPlots)
 
 plotAsCityscape=false;
 
@@ -1020,19 +1031,27 @@ data1_se=std(data1,0,1,'omitnan')./sqrt(size(data1,1));
 figure();
 if plotAsCityscape==true
     [n,x]=cityscape_hist(data1_mean,timeBins);
-    plot(x,n,'Color',color1); hold on;
+    if suppressPlots~=false
+        plot(x,n,'Color',color1); hold on;
+    end
     t=x;
     me=n;
     [n,x]=cityscape_hist(data1_mean+data1_se,timeBins);
-    plot(x,n,'Color',color1);
+    if suppressPlots~=false
+        plot(x,n,'Color',color1);
+    end
     plusSe=n;
     [n,x]=cityscape_hist(data1_mean-data1_se,timeBins);
-    plot(x,n,'Color',color1);
+    if suppressPlots~=false
+        plot(x,n,'Color',color1);
+    end
     minusSe=n;
 else
-    plot(timeBins,data1_mean,'Color',color1); hold on;
-    plot(timeBins,data1_mean+data1_se,'Color',color1);
-    plot(timeBins,data1_mean-data1_se,'Color',color1);
+    if suppressPlots~=false
+        plot(timeBins,data1_mean,'Color',color1); hold on;
+        plot(timeBins,data1_mean+data1_se,'Color',color1);
+        plot(timeBins,data1_mean-data1_se,'Color',color1);
+    end
     t=timeBins;
     me=data1_mean;
     plusSe=data1_mean+data1_se;

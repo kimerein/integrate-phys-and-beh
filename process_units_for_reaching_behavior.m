@@ -641,7 +641,7 @@ end
 % CCA: Find orthogonal dimensions of max covariance between X=[] and Y=[]
 plotN=6;
 boot=1; % num iterations for bootstrap
-groupLabelsFromTCA=principaledCA(newDataMatrix,{'units','time','conditions'},plotN,boot);
+[groupLabelsFromTCA,cuez]=principaledCA(newDataMatrix,{'units','time','conditions'},plotN,boot);
 
 % zscore_cueR=cue_Response.unitbyunit_y; zscore_cueR(zscore_cueR<0.0001)=0;
 % zscore_cueR=(zscore_cueR)./repmat(std(zscore_cueR(:,500:1000),[],2,'omitnan'),1,size(zscore_cueR,2));
@@ -664,18 +664,11 @@ groupLabelsFromTCA=principaledCA(newDataMatrix,{'units','time','conditions'},plo
 % hold on; plot(nanmean(cued_success_Response.aligncomp_x,1),nanmean(cued_success_Response.aligncomp_y(idx==2 & cuedcellresponse<0,:),1),'Color','c'); title('success uncued');
 
 %% Plot unit summaries according to groupLabelsFromTCA
-cued_success_Response.idx=groupLabelsFromTCA; exclu=cued_success_Response.excluded;
-sub1=subResponse(cued_success_Response,'idx',1); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=1))=0; sub2=subResponse(cued_success_Response,'idx',2); f=find(exclu~=0); sub2.excluded(f(groupLabelsFromTCA~=1))=0;
-plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',sub1,sub2,'meanAcrossUnits',1); title('Cued success');
-cued_failure_Response.idx=groupLabelsFromTCA; exclu=cued_failure_Response.excluded;
-sub1=subResponse(cued_failure_Response,'idx',1); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=1))=0; sub2=subResponse(cued_failure_Response,'idx',2); f=find(exclu~=0); sub2.excluded(f(groupLabelsFromTCA~=1))=0;
-plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',sub1,sub2,'meanAcrossUnits',1); title('Cued failure');
-uncued_success_Response.idx=groupLabelsFromTCA; exclu=uncued_success_Response.excluded;
-sub1=subResponse(uncued_success_Response,'idx',1); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=1))=0; sub2=subResponse(uncued_success_Response,'idx',2); f=find(exclu~=0); sub2.excluded(f(groupLabelsFromTCA~=1))=0;
-plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',sub1,sub2,'meanAcrossUnits',1); title('Uncued success');
-uncued_failure_Response.idx=groupLabelsFromTCA; exclu=uncued_failure_Response.excluded;
-sub1=subResponse(uncued_failure_Response,'idx',1); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=1))=0; sub2=subResponse(uncued_failure_Response,'idx',2); f=find(exclu~=0); sub2.excluded(f(groupLabelsFromTCA~=1))=0;
-plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',sub1,sub2,'meanAcrossUnits',1); title('Uncued failure');
+if ~exist('cuez','var')
+    temp=normalizeDataMatrix(newDataMatrix,[2 3],'sd'); cuez=reshape(max(temp(:,1:150,1),[],2,'omitnan'),size(newDataMatrix,1),1);
+    cuez=log(cuez); cuez(cuez<-2)=-2; figure(); histogram(cuez,200); 
+end
+plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response);
 
 %% colormaps
 % SUCCESS V FAILURE 

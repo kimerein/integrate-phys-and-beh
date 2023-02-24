@@ -1,4 +1,4 @@
-function idx=principaledCA(data,dimensionNames,plotN,bootstrapNTimes)
+function [idx,out_cueresponse]=principaledCA(data,dimensionNames,plotN,bootstrapNTimes)
 
 if all(strcmp(dimensionNames,{'units','time','conditions'}))
     disp('Studying units X time X conditions');
@@ -94,6 +94,7 @@ figure(); scatter(tsnetemp(D1tag==1,1),tsnetemp(D1tag==1,2),[],repmat(cmap(1,:),
 scatter(tsnetemp(A2atag==1,1),tsnetemp(A2atag==1,2),[],repmat(cmap(100,:),nansum(A2atag==1),1));
 tempiedata=normalizeData(backupdata,[2 3],'sd'); currcuescore=reshape(max(tempiedata(:,1:150,1),[],2,'omitnan'),size(backupdata,1),1);
 currcuescore=log(currcuescore); currcuescore(currcuescore<-2)=-2; figure(); histogram(currcuescore,200); 
+out_cueresponse=currcuescore;
 cuecolsfortsne=currcuescore-min(currcuescore,[],'all','omitnan'); cuecolsfortsne=cuecolsfortsne./max(cuecolsfortsne,[],'all','omitnan'); cuecolsfortsne=cuecolsfortsne*255;
 cuecolsfortsne=ceil(cuecolsfortsne); cuecolsfortsne(cuecolsfortsne==0)=1; dontshow(isnan(cuecolsfortsne))=true;  cuecolsfortsne(isnan(cuecolsfortsne))=1;
 cmap=colormap('jet');
