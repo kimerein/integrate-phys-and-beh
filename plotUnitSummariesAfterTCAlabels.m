@@ -3,9 +3,25 @@ function plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Re
 % for cue tuned plots
 basesubtract=false;
 basetimewindow=[-3 -2];
-Zscore=false; % no because miss cued success activity for grp 2
+
+% plot all SU
+cuezbins=prctile(cuez,0:10:100); 
+plotAll=true;
+Zscore=false;
+minmaxnorm=true;
+smoo=3; %smoo=3; %smoo=42;
+
+% else plotBinRange
+% cuezbins=prctile(cuez,[0 20 40 60 70 80 82 84 86 88 90 91 92 93 95 97 100]);
+% plotAll=false;
+% Zscore=false; % no because miss cued success activity for grp 2
+% smoo=6;
+
 getResiduals=true; % but need this to get rid of mid-range
 smoothBeforeResids=true;
+
+
+
 
 ds=6;
 cued_success_Response.idx=groupLabelsFromTCA; exclu=cued_success_Response.excluded;
@@ -39,21 +55,39 @@ end
 
 if Zscore==true
     [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=ZscoreResponses(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response);
+elseif minmaxnorm==true
+    [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=maxNorm(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response);
 end
 
-
-smoo=6;
 % cuezbins=-2:0.5:3;
 % cuezbins(1)=-2.0001; cuezbins(end)=3.0001;
 % cuezbins=prctile(cuez,0:10:100);
 % cuezbins=prctile(cuez,[0 10 20 30 40 50 60 70 75 80 85 87.5 90 92.5 95 97.5 100]);
-cuezbins=prctile(cuez,[0 20 40 60 70 80 90 92 93 95 97 100]);
+% cuezbins=prctile(cuez,[0 20 40 60 70 80 82 84 86 88 90 91 92 93 95 97 100]);
 cuezbins(1)=cuezbins(1)-0.0001; cuezbins(end)=cuezbins(end)+0.0001; 
-plotByCuez(cued_success_Response,cuez,groupLabelsFromTCA,'cued success',ds,smoo,'jet',cuezbins,basesubtract,basetimewindow); 
-plotByCuez(cued_failure_Response,cuez,groupLabelsFromTCA,'cued failure',ds,smoo,'jet',cuezbins,basesubtract,basetimewindow);
-plotByCuez(uncued_success_Response,cuez,groupLabelsFromTCA,'uncued success',ds,smoo,'jet',cuezbins,basesubtract,basetimewindow);
-plotByCuez(uncued_failure_Response,cuez,groupLabelsFromTCA,'uncued failure',ds,smoo,'jet',cuezbins,basesubtract,basetimewindow);
+plotByCuez(cued_success_Response,cuez,groupLabelsFromTCA,'cued success',ds,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll); 
+plotByCuez(cued_failure_Response,cuez,groupLabelsFromTCA,'cued failure',ds,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
+plotByCuez(uncued_success_Response,cuez,groupLabelsFromTCA,'uncued success',ds,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
+plotByCuez(uncued_failure_Response,cuez,groupLabelsFromTCA,'uncued failure',ds,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
 
+end
+
+function [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=maxNorm(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response)
+
+minmaxwindow=[-2 5]; % in sec wrt cue
+[cuetime,t]=getCueTimeForThisResponse(cued_success_Response);
+cued_success_Response.unitbyunit_y(cued_success_Response.unitbyunit_y<0.001)=0;
+cued_success_Response.unitbyunit_y=cued_success_Response.unitbyunit_y./repmat(max(cued_success_Response.unitbyunit_y(:,t>minmaxwindow(1) & t<minmaxwindow(2)),[],2,'omitnan'),1,size(cued_success_Response.unitbyunit_y,2));
+[cuetime,t]=getCueTimeForThisResponse(cued_failure_Response);
+cued_failure_Response.unitbyunit_y(cued_failure_Response.unitbyunit_y<0.001)=0;
+cued_failure_Response.unitbyunit_y=cued_failure_Response.unitbyunit_y./repmat(max(cued_failure_Response.unitbyunit_y(:,t>minmaxwindow(1) & t<minmaxwindow(2)),[],2,'omitnan'),1,size(cued_failure_Response.unitbyunit_y,2));
+[cuetime,t]=getCueTimeForThisResponse(uncued_success_Response);
+uncued_success_Response.unitbyunit_y(uncued_success_Response.unitbyunit_y<0.001)=0;
+uncued_success_Response.unitbyunit_y=uncued_success_Response.unitbyunit_y./repmat(max(uncued_success_Response.unitbyunit_y(:,t>minmaxwindow(1) & t<minmaxwindow(2)),[],2,'omitnan'),1,size(uncued_success_Response.unitbyunit_y,2));
+[cuetime,t]=getCueTimeForThisResponse(uncued_failure_Response);
+uncued_failure_Response.unitbyunit_y(uncued_failure_Response.unitbyunit_y<0.001)=0;
+uncued_failure_Response.unitbyunit_y=uncued_failure_Response.unitbyunit_y./repmat(max(uncued_failure_Response.unitbyunit_y(:,t>minmaxwindow(1) & t<minmaxwindow(2)),[],2,'omitnan'),1,size(uncued_failure_Response.unitbyunit_y,2));
+      
 end
 
 function [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=smoothResponses(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,smoo)
@@ -168,7 +202,10 @@ plot(out.response2.t,out.response2.plusSe,'Color',c2); plot(out.response2.t,out.
 
 end
 
-function plotByCuez(cued_success_Response,cuez,groupLabelsFromTCA,addToTit,ds,smoo,cmapname,cuezbins,basesubtract,basetimewindow,plotLog)
+function plotByCuez(cued_success_Response,cuez,groupLabelsFromTCA,addToTit,ds,smoo,cmapname,cuezbins,basesubtract,basetimewindow,plotAll)
+
+alph=0.8;
+plotBackwards=false;
 
 temp=cued_success_Response;
 bycuez=cell(length(cuezbins)-1,1);
@@ -181,12 +218,22 @@ for i=1:length(cuezbins)-1
     out=plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',sub1,ds,true);
     if ~isempty(smoo)
         out.me=smoothdata(out.me,'gaussian',smoo); out.plusSe=smoothdata(out.plusSe,'gaussian',smoo); out.minusSe=smoothdata(out.minusSe,'gaussian',smoo); 
+        if plotAll==true
+            for j=1:size(out.unitbyunit,1)
+                out.unitbyunit(j,:)=smoothdata(out.unitbyunit(j,:),'gaussian',smoo);
+            end
+        end
     end
     if basesubtract==true
         out.me=out.me-nanmean(out.me(out.t>=basetimewindow(1) & out.t<=basetimewindow(2)));
     end
-    bycuez{i}=out.me;
-    time{i}=out.t;
+    if plotAll==true
+        bycuez{i}=out.unitbyunit;
+        time{i}=out.unittimes;
+    else
+        bycuez{i}=out.me;
+        time{i}=out.t;
+    end
 end
 figure();
 if strcmp(cmapname,'jet')
@@ -195,8 +242,26 @@ else
     cmap=colormap(brewermap((length(cuezbins)-1)*2,cmap));
     cmap=cmap(length(cuezbins):end,:);
 end
-for i=1:length(cuezbins)-1
-    plot(time{i},bycuez{i},'Color',cmap(i,:)); hold on;
+if plotBackwards==true
+    for i=length(cuezbins)-1:-1:1
+        h=plot(time{i},bycuez{i},'Color',cmap(i,:)); hold on;
+        if plotAll==true
+            % h = findobj(gca,'Type','line');
+            for j=1:length(h)
+                h(j).Color=[cmap(i,:),alph];
+            end
+        end
+    end
+else
+    for i=1:length(cuezbins)-1
+        h=plot(time{i},bycuez{i},'Color',cmap(i,:)); hold on;
+        if plotAll==true
+            % h = findobj(gca,'Type','line');
+            for j=1:length(h)
+                h(j).Color=[cmap(i,:),alph];
+            end
+        end
+    end
 end
 title(['groupLabel is 1 ' addToTit]);
 
@@ -210,12 +275,22 @@ for i=1:length(cuezbins)-1
     out=plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',sub1,ds,true);
     if ~isempty(smoo)
         out.me=smoothdata(out.me,'gaussian',smoo); out.plusSe=smoothdata(out.plusSe,'gaussian',smoo); out.minusSe=smoothdata(out.minusSe,'gaussian',smoo); 
+        if plotAll==true
+            for j=1:size(out.unitbyunit,1)
+                out.unitbyunit(j,:)=smoothdata(out.unitbyunit(j,:),'gaussian',smoo);
+            end
+        end
     end
     if basesubtract==true
         out.me=out.me-nanmean(out.me(out.t>=basetimewindow(1) & out.t<=basetimewindow(2)));
     end
-    bycuez{i}=out.me;
-    time{i}=out.t;
+    if plotAll==true
+        bycuez{i}=out.unitbyunit;
+        time{i}=out.unittimes;
+    else
+        bycuez{i}=out.me;
+        time{i}=out.t;
+    end
 end
 figure();
 if strcmp(cmapname,'jet')
@@ -224,8 +299,27 @@ else
     cmap=colormap(brewermap((length(cuezbins)-1)*2,cmap));
     cmap=cmap(length(cuezbins):end,:);
 end
-for i=1:length(cuezbins)-1
-    plot(time{i},bycuez{i},'Color',cmap(i,:)); hold on;
+if plotBackwards==true
+    for i=length(cuezbins)-1:-1:1
+        h=plot(time{i},bycuez{i},'Color',cmap(i,:)); hold on;
+        if plotAll==true
+            % h = findobj(gca,'Type','line');
+            for j=1:length(h)
+                h(j).Color=[cmap(i,:),alph];
+            end
+        end
+    end
+else
+    for i=1:length(cuezbins)-1
+        h=plot(time{i},bycuez{i},'Color',cmap(i,:)); hold on;
+        if plotAll==true
+            % h = findobj(gca,'Type','line');
+            for j=1:length(h)
+                h(j).Color=[cmap(i,:),alph];
+            end
+        end
+        hold on;
+    end
 end
 title(['groupLabel is 2 ' addToTit]);
 
