@@ -4,7 +4,7 @@ ds=1;
 smoo=100; %100; %80; %42; % NOTHING ABOVE 100 BCZ WILL SMEAR IN OPTO RESPONSE
 Zscore=true;
 cuebaserange=[-3 -2]; %[-0.75 -0.54];
-cueonrange=[-0.25 1.25]; %[-0.25 0.8];
+cueonrange=[-0.25 1.75]; %[-0.25 0.8];
 reachbaserange=[-3 -2];
 reachonrange=[-1.5 0];
 
