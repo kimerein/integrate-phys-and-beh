@@ -2,11 +2,13 @@ function analyzeProbabilityOfOnAfterOutcome(dd, timeWindow, success_Response, fa
 
 % timeWindow is in seconds wrt peak of aligncomp
 
+nBoots=100;
+
 %aboveBaseHz=baseFiringRate*(timeWindow(2)-timeWindow(1));
 
 if isempty(success_Response)
     % choose type of response to plot
-    response_to_plot='all_success'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+    response_to_plot='cued_success'; %'all_success'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
     % [inStructure isFS isTAN isSPN isLowFRThin]
     plotUnitCriteria=[1 0 0 1 0]; % -100 is a wildcard, else 0 (false) and 1 (true)
     getCriteriaForUnitsToPlot(plotUnitCriteria);
@@ -23,7 +25,7 @@ if isempty(success_Response)
 end
 if isempty(failure_Response)
     % choose type of response to plot
-    response_to_plot='all_drop'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+    response_to_plot='uncued_success'; %'all_drop'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
     % read in some units
     dd_more=cell(1,length(dd));
     for i=1:length(dd)
@@ -100,6 +102,9 @@ hold on; plot(x,n,'Color','k'); xlim([-maxdp maxdp]);
 % sig from how many sess
 disp(['sig units from ' num2str(length(unique(success_Response.fromWhichSess(isSig)))) ' out of ' num2str(length(unique(success_Response.fromWhichSess))) ' sessions']);
 
+[fr_success_unitbyunit,fr_failure_unitbyunit]=getFROfResponse(units,unitfr_success,unitfr_failure,fromWhichUnit_success,fromWhichUnit_failure);
+figure(); scatter(fr_success_unitbyunit(~isSig)./200,fr_failure_unitbyunit(~isSig)./200); hold on; scatter(fr_success_unitbyunit(isSig)./200,fr_failure_unitbyunit(isSig)./200,[],'filled');
+xlabel('p success'); ylabel('p failure');
 
 % get change in unit probability 
 % sigs and plots
@@ -477,6 +482,18 @@ end
 out2point5=mean(perc2point5,2,'omitnan');
 out97point5=mean(perc97point5,2,'omitnan');
 outbinmids=mean(binmids,2,'omitnan');
+
+end
+
+function [fr_success_unitbyunit,fr_failure_unitbyunit]=getFROfResponse(units,unitfr_success,unitfr_failure,fromWhichUnit_success,fromWhichUnit_failure)
+
+fr_success_unitbyunit=nan(length(units),1);
+fr_failure_unitbyunit=nan(length(units),1);
+disp([num2str(length(units)) ' units']);
+for i=1:length(units)
+    fr_success_unitbyunit(i)=nanmean(unitfr_success(fromWhichUnit_success==units(i)));
+    fr_failure_unitbyunit(i)=nanmean(unitfr_failure(fromWhichUnit_failure==units(i)));
+end
 
 end
 

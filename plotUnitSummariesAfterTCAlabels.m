@@ -1,4 +1,4 @@
-function plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response)
+function plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,isSig)
 
 % for cue tuned plots
 basesubtract=false;
@@ -6,10 +6,14 @@ basetimewindow=[-3 -2];
 
 % plot all SU
 cuezbins=prctile(cuez,0:10:100); 
-plotAll=true;
+plotAll=false;
 Zscore=false;
 minmaxnorm=true;
 smoo=3; %smoo=3; %smoo=42;
+
+if isempty(isSig)
+    isSig=ones(size(groupLabelsFromTCA));
+end
 
 % else plotBinRange
 % cuezbins=prctile(cuez,[0 20 40 60 70 80 82 84 86 88 90 91 92 93 95 97 100]);
@@ -24,17 +28,17 @@ smoothBeforeResids=true;
 
 
 ds=6;
-cued_success_Response.idx=groupLabelsFromTCA; exclu=cued_success_Response.excluded;
-sub1=subResponse(cued_success_Response,'idx',1); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=1))=0; sub2=subResponse(cued_success_Response,'idx',2); f=find(exclu~=0); sub2.excluded(f(groupLabelsFromTCA~=1))=0;
+cued_success_Response.idx=groupLabelsFromTCA; exclu=cued_success_Response.excluded; gpLab=1;
+sub1=subResponse(cued_success_Response,'idx',gpLab); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=gpLab))=0; gpLab=2; sub2=subResponse(cued_success_Response,'idx',gpLab); f=find(exclu~=0); sub2.excluded(f(groupLabelsFromTCA~=gpLab))=0;
 outCuedSucc=plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',sub1,sub2,'meanAcrossUnits',ds,true); plotOverlayedResponses(outCuedSucc,'k','r'); title('Cued success');
-cued_failure_Response.idx=groupLabelsFromTCA; exclu=cued_failure_Response.excluded;
-sub1=subResponse(cued_failure_Response,'idx',1); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=1))=0; sub2=subResponse(cued_failure_Response,'idx',2); f=find(exclu~=0); sub2.excluded(f(groupLabelsFromTCA~=1))=0;
+cued_failure_Response.idx=groupLabelsFromTCA; exclu=cued_failure_Response.excluded; gpLab=1;
+sub1=subResponse(cued_failure_Response,'idx',gpLab); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=gpLab))=0; gpLab=2; sub2=subResponse(cued_failure_Response,'idx',gpLab); f=find(exclu~=0); sub2.excluded(f(groupLabelsFromTCA~=gpLab))=0;
 outCuedFail=plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',sub1,sub2,'meanAcrossUnits',ds,true); plotOverlayedResponses(outCuedFail,'k','r'); title('Cued failure');
-uncued_success_Response.idx=groupLabelsFromTCA; exclu=uncued_success_Response.excluded;
-sub1=subResponse(uncued_success_Response,'idx',1); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=1))=0; sub2=subResponse(uncued_success_Response,'idx',2); f=find(exclu~=0); sub2.excluded(f(groupLabelsFromTCA~=1))=0;
+uncued_success_Response.idx=groupLabelsFromTCA; exclu=uncued_success_Response.excluded; gpLab=1;
+sub1=subResponse(uncued_success_Response,'idx',gpLab); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=gpLab))=0; gpLab=2; sub2=subResponse(uncued_success_Response,'idx',gpLab); f=find(exclu~=0); sub2.excluded(f(groupLabelsFromTCA~=gpLab))=0;
 outUncuedSucc=plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',sub1,sub2,'meanAcrossUnits',ds,true); plotOverlayedResponses(outUncuedSucc,'k','r'); title('Uncued success');
-uncued_failure_Response.idx=groupLabelsFromTCA; exclu=uncued_failure_Response.excluded;
-sub1=subResponse(uncued_failure_Response,'idx',1); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=1))=0; sub2=subResponse(uncued_failure_Response,'idx',2); f=find(exclu~=0); sub2.excluded(f(groupLabelsFromTCA~=1))=0;
+uncued_failure_Response.idx=groupLabelsFromTCA; exclu=uncued_failure_Response.excluded; gpLab=1;
+sub1=subResponse(uncued_failure_Response,'idx',gpLab); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=gpLab))=0; gpLab=2; sub2=subResponse(uncued_failure_Response,'idx',gpLab); f=find(exclu~=0); sub2.excluded(f(groupLabelsFromTCA~=gpLab))=0;
 outUncuedFail=plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',sub1,sub2,'meanAcrossUnits',ds,true); plotOverlayedResponses(outUncuedFail,'k','r'); title('Uncued failure');
 
 r.response1=outCuedSucc.response1; r.response2=outCuedFail.response1; plotOverlayedResponses(r,'g','r'); title('Cued grp 1');
@@ -210,11 +214,12 @@ plotBackwards=false;
 temp=cued_success_Response;
 bycuez=cell(length(cuezbins)-1,1);
 time=cell(length(cuezbins)-1,1);
+gpLab=1;
 for i=1:length(cuezbins)-1
     temp.idx=groupLabelsFromTCA; exclu=temp.excluded;
     incuezrange=cuez>cuezbins(i) & cuez<=cuezbins(i+1);
-    sub1=subResponse(temp,'idx',1); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=1))=0;
-    sub1.incuezrange=incuezrange(temp.idx==1); sub1=subResponse(sub1,'incuezrange',1); f=find(exclu~=0); sub1.excluded(f(incuezrange~=1))=0;
+    sub1=subResponse(temp,'idx',gpLab); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=gpLab))=0;
+    sub1.incuezrange=incuezrange(temp.idx==gpLab); sub1=subResponse(sub1,'incuezrange',1); f=find(exclu~=0); sub1.excluded(f(incuezrange~=1))=0;
     out=plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',sub1,ds,true);
     if ~isempty(smoo)
         out.me=smoothdata(out.me,'gaussian',smoo); out.plusSe=smoothdata(out.plusSe,'gaussian',smoo); out.minusSe=smoothdata(out.minusSe,'gaussian',smoo); 
@@ -267,11 +272,12 @@ title(['groupLabel is 1 ' addToTit]);
 
 temp=cued_success_Response;
 bycuez=cell(length(cuezbins)-1,1);
+gpLab=2;
 for i=1:length(cuezbins)-1
     temp.idx=groupLabelsFromTCA; exclu=temp.excluded;
     incuezrange=cuez>cuezbins(i) & cuez<=cuezbins(i+1);
-    sub1=subResponse(temp,'idx',2); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=2))=0;
-    sub1.incuezrange=incuezrange(temp.idx==2); sub1=subResponse(sub1,'incuezrange',1); f=find(exclu~=0); sub1.excluded(f(incuezrange~=1))=0;
+    sub1=subResponse(temp,'idx',gpLab); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=gpLab))=0;
+    sub1.incuezrange=incuezrange(temp.idx==gpLab); sub1=subResponse(sub1,'incuezrange',1); f=find(exclu~=0); sub1.excluded(f(incuezrange~=1))=0;
     out=plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',sub1,ds,true);
     if ~isempty(smoo)
         out.me=smoothdata(out.me,'gaussian',smoo); out.plusSe=smoothdata(out.plusSe,'gaussian',smoo); out.minusSe=smoothdata(out.minusSe,'gaussian',smoo); 
