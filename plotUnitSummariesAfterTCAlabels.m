@@ -3,8 +3,8 @@ function plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Re
 % for cue tuned plots
 basesubtract=false;
 basetimewindow=[-3 -2];
-Zscore=true;
-getResiduals=true;
+Zscore=false; % no because miss cued success activity for grp 2
+getResiduals=true; % but need this to get rid of mid-range
 smoothBeforeResids=true;
 
 ds=6;
@@ -30,7 +30,7 @@ r.response1=outUncuedSucc.response2; r.response2=outUncuedFail.response2; plotOv
 % plotSU_contextAndOutcome('Z:\MICROSCOPE\Kim\WHISPER recs\Mar_1\20210803\SU aligned to behavior',failure_off);
 
 if smoothBeforeResids==true
-    [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=smoothResponses(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,10);
+    [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=smoothResponses(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,6);
 end
 
 if getResiduals==true
@@ -42,12 +42,12 @@ if Zscore==true
 end
 
 
-smoo=3;
+smoo=6;
 % cuezbins=-2:0.5:3;
 % cuezbins(1)=-2.0001; cuezbins(end)=3.0001;
 % cuezbins=prctile(cuez,0:10:100);
 % cuezbins=prctile(cuez,[0 10 20 30 40 50 60 70 75 80 85 87.5 90 92.5 95 97.5 100]);
-cuezbins=prctile(cuez,[0 20 40 60 70 80 90 95 100]);
+cuezbins=prctile(cuez,[0 20 40 60 70 80 90 92 93 95 97 100]);
 cuezbins(1)=cuezbins(1)-0.0001; cuezbins(end)=cuezbins(end)+0.0001; 
 plotByCuez(cued_success_Response,cuez,groupLabelsFromTCA,'cued success',ds,smoo,'jet',cuezbins,basesubtract,basetimewindow); 
 plotByCuez(cued_failure_Response,cuez,groupLabelsFromTCA,'cued failure',ds,smoo,'jet',cuezbins,basesubtract,basetimewindow);
@@ -168,7 +168,7 @@ plot(out.response2.t,out.response2.plusSe,'Color',c2); plot(out.response2.t,out.
 
 end
 
-function plotByCuez(cued_success_Response,cuez,groupLabelsFromTCA,addToTit,ds,smoo,cmapname,cuezbins,basesubtract,basetimewindow)
+function plotByCuez(cued_success_Response,cuez,groupLabelsFromTCA,addToTit,ds,smoo,cmapname,cuezbins,basesubtract,basetimewindow,plotLog)
 
 temp=cued_success_Response;
 bycuez=cell(length(cuezbins)-1,1);
