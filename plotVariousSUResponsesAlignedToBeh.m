@@ -40,6 +40,14 @@ switch varargin{1}
             suppressPlots=0;
         end
         out=meanAcrossUnits(Response,downSampFac,suppressPlots);
+    case 'maxAcrossUnits'
+        downSampFac=varargin{3};
+        if length(varargin)==5
+            suppressPlots=varargin{5};
+        else
+            suppressPlots=0;
+        end
+        out=maxAcrossUnits(Response,downSampFac,suppressPlots,varargin{4});
     case 'scatterInTimeWindows'
         timeWindow1=varargin{3};
         timeWindow2=varargin{4};
@@ -953,6 +961,101 @@ for i=1:length(f)
         % don't filter this field
         out.(f{i})=temp;
     end
+end
+
+end
+
+function resp=rollingMax(data,indBin)
+
+resp=nan(size(data));
+for i=1:size(data,1)
+    for j=1:size(data,2)
+        currBin=j:j+indBin;
+        if currBin(end)>size(data,2)
+            currBin=j:size(data,2);
+        end
+        resp(i,j)=max(data(i,currBin),[],'all','omitnan');
+    end
+end
+
+end
+
+function out=maxAcrossUnits(activityD1tagged,downSampFac,suppressPlots,maxTimeBin)
+
+timestep=mode(diff(nanmean(activityD1tagged.unitbyunit_x,1)));
+indBin=floor(maxTimeBin/timestep);
+activityD1tagged.unitbyunit_y=rollingMax(activityD1tagged.unitbyunit_y,indBin);
+
+rmOutliers=false;
+if rmOutliers==true
+    [activityD1tagged.unitbyunit_y,Tfrm]=rmoutliers(activityD1tagged.unitbyunit_y,"mean","ThresholdFactor",15);
+    disp(['removed ' num2str(sum(Tfrm)) ' outliers']);
+end
+temp=activityD1tagged.unitbyunit_y;
+out.unitbyunit=activityD1tagged.unitbyunit_y;
+for i=1:size(temp,1)
+%     temp(i,:)=smoothdata(temp(i,:),'gaussian',2);
+%     temp(i,:)=smoothdata(temp(i,:),'gaussian',10);
+    temp(i,:)=smoothdata(temp(i,:),'gaussian',7);
+end
+activityD1tagged.unitbyunit_y=temp;
+
+if suppressPlots~=1
+    if size(activityD1tagged.unitbyunit_y,1)>1000
+        % skip unit by unit plot because too crowded
+    else
+        figure();
+        plot(nanmean(activityD1tagged.unitbyunit_x,1),activityD1tagged.unitbyunit_y');
+        hold on; plot(nanmean(activityD1tagged.aligncomp_x,1),nanmean(activityD1tagged.aligncomp_y,1).*max(activityD1tagged.unitbyunit_y,[],'all','omitnan'),'Color','b');
+        xlabel('Time (sec)');
+        ylabel('Firing rate');
+        title('With raw times');
+    end
+end
+
+temp=nanmean(activityD1tagged.aligncomp_x,1);
+[~,f]=nanmax(nanmean(activityD1tagged.aligncomp_y,1));
+timesD1=nanmean(activityD1tagged.unitbyunit_x,1)-temp(f);
+if any(isnan(timesD1))
+    timesD1=fillmissing(timesD1,'linear');
+end
+out.unittimes=timesD1;
+
+if suppressPlots~=1
+    if size(activityD1tagged.unitbyunit_y,1)>100
+        % skip unit by unit plot because too crowded
+    else
+        figure(); plot(timesD1,activityD1tagged.unitbyunit_y');
+        title('Align companion at time=0');
+        xlabel('Time (sec)');
+        ylabel('Firing rate');
+    end
+end
+
+if suppressPlots~=1
+    figure();
+    unitoffset=0;
+    for i=1:size(activityD1tagged.unitbyunit_y,1)
+        plot(timesD1,activityD1tagged.unitbyunit_y(i,:)+unitoffset,'Color','k'); hold on;
+        uptooo=200;
+        if uptooo>size(activityD1tagged.unitbyunit_y,2)
+            uptooo=size(activityD1tagged.unitbyunit_y,2);
+        end
+        if isnan(max(activityD1tagged.unitbyunit_y(i,1:uptooo),[],'all','omitnan'))
+            continue
+        end
+        unitoffset=unitoffset+max(activityD1tagged.unitbyunit_y(i,1:uptooo),[],'all','omitnan');
+    end
+    title('Align companion at time=0');
+    xlabel('Time (sec)');
+    ylabel('Firing rate');
+end
+
+[out.me,out.plusSe,out.minusSe,out.t]=plotMeanAndSE(downSampMatrix(activityD1tagged.unitbyunit_y,downSampFac),'k',downSampAv(timesD1,downSampFac),suppressPlots);
+if suppressPlots~=1
+    title('Mean and se across units');
+    xlabel('Time (sec)');
+    ylabel('Firing rate');
 end
 
 end

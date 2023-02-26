@@ -5,24 +5,27 @@ basesubtract=false;
 basetimewindow=[-3 -2];
 
 % plot all SU
-cuezbins=prctile(cuez,0:10:100); 
+% although ugly, the raw raw data actually shows effects (maybe for
+% supplement)
+cuezbins=prctile(cuez,0:5:100); 
+% cuezbins=prctile(cuez,[0:5:30 100]); 
 plotAll=false;
 Zscore=false;
-minmaxnorm=true;
-smoo=3; %smoo=3; %smoo=42;
+minmaxnorm=false;
+smoo=6; %smoo=3; %smoo=42;
+getResiduals=true; % but need this to get rid of mid-range
 
 if isempty(isSig)
     isSig=ones(size(groupLabelsFromTCA));
 end
+groupLabelsFromTCA(isSig~=1)=-10; % omit these in plotting
 
 % else plotBinRange
 % cuezbins=prctile(cuez,[0 20 40 60 70 80 82 84 86 88 90 91 92 93 95 97 100]);
 % plotAll=false;
 % Zscore=false; % no because miss cued success activity for grp 2
 % smoo=6;
-
-getResiduals=true; % but need this to get rid of mid-range
-smoothBeforeResids=true;
+% getResiduals=true; % but need this to get rid of mid-range
 
 
 
@@ -49,6 +52,7 @@ r.response1=outUncuedSucc.response2; r.response2=outUncuedFail.response2; plotOv
 % failure_off={'unit91onCh1_A2atagged','unit97onCh28_A2atagged','unit98onCh31_A2atagged','unit99onCh28_A2atagged','unit147onCh22_A2atagged','unit159onCh27_A2atagged','unit160onCh27_A2atagged','unit162onCh27_A2atagged','unit163onCh27_A2atagged','unit208onCh23_A2atagged','unit208onCh25_A2atagged','unit209onCh21_A2atagged','unit209onCh23_A2atagged','unit215onCh27_A2atagged','unit217onCh27_A2atagged','unit227onCh30_A2atagged','unit233onCh30_A2atagged'};
 % plotSU_contextAndOutcome('Z:\MICROSCOPE\Kim\WHISPER recs\Mar_1\20210803\SU aligned to behavior',failure_off);
 
+smoothBeforeResids=false;
 if smoothBeforeResids==true
     [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=smoothResponses(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,6);
 end
@@ -158,6 +162,9 @@ end
 
 function [r1,r2,r3,r4]=getTrialTypeSpecificResiduals(r1,r2,r3,r4)
 
+smoothBeforeNonspecific=true;
+smooBefore=200;
+
 [cuetime,t]=getCueTimeForThisResponse(r1);
 
 % assumes same binning for all
@@ -176,7 +183,15 @@ resp4=resp4(:,1:size(resp1,2));
 allResp=nan(size(resp1,1),size(resp1,2),4);
 allResp(:,:,1)=resp1; allResp(:,:,2)=resp2; allResp(:,:,3)=resp3; allResp(:,:,4)=resp4;
 
-nonspecific=reshape(min(noNansOrInfs(allResp),[],3,'omitnan'),size(allResp,1),size(allResp,2));
+forNonspec=allResp;
+if smoothBeforeNonspecific==true
+    for i=1:size(forNonspec,3)
+        for j=1:size(forNonspec,1)
+            forNonspec(j,:,i)=smoothdata(reshape(forNonspec(j,:,i),1,size(forNonspec,2)),'gaussian',smooBefore);
+        end
+    end
+end
+nonspecific=reshape(min(noNansOrInfs(forNonspec),[],3,'omitnan'),size(forNonspec,1),size(forNonspec,2));
 for i=1:4
     allResp(:,:,i)=allResp(:,:,i)-nonspecific;
 end
@@ -210,6 +225,8 @@ function plotByCuez(cued_success_Response,cuez,groupLabelsFromTCA,addToTit,ds,sm
 
 alph=0.8;
 plotBackwards=false;
+doMaxInstead=true;
+maxTimeBin=0.1;
 
 temp=cued_success_Response;
 bycuez=cell(length(cuezbins)-1,1);
@@ -220,7 +237,11 @@ for i=1:length(cuezbins)-1
     incuezrange=cuez>cuezbins(i) & cuez<=cuezbins(i+1);
     sub1=subResponse(temp,'idx',gpLab); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=gpLab))=0;
     sub1.incuezrange=incuezrange(temp.idx==gpLab); sub1=subResponse(sub1,'incuezrange',1); f=find(exclu~=0); sub1.excluded(f(incuezrange~=1))=0;
-    out=plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',sub1,ds,true);
+    if doMaxInstead==true
+        out=plotVariousSUResponsesAlignedToBeh('maxAcrossUnits',sub1,ds,maxTimeBin,true);
+    else
+        out=plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',sub1,ds,true);
+    end
     if ~isempty(smoo)
         out.me=smoothdata(out.me,'gaussian',smoo); out.plusSe=smoothdata(out.plusSe,'gaussian',smoo); out.minusSe=smoothdata(out.minusSe,'gaussian',smoo); 
         if plotAll==true
@@ -278,7 +299,11 @@ for i=1:length(cuezbins)-1
     incuezrange=cuez>cuezbins(i) & cuez<=cuezbins(i+1);
     sub1=subResponse(temp,'idx',gpLab); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=gpLab))=0;
     sub1.incuezrange=incuezrange(temp.idx==gpLab); sub1=subResponse(sub1,'incuezrange',1); f=find(exclu~=0); sub1.excluded(f(incuezrange~=1))=0;
-    out=plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',sub1,ds,true);
+    if doMaxInstead==true
+        out=plotVariousSUResponsesAlignedToBeh('maxAcrossUnits',sub1,ds,maxTimeBin,true);
+    else
+        out=plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',sub1,ds,true);
+    end
     if ~isempty(smoo)
         out.me=smoothdata(out.me,'gaussian',smoo); out.plusSe=smoothdata(out.plusSe,'gaussian',smoo); out.minusSe=smoothdata(out.minusSe,'gaussian',smoo); 
         if plotAll==true
