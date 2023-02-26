@@ -1,19 +1,19 @@
 function plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,isSig)
 
 % for cue tuned plots
-basesubtract=false;
-basetimewindow=[-3 -2];
+basesubtract=true;
+basetimewindow=[4 9]; %[-3 -2];
 
 % plot all SU
 % although ugly, the raw raw data actually shows effects (maybe for
 % supplement)
-cuezbins=prctile(cuez,0:5:100); 
+cuezbins=prctile(cuez,0:10:100); 
 % cuezbins=prctile(cuez,[0:5:30 100]); 
 plotAll=false;
 Zscore=false;
 minmaxnorm=false;
-smoo=6; %smoo=3; %smoo=42;
-getResiduals=true; % but need this to get rid of mid-range
+smoo=7; %6; %smoo=3; %smoo=42;
+getResiduals=false; % but need this to get rid of mid-range
 
 if isempty(isSig)
     isSig=ones(size(groupLabelsFromTCA));

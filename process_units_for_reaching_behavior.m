@@ -674,7 +674,7 @@ out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',cue_noReach_R
 cue_noReach_Response=out.Response1;  
 % cuez=getCueTunedUnits(cue_noReach_Response,uncuedReach_Response,'vs_uncued_reach','max'); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
 cuez=getCueTunedUnits(cue_Response,uncuedReach_Response,'cue_vs_baseline','mean'); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
-plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response);
+plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[]);
 
 %% colormaps
 % SUCCESS V FAILURE 

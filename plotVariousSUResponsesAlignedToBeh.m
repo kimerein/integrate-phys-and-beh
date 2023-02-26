@@ -1136,6 +1136,49 @@ end
 
 end
 
+function [me,plusSe,minusSe,t]=plotMaxAndSE(data1,color1,timeBins,suppressPlots)
+
+plotAsCityscape=false;
+
+data1=data1(any(~isnan(data1),2),:);
+
+data1_mean=max(data1,[],1,'omitnan');
+data1_se=std(data1,0,1,'omitnan')./sqrt(size(data1,1));
+
+if suppressPlots~=1
+    figure();
+end
+if plotAsCityscape==true
+    [n,x]=cityscape_hist(data1_mean,timeBins);
+    if suppressPlots~=1
+        plot(x,n,'Color',color1); hold on;
+    end
+    t=x;
+    me=n;
+    [n,x]=cityscape_hist(data1_mean+data1_se,timeBins);
+    if suppressPlots~=1
+        plot(x,n,'Color',color1);
+    end
+    plusSe=n;
+    [n,x]=cityscape_hist(data1_mean-data1_se,timeBins);
+    if suppressPlots~=1
+        plot(x,n,'Color',color1);
+    end
+    minusSe=n;
+else
+    if suppressPlots~=1
+        plot(timeBins,data1_mean,'Color',color1); hold on;
+        plot(timeBins,data1_mean+data1_se,'Color',color1);
+        plot(timeBins,data1_mean-data1_se,'Color',color1);
+    end
+    t=timeBins;
+    me=data1_mean;
+    plusSe=data1_mean+data1_se;
+    minusSe=data1_mean-data1_se;
+end
+
+end
+
 function [me,plusSe,minusSe,t]=plotMeanAndSE(data1,color1,timeBins,suppressPlots)
 
 plotAsCityscape=false;
