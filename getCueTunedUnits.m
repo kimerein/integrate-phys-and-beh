@@ -1,11 +1,11 @@
-function [cuetuningindex,isCueTuned]=getCueTunedUnits(cueR,uncuedReachR,method,meanormax)
+function [cuetuningindex,isCueTuned]=getCueTunedUnits(cueR,uncuedReachR,method,meanormax,ds,cuebaserange,cueonrange)
 
-ds=25;
+% ds=25;
 smoo=[]; %100; %80; %42; % NOTHING ABOVE 100 BCZ WILL SMEAR IN OPTO RESPONSE
 noGaussSmooth=true;
 Zscore=false;
-cuebaserange=[-3 -2]; %[-3 -2]; %[-0.75 -0.54];
-cueonrange=[-0.25 1.25]; %[-0.25 0.8];
+% cuebaserange=[5 9]; %[-3 -2]; %[-0.75 -0.54];
+% cueonrange=[-0.375 1.25]; %[-0.375 0.375]; %[-0.25 0.8];
 reachbaserange=[-3 -2];
 reachonrange=[-1.5 0];
 

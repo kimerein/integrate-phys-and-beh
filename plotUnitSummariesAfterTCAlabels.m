@@ -2,7 +2,7 @@ function plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Re
 
 % for cue tuned plots
 basesubtract=true;
-basetimewindow=[5 9]; %[4 9];
+basetimewindow=[7 16]; %[4 9];
 
 % plot all SU
 % although ugly, the raw raw data actually shows effects (maybe for
@@ -12,8 +12,8 @@ basetimewindow=[5 9]; %[4 9];
 
 % temp=prctile(cuez(groupLabelsFromTCA==1),[0:25:75 80 85 90 95 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp;
 % temp=prctile(cuez(groupLabelsFromTCA==2),[0:25:75 80 85 90 95 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp;
-temp=prctile(cuez(groupLabelsFromTCA==1),[0:25:75 85 92 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp;
-temp=prctile(cuez(groupLabelsFromTCA==2),[0:25:75 85 92 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp;
+temp=prctile(cuez(groupLabelsFromTCA==1),[15 25 50 75 85 90 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp;
+temp=prctile(cuez(groupLabelsFromTCA==2),[15 25 50 75 85 90 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp;
 
 % temp=prctile(cuez(groupLabelsFromTCA==1),[1:100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp;
 % temp=prctile(cuez(groupLabelsFromTCA==2),[1:100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp;
