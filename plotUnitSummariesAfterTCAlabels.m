@@ -2,7 +2,7 @@ function plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Re
 
 % for cue tuned plots
 basesubtract=true;
-basetimewindow=[10 18]; %[4 9];
+basetimewindow=[9.5 12]; %[4 9];
 
 % plot all SU
 % although ugly, the raw raw data actually shows effects (maybe for
@@ -12,8 +12,10 @@ basetimewindow=[10 18]; %[4 9];
 
 % temp=prctile(cuez(groupLabelsFromTCA==1),[0:25:75 80 85 90 95 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp;
 % temp=prctile(cuez(groupLabelsFromTCA==2),[0:25:75 80 85 90 95 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp;
-temp=prctile(cuez(groupLabelsFromTCA==1),[15 25 50 75 85 90 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp;
-temp=prctile(cuez(groupLabelsFromTCA==2),[15 25 50 75 85 90 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp;
+% temp=prctile(cuez(groupLabelsFromTCA==1),[0 12.5 22 30 45 72 85 90 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp;
+% temp=prctile(cuez(groupLabelsFromTCA==2),[0 12.5 22 30 45 72 85 90 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp;
+temp=prctile(cuez(groupLabelsFromTCA==1),[0 39 50 72 85 90 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 39th prctile is 0 cuez for grp 1
+temp=prctile(cuez(groupLabelsFromTCA==2),[0 39 50 72 85 90 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp;
 
 % temp=prctile(cuez(groupLabelsFromTCA==1),[1:100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp;
 % temp=prctile(cuez(groupLabelsFromTCA==2),[1:100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp;
@@ -21,7 +23,7 @@ temp=prctile(cuez(groupLabelsFromTCA==2),[15 25 50 75 85 90 100]); temp(1)=temp(
 plotAll=false;
 Zscore=false;
 minmaxnorm=false;
-smoo=20; %6; %smoo=3; %smoo=42;
+smoo=30; %6; %smoo=3; %smoo=42;
 getResiduals=false; % but need this to get rid of mid-range
 dsForCuez=6;
 
@@ -86,7 +88,7 @@ end
 % cuezbins=prctile(cuez,0:10:100);
 % cuezbins=prctile(cuez,[0 10 20 30 40 50 60 70 75 80 85 87.5 90 92.5 95 97.5 100]);
 % cuezbins=prctile(cuez,[0 20 40 60 70 80 82 84 86 88 90 91 92 93 95 97 100]); 
-basesubtract=false;
+basesubtract=true; basetimewindow=[9.5 12];
 [grp1_succ]=plotByCuez(cued_success_Response,cuez,groupLabelsFromTCA,'cued success',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll); 
 [grp1_fail]=plotByCuez(cued_failure_Response,cuez,groupLabelsFromTCA,'cued failure',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
 [grp1_succ_uncue]=plotByCuez(uncued_success_Response,cuez,groupLabelsFromTCA,'uncued success',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
@@ -168,6 +170,8 @@ end
 
 function [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=baseSubResponses(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,basewindow)
 
+individBase=false;
+
 % basewindow=[5 9]; % in sec wrt cue
 t=nanmean(cued_success_Response.unitbyunit_x,1);
 [~,cueind]=nanmax(nanmean(cued_success_Response.aligncomp_y,1));
@@ -177,11 +181,22 @@ t=t-cuetime;
 t2=nanmean(cued_failure_Response.unitbyunit_x,1); t2=t2-cuetime;
 t3=nanmean(uncued_success_Response.unitbyunit_x,1); t3=t3-cuetime;
 t4=nanmean(uncued_failure_Response.unitbyunit_x,1); t4=t4-cuetime;
-base=mean([cued_success_Response.unitbyunit_y(:,t>basewindow(1) & t<basewindow(2)) cued_failure_Response.unitbyunit_y(:,t2>basewindow(1) & t2<basewindow(2)) uncued_success_Response.unitbyunit_y(:,t3>basewindow(1) & t3<basewindow(2)) uncued_failure_Response.unitbyunit_y(:,t4>basewindow(1) & t4<basewindow(2))],2,'omitnan');
-cued_success_Response.unitbyunit_y=cued_success_Response.unitbyunit_y-repmat(base,1,size(cued_success_Response.unitbyunit_y,2));
-cued_failure_Response.unitbyunit_y=cued_failure_Response.unitbyunit_y-repmat(base,1,size(cued_failure_Response.unitbyunit_y,2));
-uncued_success_Response.unitbyunit_y=uncued_success_Response.unitbyunit_y-repmat(base,1,size(uncued_success_Response.unitbyunit_y,2));
-uncued_failure_Response.unitbyunit_y=uncued_failure_Response.unitbyunit_y-repmat(base,1,size(uncued_failure_Response.unitbyunit_y,2));
+if individBase==false
+    base=mean([cued_success_Response.unitbyunit_y(:,t>basewindow(1) & t<basewindow(2)) cued_failure_Response.unitbyunit_y(:,t2>basewindow(1) & t2<basewindow(2)) uncued_success_Response.unitbyunit_y(:,t3>basewindow(1) & t3<basewindow(2)) uncued_failure_Response.unitbyunit_y(:,t4>basewindow(1) & t4<basewindow(2))],2,'omitnan');
+    cued_success_Response.unitbyunit_y=cued_success_Response.unitbyunit_y-repmat(base,1,size(cued_success_Response.unitbyunit_y,2));
+    cued_failure_Response.unitbyunit_y=cued_failure_Response.unitbyunit_y-repmat(base,1,size(cued_failure_Response.unitbyunit_y,2));
+    uncued_success_Response.unitbyunit_y=uncued_success_Response.unitbyunit_y-repmat(base,1,size(uncued_success_Response.unitbyunit_y,2));
+    uncued_failure_Response.unitbyunit_y=uncued_failure_Response.unitbyunit_y-repmat(base,1,size(uncued_failure_Response.unitbyunit_y,2));
+else
+    base=mean(cued_success_Response.unitbyunit_y(:,t>basewindow(1) & t<basewindow(2)),2,'omitnan');
+    cued_success_Response.unitbyunit_y=cued_success_Response.unitbyunit_y-repmat(base,1,size(cued_success_Response.unitbyunit_y,2));
+    base=mean(cued_failure_Response.unitbyunit_y(:,t>basewindow(1) & t<basewindow(2)),2,'omitnan');
+    cued_failure_Response.unitbyunit_y=cued_failure_Response.unitbyunit_y-repmat(base,1,size(cued_failure_Response.unitbyunit_y,2));
+    base=mean(uncued_success_Response.unitbyunit_y(:,t>basewindow(1) & t<basewindow(2)),2,'omitnan');
+    uncued_success_Response.unitbyunit_y=uncued_success_Response.unitbyunit_y-repmat(base,1,size(uncued_success_Response.unitbyunit_y,2));
+    base=mean(uncued_failure_Response.unitbyunit_y(:,t>basewindow(1) & t<basewindow(2)),2,'omitnan');
+    uncued_failure_Response.unitbyunit_y=uncued_failure_Response.unitbyunit_y-repmat(base,1,size(uncued_failure_Response.unitbyunit_y,2));
+end
 
 end
 
