@@ -93,11 +93,13 @@ basesubtract=true; basetimewindow=[9.5 12];
 [grp1_fail]=plotByCuez(cued_failure_Response,cuez,groupLabelsFromTCA,'cued failure',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
 [grp1_succ_uncue]=plotByCuez(uncued_success_Response,cuez,groupLabelsFromTCA,'uncued success',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
 [grp1_fail_uncue]=plotByCuez(uncued_failure_Response,cuez,groupLabelsFromTCA,'uncued failure',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
-plotDiffOfBycuez(grp1_succ,grp1_fail);
+plotDiffOfBycuez(grp1_succ,grp1_fail,[]);
+plotDiffOfBycuez(grp1_succ,grp1_fail,[-1.5 0]);
+plotDiffOfBycuez(grp1_succ,grp1_fail,[0 2.1]);
 
 end
 
-function plotDiffOfBycuez(data1,data2)
+function plotDiffOfBycuez(data1,data2,zeroAtWindow)
 
 figure();
 cmap=getCmapWithRed(1:length(data1.bycuez)+1);
@@ -117,7 +119,13 @@ elseif length(data1.bycuez{1})<length(data2.bycuez{1})
     end
 end
 for i=1:length(data1.bycuez)
-    plot(data1.time{i},data2.bycuez{i}-data1.bycuez{i},'Color',cmap(i,:)); hold on;
+    if ~isempty(zeroAtWindow)
+        temp=data2.bycuez{i}-data1.bycuez{i};
+        base=nanmean(temp(data1.time{i}>zeroAtWindow(1) & data1.time{i}<zeroAtWindow(2)));
+        plot(data1.time{i},temp-base,'Color',cmap(i,:)); hold on;
+    else
+        plot(data1.time{i},data2.bycuez{i}-data1.bycuez{i},'Color',cmap(i,:)); hold on;
+    end
 end
 
 end
