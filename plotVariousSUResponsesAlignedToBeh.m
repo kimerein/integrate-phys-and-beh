@@ -1129,6 +1129,7 @@ end
 
 if ~isempty(downSampFac)
     out.unitbyunit=downSampMatrix(out.unitbyunit,downSampFac);
+    out.unittimes=downSampAv(out.unittimes,downSampFac);
 end
 [out.me,out.plusSe,out.minusSe,out.t]=plotMeanAndSE(out.unitbyunit,'k',downSampAv(timesD1,downSampFac),suppressPlots);
 if suppressPlots~=1
