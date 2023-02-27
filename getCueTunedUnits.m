@@ -71,6 +71,15 @@ switch method
         cuetuningindex=(cuer-reachr)./(cuer+reachr);
     case 'cue_vs_baseline'
         cuetuningindex=(duringcue-beforecue)./(duringcue+beforecue);
+        cuetuningindex(cuetuningindex>1)=1;
+        cuetuningindex(cuetuningindex<-1)=-1;
+        fill_insufficient_data_w_nans=false;
+        if fill_insufficient_data_w_nans
+            cuetuningindex(cuetuningindex==1)=nan;
+            cuetuningindex(cuetuningindex==-1)=nan;
+        end
+    case 'cue_vs_baseline_no_index'
+        cuetuningindex=(duringcue-beforecue);
     case 'justcue'
         cuetuningindex=duringcue;
 end

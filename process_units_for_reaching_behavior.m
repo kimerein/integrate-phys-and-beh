@@ -674,8 +674,15 @@ out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',cue_noReach_R
 cue_noReach_Response=out.Response1;  
 cued_reach_Response=cued_success_Response; cued_reach_Response.unitbyunit_y=(cued_success_Response.unitbyunit_y+cued_failure_Response.unitbyunit_y)./2; 
 % cuez=getCueTunedUnits(cue_noReach_Response,uncuedReach_Response,'vs_uncued_reach','max'); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
-cuez=getCueTunedUnits(cued_reach_Response,uncuedReach_Response,'cue_vs_baseline','mean',25,[7 16],[-1 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
+
+% CUED
+cuez=getCueTunedUnits(cued_reach_Response,uncuedReach_Response,'cue_vs_baseline_no_index','mean',25,[7 16],[-1 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
 plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[]);
+
+% UNCUED
+% uncued_reach_Response=uncued_success_Response; uncued_reach_Response.unitbyunit_y=(uncued_success_Response.unitbyunit_y+uncued_failure_Response.unitbyunit_y(:,1:2849))./2; 
+% cuez=getCueTunedUnits(uncued_reach_Response,uncuedReach_Response,'cue_vs_baseline_no_index','mean',2,[9.5 12],[-1.8 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
+% plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[]);
 
 %% colormaps
 % SUCCESS V FAILURE 
