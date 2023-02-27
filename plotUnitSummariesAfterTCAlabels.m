@@ -2,7 +2,7 @@ function plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Re
 
 % for cue tuned plots
 basesubtract=true;
-basetimewindow=[7 16]; %[4 9];
+basetimewindow=[10 18]; %[4 9];
 
 % plot all SU
 % although ugly, the raw raw data actually shows effects (maybe for
@@ -21,7 +21,7 @@ temp=prctile(cuez(groupLabelsFromTCA==2),[15 25 50 75 85 90 100]); temp(1)=temp(
 plotAll=false;
 Zscore=false;
 minmaxnorm=false;
-smoo=12; %6; %smoo=3; %smoo=42;
+smoo=20; %6; %smoo=3; %smoo=42;
 getResiduals=false; % but need this to get rid of mid-range
 dsForCuez=6;
 
@@ -87,10 +87,36 @@ end
 % cuezbins=prctile(cuez,[0 10 20 30 40 50 60 70 75 80 85 87.5 90 92.5 95 97.5 100]);
 % cuezbins=prctile(cuez,[0 20 40 60 70 80 82 84 86 88 90 91 92 93 95 97 100]); 
 basesubtract=false;
-plotByCuez(cued_success_Response,cuez,groupLabelsFromTCA,'cued success',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll); 
-plotByCuez(cued_failure_Response,cuez,groupLabelsFromTCA,'cued failure',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
-plotByCuez(uncued_success_Response,cuez,groupLabelsFromTCA,'uncued success',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
-plotByCuez(uncued_failure_Response,cuez,groupLabelsFromTCA,'uncued failure',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
+[grp1_succ]=plotByCuez(cued_success_Response,cuez,groupLabelsFromTCA,'cued success',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll); 
+[grp1_fail]=plotByCuez(cued_failure_Response,cuez,groupLabelsFromTCA,'cued failure',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
+[grp1_succ_uncue]=plotByCuez(uncued_success_Response,cuez,groupLabelsFromTCA,'uncued success',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
+[grp1_fail_uncue]=plotByCuez(uncued_failure_Response,cuez,groupLabelsFromTCA,'uncued failure',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
+plotDiffOfBycuez(grp1_succ,grp1_fail);
+
+end
+
+function plotDiffOfBycuez(data1,data2)
+
+figure();
+cmap=getCmapWithRed(1:length(data1.bycuez)+1);
+if length(data1.bycuez{1})>length(data2.bycuez{1})
+    for i=1:length(data1.bycuez)
+        temp=data1.bycuez{i};
+        data1.bycuez{i}=temp(1:length(data2.bycuez{1}));
+        temp=data1.time{i};
+        data1.time{i}=temp(1:length(data2.bycuez{1}));
+    end
+elseif length(data1.bycuez{1})<length(data2.bycuez{1})
+    for i=1:length(data2.bycuez)
+        temp=data2.bycuez{i};
+        data2.bycuez{i}=temp(1:length(data1.bycuez{1}));
+        temp=data2.time{i};
+        data2.time{i}=temp(1:length(data1.bycuez{1}));
+    end
+end
+for i=1:length(data1.bycuez)
+    plot(data1.time{i},data2.bycuez{i}-data1.bycuez{i},'Color',cmap(i,:)); hold on;
+end
 
 end
 
@@ -264,7 +290,7 @@ cmap=flipud(cmap);
 
 end
 
-function plotByCuez(cued_success_Response,cuez,groupLabelsFromTCA,addToTit,ds,smoo,cmapname,cuezbins,basesubtract,basetimewindow,plotAll)
+function [grp1,grp2]=plotByCuez(cued_success_Response,cuez,groupLabelsFromTCA,addToTit,ds,smoo,cmapname,cuezbins,basesubtract,basetimewindow,plotAll)
 
 alph=0.8;
 plotBackwards=false;
@@ -320,6 +346,7 @@ for i=1:length(cuezbins)-1
         time{i}=out.t;
     end
 end
+grp1.bycuez=bycuez; grp1.time=time;
 figure();
 if strcmp(cmapname,'jet')
 %     cmap=colormap(jet(length(cuezbins)-1));
@@ -403,6 +430,7 @@ for i=1:length(cuezbins)-1
         time{i}=out.t;
     end
 end
+grp2.bycuez=bycuez; grp2.time=time;
 figure();
 if strcmp(cmapname,'jet')
 %     cmap=colormap(jet(length(cuezbins)-1));
