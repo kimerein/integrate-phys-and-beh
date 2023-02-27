@@ -1127,7 +1127,10 @@ if suppressPlots~=1
     ylabel('Firing rate');
 end
 
-[out.me,out.plusSe,out.minusSe,out.t]=plotMeanAndSE(downSampMatrix(activityD1tagged.unitbyunit_y,downSampFac),'k',downSampAv(timesD1,downSampFac),suppressPlots);
+if ~isempty(downSampFac)
+    out.unitbyunit=downSampMatrix(out.unitbyunit,downSampFac);
+end
+[out.me,out.plusSe,out.minusSe,out.t]=plotMeanAndSE(out.unitbyunit,'k',downSampAv(timesD1,downSampFac),suppressPlots);
 if suppressPlots~=1
     title('Mean and se across units');
     xlabel('Time (sec)');

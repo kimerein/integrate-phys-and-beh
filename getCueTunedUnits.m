@@ -1,10 +1,11 @@
 function [cuetuningindex,isCueTuned]=getCueTunedUnits(cueR,uncuedReachR,method,meanormax)
 
-ds=1;
-smoo=1; %100; %80; %42; % NOTHING ABOVE 100 BCZ WILL SMEAR IN OPTO RESPONSE
+ds=25;
+smoo=[]; %100; %80; %42; % NOTHING ABOVE 100 BCZ WILL SMEAR IN OPTO RESPONSE
+noGaussSmooth=true;
 Zscore=false;
-cuebaserange=[5 9]; %[-3 -2]; %[-0.75 -0.54];
-cueonrange=[-0.25 1]; %[-0.25 0.8];
+cuebaserange=[-3 -2]; %[-3 -2]; %[-0.75 -0.54];
+cueonrange=[-0.25 1.25]; %[-0.25 0.8];
 reachbaserange=[-3 -2];
 reachonrange=[-1.5 0];
 
@@ -23,11 +24,19 @@ end
 if ~isempty(smoo)
     for i=1:size(cueresp.unitbyunit,1)
         temp=cueresp.unitbyunit(i,:);
-        cueresp.unitbyunit(i,:)=smoothdata(temp,'gaussian',smoo);
+        if noGaussSmooth==true
+            cueresp.unitbyunit(i,:)=smooth(temp,smoo);
+        else
+            cueresp.unitbyunit(i,:)=smoothdata(temp,'gaussian',smoo);
+        end
     end
     for i=1:size(uncuedreachresp.unitbyunit,1)
         temp=uncuedreachresp.unitbyunit(i,:);
-        uncuedreachresp.unitbyunit(i,:)=smoothdata(temp,'gaussian',smoo);
+         if noGaussSmooth==true
+            uncuedreachresp.unitbyunit(i,:)=smooth(temp,smoo);
+         else
+            uncuedreachresp.unitbyunit(i,:)=smoothdata(temp,'gaussian',smoo);
+         end
     end
 end
 
