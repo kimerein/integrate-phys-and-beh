@@ -18,7 +18,7 @@ basetimewindow=[9.5 12]; %[4 9];
 %     temp=prctile(cuez(groupLabelsFromTCA==1),[0 39 50 72 85 90 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 39th prctile is 0 cuez for grp 1
 %     temp=prctile(cuez(groupLabelsFromTCA==2),[0 39 50 72 85 90 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
 temp=prctile(cuez(groupLabelsFromTCA==1),[0 39 50 72 85 90 94 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 39th prctile is 0 cuez for grp 1
-temp=prctile(cuez(groupLabelsFromTCA==2),[0 28 39 50 72 85 90 94 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
+temp=prctile(cuez(groupLabelsFromTCA==2),[0 39 50 72 85 90 94 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
 
 % temp=prctile(cuez(groupLabelsFromTCA==1),[1:100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp;
 % temp=prctile(cuez(groupLabelsFromTCA==2),[1:100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp;
@@ -97,9 +97,9 @@ basetimewindow=[9.5 12];
 [grp1_fail]=plotByCuez(cued_failure_Response,cuez,groupLabelsFromTCA,'cued failure',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
 [grp1_succ_uncue]=plotByCuez(uncued_success_Response,cuez,groupLabelsFromTCA,'uncued success',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
 [grp1_fail_uncue]=plotByCuez(uncued_failure_Response,cuez,groupLabelsFromTCA,'uncued failure',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
-plotDiffOfBycuez(grp1_succ,grp1_fail,[]);
-plotDiffOfBycuez(grp1_succ,grp1_fail,[-1.5 0]);
-plotDiffOfBycuez(grp1_succ,grp1_fail,[0 2.1]);
+% plotDiffOfBycuez(grp1_succ,grp1_fail,[]);
+% plotDiffOfBycuez(grp1_succ,grp1_fail,[-1.5 0]);
+% plotDiffOfBycuez(grp1_succ,grp1_fail,[0 2.1]);
 
 end
 
