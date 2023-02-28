@@ -3,6 +3,7 @@ function plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Re
 % for cue tuned plots
 % doingCued='uncuedOverCued'; % 'cued' or 'uncued' or 'cuedOverUncued' or 'uncuedOverCued'
 basesubtract=true;
+individBase=false;
 basetimewindow=[9.5 12.5]; %[4 9];
 
 % plot all SU
@@ -19,6 +20,13 @@ basetimewindow=[9.5 12.5]; %[4 9];
 %     temp=prctile(cuez(groupLabelsFromTCA==1),[0 39 50 72 85 90 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 39th prctile is 0 cuez for grp 1
 %     temp=prctile(cuez(groupLabelsFromTCA==2),[0 39 50 72 85 90 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
 
+plotAll=false;
+Zscore=false;
+minmaxnorm=false;
+smoo=30; %6; %smoo=3; %smoo=42;
+getResiduals=false; % but need this to get rid of mid-range
+dsForCuez=6;
+
 switch doingCued
     case 'cued'
         temp=prctile(cuez(groupLabelsFromTCA==1),[0 39 50 72 85 90 94 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 39th prctile is 0 cuez for grp 1
@@ -27,9 +35,9 @@ switch doingCued
         temp=prctile(cuez(groupLabelsFromTCA==1),[0 42 50 72 83 88 96 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 42th prctile is 0 cuez for grp 1
         temp=prctile(cuez(groupLabelsFromTCA==2),[0 42 50 72 77 85 98 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
     case 'cuedOverUncued'
-        basesubtract=false;
-        temp=prctile(cuez(groupLabelsFromTCA==1),[0 6 14 28 50 76 86 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 39th prctile is 0 cuez for grp 1
-        temp=prctile(cuez(groupLabelsFromTCA==2),[0 6 14 28 50 76 86 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
+        basesubtract=false; % [0 4 10 15 50 85 96 100] [0 10 20 50 70 80 96 100]
+        temp=prctile(cuez(groupLabelsFromTCA==1),[0 10 20 50 70 80 96 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 39th prctile is 0 cuez for grp 1
+        temp=prctile(cuez(groupLabelsFromTCA==2),[0 10 20 50 70 80 96 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
     case 'uncuedOverCued'
         basesubtract=false;
         temp=prctile(cuez(groupLabelsFromTCA==1),[0 17 22 40 60 82 90 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 42th prctile is 0 cuez for grp 1
@@ -37,13 +45,6 @@ switch doingCued
 end
 % temp=prctile(cuez(groupLabelsFromTCA==1),[1:100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp;
 % temp=prctile(cuez(groupLabelsFromTCA==2),[1:100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp;
-
-plotAll=false;
-Zscore=false;
-minmaxnorm=false;
-smoo=30; %6; %smoo=3; %smoo=42;
-getResiduals=false; % but need this to get rid of mid-range
-dsForCuez=6;
 
 if isempty(isSig)
     isSig=ones(size(groupLabelsFromTCA));
@@ -104,7 +105,7 @@ elseif minmaxnorm==true
 end
 
 if basesubtract==true
-    [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=baseSubResponses(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,basetimewindow);
+    [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=baseSubResponses(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,basetimewindow,individBase);
 end
 
 % cuezbins=-2:0.5:3;
@@ -123,7 +124,66 @@ basetimewindow=[9.5 12];
 % plotDiffOfBycuez(grp1_succ,grp1_fail,[0 2.1]); 
 % violinPlots(grp1_fail_uncue,[1 4]);
 % violinPlots(grp1_succ_uncue,[1 4]);
-violinPlots(grp2_fail_uncue,[1 4]);
+% violinPlots(grp2_fail_uncue,[1 4]);
+
+plotOutsOverlayed(grp1_fail,grp1_fail_uncue); 
+
+end
+
+function plotOutsOverlayed(out1,out2)
+
+cmap=getCmapWithRed(1:length(out2.allunits)+1); hold on;
+differs=cell(1,length(out1.allunits));
+differstimes=cell(1,length(out1.allunits));
+for i=1:length(out1.allunits)
+%     figure();
+    data1=out1.allunits{i};
+    data2=out2.allunits{i};
+%     plot(out1.time{i},nanmean(data1,1),'Color',cmap(i,:));
+    hold on;
+%     plot(out2.time{i},nanmean(data2,1),'Color',cmap(i,:));
+%     scatter(out2.time{i},nanmean(data2,1),3,cmap(i,:));
+    si=min(size(data1,2),size(data2,2));
+%     differs{i}=nanmean(data1(:,1:si),1)-nanmean(data2(:,1:si),1);
+    differs{i}=data1(:,1:si)-data2(:,1:si);
+    t1=out1.time{i}; 
+    differstimes{i}=t1(1:si);
+end
+
+figure();
+smoo=10;
+forvio_timewindow=[smoo*0.06 4];
+forvio=cell(1,2);
+k=1;
+alldatas=[];
+alldatas_labels=[];
+for i=1:length(out1.allunits)
+    if ~isempty(smoo)
+        toplot=smooth(nanmean(differs{i},1),smoo);
+    end
+    plot(differstimes{i},toplot,'Color',cmap(i,:)); hold on;
+%     if i==1 || i==length(out1.allunits)
+%         temp=differs{i};
+%         forvio{k}=nanmean(temp(:,differstimes{i}>=forvio_timewindow(1) & differstimes{i}<forvio_timewindow(2)),2);
+%         k=k+1;
+%     end
+    temp=differs{i};
+    forvio{i}=nanmean(temp(:,differstimes{i}>=forvio_timewindow(1) & differstimes{i}<forvio_timewindow(2)),2);
+    alldatas=[alldatas; forvio{i}];
+    alldatas_labels=[alldatas_labels; i.*ones(size(forvio{i}))];
+end
+
+% figure();
+% violin(forvio,'facecolor',cmap([1 end],:),'medc',[],'facealpha',1,'bw',0.15);
+% p=ranksum(forvio{1},forvio{2});
+% disp(['pval from ranksum is ' num2str(p)]);
+
+figure();
+violin(forvio,'facecolor',cmap,'medc',[],'facealpha',1);
+[p,tbl,stats]=anova1(alldatas,alldatas_labels);
+results=multcompare(stats);
+results_tbl = array2table(results,"VariableNames", ...
+    ["Group A","Group B","Lower Limit","A-B","Upper Limit","P-value"]);
 
 end
 
@@ -249,9 +309,9 @@ uncued_failure_Response.unitbyunit_y=temp;
 
 end
 
-function [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=baseSubResponses(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,basewindow)
+function [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=baseSubResponses(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,basewindow,individBase)
 
-individBase=false;
+% individBase=false;
 
 % basewindow=[5 9]; % in sec wrt cue
 t=nanmean(cued_success_Response.unitbyunit_x,1);

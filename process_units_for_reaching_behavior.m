@@ -663,6 +663,8 @@ boot=1; % num iterations for bootstrap
 % figure(); plot(nanmean(cued_success_Response.unitbyunit_x,1),nanmean(cued_success_Response.unitbyunit_y(idx==2 & cuedcellresponse<0,:),1),'Color','b');
 % hold on; plot(nanmean(cued_success_Response.aligncomp_x,1),nanmean(cued_success_Response.aligncomp_y(idx==2 & cuedcellresponse<0,:),1),'Color','c'); title('success uncued');
 
+% analyzeProbabilityOfOnAfterOutcome(dd,[0 2],[],[]);
+
 %% Plot unit summaries according to groupLabelsFromTCA
 % if ~exist('cuez','var')
 %     temp=normalizeDataMatrix(newDataMatrix,[2 3],'sd'); cuez=reshape(max(temp(:,1:150,1),[],2,'omitnan'),size(newDataMatrix,1),1);
@@ -685,8 +687,9 @@ uncued_reach_Response=uncued_success_Response; uncued_reach_Response.unitbyunit_
 % plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncued');
 
 % DIFFERENT IN CUED V UNCUED
-cuez=getCueTunedUnits(cue_noReach_Response,uncued_reach_Response,'justcue_v_justuncue','mean',1,[-3 -1],[-0.37 0.37],[7 16],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue' or 'vs_uncued_reach_no_index'
-plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued');
+cuez=getCueTunedUnits(cued_reach_Response,uncued_reach_Response,'justcue_v_justuncue','mean',1,[4 12.5],[-2 0],[4 12.5],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue' or 'vs_uncued_reach_no_index'
+% cuez=getCueTunedUnits(cue_noReach_Response,uncued_reach_Response,'vs_uncued_reach_no_index','mean',1,[9 12.5],[-0.37 1.5],[9 12.5],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue' or 'vs_uncued_reach_no_index'
+plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'cuedOverUncued');
 
 %% colormaps
 % SUCCESS V FAILURE 
