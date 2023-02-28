@@ -1,7 +1,7 @@
 function plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,isSig)
 
 % for cue tuned plots
-basesubtract=false;
+basesubtract=true;
 basetimewindow=[9.5 12]; %[4 9];
 
 % plot all SU
