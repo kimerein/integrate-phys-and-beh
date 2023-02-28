@@ -1,4 +1,4 @@
-function [cuetuningindex,isCueTuned]=getCueTunedUnits(cueR,uncuedReachR,method,meanormax,ds,cuebaserange,cueonrange)
+function [cuetuningindex,isCueTuned]=getCueTunedUnits(cueR,uncuedReachR,method,meanormax,ds,cuebaserange,cueonrange,reachbaserange,reachonrange)
 
 % ds=25;
 smoo=[]; %100; %80; %42; % NOTHING ABOVE 100 BCZ WILL SMEAR IN OPTO RESPONSE
@@ -7,9 +7,9 @@ Zscore=false;
 % cuebaserange=[5 9]; %[-3 -2]; %[-0.75 -0.54];
 % cueonrange=[-0.375 1.25]; %[-0.375 0.375]; %[-0.25 0.8];
 % reachbaserange=[-3 -2];
-% reachonrange=[-1.5 0];
-reachbaserange=cuebaserange;
-reachonrange=cueonrange;
+% reachonrange=[-2 0];
+% reachbaserange=cuebaserange;
+% reachonrange=cueonrange;
 
 % match which units and get responses unit by unit
 r=plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',cueR,uncuedReachR,'meanAcrossUnits',ds,true);
@@ -67,6 +67,8 @@ reachr=duringreach-beforereach;
 
 % define cue tuned units using cue tuning index
 switch method
+    case 'justcue_v_justuncue'
+        cuetuningindex=duringcue-duringreach;
     case 'vs_uncued_reach'
         cuer(abs(cuer)<0.0001)=0;
         reachr(abs(reachr)<0.0001)=0;

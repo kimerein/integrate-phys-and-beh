@@ -677,15 +677,15 @@ uncued_reach_Response=uncued_success_Response; uncued_reach_Response.unitbyunit_
 % cuez=getCueTunedUnits(cue_noReach_Response,uncuedReach_Response,'vs_uncued_reach','max'); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
 
 % CUED
-% cuez=getCueTunedUnits(cued_reach_Response,uncuedReach_Response,'cue_vs_baseline_no_index','mean',1,[7 16],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
+% cuez=getCueTunedUnits(cued_reach_Response,uncuedReach_Response,'cue_vs_baseline_no_index','mean',1,[7 16],[-2 0],[7 16],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
 % plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'cued');
 
 % UNCUED
-% cuez=getCueTunedUnits(uncued_reach_Response,uncuedReach_Response,'cue_vs_baseline_no_index','mean',1,[7 16],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
+% cuez=getCueTunedUnits(uncued_reach_Response,uncuedReach_Response,'cue_vs_baseline_no_index','mean',1,[7 16],[-2 0],[7 16],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
 % plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncued');
 
 % DIFFERENT IN CUED V UNCUED
-cuez=getCueTunedUnits(uncuedReach_Response,cued_reach_Response,'vs_uncued_reach_no_index','mean',1,[9 12.5],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue' or 'vs_uncued_reach_no_index'
+cuez=getCueTunedUnits(cue_noReach_Response,uncued_reach_Response,'justcue_v_justuncue','mean',1,[-3 -1],[-0.37 0.37],[7 16],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue' or 'vs_uncued_reach_no_index'
 plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued');
 
 %% colormaps

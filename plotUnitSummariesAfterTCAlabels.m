@@ -3,7 +3,7 @@ function plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Re
 % for cue tuned plots
 % doingCued='uncuedOverCued'; % 'cued' or 'uncued' or 'cuedOverUncued' or 'uncuedOverCued'
 basesubtract=true;
-basetimewindow=[9.5 12]; %[4 9];
+basetimewindow=[9.5 12.5]; %[4 9];
 
 % plot all SU
 % although ugly, the raw raw data actually shows effects (maybe for
@@ -27,9 +27,11 @@ switch doingCued
         temp=prctile(cuez(groupLabelsFromTCA==1),[0 42 50 72 83 88 96 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 42th prctile is 0 cuez for grp 1
         temp=prctile(cuez(groupLabelsFromTCA==2),[0 42 50 72 77 85 98 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
     case 'cuedOverUncued'
+        basesubtract=false;
         temp=prctile(cuez(groupLabelsFromTCA==1),[0 6 14 28 50 76 86 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 39th prctile is 0 cuez for grp 1
         temp=prctile(cuez(groupLabelsFromTCA==2),[0 6 14 28 50 76 86 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
     case 'uncuedOverCued'
+        basesubtract=false;
         temp=prctile(cuez(groupLabelsFromTCA==1),[0 17 22 40 60 82 90 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 42th prctile is 0 cuez for grp 1
         temp=prctile(cuez(groupLabelsFromTCA==2),[0 17 22 40 60 82 90 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
 end
@@ -110,7 +112,7 @@ end
 % cuezbins=prctile(cuez,0:10:100);
 % cuezbins=prctile(cuez,[0 10 20 30 40 50 60 70 75 80 85 87.5 90 92.5 95 97.5 100]);
 % cuezbins=prctile(cuez,[0 20 40 60 70 80 82 84 86 88 90 91 92 93 95 97 100]); 
-basesubtract=true; 
+basesubtract=false; 
 basetimewindow=[9.5 12]; 
 [grp1_succ,grp2_succ]=plotByCuez(cued_success_Response,cuez,groupLabelsFromTCA,'cued success',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll); 
 [grp1_fail,grp2_fail]=plotByCuez(cued_failure_Response,cuez,groupLabelsFromTCA,'cued failure',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
