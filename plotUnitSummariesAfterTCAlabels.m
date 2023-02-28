@@ -48,7 +48,13 @@ groupLabelsFromTCA(isSig~=1)=-10; % omit these in plotting
 % smoo=6;
 % getResiduals=true; % but need this to get rid of mid-range
 
-
+addbeginnings=false;
+if addbeginnings==true
+    cued_success_Response=addLastTrialToNextBeginning(cued_success_Response);
+    cued_failure_Response=addLastTrialToNextBeginning(cued_failure_Response);
+    uncued_success_Response=addLastTrialToNextBeginning(uncued_success_Response);
+    uncued_failure_Response=addLastTrialToNextBeginning(uncued_failure_Response);
+end
 
 
 ds=6;
@@ -106,6 +112,22 @@ basetimewindow=[9.5 12];
 % plotDiffOfBycuez(grp1_succ,grp1_fail,[]);
 % plotDiffOfBycuez(grp1_succ,grp1_fail,[-1.5 0]);
 % plotDiffOfBycuez(grp1_succ,grp1_fail,[0 2.1]);
+
+end
+
+function resp=addLastTrialToNextBeginning(resp)
+
+trialEnds=[12 18];
+times=nanmean(resp.unitbyunit_x,1);
+batch1begins=resp.unitbyunit_y(:,times>trialEnds(1)-3 & times<trialEnds(1));
+batch2begins=resp.unitbyunit_y(:,times>trialEnds(2)-3 & times<trialEnds(2));
+togbatch=cat(3,batch1begins,batch2begins);
+togbatch=reshape(nanmean(togbatch,3),size(batch1begins,1),size(batch1begins,2));
+timesbatch=times(times>trialEnds(1)-3 & times<trialEnds(1));
+timesbatch=timesbatch-nanmax(timesbatch);
+timesbatch=timesbatch+nanmin(times);
+resp.unitbyunit_x=[repmat(timesbatch,size(resp.unitbyunit_x,1),1) resp.unitbyunit_x];
+resp.unitbyunit_y=[togbatch resp.unitbyunit_y];
 
 end
 
