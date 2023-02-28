@@ -105,13 +105,45 @@ end
 % cuezbins=prctile(cuez,[0 20 40 60 70 80 82 84 86 88 90 91 92 93 95 97 100]); 
 basesubtract=false; 
 basetimewindow=[9.5 12]; 
-[grp1_succ]=plotByCuez(cued_success_Response,cuez,groupLabelsFromTCA,'cued success',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll); 
-[grp1_fail]=plotByCuez(cued_failure_Response,cuez,groupLabelsFromTCA,'cued failure',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
-[grp1_succ_uncue]=plotByCuez(uncued_success_Response,cuez,groupLabelsFromTCA,'uncued success',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
-[grp1_fail_uncue]=plotByCuez(uncued_failure_Response,cuez,groupLabelsFromTCA,'uncued failure',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
+[grp1_succ,grp2_succ]=plotByCuez(cued_success_Response,cuez,groupLabelsFromTCA,'cued success',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll); 
+[grp1_fail,grp2_fail]=plotByCuez(cued_failure_Response,cuez,groupLabelsFromTCA,'cued failure',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
+[grp1_succ_uncue,grp2_succ_uncue]=plotByCuez(uncued_success_Response,cuez,groupLabelsFromTCA,'uncued success',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
+[grp1_fail_uncue,grp2_fail_uncue]=plotByCuez(uncued_failure_Response,cuez,groupLabelsFromTCA,'uncued failure',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
 % plotDiffOfBycuez(grp1_succ,grp1_fail,[]);
 % plotDiffOfBycuez(grp1_succ,grp1_fail,[-1.5 0]);
-% plotDiffOfBycuez(grp1_succ,grp1_fail,[0 2.1]);
+% plotDiffOfBycuez(grp1_succ,grp1_fail,[0 2.1]); 
+% violinPlots(grp1_fail_uncue,[1 4]);
+% violinPlots(grp1_succ_uncue,[1 4]);
+violinPlots(grp2_fail_uncue,[2 5]);
+
+end
+
+function violinPlots(out,inTimeWindow)
+
+figure();
+dataforviolin=cell(1,length(out.allunits));
+alldatas=[];
+alldatas_labels=[];
+for i=1:length(out.allunits)
+    data=out.allunits{i};
+    dataforviolin{i}=nanmean(data(:,out.time{i}>=inTimeWindow(1) & out.time{i}<=inTimeWindow(2)),2);
+    alldatas=[alldatas; dataforviolin{i}];
+    alldatas_labels=[alldatas_labels; i.*ones(size(dataforviolin{i}))];
+end
+cmap=getCmapWithRed(1:length(out.allunits)+1); hold on;
+% violin(dataforviolin,'facecolor',cmap,'edgecolor','none','bw',0.1,'mc','k','medc','r-.')
+violin(dataforviolin,'facecolor',cmap,'edgecolor','none','medc',[],'facealpha',1);
+ylabel('Firing rate','FontSize',14);
+% hold on;
+% plot all points
+% for i=1:length(out.allunits)
+%     scatter(i+(rand(size(dataforviolin{i}))./8)-0.125/2,dataforviolin{i},2,cmap(i,:),'filled');
+% end
+
+[p,tbl,stats]=anova1(alldatas,alldatas_labels);
+results=multcompare(stats);
+results_tbl = array2table(results,"VariableNames", ...
+    ["Group A","Group B","Lower Limit","A-B","Upper Limit","P-value"]);
 
 end
 
@@ -390,6 +422,7 @@ for i=1:length(cuezbins)-1
             end
         end
     end
+    grp1.allunits{i}=out.unitbyunit;
     if basesubtract==true
         out.me=out.me-nanmean(out.me(out.t>=basetimewindow(1) & out.t<=basetimewindow(2)));
     end
@@ -474,6 +507,7 @@ for i=1:length(cuezbins)-1
             end
         end
     end
+    grp2.allunits{i}=out.unitbyunit;
     if basesubtract==true
         out.me=out.me-nanmean(out.me(out.t>=basetimewindow(1) & out.t<=basetimewindow(2)));
     end
