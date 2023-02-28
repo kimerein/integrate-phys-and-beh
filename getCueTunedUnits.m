@@ -6,8 +6,10 @@ noGaussSmooth=true;
 Zscore=false;
 % cuebaserange=[5 9]; %[-3 -2]; %[-0.75 -0.54];
 % cueonrange=[-0.375 1.25]; %[-0.375 0.375]; %[-0.25 0.8];
-reachbaserange=[-3 -2];
-reachonrange=[-1.5 0];
+% reachbaserange=[-3 -2];
+% reachonrange=[-1.5 0];
+reachbaserange=cuebaserange;
+reachonrange=cueonrange;
 
 % match which units and get responses unit by unit
 r=plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',cueR,uncuedReachR,'meanAcrossUnits',ds,true);
@@ -69,6 +71,10 @@ switch method
         cuer(abs(cuer)<0.0001)=0;
         reachr(abs(reachr)<0.0001)=0;
         cuetuningindex=(cuer-reachr)./(cuer+reachr);
+    case'vs_uncued_reach_no_index'
+        cuer(abs(cuer)<0.0001)=0;
+        reachr(abs(reachr)<0.0001)=0;
+        cuetuningindex=(cuer-reachr);
     case 'cue_vs_baseline'
         cuetuningindex=(duringcue-beforecue)./(duringcue+beforecue);
         cuetuningindex(cuetuningindex>1)=1;
