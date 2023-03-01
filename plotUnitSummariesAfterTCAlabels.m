@@ -4,7 +4,7 @@ function plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Re
 % doingCued='uncuedOverCued'; % 'cued' or 'uncued' or 'cuedOverUncued' or 'uncuedOverCued'
 basesubtract=true;
 individBase=false;
-basetimewindow=[9.5 12.5]; %[4 9];
+basetimewindow=[9 12.5]; %[4 9];
 
 % plot all SU
 % although ugly, the raw raw data actually shows effects (maybe for
@@ -35,9 +35,9 @@ switch doingCued
         temp=prctile(cuez(groupLabelsFromTCA==1),[0 42 50 72 83 88 96 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 42th prctile is 0 cuez for grp 1
         temp=prctile(cuez(groupLabelsFromTCA==2),[0 42 50 72 77 85 98 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
     case 'cuedOverUncued'
-        basesubtract=false; % [0 4 10 15 50 85 96 100] [0 10 20 50 70 80 96 100]
+        basesubtract=false; % [0 4 10 15 50 85 96 100] [0 10 20 50 70 80 96 100] [0 10 20 50 70 80 96 100]
         temp=prctile(cuez(groupLabelsFromTCA==1),[0 10 20 50 70 80 96 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 39th prctile is 0 cuez for grp 1
-        temp=prctile(cuez(groupLabelsFromTCA==2),[0 10 20 50 70 80 96 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
+        temp=prctile(cuez(groupLabelsFromTCA==2),[0 10 20 50 70 90 96 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
     case 'uncuedOverCued'
         basesubtract=false;
         temp=prctile(cuez(groupLabelsFromTCA==1),[0 17 22 40 60 82 90 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 42th prctile is 0 cuez for grp 1
@@ -132,20 +132,27 @@ end
 
 function plotOutsOverlayed(out1,out2)
 
+baseSubDiffers=false;
+
 cmap=getCmapWithRed(1:length(out2.allunits)+1); hold on;
 differs=cell(1,length(out1.allunits));
 differstimes=cell(1,length(out1.allunits));
 for i=1:length(out1.allunits)
-%     figure();
+    figure();
     data1=out1.allunits{i};
     data2=out2.allunits{i};
-%     plot(out1.time{i},nanmean(data1,1),'Color',cmap(i,:));
+    plot(out1.time{i},nanmean(data1,1),'Color',cmap(i,:));
     hold on;
-%     plot(out2.time{i},nanmean(data2,1),'Color',cmap(i,:));
-%     scatter(out2.time{i},nanmean(data2,1),3,cmap(i,:));
+    plot(out2.time{i},nanmean(data2,1),'Color',cmap(i,:));
+    scatter(out2.time{i},nanmean(data2,1),4,cmap(i,:));
     si=min(size(data1,2),size(data2,2));
-%     differs{i}=nanmean(data1(:,1:si),1)-nanmean(data2(:,1:si),1);
+    differs{i}=nanmean(data1(:,1:si),1)-nanmean(data2(:,1:si),1);
     differs{i}=data1(:,1:si)-data2(:,1:si);
+    if baseSubDiffers==true
+        temp=differs{i};
+        base=nanmean(nanmean(temp(:,out1.time{i}>6 & out1.time{i}<=11),2),1);
+        differs{i}=differs{i}-base;
+    end
     t1=out1.time{i}; 
     differstimes{i}=t1(1:si);
 end
@@ -153,6 +160,7 @@ end
 figure();
 smoo=10;
 forvio_timewindow=[smoo*0.06 4];
+% forvio_timewindow=[1 4];
 forvio=cell(1,2);
 k=1;
 alldatas=[];
@@ -179,7 +187,7 @@ end
 % disp(['pval from ranksum is ' num2str(p)]);
 
 figure();
-violin(forvio,'facecolor',cmap,'medc',[],'facealpha',1);
+violin(forvio,'facecolor',cmap,'medc',[],'facealpha',1,'bw',0.4);
 [p,tbl,stats]=anova1(alldatas,alldatas_labels);
 results=multcompare(stats);
 results_tbl = array2table(results,"VariableNames", ...
