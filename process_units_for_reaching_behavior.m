@@ -692,14 +692,16 @@ uncued_reach_Response=uncued_success_Response; uncued_reach_Response.unitbyunit_
 % cuez=getCueTunedUnits(uncued_reach_Response,uncuedReach_Response,'cue_vs_baseline_no_index','mean',1,[7 16],[-2 0],[7 16],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
 % plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncued');
 
-% DIFFERENT IN CUED V UNCUED
+%% Prepare for DIFFERENT IN CUED V UNCUED
 out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',cuedReach_Response,cued_success_Response,[],[],[]);
 [cuedReach_Response,whichTookFromUnits]=removeUnitFromResponse(cuedReach_Response,out.whichRmvd); 
 [cued_success_Response,whichTookFromUnits]=removeUnitFromResponse(cued_success_Response,out.whichRmvd); groupLabelsFromTCA=groupLabelsFromTCA(~ismember(1:length(groupLabelsFromTCA),whichTookFromUnits));
 [cued_failure_Response,whichTookFromUnits]=removeUnitFromResponse(cued_failure_Response,out.whichRmvd); 
 [uncued_success_Response,whichTookFromUnits]=removeUnitFromResponse(uncued_success_Response,out.whichRmvd); 
 [uncued_failure_Response,whichTookFromUnits]=removeUnitFromResponse(uncued_failure_Response,out.whichRmvd); 
-cuez=getCueTunedUnits(cuedReach_Response,uncuedReach_Response,'justcue_v_justuncue','mean',1,[4 12.5],[-2 0],[4 12.5],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue' or 'vs_uncued_reach_no_index'
+
+%% Plot DIFFERENT IN CUED V UNCUED
+cuez=getCueTunedUnits(cuedReach_Response,uncuedReach_Response,'justcue_v_justuncue','mean',1,[4 12],[-2 0],[4 12],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue' or 'vs_uncued_reach_no_index'
 % cuez=getCueTunedUnits(cued_reach_Response,uncued_reach_Response,'justcue_v_justuncue','mean',1,[4 12.5],[-2 0],[4 12.5],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue' or 'vs_uncued_reach_no_index'
 % cuez=getCueTunedUnits(cue_noReach_Response,uncued_reach_Response,'vs_uncued_reach_no_index','mean',1,[9 12.5],[-0.37 1.5],[9 12.5],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue' or 'vs_uncued_reach_no_index'
 plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'cuedOverUncued');

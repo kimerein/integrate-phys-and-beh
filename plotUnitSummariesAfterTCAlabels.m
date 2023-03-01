@@ -36,8 +36,8 @@ switch doingCued
         temp=prctile(cuez(groupLabelsFromTCA==2),[0 42 50 72 77 85 98 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
     case 'cuedOverUncued'
         basesubtract=false; % [0 4 10 15 50 85 96 100] [0 10 20 50 70 80 96 100] [0 10 20 50 70 80 96 100]
-        temp=prctile(cuez(groupLabelsFromTCA==1),[0 10 20 50 70 80 96 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 39th prctile is 0 cuez for grp 1
-        temp=prctile(cuez(groupLabelsFromTCA==2),[0 10 20 50 70 90 96 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
+        temp=prctile(cuez(groupLabelsFromTCA==1),[0 10 20 50 60 70 95 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 39th prctile is 0 cuez for grp 1
+        temp=prctile(cuez(groupLabelsFromTCA==2),[0 10 20 50 60 70 95 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
     case 'uncuedOverCued'
         basesubtract=false;
         temp=prctile(cuez(groupLabelsFromTCA==1),[0 17 22 40 60 82 90 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 42th prctile is 0 cuez for grp 1
@@ -187,7 +187,7 @@ end
 % disp(['pval from ranksum is ' num2str(p)]);
 
 figure();
-violin(forvio,'facecolor',cmap,'medc',[],'facealpha',1,'bw',0.4);
+violin(forvio,'facecolor',cmap,'medc',[],'facealpha',1); %,'bw',0.4);
 [p,tbl,stats]=anova1(alldatas,alldatas_labels);
 results=multcompare(stats);
 results_tbl = array2table(results,"VariableNames", ...
