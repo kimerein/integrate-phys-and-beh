@@ -729,6 +729,9 @@ if length(varargin)==2
     Response=varargin{1};
     Response2=varargin{2};
     Response3=[];
+    if length(Response.excluded)~=length(Response2.excluded)
+        error('Must have same length field called excluded. Use alignToReadInUnitNames.m to fix.');
+    end
     Response1_indsIntoExcluded=find(Response.excluded==0);
     Response2_indsIntoExcluded=find(Response2.excluded==0);
     useTheseUnitsResponse1=find(ismember(Response1_indsIntoExcluded,Response2_indsIntoExcluded));
@@ -741,6 +744,9 @@ elseif length(varargin)==3
     Response=varargin{1};
     Response2=varargin{2};
     Response3=varargin{3};
+    if (length(Response.excluded)~=length(Response2.excluded)) || (length(Response.excluded)~=length(Response3.excluded))
+        error('Must have same length field called excluded. Use alignToReadInUnitNames.m to fix.');
+    end
     Response1_indsIntoExcluded=find(Response.excluded==0);
     Response2_indsIntoExcluded=find(Response2.excluded==0);
     Response3_indsIntoExcluded=find(Response3.excluded==0);
@@ -777,6 +783,9 @@ elseif length(varargin)==5
     Response3=varargin{3};
     Response4=varargin{4};
     Response5=varargin{5};
+    if (length(Response.excluded)~=length(Response2.excluded)) || (length(Response.excluded)~=length(Response3.excluded)) || (length(Response.excluded)~=length(Response4.excluded)) || (length(Response.excluded)~=length(Response5.excluded))
+        error('Must have same length field called excluded. Use alignToReadInUnitNames.m to fix.');
+    end
     Response1_indsIntoExcluded=find(Response.excluded==0);
     Response2_indsIntoExcluded=find(Response2.excluded==0);
     if ~isempty(Response3)
