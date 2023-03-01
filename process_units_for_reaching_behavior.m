@@ -676,14 +676,10 @@ a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not dow
 % fixing cuedReach response because missing units compared to others
 load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\unitbyunit_names.mat');
 load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\unitbyunitnames_cuedreach.mat')
-indexCuedreachcellsIntoUnitNames=getNamesIndexIntoNamesList(unitbyunitnames_cuedreach.names,unitbyunit_names);
-f=find(unitbyunit_names.excluded==0); indsIntoExcluded=f(indexCuedreachcellsIntoUnitNames); 
-cuedReach_Response.excluded=zeros(size(unitbyunit_names.excluded)); cuedReach_Response.excluded(indsIntoExcluded)=1;
+cuedReach_Response=matchExcludedBasedOnUnitNames(unitbyunitnames_cuedreach,unitbyunit_names,cuedReach_Response);
 
-out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',cue_noReach_Response,cue_Response,[],[],[]);
+out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',cue_noReach_Response,cued_success_Response,[],[],[]);
 cue_noReach_Response=out.Response1;  
-out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',cuedReach_Response,cue_Response,[],[],[]);
-cuedReach_Response=out.Response1;  
 cued_reach_Response=cued_success_Response; cued_reach_Response.unitbyunit_y=(cued_success_Response.unitbyunit_y+cued_failure_Response.unitbyunit_y)./2; 
 uncued_reach_Response=uncued_success_Response; uncued_reach_Response.unitbyunit_y=(uncued_success_Response.unitbyunit_y+uncued_failure_Response.unitbyunit_y(:,1:2849))./2; 
 % cuez=getCueTunedUnits(cue_noReach_Response,uncuedReach_Response,'vs_uncued_reach','max'); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
@@ -697,6 +693,12 @@ uncued_reach_Response=uncued_success_Response; uncued_reach_Response.unitbyunit_
 % plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncued');
 
 % DIFFERENT IN CUED V UNCUED
+out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',cuedReach_Response,cued_success_Response,[],[],[]);
+[cuedReach_Response,whichTookFromUnits]=removeUnitFromResponse(cuedReach_Response,out.whichRmvd); 
+[cued_success_Response,whichTookFromUnits]=removeUnitFromResponse(cued_success_Response,out.whichRmvd); groupLabelsFromTCA=groupLabelsFromTCA(~ismember(1:length(groupLabelsFromTCA),whichTookFromUnits));
+[cued_failure_Response,whichTookFromUnits]=removeUnitFromResponse(cued_failure_Response,out.whichRmvd); 
+[uncued_success_Response,whichTookFromUnits]=removeUnitFromResponse(uncued_success_Response,out.whichRmvd); 
+[uncued_failure_Response,whichTookFromUnits]=removeUnitFromResponse(uncued_failure_Response,out.whichRmvd); 
 cuez=getCueTunedUnits(cuedReach_Response,uncuedReach_Response,'justcue_v_justuncue','mean',1,[4 12.5],[-2 0],[4 12.5],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue' or 'vs_uncued_reach_no_index'
 % cuez=getCueTunedUnits(cued_reach_Response,uncued_reach_Response,'justcue_v_justuncue','mean',1,[4 12.5],[-2 0],[4 12.5],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue' or 'vs_uncued_reach_no_index'
 % cuez=getCueTunedUnits(cue_noReach_Response,uncued_reach_Response,'vs_uncued_reach_no_index','mean',1,[9 12.5],[-0.37 1.5],[9 12.5],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue' or 'vs_uncued_reach_no_index'

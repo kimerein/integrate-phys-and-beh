@@ -77,7 +77,7 @@ switch varargin{1}
         Response3=varargin{4};
         Response4=varargin{5};
         Response5=varargin{6};
-        [out.Response1,out.Response2,out.Response3,out.Response4,out.Response5]=matchUnitsAcrossResponses(Response,Response2,Response3,Response4,Response5);
+        [out.Response1,out.Response2,out.Response3,out.Response4,out.Response5,out.whichRmvd]=matchUnitsAcrossResponses(Response,Response2,Response3,Response4,Response5);
     case 'scatterResponseVsResponse'
         grayOutNonResponse=true; %true;
         Response2=varargin{3};
@@ -722,7 +722,7 @@ ylabel('Response 2');
 
 end
 
-function [Response,Response2,Response3,Response4,Response5]=matchUnitsAcrossResponses(varargin)
+function [Response,Response2,Response3,Response4,Response5,whichRmvd]=matchUnitsAcrossResponses(varargin)
 
 Response=[]; Response2=[]; Response3=[]; Response4=[]; Response5=[];
 if length(varargin)==2
@@ -783,8 +783,23 @@ elseif length(varargin)==5
     Response3=varargin{3};
     Response4=varargin{4};
     Response5=varargin{5};
-    if (length(Response.excluded)~=length(Response2.excluded)) || (length(Response.excluded)~=length(Response3.excluded)) || (length(Response.excluded)~=length(Response4.excluded)) || (length(Response.excluded)~=length(Response5.excluded))
+    if (length(Response.excluded)~=length(Response2.excluded)) 
         error('Must have same length field called excluded. Use alignToReadInUnitNames.m to fix.');
+    end
+    if ~isempty(Response3)
+        if (length(Response.excluded)~=length(Response3.excluded)) 
+            error('Must have same length field called excluded. Use alignToReadInUnitNames.m to fix.');
+        end
+    end
+    if ~isempty(Response4)
+        if (length(Response.excluded)~=length(Response4.excluded)) 
+            error('Must have same length field called excluded. Use alignToReadInUnitNames.m to fix.');
+        end
+    end
+    if ~isempty(Response5)
+        if (length(Response.excluded)~=length(Response5.excluded)) 
+            error('Must have same length field called excluded. Use alignToReadInUnitNames.m to fix.');
+        end
     end
     Response1_indsIntoExcluded=find(Response.excluded==0);
     Response2_indsIntoExcluded=find(Response2.excluded==0);
@@ -823,6 +838,7 @@ elseif length(varargin)==5
         end
     end
     inAll=u(isInAll==1);
+    whichRmvd=u(isInAll==0);
 
     temp=ismember(Response1_indsIntoExcluded,inAll);
     useTheseUnitsResponse1=find(temp);
