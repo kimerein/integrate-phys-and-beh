@@ -13,8 +13,9 @@ else
         minProm=prctile(aligned.cueZone,99)-prctile(aligned.cueZone,1);
         minProm2=prctile(aligned.cueZone,98)-prctile(aligned.cueZone,2);
     else
-        minProm=200;
-        minProm2=100;
+        minProm=100000;
+        minProm2=50000;
+        minArd=0.7;
     end
 end
 settings.minProm=minProm;
@@ -22,8 +23,8 @@ settings.minProm2=minProm2;
 
 temp=aligned.cueZone-median(aligned.cueZone,'omitnan');
 temp=temp./max(temp,[],2,'omitnan');
-temp(temp>=0.5)=1;
-temp(temp<0.5)=0;
+temp(temp>=minArd)=1;
+temp(temp<minArd)=0;
 aligned.cue=temp;
 
 [~,fmovie,widths,proms]=findpeaks(aligned.cueZone,'MinPeakProminence',minProm);

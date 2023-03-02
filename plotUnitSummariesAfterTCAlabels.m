@@ -187,7 +187,7 @@ end
 % disp(['pval from ranksum is ' num2str(p)]);
 
 figure();
-violin(forvio,'facecolor',cmap,'medc',[],'facealpha',1); %,'bw',0.4);
+violin(forvio,'facecolor',cmap,'medc',[],'facealpha',1,'bw',0.4);
 [p,tbl,stats]=anova1(alldatas,alldatas_labels);
 results=multcompare(stats);
 results_tbl = array2table(results,"VariableNames", ...
@@ -466,15 +466,16 @@ backup_cuezbins=cuezbins;
 if iscell(backup_cuezbins)
     cuezbins=backup_cuezbins{1};
 end
-temp=cued_success_Response;
+
 bycuez=cell(length(cuezbins)-1,1);
 time=cell(length(cuezbins)-1,1);
 gpLab=1;
 for i=1:length(cuezbins)-1
+    temp=cued_success_Response;
     temp.idx=groupLabelsFromTCA; exclu=temp.excluded;
     incuezrange=cuez>cuezbins(i) & cuez<=cuezbins(i+1);
-    sub1=subResponse(temp,'idx',gpLab); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=gpLab))=0;
-    sub1.incuezrange=incuezrange(temp.idx==gpLab); sub1=subResponse(sub1,'incuezrange',1); f=find(exclu~=0); sub1.excluded(f(incuezrange~=1))=0;
+    sub1=subResponse(temp,'idx',gpLab); f=find(exclu~=1); sub1.excluded(f(groupLabelsFromTCA~=gpLab))=1;
+    sub1.incuezrange=incuezrange(temp.idx==gpLab); sub1=subResponse(sub1,'incuezrange',1); f=find(exclu~=1); sub1.excluded(f(incuezrange~=1))=1;
     if all(isnan(sub1.unitbyunit_y),'all')
         continue
     end
@@ -552,14 +553,15 @@ title(['groupLabel is 1 ' addToTit]);
 if iscell(backup_cuezbins)
     cuezbins=backup_cuezbins{2};
 end
-temp=cued_success_Response;
+
 bycuez=cell(length(cuezbins)-1,1);
 gpLab=2;
 for i=1:length(cuezbins)-1
+    temp=cued_success_Response;
     temp.idx=groupLabelsFromTCA; exclu=temp.excluded;
     incuezrange=cuez>cuezbins(i) & cuez<=cuezbins(i+1);
-    sub1=subResponse(temp,'idx',gpLab); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=gpLab))=0;
-    sub1.incuezrange=incuezrange(temp.idx==gpLab); sub1=subResponse(sub1,'incuezrange',1); f=find(exclu~=0); sub1.excluded(f(incuezrange~=1))=0;
+    sub1=subResponse(temp,'idx',gpLab); f=find(exclu~=1); sub1.excluded(f(groupLabelsFromTCA~=gpLab))=1;
+    sub1.incuezrange=incuezrange(temp.idx==gpLab); sub1=subResponse(sub1,'incuezrange',1); f=find(exclu~=1); sub1.excluded(f(incuezrange~=1))=1;
     if all(isnan(sub1.unitbyunit_y),'all')
         continue
     end

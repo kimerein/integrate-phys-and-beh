@@ -693,6 +693,7 @@ uncued_reach_Response=uncued_success_Response; uncued_reach_Response.unitbyunit_
 % plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncued');
 
 %% Prepare for DIFFERENT IN CUED V UNCUED
+load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\groupLabelsFromTCA.mat');
 out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',cuedReach_Response,cued_success_Response,[],[],[]);
 [cuedReach_Response,whichTookFromUnits]=removeUnitFromResponse(cuedReach_Response,out.whichRmvd); 
 [cued_success_Response,whichTookFromUnits]=removeUnitFromResponse(cued_success_Response,out.whichRmvd); groupLabelsFromTCA=groupLabelsFromTCA(~ismember(1:length(groupLabelsFromTCA),whichTookFromUnits));
