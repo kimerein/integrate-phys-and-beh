@@ -664,6 +664,7 @@ boot=1; % num iterations for bootstrap
 % hold on; plot(nanmean(cued_success_Response.aligncomp_x,1),nanmean(cued_success_Response.aligncomp_y(idx==2 & cuedcellresponse<0,:),1),'Color','c'); title('success uncued');
 
 % analyzeProbabilityOfOnAfterOutcome(dd,[0 2],[],[]);
+% plotSU_contextAndOutcome('Z:\MICROSCOPE\Kim\WHISPER recs\Mar_1\20210803\SU aligned to behavior',failure_off);
 
 %% Plot unit summaries according to groupLabelsFromTCA
 % if ~exist('cuez','var')
@@ -706,6 +707,9 @@ cuez=getCueTunedUnits(cuedReach_Response,uncuedReach_Response,'justcue_v_justunc
 % cuez=getCueTunedUnits(cued_reach_Response,uncued_reach_Response,'justcue_v_justuncue','mean',1,[4 12.5],[-2 0],[4 12.5],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue' or 'vs_uncued_reach_no_index'
 % cuez=getCueTunedUnits(cue_noReach_Response,uncued_reach_Response,'vs_uncued_reach_no_index','mean',1,[9 12.5],[-0.37 1.5],[9 12.5],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue' or 'vs_uncued_reach_no_index'
 plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'cuedOverUncued');
+
+cuez=getCueTunedUnits(uncuedReach_Response,cuedReach_Response,'justcue_v_justuncue','mean',1,[4 12],[-2 0],[4 12],[-2 0]); 
+plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued');
 
 %% colormaps
 % SUCCESS V FAILURE 
