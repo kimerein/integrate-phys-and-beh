@@ -712,7 +712,8 @@ cuez=getCueTunedUnits(uncuedReach_Response,cuedReach_Response,'justcue_v_justunc
 plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued');
 
 %% D-prime within unit across trials over time
-analyzeProbabilityOfOnAfterOutcome(dd,[0 2],[],[]);
+analyzeProbabilityOfOnAfterOutcome(dd,[],[],[],'cued_success','uncued_success','overTime');
+% analyzeProbabilityOfOnAfterOutcome(dd,[0 2],[],[]);
 
 %% colormaps
 % SUCCESS V FAILURE 

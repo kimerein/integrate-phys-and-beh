@@ -34,6 +34,18 @@ if isempty(failure_Response)
     failure_Response=getAndSaveResponse(dd_more,whichUnitsToGrab,settings,[]);
 end
 
+% make aligncomp peaks the same
+ti=nanmean(success_Response.aligncomp_x,1);
+aligncompy=nanmean(success_Response.aligncomp_y,1);
+[~,apeak]=nanmax(aligncompy); peakAt=ti(apeak);
+success_Response.aligncomp_x=success_Response.aligncomp_x-peakAt;
+success_Response.unitbyunit_x=success_Response.unitbyunit_x-peakAt;
+ti=nanmean(failure_Response.aligncomp_x,1);
+aligncompy=nanmean(failure_Response.aligncomp_y,1);
+[~,apeak]=nanmax(aligncompy); peakAt=ti(apeak);
+failure_Response.aligncomp_x=failure_Response.aligncomp_x-peakAt;
+failure_Response.unitbyunit_x=failure_Response.unitbyunit_x-peakAt;
+
 switch overTimeOrJustTimeWindow
     case 'justTimeWindow'
         % get probability of response in time window for each unit
@@ -251,12 +263,89 @@ switch overTimeOrJustTimeWindow
         % hold on; scatter(p_success_unitbyunitBEFORE(success_Response.D1tag(success_Response.excluded==0)==1)-p_success_unitbyunitAFTER(success_Response.D1tag(success_Response.excluded==0)==1),p_failure_unitbyunitBEFORE(success_Response.D1tag(success_Response.excluded==0)==1)-p_failure_unitbyunitAFTER(success_Response.D1tag(success_Response.excluded==0)==1),[],'r');
 
     case 'overTime'
-        
+        timeBins=nan(length(-3:0.125:9.5),2); 
+        timeBins(:,1)=-3:0.125:9.5;
+        timeBins(:,2)=[-3:0.125:9.5]+2;
+        [dp,dpfr,isSig,pval,p_success_ubyu,p_failure_ubyu,fr_success_ubyu,fr_failure_ubyu,timebinMeans]=dprimesOverTime(success_Response,failure_Response,timeBins);
+%         dp(isinf(dp) & dp>0)=10;
+%         dp(isinf(dp) & dp<0)=-10;
+%         dp(dp==-10)=nan; dp(dp==10)=nan;
+%         load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\groupLabelsFromTCA.mat');
+%         figure(); plot(timebinMeans,nanmean(dp(:,groupLabelsFromTCA==1),2)); hold on;
+%         plot(timebinMeans,nanmean(dp(:,groupLabelsFromTCA==1),2)+nanstd(dp(:,groupLabelsFromTCA==1),[],2)./sqrt(size(dp(:,groupLabelsFromTCA==1),1)));
+%         plot(timebinMeans,nanmean(dp(:,groupLabelsFromTCA==1),2)-nanstd(dp(:,groupLabelsFromTCA==1),[],2)./sqrt(size(dp(:,groupLabelsFromTCA==1),1)));
+%         cuez=nanmean(fr_success_ubyu(timebinMeans<0,:),1)-nanmean(fr_failure_ubyu(timebinMeans<0,:),1);
+%         ta=cuez>prctile(cuez,90);
+%         gpLab=2; figure(); plot(timebinMeans,nanmean(dp(:,groupLabelsFromTCA==gpLab & ta'),2),'Color','b'); hold on;
+%         plot(timebinMeans,nanmean(dp(:,groupLabelsFromTCA==gpLab & ta'),2)+nanstd(dp(:,groupLabelsFromTCA==gpLab & ta'),[],2)./sqrt(size(dp(:,groupLabelsFromTCA==gpLab & ta'),1)),'Color','b');
+%         plot(timebinMeans,nanmean(dp(:,groupLabelsFromTCA==gpLab & ta'),2)-nanstd(dp(:,groupLabelsFromTCA==gpLab & ta'),[],2)./sqrt(size(dp(:,groupLabelsFromTCA==gpLab & ta'),1)),'Color','b');
+%         hold on; gpLab=1; plot(timebinMeans,nanmean(dp(:,groupLabelsFromTCA==gpLab & ta'),2),'Color','r'); hold on;
+%         plot(timebinMeans,nanmean(dp(:,groupLabelsFromTCA==gpLab & ta'),2)+nanstd(dp(:,groupLabelsFromTCA==gpLab & ta'),[],2)./sqrt(size(dp(:,groupLabelsFromTCA==gpLab & ta'),1)),'Color','r');
+%         plot(timebinMeans,nanmean(dp(:,groupLabelsFromTCA==gpLab & ta'),2)-nanstd(dp(:,groupLabelsFromTCA==gpLab & ta'),[],2)./sqrt(size(dp(:,groupLabelsFromTCA==gpLab & ta'),1)),'Color','r');
+
+%         dpfr(dpfr>10)=10; dpfr(dpfr<-10)=10; dpfr(dpfr==-10)=nan; dpfr(dpfr==10)=nan;
+%         gpLab=2; figure(); plot(timebinMeans,nanmean(dpfr(:,groupLabelsFromTCA==gpLab & ta'),2),'Color','b'); hold on;
+%         plot(timebinMeans,nanmean(dpfr(:,groupLabelsFromTCA==gpLab & ta'),2)+nanstd(dpfr(:,groupLabelsFromTCA==gpLab & ta'),[],2)./sqrt(size(dpfr(:,groupLabelsFromTCA==gpLab & ta'),1)),'Color','b');
+%         plot(timebinMeans,nanmean(dpfr(:,groupLabelsFromTCA==gpLab & ta'),2)-nanstd(dpfr(:,groupLabelsFromTCA==gpLab & ta'),[],2)./sqrt(size(dpfr(:,groupLabelsFromTCA==gpLab & ta'),1)),'Color','b');
+%         hold on; gpLab=1; plot(timebinMeans,nanmean(dpfr(:,groupLabelsFromTCA==gpLab & ta'),2),'Color','r'); hold on;
+%         plot(timebinMeans,nanmean(dpfr(:,groupLabelsFromTCA==gpLab & ta'),2)+nanstd(dpfr(:,groupLabelsFromTCA==gpLab & ta'),[],2)./sqrt(size(dpfr(:,groupLabelsFromTCA==gpLab & ta'),1)),'Color','r');
+%         plot(timebinMeans,nanmean(dpfr(:,groupLabelsFromTCA==gpLab & ta'),2)-nanstd(dpfr(:,groupLabelsFromTCA==gpLab & ta'),[],2)./sqrt(size(dpfr(:,groupLabelsFromTCA==gpLab & ta'),1)),'Color','r');
+% 
+%         ta=cuez<prctile(cuez,10); gpLab=2; figure(); plot(timebinMeans,nanmean(dp(:,groupLabelsFromTCA==gpLab & ta'),2),'Color','b'); hold on; 
+%         plot(timebinMeans,nanmean(dp(:,groupLabelsFromTCA==gpLab & ta'),2)+nanstd(dp(:,groupLabelsFromTCA==gpLab & ta'),[],2)./sqrt(size(dp(:,groupLabelsFromTCA==gpLab & ta'),1)),'Color','b'); 
+%         plot(timebinMeans,nanmean(dp(:,groupLabelsFromTCA==gpLab & ta'),2)-nanstd(dp(:,groupLabelsFromTCA==gpLab & ta'),[],2)./sqrt(size(dp(:,groupLabelsFromTCA==gpLab & ta'),1)),'Color','b');
+%         hold on; gpLab=1; plot(timebinMeans,nanmean(dp(:,groupLabelsFromTCA==gpLab & ta'),2),'Color','r'); hold on; 
+%         plot(timebinMeans,nanmean(dp(:,groupLabelsFromTCA==gpLab & ta'),2)+nanstd(dp(:,groupLabelsFromTCA==gpLab & ta'),[],2)./sqrt(size(dp(:,groupLabelsFromTCA==gpLab & ta'),1)),'Color','r'); 
+%         plot(timebinMeans,nanmean(dp(:,groupLabelsFromTCA==gpLab & ta'),2)-nanstd(dp(:,groupLabelsFromTCA==gpLab & ta'),[],2)./sqrt(size(dp(:,groupLabelsFromTCA==gpLab & ta'),1)),'Color','r');
+    
+    backup.success_Response=success_Response;
+    backup.failure_Response=failure_Response;
+    timeBins=nan(length(-3:0.125:9.5),2); 
+    timeBins(:,1)=-3:0.125:9.5;
+    timeBins(:,2)=[-3:0.125:9.5]+2;
+    ta=cuez>prctile(cuez,90);
+    uns=unique(success_Response.fromWhichUnit);
+    success_Response.fromWhichUnit(ismember(success_Response.fromWhichUnit,uns(ta)))=1;
+    success_Response.fromWhichUnit(~ismember(success_Response.fromWhichUnit,uns(ta)))=2;
+    failure_Response.fromWhichUnit(ismember(failure_Response.fromWhichUnit,uns(ta)))=1;
+    failure_Response.fromWhichUnit(~ismember(failure_Response.fromWhichUnit,uns(ta)))=2;
+    [dp,dpfr,isSig,pval,p_success_ubyu,p_failure_ubyu,fr_success_ubyu,fr_failure_ubyu,timebinMeans]=withinSessDprime(success_Response,failure_Response,timeBins);
+
+end
+
+end
+
+function [dp_all,dpfr_all,isSig_all,pval_all,p_success_unitbyunit_all,p_failure_unitbyunit_all,fr_success_unitbyunit_all,fr_failure_unitbyunit_all,timebinMeans]=withinSessDprime(success_Response,failure_Response,timeBins)
+
+for i=1:size(timeBins,1)
+    [dp,dpfr,isSig,pval,p_success_unitbyunit,p_failure_unitbyunit,fr_success_unitbyunit,fr_failure_unitbyunit]=dprimeInTimeSessBySess(success_Response,failure_Response,timeBins(i,:));
+    if i==1
+        dp_all=nan(size(timeBins,1),size(dp,1),size(dp,2));
+        dpfr_all=nan(size(timeBins,1),size(dp,1),size(dp,2));
+        isSig_all=nan(size(timeBins,1),size(dp,1),size(dp,2));
+        pval_all=nan(size(timeBins,1),size(dp,1),size(dp,2));
+        p_success_unitbyunit_all=nan(size(timeBins,1),size(dp,1),size(dp,2));
+        p_failure_unitbyunit_all=nan(size(timeBins,1),size(dp,1),size(dp,2));
+        fr_success_unitbyunit_all=nan(size(timeBins,1),size(dp,1),size(dp,2));
+        fr_failure_unitbyunit_all=nan(size(timeBins,1),size(dp,1),size(dp,2));
+        timebinMeans=nan(size(timeBins,1),1);
+    end
+    dp_all(i,:,:)=dp;
+    dpfr_all(i,:,:)=dpfr;
+    if ~isempty(isSig)
+        isSig_all(i,:,:)=isSig;
+        pval_all(i,:,:)=pval;
+    end
+    p_success_unitbyunit_all(i,:,:)=p_success_unitbyunit;
+    p_failure_unitbyunit_all(i,:,:)=p_failure_unitbyunit;
+    fr_success_unitbyunit_all(i,:,:)=fr_success_unitbyunit;
+    fr_failure_unitbyunit_all(i,:,:)=fr_failure_unitbyunit;
+    timebinMeans(i)=mean(timeBins(i,:));
 end
 
 end
 
-function dprimesOverTime(success_Response,failure_Response,timeBins)
+function [dp_all,dpfr_all,isSig_all,pval_all,p_success_unitbyunit_all,p_failure_unitbyunit_all,fr_success_unitbyunit_all,fr_failure_unitbyunit_all,timebinMeans]=dprimesOverTime(success_Response,failure_Response,timeBins)
 
 for i=1:size(timeBins,1)
     [dp,dpfr,isSig,pval,p_success_unitbyunit,p_failure_unitbyunit,fr_success_unitbyunit,fr_failure_unitbyunit]=dprimeInTime(success_Response,failure_Response,timeBins(i,:));
@@ -273,14 +362,62 @@ for i=1:size(timeBins,1)
     end
     dp_all(i,:)=dp;
     dpfr_all(i,:)=dpfr;
-    isSig_all(i,:)=isSig;
-    pval_all(i,:)=pval;
+    if ~isempty(isSig)
+        isSig_all(i,:)=isSig;
+        pval_all(i,:)=pval;
+    end
     p_success_unitbyunit_all(i,:)=p_success_unitbyunit;
     p_failure_unitbyunit_all(i,:)=p_failure_unitbyunit;
     fr_success_unitbyunit_all(i,:)=fr_success_unitbyunit;
     fr_failure_unitbyunit_all(i,:)=fr_failure_unitbyunit;
-    timebinMeans(i)=nan(size(timeBins,1),1);
+    timebinMeans(i)=mean(timeBins(i,:));
 end
+
+end
+
+function [dp,dpfr,isSig,pval,p_success_unitbyunit,p_failure_unitbyunit,fr_success_unitbyunit,fr_failure_unitbyunit]=dprimeInTimeSessBySess(success_Response,failure_Response,timeWindow)
+
+isSig=[];
+pval=[];
+nBoots=100;
+
+% get probability of response in time window for each unit
+[~,alignPeakInd]=nanmax(nanmean(success_Response.aligncomp_y,1));
+temp=nanmean(success_Response.aligncomp_x,1);
+alignSuccessTime=temp(alignPeakInd);
+[~,alignPeakInd]=nanmax(nanmean(failure_Response.aligncomp_y,1));
+temp=nanmean(failure_Response.aligncomp_x,1);
+alignFailureTime=temp(alignPeakInd);
+[~,startAt]=nanmin(abs(nanmean(success_Response.unitbyunit_x,1)-(alignSuccessTime+timeWindow(1))));
+[~,endAt]=nanmin(abs(nanmean(success_Response.unitbyunit_x,1)-(alignSuccessTime+timeWindow(2))));
+successRange=[startAt endAt];
+[~,startAt]=nanmin(abs(nanmean(failure_Response.unitbyunit_x,1)-(alignFailureTime+timeWindow(1))));
+[~,endAt]=nanmin(abs(nanmean(failure_Response.unitbyunit_x,1)-(alignFailureTime+timeWindow(2))));
+failureRange=[startAt endAt];
+
+unitfr_success=sum(success_Response.unitbyunit_y(:,successRange(1):successRange(2)),2,'omitnan');
+fromWhichUnit_success=success_Response.fromWhichUnit;
+fromWhichSess_success=success_Response.fromWhichSess_forTrials;
+unitfr_success=unitfr_success(success_Response.isEventInThisTrial==1);
+fromWhichUnit_success=fromWhichUnit_success(success_Response.isEventInThisTrial==1);
+fromWhichSess_success=fromWhichSess_success(success_Response.isEventInThisTrial==1);
+unitfr_failure=sum(failure_Response.unitbyunit_y(:,failureRange(1):failureRange(2)),2,'omitnan');
+fromWhichUnit_failure=failure_Response.fromWhichUnit;
+fromWhichSess_failure=failure_Response.fromWhichSess_forTrials;
+unitfr_failure=unitfr_failure(failure_Response.isEventInThisTrial==1);
+fromWhichUnit_failure=fromWhichUnit_failure(failure_Response.isEventInThisTrial==1);
+fromWhichSess_failure=fromWhichSess_failure(failure_Response.isEventInThisTrial==1);
+
+units=unique(success_Response.fromWhichUnit);
+% [p_success_unitbyunit,p_failure_unitbyunit]=getProbOfResponse(units,unitfr_success,unitfr_failure,fromWhichUnit_success,fromWhichUnit_failure);
+[p_success_unitbyunit,p_failure_unitbyunit]=getProbOfResponseSessBySess(units,unitfr_success,unitfr_failure,fromWhichUnit_success,fromWhichUnit_failure,fromWhichSess_success,fromWhichSess_failure);
+% [isSig,pval]=getSignificantUnits(units,unitfr_success,unitfr_failure,fromWhichUnit_success,fromWhichUnit_failure,nBoots);
+% maxdp=3;
+dp=norminv(p_success_unitbyunit)-norminv(p_failure_unitbyunit);
+% dp(dp<-maxdp)=-maxdp; dp(dp>maxdp)=maxdp;
+
+[fr_success_unitbyunit,fr_failure_unitbyunit,frsd_success_unitbyunit,frsd_failure_unitbyunit]=getFROfResponseSessBySess(units,unitfr_success,unitfr_failure,fromWhichUnit_success,fromWhichUnit_failure,fromWhichSess_success,fromWhichSess_failure);
+dpfr=dprime_from_FR(fr_success_unitbyunit,fr_failure_unitbyunit,frsd_success_unitbyunit,frsd_failure_unitbyunit);
 
 end
 
@@ -581,6 +718,40 @@ for i=1:length(units)
     fr_failure_unitbyunit(i)=nanmean(unitfr_failure(fromWhichUnit_failure==units(i)));
     frsd_success_unitbyunit(i)=nanstd(unitfr_success(fromWhichUnit_success==units(i)));
     frsd_failure_unitbyunit(i)=nanstd(unitfr_failure(fromWhichUnit_failure==units(i)));
+end
+
+end
+
+function [fr_success_unitbyunit,fr_failure_unitbyunit,frsd_success_unitbyunit,frsd_failure_unitbyunit]=getFROfResponseSessBySess(units,unitfr_success,unitfr_failure,fromWhichUnit_success,fromWhichUnit_failure,fromWhichSess_success,fromWhichSess_failure)
+
+uSess=unique([fromWhichSess_success fromWhichSess_failure]);
+fr_success_unitbyunit=nan(length(units),1);
+fr_failure_unitbyunit=nan(length(units),1);
+frsd_success_unitbyunit=nan(length(units),1);
+frsd_failure_unitbyunit=nan(length(units),1);
+for j=1:length(uSess)
+    currSess=uSess(j);
+    for i=1:length(units)
+        fr_success_unitbyunit(i,j)=nanmean(unitfr_success(fromWhichUnit_success==units(i) & fromWhichSess_success==currSess));
+        fr_failure_unitbyunit(i,j)=nanmean(unitfr_failure(fromWhichUnit_failure==units(i) & fromWhichSess_failure==currSess));
+        frsd_success_unitbyunit(i,j)=nanstd(unitfr_success(fromWhichUnit_success==units(i) & fromWhichSess_success==currSess));
+        frsd_failure_unitbyunit(i,j)=nanstd(unitfr_failure(fromWhichUnit_failure==units(i) & fromWhichSess_failure==currSess));
+    end
+end
+
+end
+
+function [p_success_unitbyunit,p_failure_unitbyunit]=getProbOfResponseSessBySess(units,unitfr_success,unitfr_failure,fromWhichUnit_success,fromWhichUnit_failure,fromWhichSess_success,fromWhichSess_failure)
+
+uSess=unique([fromWhichSess_success fromWhichSess_failure]);
+p_success_unitbyunit=nan(length(units),length(uSess));
+p_failure_unitbyunit=nan(length(units),length(uSess));
+for j=1:length(uSess)
+    currSess=uSess(j);
+    for i=1:length(units)
+        p_success_unitbyunit(i,j)=nansum(unitfr_success(fromWhichUnit_success==units(i) & fromWhichSess_success==currSess)>0.5)./nansum(fromWhichUnit_success==units(i) & fromWhichSess_success==currSess);
+        p_failure_unitbyunit(i,j)=nansum(unitfr_failure(fromWhichUnit_failure==units(i) & fromWhichSess_failure==currSess)>0.5)./nansum(fromWhichUnit_failure==units(i) & fromWhichSess_failure==currSess);
+    end
 end
 
 end
