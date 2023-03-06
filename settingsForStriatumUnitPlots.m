@@ -13,3 +13,6 @@ settings.testForAlignment=false;
 settings.unitbaseline=300; %150;
 settings.maxUnitsPerSess=300; % can't get more than this many units per session
 settings.keepAllSingleTrials=false;
+settings.fracForTrainingSet=0.1; % fraction of trials to use for training set
+settings.makeTrainingSet=false;
+settings.useTestSet=false;

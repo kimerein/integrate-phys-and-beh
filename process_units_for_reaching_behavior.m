@@ -711,6 +711,38 @@ plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cu
 cuez=getCueTunedUnits(uncuedReach_Response,cuedReach_Response,'justcue_v_justuncue','mean',1,[4 12],[-2 0],[4 12],[-2 0]); 
 plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued');
 
+%% TCA for just success vs failure
+% response_to_plot='all_success'; plotUnitCriteria=[1 0 0 1 0]; getCriteriaForUnitsToPlot(plotUnitCriteria);
+% dd_more=cell(1,length(dd)); 
+% for i=1:length(dd)
+%     dd_more{i}=[dd{i} sep response_to_plot];
+% end
+% whichUnitsToGrab='_'; success_Response=getAndSaveResponse(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlots,[]); save('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\success_Response.mat','success_Response');
+% response_to_plot='all_failure'; plotUnitCriteria=[1 0 0 1 0]; getCriteriaForUnitsToPlot(plotUnitCriteria);
+% dd_more=cell(1,length(dd)); 
+% for i=1:length(dd)
+%     dd_more{i}=[dd{i} sep response_to_plot];
+% end
+% whichUnitsToGrab='_'; failure_Response=getAndSaveResponse(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlots,[]); save('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\failure_Response.mat','failure_Response');
+load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\success_Response.mat');
+load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\failure_Response.mat');
+trial_n_cutoff=0;
+out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',excludeTooFewTrials(success_Response,trial_n_cutoff,false),excludeTooFewTrials(failure_Response,trial_n_cutoff,false),[],[],[]);
+success_Response=out.Response1; failure_Response=out.Response2; 
+takePointsBeforeZero=30; %15;
+takePointsAfterZero=450;
+dataMatrix=setUpDataMatrix(success_Response,success_Response,failure_Response,success_Response,success_Response,takePointsBeforeZero,takePointsAfterZero);
+dataMatrix(dataMatrix<0)=0; dataMatrix=dataMatrix(:,31:end,:); dataMatrix(:,1:end-73,3)=dataMatrix(:,74:end,3); dataMatrix(:,1:end-73,5)=dataMatrix(:,74:end,5);
+clear newDataMatrix
+for i=1:size(dataMatrix,3)
+    temp=reshape(dataMatrix(:,:,i),size(dataMatrix(:,:,i),1),size(dataMatrix(:,:,i),2));
+    for j=1:size(temp,1)
+        temp(j,:)=smoothdata(temp(j,:),'gaussian',42);%10);
+    end
+    newDataMatrix(:,:,i)=temp; 
+end
+[groupLabelsFromTCA,cuez]=principaledCA(newDataMatrix,{'units','time','conditions'},6,1);
+
 %% D-prime within unit across trials over time
 analyzeProbabilityOfOnAfterOutcome(dd,[],[],[],'cued_success','uncued_success','overTime');
 % analyzeProbabilityOfOnAfterOutcome(dd,[0 2],[],[]);
