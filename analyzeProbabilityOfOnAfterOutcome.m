@@ -449,7 +449,7 @@ switch overTimeOrJustTimeWindow
         plot(timebinMeans,reshape(nanmean(temp(:,1,:),3),size(dp,1),1),'Color',cs{i}); hold on;
         plot(timebinMeans,reshape(nanmean(temp(:,1,:),3),size(dp,1),1)+reshape(nanstd(temp(:,1,:),[],3)./sqrt(size(dp,3)),size(dp,1),1),'Color',cs{i});
         plot(timebinMeans,reshape(nanmean(temp(:,1,:),3),size(dp,1),1)-reshape(nanstd(temp(:,1,:),[],3)./sqrt(size(dp,3)),size(dp,1),1),'Color',cs{i});
-        dps{i}=nanmean(temp(timebinMeans>1 & timebinMeans<=3,1,:),1);
+        dps{i}=nanmean(temp(timebinMeans>2 & timebinMeans<=4,1,:),1);
     end
     figure(); 
     for i=1:length(unneur)
