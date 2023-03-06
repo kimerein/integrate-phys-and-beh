@@ -420,7 +420,10 @@ switch overTimeOrJustTimeWindow
     plot(timebinMeans,reshape(nanmean(temp(:,1,:),3),size(dp,1),1)-reshape(nanstd(temp(:,1,:),[],3)./sqrt(size(dp,3)),size(dp,1),1),'Color','k');
     legend({'dprime prob ta true vs ta false FIRST TRIAL TYPE'});
 
-    dpwithinsess=(fr_success_ubyu(:,1,:)-fr_success_ubyu(:,2,:))./sqrt(fr_succ_sd.^2+fr_fail_sd.^2);
+    backup.fr_succ_sd=fr_succ_sd; backup.fr_fail_sd=fr_fail_sd;
+    fr_succ_sd(fr_succ_sd<0.001)=0; fr_fail_sd(fr_fail_sd<0.001)=0;
+
+    dpwithinsess=(fr_success_ubyu(:,1,:)-fr_success_ubyu(:,2,:))./sqrt(fr_succ_sd(:,1,:).^2+fr_succ_sd(:,2,:).^2);
     dpwithinsess(isinf(dpwithinsess))=nan;
     temp=dpwithinsess;
     figure(); plot(timebinMeans,reshape(nanmean(temp(:,1,:),3),size(dp,1),1),'Color','k'); hold on;
@@ -428,13 +431,33 @@ switch overTimeOrJustTimeWindow
     plot(timebinMeans,reshape(nanmean(temp(:,1,:),3),size(dp,1),1)-reshape(nanstd(temp(:,1,:),[],3)./sqrt(size(dp,3)),size(dp,1),1),'Color','k');
     legend({'dprime from fr ta true vs ta false FIRST TRIAL TYPE'});
 
-%     nneuronsinthissess=nan(length(usess),1);
-%     for i=1:length(usess)
-%     currsess=usess(i);
-%     nneuronsinthissess(i)=length(unique(backup.success_Response.fromWhichUnit(success_Response.fromWhichUnit==1 & success_Response.fromWhichSess_forTrials==currsess)));
-%     end
-%     figure(); histogram(nneuronsinthissess,200);
-
+    nneuronsinthissess=nan(length(usess),1);
+    for i=1:length(usess)
+    currsess=usess(i);
+    nneuronsinthissess(i)=length(unique(backup.success_Response.fromWhichUnit(success_Response.fromWhichUnit==1 & success_Response.fromWhichSess_forTrials==currsess)));
+    end
+    figure(); histogram(nneuronsinthissess,200);
+    unneur=unique(nneuronsinthissess); unneur=unneur(unneur~=0);
+    figure();
+    cs={'m','k','g','c','y','r','b'};
+    dps=cell(1,length(unneur));
+    for i=1:length(unneur)
+        hold on;
+        dpwithinsess=(fr_success_ubyu(:,1,nneuronsinthissess==unneur(i))-fr_success_ubyu(:,2,nneuronsinthissess==unneur(i)))./sqrt(fr_succ_sd(:,1,nneuronsinthissess==unneur(i)).^2+fr_succ_sd(:,2,nneuronsinthissess==unneur(i)).^2);
+        dpwithinsess(isinf(dpwithinsess))=nan;
+        temp=dpwithinsess;
+        plot(timebinMeans,reshape(nanmean(temp(:,1,:),3),size(dp,1),1),'Color',cs{i}); hold on;
+        plot(timebinMeans,reshape(nanmean(temp(:,1,:),3),size(dp,1),1)+reshape(nanstd(temp(:,1,:),[],3)./sqrt(size(dp,3)),size(dp,1),1),'Color',cs{i});
+        plot(timebinMeans,reshape(nanmean(temp(:,1,:),3),size(dp,1),1)-reshape(nanstd(temp(:,1,:),[],3)./sqrt(size(dp,3)),size(dp,1),1),'Color',cs{i});
+        dps{i}=nanmean(temp(timebinMeans>1 & timebinMeans<=3,1,:),1);
+    end
+    figure(); 
+    for i=1:length(unneur)
+        temp=dps{i}; temp=reshape(temp,length(temp),1); dps{i}=temp;
+        scatter(ones(size(temp)).*i,temp); hold on;
+    end
+    figure();
+    violin(dps); %,'bw',0.4);
 end
 
 end
