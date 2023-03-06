@@ -641,7 +641,7 @@ end
 % CCA: Find orthogonal dimensions of max covariance between X=[] and Y=[]
 plotN=6;
 boot=1; % num iterations for bootstrap
-[groupLabelsFromTCA,cuez]=principaledCA(newDataMatrix,{'units','time','conditions'},plotN,boot);
+[groupLabelsFromTCA,cuez]=principaledCA(newDataMatrix,{'units','time','conditions'},plotN,boot,'high');
 
 % zscore_cueR=cue_Response.unitbyunit_y; zscore_cueR(zscore_cueR<0.0001)=0;
 % zscore_cueR=(zscore_cueR)./repmat(std(zscore_cueR(:,500:1000),[],2,'omitnan'),1,size(zscore_cueR,2));
@@ -741,7 +741,7 @@ for i=1:size(dataMatrix,3)
     end
     newDataMatrix(:,:,i)=temp; 
 end
-[groupLabelsFromTCA,cuez]=principaledCA(newDataMatrix,{'units','time','conditions'},6,1);
+[groupLabelsFromTCA,cuez]=principaledCA(newDataMatrix,{'units','time','conditions'},6,1,'low');
 
 %% D-prime within unit across trials over time
 analyzeProbabilityOfOnAfterOutcome(dd,[],[],[],'cued_success','uncued_success','overTime');

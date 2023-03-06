@@ -1,4 +1,6 @@
-function [idx,out_cueresponse]=principaledCA(data,dimensionNames,plotN,bootstrapNTimes)
+function [idx,out_cueresponse]=principaledCA(data,dimensionNames,plotN,bootstrapNTimes,doingHighOrLowRank)
+
+% doingHighOrLowRank='high';
 
 if all(strcmp(dimensionNames,{'units','time','conditions'}))
     disp('Studying units X time X conditions');
@@ -6,40 +8,66 @@ else
     error('principaledCA.m currently requires data matrix structured as units X time X conditions');
 end
 
-backupdata=data;
-data=getTrialTypeDependentResidual(data);
-% Normalize each unit's PSTH, don't min-subtract here bcz assume 0 is 0
-data=normalizeData(data,[2 3],'sd'); % last argument either 'sd', 'max' or 'mean'
-% Remove outliers, only necessary if norm by the mean
-% data=rmOutliersFromNormedPSTH(data);
-% data=ZscoreData(data,[2 3]);
-% data=smoothData(data,2,10); % last arg is gaussian smooth bin
+switch doingHighOrLowRank
+    case 'high'
+        backupdata=data;
+        data=getTrialTypeDependentResidual(data);
+        % Normalize each unit's PSTH, don't min-subtract here bcz assume 0 is 0
+        data=normalizeData(data,[2 3],'sd'); % last argument either 'sd', 'max' or 'mean'
+        % Remove outliers, only necessary if norm by the mean
+        % data=rmOutliersFromNormedPSTH(data);
+        % data=ZscoreData(data,[2 3]);
+        % data=smoothData(data,2,10); % last arg is gaussian smooth bin
 
-% Flatten
-flatData=flatten(data,'expand',[3 1]); % for temporal factors
+        % Flatten
+        flatData=flatten(data,'expand',[3 1]); % for temporal factors
 
-% Display flattened data matrix
-figure();
-imagesc(flatData); title('flatData');
+        % Display flattened data matrix
+        figure();
+        imagesc(flatData); title('flatData');
 
-% Fill in nans and infs
-flatData=noNansOrInfs(flatData);
+        % Fill in nans and infs
+        flatData=noNansOrInfs(flatData);
 
-% Eigenvalues and vectors
-[eigVec_1,sorted_eigVal_1,eigVec_2,sorted_eigVal_2]=plotEigs(flatData,plotN,true);
-bootstrapEigs(flatData,bootstrapNTimes,plotN);
+        % Eigenvalues and vectors
+        [eigVec_1,sorted_eigVal_1,eigVec_2,sorted_eigVal_2]=plotEigs(flatData,plotN,true);
+        bootstrapEigs(flatData,bootstrapNTimes,plotN);
 
-% PCA
-plotPCA(flatData,plotN);
-plotPCA(flatData',plotN);
+        % PCA
+        plotPCA(flatData,plotN);
+        plotPCA(flatData',plotN);
 
-% Project onto eig space
-% projectOntoEigSpace(flatData,2,eigVec_2(:,1:plotN),sorted_eigVal_2(1:plotN));
+        % Project onto eig space
+        % projectOntoEigSpace(flatData,2,eigVec_2(:,1:plotN),sorted_eigVal_2(1:plotN));
 
-% TCA
-R_guess=6; % guess matrix rank
-allconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[2:5])),20,R_guess);
-[allcell_PCs,allcell_archetypeCells,dimOrdering]=studyCPmodel(allconditions_cpmodel);
+        % TCA
+        R_guess=6; % guess matrix rank
+        allconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[2:5])),20,R_guess);
+        [allcell_PCs,allcell_archetypeCells,dimOrdering]=studyCPmodel(allconditions_cpmodel);
+    case 'low'
+        backupdata=data;
+        % Normalize each unit's PSTH, don't min-subtract here bcz assume 0 is 0
+        data=normalizeData(data,[2 3],'sd'); % last argument either 'sd', 'max' or 'mean'
+        % Flatten
+        flatData=flatten(data,'expand',[3 1]); % for temporal factors
+        % Display flattened data matrix
+        figure();
+        imagesc(flatData); title('flatData');
+        % Fill in nans and infs
+        flatData=noNansOrInfs(flatData);
+        % Eigenvalues and vectors
+        [eigVec_1,sorted_eigVal_1,eigVec_2,sorted_eigVal_2]=plotEigs(flatData,plotN,true);
+        bootstrapEigs(flatData,bootstrapNTimes,plotN);
+        % PCA
+        plotPCA(flatData,plotN);
+        plotPCA(flatData',plotN);
+        % Project onto eig space
+        % projectOntoEigSpace(flatData,2,eigVec_2(:,1:plotN),sorted_eigVal_2(1:plotN));
+        % TCA
+        R_guess=4; % guess matrix rank
+        allconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[2:5])),20,R_guess);
+        [allcell_PCs,allcell_archetypeCells,dimOrdering]=studyCPmodel(allconditions_cpmodel);
+end
 
 temp=allconditions_cpmodel.U{1}; meanMinusTemp=temp-repmat(nanmean(temp,2),1,size(temp,2));
 [~,si]=sort(meanMinusTemp(:,3));
