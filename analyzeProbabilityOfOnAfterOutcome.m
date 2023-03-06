@@ -298,27 +298,151 @@ switch overTimeOrJustTimeWindow
 %         plot(timebinMeans,nanmean(dp(:,groupLabelsFromTCA==gpLab & ta'),2)+nanstd(dp(:,groupLabelsFromTCA==gpLab & ta'),[],2)./sqrt(size(dp(:,groupLabelsFromTCA==gpLab & ta'),1)),'Color','r'); 
 %         plot(timebinMeans,nanmean(dp(:,groupLabelsFromTCA==gpLab & ta'),2)-nanstd(dp(:,groupLabelsFromTCA==gpLab & ta'),[],2)./sqrt(size(dp(:,groupLabelsFromTCA==gpLab & ta'),1)),'Color','r');
     
+    load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\groupLabelsFromTCA.mat');
     backup.success_Response=success_Response;
     backup.failure_Response=failure_Response;
     timeBins=nan(length(-3:0.125:9.5),2); 
     timeBins(:,1)=-3:0.125:9.5;
     timeBins(:,2)=[-3:0.125:9.5]+2;
-    ta=cuez>prctile(cuez,90);
+    ta=cuez>prctile(cuez,90) & groupLabelsFromTCA'==2;
     uns=unique(success_Response.fromWhichUnit);
-    success_Response.fromWhichUnit(ismember(success_Response.fromWhichUnit,uns(ta)))=1;
-    success_Response.fromWhichUnit(~ismember(success_Response.fromWhichUnit,uns(ta)))=2;
-    failure_Response.fromWhichUnit(ismember(failure_Response.fromWhichUnit,uns(ta)))=1;
-    failure_Response.fromWhichUnit(~ismember(failure_Response.fromWhichUnit,uns(ta)))=2;
-    [dp,dpfr,isSig,pval,p_success_ubyu,p_failure_ubyu,fr_success_ubyu,fr_failure_ubyu,timebinMeans]=withinSessDprime(success_Response,failure_Response,timeBins);
+    succFWU=success_Response.fromWhichUnit;
+    failFWU=failure_Response.fromWhichUnit;
+    success_Response.fromWhichUnit(ismember(succFWU,uns(ta)))=1;
+    success_Response.fromWhichUnit(~ismember(succFWU,uns(ta)))=2;
+    failure_Response.fromWhichUnit(ismember(failFWU,uns(ta)))=1;
+    failure_Response.fromWhichUnit(~ismember(failFWU,uns(ta)))=2;
+    
+    combineTrials=true;
+    if combineTrials==true
+        newSuccess_Response=success_Response;
+        newFailure_Response=failure_Response;
+        usess=unique(success_Response.fromWhichSess_forTrials);
+        k=1;
+        for l=1:length(usess)
+            thetrials=unique(success_Response.fromWhichTrial(success_Response.fromWhichSess_forTrials==usess(l)));
+            for i=1:length(thetrials)
+                currtrial=thetrials(i);
+                for j=1:2 % 2 types of units
+                    takeTrials=ismember(success_Response.fromWhichTrial,currtrial) & success_Response.fromWhichUnit==j & success_Response.fromWhichSess_forTrials==usess(l);
+                    if nansum(takeTrials)>0
+                        newSuccess_Response.unitbyunit_x(k,:)=nanmean(success_Response.unitbyunit_x(takeTrials,:),1);
+                        newSuccess_Response.unitbyunit_y(k,:)=nanmean(success_Response.unitbyunit_y(takeTrials,:),1);
+                        newSuccess_Response.aligncomp_x(k,:)=nanmean(success_Response.aligncomp_x(takeTrials,:),1);
+                        newSuccess_Response.aligncomp_y(k,:)=nanmean(success_Response.aligncomp_y(takeTrials,:),1);
+                        newSuccess_Response.fromWhichUnit(k,:)=nanmean(success_Response.fromWhichUnit(takeTrials,:),1);
+                        newSuccess_Response.fromWhichTrial(k,:)=nanmean(success_Response.fromWhichTrial(takeTrials,:),1);
+                        newSuccess_Response.isEventInThisTrial(k,:)=nanmean(success_Response.isEventInThisTrial(takeTrials,:),1);
+                        newSuccess_Response.fromWhichSess_forTrials(k,:)=nanmean(success_Response.fromWhichSess_forTrials(takeTrials,:),1);
+                        k=k+1;
+                        if mod(k,100)==0
+                            disp(k);
+                        end
+                    end
+                end
+            end
+        end
+        newSuccess_Response.unitbyunit_x=newSuccess_Response.unitbyunit_x(1:k-1,:);
+        newSuccess_Response.unitbyunit_y=newSuccess_Response.unitbyunit_y(1:k-1,:);
+        newSuccess_Response.aligncomp_x=newSuccess_Response.aligncomp_x(1:k-1,:);
+        newSuccess_Response.aligncomp_y=newSuccess_Response.aligncomp_y(1:k-1,:);
+        newSuccess_Response.fromWhichUnit=newSuccess_Response.fromWhichUnit(1:k-1,:);
+        newSuccess_Response.fromWhichTrial=newSuccess_Response.fromWhichTrial(1:k-1,:);
+        newSuccess_Response.isEventInThisTrial=newSuccess_Response.isEventInThisTrial(1:k-1,:);
+        newSuccess_Response.fromWhichSess_forTrials=newSuccess_Response.fromWhichSess_forTrials(1:k-1,:);
+
+        usess=unique(failure_Response.fromWhichSess_forTrials);
+        k=1;
+        for l=1:length(usess)
+            thetrials=unique(failure_Response.fromWhichTrial(failure_Response.fromWhichSess_forTrials==usess(l)));
+            for i=1:length(thetrials)
+                currtrial=thetrials(i);
+                for j=1:2 % 2 types of units
+                    takeTrials=ismember(failure_Response.fromWhichTrial,currtrial) & failure_Response.fromWhichUnit==j & failure_Response.fromWhichSess_forTrials==usess(l);
+                    if nansum(takeTrials)>0
+                        newFailure_Response.unitbyunit_x(k,:)=nanmean(failure_Response.unitbyunit_x(takeTrials,:),1);
+                        newFailure_Response.unitbyunit_y(k,:)=nanmean(failure_Response.unitbyunit_y(takeTrials,:),1);
+                        newFailure_Response.aligncomp_x(k,:)=nanmean(failure_Response.aligncomp_x(takeTrials,:),1);
+                        newFailure_Response.aligncomp_y(k,:)=nanmean(failure_Response.aligncomp_y(takeTrials,:),1);
+                        newFailure_Response.fromWhichUnit(k,:)=nanmean(failure_Response.fromWhichUnit(takeTrials,:),1);
+                        newFailure_Response.fromWhichTrial(k,:)=nanmean(failure_Response.fromWhichTrial(takeTrials,:),1);
+                        newFailure_Response.isEventInThisTrial(k,:)=nanmean(failure_Response.isEventInThisTrial(takeTrials,:),1);
+                        newFailure_Response.fromWhichSess_forTrials(k,:)=nanmean(failure_Response.fromWhichSess_forTrials(takeTrials,:),1);
+                        k=k+1;
+                    end
+                end
+            end
+        end
+
+        newFailure_Response.unitbyunit_x=newFailure_Response.unitbyunit_x(1:k-1,:);
+        newFailure_Response.unitbyunit_y=newFailure_Response.unitbyunit_y(1:k-1,:);
+        newFailure_Response.aligncomp_x=newFailure_Response.aligncomp_x(1:k-1,:);
+        newFailure_Response.aligncomp_y=newFailure_Response.aligncomp_y(1:k-1,:);
+        newFailure_Response.fromWhichUnit=newFailure_Response.fromWhichUnit(1:k-1,:);
+        newFailure_Response.fromWhichTrial=newFailure_Response.fromWhichTrial(1:k-1,:);
+        newFailure_Response.isEventInThisTrial=newFailure_Response.isEventInThisTrial(1:k-1,:);
+        newFailure_Response.fromWhichSess_forTrials=newFailure_Response.fromWhichSess_forTrials(1:k-1,:);
+        [dp,dpfr,isSig,pval,p_success_ubyu,p_failure_ubyu,fr_success_ubyu,fr_failure_ubyu,timebinMeans,fr_succ_sd,fr_fail_sd]=withinSessDprime(newSuccess_Response,newFailure_Response,timeBins);
+    else
+        [dp,dpfr,isSig,pval,p_success_ubyu,p_failure_ubyu,fr_success_ubyu,fr_failure_ubyu,timebinMeans,fr_succ_sd,fr_fail_sd]=withinSessDprime(success_Response,failure_Response,timeBins);
+    end
+    % axes of dp are now 1st dim (timebins) x 2nd dim (unit type) x 3rd dim
+    % (n sessions)
+    temp=p_success_ubyu(:,1,:); temp(isinf(temp))=nan;
+%     temp=fr_success_ubyu(:,1,:); temp(isinf(temp))=nan;
+    figure(); plot(timebinMeans,reshape(nanmean(temp(:,1,:),3),size(dp,1),1),'Color','k'); hold on;
+    plot(timebinMeans,reshape(nanmean(temp(:,1,:),3),size(dp,1),1)+reshape(nanstd(temp(:,1,:),[],3)./sqrt(size(dp,3)),size(dp,1),1),'Color','k');
+    plot(timebinMeans,reshape(nanmean(temp(:,1,:),3),size(dp,1),1)-reshape(nanstd(temp(:,1,:),[],3)./sqrt(size(dp,3)),size(dp,1),1),'Color','k');
+    temp=p_success_ubyu(:,2,:); temp(isinf(temp))=nan;
+%     temp=fr_success_ubyu(:,2,:); temp(isinf(temp))=nan;
+    plot(timebinMeans,reshape(nanmean(temp(:,1,:),3),size(dp,1),1),'Color','m'); 
+    plot(timebinMeans,reshape(nanmean(temp(:,1,:),3),size(dp,1),1)+reshape(nanstd(temp(:,1,:),[],3)./sqrt(size(dp,3)),size(dp,1),1),'Color','m');
+    plot(timebinMeans,reshape(nanmean(temp(:,1,:),3),size(dp,1),1)-reshape(nanstd(temp(:,1,:),[],3)./sqrt(size(dp,3)),size(dp,1),1),'Color','m');
+    legend({'ta true p active FIRST TRIAL TYPE','ta false p active FIRST TRIAL TYPE'});
+
+%     temp=p_failure_ubyu(:,1,:); temp(isinf(temp))=nan;
+    temp=fr_failure_ubyu(:,1,:); temp(isinf(temp))=nan;
+    figure(); plot(timebinMeans,reshape(nanmean(temp(:,1,:),3),size(dp,1),1),'Color','k'); hold on;
+    plot(timebinMeans,reshape(nanmean(temp(:,1,:),3),size(dp,1),1)+reshape(nanstd(temp(:,1,:),[],3)./sqrt(size(dp,3)),size(dp,1),1),'Color','k');
+    plot(timebinMeans,reshape(nanmean(temp(:,1,:),3),size(dp,1),1)-reshape(nanstd(temp(:,1,:),[],3)./sqrt(size(dp,3)),size(dp,1),1),'Color','k');
+%     temp=p_failure_ubyu(:,2,:); temp(isinf(temp))=nan;
+    temp=fr_failure_ubyu(:,2,:); temp(isinf(temp))=nan;
+    plot(timebinMeans,reshape(nanmean(temp(:,1,:),3),size(dp,1),1),'Color','m'); 
+    plot(timebinMeans,reshape(nanmean(temp(:,1,:),3),size(dp,1),1)+reshape(nanstd(temp(:,1,:),[],3)./sqrt(size(dp,3)),size(dp,1),1),'Color','m');
+    plot(timebinMeans,reshape(nanmean(temp(:,1,:),3),size(dp,1),1)-reshape(nanstd(temp(:,1,:),[],3)./sqrt(size(dp,3)),size(dp,1),1),'Color','m');
+    legend({'ta true p active SECOND TRIAL TYPE','ta false p active SECOND TRIAL TYPE'});
+
+    dpwithinsess=norminv(p_success_ubyu(:,1,:))-norminv(p_success_ubyu(:,2,:));
+    dpwithinsess(isinf(dpwithinsess))=nan;
+    temp=dpwithinsess;
+    figure(); plot(timebinMeans,reshape(nanmean(temp(:,1,:),3),size(dp,1),1),'Color','k'); hold on;
+    plot(timebinMeans,reshape(nanmean(temp(:,1,:),3),size(dp,1),1)+reshape(nanstd(temp(:,1,:),[],3)./sqrt(size(dp,3)),size(dp,1),1),'Color','k');
+    plot(timebinMeans,reshape(nanmean(temp(:,1,:),3),size(dp,1),1)-reshape(nanstd(temp(:,1,:),[],3)./sqrt(size(dp,3)),size(dp,1),1),'Color','k');
+    legend({'dprime prob ta true vs ta false FIRST TRIAL TYPE'});
+
+    dpwithinsess=(fr_success_ubyu(:,1,:)-fr_success_ubyu(:,2,:))./sqrt(fr_succ_sd.^2+fr_fail_sd.^2);
+    dpwithinsess(isinf(dpwithinsess))=nan;
+    temp=dpwithinsess;
+    figure(); plot(timebinMeans,reshape(nanmean(temp(:,1,:),3),size(dp,1),1),'Color','k'); hold on;
+    plot(timebinMeans,reshape(nanmean(temp(:,1,:),3),size(dp,1),1)+reshape(nanstd(temp(:,1,:),[],3)./sqrt(size(dp,3)),size(dp,1),1),'Color','k');
+    plot(timebinMeans,reshape(nanmean(temp(:,1,:),3),size(dp,1),1)-reshape(nanstd(temp(:,1,:),[],3)./sqrt(size(dp,3)),size(dp,1),1),'Color','k');
+    legend({'dprime from fr ta true vs ta false FIRST TRIAL TYPE'});
+
+%     nneuronsinthissess=nan(length(usess),1);
+%     for i=1:length(usess)
+%     currsess=usess(i);
+%     nneuronsinthissess(i)=length(unique(backup.success_Response.fromWhichUnit(success_Response.fromWhichUnit==1 & success_Response.fromWhichSess_forTrials==currsess)));
+%     end
+%     figure(); histogram(nneuronsinthissess,200);
 
 end
 
 end
 
-function [dp_all,dpfr_all,isSig_all,pval_all,p_success_unitbyunit_all,p_failure_unitbyunit_all,fr_success_unitbyunit_all,fr_failure_unitbyunit_all,timebinMeans]=withinSessDprime(success_Response,failure_Response,timeBins)
+function [dp_all,dpfr_all,isSig_all,pval_all,p_success_unitbyunit_all,p_failure_unitbyunit_all,fr_success_unitbyunit_all,fr_failure_unitbyunit_all,timebinMeans,frsd_success_unitbyunit_all,frsd_failure_unitbyunit_all]=withinSessDprime(success_Response,failure_Response,timeBins)
 
 for i=1:size(timeBins,1)
-    [dp,dpfr,isSig,pval,p_success_unitbyunit,p_failure_unitbyunit,fr_success_unitbyunit,fr_failure_unitbyunit]=dprimeInTimeSessBySess(success_Response,failure_Response,timeBins(i,:));
+    [dp,dpfr,isSig,pval,p_success_unitbyunit,p_failure_unitbyunit,fr_success_unitbyunit,fr_failure_unitbyunit,frsd_success_unitbyunit,frsd_failure_unitbyunit]=dprimeInTimeSessBySess(success_Response,failure_Response,timeBins(i,:));
     if i==1
         dp_all=nan(size(timeBins,1),size(dp,1),size(dp,2));
         dpfr_all=nan(size(timeBins,1),size(dp,1),size(dp,2));
@@ -328,6 +452,8 @@ for i=1:size(timeBins,1)
         p_failure_unitbyunit_all=nan(size(timeBins,1),size(dp,1),size(dp,2));
         fr_success_unitbyunit_all=nan(size(timeBins,1),size(dp,1),size(dp,2));
         fr_failure_unitbyunit_all=nan(size(timeBins,1),size(dp,1),size(dp,2));
+        frsd_success_unitbyunit_all=nan(size(timeBins,1),size(dp,1),size(dp,2));
+        frsd_failure_unitbyunit_all=nan(size(timeBins,1),size(dp,1),size(dp,2));
         timebinMeans=nan(size(timeBins,1),1);
     end
     dp_all(i,:,:)=dp;
@@ -340,6 +466,8 @@ for i=1:size(timeBins,1)
     p_failure_unitbyunit_all(i,:,:)=p_failure_unitbyunit;
     fr_success_unitbyunit_all(i,:,:)=fr_success_unitbyunit;
     fr_failure_unitbyunit_all(i,:,:)=fr_failure_unitbyunit;
+    frsd_success_unitbyunit_all(i,:,:)=frsd_success_unitbyunit;
+    frsd_failure_unitbyunit_all(i,:,:)=frsd_failure_unitbyunit;
     timebinMeans(i)=mean(timeBins(i,:));
 end
 
@@ -375,7 +503,7 @@ end
 
 end
 
-function [dp,dpfr,isSig,pval,p_success_unitbyunit,p_failure_unitbyunit,fr_success_unitbyunit,fr_failure_unitbyunit]=dprimeInTimeSessBySess(success_Response,failure_Response,timeWindow)
+function [dp,dpfr,isSig,pval,p_success_unitbyunit,p_failure_unitbyunit,fr_success_unitbyunit,fr_failure_unitbyunit,frsd_success_unitbyunit,frsd_failure_unitbyunit]=dprimeInTimeSessBySess(success_Response,failure_Response,timeWindow)
 
 isSig=[];
 pval=[];
@@ -724,7 +852,7 @@ end
 
 function [fr_success_unitbyunit,fr_failure_unitbyunit,frsd_success_unitbyunit,frsd_failure_unitbyunit]=getFROfResponseSessBySess(units,unitfr_success,unitfr_failure,fromWhichUnit_success,fromWhichUnit_failure,fromWhichSess_success,fromWhichSess_failure)
 
-uSess=unique([fromWhichSess_success fromWhichSess_failure]);
+uSess=unique([fromWhichSess_success; fromWhichSess_failure]);
 fr_success_unitbyunit=nan(length(units),1);
 fr_failure_unitbyunit=nan(length(units),1);
 frsd_success_unitbyunit=nan(length(units),1);
@@ -743,7 +871,7 @@ end
 
 function [p_success_unitbyunit,p_failure_unitbyunit]=getProbOfResponseSessBySess(units,unitfr_success,unitfr_failure,fromWhichUnit_success,fromWhichUnit_failure,fromWhichSess_success,fromWhichSess_failure)
 
-uSess=unique([fromWhichSess_success fromWhichSess_failure]);
+uSess=unique([fromWhichSess_success; fromWhichSess_failure]);
 p_success_unitbyunit=nan(length(units),length(uSess));
 p_failure_unitbyunit=nan(length(units),length(uSess));
 for j=1:length(uSess)
