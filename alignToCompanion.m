@@ -225,9 +225,39 @@ for j=1:length(dd)
             trials_count=trials_count+1;
         else
             if keepAllSingleTrials==false
-                unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
-                unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(:,1:upTo),1)];
+                if settings.makeTrainingSet==true
+                    f=find(eventHappens==1);
+                    temp=randperm(nansum(eventHappens==1));
+                    tempindsend=ceil(nansum(eventHappens==1)*settings.fracForTrainingSet);
+                    if tempindsend>length(temp)
+                        tempindsend=length(temp);
+                    end
+                    trainingSet=temp(1:tempindsend);
+                    trainingSetTrials=f(trainingSet);
+                    tempindsstart=tempindsend+1;
+                    if tempindsstart>length(temp)
+                        % no test set
+                        testSet=[];
+                    else
+                        testSet=temp(tempindsstart:end);
+                        testSetTrials=f(testSet);
+                    end
+                    save([ls(i).folder sep ls(i).name(1:regexp(ls(i).name,'.mat','once')-1) '_testSet.mat'],'testSet','testSetTrials');
+                    save([ls(i).folder sep ls(i).name(1:regexp(ls(i).name,'.mat','once')-1) '_trainingSet.mat'],'trainingSet','trainingSetTrials');
+                    unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
+                    unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(trainingSetTrials,1:upTo),1)];
+                elseif settings.useTestSet==true
+                    load([ls(i).folder sep ls(i).name(1:regexp(ls(i).name,'.mat','once')-1) '_testSet.mat']);
+                    unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
+                    unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(testSetTrials,1:upTo),1)];
+                else
+                    unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
+                    unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(:,1:upTo),1)];
+                end
             else
+                if settings.makeTrainingSet==true || settings.useTestSet==true
+                    error('Error in alignToCompanion.m: makeTrainingSet or useTestSet functionality not implemented when keep single trials');
+                end
                 unitbyunit_x(trials_count:trials_count+size(a.dataout.y,1)-1,:)=repmat(a.dataout.x(1:upTo),size(a.dataout.y,1),1);
                 unitbyunit_y(trials_count:trials_count+size(a.dataout.y,1)-1,:)=[a.dataout.y(:,1:upTo)];
             end
