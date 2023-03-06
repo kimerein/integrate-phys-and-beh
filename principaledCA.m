@@ -65,7 +65,7 @@ switch doingHighOrLowRank
         % projectOntoEigSpace(flatData,2,eigVec_2(:,1:plotN),sorted_eigVal_2(1:plotN));
         % TCA
         R_guess=4; % guess matrix rank
-        allconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[2:5])),20,R_guess);
+        allconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[2:3])),20,R_guess);
         [allcell_PCs,allcell_archetypeCells,dimOrdering]=studyCPmodel(allconditions_cpmodel);
 end
 
