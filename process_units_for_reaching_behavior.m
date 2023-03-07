@@ -15,7 +15,7 @@ skipIfBehaviorAlignmentsAlreadyExist=true; % if true, will skip any units for wh
 % CAN COMMENT OUT SOME BEHAVIOR ALIGNMENTS IN
 % saveBehaviorAlignmentsSingleNeuron.m IF DON'T WANT TO REPOPULATE
 % EVERYTHING
-skipUnitDetails=false; % if true, will skip populating the unit details
+skipUnitDetails=true; % if true, will skip populating the unit details
 skipUnitDetailsUnlessNoQCfig=true; % skips populating unit details unless QC fig does not yet exist
 % BUT NOTE WILL STILL REPOPULATE UNIT DETAILS
 % second row is Matlab index, first row is depth on probe, where 32 is most

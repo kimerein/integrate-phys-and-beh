@@ -24,6 +24,10 @@ for j=1:length(dd)
     ls=dir(datadir);
     for i=3:length(ls)
         a=[];
+        if contains(ls(i).name,'trainingSet') || contains(ls(i).name,'testSet') % ignore these files
+            continue
+        end
+        
         if ismac()
             a=load([ls(i).folder '/' ls(i).name]);
         else

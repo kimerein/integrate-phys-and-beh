@@ -42,7 +42,7 @@ switch doingHighOrLowRank
 
         % TCA
         R_guess=6; % guess matrix rank
-        allconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[2:5])),20,R_guess);
+        allconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[2:5])),10,R_guess);
         [allcell_PCs,allcell_archetypeCells,dimOrdering]=studyCPmodel(allconditions_cpmodel);
     case 'low'
         backupdata=data;
@@ -465,7 +465,7 @@ end
 
 function bestmodel=plotTCA(inputdata,n_fits,R)
 
-userChooseDecomp=true;
+userChooseDecomp=false;
 
 % Fit CP Tensor Decomposition
 % these commands require that you download Sandia Labs' tensor toolbox:
