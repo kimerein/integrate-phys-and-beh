@@ -59,7 +59,7 @@ for j=1:length(dd)
         if contains(ls(i).name,'trainingSet') || contains(ls(i).name,'testSet') % ignore these files
             continue
         end
-        
+
         if ismac()
             a=load([ls(i).folder '/' ls(i).name]);
         else
@@ -254,6 +254,10 @@ for j=1:length(dd)
                     b=load([ls(i).folder sep ls(i).name(1:regexp(ls(i).name,'.mat','once')-1) '_testSet.mat']);
                     unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
                     unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(b.testSetTrials,1:upTo),1)];
+                elseif settings.useTrainingSet==true
+                    b=load([ls(i).folder sep ls(i).name(1:regexp(ls(i).name,'.mat','once')-1) '_trainingSet.mat']);
+                    unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
+                    unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(b.trainingSetTrials,1:upTo),1)];
                 else
                     unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
                     unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(:,1:upTo),1)];
