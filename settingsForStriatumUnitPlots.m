@@ -15,5 +15,5 @@ settings.maxUnitsPerSess=300; % can't get more than this many units per session
 settings.keepAllSingleTrials=false;
 settings.fracForTrainingSet=0.15; % fraction of trials to use for training set
 settings.makeTrainingSet=false;
-settings.useTestSet=false;
-settings.useTrainingSet=true;
+settings.useTestSet=true;
+settings.useTrainingSet=false;

@@ -242,6 +242,7 @@ for j=1:length(dd)
                     if tempindsstart>length(temp)
                         % no test set
                         testSet=[];
+                        testSetTrials=[];
                     else
                         testSet=temp(tempindsstart:end);
                         testSetTrials=f(testSet);
@@ -253,7 +254,12 @@ for j=1:length(dd)
                 elseif settings.useTestSet==true
                     b=load([ls(i).folder sep ls(i).name(1:regexp(ls(i).name,'.mat','once')-1) '_testSet.mat']);
                     unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
-                    unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(b.testSetTrials,1:upTo),1)];
+                    if isempty(b.testSet) % only one trial
+                        unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
+                        unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(:,1:upTo),1)];
+                    else
+                        unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(b.testSetTrials,1:upTo),1)];
+                    end
                 elseif settings.useTrainingSet==true
                     b=load([ls(i).folder sep ls(i).name(1:regexp(ls(i).name,'.mat','once')-1) '_trainingSet.mat']);
                     unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];

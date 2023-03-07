@@ -697,13 +697,17 @@ uncued_reach_Response=uncued_success_Response; uncued_reach_Response.unitbyunit_
 % plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncued');
 
 %% Prepare for DIFFERENT IN CUED V UNCUED
-load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\groupLabelsFromTCA.mat');
-out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',cuedReach_Response,cued_success_Response,[],[],[]);
-[cuedReach_Response,whichTookFromUnits]=removeUnitFromResponse(cuedReach_Response,out.whichRmvd); 
-[cued_success_Response,whichTookFromUnits]=removeUnitFromResponse(cued_success_Response,out.whichRmvd); groupLabelsFromTCA=groupLabelsFromTCA(~ismember(1:length(groupLabelsFromTCA),whichTookFromUnits));
-[cued_failure_Response,whichTookFromUnits]=removeUnitFromResponse(cued_failure_Response,out.whichRmvd); 
-[uncued_success_Response,whichTookFromUnits]=removeUnitFromResponse(uncued_success_Response,out.whichRmvd); 
-[uncued_failure_Response,whichTookFromUnits]=removeUnitFromResponse(uncued_failure_Response,out.whichRmvd); 
+% load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\groupLabelsFromTCA.mat');
+% out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',cuedReach_Response,cued_success_Response,[],[],[]);
+% [cuedReach_Response,whichTookFromUnits]=removeUnitFromResponse(cuedReach_Response,out.whichRmvd); 
+% [cued_success_Response,whichTookFromUnits]=removeUnitFromResponse(cued_success_Response,out.whichRmvd); groupLabelsFromTCA=groupLabelsFromTCA(~ismember(1:length(groupLabelsFromTCA),whichTookFromUnits));
+% [cued_failure_Response,whichTookFromUnits]=removeUnitFromResponse(cued_failure_Response,out.whichRmvd); 
+% [uncued_success_Response,whichTookFromUnits]=removeUnitFromResponse(uncued_success_Response,out.whichRmvd); 
+% [uncued_failure_Response,whichTookFromUnits]=removeUnitFromResponse(uncued_failure_Response,out.whichRmvd); 
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\cued_reach_Response.mat');
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\uncued_reach_Response.mat');
+out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',cued_reach_Response,uncued_reach_Response,cued_success_Response,[],[]);
+cued_reach_Response=out.Response1; uncued_reach_Response=out.Response2;
 
 %% Plot DIFFERENT IN CUED V UNCUED
 cuez=getCueTunedUnits(cuedReach_Response,uncuedReach_Response,'justcue_v_justuncue','mean',1,[4 12],[-2 0],[4 12],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue' or 'vs_uncued_reach_no_index'

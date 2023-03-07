@@ -153,6 +153,15 @@ cmap=colormap('jet');
 ccft=cmap(cuecolsfortsne,:); ccft(dontshow==true,:)=repmat([1 1 1],sum(dontshow==true),1);
 figure(); scatter(tsnetemp(:,1),tsnetemp(:,2),[],ccft); title('cue responsive');
 
+% currcuescore=cuez;
+% currcuescore(currcuescore<-2)=-2; currcuescore(currcuescore>4)=4;
+% [~,sicc]=sort(currcuescore,'ascend'); r=1:length(currcuescore); r(sicc)=r; currcuescore=r;
+% cuecolsfortsne=currcuescore-min(currcuescore,[],'all','omitnan'); cuecolsfortsne=cuecolsfortsne./max(cuecolsfortsne,[],'all','omitnan'); cuecolsfortsne=cuecolsfortsne*255;
+% cuecolsfortsne=ceil(cuecolsfortsne); cuecolsfortsne(cuecolsfortsne==0)=1; dontshow(isnan(cuecolsfortsne))=true;  cuecolsfortsne(isnan(cuecolsfortsne))=1;
+% cmap=colormap('jet');
+% ccft=cmap(cuecolsfortsne,:); ccft(dontshow==true,:)=repmat([1 1 1],sum(dontshow==true),1);
+% figure(); scatter(tsnetemp(:,1),tsnetemp(:,2),[],ccft,'filled'); title('cue responsive');
+
 return
 
 response_forThisArchetype(allconditions_cpmodel,idx==1);
