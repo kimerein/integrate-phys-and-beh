@@ -42,7 +42,7 @@ switch doingHighOrLowRank
 
         % TCA
         R_guess=6; % guess matrix rank
-        allconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[2:5])),10,R_guess);
+        allconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[2:5])),20,R_guess);
         [allcell_PCs,allcell_archetypeCells,dimOrdering]=studyCPmodel(allconditions_cpmodel);
     case 'low'
         backupdata=data;
@@ -70,21 +70,33 @@ switch doingHighOrLowRank
 end
 
 temp=allconditions_cpmodel.U{1}; meanMinusTemp=temp-repmat(nanmean(temp,2),1,size(temp,2));
-[~,si]=sort(meanMinusTemp(:,3));
+[~,si]=sort(meanMinusTemp(:,1));
+[~,sipc]=sort(allcell_PCs.score(:,1)); % alternate sorting
 ngroups=2;
-currc={'k','r','c','g','b'};
+currc={[0, 0.75, 0.75], [0.4940, 0.1840, 0.5560]}; %currc={'k','r','c','g','b'};
 %Y=pdist(meanMinusTemp);
 %Z=linkage(Y);
 %idx=cluster(Z,'maxclust',3);
-idx=kmeans(meanMinusTemp,ngroups,'Replicates',10);
+idx=kmeans(meanMinusTemp,ngroups,'Replicates',50);
+% replicate idx
+idx_replicates=nan(length(idx),100);
+for i=1:100
+    temp=kmeans(meanMinusTemp,ngroups,'Replicates',5);
+    if nansum(temp==idx)/length(idx)>0.5
+        % same label
+    else % flip labels
+        newtemp=temp; newtemp(temp==1)=2; newtemp(temp==2)=1; temp=newtemp;
+    end
+    idx_replicates(:,i)=temp;
+end
 figure();
 for i=1:size(meanMinusTemp,2)
 subplot(1,size(meanMinusTemp,2),i);
-bar(meanMinusTemp(si,i));
-thesevals=meanMinusTemp(si,i);
+bar(meanMinusTemp(sipc,i),'k');
+thesevals=meanMinusTemp(sipc,i);
 hold on;
 for j=1:ngroups
-scatter(find(idx(si)==j),thesevals(idx(si)==j),2,currc{j});
+scatter(find(idx(sipc)==j),thesevals(idx(sipc)==j),2,currc{j});
 end
 end
 figure(); scatter3(allcell_PCs.score(idx==1,2),allcell_PCs.score(idx==1,3),allcell_PCs.score(idx==1,4),[],'k'); hold on;
@@ -95,11 +107,11 @@ load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\for_data_mat
 figure();
 for i=1:size(meanMinusTemp,2)
     subplot(1,size(meanMinusTemp,2),i);
-    bar(meanMinusTemp(si,i));
-    thesevals=meanMinusTemp(si,i);
+    bar(meanMinusTemp(sipc,i));
+    thesevals=meanMinusTemp(sipc,i);
     hold on;
-    scatter(find(D1tag(si)==1),thesevals(find(D1tag(si)==1)),2,'r');
-    scatter(find(A2atag(si)==1),thesevals(find(A2atag(si)==1)),2,'b');
+    scatter(find(D1tag(sipc)==1),thesevals(find(D1tag(sipc)==1)),2,'r');
+    scatter(find(A2atag(sipc)==1),thesevals(find(A2atag(sipc)==1)),2,'b');
 end
 
 % Is there a way to regress off the trial type-independent turning off
@@ -110,14 +122,26 @@ end
 % cell? How about subtracting the averaged across all cells, averaged across all trials, 
 % Z-scored rate, and then only consider deviations from this average?
 score=allcell_PCs.score;
+[n,x]=histcounts(score(idx==1,1),[-0.06:0.005:0.1]+0.0025); [n,x]=cityscape_hist(n,x); figure(); plot(x,n./nansum(n),'Color',currc{1});
+[n,x]=histcounts(score(idx==2,1),[-0.06:0.005:0.1]+0.0025); [n,x]=cityscape_hist(n,x); hold on; plot(x,n./nansum(n),'Color',currc{2});
 figure(); scatter3(score(:,1),score(:,2),score(:,3),[],[0.5 0.5 0.5]); hold on; scatter3(score(D1tag==1,1),score(D1tag==1,2),score(D1tag==1,3),[],'r','filled');
 scatter3(score(A2atag==1,1),score(A2atag==1,2),score(A2atag==1,3),[],'b','filled');
 xlabel('Proj1'); ylabel('Proj2'); zlabel('Proj3');
 % tsnetemp=tsne(score,'Algorithm','exact','Distance','chebychev','Exaggeration',10,'NumDimensions',2,'Perplexity',60,'Standardize',false);
-tsnetemp=tsne(score,'Algorithm','exact','Distance','chebychev','Exaggeration',10,'NumDimensions',2,'Perplexity',500,'Standardize',false);
-cmap=colormap('jet');
-ccft=cmap((idx-1)*100+1,:);
-figure(); scatter(tsnetemp(:,1),tsnetemp(:,2),[],ccft);
+tsnetemp=tsne(score,'Algorithm','exact','Distance','chebychev','Exaggeration',10,'NumDimensions',2,'Perplexity',900,'Standardize',false);
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\CP model\data_loc_array.mat'); [~,~,uic]=unique(data_loc_array(:,2));
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\cued_success_Response.mat'); mousebymouse=uic(cued_success_Response.fromWhichSess); 
+[~,~,umbym]=unique(mousebymouse);
+cmap=[]; for i=1:length(unique(umbym)) cmap=[cmap; rand(1,3)]; end %cmap=colormap(parula(108)); 
+figure(); scatter(tsnetemp(:,1),tsnetemp(:,2),[],cmap(umbym,:),'filled'); title('Control'); 
+figure(); scatter(1:length(unique(umbym)),ones(size(1:length(unique(umbym)))),[],cmap,'filled');
+% cmap=colormap('jet');
+% ccft=cmap((idx-1)*100+1,:);
+cmap=[0, 0.75, 0.75; 0.4940, 0.1840, 0.5560];
+ccft=cmap(idx,:); 
+adata=nansum(idx_replicates==1,2)./size(idx_replicates,2); adata2=nansum(idx_replicates==2,2)./size(idx_replicates,2);
+adata(idx==1)=adata(idx==1); adata(idx==2)=adata2(idx==2);
+figure(); s=scatter(tsnetemp(:,1),tsnetemp(:,2),[],ccft,'filled'); s.AlphaData=adata; s.MarkerFaceAlpha='flat';
 figure(); scatter(tsnetemp(D1tag==1,1),tsnetemp(D1tag==1,2),[],repmat(cmap(1,:),nansum(D1tag==1),1)); hold on;
 scatter(tsnetemp(A2atag==1,1),tsnetemp(A2atag==1,2),[],repmat(cmap(100,:),nansum(A2atag==1),1));
 tempiedata=normalizeData(backupdata,[2 3],'sd'); currcuescore=reshape(max(tempiedata(:,1:150,1),[],2,'omitnan'),size(backupdata,1),1);
@@ -465,7 +489,7 @@ end
 
 function bestmodel=plotTCA(inputdata,n_fits,R)
 
-userChooseDecomp=false;
+userChooseDecomp=true;
 
 % Fit CP Tensor Decomposition
 % these commands require that you download Sandia Labs' tensor toolbox:
