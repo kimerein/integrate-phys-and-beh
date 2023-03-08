@@ -1087,6 +1087,8 @@ end
 
 function out=meanAcrossUnits(activityD1tagged,downSampFac,suppressPlots)
 
+% normalizeToBeforeZero=false;
+
 rmOutliers=false;
 if rmOutliers==true
     [activityD1tagged.unitbyunit_y,Tfrm]=rmoutliers(activityD1tagged.unitbyunit_y,"mean","ThresholdFactor",15);
@@ -1151,6 +1153,12 @@ if suppressPlots~=1
     xlabel('Time (sec)');
     ylabel('Firing rate');
 end
+
+% if normalizeToBeforeZero==true
+%     baselinePreZeroWindow=nanmean(out.unitbyunit(:,timesD1<-2),2);
+%     baselinePreZeroWindow(baselinePreZeroWindow<0.01)=0.01;
+%     out.unitbyunit=out.unitbyunit./repmat(baselinePreZeroWindow,1,size(out.unitbyunit,2));
+% end
 
 if ~isempty(downSampFac)
     out.unitbyunit=downSampMatrix(out.unitbyunit,downSampFac);

@@ -691,9 +691,24 @@ boot=1; % num iterations for bootstrap
 
 % out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',cue_noReach_Response,cued_success_Response,[],[],[]);
 % cue_noReach_Response=out.Response1;  
-cuedReach_Response=cued_success_Response; cuedReach_Response.unitbyunit_y=(cued_success_Response.unitbyunit_y+cued_failure_Response.unitbyunit_y(:,1:size(cued_success_Response.unitbyunit_y,2)))./2; 
-uncuedReach_Response=uncued_success_Response; uncuedReach_Response.unitbyunit_y=(uncued_success_Response.unitbyunit_y+uncued_failure_Response.unitbyunit_y(:,1:size(uncued_success_Response.unitbyunit_y,2)))./2; 
+% cuedReach_Response=cued_success_Response; cuedReach_Response.unitbyunit_y=(cued_success_Response.unitbyunit_y+cued_failure_Response.unitbyunit_y(:,1:size(cued_success_Response.unitbyunit_y,2)))./2; 
+% uncuedReach_Response=uncued_success_Response; uncuedReach_Response.unitbyunit_y=(uncued_success_Response.unitbyunit_y+uncued_failure_Response.unitbyunit_y(:,1:size(uncued_success_Response.unitbyunit_y,2)))./2; 
 % cuez=getCueTunedUnits(cue_noReach_Response,uncuedReach_Response,'vs_uncued_reach','max'); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
+
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\TCA\idx_groupLabelsFromTCA.mat'); groupLabelsFromTCA=idx;
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_success_Response.mat'); cued_success_Response.idx=idx;
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_failure_Response.mat'); cued_failure_Response.idx=idx;
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\uncued_failure_Response.mat'); uncued_failure_Response.idx=idx;
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\uncued_success_Response.mat'); uncued_success_Response.idx=idx;
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\cued_reach_Response.mat');
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\uncued_reach_Response.mat');
+trial_n_cutoff=0;
+out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',excludeTooFewTrials(cued_reach_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false));
+cued_reach_Response=out.Response1; cued_success_Response=out.Response2; cued_failure_Response=out.Response3; uncued_success_Response=out.Response4; uncued_failure_Response=out.Response5;
+out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',cued_reach_Response,uncued_reach_Response,[],[],[]);
+uncued_reach_Response=out.Response2;
+allsucc_Response=makeNsWeightedResponse(cued_success_Response,uncued_success_Response);
+allfail_Response=makeNsWeightedResponse(cued_failure_Response,uncued_failure_Response);
 
 % CUED
 % cuez=getCueTunedUnits(cuedReach_Response,uncuedReach_Response,'cue_vs_baseline_no_index','mean',1,[7 16],[-2 0],[7 16],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'

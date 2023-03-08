@@ -68,7 +68,12 @@ if addbeginnings==true
     uncued_failure_Response=addLastTrialToNextBeginning(uncued_failure_Response);
 end
 
-
+if Zscore==true
+    [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=ZscoreResponses(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response);
+elseif minmaxnorm==true
+    [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=maxNorm(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response);
+end 
+Zscore=false;
 ds=6;
 cued_success_Response.idx=groupLabelsFromTCA; exclu=cued_success_Response.excluded; gpLab=1;
 sub1=subResponse(cued_success_Response,'idx',gpLab); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=gpLab))=0; gpLab=2; sub2=subResponse(cued_success_Response,'idx',gpLab); f=find(exclu~=0); sub2.excluded(f(groupLabelsFromTCA~=gpLab))=0;

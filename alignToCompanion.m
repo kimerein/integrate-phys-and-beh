@@ -252,13 +252,32 @@ for j=1:length(dd)
                     unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
                     unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(trainingSetTrials,1:upTo),1)];
                 elseif settings.useTestSet==true
-                    b=load([ls(i).folder sep ls(i).name(1:regexp(ls(i).name,'.mat','once')-1) '_testSet.mat']);
-                    unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
-                    if isempty(b.testSet) % only one trial
+                    if ~isempty(settings.useTheseTestSets)
+                        b.testSet=[]; b.testSetTrials=[];
+                        for itthroughtest=1:length(settings.useTheseTestSets)
+                            rlastslash=regexp(ls(i).folder,sep);
+                            lastunderscore=regexp(ls(i).name,'_');
+                            btemp=load([ls(i).folder(1:rlastslash(end)) settings.useTheseTestSets{itthroughtest} sep ls(i).name(1:lastunderscore(end)) settings.useTheseTestFilenames{itthroughtest} '_testSet.mat']);
+                            if ~isempty(btemp.testSet)
+                                b.testSet=[b.testSet btemp.testSet]; b.testSetTrials=[b.testSetTrials; btemp.testSetTrials];
+                            end
+                        end
                         unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
-                        unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(:,1:upTo),1)];
+                        if isempty(b.testSet) % only one trial
+                            unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
+                            unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(:,1:upTo),1)];
+                        else
+                            unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(b.testSetTrials,1:upTo),1)];
+                        end
                     else
-                        unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(b.testSetTrials,1:upTo),1)];
+                        b=load([ls(i).folder sep ls(i).name(1:regexp(ls(i).name,'.mat','once')-1) '_testSet.mat']);
+                        unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
+                        if isempty(b.testSet) % only one trial
+                            unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
+                            unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(:,1:upTo),1)];
+                        else
+                            unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(b.testSetTrials,1:upTo),1)];
+                        end
                     end
                 elseif settings.useTrainingSet==true
                     b=load([ls(i).folder sep ls(i).name(1:regexp(ls(i).name,'.mat','once')-1) '_trainingSet.mat']);
