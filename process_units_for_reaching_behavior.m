@@ -359,7 +359,7 @@ figure(); histogram(photolocs,25);
 
 %% 4. Make figures -- about 6 min to load 84 sessions of unit data
 % choose type of response to plot
-response_to_plot='uncued_success'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+response_to_plot='cued_drop'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 
 % doUnitTest.m is used to test whether to include unit in this plot
 % will include unit if unitdets match the following
@@ -549,11 +549,18 @@ end
 % Outliers for matlab glm
 outli=[312 313 319 320 322 324 374 376 377 378 379 380 381 382 383 386 387 388 389];
 all_glm_coef=all_glm_coef(~ismember(1:size(all_glm_coef,1),outli),:); unitnames_glm=unitnames_glm(~ismember(1:length(unitnames_glm),outli)); fromWhichSess_glm=fromWhichSess_glm(~ismember(1:length(fromWhichSess_glm),outli));
+f=find(cued_success_Response.excluded==0); fmore=find(unitbyunit_names.excluded==0); ftormv=find(~ismember(fmore,f));
+unitbyunit_names.names=unitbyunit_names.names(~ismember(1:length(unitbyunit_names.names),ftormv));
+unitbyunit_names.excluded=cued_success_Response.excluded;
+indexGLMcellsIntoUnitNames=getNamesIndexIntoNamesList(unitnames_glm,unitbyunit_names);
+getridisnan=find(isnan(indexGLMcellsIntoUnitNames));
+all_glm_coef=all_glm_coef(~ismember(1:size(all_glm_coef,1),getridisnan),:); unitnames_glm=unitnames_glm(~ismember(1:length(unitnames_glm),getridisnan)); fromWhichSess_glm=fromWhichSess_glm(~ismember(1:length(fromWhichSess_glm),getridisnan));
 indexGLMcellsIntoUnitNames=getNamesIndexIntoNamesList(unitnames_glm,unitbyunit_names);
 load('Z:\MICROSCOPE\Kim\WHISPER recs\Mar_6\20210625\SU aligned to behavior\forglm\output\neuron1_glm.mat')
 [ts,allco]=plotGLMcoef(all_glm_coef,0,feature_names,10*0.01,9,'mean'); title('python glm');
 load('Z:\MICROSCOPE\Kim\WHISPER recs\Mar_6\20210625\SU aligned to behavior\matglm\features_for_glm.mat');
 [ts,allco]=plotGLMcoef(all_glm_coef,[],fnames,10*0.01,9,'mean'); title('mat glm');
+[ts,allco]=plotGLMcoef(all_glm_coef(idx(indexGLMcellsIntoUnitNames)==1,:),[],fnames,10*0.01,9,'mean'); title('mat glm');
 whichCoefToUse=[4 5 6]; studyGLMcoef(all_glm_coef,ts,whichCoefToUse);
 
 %% Get significant responses 
@@ -674,22 +681,22 @@ boot=1; % num iterations for bootstrap
 %     temp=normalizeDataMatrix(newDataMatrix,[2 3],'sd'); cuez=reshape(max(temp(:,1:150,1),[],2,'omitnan'),size(newDataMatrix,1),1);
 %     cuez=log(cuez); cuez(cuez<-2)=-2; figure(); histogram(cuez,200); 
 % end
-a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\uncued_reach.mat'); uncuedReach_Response=a.Response;  
-a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\cue_noReach.mat'); cue_noReach_Response=a.Response;
-a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\cued_reach.mat'); cuedReach_Response=a.Response;
-% fixing cuedReach response because missing units compared to others
-load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\unitbyunit_names.mat');
-load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\unitbyunitnames_cuedreach.mat')
-cuedReach_Response=matchExcludedBasedOnUnitNames(unitbyunitnames_cuedreach,unitbyunit_names,cuedReach_Response);
+% a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\uncued_reach.mat'); uncuedReach_Response=a.Response;  
+% a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\cue_noReach.mat'); cue_noReach_Response=a.Response;
+% a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\cued_reach.mat'); cuedReach_Response=a.Response;
+% % fixing cuedReach response because missing units compared to others
+% load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\unitbyunit_names.mat');
+% load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\unitbyunitnames_cuedreach.mat')
+% cuedReach_Response=matchExcludedBasedOnUnitNames(unitbyunitnames_cuedreach,unitbyunit_names,cuedReach_Response);
 
-out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',cue_noReach_Response,cued_success_Response,[],[],[]);
-cue_noReach_Response=out.Response1;  
-cued_reach_Response=cued_success_Response; cued_reach_Response.unitbyunit_y=(cued_success_Response.unitbyunit_y+cued_failure_Response.unitbyunit_y)./2; 
-uncued_reach_Response=uncued_success_Response; uncued_reach_Response.unitbyunit_y=(uncued_success_Response.unitbyunit_y+uncued_failure_Response.unitbyunit_y(:,1:2849))./2; 
+% out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',cue_noReach_Response,cued_success_Response,[],[],[]);
+% cue_noReach_Response=out.Response1;  
+cuedReach_Response=cued_success_Response; cuedReach_Response.unitbyunit_y=(cued_success_Response.unitbyunit_y+cued_failure_Response.unitbyunit_y(:,1:size(cued_success_Response.unitbyunit_y,2)))./2; 
+uncuedReach_Response=uncued_success_Response; uncuedReach_Response.unitbyunit_y=(uncued_success_Response.unitbyunit_y+uncued_failure_Response.unitbyunit_y(:,1:size(uncued_success_Response.unitbyunit_y,2)))./2; 
 % cuez=getCueTunedUnits(cue_noReach_Response,uncuedReach_Response,'vs_uncued_reach','max'); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
 
 % CUED
-% cuez=getCueTunedUnits(cued_reach_Response,uncuedReach_Response,'cue_vs_baseline_no_index','mean',1,[7 16],[-2 0],[7 16],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
+% cuez=getCueTunedUnits(cuedReach_Response,uncuedReach_Response,'cue_vs_baseline_no_index','mean',1,[7 16],[-2 0],[7 16],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
 % plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'cued');
 
 % UNCUED

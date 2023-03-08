@@ -50,12 +50,12 @@ switch doingHighOrLowRank
         %whichFactor=1; [T,temp]=projectCurrentDataOntoExistingCP(loc,test_data_matrix,whichFactor);
         % meanMinusTemp=nan(length(temp),R_guess); meanMinusTemp(:,1)=temp;
         %whichFactor=2; [T,meanMinusTemp(:,2)]=projectCurrentDataOntoExistingCP(loc,test_data_matrix,whichFactor);
-        %whichFactor=3; [T,meanMinusTemp(:,2)]=projectCurrentDataOntoExistingCP(loc,test_data_matrix,whichFactor);
-        %whichFactor=4; [T,meanMinusTemp(:,2)]=projectCurrentDataOntoExistingCP(loc,test_data_matrix,whichFactor);
-        %whichFactor=5; [T,meanMinusTemp(:,2)]=projectCurrentDataOntoExistingCP(loc,test_data_matrix,whichFactor);
-        %whichFactor=6; [T,meanMinusTemp(:,2)]=projectCurrentDataOntoExistingCP(loc,test_data_matrix,whichFactor);
+        %whichFactor=3; [T,meanMinusTemp(:,3)]=projectCurrentDataOntoExistingCP(loc,test_data_matrix,whichFactor);
+        %whichFactor=4; [T,meanMinusTemp(:,4)]=projectCurrentDataOntoExistingCP(loc,test_data_matrix,whichFactor);
+        %whichFactor=5; [T,meanMinusTemp(:,5)]=projectCurrentDataOntoExistingCP(loc,test_data_matrix,whichFactor);
+        %whichFactor=6; [T,meanMinusTemp(:,6)]=projectCurrentDataOntoExistingCP(loc,test_data_matrix,whichFactor);
         %load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\CP model\sortedbyneuronloadingsPC1.mat');
-        %meanMinusTemp=temp-repmat(nanmean(temp,2),1,size(temp,2));
+        %meanMinusTemp=meanMinusTemp-repmat(nanmean(meanMinusTemp,2),1,size(meanMinusTemp,2));
         %plotLikeTrainingSet(meanMinusTemp,sipc);
     case 'low'
         backupdata=data;
@@ -116,7 +116,7 @@ figure(); scatter3(allcell_PCs.score(idx==1,2),allcell_PCs.score(idx==1,3),allce
 scatter3(allcell_PCs.score(idx==2,2),allcell_PCs.score(idx==2,3),allcell_PCs.score(idx==2,4),[],'r');
 xlabel('PC2'); ylabel('PC3'); zlabel('PC4'); % PC2 separates clusters
 
-load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\for_data_matrix_D1vA2a.mat')
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\for_data_matrix_D1vA2a.mat')
 figure();
 for i=1:size(meanMinusTemp,2)
     subplot(1,size(meanMinusTemp,2),i);
@@ -142,7 +142,7 @@ scatter3(score(A2atag==1,1),score(A2atag==1,2),score(A2atag==1,3),[],'b','filled
 xlabel('Proj1'); ylabel('Proj2'); zlabel('Proj3');
 % tsnetemp=tsne(score,'Algorithm','exact','Distance','chebychev','Exaggeration',10,'NumDimensions',2,'Perplexity',60,'Standardize',false);
 tsnetemp=tsne(score,'Algorithm','exact','Distance','chebychev','Exaggeration',10,'NumDimensions',2,'Perplexity',900,'Standardize',false);
-load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\CP model\data_loc_array.mat'); [~,~,uic]=unique(data_loc_array(:,2));
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\old batch\training\CP model\data_loc_array.mat'); [~,~,uic]=unique(data_loc_array(:,2));
 load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\cued_success_Response.mat'); mousebymouse=uic(cued_success_Response.fromWhichSess); 
 [~,~,umbym]=unique(mousebymouse);
 cmap=[]; for i=1:length(unique(umbym)) cmap=[cmap; rand(1,3)]; end %cmap=colormap(parula(108)); 
@@ -281,12 +281,15 @@ function plotLikeTrainingSet(meanMinusTemp,sipc)
 
 %load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\CP model\sortedbyneuronloadingsPC1.mat');
 % temp=T.U{1}./T.core(1,1,1); meanMinusTemp=temp-repmat(nanmean(temp,2),1,size(temp,2));
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\CP model\idx_groupLabelsFromTCAkmeans.mat');
 figure();
 for i=1:size(meanMinusTemp,2)
 subplot(1,size(meanMinusTemp,2),i);
 bar(meanMinusTemp(sipc,i),'k');
 thesevals=meanMinusTemp(sipc,i);
 hold on;
+ngroups=2;
+currc={[0, 0.75, 0.75], [0.4940, 0.1840, 0.5560]};
 for j=1:ngroups
 scatter(find(idx(sipc)==j),thesevals(idx(sipc)==j),2,currc{j});
 end
