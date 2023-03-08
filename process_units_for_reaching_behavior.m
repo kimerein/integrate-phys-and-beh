@@ -700,19 +700,24 @@ load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_success_Respons
 load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_failure_Response.mat'); cued_failure_Response.idx=idx;
 load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\uncued_failure_Response.mat'); uncued_failure_Response.idx=idx;
 load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\uncued_success_Response.mat'); uncued_success_Response.idx=idx;
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\all_success_Response.mat');
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\all_failure_Response.mat');
 load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\cued_reach_Response.mat');
 load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\uncued_reach_Response.mat');
 trial_n_cutoff=0;
-out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',excludeTooFewTrials(cued_reach_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false));
-cued_reach_Response=out.Response1; cued_success_Response=out.Response2; cued_failure_Response=out.Response3; uncued_success_Response=out.Response4; uncued_failure_Response=out.Response5;
-out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',cued_reach_Response,uncued_reach_Response,[],[],[]);
-uncued_reach_Response=out.Response2;
-allsucc_Response=makeNsWeightedResponse(cued_success_Response,uncued_success_Response);
-allfail_Response=makeNsWeightedResponse(cued_failure_Response,uncued_failure_Response);
+out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',excludeTooFewTrials(all_success_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(all_drop_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false));
+all_success_Response=out.Response1; cued_success_Response=out.Response2; all_drop_Response=out.Response3; uncued_success_Response=out.Response4; uncued_failure_Response=out.Response5;
+% out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',excludeTooFewTrials(all_success_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false));
+% all_success_Response=out.Response1; cued_success_Response=out.Response2; cued_failure_Response=out.Response3; uncued_success_Response=out.Response4; uncued_failure_Response=out.Response5;
+out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',cued_success_Response,all_failure_Response,cued_reach_Response,uncued_reach_Response,[]);
+all_failure_Response=out.Response2; cued_reach_Response=out.Response3; uncued_reach_Response=out.Response4;
+
+% Exclude reach-only units
 
 % CUED
-% cuez=getCueTunedUnits(cuedReach_Response,uncuedReach_Response,'cue_vs_baseline_no_index','mean',1,[7 16],[-2 0],[7 16],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
-% plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'cued');
+% cuez=getCueTunedUnits(cued_reach_Response,uncued_reach_Response,'cue_vs_baseline_no_index','mean',1,[7 16],[-2 0],[7 16],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
+% plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'cued','tuning');
+% plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cuez,all_success_Response,all_failure_Response,uncued_success_Response,uncued_failure_Response,cuez<4,'cued','justAvs');
 
 % UNCUED
 % cuez=getCueTunedUnits(uncued_reach_Response,uncuedReach_Response,'cue_vs_baseline_no_index','mean',1,[7 16],[-2 0],[7 16],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'

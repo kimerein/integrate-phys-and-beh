@@ -1,10 +1,36 @@
-function plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,isSig,doingCued)
+function plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,isSig,doingCued,justAvsOrTuning)
 
-% for cue tuned plots
-% doingCued='uncuedOverCued'; % 'cued' or 'uncued' or 'cuedOverUncued' or 'uncuedOverCued'
-basesubtract=true;
-individBase=false;
-basetimewindow=[9 12.5]; %[4 9];
+switch justAvsOrTuning
+    case 'justAvs'
+        basesubtract=false;
+        individBase=false;
+        basetimewindow=[9 12.5]; %[4 9];
+
+        plotAll=false;
+        Zscore=false;
+        minmaxnorm=false;
+        chopOutliers=false;
+        smoo=30; %6; %smoo=3; %smoo=42;
+        smoothBeforeResids=false; 
+        smooBef=50;
+        getResiduals=false; % but need this to get rid of mid-range
+        ds=6;
+    case 'tuning'
+        % for cue tuned plots
+        % doingCued='uncuedOverCued'; % 'cued' or 'uncued' or 'cuedOverUncued' or 'uncuedOverCued'
+        basesubtract=true;
+        individBase=false;
+        basetimewindow=[9 12.5]; %[4 9];
+
+        plotAll=false;
+        Zscore=false;
+        minmaxnorm=false;
+        smoo=30; %6; %smoo=3; %smoo=42;
+        smoothBeforeResids=false;
+        smooBef=1;
+        getResiduals=false; % but need this to get rid of mid-range
+        dsForCuez=6;
+end
 
 % plot all SU
 % although ugly, the raw raw data actually shows effects (maybe for
@@ -19,13 +45,6 @@ basetimewindow=[9 12.5]; %[4 9];
 
 %     temp=prctile(cuez(groupLabelsFromTCA==1),[0 39 50 72 85 90 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 39th prctile is 0 cuez for grp 1
 %     temp=prctile(cuez(groupLabelsFromTCA==2),[0 39 50 72 85 90 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
-
-plotAll=false;
-Zscore=false;
-minmaxnorm=false;
-smoo=30; %6; %smoo=3; %smoo=42;
-getResiduals=false; % but need this to get rid of mid-range
-dsForCuez=6;
 
 switch doingCued
     case 'cued'
@@ -68,37 +87,14 @@ if addbeginnings==true
     uncued_failure_Response=addLastTrialToNextBeginning(uncued_failure_Response);
 end
 
-if Zscore==true
-    [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=ZscoreResponses(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response);
-elseif minmaxnorm==true
-    [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=maxNorm(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response);
-end 
-Zscore=false;
-ds=6;
-cued_success_Response.idx=groupLabelsFromTCA; exclu=cued_success_Response.excluded; gpLab=1;
-sub1=subResponse(cued_success_Response,'idx',gpLab); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=gpLab))=0; gpLab=2; sub2=subResponse(cued_success_Response,'idx',gpLab); f=find(exclu~=0); sub2.excluded(f(groupLabelsFromTCA~=gpLab))=0;
-outCuedSucc=plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',sub1,sub2,'meanAcrossUnits',ds,true); plotOverlayedResponses(outCuedSucc,'k','r'); title('Cued success');
-cued_failure_Response.idx=groupLabelsFromTCA; exclu=cued_failure_Response.excluded; gpLab=1;
-sub1=subResponse(cued_failure_Response,'idx',gpLab); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=gpLab))=0; gpLab=2; sub2=subResponse(cued_failure_Response,'idx',gpLab); f=find(exclu~=0); sub2.excluded(f(groupLabelsFromTCA~=gpLab))=0;
-outCuedFail=plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',sub1,sub2,'meanAcrossUnits',ds,true); plotOverlayedResponses(outCuedFail,'k','r'); title('Cued failure');
-uncued_success_Response.idx=groupLabelsFromTCA; exclu=uncued_success_Response.excluded; gpLab=1;
-sub1=subResponse(uncued_success_Response,'idx',gpLab); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=gpLab))=0; gpLab=2; sub2=subResponse(uncued_success_Response,'idx',gpLab); f=find(exclu~=0); sub2.excluded(f(groupLabelsFromTCA~=gpLab))=0;
-outUncuedSucc=plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',sub1,sub2,'meanAcrossUnits',ds,true); plotOverlayedResponses(outUncuedSucc,'k','r'); title('Uncued success');
-uncued_failure_Response.idx=groupLabelsFromTCA; exclu=uncued_failure_Response.excluded; gpLab=1;
-sub1=subResponse(uncued_failure_Response,'idx',gpLab); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=gpLab))=0; gpLab=2; sub2=subResponse(uncued_failure_Response,'idx',gpLab); f=find(exclu~=0); sub2.excluded(f(groupLabelsFromTCA~=gpLab))=0;
-outUncuedFail=plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',sub1,sub2,'meanAcrossUnits',ds,true); plotOverlayedResponses(outUncuedFail,'k','r'); title('Uncued failure');
+if chopOutliers==true
+    aboveThisFR=20;
+    [cued_success_Response,~,uncued_success_Response,~]=chopOuts(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,aboveThisFR,groupLabelsFromTCA==1);
+    [~,cued_failure_Response,~,uncued_failure_Response]=chopOuts(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,aboveThisFR,groupLabelsFromTCA==2);
+end
 
-r.response1=outCuedSucc.response1; r.response2=outCuedFail.response1; plotOverlayedResponses(r,'g','r'); title('Cued grp 1');
-r.response1=outCuedSucc.response2; r.response2=outCuedFail.response2; plotOverlayedResponses(r,'g','r'); title('Cued grp 2');
-r.response1=outUncuedSucc.response1; r.response2=outUncuedFail.response1; plotOverlayedResponses(r,'g','r'); title('Uncued grp 1');
-r.response1=outUncuedSucc.response2; r.response2=outUncuedFail.response2; plotOverlayedResponses(r,'g','r'); title('Uncued grp 2');
-
-% failure_off={'unit91onCh1_A2atagged','unit97onCh28_A2atagged','unit98onCh31_A2atagged','unit99onCh28_A2atagged','unit147onCh22_A2atagged','unit159onCh27_A2atagged','unit160onCh27_A2atagged','unit162onCh27_A2atagged','unit163onCh27_A2atagged','unit208onCh23_A2atagged','unit208onCh25_A2atagged','unit209onCh21_A2atagged','unit209onCh23_A2atagged','unit215onCh27_A2atagged','unit217onCh27_A2atagged','unit227onCh30_A2atagged','unit233onCh30_A2atagged'};
-% plotSU_contextAndOutcome('Z:\MICROSCOPE\Kim\WHISPER recs\Mar_1\20210803\SU aligned to behavior',failure_off);
-
-smoothBeforeResids=false;
 if smoothBeforeResids==true
-    [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=smoothResponses(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,6);
+    [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=smoothResponses(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,smooBef);
 end
 
 if getResiduals==true
@@ -115,25 +111,50 @@ if basesubtract==true
     [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=baseSubResponses(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,basetimewindow,individBase);
 end
 
-% cuezbins=-2:0.5:3;
-% cuezbins(1)=-2.0001; cuezbins(end)=3.0001;
-% cuezbins=prctile(cuez,0:10:100);
-% cuezbins=prctile(cuez,[0 10 20 30 40 50 60 70 75 80 85 87.5 90 92.5 95 97.5 100]);
-% cuezbins=prctile(cuez,[0 20 40 60 70 80 82 84 86 88 90 91 92 93 95 97 100]); 
-basesubtract=false; 
-basetimewindow=[9.5 12]; 
-[grp1_succ,grp2_succ]=plotByCuez(cued_success_Response,cuez,groupLabelsFromTCA,'cued success',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll); 
-[grp1_fail,grp2_fail]=plotByCuez(cued_failure_Response,cuez,groupLabelsFromTCA,'cued failure',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
-[grp1_succ_uncue,grp2_succ_uncue]=plotByCuez(uncued_success_Response,cuez,groupLabelsFromTCA,'uncued success',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
-[grp1_fail_uncue,grp2_fail_uncue]=plotByCuez(uncued_failure_Response,cuez,groupLabelsFromTCA,'uncued failure',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
-% plotDiffOfBycuez(grp1_succ,grp1_fail,[]);
-% plotDiffOfBycuez(grp1_succ,grp1_fail,[-1.5 0]);
-% plotDiffOfBycuez(grp1_succ,grp1_fail,[0 2.1]); 
-% violinPlots(grp1_fail_uncue,[1 4]);
-% violinPlots(grp1_succ_uncue,[1 4]);
-% violinPlots(grp2_fail_uncue,[1 4]);
+switch justAvsOrTuning
+    case 'justAvs'
+        % ds=6;
+        cued_success_Response.idx=groupLabelsFromTCA; exclu=cued_success_Response.excluded; gpLab=1;
+        sub1=subResponse(cued_success_Response,'idx',gpLab); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=gpLab))=0; gpLab=2; sub2=subResponse(cued_success_Response,'idx',gpLab); f=find(exclu~=0); sub2.excluded(f(groupLabelsFromTCA~=gpLab))=0;
+        outCuedSucc=plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',sub1,sub2,'meanAcrossUnits',ds,true); plotOverlayedResponses(outCuedSucc,'k','r'); title('Cued success');
+        cued_failure_Response.idx=groupLabelsFromTCA; exclu=cued_failure_Response.excluded; gpLab=1;
+        sub1=subResponse(cued_failure_Response,'idx',gpLab); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=gpLab))=0; gpLab=2; sub2=subResponse(cued_failure_Response,'idx',gpLab); f=find(exclu~=0); sub2.excluded(f(groupLabelsFromTCA~=gpLab))=0;
+        outCuedFail=plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',sub1,sub2,'meanAcrossUnits',ds,true); plotOverlayedResponses(outCuedFail,'k','r'); title('Cued failure');
+        uncued_success_Response.idx=groupLabelsFromTCA; exclu=uncued_success_Response.excluded; gpLab=1;
+        sub1=subResponse(uncued_success_Response,'idx',gpLab); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=gpLab))=0; gpLab=2; sub2=subResponse(uncued_success_Response,'idx',gpLab); f=find(exclu~=0); sub2.excluded(f(groupLabelsFromTCA~=gpLab))=0;
+        outUncuedSucc=plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',sub1,sub2,'meanAcrossUnits',ds,true); plotOverlayedResponses(outUncuedSucc,'k','r'); title('Uncued success');
+        uncued_failure_Response.idx=groupLabelsFromTCA; exclu=uncued_failure_Response.excluded; gpLab=1;
+        sub1=subResponse(uncued_failure_Response,'idx',gpLab); f=find(exclu~=0); sub1.excluded(f(groupLabelsFromTCA~=gpLab))=0; gpLab=2; sub2=subResponse(uncued_failure_Response,'idx',gpLab); f=find(exclu~=0); sub2.excluded(f(groupLabelsFromTCA~=gpLab))=0;
+        outUncuedFail=plotVariousSUResponsesAlignedToBeh('scatterResponseVsResponse',sub1,sub2,'meanAcrossUnits',ds,true); plotOverlayedResponses(outUncuedFail,'k','r'); title('Uncued failure');
 
-plotOutsOverlayed(grp1_fail,grp1_fail_uncue); 
+        r.response1=outCuedSucc.response1; r.response2=outCuedFail.response1; plotOverlayedResponses(r,'g','r'); title('Cued grp 1');
+        r.response1=outCuedSucc.response2; r.response2=outCuedFail.response2; plotOverlayedResponses(r,'g','r'); title('Cued grp 2');
+        r.response1=outUncuedSucc.response1; r.response2=outUncuedFail.response1; plotOverlayedResponses(r,'g','r'); title('Uncued grp 1');
+        r.response1=outUncuedSucc.response2; r.response2=outUncuedFail.response2; plotOverlayedResponses(r,'g','r'); title('Uncued grp 2');
+    case 'tuning'
+        % failure_off={'unit91onCh1_A2atagged','unit97onCh28_A2atagged','unit98onCh31_A2atagged','unit99onCh28_A2atagged','unit147onCh22_A2atagged','unit159onCh27_A2atagged','unit160onCh27_A2atagged','unit162onCh27_A2atagged','unit163onCh27_A2atagged','unit208onCh23_A2atagged','unit208onCh25_A2atagged','unit209onCh21_A2atagged','unit209onCh23_A2atagged','unit215onCh27_A2atagged','unit217onCh27_A2atagged','unit227onCh30_A2atagged','unit233onCh30_A2atagged'};
+        % plotSU_contextAndOutcome('Z:\MICROSCOPE\Kim\WHISPER recs\Mar_1\20210803\SU aligned to behavior',failure_off);
+
+        % cuezbins=-2:0.5:3;
+        % cuezbins(1)=-2.0001; cuezbins(end)=3.0001;
+        % cuezbins=prctile(cuez,0:10:100);
+        % cuezbins=prctile(cuez,[0 10 20 30 40 50 60 70 75 80 85 87.5 90 92.5 95 97.5 100]);
+        % cuezbins=prctile(cuez,[0 20 40 60 70 80 82 84 86 88 90 91 92 93 95 97 100]);
+        basesubtract=false;
+        basetimewindow=[9.5 12];
+        [grp1_succ,grp2_succ]=plotByCuez(cued_success_Response,cuez,groupLabelsFromTCA,'cued success',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
+        [grp1_fail,grp2_fail]=plotByCuez(cued_failure_Response,cuez,groupLabelsFromTCA,'cued failure',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
+        [grp1_succ_uncue,grp2_succ_uncue]=plotByCuez(uncued_success_Response,cuez,groupLabelsFromTCA,'uncued success',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
+        [grp1_fail_uncue,grp2_fail_uncue]=plotByCuez(uncued_failure_Response,cuez,groupLabelsFromTCA,'uncued failure',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
+        % plotDiffOfBycuez(grp1_succ,grp1_fail,[]);
+        % plotDiffOfBycuez(grp1_succ,grp1_fail,[-1.5 0]);
+        % plotDiffOfBycuez(grp1_succ,grp1_fail,[0 2.1]);
+        % violinPlots(grp1_fail_uncue,[1 4]);
+        % violinPlots(grp1_succ_uncue,[1 4]);
+        % violinPlots(grp2_fail_uncue,[1 4]);
+
+        plotOutsOverlayed(grp1_fail,grp1_fail_uncue);
+end
 
 end
 
@@ -294,6 +315,15 @@ uncued_success_Response.unitbyunit_y=uncued_success_Response.unitbyunit_y./repma
 uncued_failure_Response.unitbyunit_y(uncued_failure_Response.unitbyunit_y<0.001)=0;
 uncued_failure_Response.unitbyunit_y=uncued_failure_Response.unitbyunit_y./repmat(max(uncued_failure_Response.unitbyunit_y(:,t>minmaxwindow(1) & t<minmaxwindow(2)),[],2,'omitnan'),1,size(uncued_failure_Response.unitbyunit_y,2));
       
+end
+
+function [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=chopOuts(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,aboveThisFR,justForThese)
+
+backup=cued_success_Response.unitbyunit_y; cued_success_Response.unitbyunit_y(cued_success_Response.unitbyunit_y>aboveThisFR)=aboveThisFR; cued_success_Response.unitbyunit_y(~justForThese,:)=backup(~justForThese,:);
+backup=cued_failure_Response.unitbyunit_y; cued_failure_Response.unitbyunit_y(cued_failure_Response.unitbyunit_y>aboveThisFR)=aboveThisFR; cued_failure_Response.unitbyunit_y(~justForThese,:)=backup(~justForThese,:);
+backup=uncued_success_Response.unitbyunit_y; uncued_success_Response.unitbyunit_y(uncued_success_Response.unitbyunit_y>aboveThisFR)=aboveThisFR; uncued_success_Response.unitbyunit_y(~justForThese,:)=backup(~justForThese,:);
+backup=uncued_failure_Response.unitbyunit_y; uncued_failure_Response.unitbyunit_y(uncued_failure_Response.unitbyunit_y>aboveThisFR)=aboveThisFR; uncued_failure_Response.unitbyunit_y(~justForThese,:)=backup(~justForThese,:);
+
 end
 
 function [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=smoothResponses(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,smoo)
