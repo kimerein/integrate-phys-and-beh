@@ -44,6 +44,10 @@ switch doingHighOrLowRank
         R_guess=6; % guess matrix rank
         allconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[2:5])),20,R_guess);
         [allcell_PCs,allcell_archetypeCells,dimOrdering]=studyCPmodel(allconditions_cpmodel);
+        % project onto existing CP model
+        %loc='Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\CP model\allconditions_cpmodel.mat';
+        %whichFactor=1;
+        %T=projectCurrentDataOntoExistingCP(loc,test_data_matrix,whichFactor);
     case 'low'
         backupdata=data;
         % Normalize each unit's PSTH, don't min-subtract here bcz assume 0 is 0
@@ -241,6 +245,25 @@ figure(); scatter(mean(us(:,2:3),2),mean(us(:,4:5),2));
 % figure(); imagesc(S(:,1:10));
 % figure(); imagesc(V(1:4,:)');
 % figure(); imagesc(V(:,1:4));
+
+end
+
+function T=projectCurrentDataOntoExistingCP(loc,test_data_matrix,whichFactor)
+
+% load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\CP model\allconditions_cpmodel.mat');
+load(loc);
+temp=allconditions_cpmodel.U{1}; fac1_vec1=temp(:,whichFactor);
+temp=allconditions_cpmodel.U{2}; fac1_vec2=temp(:,whichFactor);
+temp=allconditions_cpmodel.U{3}; fac1_vec3=temp(:,whichFactor);
+fac1_ktens=ktensor({fac1_vec1,fac1_vec2,fac1_vec3});
+fac1=outerProduct(outerProduct(fac1_vec1,fac1_vec2),fac1_vec3);
+projected=(test_data_matrix.*fac1)./norm(fac1_ktens);
+ptens=tensor(projected);
+T=hosvd(ptens,sqrt(3e-1),'rank',[1 1 1]); 
+figure(); bar(T.U{1}./T.core(1,1,1),'r');
+figure(); plot(fac1_vec1,'Color','k'); hold on; plot(T.U{1}./T.core(1,1,1),'Color','r'); legend({'existing CP','new data'});
+figure(); plot(fac1_vec2,'Color','k'); hold on; plot(T.U{2},'Color','r');
+figure(); plot(fac1_vec3,'Color','k'); hold on; plot(T.U{3},'Color','r');
 
 end
 
