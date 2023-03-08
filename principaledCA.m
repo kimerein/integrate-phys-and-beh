@@ -45,9 +45,18 @@ switch doingHighOrLowRank
         allconditions_cpmodel=plotTCA(noNansOrInfs(data(:,:,[2:5])),20,R_guess);
         [allcell_PCs,allcell_archetypeCells,dimOrdering]=studyCPmodel(allconditions_cpmodel);
         % project onto existing CP model
+        %test_data_matrix=noNansOrInfs(data(:,:,[2:5]));
         %loc='Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\CP model\allconditions_cpmodel.mat';
-        %whichFactor=1;
-        %T=projectCurrentDataOntoExistingCP(loc,test_data_matrix,whichFactor);
+        %whichFactor=1; [T,temp]=projectCurrentDataOntoExistingCP(loc,test_data_matrix,whichFactor);
+        % meanMinusTemp=nan(length(temp),R_guess); meanMinusTemp(:,1)=temp;
+        %whichFactor=2; [T,meanMinusTemp(:,2)]=projectCurrentDataOntoExistingCP(loc,test_data_matrix,whichFactor);
+        %whichFactor=3; [T,meanMinusTemp(:,2)]=projectCurrentDataOntoExistingCP(loc,test_data_matrix,whichFactor);
+        %whichFactor=4; [T,meanMinusTemp(:,2)]=projectCurrentDataOntoExistingCP(loc,test_data_matrix,whichFactor);
+        %whichFactor=5; [T,meanMinusTemp(:,2)]=projectCurrentDataOntoExistingCP(loc,test_data_matrix,whichFactor);
+        %whichFactor=6; [T,meanMinusTemp(:,2)]=projectCurrentDataOntoExistingCP(loc,test_data_matrix,whichFactor);
+        %load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\CP model\sortedbyneuronloadingsPC1.mat');
+        %meanMinusTemp=temp-repmat(nanmean(temp,2),1,size(temp,2));
+        %plotLikeTrainingSet(meanMinusTemp,sipc);
     case 'low'
         backupdata=data;
         % Normalize each unit's PSTH, don't min-subtract here bcz assume 0 is 0
@@ -248,7 +257,7 @@ figure(); scatter(mean(us(:,2:3),2),mean(us(:,4:5),2));
 
 end
 
-function T=projectCurrentDataOntoExistingCP(loc,test_data_matrix,whichFactor)
+function [T,neuron_loadings]=projectCurrentDataOntoExistingCP(loc,test_data_matrix,whichFactor)
 
 % load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\CP model\allconditions_cpmodel.mat');
 load(loc);
@@ -259,11 +268,39 @@ fac1_ktens=ktensor({fac1_vec1,fac1_vec2,fac1_vec3});
 fac1=outerProduct(outerProduct(fac1_vec1,fac1_vec2),fac1_vec3);
 projected=(test_data_matrix.*fac1)./norm(fac1_ktens);
 ptens=tensor(projected);
-T=hosvd(ptens,sqrt(3e-1),'rank',[1 1 1]); 
+T=hosvd(ptens,sqrt(3e-1),'rank',[1 1 1]);
+neuron_loadings=T.U{1}./T.core(1,1,1);
 figure(); bar(T.U{1}./T.core(1,1,1),'r');
-figure(); plot(fac1_vec1,'Color','k'); hold on; plot(T.U{1}./T.core(1,1,1),'Color','r'); legend({'existing CP','new data'});
-figure(); plot(fac1_vec2,'Color','k'); hold on; plot(T.U{2},'Color','r');
-figure(); plot(fac1_vec3,'Color','k'); hold on; plot(T.U{3},'Color','r');
+figure(); subplot(1,3,1); plot(fac1_vec1,'Color','k'); hold on; plot(T.U{1}./T.core(1,1,1),'Color','r'); legend({'existing CP','new data'});
+subplot(1,3,2); plot(fac1_vec2,'Color','k'); hold on; plot(T.U{2},'Color','r');
+subplot(1,3,3); plot(fac1_vec3,'Color','k'); hold on; plot(T.U{3},'Color','r');
+
+end
+
+function plotLikeTrainingSet(meanMinusTemp,sipc)
+
+%load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\CP model\sortedbyneuronloadingsPC1.mat');
+% temp=T.U{1}./T.core(1,1,1); meanMinusTemp=temp-repmat(nanmean(temp,2),1,size(temp,2));
+figure();
+for i=1:size(meanMinusTemp,2)
+subplot(1,size(meanMinusTemp,2),i);
+bar(meanMinusTemp(sipc,i),'k');
+thesevals=meanMinusTemp(sipc,i);
+hold on;
+for j=1:ngroups
+scatter(find(idx(sipc)==j),thesevals(idx(sipc)==j),2,currc{j});
+end
+end
+load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\for_data_matrix_D1vA2a.mat');
+figure();
+for i=1:size(meanMinusTemp,2)
+    subplot(1,size(meanMinusTemp,2),i);
+    bar(meanMinusTemp(sipc,i));
+    thesevals=meanMinusTemp(sipc,i);
+    hold on;
+    scatter(find(D1tag(sipc)==1),thesevals(find(D1tag(sipc)==1)),2,'r');
+    scatter(find(A2atag(sipc)==1),thesevals(find(A2atag(sipc)==1)),2,'b');
+end
 
 end
 
