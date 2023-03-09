@@ -261,34 +261,22 @@ for j=1:length(dd)
                                 % i.e., intersection of test set and
                                 % current set
                                 doingIntersect=true;
-                                if contains(settings.useTheseTestSets{itthroughtest},'NOT')
-                                    IntersectNOT=true;
-                                else
-                                    IntersectNOT=false;
-                                end
                                 tsstr=settings.useTheseTestSets{itthroughtest};
                                 settings.useTheseTestSets{itthroughtest}=tsstr(1:regexp(settings.useTheseTestSets{itthroughtest},'Intersect')-1);
                             else
                                 doingIntersect=false;
-                                IntersectNOT=false;
                             end 
                             rlastslash=regexp(ls(i).folder,sep);
                             lastunderscore=regexp(ls(i).name,'_');
                             btemp=load([ls(i).folder(1:rlastslash(end)) settings.useTheseTestSets{itthroughtest} sep ls(i).name(1:lastunderscore(end)) settings.useTheseTestFilenames{itthroughtest} '_testSet.mat']);
                             if ~isempty(btemp.testSet)
                                 if doingIntersect==true
-                                    if IntersectNOT==false
-                                        % find intersection of test set and
-                                        % current eventHappens trials
-                                        f=find(eventHappens==1);
-                                        whichInBoth=find(ismember(f,btemp.testSetTrials));
-                                        whichInBoth2=find(ismember(btemp.testSetTrials,f));
-                                        b.testSet=[b.testSet btemp.testSet(whichInBoth2)]; b.testSetTrials=[b.testSetTrials; f(whichInBoth)];
-                                    else
-                                        f=find(eventHappens==1);
-                                        whichInBothNOT=find(~ismember(btemp.testSetTrials,f));
-                                        b.testSet=[b.testSet btemp.testSet(whichInBothNOT)]; b.testSetTrials=[b.testSetTrials; btemp.testSetTrials(whichInBothNOT)];
-                                    end
+                                    % find intersection of test set and
+                                    % current eventHappens trials
+                                    f=find(eventHappens==1);
+                                    whichInBoth=find(ismember(f,btemp.testSetTrials));
+                                    whichInBoth2=find(ismember(btemp.testSetTrials,f));
+                                    b.testSet=[b.testSet btemp.testSet(whichInBoth2)]; b.testSetTrials=[b.testSetTrials; f(whichInBoth)];
                                 else
                                     b.testSet=[b.testSet btemp.testSet]; b.testSetTrials=[b.testSetTrials; btemp.testSetTrials];
                                 end
@@ -303,6 +291,20 @@ for j=1:length(dd)
                         end
                     else
                         b=load([ls(i).folder sep ls(i).name(1:regexp(ls(i).name,'.mat','once')-1) '_testSet.mat']);
+
+                        % discard drops
+                        if settings.discardDrops==true
+                            rlastslash=regexp(ls(i).folder,sep);
+                            lastunderscore=regexp(ls(i).name,'_');
+                            tempDrop=load([ls(i).folder(1:rlastslash(end)) settings.dropFolderName sep ls(i).name(1:lastunderscore(end)) settings.dropFileName '.mat']);
+                            tempDrop.dataout.y=tempDrop.dataout.y(usingTrialsInds,:);
+                            tempDrop.alignComp.y=tempDrop.alignComp.y(usingTrialsInds,:);
+                            dropHappens=any(~isnan(tempDrop.alignComp.y),2);
+                            % nan out the drops
+                            a.dataout.y(dropHappens==1,:)=nan;
+                            a.alignComp.y(dropHappens==1,:)=nan;
+                        end
+
                         unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
                         if isempty(b.testSet) % only one trial
                             unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
