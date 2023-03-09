@@ -261,22 +261,34 @@ for j=1:length(dd)
                                 % i.e., intersection of test set and
                                 % current set
                                 doingIntersect=true;
+                                if contains(settings.useTheseTestSets{itthroughtest},'NOT')
+                                    IntersectNOT=true;
+                                else
+                                    IntersectNOT=false;
+                                end
                                 tsstr=settings.useTheseTestSets{itthroughtest};
                                 settings.useTheseTestSets{itthroughtest}=tsstr(1:regexp(settings.useTheseTestSets{itthroughtest},'Intersect')-1);
                             else
                                 doingIntersect=false;
-                            end
+                                IntersectNOT=false;
+                            end 
                             rlastslash=regexp(ls(i).folder,sep);
                             lastunderscore=regexp(ls(i).name,'_');
                             btemp=load([ls(i).folder(1:rlastslash(end)) settings.useTheseTestSets{itthroughtest} sep ls(i).name(1:lastunderscore(end)) settings.useTheseTestFilenames{itthroughtest} '_testSet.mat']);
                             if ~isempty(btemp.testSet)
                                 if doingIntersect==true
-                                    % find intersection of test set and
-                                    % current eventHappens trials
-                                    f=find(eventHappens==1);
-                                    whichInBoth=find(ismember(f,btemp.testSetTrials));
-                                    whichInBoth2=find(ismember(btemp.testSetTrials,f));
-                                    b.testSet=[b.testSet btemp.testSet(whichInBoth2)]; b.testSetTrials=[b.testSetTrials; f(whichInBoth)];
+                                    if IntersectNOT==false
+                                        % find intersection of test set and
+                                        % current eventHappens trials
+                                        f=find(eventHappens==1);
+                                        whichInBoth=find(ismember(f,btemp.testSetTrials));
+                                        whichInBoth2=find(ismember(btemp.testSetTrials,f));
+                                        b.testSet=[b.testSet btemp.testSet(whichInBoth2)]; b.testSetTrials=[b.testSetTrials; f(whichInBoth)];
+                                    else
+                                        f=find(eventHappens==1);
+                                        whichInBothNOT=find(~ismember(btemp.testSetTrials,f));
+                                        b.testSet=[b.testSet btemp.testSet(whichInBothNOT)]; b.testSetTrials=[b.testSetTrials; btemp.testSetTrials(whichInBothNOT)];
+                                    end
                                 else
                                     b.testSet=[b.testSet btemp.testSet]; b.testSetTrials=[b.testSetTrials; btemp.testSetTrials];
                                 end
