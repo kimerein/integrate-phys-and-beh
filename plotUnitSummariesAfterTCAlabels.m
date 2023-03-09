@@ -9,10 +9,10 @@ switch justAvsOrTuning
         plotAll=false;
         Zscore=false;
         minmaxnorm=false;
-        chopOutliers=false;
+        chopOutliers=true;
         smoo=30; %6; %smoo=3; %smoo=42;
         smoothBeforeResids=true; 
-        smooBef=250;
+        smooBef=30; %83;
         getResiduals=false; % but need this to get rid of mid-range
         ds=1;
     case 'tuning'
@@ -88,14 +88,14 @@ if addbeginnings==true
     uncued_failure_Response=addLastTrialToNextBeginning(uncued_failure_Response);
 end
 
-if chopOutliers==true
-    aboveThisFR=20;
-    [cued_success_Response,~,uncued_success_Response,~]=chopOuts(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,aboveThisFR,groupLabelsFromTCA==1);
-    [~,cued_failure_Response,~,uncued_failure_Response]=chopOuts(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,aboveThisFR,groupLabelsFromTCA==2);
-end
-
 if smoothBeforeResids==true
     [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=smoothResponses(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,smooBef);
+end
+
+if chopOutliers==true
+    aboveThisFR=10;
+    [cued_success_Response,~,uncued_success_Response,~]=chopOuts(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,aboveThisFR,groupLabelsFromTCA==1);
+    [~,cued_failure_Response,~,uncued_failure_Response]=chopOuts(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,aboveThisFR,groupLabelsFromTCA==2);
 end
 
 if getResiduals==true
