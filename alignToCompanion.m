@@ -297,12 +297,14 @@ for j=1:length(dd)
                             rlastslash=regexp(ls(i).folder,sep);
                             lastunderscore=regexp(ls(i).name,'_');
                             tempDrop=load([ls(i).folder(1:rlastslash(end)) settings.dropFolderName sep ls(i).name(1:lastunderscore(end)) settings.dropFileName '.mat']);
-                            tempDrop.dataout.y=tempDrop.dataout.y(usingTrialsInds,:);
-                            tempDrop.alignComp.y=tempDrop.alignComp.y(usingTrialsInds,:);
-                            dropHappens=any(~isnan(tempDrop.alignComp.y),2);
-                            % nan out the drops
-                            a.dataout.y(dropHappens==1,:)=nan;
-                            a.alignComp.y(dropHappens==1,:)=nan;
+                            if ~isempty(tempDrop.dataout)
+                                tempDrop.dataout.y=tempDrop.dataout.y(usingTrialsInds,:);
+                                tempDrop.alignComp.y=tempDrop.alignComp.y(usingTrialsInds,:);
+                                dropHappens=any(~isnan(tempDrop.alignComp.y),2);
+                                % nan out the drops
+                                a.dataout.y(dropHappens==1,:)=nan;
+                                a.alignComp.y(dropHappens==1,:)=nan;
+                            end
                         end
 
                         unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
