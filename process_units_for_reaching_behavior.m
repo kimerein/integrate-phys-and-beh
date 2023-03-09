@@ -721,11 +721,21 @@ uncued_reach_Response=r{10};
 groupLabelsFromTCA=cued_success_Response.idx;
 
 % Exclude non-SPN units, i.e., firing rate > 4 Hz
-% nonSPNs=
+nonSPNs=[762 797 896 1681 1686]; trmv=zeros(length(cued_success_Response.excluded),1); trmv(nonSPNs)=1; trmv=logical(trmv);
+cued_success_Response=removeUnitFromResponse(cued_success_Response,trmv);
+cued_failure_Response=removeUnitFromResponse(cued_failure_Response,trmv);
+uncued_failure_Response=removeUnitFromResponse(uncued_failure_Response,trmv);
+uncued_success_Response=removeUnitFromResponse(uncued_success_Response,trmv);
+cued_drop_Response=removeUnitFromResponse(cued_drop_Response,trmv);
+cued_failureNotDrop_Response=removeUnitFromResponse(cued_failureNotDrop_Response,trmv);
+uncued_drop_Response=removeUnitFromResponse(uncued_drop_Response,trmv);
+uncued_failureNotDrop_Response=removeUnitFromResponse(uncued_failureNotDrop_Response,trmv);
+cued_reach_Response=removeUnitFromResponse(cued_reach_Response,trmv);
+uncued_reach_Response=removeUnitFromResponse(uncued_reach_Response,trmv);
 
 % CUED
 cuez=getCueTunedUnits(cued_reach_Response,uncued_reach_Response,'cue_vs_baseline_no_index','mean',1,[7 16],[-2 0],[7 16],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
-plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'cued','tuning');
+plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'cued','justAvs');
 % plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cuez,all_success_Response,all_failure_Response,uncued_success_Response,uncued_failure_Response,cuez<4,'cued','justAvs');
 
 % UNCUED
