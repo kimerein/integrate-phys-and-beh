@@ -255,11 +255,31 @@ for j=1:length(dd)
                     if ~isempty(settings.useTheseTestSets)
                         b.testSet=[]; b.testSetTrials=[];
                         for itthroughtest=1:length(settings.useTheseTestSets)
+                            if contains(settings.useTheseTestSets{itthroughtest},'Intersect')
+                                % only take trials from this test set that
+                                % are also in current eventHappens
+                                % i.e., intersection of test set and
+                                % current set
+                                doingIntersect=true;
+                                tsstr=settings.useTheseTestSets{itthroughtest};
+                                settings.useTheseTestSets{itthroughtest}=tsstr(1:regexp(settings.useTheseTestSets{itthroughtest},'Intersect')-1);
+                            else
+                                doingIntersect=false;
+                            end
                             rlastslash=regexp(ls(i).folder,sep);
                             lastunderscore=regexp(ls(i).name,'_');
                             btemp=load([ls(i).folder(1:rlastslash(end)) settings.useTheseTestSets{itthroughtest} sep ls(i).name(1:lastunderscore(end)) settings.useTheseTestFilenames{itthroughtest} '_testSet.mat']);
                             if ~isempty(btemp.testSet)
-                                b.testSet=[b.testSet btemp.testSet]; b.testSetTrials=[b.testSetTrials; btemp.testSetTrials];
+                                if doingIntersect==true
+                                    % find intersection of test set and
+                                    % current eventHappens trials
+                                    f=find(eventHappens==1);
+                                    whichInBoth=find(ismember(f,btemp.testSetTrials));
+                                    whichInBoth2=find(ismember(btemp.testSetTrials,f));
+                                    b.testSet=[b.testSet btemp.testSet(whichInBoth2)]; b.testSetTrials=[b.testSetTrials; f(whichInBoth)];
+                                else
+                                    b.testSet=[b.testSet btemp.testSet]; b.testSetTrials=[b.testSetTrials; btemp.testSetTrials];
+                                end
                             end
                         end
                         unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];

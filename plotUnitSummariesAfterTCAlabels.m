@@ -11,7 +11,7 @@ switch justAvsOrTuning
         minmaxnorm=false;
         chopOutliers=false;
         smoo=30; %6; %smoo=3; %smoo=42;
-        smoothBeforeResids=false; 
+        smoothBeforeResids=true; 
         smooBef=50;
         getResiduals=false; % but need this to get rid of mid-range
         ds=6;
@@ -26,6 +26,7 @@ switch justAvsOrTuning
         Zscore=false;
         minmaxnorm=false;
         smoo=30; %6; %smoo=3; %smoo=42;
+        chopOutliers=false;
         smoothBeforeResids=false;
         smooBef=1;
         getResiduals=false; % but need this to get rid of mid-range
