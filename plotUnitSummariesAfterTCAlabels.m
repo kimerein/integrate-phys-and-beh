@@ -18,19 +18,19 @@ switch justAvsOrTuning
     case 'tuning'
         % for cue tuned plots
         % doingCued='uncuedOverCued'; % 'cued' or 'uncued' or 'cuedOverUncued' or 'uncuedOverCued'
-        basesubtract=true;
+        basesubtract=false;
         individBase=false;
-        basetimewindow=[9 12.5]; %[4 9];
+        basetimewindow=[-10 -3]; %[4 9];
 
         plotAll=false;
         Zscore=false;
         minmaxnorm=false;
-        smoo=30; %6; %smoo=3; %smoo=42;
+        smoo=1; %6; %smoo=3; %smoo=42;
         chopOutliers=false;
-        smoothBeforeResids=false;
-        smooBef=1;
+        smoothBeforeResids=true;
+        smooBef=30;
         getResiduals=false; % but need this to get rid of mid-range
-        dsForCuez=6;
+        dsForCuez=1;
 end
 
 % plot all SU
@@ -48,6 +48,7 @@ end
 %     temp=prctile(cuez(groupLabelsFromTCA==2),[0 39 50 72 85 90 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
 
 switch doingCued
+    case 'justAvs'
     case 'cued'
         temp=prctile(cuez(groupLabelsFromTCA==1),[0 39 50 72 85 90 94 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 39th prctile is 0 cuez for grp 1
         temp=prctile(cuez(groupLabelsFromTCA==2),[0 39 50 72 85 90 94 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
@@ -56,8 +57,10 @@ switch doingCued
         temp=prctile(cuez(groupLabelsFromTCA==2),[0 42 50 72 77 85 98 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
     case 'cuedOverUncued'
         basesubtract=false; % [0 4 10 15 50 85 96 100] [0 10 20 50 70 80 96 100] [0 10 20 50 70 80 96 100]
-        temp=prctile(cuez(groupLabelsFromTCA==1),[0 10 20 50 60 70 95 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 39th prctile is 0 cuez for grp 1
-        temp=prctile(cuez(groupLabelsFromTCA==2),[0 10 20 50 60 70 95 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
+%         temp=prctile(cuez(groupLabelsFromTCA==1),[0 10 20 50 60 70 95 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 39th prctile is 0 cuez for grp 1
+%         temp=prctile(cuez(groupLabelsFromTCA==2),[0 10 20 50 60 70 95 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
+        temp=prctile(cuez(groupLabelsFromTCA==1),[0:20:100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 39th prctile is 0 cuez for grp 1
+        temp=prctile(cuez(groupLabelsFromTCA==2),[0:20:100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
     case 'uncuedOverCued'
         basesubtract=false;
         temp=prctile(cuez(groupLabelsFromTCA==1),[0 10 20 50 60 70 95 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp;
