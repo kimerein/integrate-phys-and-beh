@@ -2,7 +2,7 @@ function [newResponse,whichToTakeFromUnits]=removeUnitFromResponse(Response,whic
 
 warning('Function currently only works for unit averages, not trial by trial');
 
-f=find(Response.excluded'==0 & ismember(1:length(Response.excluded),whichRmv));
+f=find(Response.excluded'==0 & ismember(1:length(Response.excluded),find(whichRmv==1)));
 currIncluded=find(Response.excluded'==0);
 whichToTakeFromUnits=find(ismember(currIncluded,f));
 

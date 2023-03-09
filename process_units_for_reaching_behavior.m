@@ -695,46 +695,42 @@ boot=1; % num iterations for bootstrap
 % uncuedReach_Response=uncued_success_Response; uncuedReach_Response.unitbyunit_y=(uncued_success_Response.unitbyunit_y+uncued_failure_Response.unitbyunit_y(:,1:size(uncued_success_Response.unitbyunit_y,2)))./2; 
 % cuez=getCueTunedUnits(cue_noReach_Response,uncuedReach_Response,'vs_uncued_reach','max'); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
 
-load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\TCA\idx_groupLabelsFromTCA.mat'); groupLabelsFromTCA=idx;
-load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_success_Response.mat'); cued_success_Response.idx=idx;
-load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_failure_Response.mat'); cued_failure_Response.idx=idx;
-load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\uncued_failure_Response.mat'); uncued_failure_Response.idx=idx;
-load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\uncued_success_Response.mat'); uncued_success_Response.idx=idx;
-load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\all_success_Response.mat');
-load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\all_failure_Response.mat');
-load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\cued_reach_Response.mat');
-load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\uncued_reach_Response.mat');
-trial_n_cutoff=0;
-% out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',excludeTooFewTrials(all_success_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(all_drop_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false));
-% all_success_Response=out.Response1; cued_success_Response=out.Response2; all_drop_Response=out.Response3; uncued_success_Response=out.Response4; uncued_failure_Response=out.Response5;
-out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',excludeTooFewTrials(all_success_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false));
-all_success_Response=out.Response1; cued_success_Response=out.Response2; cued_failure_Response=out.Response3; uncued_success_Response=out.Response4; uncued_failure_Response=out.Response5;
-out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',cued_success_Response,all_failure_Response,cued_reach_Response,uncued_reach_Response,[]);
-all_failure_Response=out.Response2; cued_reach_Response=out.Response3; uncued_reach_Response=out.Response4;
+clear r
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\TCA\idx_groupLabelsFromTCA.mat');
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_success_Response.mat'); cued_success_Response.idx=idx; r{1}=cued_success_Response;
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_failure_Response.mat'); cued_failure_Response.idx=idx; r{2}=cued_failure_Response;
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\uncued_failure_Response.mat'); uncued_failure_Response.idx=idx; r{3}=uncued_failure_Response;
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\uncued_success_Response.mat'); uncued_success_Response.idx=idx; r{4}=uncued_success_Response;
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_drop_Response.mat'); r{5}=cued_drop_Response;
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_failureNotDrop_Response.mat'); r{6}=cued_failureNotDrop_Response;
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\uncued_drop_Response.mat'); r{7}=uncued_drop_Response;
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\uncued_failureNotDrop_Response.mat'); r{8}=uncued_failureNotDrop_Response;
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\cued_reach_Response.mat'); r{9}=cued_reach_Response;
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\uncued_reach_Response.mat'); r{10}=uncued_reach_Response;
+r=matchAllUnits(r);
+cued_success_Response=r{1};
+cued_failure_Response=r{2};
+uncued_failure_Response=r{3};
+uncued_success_Response=r{4};
+cued_drop_Response=r{5};
+cued_failureNotDrop_Response=r{6};
+uncued_drop_Response=r{7};
+uncued_failureNotDrop_Response=r{8};
+cued_reach_Response=r{9};
+uncued_reach_Response=r{10};
+groupLabelsFromTCA=cued_success_Response.idx;
+
+% Exclude non-SPN units, i.e., firing rate > 4 Hz
+% nonSPNs=
 
 % CUED
 cuez=getCueTunedUnits(cued_reach_Response,uncued_reach_Response,'cue_vs_baseline_no_index','mean',1,[7 16],[-2 0],[7 16],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
-% Exclude non-SPN units
-
 plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'cued','tuning');
 % plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cuez,all_success_Response,all_failure_Response,uncued_success_Response,uncued_failure_Response,cuez<4,'cued','justAvs');
 
 % UNCUED
 % cuez=getCueTunedUnits(uncued_reach_Response,uncuedReach_Response,'cue_vs_baseline_no_index','mean',1,[7 16],[-2 0],[7 16],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
 % plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncued');
-
-%% Prepare for DIFFERENT IN CUED V UNCUED
-% load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\groupLabelsFromTCA.mat');
-% out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',cuedReach_Response,cued_success_Response,[],[],[]);
-% [cuedReach_Response,whichTookFromUnits]=removeUnitFromResponse(cuedReach_Response,out.whichRmvd); 
-% [cued_success_Response,whichTookFromUnits]=removeUnitFromResponse(cued_success_Response,out.whichRmvd); groupLabelsFromTCA=groupLabelsFromTCA(~ismember(1:length(groupLabelsFromTCA),whichTookFromUnits));
-% [cued_failure_Response,whichTookFromUnits]=removeUnitFromResponse(cued_failure_Response,out.whichRmvd); 
-% [uncued_success_Response,whichTookFromUnits]=removeUnitFromResponse(uncued_success_Response,out.whichRmvd); 
-% [uncued_failure_Response,whichTookFromUnits]=removeUnitFromResponse(uncued_failure_Response,out.whichRmvd); 
-load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\cued_reach_Response.mat');
-load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\uncued_reach_Response.mat');
-out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',cued_reach_Response,uncued_reach_Response,cued_success_Response,[],[]);
-cued_reach_Response=out.Response1; uncued_reach_Response=out.Response2;
 
 %% Plot DIFFERENT IN CUED V UNCUED
 cuez=getCueTunedUnits(cued_reach_Response,uncued_reach_Response,'justcue_v_justuncue','mean',1,[4 12],[-2 0],[4 12],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue' or 'vs_uncued_reach_no_index'
