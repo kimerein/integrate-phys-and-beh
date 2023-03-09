@@ -12,9 +12,9 @@ switch justAvsOrTuning
         chopOutliers=false;
         smoo=30; %6; %smoo=3; %smoo=42;
         smoothBeforeResids=true; 
-        smooBef=50;
+        smooBef=250;
         getResiduals=false; % but need this to get rid of mid-range
-        ds=6;
+        ds=1;
     case 'tuning'
         % for cue tuned plots
         % doingCued='uncuedOverCued'; % 'cued' or 'uncued' or 'cuedOverUncued' or 'uncuedOverCued'
@@ -329,29 +329,60 @@ end
 
 function [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=smoothResponses(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,smoo)
 
-temp=cued_success_Response.unitbyunit_y;
-for i=1:size(temp,1)
-    temp(i,:)=smoothdata(temp(i,:),'gaussian',smoo);
-end
-cued_success_Response.unitbyunit_y=temp;
+doGauss=false;
+if doGauss==true
+    temp=cued_success_Response.unitbyunit_y;
+    for i=1:size(temp,1)
+        temp(i,:)=smoothdata(temp(i,:),'gaussian',smoo);
+    end
+    cued_success_Response.unitbyunit_y=temp;
 
-temp=cued_failure_Response.unitbyunit_y;
-for i=1:size(temp,1)
-    temp(i,:)=smoothdata(temp(i,:),'gaussian',smoo);
-end
-cued_failure_Response.unitbyunit_y=temp;
+    temp=cued_failure_Response.unitbyunit_y;
+    for i=1:size(temp,1)
+        temp(i,:)=smoothdata(temp(i,:),'gaussian',smoo);
+    end
+    cued_failure_Response.unitbyunit_y=temp;
 
-temp=uncued_success_Response.unitbyunit_y;
-for i=1:size(temp,1)
-    temp(i,:)=smoothdata(temp(i,:),'gaussian',smoo);
-end
-uncued_success_Response.unitbyunit_y=temp;
+    temp=uncued_success_Response.unitbyunit_y;
+    for i=1:size(temp,1)
+        temp(i,:)=smoothdata(temp(i,:),'gaussian',smoo);
+    end
+    uncued_success_Response.unitbyunit_y=temp;
 
-temp=uncued_failure_Response.unitbyunit_y;
-for i=1:size(temp,1)
-    temp(i,:)=smoothdata(temp(i,:),'gaussian',smoo);
+    temp=uncued_failure_Response.unitbyunit_y;
+    for i=1:size(temp,1)
+        temp(i,:)=smoothdata(temp(i,:),'gaussian',smoo);
+    end
+    uncued_failure_Response.unitbyunit_y=temp;
+else
+    temp=cued_success_Response.unitbyunit_y;
+    for i=1:size(temp,1)
+        temp(i,:)=smooth(temp(i,:)',smoo,'moving')';
+    end
+    cued_success_Response.unitbyunit_y=temp;
+    disp('smooth 1 of 4 done');
+
+    temp=cued_failure_Response.unitbyunit_y;
+    for i=1:size(temp,1)
+        temp(i,:)=smooth(temp(i,:)',smoo,'moving')';
+    end
+    cued_failure_Response.unitbyunit_y=temp;
+    disp('smooth 2 of 4 done');
+
+    temp=uncued_success_Response.unitbyunit_y;
+    for i=1:size(temp,1)
+        temp(i,:)=smooth(temp(i,:)',smoo,'moving')';
+    end
+    uncued_success_Response.unitbyunit_y=temp;
+    disp('smooth 3 of 4 done');
+
+    temp=uncued_failure_Response.unitbyunit_y;
+    for i=1:size(temp,1)
+        temp(i,:)=smooth(temp(i,:)',smoo,'moving')';
+    end
+    uncued_failure_Response.unitbyunit_y=temp;
+    disp('smooth 4 of 4 done');
 end
-uncued_failure_Response.unitbyunit_y=temp;
 
 end
 
