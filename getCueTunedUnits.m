@@ -49,7 +49,15 @@ switch meanormax
         beforecue=max(cueresp.unitbyunit(:,t>cuebaserange(1) & t<cuebaserange(2)),[],2,'omitnan'); 
         duringcue=max(cueresp.unitbyunit(:,t>cueonrange(1) & t<cueonrange(2)),[],2,'omitnan'); 
     case 'mean'
-        beforecue=mean(cueresp.unitbyunit(:,t>cuebaserange(1) & t<cuebaserange(2)),2,'omitnan'); 
+        if iscell(cuebaserange)
+            for i=1:length(cuebaserange)
+                cbr=cuebaserange{i};
+                currbeforecue(:,i)=mean(cueresp.unitbyunit(:,t>cbr(1) & t<cbr(2)),2,'omitnan'); 
+            end
+            beforecue=mean(currbeforecue,2);
+        else
+            beforecue=mean(cueresp.unitbyunit(:,t>cuebaserange(1) & t<cuebaserange(2)),2,'omitnan'); 
+        end
         duringcue=mean(cueresp.unitbyunit(:,t>cueonrange(1) & t<cueonrange(2)),2,'omitnan'); 
 end
 cuer=duringcue-beforecue;
@@ -60,7 +68,15 @@ switch meanormax
         beforereach=max(uncuedreachresp.unitbyunit(:,t>reachbaserange(1) & t<reachbaserange(2)),[],2,'omitnan');
         duringreach=max(uncuedreachresp.unitbyunit(:,t>reachonrange(1) & t<reachonrange(2)),[],2,'omitnan');
     case 'mean'
-        beforereach=mean(uncuedreachresp.unitbyunit(:,t>reachbaserange(1) & t<reachbaserange(2)),2,'omitnan');
+        if iscell(reachbaserange)
+            for i=1:length(reachbaserange)
+                cbr=reachbaserange{i};
+                currbeforereach(:,i)=mean(uncuedreachresp.unitbyunit(:,t>cbr(1) & t<cbr(2)),2,'omitnan'); 
+            end
+            beforereach=mean(currbeforereach,2);
+        else
+            beforereach=mean(uncuedreachresp.unitbyunit(:,t>reachbaserange(1) & t<reachbaserange(2)),2,'omitnan');
+        end
         duringreach=mean(uncuedreachresp.unitbyunit(:,t>reachonrange(1) & t<reachonrange(2)),2,'omitnan');
 end
 reachr=duringreach-beforereach;

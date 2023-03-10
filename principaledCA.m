@@ -46,7 +46,7 @@ switch doingHighOrLowRank
         [allcell_PCs,allcell_archetypeCells,dimOrdering]=studyCPmodel(allconditions_cpmodel);
         % project onto existing CP model
         %test_data_matrix=noNansOrInfs(data(:,:,[2:5]));
-        %loc='Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\CP model\allconditions_cpmodel.mat';
+        %loc='Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\TCA\allconditions_cpmodel.mat';
         %whichFactor=1; [T,temp]=projectCurrentDataOntoExistingCP(loc,test_data_matrix,whichFactor);
         % meanMinusTemp=nan(length(temp),R_guess); meanMinusTemp(:,1)=temp;
         %whichFactor=2; [T,meanMinusTemp(:,2)]=projectCurrentDataOntoExistingCP(loc,test_data_matrix,whichFactor);

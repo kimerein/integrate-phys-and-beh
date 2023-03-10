@@ -20,13 +20,13 @@ switch justAvsOrTuning
         % doingCued='uncuedOverCued'; % 'cued' or 'uncued' or 'cuedOverUncued' or 'uncuedOverCued'
         basesubtract=false;
         individBase=false;
-        basetimewindow=[-10 -3]; %[4 9];
+        basetimewindow=[9 12.5]; %[4 9];
 
         plotAll=false;
         Zscore=false;
         minmaxnorm=false;
         smoo=1; %6; %smoo=3; %smoo=42;
-        chopOutliers=false;
+        chopOutliers=true;
         smoothBeforeResids=true;
         smooBef=30;
         getResiduals=false; % but need this to get rid of mid-range
@@ -50,8 +50,11 @@ end
 switch doingCued
     case 'justAvs'
     case 'cued'
-        temp=prctile(cuez(groupLabelsFromTCA==1),[0 39 50 72 85 90 94 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 39th prctile is 0 cuez for grp 1
-        temp=prctile(cuez(groupLabelsFromTCA==2),[0 39 50 72 85 90 94 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
+        smooBef=100;
+%         temp=prctile(cuez(groupLabelsFromTCA==1),[0 39 50 72 85 90 94 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 39th prctile is 0 cuez for grp 1
+%         temp=prctile(cuez(groupLabelsFromTCA==2),[0 39 50 72 85 90 94 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
+        temp=prctile(cuez(groupLabelsFromTCA==1),[0 50 72 78 85 90 94 98 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 39th prctile is 0 cuez for grp 1
+        temp=prctile(cuez(groupLabelsFromTCA==2),[0 50 72 78 85 90 94 98 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
     case 'uncued'
         temp=prctile(cuez(groupLabelsFromTCA==1),[0 42 50 72 83 88 96 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 42th prctile is 0 cuez for grp 1
         temp=prctile(cuez(groupLabelsFromTCA==2),[0 42 50 72 77 85 98 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
@@ -59,8 +62,10 @@ switch doingCued
         basesubtract=false; % [0 4 10 15 50 85 96 100] [0 10 20 50 70 80 96 100] [0 10 20 50 70 80 96 100]
 %         temp=prctile(cuez(groupLabelsFromTCA==1),[0 10 20 50 60 70 95 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 39th prctile is 0 cuez for grp 1
 %         temp=prctile(cuez(groupLabelsFromTCA==2),[0 10 20 50 60 70 95 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
-        temp=prctile(cuez(groupLabelsFromTCA==1),[0:20:100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 39th prctile is 0 cuez for grp 1
-        temp=prctile(cuez(groupLabelsFromTCA==2),[0:20:100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
+        temp=prctile(cuez(groupLabelsFromTCA==1),[0 15 30 45 55 65 80 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 39th prctile is 0 cuez for grp 1
+        temp=prctile(cuez(groupLabelsFromTCA==2),[0 15 30 45 55 65 80 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
+%         temp=prctile(cuez(groupLabelsFromTCA==1),[0 15 30 45 55 65 80 94 98 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 39th prctile is 0 cuez for grp 1
+%         temp=prctile(cuez(groupLabelsFromTCA==2),[0 15 30 45 55 65 80 94 98 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
     case 'uncuedOverCued'
         basesubtract=false;
         temp=prctile(cuez(groupLabelsFromTCA==1),[0 10 20 50 60 70 95 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp;
@@ -91,6 +96,10 @@ if addbeginnings==true
     uncued_failure_Response=addLastTrialToNextBeginning(uncued_failure_Response);
 end
 
+if basesubtract==true
+    [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=baseSubResponses(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,basetimewindow,individBase);
+end
+
 if smoothBeforeResids==true
     [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=smoothResponses(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,smooBef);
 end
@@ -109,10 +118,6 @@ if Zscore==true
     [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=ZscoreResponses(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response);
 elseif minmaxnorm==true
     [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=maxNorm(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response);
-end
-
-if basesubtract==true
-    [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=baseSubResponses(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,basetimewindow,individBase);
 end
 
 switch justAvsOrTuning
@@ -145,7 +150,7 @@ switch justAvsOrTuning
         % cuezbins=prctile(cuez,[0 10 20 30 40 50 60 70 75 80 85 87.5 90 92.5 95 97.5 100]);
         % cuezbins=prctile(cuez,[0 20 40 60 70 80 82 84 86 88 90 91 92 93 95 97 100]);
         basesubtract=false;
-        basetimewindow=[9.5 12];
+        basetimewindow=[9 12.5];
         [grp1_succ,grp2_succ]=plotByCuez(cued_success_Response,cuez,groupLabelsFromTCA,'cued success',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
         [grp1_fail,grp2_fail]=plotByCuez(cued_failure_Response,cuez,groupLabelsFromTCA,'cued failure',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
         [grp1_succ_uncue,grp2_succ_uncue]=plotByCuez(uncued_success_Response,cuez,groupLabelsFromTCA,'uncued success',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
@@ -191,8 +196,9 @@ end
 
 figure();
 smoo=10;
-forvio_timewindow=[smoo*0.06 4];
+% forvio_timewindow=[smoo*0.06 4];
 % forvio_timewindow=[1 4];
+forvio_timewindow=[2 5];
 forvio=cell(1,2);
 k=1;
 alldatas=[];
