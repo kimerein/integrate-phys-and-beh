@@ -26,9 +26,9 @@ switch justAvsOrTuning
         Zscore=false;
         minmaxnorm=false;
         smoo=1; %6; %smoo=3; %smoo=42;
-        chopOutliers=true;
+        chopOutliers=false;
         smoothBeforeResids=true;
-        smooBef=30;
+        smooBef=10; %30;
         getResiduals=false; % but need this to get rid of mid-range
         dsForCuez=1;
 end
