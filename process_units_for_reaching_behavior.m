@@ -801,7 +801,7 @@ plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cuez,cued_success_Resp
 % Plot DIFFERENT IN CUED V UNCUED
 % get rid of cells that NEVER turn on -- they are not useful for this
 % comparison
-trial_n_cutoff=6;
+trial_n_cutoff=4;
 out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',excludeTooFewTrials(cued_reach_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false));
 cued_reach_Response=out.Response1; cued_success_Response=out.Response2; cued_failure_Response=out.Response3; uncued_success_Response=out.Response4; uncued_failure_Response=out.Response5;
 r{1}=cued_reach_Response; r{2}=uncued_reach_Response; r=matchAllUnits(r); uncued_reach_Response=r{2};

@@ -161,7 +161,7 @@ if strcmp(doOrSaveGLM,'save')
     save([saveTo sep 'unitnames.mat'],'unitnames');
 end
 if strcmp(doOrSaveGLM,'do') || strcmp(doOrSaveGLM,'doAndSave')
-    saveTo=[dd{whichSess} sep 'matglm'];
+    saveTo=[dd{whichSess} sep 'matglm_trainingSet'];
     if ~exist(saveTo, 'dir')
        mkdir(saveTo);
     end
@@ -187,7 +187,7 @@ if strcmp(doOrSaveGLM,'doAndSave')
         neuron_data_matrix=neuron_data_matrix(neuron_disappears==0,:);
         unitnames=unitnames(neuron_disappears==0);
     end
-    saveTo=[dd{whichSess} sep 'forglm'];
+    saveTo=[dd{whichSess} sep 'forglm_trainingSet'];
     if ~exist(saveTo, 'dir')
        mkdir(saveTo);
     end
@@ -447,6 +447,7 @@ function [phystbtout,behtbtout,fromwhichday,evsGrabbed]=grabOtherBehaviorEvents(
 
 getEventsFromPhysTbt={'cue','opto','distractor'};
 getEventsFromBehTbt={'success_fromPerchOrWheel','drop_fromPerchOrWheel','misses_and_pelletMissing'};
+interactionEvents={};
 % getEventsFromBehTbt={'all_reachBatch','isFidgeting','success_fromPerchOrWheel',...
 %     'drop_fromPerchOrWheel','misses_and_pelletMissing','misses_and_pelletMissing_and_drop','isChewing'};
 

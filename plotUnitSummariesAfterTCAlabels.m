@@ -212,8 +212,12 @@ alldatas_labels=[];
 for i=1:length(out1.allunits)
     if ~isempty(smoo)
         toplot=smooth(nanmean(differs{i},1),smoo);
+        se_plus_toplot=smooth(nanmean(differs{i},1)+nanstd(differs{i},[],1)./sqrt(size(differs{i},1)),smoo);
+        se_minus_toplot=smooth(nanmean(differs{i},1)-nanstd(differs{i},[],1)./sqrt(size(differs{i},1)),smoo);
     end
     plot(differstimes{i},toplot,'Color',cmap(i,:)); hold on;
+    plot(differstimes{i},se_plus_toplot,'Color',cmap(i,:));
+    plot(differstimes{i},se_minus_toplot,'Color',cmap(i,:));
 %     if i==1 || i==length(out1.allunits)
 %         temp=differs{i};
 %         forvio{k}=nanmean(temp(:,differstimes{i}>=forvio_timewindow(1) & differstimes{i}<forvio_timewindow(2)),2);

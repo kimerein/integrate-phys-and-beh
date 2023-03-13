@@ -325,7 +325,11 @@ for j=1:length(dd)
                 end
             else
                 if settings.makeTrainingSet==true || settings.useTestSet==true
-                    error('Error in alignToCompanion.m: makeTrainingSet or useTestSet functionality not implemented when keep single trials');
+                    error('Error in alignToCompanion.m: makeTrainingSet and useTestSet functionality not implemented when keep single trials');
+                end
+                if settings.useTrainingSet==true
+                    b=load([ls(i).folder sep ls(i).name(1:regexp(ls(i).name,'.mat','once')-1) '_trainingSet.mat']);
+                    a.dataout.y=a.dataout.y(b.trainingSetTrials,1:upTo);
                 end
                 unitbyunit_x(trials_count:trials_count+size(a.dataout.y,1)-1,:)=repmat(a.dataout.x(1:upTo),size(a.dataout.y,1),1);
                 unitbyunit_y(trials_count:trials_count+size(a.dataout.y,1)-1,:)=[a.dataout.y(:,1:upTo)];
