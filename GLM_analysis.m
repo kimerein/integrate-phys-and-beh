@@ -447,7 +447,7 @@ function [phystbtout,behtbtout,fromwhichday,evsGrabbed]=grabOtherBehaviorEvents(
 
 getEventsFromPhysTbt={'cue','opto','distractor'};
 getEventsFromBehTbt={'success_fromPerchOrWheel','drop_fromPerchOrWheel','misses_and_pelletMissing'};
-interactionEvents={};
+interactionEvents={'cueZone_onVoff','success_fromPerchOrWheel';'cueZone_onVoff','drop_fromPerchOrWheel';'cueZone_onVoff','misses_and_pelletMissing'};
 % getEventsFromBehTbt={'all_reachBatch','isFidgeting','success_fromPerchOrWheel',...
 %     'drop_fromPerchOrWheel','misses_and_pelletMissing','misses_and_pelletMissing_and_drop','isChewing'};
 
@@ -506,6 +506,21 @@ for j=1:length(dd)
     for i=1:length(getEventsFromBehTbt)
         temp=getEventsOfType(getEventsFromBehTbt{i},beh2_tbt);
         evsGrabbed_beh{evgrabcount}=getEventsFromBehTbt{i};
+        evgrabcount=evgrabcount+1;
+        % map to unit times
+        tempinunittimes=mapToUnitTimes(temp,true,indsIntoBeh_step1,indsIntoBeh_step2,fromPhystbtTimes,unitTimes);
+        if ~isfield(behtbtout,getEventsFromBehTbt{i})
+            behtbtout.(getEventsFromBehTbt{i})=tempinunittimes;
+        elseif isempty(behtbtout.(getEventsFromBehTbt{i}))
+            behtbtout.(getEventsFromBehTbt{i})=tempinunittimes;
+        else
+            behtbtout.(getEventsFromBehTbt{i})=[behtbtout.(getEventsFromBehTbt{i}); tempinunittimes];
+        end
+    end
+    % interaction events
+    for i=1:length(interactionEvents)
+        temp=getEventsOfType(interactionEvents{i},beh2_tbt);
+        evsGrabbed_beh{evgrabcount}=interactionEvents{i};
         evgrabcount=evgrabcount+1;
         % map to unit times
         tempinunittimes=mapToUnitTimes(temp,true,indsIntoBeh_step1,indsIntoBeh_step2,fromPhystbtTimes,unitTimes);

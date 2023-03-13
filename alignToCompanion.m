@@ -329,7 +329,7 @@ for j=1:length(dd)
                 end
                 if settings.useTrainingSet==true
                     b=load([ls(i).folder sep ls(i).name(1:regexp(ls(i).name,'.mat','once')-1) '_trainingSet.mat']);
-                    a.dataout.y=a.dataout.y(b.trainingSetTrials,1:upTo);
+                    a.dataout.y(~ismember(1:size(a.dataout.y,1),b.trainingSetTrials),:)=nan;
                 end
                 unitbyunit_x(trials_count:trials_count+size(a.dataout.y,1)-1,:)=repmat(a.dataout.x(1:upTo),size(a.dataout.y,1),1);
                 unitbyunit_y(trials_count:trials_count+size(a.dataout.y,1)-1,:)=[a.dataout.y(:,1:upTo)];
