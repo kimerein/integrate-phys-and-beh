@@ -801,6 +801,10 @@ plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cuez,cued_success_Resp
 % Plot DIFFERENT IN CUED V UNCUED
 % get rid of cells that NEVER turn on -- they are not useful for this
 % comparison
+trial_n_cutoff=6;
+out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',excludeTooFewTrials(cued_reach_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false));
+cued_reach_Response=out.Response1; cued_success_Response=out.Response2; cued_failure_Response=out.Response3; uncued_success_Response=out.Response4; uncued_failure_Response=out.Response5;
+r{1}=cued_reach_Response; r{2}=uncued_reach_Response; r=matchAllUnits(r); uncued_reach_Response=r{2};
 doesntSpike=~any([downSampMatrix(cued_success_Response.unitbyunit_y(:,201:500),100) downSampMatrix(cued_failure_Response.unitbyunit_y(:,1:2000),100) downSampMatrix(uncued_success_Response.unitbyunit_y(:,1:2000),100) downSampMatrix(uncued_failure_Response.unitbyunit_y(:,1:2000),100)]>1,2); 
 newexcl=cued_success_Response.excluded; newexcl(doesntSpike)=1; newexcl=logical(newexcl);
 cued_success_Response=removeUnitFromResponse(cued_success_Response,newexcl);
