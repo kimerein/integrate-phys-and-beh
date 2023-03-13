@@ -604,6 +604,8 @@ timesD1=nanmean(Response1.unitbyunit_x,1)-temp(f);
 if any(isnan(timesD1))
     timesD1=fillmissing(timesD1,'linear');
 end
+Response1.unitbyunit_y(Response1.unitbyunit_y<0.001)=0;
+Response2.unitbyunit_y(Response2.unitbyunit_y<0.001)=0;
 % Zscore within each unit, then plot transition to time window 2
 temp=Response1.unitbyunit_y;
 temp=temp-mean(temp,2,'omitnan');
@@ -618,7 +620,7 @@ cmap=jet(length(col(~isnan(col))));
 [~,si]=sort(col(~isnan(col)));
 figure();
 incColorInd=1;
-offsetLines=true;
+offsetLines=false;
 lineOff=0;
 for i=1:size(Response1.unitbyunit_y,1)
     if isnan(col(i))

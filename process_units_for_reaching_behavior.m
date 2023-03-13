@@ -785,11 +785,10 @@ uncued_drop_Response=removeUnitFromResponse(uncued_drop_Response,trmv);
 % cuez=getCueTunedUnits(cued_reach_Response,uncued_reach_Response,'cue_vs_baseline_no_index','mean',1,[7 16],[-1 0.5],[7 16],[-1 0.5]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
 %%% for the sustained reach-related activity, take cells that turn on
 %%% within 1 sec window of the arm outstretched
-cuez=getCueTunedUnits(uncued_reach_Response,cued_reach_Response,'cue_vs_baseline_no_index','mean',1,[7 16],[-1 0],[7 16],[-1 0.5]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
-plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'cued','tuning');
-
+% grp 2
 cuez=getCueTunedUnits(cued_reach_Response,uncued_reach_Response,'cue_vs_baseline_no_index','mean',1,[7 16],[-0.1 0],[7 16],[-1 0.5]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
 plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'cued','tuning');
+% grp 1
 cuez=getCueTunedUnits(cued_reach_Response,uncued_reach_Response,'cue_vs_baseline_no_index','mean',1,[7 16],[-1 0],[7 16],[-1 0.5]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
 plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'cued','tuning');
 cuez=getCueTunedUnits(cued_reach_Response,uncued_reach_Response,'cue_vs_baseline_no_index','mean',1,[7 16],[-1 -0.5],[7 16],[-1 0.5]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
@@ -800,10 +799,21 @@ plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cuez,cued_success_Resp
 % plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncued');
 
 % Plot DIFFERENT IN CUED V UNCUED
+% get rid of cells that NEVER turn on -- they are not useful for this
+% comparison
+doesntSpike=~any([downSampMatrix(cued_success_Response.unitbyunit_y(:,201:500),100) downSampMatrix(cued_failure_Response.unitbyunit_y(:,1:2000),100) downSampMatrix(uncued_success_Response.unitbyunit_y(:,1:2000),100) downSampMatrix(uncued_failure_Response.unitbyunit_y(:,1:2000),100)]>1,2); 
+newexcl=cued_success_Response.excluded; newexcl(doesntSpike)=1; newexcl=logical(newexcl);
+cued_success_Response=removeUnitFromResponse(cued_success_Response,newexcl);
+cued_failure_Response=removeUnitFromResponse(cued_failure_Response,newexcl);
+uncued_success_Response=removeUnitFromResponse(uncued_success_Response,newexcl);
+uncued_failure_Response=removeUnitFromResponse(uncued_failure_Response,newexcl);
+cued_reach_Response=removeUnitFromResponse(cued_reach_Response,newexcl);
+uncued_reach_Response=removeUnitFromResponse(uncued_reach_Response,newexcl);
 % cuez=getCueTunedUnits(cued_reach_Response,uncued_reach_Response,'vs_uncued_reach_no_index','mean',1,{[-5 -4],[9 12.5]},[-3.3 0],{[-5 -4],[9 12.5]},[-3.3 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue' or 'vs_uncued_reach_no_index'
-cuez=getCueTunedUnits(cued_reach_Response,uncued_reach_Response,'justcue_v_justuncue','mean',1,[4 12],[-3.3 0.5],[4 12],[-3.3 0.5]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue' or 'vs_uncued_reach_no_index'
+% cuez=getCueTunedUnits(cued_reach_Response,uncued_reach_Response,'justcue_v_justuncue','mean',1,[4 12],[-3.3 0.5],[4 12],[-3.3 0.5]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue' or 'vs_uncued_reach_no_index'
 % cuez=getCueTunedUnits(cued_reach_Response,uncued_reach_Response,'justcue_v_justuncue','mean',1,[4 12.5],[-2 0],[4 12.5],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue' or 'vs_uncued_reach_no_index'
 % cuez=getCueTunedUnits(cue_noReach_Response,uncued_reach_Response,'vs_uncued_reach_no_index','mean',1,[9 12.5],[-0.37 1.5],[9 12.5],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue' or 'vs_uncued_reach_no_index'
+cuez=getCueTunedUnits(cued_reach_Response,uncued_reach_Response,'justcue_v_justuncue','mean',1,[7 16],[-0.1 0],[7 16],[-0.1 0]);
 plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'cuedOverUncued','tuning');
 
 % cuez=getCueTunedUnits(uncuedReach_Response,cuedReach_Response,'justcue_v_justuncue','mean',1,[4 12],[-2 0],[4 12],[-2 0]); 
