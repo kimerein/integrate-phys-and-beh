@@ -1,6 +1,8 @@
 function GLM_analysis(whichSess,dd,downSampBy)
 % wrapper for first pass at GLM, calls B's poissModel
 
+saveToAppend='_trainingSet';
+
 % if want to put in more than one session, will need to debug this code
 
 % Next section specific to Kim's table format
@@ -151,7 +153,7 @@ if strcmp(doOrSaveGLM,'save')
         neuron_data_matrix=neuron_data_matrix(neuron_disappears==0,:);
         unitnames=unitnames(neuron_disappears==0);
     end
-    saveTo=[dd{whichSess} sep 'forglm'];
+    saveTo=[dd{whichSess} sep 'forglm' saveToAppend];
     if ~exist(saveTo, 'dir')
        mkdir(saveTo);
     end
@@ -161,7 +163,7 @@ if strcmp(doOrSaveGLM,'save')
     save([saveTo sep 'unitnames.mat'],'unitnames');
 end
 if strcmp(doOrSaveGLM,'do') || strcmp(doOrSaveGLM,'doAndSave')
-    saveTo=[dd{whichSess} sep 'matglm_trainingSet'];
+    saveTo=[dd{whichSess} sep 'matglm' saveToAppend];
     if ~exist(saveTo, 'dir')
        mkdir(saveTo);
     end
@@ -187,7 +189,7 @@ if strcmp(doOrSaveGLM,'doAndSave')
         neuron_data_matrix=neuron_data_matrix(neuron_disappears==0,:);
         unitnames=unitnames(neuron_disappears==0);
     end
-    saveTo=[dd{whichSess} sep 'forglm_trainingSet'];
+    saveTo=[dd{whichSess} sep 'forglm' saveToAppend];
     if ~exist(saveTo, 'dir')
        mkdir(saveTo);
     end
@@ -448,6 +450,7 @@ function [phystbtout,behtbtout,fromwhichday,evsGrabbed]=grabOtherBehaviorEvents(
 getEventsFromPhysTbt={'cue','opto','distractor'};
 getEventsFromBehTbt={'success_fromPerchOrWheel','drop_fromPerchOrWheel','misses_and_pelletMissing'};
 interactionEvents={'cueZone_onVoff','success_fromPerchOrWheel';'cueZone_onVoff','drop_fromPerchOrWheel';'cueZone_onVoff','misses_and_pelletMissing'};
+event2WithinXSecsOfEvent1=3; % time delay from cue, for example
 % getEventsFromBehTbt={'all_reachBatch','isFidgeting','success_fromPerchOrWheel',...
 %     'drop_fromPerchOrWheel','misses_and_pelletMissing','misses_and_pelletMissing_and_drop','isChewing'};
 
@@ -519,17 +522,29 @@ for j=1:length(dd)
     end
     % interaction events
     for i=1:length(interactionEvents)
-        temp=getEventsOfType(interactionEvents{i},beh2_tbt);
-        evsGrabbed_beh{evgrabcount}=interactionEvents{i};
+        tempFirst=getEventsOfType(interactionEvents{i,1},beh2_tbt);
+        tempSecond=getEventsOfType(interactionEvents{i,2},beh2_tbt);
+        indsWithin=event2WithinXSecsOfEvent1./mode(diff(nanmean(behtimes,1)));
+        shiftedTempFirst=zeros(size(tempFirst));
+        for j=1:size(tempFirst,1)
+            f=find(tempFirst(j,:)>0.5,1,'first');
+            fend=f+indsWithin;
+            if fend>size(shiftedTempFirst,2)
+                fend=size(shiftedTempFirst,2);
+            end
+            shiftedTempFirst(j,f:fend)=1;
+        end
+        temp=shiftedTempFirst==1 & tempSecond==1;
+        evsGrabbed_beh{evgrabcount}=[interactionEvents{i,1} '_X_' interactionEvents{i,2}];
         evgrabcount=evgrabcount+1;
         % map to unit times
         tempinunittimes=mapToUnitTimes(temp,true,indsIntoBeh_step1,indsIntoBeh_step2,fromPhystbtTimes,unitTimes);
-        if ~isfield(behtbtout,getEventsFromBehTbt{i})
-            behtbtout.(getEventsFromBehTbt{i})=tempinunittimes;
-        elseif isempty(behtbtout.(getEventsFromBehTbt{i}))
-            behtbtout.(getEventsFromBehTbt{i})=tempinunittimes;
+        if ~isfield(behtbtout,[interactionEvents{i,1} '_X_' interactionEvents{i,2}])
+            behtbtout.([interactionEvents{i,1} '_X_' interactionEvents{i,2}])=tempinunittimes;
+        elseif isempty(behtbtout.([interactionEvents{i,1} '_X_' interactionEvents{i,2}]))
+            behtbtout.([interactionEvents{i,1} '_X_' interactionEvents{i,2}])=tempinunittimes;
         else
-            behtbtout.(getEventsFromBehTbt{i})=[behtbtout.(getEventsFromBehTbt{i}); tempinunittimes];
+            behtbtout.([interactionEvents{i,1} '_X_' interactionEvents{i,2}])=[behtbtout.([interactionEvents{i,1} '_X_' interactionEvents{i,2}]); tempinunittimes];
         end
     end
     evgrabcount=1;

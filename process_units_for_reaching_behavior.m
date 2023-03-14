@@ -523,13 +523,17 @@ save(['C:\Users\sabatini\Documents\allLabels.mat'],'allLabels');
 save(['C:\Users\sabatini\Documents\timepoints_for_tensor.mat'],'timepoints_for_tensor');
 
 %% GLM analysis
-for i=441:450
+for i=441:441 %441:450
     if data_loc_array{i,13}==1
         continue
     end
     if strcmp(data_loc_array{i,8},'no_tbt')
         continue
     end
+    % Make cue training set as combination of reach types
+    makeComboTrainingSet({'cued_success','cued_failure','uncued_success','uncued_failure'},...
+                         {'cuedSuccess','cuedFailure','uncuedSuccess','uncuedFailure'},'cue','cueAligned',data_loc_array{i,8});
+    % Set up and fit GLM
     GLM_analysis(i,data_loc_array,10);
     close all;
 end
