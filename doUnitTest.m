@@ -1,5 +1,8 @@
 function [out,dontUseTrials]=doUnitTest(foldername, unitname)
 
+out=[];
+dontUseTrials=[];
+
 temp=getCriteriaForUnitsToPlot();
 if ischar(temp)
     if strcmp(temp,'alltrue')
@@ -13,6 +16,7 @@ end
 runit=regexp(unitname,'_');
 if isempty(runit)
     disp([unitname ' seems to not be the name of a unit ... skipping']);
+    return
 end
 unitOnlyName=unitname(1:runit(1)-1);
 r=regexp(foldername,sep);

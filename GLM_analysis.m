@@ -53,7 +53,7 @@ if length(whichSess)>1
     strset=settingsForStriatumUnitPlots;
     if strset.useSameTrainingSetForAllNeurons==true
         b=load([dd_m sep 'COMMONtrainingSet.mat']);
-        
+
     end
 else
     ResponseCued=getAndSaveResponse([dd{whichSess} sep response_to_plot],whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
@@ -262,6 +262,10 @@ for j=1:length(dd)
     ls=dir(datadir);
     for i=3:length(ls)
         unitTest=doUnitTest(ls(i).folder, ls(i).name);
+        if isempty(unitTest)
+            disp(['skipping ' ls(i).name]);
+            continue
+        end
         if unitTest
             names{unit_count}=ls(i).name;
             unit_count=unit_count+1;
