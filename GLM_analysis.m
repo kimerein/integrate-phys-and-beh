@@ -46,27 +46,14 @@ if length(whichSess)>1
     ResponseCued=getAndSaveResponse(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
     [~,ma]=max(mean(ResponseCued.aligncomp_y,1,'omitnan'),[],2,'omitnan');
     temp=mean(ResponseCued.aligncomp_x,1,'omitnan');
-    [phystbtout,behtbtout,fromwhichday,evsGrabbed]=grabOtherBehaviorEvents(dd_m,mean(ResponseCued.unitbyunit_x,1,'omitnan')-temp(ma),whereIsTbt);
-    unitnames=getUnitNames(dd_more);
-    % If just doing training set, zero out behavior trials that are not part of
-    % behavior set
-    strset=settingsForStriatumUnitPlots;
-    if strset.useSameTrainingSetForAllNeurons==true
-        b=load([dd_m sep 'COMMONtrainingSet.mat']);
-
-    end
+    [phystbtout,behtbtout,fromwhichday,evsGrabbed]=grabOtherBehaviorEvents(dd_m,mean(ResponseCued.unitbyunit_x,1,'omitnan')-temp(ma),whereIsTbt,'cue');
+    unitnames=getUnitNames(dd_more); 
 else
     ResponseCued=getAndSaveResponse([dd{whichSess} sep response_to_plot],whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
     [~,ma]=max(mean(ResponseCued.aligncomp_y,1,'omitnan'),[],2,'omitnan');
     temp=mean(ResponseCued.aligncomp_x,1,'omitnan');
-    [phystbtout,behtbtout,fromwhichday,evsGrabbed]=grabOtherBehaviorEvents(dd{whichSess},mean(ResponseCued.unitbyunit_x,1,'omitnan')-temp(ma),whereIsTbt);
+    [phystbtout,behtbtout,fromwhichday,evsGrabbed]=grabOtherBehaviorEvents(dd{whichSess},mean(ResponseCued.unitbyunit_x,1,'omitnan')-temp(ma),whereIsTbt,'cue');
     unitnames=getUnitNames({[dd{whichSess} sep response_to_plot]});
-    % If just doing training set, zero out behavior trials that are not part of
-    % behavior set
-    strset=settingsForStriatumUnitPlots;
-    if strset.useSameTrainingSetForAllNeurons==true
-        
-    end
 end
 % When do time alignment, cue ends up getting turned into non-step
 phystbtout=fixCueAfterResample(phystbtout,'cue',0.25,mean(ResponseCued.unitbyunit_x,1,'omitnan'));
@@ -356,8 +343,8 @@ bins=length(tRange);
 
 % prepare time shift matrix of events for the glm
 % maxShifts=100; % how many +/- bins to consider for glm
-maxShiftsPos=30;
-maxShiftsNeg=9;
+maxShiftsPos=50; %30;
+maxShiftsNeg=20; %9;
 shifts=-maxShiftsNeg:maxShiftsPos;
 if ~isempty(saveDir)
     save([saveDir sep 'shifts.mat'],'shifts');
@@ -382,8 +369,9 @@ for neuronIndex=testNeuron
     figure('NumberTitle','off', 'Name', ['neuron ' num2str(neuronIndex)])
     set(gcf, 'Position', [  99         549        1386         317])
 
+    fitIntercept=false;
     % run model with time shifted events. This is what we would do
-    mdl=fitglm(allEvents', neuronFiring(neuronIndex,:)', 'linear', 'Link', 'identity'); 
+    mdl=fitglm(allEvents', neuronFiring(neuronIndex,:)', 'linear', 'Link', 'identity','Intercept',fitIntercept); 
     % You can add 'Distribution', 'poisson' but I find that I get identical
     % results and without it, it runs much faster and converges better
     % Maybe it gets the right answer with a linear link  
@@ -391,8 +379,13 @@ for neuronIndex=testNeuron
     % processes?
 
     subplot(1, 4, 1)
-    pva=mdl.Coefficients.pValue(2:end);
-    coef=mdl.Coefficients.Estimate(2:end);
+    if fitIntercept==true
+        pva=mdl.Coefficients.pValue(2:end);
+        coef=mdl.Coefficients.Estimate(2:end);
+    else
+        pva=mdl.Coefficients.pValue(1:end);
+        coef=mdl.Coefficients.Estimate(1:end);
+    end
     if ~isempty(saveDir)
         save([saveDir sep 'neuron' num2str(neuronIndex) '_glm_coef.mat'],'coef');
         save([saveDir sep 'neuron' num2str(neuronIndex) '_glm_p.mat'],'pva');
@@ -466,7 +459,7 @@ end
 
 end
 
-function [phystbtout,behtbtout,fromwhichday,evsGrabbed]=grabOtherBehaviorEvents(datadir,unitTimes,whereIsTbt)
+function [phystbtout,behtbtout,fromwhichday,evsGrabbed]=grabOtherBehaviorEvents(datadir,unitTimes,whereIsTbt,whereIsCommonTrainingSet)
 
 getEventsFromPhysTbt={'cue','opto','distractor'};
 getEventsFromBehTbt={'success_fromPerchOrWheel','drop_fromPerchOrWheel','misses_and_pelletMissing'};
@@ -480,6 +473,7 @@ if iscell(datadir)
 else
     dd=1;
 end
+strset=settingsForStriatumUnitPlots;
 phystbtout.(getEventsFromPhysTbt{1})=[];
 behtbtout.(getEventsFromBehTbt{1})=[];
 fromwhichday=[];
@@ -584,6 +578,22 @@ for j=1:length(dd)
         end
     end
     fromwhichday=[fromwhichday; j*ones(size(tempinunittimes,1),1)];
+    % If just doing training set, zero out behavior trials that are not part of
+    % training set
+    if strset.useSameTrainingSetForAllNeurons==true
+        b=load([datadir sep whereIsCommonTrainingSet sep 'COMMONtrainingSet.mat']);
+        for i=1:length(getEventsFromPhysTbt)
+            temp=phystbtout.(getEventsFromPhysTbt{i});
+            temp(~ismember(1:size(temp,1),b.currTrainingSet),:)=0;
+            phystbtout.(getEventsFromPhysTbt{i})=temp;
+        end
+        f=fieldnames(behtbtout);
+        for i=1:length(f)
+            temp=behtbtout.(f{i});
+            temp(~ismember(1:size(temp,1),b.currTrainingSet),:)=0;
+            behtbtout.(f{i})=temp;
+        end
+    end
 end
 evsGrabbed(length(evsGrabbed)+1:length(evsGrabbed)+length(evsGrabbed_beh))=evsGrabbed_beh;
 
