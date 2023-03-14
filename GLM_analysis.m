@@ -2,6 +2,10 @@ function GLM_analysis(whichSess,dd,downSampBy)
 % wrapper for first pass at GLM, calls B's poissModel
 
 saveToAppend='_trainingSet';
+% If settings.useTrainingSet are true, will zero out spiking activity in all
+% trials that are not part of the training set
+% And will zero out all behavior events for trials that are not part of the
+% training set
 
 % if want to put in more than one session, will need to debug this code
 
@@ -44,12 +48,25 @@ if length(whichSess)>1
     temp=mean(ResponseCued.aligncomp_x,1,'omitnan');
     [phystbtout,behtbtout,fromwhichday,evsGrabbed]=grabOtherBehaviorEvents(dd_m,mean(ResponseCued.unitbyunit_x,1,'omitnan')-temp(ma),whereIsTbt);
     unitnames=getUnitNames(dd_more);
+    % If just doing training set, zero out behavior trials that are not part of
+    % behavior set
+    strset=settingsForStriatumUnitPlots;
+    if strset.useSameTrainingSetForAllNeurons==true
+        b=load([dd_m sep 'COMMONtrainingSet.mat']);
+        
+    end
 else
     ResponseCued=getAndSaveResponse([dd{whichSess} sep response_to_plot],whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
     [~,ma]=max(mean(ResponseCued.aligncomp_y,1,'omitnan'),[],2,'omitnan');
     temp=mean(ResponseCued.aligncomp_x,1,'omitnan');
     [phystbtout,behtbtout,fromwhichday,evsGrabbed]=grabOtherBehaviorEvents(dd{whichSess},mean(ResponseCued.unitbyunit_x,1,'omitnan')-temp(ma),whereIsTbt);
     unitnames=getUnitNames({[dd{whichSess} sep response_to_plot]});
+    % If just doing training set, zero out behavior trials that are not part of
+    % behavior set
+    strset=settingsForStriatumUnitPlots;
+    if strset.useSameTrainingSetForAllNeurons==true
+        
+    end
 end
 % When do time alignment, cue ends up getting turned into non-step
 phystbtout=fixCueAfterResample(phystbtout,'cue',0.25,mean(ResponseCued.unitbyunit_x,1,'omitnan'));

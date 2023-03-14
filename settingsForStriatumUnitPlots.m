@@ -19,6 +19,7 @@ settings.useTestSet=false;
 settings.useTheseTestSets={}; %{'cued_failureIntersect'}; %{'cued_failure','uncued_failure'};
 settings.useTheseTestFilenames={}; %{'cuedFailure'}; %{'cuedFailure','uncuedFailure'};
 settings.useTrainingSet=true;
+settings.useSameTrainingSetForAllNeurons=true;
 settings.discardDrops=false;
 settings.dropFolderName='uncued_drop';
 settings.dropFileName='uncuedDrop';

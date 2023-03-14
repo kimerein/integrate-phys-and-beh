@@ -11,6 +11,9 @@ end
 
 % find details for this unit
 runit=regexp(unitname,'_');
+if isempty(runit)
+    disp([unitname ' seems to not be the name of a unit ... skipping']);
+end
 unitOnlyName=unitname(1:runit(1)-1);
 r=regexp(foldername,sep);
 try

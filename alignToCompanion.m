@@ -54,6 +54,7 @@ for j=1:length(dd)
     end
     disp(['reading in from ' datadir]);
     ls=dir(datadir);
+    currTrainingSet=[]; % different training set from each session
     for i=3:length(ls)
         a=[];
         if contains(ls(i).name,'trainingSet') || contains(ls(i).name,'testSet') % ignore these files
@@ -229,6 +230,9 @@ for j=1:length(dd)
             trials_count=trials_count+1;
         else
             if keepAllSingleTrials==false
+                if settings.useSameTrainingSetForAllNeurons==true
+                    error('Have not yet implemented useSameTrainingSetForAllNeurons functionality if keepAllSingleTrials==false');
+                end
                 if settings.makeTrainingSet==true
                     f=find(eventHappens==1);
                     temp=randperm(nansum(eventHappens==1));
@@ -327,7 +331,16 @@ for j=1:length(dd)
                 if settings.makeTrainingSet==true || settings.useTestSet==true
                     error('Error in alignToCompanion.m: makeTrainingSet and useTestSet functionality not implemented when keep single trials');
                 end
-                if settings.useTrainingSet==true
+                if settings.useSameTrainingSetForAllNeurons==true && settings.useTrainingSet==true
+                    if isempty(currTrainingSet)
+                        b=load([ls(i).folder sep ls(i).name(1:regexp(ls(i).name,'.mat','once')-1) '_trainingSet.mat']);
+                        a.dataout.y(~ismember(1:size(a.dataout.y,1),b.trainingSetTrials),:)=nan;
+                        currTrainingSet=b.trainingSetTrials;
+                        save([ls(i).folder sep 'COMMONtrainingSet.mat'],'currTrainingSet');
+                    else
+                        a.dataout.y(~ismember(1:size(a.dataout.y,1),currTrainingSet),:)=nan;
+                    end
+                elseif settings.useTrainingSet==true
                     b=load([ls(i).folder sep ls(i).name(1:regexp(ls(i).name,'.mat','once')-1) '_trainingSet.mat']);
                     a.dataout.y(~ismember(1:size(a.dataout.y,1),b.trainingSetTrials),:)=nan;
                 end
