@@ -526,13 +526,13 @@ for j=1:length(dd)
         tempSecond=getEventsOfType(interactionEvents{i,2},beh2_tbt);
         indsWithin=event2WithinXSecsOfEvent1./mode(diff(nanmean(behtimes,1)));
         shiftedTempFirst=zeros(size(tempFirst));
-        for j=1:size(tempFirst,1)
-            f=find(tempFirst(j,:)>0.5,1,'first');
+        for j2=1:size(tempFirst,1)
+            f=find(tempFirst(j2,:)>0.5,1,'first');
             fend=f+indsWithin;
             if fend>size(shiftedTempFirst,2)
                 fend=size(shiftedTempFirst,2);
             end
-            shiftedTempFirst(j,f:fend)=1;
+            shiftedTempFirst(j2,f:fend)=1;
         end
         temp=shiftedTempFirst==1 & tempSecond==1;
         evsGrabbed_beh{evgrabcount}=[interactionEvents{i,1} '_X_' interactionEvents{i,2}];
