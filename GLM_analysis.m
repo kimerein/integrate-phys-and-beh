@@ -466,13 +466,13 @@ function [phystbtout,behtbtout,fromwhichday,evsGrabbed]=grabOtherBehaviorEvents(
 
 getEventsFromPhysTbt={'cue','opto','distractor'};
 % getEventsFromBehTbt={'success_fromPerchOrWheel','drop_fromPerchOrWheel','misses_and_pelletMissing'};
-getEventsFromBehTbt={}; %'success_fromPerchOrWheel','drop_fromPerchOrWheel','misses_and_pelletMissing'};
-% interactionEvents={'cueZone_onVoff','success_fromPerchOrWheel';'cueZone_onVoff','drop_fromPerchOrWheel';'cueZone_onVoff','misses_and_pelletMissing'};
+getEventsFromBehTbt={'success_fromPerchOrWheel','drop_fromPerchOrWheel','misses_and_pelletMissing'};
+interactionEvents={'cueZone_onVoff','success_fromPerchOrWheel';'cueZone_onVoff','drop_fromPerchOrWheel';'cueZone_onVoff','misses_and_pelletMissing'};
 % NOT must be first three letters!!!!!!!!!!!!!!
-interactionEvents={'cueZone_onVoff','success_fromPerchOrWheel';'cueZone_onVoff','drop_fromPerchOrWheel';'cueZone_onVoff','misses_and_pelletMissing';...
-                   'NOTcueZone_onVoff','success_fromPerchOrWheel';'NOTcueZone_onVoff','drop_fromPerchOrWheel';'NOTcueZone_onVoff','misses_and_pelletMissing'};
-% interactionEventNames={'cXsuc','cXdro','cXmis'};
-interactionEventNames={'cXsuc','cXdro','cXmis','uXsuc','uXdro','uXmis'};
+% interactionEvents={'cueZone_onVoff','success_fromPerchOrWheel';'cueZone_onVoff','drop_fromPerchOrWheel';'cueZone_onVoff','misses_and_pelletMissing';...
+%                    'NOTcueZone_onVoff','success_fromPerchOrWheel';'NOTcueZone_onVoff','drop_fromPerchOrWheel';'NOTcueZone_onVoff','misses_and_pelletMissing'};
+interactionEventNames={'cXsuc','cXdro','cXmis'};
+% interactionEventNames={'cXsuc','cXdro','cXmis','uXsuc','uXdro','uXmis'};
 event2WithinXSecsOfEvent1=3; % time delay from cue, for example
 % getEventsFromBehTbt={'all_reachBatch','isFidgeting','success_fromPerchOrWheel',...
 %     'drop_fromPerchOrWheel','misses_and_pelletMissing','misses_and_pelletMissing_and_drop','isChewing'};
