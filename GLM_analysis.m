@@ -53,6 +53,9 @@ if length(whichSess)>1
     unitnames=getUnitNames(dd_more); 
 else
     ResponseCued=getAndSaveResponse([dd{whichSess} sep response_to_plot],whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
+    if isempty(ResponseCued.unitbyunit_y) && all(ResponseCued.excluded==1)
+        disp(['None of the units in ' dd{whichSess} sep response_to_plot ' were of the type specified in settingsForStriatumUnits.m, so skipping this session']);
+    end
     [~,ma]=max(mean(ResponseCued.aligncomp_y,1,'omitnan'),[],2,'omitnan');
     temp=mean(ResponseCued.aligncomp_x,1,'omitnan');
     [phystbtout,behtbtout,fromwhichday,evsGrabbed]=grabOtherBehaviorEvents(dd{whichSess},mean(ResponseCued.unitbyunit_x,1,'omitnan')-temp(ma),whereIsTbt,'cue');
@@ -553,10 +556,14 @@ for j=1:length(dd)
         if isempty(regexp(interactionEvents{i,1},'NOT','once'))
             tempFirst=getEventsOfType(interactionEvents{i,1},beh2_tbt);
             tempSecond=getEventsOfType(interactionEvents{i,2},beh2_tbt);
-            indsWithin=event2WithinXSecsOfEvent1./mode(diff(nanmean(behtimes,1)));
+            indsWithin=floor(event2WithinXSecsOfEvent1./mode(diff(nanmean(behtimes,1))));
             shiftedTempFirst=zeros(size(tempFirst));
             for j2=1:size(tempFirst,1)
                 f=find(tempFirst(j2,:)>0.5,1,'first');
+                if f~=94 % just a kim check
+                    disp('pausing in line 561 of GLM_analysis.m');
+                    pause;
+                end
                 fend=f+indsWithin;
                 if fend>size(shiftedTempFirst,2)
                     fend=size(shiftedTempFirst,2);
