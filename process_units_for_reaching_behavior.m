@@ -559,11 +559,15 @@ end
 getridisnan=find(isnan(indexGLMcellsIntoUnitNames));
 all_glm_coef=all_glm_coef(~ismember(1:size(all_glm_coef,1),getridisnan),:); unitnames_glm=unitnames_glm(~ismember(1:length(unitnames_glm),getridisnan)); fromWhichSess_glm=fromWhichSess_glm(~ismember(1:length(fromWhichSess_glm),getridisnan));
 indexGLMcellsIntoUnitNames=getNamesIndexIntoNamesList(unitnames_glm,unitbyunit_names);
-load('Z:\MICROSCOPE\Kim\WHISPER recs\Mar_6\20210625\SU aligned to behavior\forglm\output\neuron1_glm.mat')
-[ts,allco]=plotGLMcoef(all_glm_coef,0,feature_names,10*0.01,9,'mean'); title('python glm');
-load('Z:\MICROSCOPE\Kim\WHISPER recs\Mar_6\20210625\SU aligned to behavior\matglm\features_for_glm.mat');
-[ts,allco]=plotGLMcoef(all_glm_coef,[],fnames,10*0.01,9,'mean'); title('mat glm');
-[ts,allco]=plotGLMcoef(all_glm_coef(idx(indexGLMcellsIntoUnitNames)==1,:),[],fnames,10*0.01,9,'mean'); title('mat glm');
+% load('Z:\MICROSCOPE\Kim\WHISPER recs\Mar_6\20210625\SU aligned to behavior\forglm\output\neuron1_glm.mat')
+% [ts,allco]=plotGLMcoef(all_glm_coef,0,feature_names,10*0.01,9,'mean'); title('python glm');
+% load('Z:\MICROSCOPE\Kim\WHISPER recs\Mar_6\20210625\SU aligned to behavior\matglm\features_for_glm.mat');
+% [ts,allco]=plotGLMcoef(all_glm_coef,[],fnames,10*0.01,9,'mean'); title('mat glm');
+% [ts,allco]=plotGLMcoef(all_glm_coef(idx(indexGLMcellsIntoUnitNames)==1,:),[],fnames,10*0.01,9,'mean'); title('mat glm');
+load('Z:\MICROSCOPE\Kim\WHISPER recs\Mar_2\20210805\SU aligned to behavior\matglm_trainingSet\neuron1_glm_coef.mat');
+load('Z:\MICROSCOPE\Kim\WHISPER recs\Mar_2\20210805\SU aligned to behavior\matglm_trainingSet\features_for_glm.mat');
+load('Z:\MICROSCOPE\Kim\WHISPER recs\Mar_2\20210805\SU aligned to behavior\matglm_trainingSet\shifts.mat');
+[ts,allco]=plotGLMcoef(coef,[],fnames,10*0.01,nansum(shifts<0),'mean'); title('mat glm');
 whichCoefToUse=[4 5 6]; studyGLMcoef(all_glm_coef,ts,whichCoefToUse);
 
 %% Get significant responses 

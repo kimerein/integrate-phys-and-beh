@@ -65,6 +65,16 @@ for i=1:length(event_types)
     ts=0:timestep:(size(allcoef,2)-1)*timestep;
     ts=ts-nShiftsBefore*timestep;
     plot(ts,allcoef(i,:),'Color',cm(i,:));
+    if ~isempty(regexp(event_types{i},'cue','once'))
+        params.tapers=[1 3];
+        params.Fs=1/mode(diff(ts));
+        params.trialave=1;
+        filter_range=[3 6]; 
+        addpath(genpath('C:\Users\sabatini\Documents\GitHub\chronux_2_11'));
+        [amp,S,t,f]=getAmpWithChronux(allcoef(i,:),[0.5 0.1],params,filter_range);
+        rmpath(genpath('C:\Users\sabatini\Documents\GitHub\chronux_2_11'));
+        hold on; plot(t-(nShiftsBefore*timestep),amp*10,'Color',[0 0 0.5]);
+    end
     P=polyfit(ts,allcoef(i,:),1);
     yfit=P(1)*ts+P(2);
     hold on; plot(ts,yfit,'Color','m');
@@ -77,6 +87,16 @@ for i=1:length(event_types)
     ylim([nanmin(allcoef(1:end)) nanmax(allcoef(1:end))]);
 end
 set(gcf,'Position',[20 20 1300 400]);
+
+end
+
+function [amp,S,t,f]=getAmpWithChronux(data,movingwin,params,filter_range)
+
+[S,t,f]=mtspecgramc(data,movingwin,params);
+
+S=sqrt(S);
+
+amp=nanmean(S(:,f>=filter_range(1) & f<=filter_range(2)),2)';
 
 end
 
@@ -101,8 +121,9 @@ end
 
 function event_types=getFeatureNames(feature_names)
 
-potential_event_types = {'cue', 'opto', 'distract', 'reach', 'fidget', 'success', 'drop', 'miss', 'failure', 'chew'};
-evcount=1;
+potential_event_types = {'cue', 'opto', 'distract', 'reach', 'fidget', 'success', 'drop', 'miss', 'failure', 'chew', ...
+                          'cXsuc', 'cXdro', 'cXmis','uXsuc','uXdro','uXmis'};
+evcount=1; 
 for i=1:length(potential_event_types)
     for j=1:length(feature_names)
         if iscell(feature_names)

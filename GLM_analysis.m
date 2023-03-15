@@ -1,6 +1,9 @@
 function GLM_analysis(whichSess,dd,downSampBy)
 % wrapper for first pass at GLM, calls B's poissModel
 
+% note that GLM feature names need to not contain other GLM feature names
+% if want to use Kim's plotting code, e.g., plotGLMcoef.m
+
 saveToAppend='_trainingSet';
 % If settings.useTrainingSet are true, will zero out spiking activity in all
 % trials that are not part of the training set
@@ -369,7 +372,7 @@ for neuronIndex=testNeuron
     figure('NumberTitle','off', 'Name', ['neuron ' num2str(neuronIndex)])
     set(gcf, 'Position', [  99         549        1386         317])
 
-    fitIntercept=false;
+    fitIntercept=true;
     % run model with time shifted events. This is what we would do
     mdl=fitglm(allEvents', neuronFiring(neuronIndex,:)', 'linear', 'Link', 'identity','Intercept',fitIntercept); 
     % You can add 'Distribution', 'poisson' but I find that I get identical
@@ -462,8 +465,14 @@ end
 function [phystbtout,behtbtout,fromwhichday,evsGrabbed]=grabOtherBehaviorEvents(datadir,unitTimes,whereIsTbt,whereIsCommonTrainingSet)
 
 getEventsFromPhysTbt={'cue','opto','distractor'};
-getEventsFromBehTbt={'success_fromPerchOrWheel','drop_fromPerchOrWheel','misses_and_pelletMissing'};
-interactionEvents={'cueZone_onVoff','success_fromPerchOrWheel';'cueZone_onVoff','drop_fromPerchOrWheel';'cueZone_onVoff','misses_and_pelletMissing'};
+% getEventsFromBehTbt={'success_fromPerchOrWheel','drop_fromPerchOrWheel','misses_and_pelletMissing'};
+getEventsFromBehTbt={}; %'success_fromPerchOrWheel','drop_fromPerchOrWheel','misses_and_pelletMissing'};
+% interactionEvents={'cueZone_onVoff','success_fromPerchOrWheel';'cueZone_onVoff','drop_fromPerchOrWheel';'cueZone_onVoff','misses_and_pelletMissing'};
+% NOT must be first three letters!!!!!!!!!!!!!!
+interactionEvents={'cueZone_onVoff','success_fromPerchOrWheel';'cueZone_onVoff','drop_fromPerchOrWheel';'cueZone_onVoff','misses_and_pelletMissing';...
+                   'NOTcueZone_onVoff','success_fromPerchOrWheel';'NOTcueZone_onVoff','drop_fromPerchOrWheel';'NOTcueZone_onVoff','misses_and_pelletMissing'};
+% interactionEventNames={'cXsuc','cXdro','cXmis'};
+interactionEventNames={'cXsuc','cXdro','cXmis','uXsuc','uXdro','uXmis'};
 event2WithinXSecsOfEvent1=3; % time delay from cue, for example
 % getEventsFromBehTbt={'all_reachBatch','isFidgeting','success_fromPerchOrWheel',...
 %     'drop_fromPerchOrWheel','misses_and_pelletMissing','misses_and_pelletMissing_and_drop','isChewing'};
@@ -475,7 +484,11 @@ else
 end
 strset=settingsForStriatumUnitPlots;
 phystbtout.(getEventsFromPhysTbt{1})=[];
-behtbtout.(getEventsFromBehTbt{1})=[];
+if isempty(getEventsFromBehTbt)
+    behtbtout.(interactionEventNames{1})=[];
+else
+    behtbtout.(getEventsFromBehTbt{1})=[];
+end
 fromwhichday=[];
 evgrabcount=1;
 for j=1:length(dd)
@@ -537,29 +550,46 @@ for j=1:length(dd)
     end
     % interaction events
     for i=1:length(interactionEvents)
-        tempFirst=getEventsOfType(interactionEvents{i,1},beh2_tbt);
-        tempSecond=getEventsOfType(interactionEvents{i,2},beh2_tbt);
-        indsWithin=event2WithinXSecsOfEvent1./mode(diff(nanmean(behtimes,1)));
-        shiftedTempFirst=zeros(size(tempFirst));
-        for j2=1:size(tempFirst,1)
-            f=find(tempFirst(j2,:)>0.5,1,'first');
-            fend=f+indsWithin;
-            if fend>size(shiftedTempFirst,2)
-                fend=size(shiftedTempFirst,2);
+        if isempty(regexp(interactionEvents{i,1},'NOT','once'))
+            tempFirst=getEventsOfType(interactionEvents{i,1},beh2_tbt);
+            tempSecond=getEventsOfType(interactionEvents{i,2},beh2_tbt);
+            indsWithin=event2WithinXSecsOfEvent1./mode(diff(nanmean(behtimes,1)));
+            shiftedTempFirst=zeros(size(tempFirst));
+            for j2=1:size(tempFirst,1)
+                f=find(tempFirst(j2,:)>0.5,1,'first');
+                fend=f+indsWithin;
+                if fend>size(shiftedTempFirst,2)
+                    fend=size(shiftedTempFirst,2);
+                end
+                shiftedTempFirst(j2,f:fend)=1;
             end
-            shiftedTempFirst(j2,f:fend)=1;
+            temp=shiftedTempFirst==1 & tempSecond==1;
+        else
+            intername=interactionEvents{i,1};
+            tempFirst=getEventsOfType(intername(4:end),beh2_tbt);
+            tempSecond=getEventsOfType(interactionEvents{i,2},beh2_tbt);
+            indsWithin=event2WithinXSecsOfEvent1./mode(diff(nanmean(behtimes,1)));
+            shiftedTempFirst=zeros(size(tempFirst));
+            for j2=1:size(tempFirst,1)
+                f=find(tempFirst(j2,:)>0.5,1,'first');
+                fstart=f+indsWithin+1;
+                if fstart>size(shiftedTempFirst,2)
+                    fstart=size(shiftedTempFirst,2);
+                end
+                shiftedTempFirst(j2,fstart:end)=1;
+            end
+            temp=shiftedTempFirst==1 & tempSecond==1;
         end
-        temp=shiftedTempFirst==1 & tempSecond==1;
-        evsGrabbed_beh{evgrabcount}=[interactionEvents{i,1} '_X_' interactionEvents{i,2}];
+        evsGrabbed_beh{evgrabcount}=interactionEventNames{i};
         evgrabcount=evgrabcount+1;
         % map to unit times
         tempinunittimes=mapToUnitTimes(temp,true,indsIntoBeh_step1,indsIntoBeh_step2,fromPhystbtTimes,unitTimes);
-        if ~isfield(behtbtout,[interactionEvents{i,1} '_X_' interactionEvents{i,2}])
-            behtbtout.([interactionEvents{i,1} '_X_' interactionEvents{i,2}])=tempinunittimes;
-        elseif isempty(behtbtout.([interactionEvents{i,1} '_X_' interactionEvents{i,2}]))
-            behtbtout.([interactionEvents{i,1} '_X_' interactionEvents{i,2}])=tempinunittimes;
+        if ~isfield(behtbtout,interactionEventNames{i})
+            behtbtout.(interactionEventNames{i})=tempinunittimes;
+        elseif isempty(behtbtout.(interactionEventNames{i}))
+            behtbtout.(interactionEventNames{i})=tempinunittimes;
         else
-            behtbtout.([interactionEvents{i,1} '_X_' interactionEvents{i,2}])=[behtbtout.([interactionEvents{i,1} '_X_' interactionEvents{i,2}]); tempinunittimes];
+            behtbtout.(interactionEventNames{i})=[behtbtout.(interactionEventNames{i}); tempinunittimes];
         end
     end
     evgrabcount=1;
