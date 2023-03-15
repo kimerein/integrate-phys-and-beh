@@ -362,7 +362,10 @@ for j=1:length(dd)
 end
 excluded_count=excluded_count-1;
 units_count=units_count-1;
-if isempty(a.dataout)
+if isempty(a)
+    if isempty(a.dataout)
+        trials_count=trials_count-1;
+    end
     trials_count=trials_count-1;
 end
 trials_count=trials_count-1;

@@ -523,7 +523,7 @@ save(['C:\Users\sabatini\Documents\allLabels.mat'],'allLabels');
 save(['C:\Users\sabatini\Documents\timepoints_for_tensor.mat'],'timepoints_for_tensor');
 
 %% GLM analysis
-for i=441:441 %441:450
+for i=256:270 %441:450
     if data_loc_array{i,13}==1
         continue
     end
