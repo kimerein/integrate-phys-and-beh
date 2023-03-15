@@ -69,6 +69,8 @@ metrics.allDrop_sustained=[];
 metrics.cXdrop_sustained=[];
 metrics.allSucc_sustained=[];
 metrics.cXsucc_sustained=[];
+metrics.allMiss_sustained=[];
+metrics.cXmiss_sustained=[];
 for i=1:length(event_types)
     if suppressPlots==false
         subplot(1,length(event_types),i);
@@ -86,15 +88,23 @@ for i=1:length(event_types)
         addpath(genpath('C:\Users\sabatini\Documents\GitHub\chronux_2_11'));
         [amp,S,t,f]=getAmpWithChronux(allcoef(i,:),[0.5 0.1],params,filter_range);
         rmpath(genpath('C:\Users\sabatini\Documents\GitHub\chronux_2_11'));
+        
+        plotAmp=false;
+        
         if suppressPlots==false
-            plotAmp=false;
             if plotAmp==true
                 hold on; plot(t-(nShiftsBefore*timestep),amp*10,'Color',[0 0 0.5]);
+                metrics.preCueAmp=nanmean(amp(t-(nShiftsBefore*timestep)>=-1.3 & t-(nShiftsBefore*timestep)<-0.3));
+                metrics.postCueAmp_over1sec=nanmean(amp(t-(nShiftsBefore*timestep)>-0.3 & t-(nShiftsBefore*timestep)<=1));
+                metrics.postCueAmp_at1sec=nanmean(amp(t-(nShiftsBefore*timestep)>0.7 & t-(nShiftsBefore*timestep)<=1));
             end
         end
-        metrics.preCueAmp=nanmean(amp(t-(nShiftsBefore*timestep)>=-1.3 & t-(nShiftsBefore*timestep)<-0.3));
-        metrics.postCueAmp_over1sec=nanmean(amp(t-(nShiftsBefore*timestep)>-0.3 & t-(nShiftsBefore*timestep)<=1));
-        metrics.postCueAmp_at1sec=nanmean(amp(t-(nShiftsBefore*timestep)>0.7 & t-(nShiftsBefore*timestep)<=1));
+        if plotAmp==false
+            % take DC
+            metrics.preCueAmp=nanmean(allcoef(i,ts>=-1.3 & ts<-0.3));
+            metrics.postCueAmp_over1sec=nanmean(allcoef(i,ts>-0.3 & ts<=1));
+            metrics.postCueAmp_at1sec=nanmean(allcoef(i,ts>0.7 & ts<=1));
+        end
     end
     if ~isempty(regexp(event_types{i},'drop','once'))
         metrics.allDrop_sustained=nanmean(allcoef(i,ts>1 & ts<=5),2);
@@ -107,6 +117,12 @@ for i=1:length(event_types)
     end
     if ~isempty(regexp(event_types{i},'cXsuc','once'))
         metrics.cXsucc_sustained=nanmean(allcoef(i,ts>1 & ts<=5),2);
+    end
+    if ~isempty(regexp(event_types{i},'miss','once'))
+        metrics.allMiss_sustained=nanmean(allcoef(i,ts>1 & ts<=5),2);
+    end
+    if ~isempty(regexp(event_types{i},'cXmis','once'))
+        metrics.cXmiss_sustained=nanmean(allcoef(i,ts>1 & ts<=5),2);
     end
     if suppressPlots==false
         P=polyfit(ts,allcoef(i,:),1);
