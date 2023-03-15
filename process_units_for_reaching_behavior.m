@@ -570,9 +570,9 @@ load('Z:\MICROSCOPE\Kim\WHISPER recs\Mar_2\20210805\SU aligned to behavior\matgl
 [ts,allco]=plotGLMcoef(coef,[],fnames,10*0.01,nansum(shifts<0),'mean',false); title('mat glm');
 whichCoefToUse=[4 5 6]; studyGLMcoef(all_glm_coef,ts,whichCoefToUse);
 metrics=getMetricsForAllGLMcoef(all_glm_coef,[],fnames,10*0.01,nansum(shifts<0));
-figure(); scatter(metrics.postCueAmp_over1sec-metrics.preCueAmp,metrics.cXdrop_sustained); xlabel('post minus pre cue'); ylabel('FAILURE cue interaction');
-figure(); scatter(metrics.postCueAmp_at1sec-metrics.preCueAmp,metrics.cXsucc_sustained); xlabel('post minus pre cue'); ylabel('SUCCESS cue interaction');
-figure(); scatter(metrics.allDrop_sustained,metrics.allSucc_sustained); xlabel('drop sustained'); ylabel('success sustained');
+figure(); scatter(metrics.postCueAmp_over1sec-metrics.preCueAmp,metrics.cXfail_sustained); xlabel('post minus pre cue'); ylabel('FAILURE cue interaction');
+figure(); scatter(metrics.postCueAmp_at1sec-metrics.preCueAmp,metrics.cXfail_sustained); xlabel('post minus pre cue'); ylabel('SUCCESS cue interaction');
+figure(); scatter(metrics.allFail_sustained,metrics.allSucc_sustained); xlabel('drop sustained'); ylabel('success sustained');
 
 %% Get significant responses 
 % Get significance from trial by trial
