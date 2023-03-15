@@ -1,4 +1,4 @@
-function [ts,allcoef]=plotGLMcoef(glm_coef,glm_intercept,feature_names,timestep,nShiftsBefore,putTog)
+function [ts,allcoef,metrics]=plotGLMcoef(glm_coef,glm_intercept,feature_names,timestep,nShiftsBefore,putTog,suppressPlots)
 
 % GLM python
 % plotGLMcoef(glm_coef,glm_intercept,feature_names,10*0.01,9);
@@ -21,7 +21,9 @@ end
 l=1;
 coef=[];
 allcoef=[];
-figure();
+if suppressPlots==false
+    figure();
+end
 cm=jet(length(event_types));
 for i=1:length(event_types)
     currev=event_types{i};
@@ -60,11 +62,22 @@ for i=1:length(event_types)
     end
 end
 slopes=nan(1,length(event_types));
+metrics.preCueAmp=[];
+metrics.postCueAmp_over1sec=[];
+metrics.postCueAmp_at1sec=[];
+metrics.allDrop_sustained=[];
+metrics.cXdrop_sustained=[];
+metrics.allSucc_sustained=[];
+metrics.cXsucc_sustained=[];
 for i=1:length(event_types)
-    subplot(1,length(event_types),i);
+    if suppressPlots==false
+        subplot(1,length(event_types),i);
+    end
     ts=0:timestep:(size(allcoef,2)-1)*timestep;
     ts=ts-nShiftsBefore*timestep;
-    plot(ts,allcoef(i,:),'Color',cm(i,:));
+    if suppressPlots==false
+        plot(ts,allcoef(i,:),'Color',cm(i,:));
+    end
     if ~isempty(regexp(event_types{i},'cue','once'))
         params.tapers=[1 3];
         params.Fs=1/mode(diff(ts));
@@ -73,20 +86,41 @@ for i=1:length(event_types)
         addpath(genpath('C:\Users\sabatini\Documents\GitHub\chronux_2_11'));
         [amp,S,t,f]=getAmpWithChronux(allcoef(i,:),[0.5 0.1],params,filter_range);
         rmpath(genpath('C:\Users\sabatini\Documents\GitHub\chronux_2_11'));
-        hold on; plot(t-(nShiftsBefore*timestep),amp*10,'Color',[0 0 0.5]);
+        if suppressPlots==false
+            hold on; plot(t-(nShiftsBefore*timestep),amp*10,'Color',[0 0 0.5]);
+        end
+        metrics.preCueAmp=nanmean(amp(t-(nShiftsBefore*timestep)>=-1.3 & t-(nShiftsBefore*timestep)<-0.3));
+        metrics.postCueAmp_over1sec=nanmean(amp(t-(nShiftsBefore*timestep)>-0.3 & t-(nShiftsBefore*timestep)<=1));
+        metrics.postCueAmp_at1sec=nanmean(amp(t-(nShiftsBefore*timestep)>0.7 & t-(nShiftsBefore*timestep)<=1));
     end
-    P=polyfit(ts,allcoef(i,:),1);
-    yfit=P(1)*ts+P(2);
-    hold on; plot(ts,yfit,'Color','m');
-    slopes(i)=P(1);
-    xlim([ts(1) ts(end)]);
-    hold on;
-    line([0 0],[-0.1 0.5],'Color',[0.3 0.3 0.3]);
-    line([ts(1) ts(end)],[0 0],'Color',[0.3 0.3 0.3]);
-    xlabel(event_types{i});
-    ylim([nanmin(allcoef(1:end)) nanmax(allcoef(1:end))]);
+    if ~isempty(regexp(event_types{i},'drop','once'))
+        metrics.allDrop_sustained=nanmean(allcoef(i,ts>1 & ts<=5),2);
+    end
+    if ~isempty(regexp(event_types{i},'cXdro','once'))
+        metrics.cXdrop_sustained=nanmean(allcoef(i,ts>1 & ts<=5),2);
+    end
+    if ~isempty(regexp(event_types{i},'success','once'))
+        metrics.allSucc_sustained=nanmean(allcoef(i,ts>1 & ts<=5),2);
+    end
+    if ~isempty(regexp(event_types{i},'cXsuc','once'))
+        metrics.cXsucc_sustained=nanmean(allcoef(i,ts>1 & ts<=5),2);
+    end
+    if suppressPlots==false
+        P=polyfit(ts,allcoef(i,:),1);
+        yfit=P(1)*ts+P(2);
+        hold on; plot(ts,yfit,'Color','m');
+        slopes(i)=P(1);
+        xlim([ts(1) ts(end)]);
+        hold on;
+        line([0 0],[-0.1 0.5],'Color',[0.3 0.3 0.3]);
+        line([ts(1) ts(end)],[0 0],'Color',[0.3 0.3 0.3]);
+        xlabel(event_types{i});
+        ylim([nanmin(allcoef(1:end)) nanmax(allcoef(1:end))]);
+    end
 end
-set(gcf,'Position',[20 20 1300 400]);
+if suppressPlots==false
+    set(gcf,'Position',[20 20 1300 400]);
+end
 
 end
 
