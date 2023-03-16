@@ -1,4 +1,4 @@
-function [ts,allcoef,metrics]=plotGLMcoef(glm_coef,glm_intercept,feature_names,timestep,nShiftsBefore,putTog,suppressPlots)
+function [ts,allcoef,metrics]=plotGLMcoef(glm_coef,glm_intercept,feature_names,timestep,nShiftsBefore,putTog,suppressPlots,pva)
 
 % GLM python
 % plotGLMcoef(glm_coef,glm_intercept,feature_names,10*0.01,9);
@@ -7,7 +7,8 @@ function [ts,allcoef,metrics]=plotGLMcoef(glm_coef,glm_intercept,feature_names,t
 
 % putTog can be 'mean','median','me+se','me-se'
 
-smoobin=1;
+smoobin=5;
+pvalThresh=0.05;
 
 if iscell(feature_names)
     event_types=getFeatureNames(feature_names);
@@ -21,6 +22,8 @@ end
 l=1;
 coef=[];
 allcoef=[];
+pval=[];
+allpval=[];
 if suppressPlots==false
     figure();
 end
@@ -36,6 +39,9 @@ for i=1:length(event_types)
                 else
                     coef(k)=glm_coef(l);
                 end
+                if ~isempty(pva)
+                    pval(k)=pva(l);
+                end
                 k=k+1;
                 l=l+1;
             end
@@ -45,6 +51,9 @@ for i=1:length(event_types)
                     coef(k)=putTogether(glm_coef(:,l),putTog);
                 else
                     coef(k)=glm_coef(l);
+                end
+                if ~isempty(pva)
+                    pval(k)=pva(l);
                 end
                 k=k+1;
                 l=l+1;
@@ -57,8 +66,14 @@ for i=1:length(event_types)
     %allcoef(i,:)=smooth(coef,smoobin);
     if smoobin~=1
         allcoef(i,:)=smoothdata(coef,'gaussian',smoobin);
+        if ~isempty(pval)
+            allpval(i,:)=smooth(pval,smoobin);
+        end
     else
         allcoef(i,:)=coef;
+        if ~isempty(pval)
+            allpval(i,:)=pval;
+        end
     end
 end
 slopes=nan(1,length(event_types));
@@ -79,6 +94,9 @@ for i=1:length(event_types)
     ts=ts-nShiftsBefore*timestep;
     if suppressPlots==false
         plot(ts,allcoef(i,:),'Color',cm(i,:));
+        if ~isempty(pva)
+            hold on; scatter(ts(allpval(i,:)<pvalThresh),allcoef(i,allpval(i,:)<pvalThresh),[],'k');
+        end
     end
     if ~isempty(regexp(event_types{i},'cue','once'))
         params.tapers=[1 3];

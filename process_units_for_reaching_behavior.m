@@ -523,7 +523,7 @@ save(['C:\Users\sabatini\Documents\allLabels.mat'],'allLabels');
 save(['C:\Users\sabatini\Documents\timepoints_for_tensor.mat'],'timepoints_for_tensor');
 
 %% GLM analysis
-for i=283:290 %441:450
+for i=320:350 %441:450
     if data_loc_array{i,13}==1
         continue
     end
@@ -567,7 +567,7 @@ indexGLMcellsIntoUnitNames=getNamesIndexIntoNamesList(unitnames_glm,unitbyunit_n
 load('Z:\MICROSCOPE\Kim\WHISPER recs\Mar_2\20210805\SU aligned to behavior\matglm_trainingSet\neuron1_glm_coef.mat');
 load('Z:\MICROSCOPE\Kim\WHISPER recs\Mar_2\20210805\SU aligned to behavior\matglm_trainingSet\features_for_glm.mat');
 load('Z:\MICROSCOPE\Kim\WHISPER recs\Mar_2\20210805\SU aligned to behavior\matglm_trainingSet\shifts.mat');
-[ts,allco]=plotGLMcoef(coef,[],fnames,10*0.01,nansum(shifts<0),'mean',false); title('mat glm');
+[ts,allco]=plotGLMcoef(coef,[],fnames,10*0.01,nansum(shifts<0),'mean',false,[]); title('mat glm');
 whichCoefToUse=[4 5 6]; studyGLMcoef(all_glm_coef,ts,whichCoefToUse);
 metrics=getMetricsForAllGLMcoef(all_glm_coef,[],fnames,10*0.01,nansum(shifts<0));
 figure(); scatter(metrics.postCueAmp_over1sec-metrics.preCueAmp,metrics.cXfail_sustained); xlabel('post minus pre cue'); ylabel('FAILURE cue interaction');
