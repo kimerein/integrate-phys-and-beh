@@ -55,6 +55,7 @@ else
     ResponseCued=getAndSaveResponse([dd{whichSess} sep response_to_plot],whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
     if isempty(ResponseCued.unitbyunit_y) && all(ResponseCued.excluded==1)
         disp(['None of the units in ' dd{whichSess} sep response_to_plot ' were of the type specified in settingsForStriatumUnits.m, so skipping this session']);
+        return
     end
     [~,ma]=max(mean(ResponseCued.aligncomp_y,1,'omitnan'),[],2,'omitnan');
     temp=mean(ResponseCued.aligncomp_x,1,'omitnan');
@@ -560,9 +561,8 @@ for j=1:length(dd)
             shiftedTempFirst=zeros(size(tempFirst));
             for j2=1:size(tempFirst,1)
                 f=find(tempFirst(j2,:)>0.5,1,'first');
-                if f~=94 % just a kim check
-                    disp('pausing in line 561 of GLM_analysis.m');
-                    pause;
+                if isempty(f)
+                    error('cannot find event in line 565 in GLM_analysis.m');
                 end
                 fend=f+indsWithin;
                 if fend>size(shiftedTempFirst,2)
