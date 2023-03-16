@@ -107,14 +107,15 @@ for i=1:length(event_types)
         [amp,S,t,f]=getAmpWithChronux(allcoef(i,:),[0.5 0.1],params,filter_range);
         rmpath(genpath('C:\Users\sabatini\Documents\GitHub\chronux_2_11'));
         
-        plotAmp=false;
-        
+        plotAmp=true;
+        if plotAmp==true
+            metrics.preCueAmp=nanmean(amp(t-(nShiftsBefore*timestep)>=-1.3 & t-(nShiftsBefore*timestep)<-0.3));
+            metrics.postCueAmp_over1sec=nanmean(amp(t-(nShiftsBefore*timestep)>-0.3 & t-(nShiftsBefore*timestep)<=1));
+            metrics.postCueAmp_at1sec=nanmean(amp(t-(nShiftsBefore*timestep)>0.7 & t-(nShiftsBefore*timestep)<=1));
+        end
         if suppressPlots==false
             if plotAmp==true
                 hold on; plot(t-(nShiftsBefore*timestep),amp*10,'Color',[0 0 0.5]);
-                metrics.preCueAmp=nanmean(amp(t-(nShiftsBefore*timestep)>=-1.3 & t-(nShiftsBefore*timestep)<-0.3));
-                metrics.postCueAmp_over1sec=nanmean(amp(t-(nShiftsBefore*timestep)>-0.3 & t-(nShiftsBefore*timestep)<=1));
-                metrics.postCueAmp_at1sec=nanmean(amp(t-(nShiftsBefore*timestep)>0.7 & t-(nShiftsBefore*timestep)<=1));
             end
         end
         if plotAmp==false

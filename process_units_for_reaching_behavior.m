@@ -523,7 +523,7 @@ save(['C:\Users\sabatini\Documents\allLabels.mat'],'allLabels');
 save(['C:\Users\sabatini\Documents\timepoints_for_tensor.mat'],'timepoints_for_tensor');
 
 %% GLM analysis
-for i=320:350 %441:450
+for i=378:381 %351:381 %441:450
     if data_loc_array{i,13}==1
         continue
     end
@@ -547,7 +547,7 @@ whichUnitsToGrab='_';
 [unitbyunit_names.names,unitbyunit_names.excluded,unitbyunit_names.D1orD2taggingExpt,unitbyunit_names.D1taggedCells,unitbyunit_names.A2ataggedCells,unitbyunit_names.fromWhichSess,unitbyunit_names.fromWhichUnit]=alignToReadInUnitNames(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlots);
 % Read in GLM coefficients
 for i=1:length(dd)
-    dd_more{i}=[dd{i} sep 'matglm']; % just a placeholder to read in names
+    dd_more{i}=[dd{i} sep 'matglm_trainingSet']; % just a placeholder to read in names
 end
 [all_glm_coef,unitnames_glm,fromWhichSess_glm]=readInGLMCoefs(dd_more,settingsForStriatumUnitPlots);
 % Outliers for matlab glm
@@ -572,7 +572,7 @@ whichCoefToUse=[4 5 6]; studyGLMcoef(all_glm_coef,ts,whichCoefToUse);
 metrics=getMetricsForAllGLMcoef(all_glm_coef,[],fnames,10*0.01,nansum(shifts<0));
 figure(); scatter(metrics.postCueAmp_over1sec-metrics.preCueAmp,metrics.cXfail_sustained); xlabel('post minus pre cue'); ylabel('FAILURE cue interaction');
 figure(); scatter(metrics.postCueAmp_at1sec-metrics.preCueAmp,metrics.cXfail_sustained); xlabel('post minus pre cue'); ylabel('SUCCESS cue interaction');
-figure(); scatter(metrics.allFail_sustained,metrics.allSucc_sustained); xlabel('drop sustained'); ylabel('success sustained');
+figure(); scatter(metrics.allFail_sustained,metrics.allSucc_sustained); xlabel('failure sustained'); ylabel('success sustained'); % this works
 
 %% Get significant responses 
 % Get significance from trial by trial
