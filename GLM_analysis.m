@@ -562,7 +562,10 @@ for j=1:length(dd)
             for j2=1:size(tempFirst,1)
                 f=find(tempFirst(j2,:)>0.5,1,'first');
                 if isempty(f)
-                    error('cannot find event in line 565 in GLM_analysis.m');
+                    % fill in 
+                    tempie=nanmean(tempFirst,1);
+                    f=find(tempie>0.5,1,'first');
+                    warning('could not find event in line 565 in GLM_analysis.m -- filling in based on other rows');
                 end
                 fend=f+indsWithin;
                 if fend>size(shiftedTempFirst,2)
