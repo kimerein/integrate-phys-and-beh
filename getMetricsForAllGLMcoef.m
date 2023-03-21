@@ -22,8 +22,8 @@ for i=1:size(glm_coef,1)
     metrics.cXsucc_sustained(i)=met.cXsucc_sustained;
     metrics.allMiss_sustained(i)=met.allMiss_sustained;
     metrics.cXmiss_sustained(i)=met.cXmiss_sustained;
-    metrics.allFail_sustained(i)=(met.allDrop_sustained+met.allMiss_sustained)/2;
-    metrics.cXfail_sustained(i)=(met.cXsucc_sustained+met.cXmiss_sustained)/2;
+    metrics.allFail_sustained(i)=(met.allDrop_sustained+met.allMiss_sustained);
+    metrics.cXfail_sustained(i)=(met.cXdrop_sustained+met.cXmiss_sustained);
 end
 
 end
