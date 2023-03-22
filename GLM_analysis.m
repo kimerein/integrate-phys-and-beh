@@ -255,6 +255,9 @@ for j=1:length(dd)
     end
     ls=dir(datadir);
     for i=3:length(ls)
+        if contains(ls(i).name,'trainingSet') || contains(ls(i).name,'testSet')
+            continue
+        end
         unitTest=doUnitTest(ls(i).folder, ls(i).name);
         if isempty(unitTest)
             disp(['skipping ' ls(i).name]);
