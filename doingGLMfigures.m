@@ -1,6 +1,7 @@
 function doingGLMfigures(all_glm_coef,metrics,mat_all_glm_coef,mat_metrics,fromWhichSess_glm)
 
-indsdelay=41;
+indsdelay=44;
+endminusinds=5;
 smooby=21;
 
 % some basic plots
@@ -19,17 +20,17 @@ xlabel('failure sustained'); ylabel('success sustained'); % this works
 coefs_after_outcome=[];
 % coefs_after_outcome=[coefs_after_outcome smoothMatrix(all_glm_coef(:,[71*3+1+indsdelay:71*3+1+70])+all_glm_coef(:,[71*6+1+indsdelay:71*6+1+70]),smooby)];
 % coefs_after_outcome=[coefs_after_outcome smoothMatrix(all_glm_coef(:,[71*4+1+indsdelay:71*4+1+70])+all_glm_coef(:,[71*5+1+indsdelay:71*5+1+70])+all_glm_coef(:,[71*7+1+indsdelay:71*7+1+70])+all_glm_coef(:,[71*8+1+indsdelay:71*8+1+70]),smooby)];
-coefs_after_outcome=[coefs_after_outcome smoothMatrix(all_glm_coef(:,[71*3+1+indsdelay:71*3+1+70]),smooby)];
-coefs_after_outcome=[coefs_after_outcome smoothMatrix(all_glm_coef(:,[71*4+1+indsdelay:71*4+1+70])+all_glm_coef(:,[71*5+1+indsdelay:71*5+1+70]),smooby)];
-coefs_after_outcome=[coefs_after_outcome smoothMatrix(all_glm_coef(:,[71*3+1+indsdelay:71*3+1+70])+all_glm_coef(:,[71*6+1+indsdelay:71*6+1+70]),smooby)];
-coefs_after_outcome=[coefs_after_outcome smoothMatrix(all_glm_coef(:,[71*4+1+indsdelay:71*4+1+70])+all_glm_coef(:,[71*5+1+indsdelay:71*5+1+70])+all_glm_coef(:,[71*7+1+indsdelay:71*7+1+70])+all_glm_coef(:,[71*8+1+indsdelay:71*8+1+70]),smooby)];
+coefs_after_outcome=[coefs_after_outcome smoothMatrix(all_glm_coef(:,[71*3+1+indsdelay:71*3+1+70-endminusinds]),smooby)];
+coefs_after_outcome=[coefs_after_outcome smoothMatrix(all_glm_coef(:,[71*4+1+indsdelay:71*4+1+70-endminusinds])+all_glm_coef(:,[71*5+1+indsdelay:71*5+1+70-endminusinds]),smooby)];
+coefs_after_outcome=[coefs_after_outcome smoothMatrix(all_glm_coef(:,[71*3+1+indsdelay:71*3+1+70-endminusinds])+all_glm_coef(:,[71*6+1+indsdelay:71*6+1+70-endminusinds]),smooby)];
+coefs_after_outcome=[coefs_after_outcome smoothMatrix(all_glm_coef(:,[71*4+1+indsdelay:71*4+1+70-endminusinds])+all_glm_coef(:,[71*5+1+indsdelay:71*5+1+70-endminusinds])+all_glm_coef(:,[71*7+1+indsdelay:71*7+1+70-endminusinds])+all_glm_coef(:,[71*8+1+indsdelay:71*8+1+70-endminusinds]),smooby)];
 clear trialTypeIndependent
 % trialTypeIndependent(:,:,1)=smoothMatrix(all_glm_coef(:,[71*3+1+indsdelay:71*3+1+70])+all_glm_coef(:,[71*6+1+indsdelay:71*6+1+70]),10); 
 % trialTypeIndependent(:,:,2)=smoothMatrix(all_glm_coef(:,[71*4+1+indsdelay:71*4+1+70])+all_glm_coef(:,[71*5+1+indsdelay:71*5+1+70])+all_glm_coef(:,[71*7+1+indsdelay:71*7+1+70])+all_glm_coef(:,[71*8+1+indsdelay:71*8+1+70]),10); 
-trialTypeIndependent(:,:,1)=smoothMatrix(all_glm_coef(:,[71*3+1+indsdelay:71*3+1+70]),smooby); 
-trialTypeIndependent(:,:,2)=smoothMatrix(all_glm_coef(:,[71*4+1+indsdelay:71*4+1+70])+all_glm_coef(:,[71*5+1+indsdelay:71*5+1+70]),smooby); 
-trialTypeIndependent(:,:,3)=smoothMatrix(all_glm_coef(:,[71*3+1+indsdelay:71*3+1+70])+all_glm_coef(:,[71*6+1+indsdelay:71*6+1+70]),smooby); 
-trialTypeIndependent(:,:,4)=smoothMatrix(all_glm_coef(:,[71*4+1+indsdelay:71*4+1+70])+all_glm_coef(:,[71*5+1+indsdelay:71*5+1+70])+all_glm_coef(:,[71*7+1+indsdelay:71*7+1+70])+all_glm_coef(:,[71*8+1+indsdelay:71*8+1+70]),smooby); 
+trialTypeIndependent(:,:,1)=smoothMatrix(all_glm_coef(:,[71*3+1+indsdelay:71*3+1+70-endminusinds]),smooby); 
+trialTypeIndependent(:,:,2)=smoothMatrix(all_glm_coef(:,[71*4+1+indsdelay:71*4+1+70-endminusinds])+all_glm_coef(:,[71*5+1+indsdelay:71*5+1+70-endminusinds]),smooby); 
+trialTypeIndependent(:,:,3)=smoothMatrix(all_glm_coef(:,[71*3+1+indsdelay:71*3+1+70-endminusinds])+all_glm_coef(:,[71*6+1+indsdelay:71*6+1+70-endminusinds]),smooby); 
+trialTypeIndependent(:,:,4)=smoothMatrix(all_glm_coef(:,[71*4+1+indsdelay:71*4+1+70-endminusinds])+all_glm_coef(:,[71*5+1+indsdelay:71*5+1+70-endminusinds])+all_glm_coef(:,[71*7+1+indsdelay:71*7+1+70-endminusinds])+all_glm_coef(:,[71*8+1+indsdelay:71*8+1+70-endminusinds]),smooby); 
 % trialTypeIndependent(:,:,2)=smoothMatrix(all_glm_coef(:,[71*4+1+20:71*4+1+70]),10); 
 % trialTypeIndependent(:,:,3)=smoothMatrix(all_glm_coef(:,[71*5+1+20:71*5+1+70]),10); 
 % trialTypeIndependent(:,:,4)=smoothMatrix(all_glm_coef(:,[71*6+1+20:71*6+1+70]),10); 
@@ -44,17 +45,17 @@ py_temp=temp;
 coefs_after_outcome=[];
 % coefs_after_outcome=[coefs_after_outcome smoothMatrix(mat_all_glm_coef(:,[71*3+1+indsdelay:71*3+1+70])+mat_all_glm_coef(:,[71*6+1+indsdelay:71*6+1+70]),smooby)];
 % coefs_after_outcome=[coefs_after_outcome smoothMatrix(mat_all_glm_coef(:,[71*4+1+indsdelay:71*4+1+70])+mat_all_glm_coef(:,[71*5+1+indsdelay:71*5+1+70])+mat_all_glm_coef(:,[71*7+1+indsdelay:71*7+1+70])+mat_all_glm_coef(:,[71*8+1+indsdelay:71*8+1+70]),smooby)];
-coefs_after_outcome=[coefs_after_outcome smoothMatrix(mat_all_glm_coef(:,[71*3+1+indsdelay:71*3+1+70]),smooby)];
-coefs_after_outcome=[coefs_after_outcome smoothMatrix(mat_all_glm_coef(:,[71*4+1+indsdelay:71*4+1+70])+mat_all_glm_coef(:,[71*5+1+indsdelay:71*5+1+70]),smooby)];
-coefs_after_outcome=[coefs_after_outcome smoothMatrix(mat_all_glm_coef(:,[71*3+1+indsdelay:71*3+1+70])+mat_all_glm_coef(:,[71*6+1+indsdelay:71*6+1+70]),smooby)];
-coefs_after_outcome=[coefs_after_outcome smoothMatrix(mat_all_glm_coef(:,[71*4+1+indsdelay:71*4+1+70])+mat_all_glm_coef(:,[71*5+1+indsdelay:71*5+1+70])+mat_all_glm_coef(:,[71*7+1+indsdelay:71*7+1+70])+mat_all_glm_coef(:,[71*8+1+indsdelay:71*8+1+70]),smooby)];
+coefs_after_outcome=[coefs_after_outcome smoothMatrix(mat_all_glm_coef(:,[71*3+1+indsdelay:71*3+1+70-endminusinds]),smooby)];
+coefs_after_outcome=[coefs_after_outcome smoothMatrix(mat_all_glm_coef(:,[71*4+1+indsdelay:71*4+1+70-endminusinds])+mat_all_glm_coef(:,[71*5+1+indsdelay:71*5+1+70-endminusinds]),smooby)];
+coefs_after_outcome=[coefs_after_outcome smoothMatrix(mat_all_glm_coef(:,[71*3+1+indsdelay:71*3+1+70-endminusinds])+mat_all_glm_coef(:,[71*6+1+indsdelay:71*6+1+70-endminusinds]),smooby)];
+coefs_after_outcome=[coefs_after_outcome smoothMatrix(mat_all_glm_coef(:,[71*4+1+indsdelay:71*4+1+70-endminusinds])+mat_all_glm_coef(:,[71*5+1+indsdelay:71*5+1+70-endminusinds])+mat_all_glm_coef(:,[71*7+1+indsdelay:71*7+1+70-endminusinds])+mat_all_glm_coef(:,[71*8+1+indsdelay:71*8+1+70-endminusinds]),smooby)];
 clear trialTypeIndependent
 % trialTypeIndependent(:,:,1)=smoothMatrix(mat_all_glm_coef(:,[71*3+1+indsdelay:71*3+1+70])+mat_all_glm_coef(:,[71*6+1+indsdelay:71*6+1+70]),10); 
 % trialTypeIndependent(:,:,2)=smoothMatrix(mat_all_glm_coef(:,[71*4+1+indsdelay:71*4+1+70])+mat_all_glm_coef(:,[71*5+1+indsdelay:71*5+1+70])+mat_all_glm_coef(:,[71*7+1+indsdelay:71*7+1+70])+mat_all_glm_coef(:,[71*8+1+indsdelay:71*8+1+70]),10); 
-trialTypeIndependent(:,:,1)=smoothMatrix(mat_all_glm_coef(:,[71*3+1+indsdelay:71*3+1+70]),smooby); 
-trialTypeIndependent(:,:,2)=smoothMatrix(mat_all_glm_coef(:,[71*4+1+indsdelay:71*4+1+70])+mat_all_glm_coef(:,[71*5+1+indsdelay:71*5+1+70]),smooby); 
-trialTypeIndependent(:,:,3)=smoothMatrix(mat_all_glm_coef(:,[71*3+1+indsdelay:71*3+1+70])+mat_all_glm_coef(:,[71*6+1+indsdelay:71*6+1+70]),smooby); 
-trialTypeIndependent(:,:,4)=smoothMatrix(mat_all_glm_coef(:,[71*4+1+indsdelay:71*4+1+70])+mat_all_glm_coef(:,[71*5+1+indsdelay:71*5+1+70])+mat_all_glm_coef(:,[71*7+1+indsdelay:71*7+1+70])+mat_all_glm_coef(:,[71*8+1+indsdelay:71*8+1+70]),smooby); 
+trialTypeIndependent(:,:,1)=smoothMatrix(mat_all_glm_coef(:,[71*3+1+indsdelay:71*3+1+70-endminusinds]),smooby); 
+trialTypeIndependent(:,:,2)=smoothMatrix(mat_all_glm_coef(:,[71*4+1+indsdelay:71*4+1+70-endminusinds])+mat_all_glm_coef(:,[71*5+1+indsdelay:71*5+1+70-endminusinds]),smooby); 
+trialTypeIndependent(:,:,3)=smoothMatrix(mat_all_glm_coef(:,[71*3+1+indsdelay:71*3+1+70-endminusinds])+mat_all_glm_coef(:,[71*6+1+indsdelay:71*6+1+70-endminusinds]),smooby); 
+trialTypeIndependent(:,:,4)=smoothMatrix(mat_all_glm_coef(:,[71*4+1+indsdelay:71*4+1+70-endminusinds])+mat_all_glm_coef(:,[71*5+1+indsdelay:71*5+1+70-endminusinds])+mat_all_glm_coef(:,[71*7+1+indsdelay:71*7+1+70-endminusinds])+mat_all_glm_coef(:,[71*8+1+indsdelay:71*8+1+70-endminusinds]),smooby); 
 % trialTypeIndependent(:,:,2)=smoothMatrix(all_glm_coef(:,[71*4+1+20:71*4+1+70]),10); 
 % trialTypeIndependent(:,:,3)=smoothMatrix(all_glm_coef(:,[71*5+1+20:71*5+1+70]),10); 
 % trialTypeIndependent(:,:,4)=smoothMatrix(all_glm_coef(:,[71*6+1+20:71*6+1+70]),10); 
