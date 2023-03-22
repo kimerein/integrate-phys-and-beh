@@ -59,8 +59,8 @@ plot(x,n,'Color','b');
 labeltempr=cue_Response.D1tag(cue_Response.excluded==0); figure(); plot(nanmean(coef(labeltempr(indexGLMcellsIntoUnitNames)==1,:),1),'Color','r');
 labeltempb=cue_Response.A2atag(cue_Response.excluded==0); hold on; plot(nanmean(coef(labeltempb(indexGLMcellsIntoUnitNames)==1,:),1),'Color','b');
 
-figure(); histogram(mean(coef(:,122:142),2,'omitnan')-mean(coef(:,162:182),2,'omitnan'),1000);
-cuer=nanmax(all_glm_coef(:,10:40)-repmat(mean(all_glm_coef(1:9,:),'all','omitnan'),1,size(all_glm_coef(:,10:40),2)),[],2);
+% figure(); histogram(mean(coef(:,122:142),2,'omitnan')-mean(coef(:,162:182),2,'omitnan'),1000);
+% cuer=nanmax(all_glm_coef(:,10:40)-repmat(mean(all_glm_coef(1:9,:),'all','omitnan'),1,size(all_glm_coef(:,10:40),2)),[],2);
 
 
 end

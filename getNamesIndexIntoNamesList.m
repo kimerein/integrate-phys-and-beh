@@ -1,6 +1,15 @@
 function [indexIntoList,backwardsIndexIntoList,unitnames_glm_notInThisList]=getNamesIndexIntoNamesList(unitnames_glm,unitbyunit_names)
 
-list=unitbyunit_names.names;
+if iscell(unitbyunit_names)
+    list=unitbyunit_names;
+    for i=1:length(list)
+        temp=list{i};
+        r=regexp(temp,'_');
+        list{i}=temp(1:r(1)-1);
+    end
+else
+    list=unitbyunit_names.names;
+end
 indexIntoList=nan(length(unitnames_glm),1);
 backwardsIndexIntoList=nan(length(list),2);
 unitnames_glm_notInThisList=zeros(length(unitnames_glm),1);

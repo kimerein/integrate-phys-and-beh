@@ -547,7 +547,7 @@ whichUnitsToGrab='_';
 [unitbyunit_names.names,unitbyunit_names.excluded,unitbyunit_names.D1orD2taggingExpt,unitbyunit_names.D1taggedCells,unitbyunit_names.A2ataggedCells,unitbyunit_names.fromWhichSess,unitbyunit_names.fromWhichUnit]=alignToReadInUnitNames(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlots);
 % Read in GLM coefficients
 for i=1:length(dd)
-    dd_more{i}=[dd{i} sep 'forglm_trainingSet']; % just a placeholder to read in names
+    dd_more{i}=[dd{i} sep 'matglm_trainingSet']; % just a placeholder to read in names
 end
 [all_glm_coef,unitnames_glm,fromWhichSess_glm]=readInGLMCoefs(dd_more,settingsForStriatumUnitPlots);
 % Outliers for matlab glm
@@ -570,7 +570,16 @@ load('Z:\MICROSCOPE\Kim\WHISPER recs\Mar_2\20210805\SU aligned to behavior\matgl
 [ts,allco]=plotGLMcoef(coef,[],fnames,10*0.01,nansum(shifts<0),'mean',false,[]); title('mat glm');
 whichCoefToUse=[4 5 6]; studyGLMcoef(all_glm_coef,ts,whichCoefToUse);
 metrics=getMetricsForAllGLMcoef(all_glm_coef,[],fnames,10*0.01,nansum(shifts<0));
-doingGLMfigures(all_glm_coef,metrics);
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\metrics.mat'); mat_metrics=metrics; backup_mat_metrics=metrics;
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\all_glm_coef.mat');  mat_all_glm_coef=all_glm_coef;
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\metrics.mat'); f=fieldnames(mat_metrics);
+for i=1:length(f)
+    temp=mat_metrics.(f{i});
+    temp(indexPyGLMintoMatGLM)=metrics.(f{i});
+    mat_metrics.(f{i})=temp;
+end
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\all_glm_coef.mat'); py_all_glm_coef=mat_all_glm_coef; py_all_glm_coef(indexPyGLMintoMatGLM,:)=all_glm_coef;
+doingGLMfigures(py_all_glm_coef,mat_metrics,mat_all_glm_coef,backup_mat_metrics,fromWhichSess_glm);
 
 %% Get significant responses 
 % Get significance from trial by trial
