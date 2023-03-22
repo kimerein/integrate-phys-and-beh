@@ -1,6 +1,6 @@
 function doingGLMfigures(all_glm_coef,metrics,mat_all_glm_coef,mat_metrics,fromWhichSess_glm)
 
-indsdelay=21;
+indsdelay=41;
 smooby=21;
 
 % some basic plots
