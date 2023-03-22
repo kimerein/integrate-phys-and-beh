@@ -55,8 +55,13 @@ for j=1:length(dd)
     disp(['reading in from ' datadir]);
     ls=dir(datadir);
     currTrainingSet=[]; % different training set from each session
-    if exist([ls(1).folder sep 'COMMONtrainingSet.mat'],'file')
-        a=load([ls(1).folder sep 'COMMONtrainingSet.mat']);
+    if isempty(ls)
+        continue
+    end
+    % COMMONtrainingSet.mat is always in cue folder
+    rcue=regexp(ls(1).folder,'\');
+    if exist([ls(1).folder(1:rcue(end)) 'cue' sep 'COMMONtrainingSet.mat'],'file')
+        a=load([ls(1).folder(1:rcue(end)) 'cue' sep 'COMMONtrainingSet.mat']);
         currTrainingSet=a.currTrainingSet;
     end
     for i=3:length(ls)
@@ -235,9 +240,10 @@ for j=1:length(dd)
         else
             if keepAllSingleTrials==false
                 if settings.useSameTrainingSetForAllNeurons==true
-                    error('Have not yet implemented useSameTrainingSetForAllNeurons functionality if keepAllSingleTrials==false');
-                end
-                if settings.makeTrainingSet==true
+                    a.dataout.y(~ismember(1:size(a.dataout.y,1),currTrainingSet),:)=nan;
+                    unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
+                    unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(:,1:upTo),1)];
+                elseif settings.makeTrainingSet==true
                     f=find(eventHappens==1);
                     temp=randperm(nansum(eventHappens==1));
                     tempindsend=ceil(nansum(eventHappens==1)*settings.fracForTrainingSet);

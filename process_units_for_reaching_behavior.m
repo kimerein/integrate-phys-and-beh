@@ -580,6 +580,8 @@ for i=1:length(f)
 end
 load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\all_glm_coef.mat'); py_all_glm_coef=mat_all_glm_coef; py_all_glm_coef(indexPyGLMintoMatGLM,:)=all_glm_coef;
 doingGLMfigures(py_all_glm_coef,mat_metrics,mat_all_glm_coef,backup_mat_metrics,fromWhichSess_glm);
+% how does TCA classification relate to glm classification?
+
 
 %% Get significant responses 
 % Get significance from trial by trial
@@ -718,10 +720,10 @@ load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\TCA\idx_groupLabelsF
 
 usingGLMidx=true;
 if usingGLMidx==true
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\idx_from_glm.mat');
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\combine mat and python glms\consensus_idx_from_glm.mat');
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_success_Response.mat');
     idx=nan(size(cued_success_Response.unitbyunit_x,1),1);
-    idx(indexGLMcellsIntoUnitNames)=idx_from_glm;
+    idx(indexGLMcellsIntoUnitNames(~isnan(indexGLMcellsIntoUnitNames)))=idx_from_glm(~isnan(indexGLMcellsIntoUnitNames));
     cued_success_Response.idx=idx; r{1}=cued_success_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_failure_Response.mat'); cued_failure_Response.idx=idx; r{2}=cued_failure_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\uncued_failure_Response.mat'); uncued_failure_Response.idx=idx; r{3}=uncued_failure_Response;
