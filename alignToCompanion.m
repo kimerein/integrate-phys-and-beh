@@ -55,6 +55,10 @@ for j=1:length(dd)
     disp(['reading in from ' datadir]);
     ls=dir(datadir);
     currTrainingSet=[]; % different training set from each session
+    if exist([ls(1).folder sep 'COMMONtrainingSet.mat'],'file')
+        a=load([ls(1).folder sep 'COMMONtrainingSet.mat']);
+        currTrainingSet=a.currTrainingSet;
+    end
     for i=3:length(ls)
         a=[];
         if contains(ls(i).name,'trainingSet') || contains(ls(i).name,'testSet') % ignore these files

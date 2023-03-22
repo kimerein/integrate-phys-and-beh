@@ -774,7 +774,18 @@ if usingGLMidx==true
     f=find(cued_success_Response.excluded==0); 
     trmv=cued_success_Response.excluded;
     trmv(f(isnan(cued_success_Response.idx)))=1; trmv=logical(trmv);
-    
+    cued_success_Response=removeUnitFromResponse(cued_success_Response,trmv);
+    cued_failure_Response=removeUnitFromResponse(cued_failure_Response,trmv);
+    uncued_failure_Response=removeUnitFromResponse(uncued_failure_Response,trmv);
+    uncued_success_Response=removeUnitFromResponse(uncued_success_Response,trmv);
+    cued_drop_Response=removeUnitFromResponse(cued_drop_Response,trmv);
+    cued_failureNotDrop_Response=removeUnitFromResponse(cued_failureNotDrop_Response,trmv);
+    uncued_drop_Response=removeUnitFromResponse(uncued_drop_Response,trmv);
+    uncued_failureNotDrop_Response=removeUnitFromResponse(uncued_failureNotDrop_Response,trmv);
+    cued_reach_Response=removeUnitFromResponse(cued_reach_Response,trmv);
+    uncued_reach_Response=removeUnitFromResponse(uncued_reach_Response,trmv);
+    cued_failure_noReach_Response=removeUnitFromResponse(cued_failure_noReach_Response,trmv);
+    uncued_failure_noReach_Response=removeUnitFromResponse(uncued_failure_noReach_Response,trmv);
 end
 
 % Average firing rates
