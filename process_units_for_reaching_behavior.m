@@ -737,21 +737,21 @@ load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\TCA\idx_groupLabelsF
 usingGLMidx=true;
 if usingGLMidx==true
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\combine mat and python glms\consensus_idx_from_glm_when_normByGLMcoefIntegral.mat');
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_success_Response.mat');
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\cued_success_Response.mat');
     idx=nan(size(cued_success_Response.unitbyunit_x,1),1);
     idx(indexGLMcellsIntoUnitNames(~isnan(indexGLMcellsIntoUnitNames)))=idx_from_glm(~isnan(indexGLMcellsIntoUnitNames));
     cued_success_Response.idx=idx; r{1}=cued_success_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_failure_Response.mat'); cued_failure_Response.idx=idx; r{2}=cued_failure_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\uncued_failure_Response.mat'); uncued_failure_Response.idx=idx; r{3}=uncued_failure_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\uncued_success_Response.mat'); uncued_success_Response.idx=idx; r{4}=uncued_success_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_drop_Response.mat'); r{5}=cued_drop_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_failureNotDrop_Response.mat'); r{6}=cued_failureNotDrop_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\uncued_drop_Response.mat'); r{7}=uncued_drop_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\uncued_failureNotDrop_Response.mat'); r{8}=uncued_failureNotDrop_Response;
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\cued_failure_Response.mat'); cued_failure_Response.idx=idx; r{2}=cued_failure_Response;
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\uncued_failure_Response.mat'); uncued_failure_Response.idx=idx; r{3}=uncued_failure_Response;
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\uncued_success_Response.mat'); uncued_success_Response.idx=idx; r{4}=uncued_success_Response;
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\cued_drop_Response.mat'); r{5}=cued_drop_Response;
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\cued_failureNotDrop_Response.mat'); r{6}=cued_failureNotDrop_Response;
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\uncued_drop_Response.mat'); r{7}=uncued_drop_Response;
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\uncued_failureNotDrop_Response.mat'); r{8}=uncued_failureNotDrop_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\cued_reach_Response.mat'); r{9}=cued_reach_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\uncued_reach_Response.mat'); r{10}=uncued_reach_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_failure_noReach_Response.mat'); r{11}=cued_failure_noReach_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\uncued_failure_noReach_Response.mat'); r{12}=uncued_failure_noReach_Response;
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\cued_failure_noReach_Response.mat'); r{11}=cued_failure_noReach_Response;
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\uncued_failure_noReach_Response.mat'); r{12}=uncued_failure_noReach_Response;
 else
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_success_Response.mat'); cued_success_Response.idx=idx; r{1}=cued_success_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_failure_Response.mat'); cued_failure_Response.idx=idx; r{2}=cued_failure_Response;
@@ -782,7 +782,7 @@ uncued_failure_noReach_Response=r{12};
 % groupLabelsFromTCA=cued_success_Response.idx;
 
 % Exclude non-SPN units, i.e., firing rate > 4 Hz
-% nonSPNs=[]; %[762 797]; %[762 797 1541]; 
+% nonSPNs=[762 797 1541]; 
 % trmv=zeros(length(cued_success_Response.excluded),1); trmv(nonSPNs)=1; trmv=logical(trmv);
 % cued_success_Response=removeUnitFromResponse(cued_success_Response,trmv);
 % cued_failure_Response=removeUnitFromResponse(cued_failure_Response,trmv);
@@ -879,7 +879,7 @@ plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cuez,cued_success_Resp
 % Plot DIFFERENT IN CUED V UNCUED
 % get rid of cells that NEVER turn on -- they are not useful for this
 % comparison
-trial_n_cutoff=4;
+trial_n_cutoff=6;
 out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',excludeTooFewTrials(cued_reach_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false));
 cued_reach_Response=out.Response1; cued_success_Response=out.Response2; cued_failure_Response=out.Response3; uncued_success_Response=out.Response4; uncued_failure_Response=out.Response5;
 r{1}=cued_reach_Response; r{2}=uncued_reach_Response; r=matchAllUnits(r); uncued_reach_Response=r{2};
@@ -895,7 +895,9 @@ uncued_reach_Response=removeUnitFromResponse(uncued_reach_Response,newexcl);
 % cuez=getCueTunedUnits(cued_reach_Response,uncued_reach_Response,'justcue_v_justuncue','mean',1,[4 12],[-3.3 0.5],[4 12],[-3.3 0.5]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue' or 'vs_uncued_reach_no_index'
 % cuez=getCueTunedUnits(cued_reach_Response,uncued_reach_Response,'justcue_v_justuncue','mean',1,[4 12.5],[-2 0],[4 12.5],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue' or 'vs_uncued_reach_no_index'
 % cuez=getCueTunedUnits(cue_noReach_Response,uncued_reach_Response,'vs_uncued_reach_no_index','mean',1,[9 12.5],[-0.37 1.5],[9 12.5],[-2 0]); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue' or 'vs_uncued_reach_no_index'
-cuez=getCueTunedUnits(cued_reach_Response,uncued_reach_Response,'justcue_v_justuncue','mean',1,[7 16],[-0.1 0],[7 16],[-0.1 0]);
+% cuez=getCueTunedUnits(cued_reach_Response,uncued_reach_Response,'justcue_v_justuncue','mean',1,[7 16],[-0.1 0],[7 16],[-0.1 0]);
+% cuez=getCueTunedUnits(cued_reach_Response,uncued_reach_Response,'justcue_v_justuncue','mean',1,[7 16],[-0.1 0],[7 16],[-0.1 0]);
+cuez=getCueTunedUnits(cued_reach_Response,uncued_reach_Response,'justcue_v_justuncue','mean',1,[7 16],[-1 -0.2],[7 16],[-1 -0.2]);
 plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning');
 
 % cuez=getCueTunedUnits(uncuedReach_Response,cuedReach_Response,'justcue_v_justuncue','mean',1,[4 12],[-2 0],[4 12],[-2 0]); 

@@ -3,20 +3,22 @@ function plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Re
 switch justAvsOrTuning
     case 'justAvs'
         basesubtract=false;
-        individBase=false;
-        basetimewindow=[9 12.5]; %[4 9];
+        individBase=true;
+        basetimewindow=[-3.5 -2.5]; %[9 12.5]; %[4 9];
 
         plotAll=false;
         Zscore=false;
         minmaxnorm=false;
         chopOutliers=false;
-        smoo=30; %6; %smoo=3; %smoo=42;
+        smoo=30; %30; %6; %smoo=3; %smoo=42;
         smoothBeforeResids=true; 
         smooBef=30; %83;
         getResiduals=false; % but need this to get rid of mid-range
         ds=1;
         removeInsufficientBaseline=true; % will nan out units that don't have at least X seconds of baseline before aligncomp max
         atLeastXBaseline=0.75; % in sec
+        removeInsufficientPostBaseline=true;
+        atLeastXAfterBaseline=5;
     case 'tuning'
         % for cue tuned plots
         % doingCued='uncuedOverCued'; % 'cued' or 'uncued' or 'cuedOverUncued' or 'uncuedOverCued'
@@ -35,6 +37,8 @@ switch justAvsOrTuning
         dsForCuez=1;
         removeInsufficientBaseline=true; % will nan out units that don't have at least X seconds of baseline before aligncomp max
         atLeastXBaseline=0.75; % in sec
+        removeInsufficientPostBaseline=true;
+        atLeastXAfterBaseline=5;
 end
 
 % plot all SU
@@ -111,6 +115,10 @@ if removeInsufficientBaseline==true
    [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=removeInsuffBase(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,atLeastXBaseline);
 end
 
+if removeInsufficientPostBaseline==true
+   [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=removeInsufPostBase(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,atLeastXAfterBaseline);
+end
+
 if basesubtract==true
     [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=baseSubResponses(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,basetimewindow,individBase);
 end
@@ -178,6 +186,74 @@ switch justAvsOrTuning
         % violinPlots(grp2_fail_uncue,[1 4]);
 
 %         plotOutsOverlayed(grp1_fail,grp1_fail_uncue);
+end
+
+end
+
+function [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=removeInsufPostBase(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,atLeastXBaseline)
+
+shouldExclude=zeros(size(cued_success_Response.unitbyunit_y,1),1);
+
+currR=cued_success_Response;
+time=nanmean(currR.unitbyunit_x,1);
+temp=nanmean(currR.aligncomp_x,1);
+[~,ma]=nanmax(nanmean(currR.aligncomp_y,1));
+timeOfMaxAlignComp=temp(ma);
+for i=1:size(currR.unitbyunit_y,1)
+    lastNonNan=find(~isnan(currR.unitbyunit_y(i,:)),1,'last');
+    lastNonNanTime=time(lastNonNan);
+    if lastNonNanTime-timeOfMaxAlignComp<atLeastXBaseline
+        shouldExclude(i)=1;
+    end
+end
+
+currR=cued_failure_Response;
+time=nanmean(currR.unitbyunit_x,1);
+temp=nanmean(currR.aligncomp_x,1);
+[~,ma]=nanmax(nanmean(currR.aligncomp_y,1));
+timeOfMaxAlignComp=temp(ma);
+for i=1:size(currR.unitbyunit_y,1)
+    lastNonNan=find(~isnan(currR.unitbyunit_y(i,:)),1,'last');
+    lastNonNanTime=time(lastNonNan);
+    if lastNonNanTime-timeOfMaxAlignComp<atLeastXBaseline
+        shouldExclude(i)=1;
+    end
+end
+
+currR=uncued_success_Response;
+time=nanmean(currR.unitbyunit_x,1);
+temp=nanmean(currR.aligncomp_x,1);
+[~,ma]=nanmax(nanmean(currR.aligncomp_y,1));
+timeOfMaxAlignComp=temp(ma);
+for i=1:size(currR.unitbyunit_y,1)
+    lastNonNan=find(~isnan(currR.unitbyunit_y(i,:)),1,'last');
+    lastNonNanTime=time(lastNonNan);
+    if lastNonNanTime-timeOfMaxAlignComp<atLeastXBaseline
+        shouldExclude(i)=1;
+    end
+end
+
+currR=uncued_failure_Response;
+time=nanmean(currR.unitbyunit_x,1);
+temp=nanmean(currR.aligncomp_x,1);
+[~,ma]=nanmax(nanmean(currR.aligncomp_y,1));
+timeOfMaxAlignComp=temp(ma);
+for i=1:size(currR.unitbyunit_y,1)
+    lastNonNan=find(~isnan(currR.unitbyunit_y(i,:)),1,'last');
+    lastNonNanTime=time(lastNonNan);
+    if lastNonNanTime-timeOfMaxAlignComp<atLeastXBaseline
+        shouldExclude(i)=1;
+    end
+end
+
+% remove units with insufficient baseline from all responses
+for i=1:length(shouldExclude)
+    if shouldExclude(i)==1
+        cued_success_Response.unitbyunit_y(i,:)=nan(size(cued_success_Response.unitbyunit_y(i,:)));
+        cued_failure_Response.unitbyunit_y(i,:)=nan(size(cued_failure_Response.unitbyunit_y(i,:)));
+        uncued_success_Response.unitbyunit_y(i,:)=nan(size(uncued_success_Response.unitbyunit_y(i,:)));
+        uncued_failure_Response.unitbyunit_y(i,:)=nan(size(uncued_failure_Response.unitbyunit_y(i,:)));
+    end
 end
 
 end

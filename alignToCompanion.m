@@ -240,9 +240,30 @@ for j=1:length(dd)
         else
             if keepAllSingleTrials==false
                 if settings.useSameTrainingSetForAllNeurons==true
-                    a.dataout.y(~ismember(1:size(a.dataout.y,1),currTrainingSet),:)=nan;
-                    unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
-                    unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(:,1:upTo),1)];
+                    if settings.useTestSet==true
+                        % discard drops
+                        if settings.discardDrops==true
+                            rlastslash=regexp(ls(i).folder,sep);
+                            lastunderscore=regexp(ls(i).name,'_');
+                            tempDrop=load([ls(i).folder(1:rlastslash(end)) settings.dropFolderName sep ls(i).name(1:lastunderscore(end)) settings.dropFileName '.mat']);
+                            if ~isempty(tempDrop.dataout)
+                                tempDrop.dataout.y=tempDrop.dataout.y(usingTrialsInds,:);
+                                tempDrop.alignComp.y=tempDrop.alignComp.y(usingTrialsInds,:);
+                                dropHappens=any(~isnan(tempDrop.alignComp.y),2);
+                                % nan out the drops
+                                a.dataout.y(dropHappens==1,:)=nan;
+                                a.alignComp.y(dropHappens==1,:)=nan;
+                            end
+                        end
+
+                        a.dataout.y(ismember(1:size(a.dataout.y,1),currTrainingSet),:)=nan;
+                        unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
+                        unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(:,1:upTo),1)];
+                    else
+                        a.dataout.y(~ismember(1:size(a.dataout.y,1),currTrainingSet),:)=nan;
+                        unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
+                        unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(:,1:upTo),1)];
+                    end
                 elseif settings.makeTrainingSet==true
                     f=find(eventHappens==1);
                     temp=randperm(nansum(eventHappens==1));
@@ -340,6 +361,9 @@ for j=1:length(dd)
             else
                 if settings.makeTrainingSet==true || settings.useTestSet==true
                     error('Error in alignToCompanion.m: makeTrainingSet and useTestSet functionality not implemented when keep single trials');
+                end
+                if settings.useTestSet==true && settings.useSameTrainingSetForAllNeurons==true
+                    error('Error in alignToCompanion.m: settings.useTestSet==true && settings.useSameTrainingSetForAllNeurons==true functionality not implemented when keep single trials');
                 end
                 if settings.useSameTrainingSetForAllNeurons==true && settings.useTrainingSet==true
                     if isempty(currTrainingSet)

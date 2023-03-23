@@ -38,6 +38,8 @@ trialTypeIndependent(:,:,4)=smoothMatrix(all_glm_coef(:,[71*4+1+indsdelay:71*4+1
 % trialTypeIndependent(:,:,6)=smoothMatrix(all_glm_coef(:,[71*8+1+20:71*8+1+70]),10);
 ttInd=nanmin(trialTypeIndependent,[],3);
 temp=smoothMatrix(coefs_after_outcome,1)-repmat(ttInd,1,floor(size(coefs_after_outcome,2)/size(ttInd,2))); 
+% rmv outliers
+% dontuse=nanmean(temp,2)>0.4;
 temp=temp./nansum(temp,2);
 % temp=temp./nanmax(temp,[],2); %temp=temp./nanstd(temp,[],2);
 idx_from_glm=kmeans(temp,3,'Replicates',50);
@@ -65,8 +67,11 @@ trialTypeIndependent(:,:,4)=smoothMatrix(mat_all_glm_coef(:,[71*4+1+indsdelay:71
 % trialTypeIndependent(:,:,6)=smoothMatrix(all_glm_coef(:,[71*8+1+20:71*8+1+70]),10);
 ttInd=nanmin(trialTypeIndependent,[],3);
 temp=smoothMatrix(coefs_after_outcome,1)-repmat(ttInd,1,floor(size(coefs_after_outcome,2)/size(ttInd,2))); 
-temp=temp./nansum(temp,2);
+% dontusemat=nanmean(temp,2)>5; 
+% temp(dontusemat,:)=nan;
+temp=temp./nansum(temp,2); 
 temp(~isnan(idx_from_glm),:)=py_temp(~isnan(idx_from_glm),:);
+% temp(dontuse,:)=nan;
 
 idx_from_glm=kmeans(temp,2,'Replicates',50); 
 
