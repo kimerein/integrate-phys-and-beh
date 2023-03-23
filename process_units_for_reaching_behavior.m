@@ -816,7 +816,8 @@ if usingGLMidx==true
     uncued_failure_noReach_Response=removeUnitFromResponse(uncued_failure_noReach_Response,trmv);
 end
 
-% Average firing rates
+% Average firing rates could try excluding all with trial_n_cutoff=5 or 8
+% or 9 or 12 or more (but only for succ-continuing)
 plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'justAvs','justAvs');
 plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Response,cued_drop_Response,uncued_success_Response,uncued_drop_Response,[],'justAvs','justAvs');
 plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Response,cued_failureNotDrop_Response,uncued_success_Response,uncued_failureNotDrop_Response,[],'justAvs','justAvs');
