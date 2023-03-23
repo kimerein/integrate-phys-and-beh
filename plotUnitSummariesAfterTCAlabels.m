@@ -9,12 +9,14 @@ switch justAvsOrTuning
         plotAll=false;
         Zscore=false;
         minmaxnorm=false;
-        chopOutliers=true;
+        chopOutliers=false;
         smoo=30; %6; %smoo=3; %smoo=42;
         smoothBeforeResids=true; 
         smooBef=30; %83;
         getResiduals=false; % but need this to get rid of mid-range
         ds=1;
+        removeInsufficientBaseline=true; % will nan out units that don't have at least X seconds of baseline before aligncomp max
+        atLeastXBaseline=1; % in sec
     case 'tuning'
         % for cue tuned plots
         % doingCued='uncuedOverCued'; % 'cued' or 'uncued' or 'cuedOverUncued' or 'uncuedOverCued'
@@ -31,6 +33,8 @@ switch justAvsOrTuning
         smooBef=150; %10; %30;
         getResiduals=false; % but need this to get rid of mid-range
         dsForCuez=1;
+        removeInsufficientBaseline=true; % will nan out units that don't have at least X seconds of baseline before aligncomp max
+        atLeastXBaseline=1; % in sec
 end
 
 % plot all SU
@@ -102,6 +106,11 @@ if addbeginnings==true
     uncued_failure_Response=addLastTrialToNextBeginning(uncued_failure_Response);
 end
 
+if removeInsufficientBaseline==true
+   % find units with insufficient pre-event baseline
+   [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=removeInsuffBase(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,atLeastXBaseline);
+end
+
 if basesubtract==true
     [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=baseSubResponses(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,basetimewindow,individBase);
 end
@@ -169,6 +178,74 @@ switch justAvsOrTuning
         % violinPlots(grp2_fail_uncue,[1 4]);
 
 %         plotOutsOverlayed(grp1_fail,grp1_fail_uncue);
+end
+
+end
+
+function [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=removeInsuffBase(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,atLeastXBaseline)
+
+shouldExclude=zeros(size(cued_success_Response.unitbyunit_y,1),1);
+
+currR=cued_success_Response;
+time=nanmean(currR.unitbyunit_x,1);
+temp=nanmean(currR.aligncomp_x,1);
+[~,ma]=nanmax(nanmean(currR.aligncomp_y,1));
+timeOfMaxAlignComp=temp(ma);
+for i=1:size(currR.unitbyunit_y,1)
+    firstNonNan=find(~isnan(currR.unitbyunit_y(i,:)),1,'first');
+    firstNonNanTime=time(firstNonNan);
+    if timeOfMaxAlignComp-firstNonNanTime<atLeastXBaseline
+        shouldExclude(i)=1;
+    end
+end
+
+currR=cued_failure_Response;
+time=nanmean(currR.unitbyunit_x,1);
+temp=nanmean(currR.aligncomp_x,1);
+[~,ma]=nanmax(nanmean(currR.aligncomp_y,1));
+timeOfMaxAlignComp=temp(ma);
+for i=1:size(currR.unitbyunit_y,1)
+    firstNonNan=find(~isnan(currR.unitbyunit_y(i,:)),1,'first');
+    firstNonNanTime=time(firstNonNan);
+    if timeOfMaxAlignComp-firstNonNanTime<atLeastXBaseline
+        shouldExclude(i)=1;
+    end
+end
+
+currR=uncued_success_Response;
+time=nanmean(currR.unitbyunit_x,1);
+temp=nanmean(currR.aligncomp_x,1);
+[~,ma]=nanmax(nanmean(currR.aligncomp_y,1));
+timeOfMaxAlignComp=temp(ma);
+for i=1:size(currR.unitbyunit_y,1)
+    firstNonNan=find(~isnan(currR.unitbyunit_y(i,:)),1,'first');
+    firstNonNanTime=time(firstNonNan);
+    if timeOfMaxAlignComp-firstNonNanTime<atLeastXBaseline
+        shouldExclude(i)=1;
+    end
+end
+
+currR=uncued_failure_Response;
+time=nanmean(currR.unitbyunit_x,1);
+temp=nanmean(currR.aligncomp_x,1);
+[~,ma]=nanmax(nanmean(currR.aligncomp_y,1));
+timeOfMaxAlignComp=temp(ma);
+for i=1:size(currR.unitbyunit_y,1)
+    firstNonNan=find(~isnan(currR.unitbyunit_y(i,:)),1,'first');
+    firstNonNanTime=time(firstNonNan);
+    if timeOfMaxAlignComp-firstNonNanTime<atLeastXBaseline
+        shouldExclude(i)=1;
+    end
+end
+
+% remove units with insufficient baseline from all responses
+for i=1:length(shouldExclude)
+    if shouldExclude(i)==1
+        cued_success_Response.unitbyunit_y(i,:)=nan(size(cued_success_Response.unitbyunit_y(i,:)));
+        cued_failure_Response.unitbyunit_y(i,:)=nan(size(cued_failure_Response.unitbyunit_y(i,:)));
+        uncued_success_Response.unitbyunit_y(i,:)=nan(size(uncued_success_Response.unitbyunit_y(i,:)));
+        uncued_failure_Response.unitbyunit_y(i,:)=nan(size(uncued_failure_Response.unitbyunit_y(i,:)));
+    end
 end
 
 end

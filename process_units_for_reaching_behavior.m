@@ -736,7 +736,7 @@ load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\TCA\idx_groupLabelsF
 
 usingGLMidx=true;
 if usingGLMidx==true
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\combine mat and python glms\consensus_idx_from_glm.mat');
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\combine mat and python glms\consensus_idx_from_glm_when_normByGLMcoefIntegral.mat');
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_success_Response.mat');
     idx=nan(size(cued_success_Response.unitbyunit_x,1),1);
     idx(indexGLMcellsIntoUnitNames(~isnan(indexGLMcellsIntoUnitNames)))=idx_from_glm(~isnan(indexGLMcellsIntoUnitNames));
@@ -782,19 +782,20 @@ uncued_failure_noReach_Response=r{12};
 % groupLabelsFromTCA=cued_success_Response.idx;
 
 % Exclude non-SPN units, i.e., firing rate > 4 Hz
-nonSPNs=[762 797 1541]; trmv=zeros(length(cued_success_Response.excluded),1); trmv(nonSPNs)=1; trmv=logical(trmv);
-cued_success_Response=removeUnitFromResponse(cued_success_Response,trmv);
-cued_failure_Response=removeUnitFromResponse(cued_failure_Response,trmv);
-uncued_failure_Response=removeUnitFromResponse(uncued_failure_Response,trmv);
-uncued_success_Response=removeUnitFromResponse(uncued_success_Response,trmv);
-cued_drop_Response=removeUnitFromResponse(cued_drop_Response,trmv);
-cued_failureNotDrop_Response=removeUnitFromResponse(cued_failureNotDrop_Response,trmv);
-uncued_drop_Response=removeUnitFromResponse(uncued_drop_Response,trmv);
-uncued_failureNotDrop_Response=removeUnitFromResponse(uncued_failureNotDrop_Response,trmv);
-cued_reach_Response=removeUnitFromResponse(cued_reach_Response,trmv);
-uncued_reach_Response=removeUnitFromResponse(uncued_reach_Response,trmv);
-cued_failure_noReach_Response=removeUnitFromResponse(cued_failure_noReach_Response,trmv);
-uncued_failure_noReach_Response=removeUnitFromResponse(uncued_failure_noReach_Response,trmv);
+% nonSPNs=[]; %[762 797]; %[762 797 1541]; 
+% trmv=zeros(length(cued_success_Response.excluded),1); trmv(nonSPNs)=1; trmv=logical(trmv);
+% cued_success_Response=removeUnitFromResponse(cued_success_Response,trmv);
+% cued_failure_Response=removeUnitFromResponse(cued_failure_Response,trmv);
+% uncued_failure_Response=removeUnitFromResponse(uncued_failure_Response,trmv);
+% uncued_success_Response=removeUnitFromResponse(uncued_success_Response,trmv);
+% cued_drop_Response=removeUnitFromResponse(cued_drop_Response,trmv);
+% cued_failureNotDrop_Response=removeUnitFromResponse(cued_failureNotDrop_Response,trmv);
+% uncued_drop_Response=removeUnitFromResponse(uncued_drop_Response,trmv);
+% uncued_failureNotDrop_Response=removeUnitFromResponse(uncued_failureNotDrop_Response,trmv);
+% cued_reach_Response=removeUnitFromResponse(cued_reach_Response,trmv);
+% uncued_reach_Response=removeUnitFromResponse(uncued_reach_Response,trmv);
+% cued_failure_noReach_Response=removeUnitFromResponse(cued_failure_noReach_Response,trmv);
+% uncued_failure_noReach_Response=removeUnitFromResponse(uncued_failure_noReach_Response,trmv);
 
 if usingGLMidx==true
     % remove all units with nan classification
@@ -817,9 +818,9 @@ end
 
 % Average firing rates
 plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'justAvs','justAvs');
-plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Response,cued_drop_Response,uncued_success_Response,uncued_drop_Response,[],'justAvs','justAvs');
-plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Response,cued_failureNotDrop_Response,uncued_success_Response,uncued_failureNotDrop_Response,[],'justAvs','justAvs');
-plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Response,cued_failure_noReach_Response,uncued_success_Response,uncued_failure_noReach_Response,[],'justAvs','justAvs');
+% plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Response,cued_drop_Response,uncued_success_Response,uncued_drop_Response,[],'justAvs','justAvs');
+% plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Response,cued_failureNotDrop_Response,uncued_success_Response,uncued_failureNotDrop_Response,[],'justAvs','justAvs');
+% plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Response,cued_failure_noReach_Response,uncued_success_Response,uncued_failure_noReach_Response,[],'justAvs','justAvs');
 
 %% TUNING OF PERSISTENT ACTIVITY
 clear r
