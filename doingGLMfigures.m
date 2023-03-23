@@ -1,4 +1,4 @@
-function doingGLMfigures(all_glm_coef,metrics,mat_all_glm_coef,mat_metrics,fromWhichSess_glm)
+function doingGLMfigures(all_glm_coef,metrics,mat_all_glm_coef,mat_metrics,fromWhichSess_glm,g_p)
 
 indsdelay=44;
 endminusinds=5;
@@ -37,7 +37,9 @@ trialTypeIndependent(:,:,4)=smoothMatrix(all_glm_coef(:,[71*4+1+indsdelay:71*4+1
 % trialTypeIndependent(:,:,5)=smoothMatrix(all_glm_coef(:,[71*7+1+20:71*7+1+70]),10); 
 % trialTypeIndependent(:,:,6)=smoothMatrix(all_glm_coef(:,[71*8+1+20:71*8+1+70]),10);
 ttInd=nanmin(trialTypeIndependent,[],3);
-temp=smoothMatrix(coefs_after_outcome,1)-repmat(ttInd,1,floor(size(coefs_after_outcome,2)/size(ttInd,2))); temp=temp./nanstd(temp,[],2);
+temp=smoothMatrix(coefs_after_outcome,1)-repmat(ttInd,1,floor(size(coefs_after_outcome,2)/size(ttInd,2))); 
+temp=temp./nansum(temp,2);
+% temp=temp./nanmax(temp,[],2); %temp=temp./nanstd(temp,[],2);
 idx_from_glm=kmeans(temp,3,'Replicates',50);
 
 % MAT
@@ -62,7 +64,8 @@ trialTypeIndependent(:,:,4)=smoothMatrix(mat_all_glm_coef(:,[71*4+1+indsdelay:71
 % trialTypeIndependent(:,:,5)=smoothMatrix(all_glm_coef(:,[71*7+1+20:71*7+1+70]),10); 
 % trialTypeIndependent(:,:,6)=smoothMatrix(all_glm_coef(:,[71*8+1+20:71*8+1+70]),10);
 ttInd=nanmin(trialTypeIndependent,[],3);
-temp=smoothMatrix(coefs_after_outcome,1)-repmat(ttInd,1,floor(size(coefs_after_outcome,2)/size(ttInd,2))); temp=temp./nanstd(temp,[],2);
+temp=smoothMatrix(coefs_after_outcome,1)-repmat(ttInd,1,floor(size(coefs_after_outcome,2)/size(ttInd,2))); 
+temp=temp./nansum(temp,2);
 temp(~isnan(idx_from_glm),:)=py_temp(~isnan(idx_from_glm),:);
 
 idx_from_glm=kmeans(temp,2,'Replicates',50); 

@@ -583,9 +583,9 @@ for i=1:length(f)
     mat_metrics.(f{i})=temp;
 end
 load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\all_glm_coef.mat'); py_all_glm_coef=mat_all_glm_coef; py_all_glm_coef(indexPyGLMintoMatGLM,:)=all_glm_coef;
-doingGLMfigures(py_all_glm_coef,mat_metrics,mat_all_glm_coef,backup_mat_metrics,fromWhichSess_glm);
+doingGLMfigures(py_all_glm_coef,mat_metrics,mat_all_glm_coef,backup_mat_metrics,fromWhichSess_glm,pva_glm);
 % relate glm classification to TCA classification
-load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\combine mat and python glms\consensus_idx_from_glm.mat');
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\combine mat and python glms\consensus_idx_from_glm_when_normByGLMcoefIntegral.mat');
 load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_success_Response.mat');
 idx_g=nan(size(cued_success_Response.unitbyunit_x,1),1);
 idx_g(indexGLMcellsIntoUnitNames(~isnan(indexGLMcellsIntoUnitNames)))=idx_from_glm(~isnan(indexGLMcellsIntoUnitNames));
