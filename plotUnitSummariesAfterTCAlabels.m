@@ -16,7 +16,7 @@ switch justAvsOrTuning
         getResiduals=false; % but need this to get rid of mid-range
         ds=1;
         removeInsufficientBaseline=true; % will nan out units that don't have at least X seconds of baseline before aligncomp max
-        atLeastXBaseline=1; % in sec
+        atLeastXBaseline=0.75; % in sec
     case 'tuning'
         % for cue tuned plots
         % doingCued='uncuedOverCued'; % 'cued' or 'uncued' or 'cuedOverUncued' or 'uncuedOverCued'
@@ -34,7 +34,7 @@ switch justAvsOrTuning
         getResiduals=false; % but need this to get rid of mid-range
         dsForCuez=1;
         removeInsufficientBaseline=true; % will nan out units that don't have at least X seconds of baseline before aligncomp max
-        atLeastXBaseline=1; % in sec
+        atLeastXBaseline=0.75; % in sec
 end
 
 % plot all SU
