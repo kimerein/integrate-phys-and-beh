@@ -71,6 +71,7 @@ cmap=[0, 0.75, 0.75; 0.4940, 0.1840, 0.5560];
 
 % Make tsne plot
 Y=tsne(temp); 
+% Y=tsne(temp,'Algorithm','exact','Distance','chebychev','Exaggeration',10,'NumDimensions',2,'Perplexity',900,'Standardize',false);
 Ynanned=all(isnan(temp),2);
 
 % Plot output of clustering

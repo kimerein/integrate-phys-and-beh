@@ -1,4 +1,4 @@
-function [all_glm_coef,unitnames,fromWhichSess]=readInGLMCoefs(datadir,settings)
+function [all_glm_coef,unitnames,fromWhichSess,all_glm_pva]=readInGLMCoefs(datadir,settings)
 
 maxUnitsPerSess=settings.maxUnitsPerSess;
 if iscell(datadir)
@@ -26,6 +26,7 @@ unitnames=cell(maxUnitsPerSess*length(dd),1);
 fromWhichSess=nan(maxUnitsPerSess*length(dd),1);
 unitscount_coef=1;
 all_glm_coef=[];
+all_glm_pva=[];
 for j=1:length(dd)
     if iscell(dd)
         datadir=dd{j};
@@ -56,9 +57,12 @@ for j=1:length(dd)
                         units_count=units_count+length(una);
                     end
                     continue
-                end
+                end 
                 a=load([ls(i).folder sep ls(i).name]);
                 glm_coef=a.coef;
+                rp=regexp(ls(i).name,'coef.mat');
+                a=load([ls(i).folder sep ls(i).name(1:rp-1) 'p.mat']);
+                glm_pva=a.pva;
             case false
                 if contains(ls(i).name,'metadata')
                     continue
@@ -70,6 +74,7 @@ for j=1:length(dd)
             all_glm_coef=nan(maxUnitsPerSess*length(dd),length(glm_coef));
         end
         all_glm_coef(unitscount_coef,:)=glm_coef;
+        all_glm_pva(unitscount_coef,:)=glm_pva;
         unitscount_coef=unitscount_coef+1;
     end
 end

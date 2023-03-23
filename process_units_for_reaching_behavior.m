@@ -549,7 +549,7 @@ whichUnitsToGrab='_';
 for i=1:length(dd)
     dd_more{i}=[dd{i} sep 'matglm_trainingSet']; % just a placeholder to read in names
 end
-[all_glm_coef,unitnames_glm,fromWhichSess_glm]=readInGLMCoefs(dd_more,settingsForStriatumUnitPlots);
+[all_glm_coef,unitnames_glm,fromWhichSess_glm,pva_glm]=readInGLMCoefs(dd_more,settingsForStriatumUnitPlots);
 % Outliers for matlab glm
 % outli=[312 313 319 320 322 324 374 376 377 378 379 380 381 382 383 386 387 388 389];
 % all_glm_coef=all_glm_coef(~ismember(1:size(all_glm_coef,1),outli),:); unitnames_glm=unitnames_glm(~ismember(1:length(unitnames_glm),outli)); fromWhichSess_glm=fromWhichSess_glm(~ismember(1:length(fromWhichSess_glm),outli));
@@ -570,8 +570,12 @@ load('Z:\MICROSCOPE\Kim\WHISPER recs\Mar_2\20210805\SU aligned to behavior\matgl
 [ts,allco]=plotGLMcoef(coef,[],fnames,10*0.01,nansum(shifts<0),'mean',false,[]); title('mat glm');
 whichCoefToUse=[4 5 6]; studyGLMcoef(all_glm_coef,ts,whichCoefToUse);
 metrics=getMetricsForAllGLMcoef(all_glm_coef,[],fnames,10*0.01,nansum(shifts<0));
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\unitnames_glm.mat'); mat_unitnames_glm=unitnames_glm;
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\unitnames_glm.mat');
+indexPyGLMintoMatGLM=getNamesIndexIntoNamesList(unitnames_glm,mat_unitnames_glm);
 load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\metrics.mat'); mat_metrics=metrics; backup_mat_metrics=metrics;
 load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\all_glm_coef.mat');  mat_all_glm_coef=all_glm_coef;
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\fromWhichSess_glm.mat');
 load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\metrics.mat'); f=fieldnames(mat_metrics);
 for i=1:length(f)
     temp=mat_metrics.(f{i});
@@ -580,9 +584,21 @@ for i=1:length(f)
 end
 load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\all_glm_coef.mat'); py_all_glm_coef=mat_all_glm_coef; py_all_glm_coef(indexPyGLMintoMatGLM,:)=all_glm_coef;
 doingGLMfigures(py_all_glm_coef,mat_metrics,mat_all_glm_coef,backup_mat_metrics,fromWhichSess_glm);
-% how does TCA classification relate to glm classification?
-
-
+% relate glm classification to TCA classification
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\combine mat and python glms\consensus_idx_from_glm.mat');
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_success_Response.mat');
+idx_g=nan(size(cued_success_Response.unitbyunit_x,1),1);
+idx_g(indexGLMcellsIntoUnitNames(~isnan(indexGLMcellsIntoUnitNames)))=idx_from_glm(~isnan(indexGLMcellsIntoUnitNames));
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\TCA decomp using GLM training set\idx_groupLabelsFromTCA.mat');
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\TCA decomp using GLM training set\allcell_PCs.mat');
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\combine mat and python glms\figures\tsne.mat');
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\combine mat and python glms\figures\tsne_whichNanned.mat');
+Ywithnans=nan(length(Ynanned),1); Ywithnans(Ynanned==0)=Y(:,1);
+Y_tomatchTCA=nan(size(cued_success_Response.unitbyunit_x,1),1); 
+Y_tomatchTCA(indexGLMcellsIntoUnitNames(~isnan(indexGLMcellsIntoUnitNames)))=Ywithnans(~isnan(indexGLMcellsIntoUnitNames),1);
+figure(); scatter(Y_tomatchTCA,allcell_PCs.score(:,1)); forvio{1}=allcell_PCs.score(Y_tomatchTCA<0,1); forvio{2}=allcell_PCs.score(Y_tomatchTCA>=0,1);
+figure(); violin(forvio);
+[r,p]=corrcoef(Y_tomatchTCA(~isnan(Y_tomatchTCA)),allcell_PCs.score(~isnan(Y_tomatchTCA),1));
 %% Get significant responses 
 % Get significance from trial by trial
 a=load('Z:\MICROSCOPE\Kim\20221107 figures for Sys Club talk\allunits_cueResponse_trialbytrial.mat'); allTrials_cue_Response=a.allTrials_cue_Response;
@@ -614,10 +630,10 @@ anyIsSig=any(isSig==1,2);
 %% Set up data matrix
 % Units X conditions (alignments to beh events) X time
 % a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\cue.mat'); cue_Response=a.Response; 
-a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\cued_success_Response.mat'); cued_success_Response=a.cued_success_Response;  
-a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\cued_failure_Response.mat'); cued_failure_Response=a.cued_failure_Response; 
-a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\uncued_success_Response.mat'); uncued_success_Response=a.uncued_success_Response; 
-a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\uncued_failure_Response.mat'); uncued_failure_Response=a.uncued_failure_Response;
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\cued_success_Response.mat'); cued_success_Response=a.cued_success_Response;  
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\cued_failure_Response.mat'); cued_failure_Response=a.cued_failure_Response; 
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\uncued_success_Response.mat'); uncued_success_Response=a.uncued_success_Response; 
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\uncued_failure_Response.mat'); uncued_failure_Response=a.uncued_failure_Response;
 % a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\cue_noReach.mat'); cue_noReach_Response=a.Response;
 %a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\uncued_reach.mat'); uncued_reach_Response=a.Response;
 trial_n_cutoff=0;

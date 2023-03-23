@@ -142,7 +142,7 @@ scatter3(score(A2atag==1,1),score(A2atag==1,2),score(A2atag==1,3),[],'b','filled
 xlabel('Proj1'); ylabel('Proj2'); zlabel('Proj3');
 % tsnetemp=tsne(score,'Algorithm','exact','Distance','chebychev','Exaggeration',10,'NumDimensions',2,'Perplexity',60,'Standardize',false);
 tsnetemp=tsne(score,'Algorithm','exact','Distance','chebychev','Exaggeration',10,'NumDimensions',2,'Perplexity',900,'Standardize',false);
-load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\old batch\training\CP model\data_loc_array.mat'); [~,~,uic]=unique(data_loc_array(:,2));
+load('Z:\MICROSCOPE\Kim\old batch Physiology Final Data Sets\training\CP model\data_loc_array.mat'); [~,~,uic]=unique(data_loc_array(:,2));
 load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\cued_success_Response.mat'); mousebymouse=uic(cued_success_Response.fromWhichSess); 
 [~,~,umbym]=unique(mousebymouse);
 cmap=[]; for i=1:length(unique(umbym)) cmap=[cmap; rand(1,3)]; end %cmap=colormap(parula(108)); 
