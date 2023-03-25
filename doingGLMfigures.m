@@ -210,6 +210,11 @@ figure(); imagesc(nama_all_glm_coef_othercoefs(idx_from_glm==2,[71*0+1:71*0+71 7
 
 consensus_glm_coef(:,1:213)=all_glm_coef(:,1:213); % take Python coefs
 
+nanma=nanmax(consensus_glm_coef,[],2); nanma(nanma<0.1)=0.1;
+nama_consensus_all_glm_coef=consensus_glm_coef./repmat(nanma,1,size(consensus_glm_coef,2)); 
+% nama_consensus_all_glm_coef=nama_consensus_all_glm_coef(orderingSuccVFail,:);
+% nama_consensus_all_glm_coef(nama_consensus_all_glm_coef<0)=0;
+
 % Plot with reference to TCA idx
 % figure(); scatter(metrics.allSucc_sustained(idx(indexGLMcellsIntoUnitNames)==2),metrics.allMiss_sustained(idx(indexGLMcellsIntoUnitNames)==2),[],'r');
 % hold on; scatter(metrics.allSucc_sustained(idx(indexGLMcellsIntoUnitNames)==1),metrics.allMiss_sustained(idx(indexGLMcellsIntoUnitNames)==1),[],'k');
