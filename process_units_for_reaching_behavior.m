@@ -739,11 +739,17 @@ usingGLMidx=true;
 if usingGLMidx==true
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\combine mat and python glms\consensus_idx_from_glm_when_normByGLMcoefIntegral.mat');
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\cued_success_Response.mat');
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\py_all_glm_coef_butIndexedIntoMatCoefs.mat');
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\py_metrics_butIndexedIntoMatCoefs.mat');
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\unitnames_glm.mat');
+    indexGLMcellsIntoUnitNames=getNamesIndexIntoNamesList(unitnames_glm,unitbyunit_names);
+    py_metrics.activeMoreBeforeCuedReach=nansum(py_all_glm_coef(:,[1:16 427:427+20 498:498+20 569:569+20]),2);
+    py_metrics.activeMoreBeforeAnyReach=nansum(py_all_glm_coef(:,[214:214+20 285:285+20 356:356+20]),2);
     idx=nan(size(cued_success_Response.unitbyunit_x,1),1);
     idx(indexGLMcellsIntoUnitNames(~isnan(indexGLMcellsIntoUnitNames)))=idx_from_glm(~isnan(indexGLMcellsIntoUnitNames)); cued_success_Response.idx=idx;
 %     whichGLMinds=[286:286+71 356:356+71 499:499+71 568:568+71];
-    whichGLMinds=[1:71];
-    cued_success_Response=addMetricsToResponse(cued_success_Response,metrics,all_glm_coef,indexGLMcellsIntoUnitNames,whichGLMinds);
+    whichGLMinds=[1];
+    cued_success_Response=addMetricsToResponse(cued_success_Response,py_metrics,py_all_glm_coef,indexGLMcellsIntoUnitNames,whichGLMinds);
     r{1}=cued_success_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\cued_failure_Response.mat'); cued_failure_Response.idx=idx; r{2}=cued_failure_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\uncued_failure_Response.mat'); uncued_failure_Response.idx=idx; r{3}=uncued_failure_Response;
@@ -756,6 +762,8 @@ if usingGLMidx==true
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\uncued_reach_Response.mat'); r{10}=uncued_reach_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\cued_failure_noReach_Response.mat'); r{11}=cued_failure_noReach_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\uncued_failure_noReach_Response.mat'); r{12}=uncued_failure_noReach_Response;
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\all_success_Response.mat'); r{13}=all_success_Response;
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\all_failure_Response.mat'); r{14}=all_failure_Response;
 else
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_success_Response.mat'); cued_success_Response.idx=idx; r{1}=cued_success_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_failure_Response.mat'); cued_failure_Response.idx=idx; r{2}=cued_failure_Response;
@@ -783,6 +791,8 @@ cued_reach_Response=r{9};
 uncued_reach_Response=r{10};
 cued_failure_noReach_Response=r{11};
 uncued_failure_noReach_Response=r{12};
+all_success_Response=r{13};
+all_failure_Response=r{14};
 % groupLabelsFromTCA=cued_success_Response.idx;
 
 % Exclude non-SPN units, i.e., firing rate > 4 Hz
@@ -818,6 +828,8 @@ if usingGLMidx==true
     uncued_reach_Response=removeUnitFromResponse(uncued_reach_Response,trmv);
     cued_failure_noReach_Response=removeUnitFromResponse(cued_failure_noReach_Response,trmv);
     uncued_failure_noReach_Response=removeUnitFromResponse(uncued_failure_noReach_Response,trmv);
+    all_success_Response=removeUnitFromResponse(all_success_Response,trmv);
+    all_failure_Response=removeUnitFromResponse(all_failure_Response,trmv);
 end
 
 % Average firing rates could try excluding all with trial_n_cutoff=5 or 8
