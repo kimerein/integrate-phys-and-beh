@@ -11,6 +11,7 @@ metrics.allMiss_sustained=nan(size(glm_coef,1),1);
 metrics.cXmiss_sustained=nan(size(glm_coef,1),1);
 metrics.allFail_sustained=nan(size(glm_coef,1),1);
 metrics.cXfail_sustained=nan(size(glm_coef,1),1);
+metrics.amp_secs2to5=nan(size(glm_coef,1),1);
 for i=1:size(glm_coef,1)
     [~,~,met]=plotGLMcoef(glm_coef(i,:),glm_intercept,feature_names,timestep,nShiftsBefore,'mean',true,[]);
     metrics.preCueAmp(i)=met.preCueAmp;
@@ -24,6 +25,7 @@ for i=1:size(glm_coef,1)
     metrics.cXmiss_sustained(i)=met.cXmiss_sustained;
     metrics.allFail_sustained(i)=(met.allDrop_sustained+met.allMiss_sustained);
     metrics.cXfail_sustained(i)=(met.cXdrop_sustained+met.cXmiss_sustained);
+    metrics.amp_secs2to5(i)=met.amp_secs2to5;
 end
 
 end

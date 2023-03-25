@@ -79,6 +79,7 @@ end
 slopes=nan(1,length(event_types));
 metrics.preCueAmp=[];
 metrics.postCueAmp_over1sec=[];
+metrics.amp_secs2to5=[];
 metrics.postCueAmp_at1sec=[];
 metrics.allDrop_sustained=[];
 metrics.cXdrop_sustained=[];
@@ -112,6 +113,7 @@ for i=1:length(event_types)
             metrics.preCueAmp=nanmean(amp(t-(nShiftsBefore*timestep)>=-1.3 & t-(nShiftsBefore*timestep)<-0.3));
             metrics.postCueAmp_over1sec=nanmean(amp(t-(nShiftsBefore*timestep)>-0.3 & t-(nShiftsBefore*timestep)<=1));
             metrics.postCueAmp_at1sec=nanmean(amp(t-(nShiftsBefore*timestep)>0.7 & t-(nShiftsBefore*timestep)<=1));
+            metrics.amp_secs2to5=nanmean(amp(t-(nShiftsBefore*timestep)>=2 & t-(nShiftsBefore*timestep)<=5));
         end
         if suppressPlots==false
             if plotAmp==true
@@ -126,22 +128,22 @@ for i=1:length(event_types)
         end
     end
     if ~isempty(regexp(event_types{i},'drop','once'))
-        metrics.allDrop_sustained=nanmean(allcoef(i,ts>1 & ts<=5),2);
+        metrics.allDrop_sustained=nanmean(allcoef(i,ts>2 & ts<=5),2);
     end
     if ~isempty(regexp(event_types{i},'cXdro','once'))
-        metrics.cXdrop_sustained=nanmean(allcoef(i,ts>1 & ts<=5),2);
+        metrics.cXdrop_sustained=nanmean(allcoef(i,ts>2 & ts<=5),2);
     end
     if ~isempty(regexp(event_types{i},'success','once'))
-        metrics.allSucc_sustained=nanmean(allcoef(i,ts>1 & ts<=5),2);
+        metrics.allSucc_sustained=nanmean(allcoef(i,ts>2 & ts<=5),2);
     end
     if ~isempty(regexp(event_types{i},'cXsuc','once'))
-        metrics.cXsucc_sustained=nanmean(allcoef(i,ts>1 & ts<=5),2);
+        metrics.cXsucc_sustained=nanmean(allcoef(i,ts>2 & ts<=5),2);
     end
     if ~isempty(regexp(event_types{i},'miss','once'))
-        metrics.allMiss_sustained=nanmean(allcoef(i,ts>1 & ts<=5),2);
+        metrics.allMiss_sustained=nanmean(allcoef(i,ts>2 & ts<=5),2);
     end
     if ~isempty(regexp(event_types{i},'cXmis','once'))
-        metrics.cXmiss_sustained=nanmean(allcoef(i,ts>1 & ts<=5),2);
+        metrics.cXmiss_sustained=nanmean(allcoef(i,ts>2 & ts<=5),2);
     end
     if suppressPlots==false
         P=polyfit(ts,allcoef(i,:),1);
