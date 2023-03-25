@@ -576,6 +576,7 @@ indexPyGLMintoMatGLM=getNamesIndexIntoNamesList(unitnames_glm,mat_unitnames_glm)
 load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\metrics.mat'); mat_metrics=metrics; backup_mat_metrics=metrics;
 load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\all_glm_coef.mat');  mat_all_glm_coef=all_glm_coef;
 load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\fromWhichSess_glm.mat');
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\pvals_glm.mat');
 load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\metrics.mat'); f=fieldnames(mat_metrics);
 for i=1:length(f)
     temp=mat_metrics.(f{i});

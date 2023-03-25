@@ -21,5 +21,5 @@ settings.useTheseTestFilenames={}; %{'cuedFailure'}; %{'cuedFailure','uncuedFail
 settings.useTrainingSet=false;
 settings.useSameTrainingSetForAllNeurons=true;
 settings.discardDrops=false;
-settings.dropFolderName='uncued_drop';
-settings.dropFileName='uncuedDrop';
+settings.dropFolderName='cued_drop';
+settings.dropFileName='cuedDrop';

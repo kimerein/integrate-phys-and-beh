@@ -73,6 +73,8 @@ temp=temp./nansum(temp,2);
 temp(~isnan(idx_from_glm),:)=py_temp(~isnan(idx_from_glm),:);
 % temp(dontuse,:)=nan;
 
+consensus_glm_coef=mat_all_glm_coef; consensus_glm_coef(~isnan(idx_from_glm),:)=all_glm_coef(~isnan(idx_from_glm),:);
+
 idx_from_glm=kmeans(temp,2,'Replicates',50); 
 
 cmap=[0, 0.75, 0.75; 0.4940, 0.1840, 0.5560];
@@ -184,6 +186,29 @@ nama_all_glm_coef_othercoefs=nama_all_glm_coef_othercoefs(orderingSuccVFail,:);
 nama_all_glm_coef_othercoefs(nama_all_glm_coef_othercoefs<0)=0;
 figure(); imagesc(nama_all_glm_coef_othercoefs(idx_from_glm==1,[71*0+1:71*0+71 71*2+1:71*2+71])); 
 figure(); imagesc(nama_all_glm_coef_othercoefs(idx_from_glm==2,[71*0+1:71*0+71 71*2+1:71*2+71]));
+
+% Plot other coefs (Matlab coefs)
+nanma=nanmax(mat_all_glm_coef(:,[71*0+1:71*0+71 71*2+1:71*2+71]),[],2); nanma(nanma<0.1)=0.1;
+nama_all_glm_coef_othercoefs=mat_all_glm_coef./repmat(nanma,1,size(mat_all_glm_coef,2)); 
+nama_all_glm_coef_othercoefs=nama_all_glm_coef_othercoefs(orderingSuccVFail,:);
+nama_all_glm_coef_othercoefs(nama_all_glm_coef_othercoefs<0)=0;
+figure(); imagesc(nama_all_glm_coef_othercoefs(idx_from_glm==1,[71*0+1:71*0+71 71*2+1:71*2+71])); 
+figure(); imagesc(nama_all_glm_coef_othercoefs(idx_from_glm==2,[71*0+1:71*0+71 71*2+1:71*2+71]));
+
+% Consensus to get rid of opto when doing heavy regularization in Python
+% GLM
+backup_all_glm_coef=all_glm_coef;
+needtoreplace=nanmean(all_glm_coef(:,5:10),2)>2*nanmean(all_glm_coef(:,1:4),2);
+all_glm_coef(nanmean(all_glm_coef(:,1:4),2)<0.01 & needtoreplace,5:10)=0;
+all_glm_coef(needtoreplace,5:10)=(mat_all_glm_coef(needtoreplace,5:10)./repmat(nanmean(mat_all_glm_coef(needtoreplace,5:10),2),1,length(5:10))).*repmat(nanmean(all_glm_coef(needtoreplace,1:4),2),1,length(5:10));
+nanma=nanmax(all_glm_coef(:,[71*0+1:71*0+71 71*2+1:71*2+71]),[],2); nanma(nanma<0.1)=0.1;
+nama_all_glm_coef_othercoefs=all_glm_coef./repmat(nanma,1,size(all_glm_coef,2)); 
+nama_all_glm_coef_othercoefs=nama_all_glm_coef_othercoefs(orderingSuccVFail,:);
+nama_all_glm_coef_othercoefs(nama_all_glm_coef_othercoefs<0)=0;
+figure(); imagesc(nama_all_glm_coef_othercoefs(idx_from_glm==1,[71*0+1:71*0+71 71*2+1:71*2+71])); 
+figure(); imagesc(nama_all_glm_coef_othercoefs(idx_from_glm==2,[71*0+1:71*0+71 71*2+1:71*2+71]));
+
+consensus_glm_coef(:,1:213)=all_glm_coef(:,1:213); % take Python coefs
 
 % Plot with reference to TCA idx
 % figure(); scatter(metrics.allSucc_sustained(idx(indexGLMcellsIntoUnitNames)==2),metrics.allMiss_sustained(idx(indexGLMcellsIntoUnitNames)==2),[],'r');
