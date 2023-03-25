@@ -185,7 +185,7 @@ switch justAvsOrTuning
         % violinPlots(grp1_succ_uncue,[1 4]);
         % violinPlots(grp2_fail_uncue,[1 4]);
 
-%         plotOutsOverlayed(grp1_fail,grp1_fail_uncue);
+        plotOutsOverlayed(grp2_fail,grp2_fail_uncue);
 end
 
 end
@@ -362,6 +362,7 @@ forvio=cell(1,2);
 k=1;
 alldatas=[];
 alldatas_labels=[];
+excludeForVio=zeros(length(out1.allunits),1);
 for i=1:length(out1.allunits)
     if ~isempty(smoo)
         toplot=smooth(nanmean(differs{i},1),smoo);
@@ -378,6 +379,9 @@ for i=1:length(out1.allunits)
 %     end
     temp=differs{i};
     forvio{i}=nanmean(temp(:,differstimes{i}>=forvio_timewindow(1) & differstimes{i}<forvio_timewindow(2)),2);
+    if isempty(forvio{i})
+        excludeForVio(i)=1;
+    end
     alldatas=[alldatas; forvio{i}];
     alldatas_labels=[alldatas_labels; i.*ones(size(forvio{i}))];
 end
@@ -388,7 +392,7 @@ end
 % disp(['pval from ranksum is ' num2str(p)]);
 
 figure();
-violin(forvio,'facecolor',cmap,'medc',[],'facealpha',1); %,'bw',0.4);
+violin(forvio(excludeForVio==0),'facecolor',cmap(excludeForVio==0,:),'medc',[],'facealpha',1); %,'bw',0.4);
 [p,tbl,stats]=anova1(alldatas,alldatas_labels);
 results=multcompare(stats);
 results_tbl = array2table(results,"VariableNames", ...
