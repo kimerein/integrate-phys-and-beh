@@ -32,7 +32,7 @@ switch justAvsOrTuning
         smoo=1; %6; %smoo=3; %smoo=42;
         chopOutliers=false;
         smoothBeforeResids=true;
-        smooBef=150; %10; %30;
+        smooBef=200; %150; %10; %30;
         getResiduals=false; % but need this to get rid of mid-range
         dsForCuez=1;
         removeInsufficientBaseline=true; % will nan out units that don't have at least X seconds of baseline before aligncomp max
@@ -346,6 +346,7 @@ for i=1:length(out1.allunits)
     differs{i}=data1(:,1:si)-data2(:,1:si);
     if baseSubDiffers==true
         temp=differs{i};
+%         base=nanmean(nanmean(temp(:,out1.time{i}>-5 & out1.time{i}<-3),2),1);
         base=nanmean(nanmean(temp(:,out1.time{i}>-5 & out1.time{i}<-3),2),1);
         differs{i}=differs{i}-base;
 %         base=nanmean(temp(:,out1.time{i}>-5 & out1.time{i}<-3),2);
