@@ -82,8 +82,8 @@ switch doingCued
         basesubtract=false;
 %         temp=prctile(cuez(groupLabelsFromTCA==1),[0 10 20 50 60 70 95 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp;
 %         temp=prctile(cuez(groupLabelsFromTCA==2),[0 10 20 50 60 70 95 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; 
-        temp=prctile(cuez(groupLabelsFromTCA==1),[0 6 12 50 88 94 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp;
-        temp=prctile(cuez(groupLabelsFromTCA==2),[0 6 12 50 88 94 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; 
+        temp=prctile(cuez(groupLabelsFromTCA==1),[0 6 12 50 88 94 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; temp=sort(unique(temp)); cuezbins{1}=temp;
+        temp=prctile(cuez(groupLabelsFromTCA==2),[0 6 12 50 88 94 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; temp=sort(unique(temp)); cuezbins{2}=temp; 
 %         temp=prctile(cuez(groupLabelsFromTCA==1),[0 17 22 40 60 82 90 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 42th prctile is 0 cuez for grp 1
 %         temp=prctile(cuez(groupLabelsFromTCA==2),[0 17 22 40 60 82 90 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
 end
@@ -328,7 +328,7 @@ end
 
 function plotOutsOverlayed(out1,out2)
 
-baseSubDiffers=false;
+baseSubDiffers=true;
 
 cmap=getCmapWithRed(1:length(out2.allunits)+1); hold on;
 differs=cell(1,length(out1.allunits));
@@ -342,12 +342,14 @@ for i=1:length(out1.allunits)
 %     plot(out2.time{i},nanmean(data2,1),'Color',cmap(i,:));
 %     scatter(out2.time{i},nanmean(data2,1),4,cmap(i,:));
     si=min(size(data1,2),size(data2,2));
-    differs{i}=nanmean(data1(:,1:si),1)-nanmean(data2(:,1:si),1);
+%     differs{i}=nanmean(data1(:,1:si),1)-nanmean(data2(:,1:si),1);
     differs{i}=data1(:,1:si)-data2(:,1:si);
     if baseSubDiffers==true
         temp=differs{i};
-        base=nanmean(nanmean(temp(:,out1.time{i}>6 & out1.time{i}<=11),2),1);
+        base=nanmean(nanmean(temp(:,out1.time{i}>-5 & out1.time{i}<-3),2),1);
         differs{i}=differs{i}-base;
+%         base=nanmean(temp(:,out1.time{i}>-5 & out1.time{i}<-3),2);
+%         differs{i}=differs{i}-repmat(base,1,size(differs{i},2));
     end
     t1=out1.time{i}; 
     differstimes{i}=t1(1:si);
