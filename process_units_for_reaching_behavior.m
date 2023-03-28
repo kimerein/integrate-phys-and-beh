@@ -738,6 +738,7 @@ load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\TCA\idx_groupLabelsF
 usingGLMidx=true;
 if usingGLMidx==true
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\combine mat and python glms\consensus_idx_from_glm_when_normByGLMcoefIntegral.mat');
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\combine mat and python glms\consensus_idx_from_glm_outliers_removed.mat');
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\cued_success_Response.mat');
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\py_all_glm_coef_butIndexedIntoMatCoefs.mat');
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\py_metrics_butIndexedIntoMatCoefs.mat');
@@ -1047,7 +1048,7 @@ end
 [groupLabelsFromTCA,cuez]=principaledCA(newDataMatrix,{'units','time','conditions'},6,1,'low');
 
 %% D-prime within unit across trials over time
-analyzeProbabilityOfOnAfterOutcome(dd,[],[],[],'cued_success','uncued_success','overTime');
+analyzeProbabilityOfOnAfterOutcome(dd,[],[],[],'cued_failure','uncued_failure','overTime');
 % analyzeProbabilityOfOnAfterOutcome(dd,[0 2],[],[]);
 
 %% colormaps

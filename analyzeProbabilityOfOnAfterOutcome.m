@@ -122,7 +122,7 @@ switch overTimeOrJustTimeWindow
 
         % get change in unit probability
         % sigs and plots
-        [isSig,pval]=getSignificantUnits_Differences(units,unitfr_success,unitfr_failure,fromWhichUnit_success,fromWhichUnit_failure,nBoots);
+        [isSig,pval]=getSignificantUnits_Differences(units,unitfr_success,unitfr_failure,fromWhichUnit_success,fromWhichUnit_failure,nBoots,[-2 0],[2 5],'justTimeWindow2');
         figure(); scatter(p_success_unitbyunit(~isSig),p_failure_unitbyunit(~isSig)); hold on; scatter(p_success_unitbyunit(isSig),p_failure_unitbyunit(isSig),[],'filled');
         xlabel('p success'); ylabel('p failure');
         binedges=-1-0.025:0.05:1; binedges(1)=-1.001; binedges(end)=1.001;
@@ -143,7 +143,7 @@ switch overTimeOrJustTimeWindow
         disp(['sig units from ' num2str(length(unique(success_Response.fromWhichSess(isSig)))) ' out of ' num2str(length(unique(success_Response.fromWhichSess))) ' sessions']);
 
         % changes across time
-        [isSig,pval,real_success_per_unit,real_failure_per_unit]=getSignificantUnits_Differences(units,success_Response,failure_Response,100);
+        [isSig,pval,real_success_per_unit,real_failure_per_unit]=getSignificantUnits_Differences(units,success_Response,failure_Response,100,[-2 0],[2 5],'justTimeWindow2');
         figure(); scatter(real_success_per_unit(~isSig),real_failure_per_unit(~isSig)); hold on; scatter(real_success_per_unit(isSig),real_failure_per_unit(isSig),[],'filled');
         xlabel('change p success'); ylabel('change p failure');
         binedges=-1-0.025:0.05:1; binedges(1)=-1.001; binedges(end)=1.001;
@@ -622,12 +622,12 @@ dp=(data1_me-data2_me)./sqrt(data1_sd.^2+data2_sd.^2);
 
 end
 
-function [isSig,pval,real_success_per_unit,real_failure_per_unit]=getSignificantUnits_Differences(units,success_Response,failure_Response,nBoots)
+function [isSig,pval,real_success_per_unit,real_failure_per_unit]=getSignificantUnits_Differences(units,success_Response,failure_Response,nBoots,timeWindow1,timeWindow2,vsOrJustTimeWindow2)
 
 boot_success_per_unit=nan(length(units),nBoots);
 boot_failure_per_unit=nan(length(units),nBoots);
 % get real prob values
-timeWindow=[-2 0];
+timeWindow=timeWindow1; %[-2 0];
 [~,alignPeakInd]=nanmax(nanmean(success_Response.aligncomp_y,1));
 temp=nanmean(success_Response.aligncomp_x,1);
 alignSuccessTime=temp(alignPeakInd);
@@ -650,7 +650,7 @@ unitfr_failure=unitfr_failure(failure_Response.isEventInThisTrial==1);
 fromWhichUnit_failure=fromWhichUnit_failure(failure_Response.isEventInThisTrial==1);
 units=unique(success_Response.fromWhichUnit);
 [p_success_unitbyunit_BEFORE,p_failure_unitbyunit_BEFORE]=getProbOfResponse(units,unitfr_success,unitfr_failure,fromWhichUnit_success,fromWhichUnit_failure);
-timeWindow=[1 3];
+timeWindow=timeWindow2; %[1 3];
 [~,alignPeakInd]=nanmax(nanmean(success_Response.aligncomp_y,1));
 temp=nanmean(success_Response.aligncomp_x,1);
 alignSuccessTime=temp(alignPeakInd);
@@ -734,8 +734,14 @@ for j=1:nBoots
     end
     % get prob
     [p_success_unitbyunit_AFTER,p_failure_unitbyunit_AFTER]=getProbOfResponse(units,unitfr_success,unitfr_failure,fromWhichUnit_success,fromWhichUnit_failure);
-    boot_success_per_unit(:,j)=p_success_unitbyunit_BEFORE-p_success_unitbyunit_AFTER;
-    boot_failure_per_unit(:,j)=p_failure_unitbyunit_BEFORE-p_failure_unitbyunit_AFTER;
+    switch vsOrJustTimeWindow2
+        case 'versus'
+            boot_success_per_unit(:,j)=p_success_unitbyunit_BEFORE-p_success_unitbyunit_AFTER;
+            boot_failure_per_unit(:,j)=p_failure_unitbyunit_BEFORE-p_failure_unitbyunit_AFTER;
+        case 'justTimeWindow2'
+            boot_success_per_unit(:,j)=p_success_unitbyunit_AFTER;
+            boot_failure_per_unit(:,j)=p_failure_unitbyunit_AFTER;
+    end
 end
 % get significance for each unit
 % is significant if real difference between success and failure is greater

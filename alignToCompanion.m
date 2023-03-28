@@ -359,11 +359,13 @@ for j=1:length(dd)
                     unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(:,1:upTo),1)];
                 end
             else
-                if settings.makeTrainingSet==true || settings.useTestSet==true
-                    error('Error in alignToCompanion.m: makeTrainingSet and useTestSet functionality not implemented when keep single trials');
-                end
+%                 if settings.makeTrainingSet==true || settings.useTestSet==true
+%                     error('Error in alignToCompanion.m: makeTrainingSet and useTestSet functionality not implemented when keep single trials');
+%                 end
                 if settings.useTestSet==true && settings.useSameTrainingSetForAllNeurons==true
-                    error('Error in alignToCompanion.m: settings.useTestSet==true && settings.useSameTrainingSetForAllNeurons==true functionality not implemented when keep single trials');
+                    a.dataout.y(ismember(1:size(a.dataout.y,1),currTrainingSet),:)=nan;
+                    unitbyunit_x(trials_count:trials_count+size(a.dataout.y,1)-1,:)=repmat(a.dataout.x(1:upTo),size(a.dataout.y,1),1);
+                    unitbyunit_y(trials_count:trials_count+size(a.dataout.y,1)-1,:)=[a.dataout.y(:,1:upTo)];
                 end
                 if settings.useSameTrainingSetForAllNeurons==true && settings.useTrainingSet==true
                     if isempty(currTrainingSet)
