@@ -256,10 +256,43 @@ for j=1:length(dd)
                             end
                         end
 
+                        % discard opto trials if opto was on during cue
+                        if settings.discardTrialsWhereOptoDuringCue==true
+                            rlastslash=regexp(ls(i).folder,sep);
+                            if exist([ls(i).folder(1:rlastslash(end-1)) 'tbt' sep 'opto_was_on.txt'],'file')
+                                % then continue
+                                tempOpto=load([ls(i).folder(1:rlastslash(end-1)) 'tbt' sep 'physiology_tbt.mat']);
+                                minTrialInds=floor(settings.minTrialLength./mode(diff(nanmean(tempOpto.physiology_tbt.cuetimes_wrt_trial_start,1))));
+                                isOverlapping=any(tempOpto.physiology_tbt.opto(:,1:minTrialInds)==1 & tempOpto.physiology_tbt.cue(:,1:minTrialInds)==1,2);
+                                a.dataout.y(isOverlapping(usingTrialsInds)==1,:)=nan;
+                            end
+                        elseif settings.onlyTrialsWhereOptoDuringCue==true
+                            rlastslash=regexp(ls(i).folder,sep);
+                            if exist([ls(i).folder(1:rlastslash(end-1)) 'tbt' sep 'opto_was_on.txt'],'file')
+                                % then continue
+                                tempOpto=load([ls(i).folder(1:rlastslash(end-1)) 'tbt' sep 'physiology_tbt.mat']);
+                                minTrialInds=floor(settings.minTrialLength./mode(diff(nanmean(tempOpto.physiology_tbt.cuetimes_wrt_trial_start,1))));
+                                isOverlapping=any(tempOpto.physiology_tbt.opto(:,1:minTrialInds)==1 & tempOpto.physiology_tbt.cue(:,1:minTrialInds)==1,2);
+                                a.dataout.y(~isOverlapping(usingTrialsInds)==1,:)=nan;
+                            end
+                        elseif settings.discardTrialsIfAnyOpto==true
+                            rlastslash=regexp(ls(i).folder,sep);
+                            if exist([ls(i).folder(1:rlastslash(end-1)) 'tbt' sep 'opto_was_on.txt'],'file')
+                                % then continue
+                                tempOpto=load([ls(i).folder(1:rlastslash(end-1)) 'tbt' sep 'physiology_tbt.mat']);
+                                minTrialInds=floor(settings.minTrialLength./mode(diff(nanmean(tempOpto.physiology_tbt.cuetimes_wrt_trial_start,1))));
+                                isOverlapping=any(tempOpto.physiology_tbt.opto(:,1:minTrialInds)==1,2);
+                                a.dataout.y(isOverlapping(usingTrialsInds)==1,:)=nan;
+                            end
+                        end
+                        
                         a.dataout.y(ismember(1:size(a.dataout.y,1),currTrainingSet),:)=nan;
                         unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
                         unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(:,1:upTo),1)];
                     else
+                        if settings.discardDrops==true || settings.discardTrialsWhereOptoDuringCue==true
+                            error('settings.discardDrops==true || settings.discardTrialsWhereOptoDuringCue==true functionality not implemented for settings.useSameTrainingSetForAllNeurons==true and settings.useTestSet==false');
+                        end
                         a.dataout.y(~ismember(1:size(a.dataout.y,1),currTrainingSet),:)=nan;
                         unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
                         unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(:,1:upTo),1)];

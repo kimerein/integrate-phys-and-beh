@@ -12,14 +12,23 @@ settings.padsize=1000;
 settings.testForAlignment=false;
 settings.unitbaseline=600; %300; %150;
 settings.maxUnitsPerSess=300; % can't get more than this many units per session
-settings.keepAllSingleTrials=false;
+settings.keepAllSingleTrials=true;
 settings.fracForTrainingSet=0.5; % fraction of trials to use for training set
 settings.makeTrainingSet=false;
-settings.useTestSet=true;
+settings.useTestSet=false;
 settings.useTheseTestSets={}; %{'cued_failureIntersect'}; %{'cued_failure','uncued_failure'};
 settings.useTheseTestFilenames={}; %{'cuedFailure'}; %{'cuedFailure','uncuedFailure'};
 settings.useTrainingSet=false;
-settings.useSameTrainingSetForAllNeurons=true;
+settings.useSameTrainingSetForAllNeurons=false;
 settings.discardDrops=false;
 settings.dropFolderName='cued_drop';
 settings.dropFileName='cuedDrop';
+settings.discardTrialsWhereOptoDuringCue=false;
+settings.onlyTrialsWhereOptoDuringCue=false;
+settings.discardTrialsIfAnyOpto=false;
+settings.minTrialLength=9.5; % in seconds
+
+% basic checks
+if settings.discardTrialsWhereOptoDuringCue==true && settings.onlyTrialsWhereOptoDuringCue==true
+    error('Cannot both be true in settingsForStriatumUnitPlots.m: settings.discardTrialsWhereOptoDuringCue==true && settings.onlyTrialsWhereOptoDuringCue==true');
+end

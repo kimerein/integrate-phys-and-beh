@@ -4,6 +4,7 @@ function [tensor, allLabels, timepoints_for_tensor]=getTensorsForOneSession(whic
 % downSampBy=4; % downsamp 60 ms bins by this much
 % takeNPointsAfterEvent=15;
 % takeNPointsBeforeEvent=0;
+% response_to_plot1='cue'; response_to_plot2='uncued_success';
 response_to_plot1='cued_success'; response_to_plot2='uncued_success';
 putTogetherTensor(whichSess,downSampBy,takeNPointsAfterEvent,takeNPointsBeforeEvent,response_to_plot1,response_to_plot2,dd,'C:\Users\sabatini\Documents\MATLAB\cued_success_then_uncued_success');
 response_to_plot1='cued_failure'; response_to_plot2='uncued_failure';
