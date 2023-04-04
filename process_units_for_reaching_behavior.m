@@ -738,6 +738,10 @@ load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\TCA\idx_groupLabelsF
 
 usingGLMidx=true;
 if usingGLMidx==true
+
+    % CONSIDER THROWING OUT CUED TRIALS WHERE REACH SEEMS
+    % PREEMPTIVE!!!!!!!!!!!!!!!!!!!!!!!!
+
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\combine mat and python glms\consensus_idx_from_glm_when_normByGLMcoefIntegral.mat');
 %     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\combine mat and python glms\consensus_idx_from_glm_outliers_removed.mat');
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_success_Response.mat');
