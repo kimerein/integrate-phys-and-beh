@@ -1,5 +1,9 @@
 function realign_tbt=realignToCue_useCueZone(tbt,useAsCue,cueDuration,settings)
 
+beginningOrEnd=false; % if want to just shift according to guess of whether beginning or end
+% otherwise will actually try to align to cue onset using the derivative of
+% the cue zone
+
 if isempty(settings)
     settings.lowThresh=0.05;
     settings.isOrchestra=false;
@@ -33,14 +37,25 @@ for i=1:size(cue,1)
     else
         fi(i)=temp;
         % what does cue zone look like surrounding this point?
-        if temp-cueDurationInds<1 || temp+cueDurationInds>size(cueZone,2)
+        if temp-2*cueDurationInds<1 || temp+cueDurationInds>size(cueZone,2)
             continue
         end
-        if nanmean(cueZone(i,temp-cueDurationInds:temp))<nanmean(cueZone(i,temp:temp+cueDurationInds)) % this is beginning of cue
-            % leave alone
-        else % this is end of cue
-            fi(i)=temp-(cueDurationInds-2);
+
+        if beginningOrEnd==false
+            % Actually realign to cue onset
+            % Use positive peak of derivative
+            d=diff(cueZone(i,temp-2*cueDurationInds:temp+cueDurationInds));
+            [~,maxie]=nanmax(d,[],2);
+            fi(i)=temp-2*cueDurationInds+maxie-1;
+        else
+            % Just check if beginning or end of cue
+            if nanmean(cueZone(i,temp-cueDurationInds:temp))<nanmean(cueZone(i,temp:temp+cueDurationInds)) % this is beginning of cue
+                % leave alone
+            else % this is end of cue
+                fi(i)=temp-(cueDurationInds-2);
+            end
         end
+
         if fi(i)-cueDurationInds<1 || fi(i)+cueDurationInds>size(cueZone,2)
             continue
         end
