@@ -46,7 +46,7 @@ for i=1:size(cue,1)
             % Use positive peak of derivative
             d=diff(cueZone(i,temp-2*cueDurationInds:temp+cueDurationInds));
             [~,maxie]=nanmax(d,[],2);
-            fi(i)=temp-2*cueDurationInds+maxie-1;
+            fi(i)=temp-2*cueDurationInds+maxie;
         else
             % Just check if beginning or end of cue
             if nanmean(cueZone(i,temp-cueDurationInds:temp))<nanmean(cueZone(i,temp:temp+cueDurationInds)) % this is beginning of cue
