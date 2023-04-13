@@ -7,6 +7,8 @@
 %% load in data
 
 exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt25May2021220005\'; % directory containing experimental data
+behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log - Slimmed down table.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
+mouseDBdir=''; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -24,6 +26,10 @@ disp('loading metadata');
 metadata=loadStructFieldByField([exptDataDir sprtr 'metadata']); % load metadata
 a=load([exptDataDir sprtr 'reachExptAnalysis_settings.mat']); % load reach expt analysis settings 
 reachExptSettings=a.settings;
+
+% Use behavior log table to fix nth_session, where possible
+mouse_database=load(mouseDBdir);
+metadata=getNthSession(behaviorLogDir,mouse_database,metadata,true,true); % last two args are alsoFixOptoOnHere, then excludeTrainingRig
 
 % Optional
 % Back-up full, unfiltered alltbt in workspace

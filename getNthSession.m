@@ -1,4 +1,4 @@
-function getNthSession(dataTable,mouse_database,metadata,alsoFixOptoOnHere,excludeTrainingRig)
+function metadata=getNthSession(dataTable,mouse_database,metadata,alsoFixOptoOnHere,excludeTrainingRig)
 
 % Use TAB delimiter when downloading table
     
