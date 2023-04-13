@@ -31,7 +31,7 @@ if isempty(settings)
     settings.useOptoZone=0; % 1 if want to use manually defined optoZone in video instead of Arduino-based optoOn
     settings.maxDelayUntilOpto=9.5; % in seconds, max time from trial onset until opto turns on
     settings.isOrchestra=1; % will suppress figures if running on server
-    settings.tryForFiles={'optoOnHere','nth_session','optoThresh','preemptCue'}; % look for these files in each directory
+    settings.tryForFiles={'optoOnHere','nth_session','optoThresh','preemptCue','dateFromTextFile'}; % look for these files in each directory
 end
 
 if ~isempty(varargin) && length(varargin)>1

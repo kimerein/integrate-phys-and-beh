@@ -46,6 +46,9 @@ for i=1:length(ls) % iterate through mice
                 for l=1:length(sub_sub_ls)
                     % look for date .txt file
                     if ismember(1,regexp(sub_sub_ls(l).name,'20'))
+                        % save as a datetime in dateFromTextFile.mat
+                        dateFromTextFile=datetime(str2num(sub_sub_ls(l).name(1:4)),str2num(sub_sub_ls(l).name(5:6)),str2num(sub_sub_ls(l).name(7:8)));
+                        save([expt_dir '\' thisname '\' sub_thisname '\dateFromTextFile.mat'],'dateFromTextFile');
                         % assign from database
                         if ismember(sub_sub_ls(l).name,dates_db)
                             f=find(ismember(dates_db,sub_sub_ls(l).name));
@@ -71,5 +74,8 @@ for i=1:length(ls) % iterate through mice
         end
     end
 end
+
+% save in current working directory the mouse id database
+save(['mouse_database.mat'],'mouse_database');
 
 checkForESPreaching(continuingAnalysisDir); % manually check for preemptive reaching
