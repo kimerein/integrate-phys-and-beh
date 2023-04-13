@@ -27,8 +27,9 @@ function getNthSession(dataTable,mouse_database,metadata,alsoFixOptoOnHere,exclu
 % ingest this from .csv file
 %dataTable='/Users/kim/Downloads/Combo Behavior Log - Slimmed down table.csv';
 % BETTER TO USE TAB DELIMITER
-% data_array=table2cell(readtable(dataTable,'Format','%s%s%s%s%s%s%s%s%s%s','Delimiter', '\t', 'HeaderLines', 0, 'ReadVariableNames', true));
-data_array=table2cell(readtable(dataTable,'Format','%s%s%s%s%s%s%s%s%s%s','Delimiter', ',', 'HeaderLines', 0, 'ReadVariableNames', true));
+% Download google spreadsheet as .tsv, then change extension to .csv
+data_array=table2cell(readtable(dataTable,'Format','%s%s%s%s%s%s%s%s%s%s','Delimiter', '\t', 'HeaderLines', 0, 'ReadVariableNames', true));
+% data_array=table2cell(readtable(dataTable,'Format','%s%s%s%s%s%s%s%s%s%s','Delimiter', ',', 'HeaderLines', 0, 'ReadVariableNames', true));
 
 %data_array=clearEmptyRows(data_array);
 
@@ -40,7 +41,12 @@ for i=1:size(data_array,1)
     r=regexp(data_array{i,1},'/');
     if ~isempty(r)
         try
-            datetime_array(i)=datetime(str2num(temp(r(end)+1:end)),str2num(temp(1:r(1)-1)),str2num(temp(r(1)+1:r(2)-1)));
+            year=temp(r(end)+1:end);
+            if length(year)==2
+                year=['20' year];
+            end
+            year=str2num(year);
+            datetime_array(i)=datetime(year,str2num(temp(1:r(1)-1)),str2num(temp(r(1)+1:r(2)-1)));
         catch
 %             disp(data_array{i,1});
         end
@@ -59,10 +65,11 @@ end
 % in table
 table_mousenames=unique(data_array(:,2));
 for i=1:length(table_mousenames)
-    currmousename=table_mousenames{i,2};
+    currmousename=table_mousenames{i};
     [isInDB,correspondingMouseID]=findMouseNameInDatabase(currmousename,mouse_database);
     if ~isInDB
         disp(['This mouse name from table is not in database: ' currmousename]);
+        continue
     else
         % Exclude days on training rig!!!
         datesForThisMouse=whichDatesForThisMouse(datetime_array,data_array,currmousename,excludeTrainingRig);
@@ -81,14 +88,16 @@ end
 
 function datesForThisMouse=whichDatesForThisMouse(datetime_array,data_array,currmousename,excludeTrainingRig)
 
-datesForThisMouse=[];
+datesForThisMouse(1)=datetime(1900,3,3); % just a placeholder to define
 for i=1:size(data_array,1)
-    if strcmp(data_array{i,1},currmousename)
+    if strcmp(data_array{i,2},currmousename)
         if ~ismember(datetime_array(i),datesForThisMouse)
             datesForThisMouse=[datesForThisMouse; datetime_array(i)]; 
         end
     end
 end
+% drop placeholder
+datesForThisMouse=datesForThisMouse(2:end);
 
 end
 
