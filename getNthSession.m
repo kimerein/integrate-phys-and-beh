@@ -72,27 +72,49 @@ for i=1:length(table_mousenames)
         continue
     else
         % Exclude days on training rig!!!
-        datesForThisMouse=whichDatesForThisMouse(datetime_array,data_array,currmousename,excludeTrainingRig);
+        [datesForThisMouse,optoAttachForThisMouse,percOptoForThisMouse]=whichDatesForThisMouse(datetime_array,data_array,currmousename,excludeTrainingRig);
     end
     % Fix nth_session in metadata
     for j=1:length(datesForThisMouse)
         metadata.nth_session(eq(metadata.dateFromTextFile,datesForThisMouse(j)) & metadata.mouseid==correspondingMouseID)=j;
+        if alsoFixOptoOnHere==true
+            % if optoOnHere field does not match field Opto_attach, fix it
+            switch optoAttachForThisMouse{j}
+                case 'yes'
+                    if str2num(percOptoForThisMouse{j})~=0
+                        metadata.optoOnHere(eq(metadata.dateFromTextFile,datesForThisMouse(j)) & metadata.mouseid==correspondingMouseID)=1;
+                    else
+                        metadata.optoOnHere(eq(metadata.dateFromTextFile,datesForThisMouse(j)) & metadata.mouseid==correspondingMouseID)=0;
+                    end
+                case 'no'
+                    metadata.optoOnHere(eq(metadata.dateFromTextFile,datesForThisMouse(j)) & metadata.mouseid==correspondingMouseID)=0;
+                otherwise
+                    metadata.optoOnHere(eq(metadata.dateFromTextFile,datesForThisMouse(j)) & metadata.mouseid==correspondingMouseID)=0;
+            end
+        end
     end
 end
 
-if alsoFixOptoOnHere==true
-    % if optoOnHere field does not match field Opto_attach, fix it
 end
 
-end
-
-function datesForThisMouse=whichDatesForThisMouse(datetime_array,data_array,currmousename,excludeTrainingRig)
+function [datesForThisMouse,optoAttachForThisMouse,percOptoForThisMouse]=whichDatesForThisMouse(datetime_array,data_array,currmousename,excludeTrainingRig)
 
 datesForThisMouse(1)=datetime(1900,3,3); % just a placeholder to define
+optoOnForThisMouse={}; percOptoForThisMouse={};
+k=1;
+
 for i=1:size(data_array,1)
     if strcmp(data_array{i,2},currmousename)
         if ~ismember(datetime_array(i),datesForThisMouse)
-            datesForThisMouse=[datesForThisMouse; datetime_array(i)]; 
+            if excludeTrainingRig==true
+                if ~strcmp(data_array{i,3},'Training')
+                    datesForThisMouse=[datesForThisMouse; datetime_array(i)];
+                    optoAttachForThisMouse{k}=data_array{i,7}; percOptoForThisMouse{k}=data_array{i,9}; k=k+1;
+                end
+            else
+                datesForThisMouse=[datesForThisMouse; datetime_array(i)]; 
+                optoAttachForThisMouse{k}=data_array{i,7}; percOptoForThisMouse{k}=data_array{i,9}; k=k+1;
+            end
         end
     end
 end
