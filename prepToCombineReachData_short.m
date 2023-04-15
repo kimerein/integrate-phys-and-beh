@@ -65,6 +65,8 @@ for i=1:length(ls) % iterate through mice
                     if isfile([expt_dir '\' thisname '\' sub_thisname '\optoOnHere.mat'])
                     else
                         save([expt_dir '\' thisname '\' sub_thisname '\optoOnHere.mat'],'optoOnHere');
+                        optoThresh=0.5;
+                        save([expt_dir '\' thisname '\' sub_thisname '\optoThresh.mat'],'optoThresh');
                     end
                 else
                     save([expt_dir '\' thisname '\' sub_thisname '\optoOnHere.mat'],'optoOnHere');
