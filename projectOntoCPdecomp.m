@@ -4,8 +4,10 @@ function trialWeightsOntoTypeFactors=projectOntoCPdecomp(loc,test_data_matrix,wh
 
 % load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\CP model\allconditions_cpmodel.mat');
 load(loc);
-trialWeightsOntoTypeFactors=nan(length(whichFactors),length(allconditions_cpmodel.U{3}),size(test_data_matrix,3));
-% trialWeightsOntoTypeFactors is in format factor X trial type X trial 
+% trialWeightsOntoTypeFactors=nan(length(whichFactors),size(allconditions_cpmodel.U{3},1)*size(test_data_matrix,1),size(test_data_matrix,3));
+% trialWeightsOntoTypeFactors=nan(length(whichFactors),size(allconditions_cpmodel.U{3},1)*size(test_data_matrix,2),size(test_data_matrix,3));
+trialWeightsOntoTypeFactors=nan(length(whichFactors),size(allconditions_cpmodel.U{3},1)*((size(test_data_matrix,2)/25)*size(test_data_matrix,1)),size(test_data_matrix,3));
+% trialWeightsOntoTypeFactors is in format factor X (trial type X neuron) X trial 
 for i=1:length(whichFactors)
     whichFactor=whichFactors(i);
     temp=allconditions_cpmodel.U{1}; fac1_vec1=temp(:,whichFactor);
@@ -20,7 +22,18 @@ for i=1:length(whichFactors)
     for j=1:size(test_data_matrix,3)
         for k=1:size(fac1,3)
             projected=(test_data_matrix(:,:,j).*fac1(:,:,k))./norm(fac1_ktens);
-            trialWeightsOntoTypeFactors(i,k,j)=projected;
+            % collapse across time but not across neurons
+            % curbloinds=(k-1)*size(test_data_matrix,1)+1:(k-1)*size(test_data_matrix,1)+size(test_data_matrix,1);
+            % trialWeightsOntoTypeFactors(i,curbloinds,j)=nansum(projected,2);
+            % collapse across neurons but not across time
+%             curbloinds=(k-1)*size(test_data_matrix,2)+1:(k-1)*size(test_data_matrix,2)+size(test_data_matrix,2);
+%             trialWeightsOntoTypeFactors(i,curbloinds,j)=nansum(projected,1);
+            % no collapse, retain neurons X time
+            curbloinds=(k-1)*((size(test_data_matrix,2)/25)*size(test_data_matrix,1))+1:(k-1)*((size(test_data_matrix,2)/25)*size(test_data_matrix,1))+((size(test_data_matrix,2)/25)*size(test_data_matrix,1));
+            % down samp
+            projected=downSampMatrix(projected,25);
+            projected=projected';
+            trialWeightsOntoTypeFactors(i,curbloinds,j)=projected(1:end);
 %             ptens=tensor(projected);
 %             T=hosvd(ptens,sqrt(3e-1),'rank',[1 1 1]);
 %             neuron_loadings=T.U{1}./T.core(1,1,1);
