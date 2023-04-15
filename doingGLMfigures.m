@@ -116,6 +116,10 @@ cueXsucc_nama_all_glm_coef=smoothMatrix(nama_all_glm_coef(:,71*6+1:71*6+71),4);
 fail_nama_all_glm_coef=smoothMatrix(nama_all_glm_coef(:,71*4+1:71*4+71)+nama_all_glm_coef(:,71*5+1:71*5+71),4); 
 cueXfail_nama_all_glm_coef=smoothMatrix(nama_all_glm_coef(:,71*7+1:71*7+71)+nama_all_glm_coef(:,71*8+1:71*8+71),4);
 
+% Find cells with all zero coefficients after the outcome
+allg=all_glm_coef(:,71*3+1:71*3+71)+all_glm_coef(:,71*6+1:71*6+71)+all_glm_coef(:,71*4+1:71*4+71)+all_glm_coef(:,71*5+1:71*5+71)+all_glm_coef(:,71*7+1:71*7+71)+all_glm_coef(:,71*8+1:71*8+71);
+allzs=all(allg(:,30:end)==0,2);
+
 % Plot tsne
 % load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\idx_from_glm.mat'); 
 figure(); scatter(Y(idx_from_glm(~isnan(idx_from_glm))==1,1),Y(idx_from_glm(~isnan(idx_from_glm))==1,2),[],cmap(2,:),'filled'); 

@@ -3,7 +3,7 @@ function fixMissGrabDropSuccess(datadir)
 usePrevChewingThresh=true;
 
 ls_base=dir(datadir);
-for mousen=3:length(ls_base)
+for mousen=4:length(ls_base)
     if ~isfolder([ls_base(mousen).folder sep ls_base(mousen).name])
         continue
     end
@@ -103,12 +103,14 @@ function placeForO2data=getPlaceOfO2data(mousename,aviName,datestr)
 switch mousename
     case 'bi_agouti'
         placeForO2data=['Z:\MICROSCOPE\Kim\JuliaG\Behavior Expts\' mousename '\' datestr '\O2 output\' aviName];
+    case 'bi_both'
+        placeForO2data=['Z:\MICROSCOPE\Kim\JuliaG\Behavior Expts\' mousename '\' datestr '\O2 output\' aviName];
     case 'mitch_right'
-%         placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\O2 output\' aviName];
         placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\' aviName];
+%         placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\' aviName];
     case 'mitch_mismatch'
-        placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\' aviName];
-%         placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\analysis\' aviName];
+%         placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\O2 output\' aviName];
+        placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\analysis\' aviName];
     case 'mitch_thin'
 %         placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\O2 output\' aviName];
         placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\' aviName];
@@ -161,10 +163,14 @@ switch mousename
     case 'Oct_0'
         placeForO2data=['Z:\MICROSCOPE\Kim\KER Behavior\By date\Low speed\' datestr '\' mousename '\O2 output\' aviName];
     case '3F_white'
-%         placeForO2data=['Z:\MICROSCOPE\Kim\KER Behavior\By date\Low speed\' datestr '\' mousename '\O2 output\' aviName];
+        placeForO2data=['Z:\MICROSCOPE\Kim\KER Behavior\By date\Low speed\' datestr '\' mousename '\O2 output\' aviName];
 %         placeForO2data=['Z:\MICROSCOPE\Kim\KER Behavior\' mousename '\' datestr '\low speed\O2 output\' aviName];
-        placeForO2data=['Z:\MICROSCOPE\Kim\KER Behavior\' mousename '\' datestr '\O2 output\' aviName];
+%         placeForO2data=['Z:\MICROSCOPE\Kim\KER Behavior\' mousename '\' datestr '\O2 output\' aviName];
 %         placeForO2data=['Z:\MICROSCOPE\Kim\KER Behavior\' mousename '\' datestr '\low speed\' aviName];
+    case '2F_white'
+        placeForO2data=['Z:\MICROSCOPE\Kim\KER Behavior\' mousename '\' datestr '\O2 output\' aviName];
+    case '3F_spot'
+        placeForO2data=['Z:\MICROSCOPE\Kim\KER Behavior\' mousename '\' datestr '\O2 output\' aviName];
     otherwise
         placeForO2data=['Z:\MICROSCOPE\Kim\KER Behavior\By date\Low speed\' datestr '\' mousename '\O2 output\' aviName];
 end

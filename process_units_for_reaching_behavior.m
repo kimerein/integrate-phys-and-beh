@@ -502,14 +502,21 @@ response_to_plot2='uncued_success';
 LDA_analysis(whichSess,downSampBy,takeNPointsAfterEvent,takeNPointsBeforeEvent,response_to_plot1,response_to_plot2,dd,'SVM');
 
 %% Put together tensors
+% load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\combine mat and python glms\consensus_idx_from_glm_when_normByGLMcoefIntegral.mat');
+% load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\unitnames_glm.mat');
+% load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\fromWhichSess_glm.mat');
+% load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\py_all_glm_coef_butIndexedIntoMatCoefs.mat');
+% load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\py_metrics_butIndexedIntoMatCoefs.mat');
+% load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\combine mat and python glms\allZeroCoeffsAfterOutcome.mat');
 whichSess=[81 60 75 5 11 22 31 47 62 63 65 66 67 68 70 82];
 whichSess=[81 75 11 22 47 62 63 65 67 82]; % with some cue responsive neuron(s), e.g., 47
 whichSess=[81 75];
 downSampBy=5; % downsamp 60 ms bins by this much
-takeNPointsAfterEvent=12;
+takeNPointsAfterEvent=15; 
 takeNPointsBeforeEvent=0; %takeNPointsBeforeEvent=10; 
 tensor1=[]; allLabels1=[];
-% whichSess=447;
+whichSess=335; 
+% whichCellTypeToTake=2;
 for i=1:length(whichSess)
     [tensor, allLabels, timepoints_for_tensor]=getTensorsForOneSession(whichSess(i), downSampBy, takeNPointsAfterEvent, takeNPointsBeforeEvent, dd);
     if ~isempty(tensor1)
@@ -518,10 +525,34 @@ for i=1:length(whichSess)
     tensor1=tensor; allLabels1=allLabels;
     close all;
 end
+tensor=tensor1; allLabels=allLabels1;
+% if length(whichSess)==1
+%     % match these neurons to their type classification
+%     currnames=unitnames_glm(fromWhichSess_glm==whichSess);
+%     if length(currnames)==size(tensor,1)
+%         % neurons match
+%         tensor=tensor(idx_from_glm(fromWhichSess_glm==whichSess)==whichCellTypeToTake,:,:);
+% %         tensorPart1=nanmean(tensor(idx_from_glm(fromWhichSess_glm==whichSess)==1,:,:),1);
+% %         tensorPart2=nanmean(tensor(idx_from_glm(fromWhichSess_glm==whichSess)==2,:,:),1);
+% %         tensor=cat(1,tensorPart1,tensorPart2);
+%     else
+%         error('neurons do not match');
+%     end
+% end
 disp(size(tensor))
-save(['C:\Users\sabatini\Documents\tensor.mat'],'tensor');
-save(['C:\Users\sabatini\Documents\allLabels.mat'],'allLabels');
-save(['C:\Users\sabatini\Documents\timepoints_for_tensor.mat'],'timepoints_for_tensor');
+save(['C:\Users\sabatini\Documents\currtens\tensor.mat'],'tensor');
+save(['C:\Users\sabatini\Documents\currtens\allLabels.mat'],'allLabels');
+save(['C:\Users\sabatini\Documents\currtens\timepoints_for_tensor.mat'],'timepoints_for_tensor');
+
+%% Project single session tensor onto best TCA
+TCAtooktimeafterzero=450*0.01; 
+% interpolate current tensor to match TCA times, second dimension is time
+for i=1:size(tensor,1)
+    for j=1:size(tensor,3)
+        interptens(i,:,j)=interp1(timepoints_for_tensor,tensor(i,:,j),linspace(0,TCAtooktimeafterzero,450));
+    end
+end
+trialWeightsOntoTypeTimeFactors=projectOntoCPdecomp('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\TCA decomp using GLM training set\allconditions_cpmodel.mat',interptens,[1 2 3 4 5 6]);
 
 %% GLM analysis
 for i=446:450 %407:450 %351:381 %441:450
