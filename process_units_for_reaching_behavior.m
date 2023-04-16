@@ -537,10 +537,10 @@ if length(whichSess)==1
     currnames=unitnames_glm(fromWhichSess_glm==whichSess);
     if length(currnames)==size(tensor,1)
         % neurons match
-        tensor=tensor(ismember(idx_from_glm(fromWhichSess_glm==whichSess),whichCellTypeToTake),:,:);
-%         tensorPart1=nanmean(tensor(idx_from_glm(fromWhichSess_glm==whichSess)==1,:,:),1);
-%         tensorPart2=nanmean(tensor(idx_from_glm(fromWhichSess_glm==whichSess)==2,:,:),1);
-%         tensor=cat(1,tensorPart1,tensorPart2);
+%         tensor=tensor(ismember(idx_from_glm(fromWhichSess_glm==whichSess),whichCellTypeToTake),:,:);
+        tensorPart1=nanmean(tensor(idx_from_glm(fromWhichSess_glm==whichSess)==1,:,:),1);
+        tensorPart2=nanmean(tensor(idx_from_glm(fromWhichSess_glm==whichSess)==2,:,:),1);
+        tensor=cat(1,tensorPart1,tensorPart2);
     else
         disp(['length of currnames: ' num2str(length(currnames))]);
         disp(['length of neurons in tensor: ' num2str(size(tensor,1))]);
@@ -554,6 +554,7 @@ disp(['Neurons of selected type: ' num2str(size(tensor,1))]);
 cueco=nansum(py_all_glm_coef(:,[19:22]),2); % look for greater than 2
 disp([max(cueco(fromWhichSess_glm==whichSess))]);
 disp([cueco(fromWhichSess_glm==whichSess) py_metrics.cuecoef_over1sec(fromWhichSess_glm==whichSess) idx_from_glm(fromWhichSess_glm==whichSess)]);
+save(['C:\Users\sabatini\Documents\currtens\tensor.mat'],'tensor');
 
 %% Project single session tensor onto best TCA
 TCAtooktimeafterzero=450*0.01; 

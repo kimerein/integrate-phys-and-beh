@@ -1,12 +1,13 @@
 function trialWeightsOntoTypeFactors=projectOntoCPdecomp(loc,test_data_matrix,whichFactors)
 
+dsby=150;
 % test_data_matrix must be in format neurons X times X trials
 
 % load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\CP model\allconditions_cpmodel.mat');
 load(loc);
 % trialWeightsOntoTypeFactors=nan(length(whichFactors),size(allconditions_cpmodel.U{3},1)*size(test_data_matrix,1),size(test_data_matrix,3));
 % trialWeightsOntoTypeFactors=nan(length(whichFactors),size(allconditions_cpmodel.U{3},1)*size(test_data_matrix,2),size(test_data_matrix,3));
-trialWeightsOntoTypeFactors=nan(length(whichFactors),size(allconditions_cpmodel.U{3},1)*((size(test_data_matrix,2)/25)*size(test_data_matrix,1)),size(test_data_matrix,3));
+trialWeightsOntoTypeFactors=nan(length(whichFactors),size(allconditions_cpmodel.U{3},1)*((size(test_data_matrix,2)/dsby)*size(test_data_matrix,1)),size(test_data_matrix,3));
 % trialWeightsOntoTypeFactors is in format factor X (trial type X neuron) X trial 
 for i=1:length(whichFactors)
     whichFactor=whichFactors(i);
@@ -29,9 +30,9 @@ for i=1:length(whichFactors)
 %             curbloinds=(k-1)*size(test_data_matrix,2)+1:(k-1)*size(test_data_matrix,2)+size(test_data_matrix,2);
 %             trialWeightsOntoTypeFactors(i,curbloinds,j)=nansum(projected,1);
             % no collapse, retain neurons X time
-            curbloinds=(k-1)*((size(test_data_matrix,2)/25)*size(test_data_matrix,1))+1:(k-1)*((size(test_data_matrix,2)/25)*size(test_data_matrix,1))+((size(test_data_matrix,2)/25)*size(test_data_matrix,1));
+            curbloinds=(k-1)*((size(test_data_matrix,2)/dsby)*size(test_data_matrix,1))+1:(k-1)*((size(test_data_matrix,2)/dsby)*size(test_data_matrix,1))+((size(test_data_matrix,2)/dsby)*size(test_data_matrix,1));
             % down samp
-            projected=downSampMatrix(projected,25);
+            projected=downSampMatrix(projected,dsby);
             projected=projected';
             trialWeightsOntoTypeFactors(i,curbloinds,j)=projected(1:end);
 %             ptens=tensor(projected);
