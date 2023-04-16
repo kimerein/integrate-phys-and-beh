@@ -8,8 +8,8 @@ disp('Uncued grp 2 cells');
 
 timebin1=[0 8*0.06*5]; % in secs
 timebin2=[8*0.06*5 18*0.06*5]; % in secs
-timebin3=[8*0.06*5 18*0.06*5]; % in secs
-overweightCueNeurons=10;
+timebin3=[5*0.06*5 18*0.06*5]; % in secs
+overweightCueNeurons=1;
 
 % Fill nans w zeros
 tensor(isnan(tensor))=0;
@@ -28,11 +28,16 @@ cue_axis_vals=cue_axis_vals_part1-cue_axis_vals_part2;
 % Get outcome axis values
 out_axis_vals=mean(mean(tensor([1 3],indbin3,:),1,'omitnan'),2,'omitnan')-mean(mean(tensor([2 4],indbin3,:),1,'omitnan'),2,'omitnan');
 
-% Remove outliers
-% [~,rm1]=rmoutliers(squeeze(cue_axis_vals),"mean","ThresholdFactor",4);
-% [~,rm2]=rmoutliers(squeeze(out_axis_vals),"mean","ThresholdFactor",4);
-% cue_axis_vals(rm1==1 | rm2==1)=0;
-% out_axis_vals(rm1==1 | rm2==1)=0;
+% % % Drop zeros trials, assumption is that when all cells don't spike, we have no info
+todrop=abs(out_axis_vals)<0.1 | abs(cue_axis_vals)<0.1;
+% % % Remove outliers
+% % [~,rm1]=rmoutliers(squeeze(cue_axis_vals),"median","ThresholdFactor",4);
+% % [~,rm2]=rmoutliers(squeeze(out_axis_vals),"median","ThresholdFactor",4);
+% % todrop(rm1)=1; todrop(rm2)=1;
+% % % Drop
+cue_axis_vals=cue_axis_vals(:,:,todrop==0);
+out_axis_vals=out_axis_vals(:,:,todrop==0);
+allLabels=allLabels(todrop==0);
 
 % Demix
 [U,S,V]=svd([squeeze(out_axis_vals) squeeze(cue_axis_vals)]);
@@ -55,7 +60,7 @@ projXaxis_ontoS1=example_vec_outPos.*V(:,1);
 projXaxis_ontoS2=example_vec_outPos.*V(:,2);
 projYaxis_ontoS1=example_vec_cuePos.*V(:,1);
 projYaxis_ontoS2=example_vec_cuePos.*V(:,2);
-if abs(projXaxis_ontoS1(1))>abs(projXaxis_ontoS2(1)) % outcome corresponds more to SV1 direction
+if abs(V(2,1))<=abs(V(1,1)) % SV1 is X axis
     % good, leave alone
     if projXaxis_ontoS1(1)>0 % good, leave alone
     else
@@ -65,7 +70,7 @@ if abs(projXaxis_ontoS1(1))>abs(projXaxis_ontoS2(1)) % outcome corresponds more 
     else
         cue_axis_vals=-cue_axis_vals; % flip
     end
-else % outcome corresponds more to SV2 direction
+else % SV1 is Y axis
     % exchange X and Y for plot
     temp=cue_axis_vals;
     cue_axis_vals=out_axis_vals;
@@ -86,10 +91,28 @@ figure();
 unique_allLabels=unique(allLabels);
 meanOfAll=[nanmean(squeeze(out_axis_vals(:,:,:))) nanmean(squeeze(cue_axis_vals(:,:,:)))];
 for i=1:length(unique_allLabels)
-    scatter(squeeze(out_axis_vals(:,:,allLabels==unique_allLabels(i))),squeeze(cue_axis_vals(:,:,allLabels==unique_allLabels(i))),[],c{i}); hold on;
+    r=rand(size(squeeze(out_axis_vals(:,:,allLabels==unique_allLabels(i)))))*0.2;
+    scatter(squeeze(out_axis_vals(:,:,allLabels==unique_allLabels(i)))+r,squeeze(cue_axis_vals(:,:,allLabels==unique_allLabels(i)))+r,[],c{i}); hold on;
     scatter(nanmean(squeeze(out_axis_vals(:,:,allLabels==unique_allLabels(i)))),nanmean(squeeze(cue_axis_vals(:,:,allLabels==unique_allLabels(i)))),[],c{i},'filled');
     line([meanOfAll(1) nanmean(squeeze(out_axis_vals(:,:,allLabels==unique_allLabels(i))))],[meanOfAll(2) nanmean(squeeze(cue_axis_vals(:,:,allLabels==unique_allLabels(i))))],'LineWidth',2,'Color',c{i});
 end
+xlabel('Outcome axis'); ylabel('Cue axis');
+legend({'cued succ','','','uncued succ','','','cued fail','','','uncued fail','',''});
+
+% Plot trial label shuffle
+c{1}='b'; c{2}='g'; c{3}='r'; c{4}='k';
+figure();
+unique_allLabels=unique(allLabels);
+meanOfAll=[nanmean(squeeze(out_axis_vals(:,:,:))) nanmean(squeeze(cue_axis_vals(:,:,:)))];
+backup_allLabels=allLabels;
+allLabels=allLabels(randperm(length(allLabels)));
+for i=1:length(unique_allLabels)
+    r=rand(size(squeeze(out_axis_vals(:,:,allLabels==unique_allLabels(i)))))*0.2;
+    scatter(squeeze(out_axis_vals(:,:,allLabels==unique_allLabels(i)))+r,squeeze(cue_axis_vals(:,:,allLabels==unique_allLabels(i)))+r,[],c{i}); hold on;
+    scatter(nanmean(squeeze(out_axis_vals(:,:,allLabels==unique_allLabels(i)))),nanmean(squeeze(cue_axis_vals(:,:,allLabels==unique_allLabels(i)))),[],c{i},'filled');
+    line([meanOfAll(1) nanmean(squeeze(out_axis_vals(:,:,allLabels==unique_allLabels(i))))],[meanOfAll(2) nanmean(squeeze(cue_axis_vals(:,:,allLabels==unique_allLabels(i))))],'LineWidth',2,'Color',c{i});
+end
+title('TRIAL LABEL SHUFFLE');
 xlabel('Outcome axis'); ylabel('Cue axis');
 legend({'cued succ','','','uncued succ','','','cued fail','','','uncued fail','',''});
 
