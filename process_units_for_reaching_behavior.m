@@ -509,7 +509,7 @@ downSampBy=5; % downsamp 60 ms bins by this much
 takeNPointsAfterEvent=15; 
 takeNPointsBeforeEvent=0; %takeNPointsBeforeEvent=10; 
 tensor1=[]; allLabels1=[];
-whichSess=351; %335; 
+whichSess=354; %335; 
 for i=1:length(whichSess)
     [tensor, allLabels, timepoints_for_tensor]=getTensorsForOneSession(whichSess(i), downSampBy, takeNPointsAfterEvent, takeNPointsBeforeEvent, dd);
     if ~isempty(tensor1)
@@ -541,12 +541,14 @@ if length(whichSess)==1
         tensorPart1=nanmean(tensor(idx_from_glm(fromWhichSess_glm==whichSess)==1,:,:),1);
         tensorPart2=nanmean(tensor(idx_from_glm(fromWhichSess_glm==whichSess)==2,:,:),1);
         tensor=cat(1,tensorPart1,tensorPart2);
+%         morefortensor=cat(1,tensorPart1,tensorPart2);
+%         tensor=cat(1,tensor,morefortensor);
     else
         disp(['length of currnames: ' num2str(length(currnames))]);
         disp(['length of neurons in tensor: ' num2str(size(tensor,1))]);
         error('neurons do not match');
         disp(currnames);
-        whichToTake=[1 0 1 1 0 0 0 1 1 0 1 1 1 0 0 1 1 1 1 1 1 1 1];
+        whichToTake=[0 0 0 1 1 1 1 1 0 1 0 0 1 1 1 1];
         tensor=tensor(whichToTake==1,:,:);
     end
 end

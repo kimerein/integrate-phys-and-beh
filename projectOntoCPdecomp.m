@@ -1,6 +1,6 @@
 function trialWeightsOntoTypeFactors=projectOntoCPdecomp(loc,test_data_matrix,whichFactors)
 
-dsby=150;
+dsby=50;
 % test_data_matrix must be in format neurons X times X trials
 
 % load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\CP model\allconditions_cpmodel.mat');
