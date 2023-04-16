@@ -546,13 +546,20 @@ if length(whichSess)==1
         tensor=[tensorPart1; tensorPart2; tensorPart3; tensorPart4];
 %         morefortensor=cat(1,tensorPart1,tensorPart2);
 %         tensor=cat(1,tensor,morefortensor);
-        % Plot trial type decode
+        trialTypeDecode(tensor,allLabels,timepoints_for_tensor); % Plot trial type decode
+    elseif length(currnames)<size(tensor,1)
+        disp(['length of currnames: ' num2str(length(currnames))]);
+        disp(['length of neurons in tensor: ' num2str(size(tensor,1))]);
+        %error('neurons do not match');
+        disp('Cutting tensor');
+        %disp(currnames); 
+        temp=table2cell(readtable('C:\Users\sabatini\Documents\currtens\tens_unit_names.csv','Format','%s','Delimiter', ',', 'HeaderLines', 0, 'ReadVariableNames', true));
+        whichToTake=matchUpNames(temp,currnames);
+        tensor=tensor(whichToTake==1,:,:);
     else
         disp(['length of currnames: ' num2str(length(currnames))]);
         disp(['length of neurons in tensor: ' num2str(size(tensor,1))]);
-        error('neurons do not match');
-        disp(currnames); %whichToTake=matchUpNames(temp,currnames);
-        tensor=tensor(whichToTake==1,:,:);
+        disp('Not a match');
     end
 end
 disp(['Neurons of selected type: ' num2str(size(tensor,1))]);
