@@ -103,8 +103,10 @@ for i=1:size(temp,1)
     % realign to this
     shiftBy(i)=f-ma; % if positive, will shift backwards, else will shift forward in time
 end
-% shift all fields
-f=fieldnames(alltbt);
+% shift all relevant fields
+f={'all_reachBatch','cue','isChewing','isHold','movie_distractor','optoOn','optoZone','pawOnWheel','pelletPresent','pelletmissingreach_reachStarts',...
+   'reachBatch_all_pawOnWheel','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','reachBatch_success_reachStarts','reachStarts',...
+   'reachStarts_pelletPresent'};
 for i=1:length(f)
     temp=alltbt.(f{i});
     for j=1:size(temp,1)
