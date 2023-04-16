@@ -1,4 +1,4 @@
-function trialTypeDecode(tensor,allLabels,timepoints_for_tensor)
+function [meanOfAll,meanReal,meanShuffle]=trialTypeDecode(tensor,allLabels,timepoints_for_tensor)
 
 disp(['Rows of tensor must be ']);
 disp('Cued grp 1 cells');
@@ -10,6 +10,7 @@ timebin1=[0 8*0.06*5]; % in secs
 timebin2=[8*0.06*5 18*0.06*5]; % in secs
 timebin3=[5*0.06*5 18*0.06*5]; % in secs
 overweightCueNeurons=1;
+dropZeros=false;
 
 % Fill nans w zeros
 tensor(isnan(tensor))=0;
@@ -28,16 +29,59 @@ cue_axis_vals=cue_axis_vals_part1-cue_axis_vals_part2;
 % Get outcome axis values
 out_axis_vals=mean(mean(tensor([1 3],indbin3,:),1,'omitnan'),2,'omitnan')-mean(mean(tensor([2 4],indbin3,:),1,'omitnan'),2,'omitnan');
 
-% % % Drop zeros trials, assumption is that when all cells don't spike, we have no info
-todrop=abs(out_axis_vals)<0.1 | abs(cue_axis_vals)<0.1;
-% % % Remove outliers
-% % [~,rm1]=rmoutliers(squeeze(cue_axis_vals),"median","ThresholdFactor",4);
-% % [~,rm2]=rmoutliers(squeeze(out_axis_vals),"median","ThresholdFactor",4);
-% % todrop(rm1)=1; todrop(rm2)=1;
-% % % Drop
-cue_axis_vals=cue_axis_vals(:,:,todrop==0);
-out_axis_vals=out_axis_vals(:,:,todrop==0);
-allLabels=allLabels(todrop==0);
+if dropZeros==true
+    % % % Drop zeros trials, assumption is that when all cells don't spike, we have no info
+    todrop=abs(out_axis_vals)<0.1 | abs(cue_axis_vals)<0.1;
+    % % % Remove outliers
+    % % [~,rm1]=rmoutliers(squeeze(cue_axis_vals),"median","ThresholdFactor",4);
+    % % [~,rm2]=rmoutliers(squeeze(out_axis_vals),"median","ThresholdFactor",4);
+    % % todrop(rm1)=1; todrop(rm2)=1;
+    % % % Drop
+    cue_axis_vals=cue_axis_vals(:,:,todrop==0);
+    out_axis_vals=out_axis_vals(:,:,todrop==0);
+    allLabels=allLabels(todrop==0);
+end
+
+% Plot
+c{1}='b'; c{2}='g'; c{3}='r'; c{4}='k';
+figure(); subplot(1,2,1);
+unique_allLabels=unique(allLabels);
+meanOfAll=[nanmean(squeeze(out_axis_vals(:,:,:))) nanmean(squeeze(cue_axis_vals(:,:,:)))];
+for i=1:length(unique_allLabels)
+    r=rand(size(squeeze(out_axis_vals(:,:,allLabels==unique_allLabels(i)))))*0.2;
+    scatter(squeeze(out_axis_vals(:,:,allLabels==unique_allLabels(i)))+r,squeeze(cue_axis_vals(:,:,allLabels==unique_allLabels(i)))+r,[],c{i}); hold on;
+    me_x=nanmean(squeeze(out_axis_vals(:,:,allLabels==unique_allLabels(i))));
+    me_y=nanmean(squeeze(cue_axis_vals(:,:,allLabels==unique_allLabels(i))));
+    scatter(me_x,me_y,[],c{i},'filled');
+    line([meanOfAll(1) nanmean(squeeze(out_axis_vals(:,:,allLabels==unique_allLabels(i))))],[meanOfAll(2) nanmean(squeeze(cue_axis_vals(:,:,allLabels==unique_allLabels(i))))],'LineWidth',2,'Color',c{i});
+end
+meanReal=[me_x me_y];
+xlabel('Outcome axis'); ylabel('Cue axis');
+legend({'cued succ','','','uncued succ','','','cued fail','','','uncued fail','',''});
+title('BEFORE DEMIX');
+
+% Plot trial label shuffle
+c{1}='b'; c{2}='g'; c{3}='r'; c{4}='k';
+subplot(1,2,2);
+unique_allLabels=unique(allLabels);
+meanOfAll=[nanmean(squeeze(out_axis_vals(:,:,:))) nanmean(squeeze(cue_axis_vals(:,:,:)))];
+backup_allLabels=allLabels;
+allLabels=allLabels(randperm(length(allLabels)));
+for i=1:length(unique_allLabels)
+    r=rand(size(squeeze(out_axis_vals(:,:,allLabels==unique_allLabels(i)))))*0.2;
+    scatter(squeeze(out_axis_vals(:,:,allLabels==unique_allLabels(i)))+r,squeeze(cue_axis_vals(:,:,allLabels==unique_allLabels(i)))+r,[],c{i}); hold on;
+    meShuffle_x=nanmean(squeeze(out_axis_vals(:,:,allLabels==unique_allLabels(i))));
+    meShuffle_y=nanmean(squeeze(cue_axis_vals(:,:,allLabels==unique_allLabels(i))));
+    scatter(meShuffle_x,meShuffle_y,[],c{i},'filled');
+    line([meanOfAll(1) nanmean(squeeze(out_axis_vals(:,:,allLabels==unique_allLabels(i))))],[meanOfAll(2) nanmean(squeeze(cue_axis_vals(:,:,allLabels==unique_allLabels(i))))],'LineWidth',2,'Color',c{i});
+end
+title('TRIAL LABEL SHUFFLE BEFORE DEMIX');
+xlabel('Outcome axis'); ylabel('Cue axis');
+legend({'cued succ','','','uncued succ','','','cued fail','','','uncued fail','',''});
+allLabels=backup_allLabels;
+meanShuffle=[meShuffle_x meShuffle_y];
+
+return
 
 % Demix
 [U,S,V]=svd([squeeze(out_axis_vals) squeeze(cue_axis_vals)]);

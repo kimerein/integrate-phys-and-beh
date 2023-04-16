@@ -509,7 +509,7 @@ downSampBy=5; % downsamp 60 ms bins by this much
 takeNPointsAfterEvent=17; 
 takeNPointsBeforeEvent=0; %takeNPointsBeforeEvent=10; 
 tensor1=[]; allLabels1=[];
-whichSess=368; %335; 
+whichSess=371; %335; 
 for i=1:length(whichSess)
     [tensor, allLabels, timepoints_for_tensor]=getTensorsForOneSession(whichSess(i), downSampBy, takeNPointsAfterEvent, takeNPointsBeforeEvent, dd);
     if ~isempty(tensor1)
@@ -551,7 +551,7 @@ if length(whichSess)==1
         figure(); imagesc(nanmean(tensor(:,:,allLabels==1),3)); title('uncued success');
         figure(); imagesc(nanmean(tensor(:,:,allLabels==2),3)); title('cued failure');
         figure(); imagesc(nanmean(tensor(:,:,allLabels==3),3)); title('uncued failure');
-        trialTypeDecode(tensor,allLabels,timepoints_for_tensor); % Plot trial type decode
+        [meanOfAll,meanReal,meanShuffle]=trialTypeDecode(tensor,allLabels,timepoints_for_tensor); % Plot trial type decode
     elseif length(currnames)<size(tensor,1)
         disp(['length of currnames: ' num2str(length(currnames))]);
         disp(['length of neurons in tensor: ' num2str(size(tensor,1))]);
