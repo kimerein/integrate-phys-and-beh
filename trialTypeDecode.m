@@ -8,7 +8,10 @@ disp('Uncued grp 2 cells');
 
 timebin1=[0 8*0.06*5]; % in secs
 timebin2=[8*0.06*5 18*0.06*5]; % in secs
-timebin3=[3.5*0.06*5 18*0.06*5]; % in secs
+timebin3=[8*0.06*5 18*0.06*5]; % in secs
+
+% Fill nans w zeros
+tensor(isnan(tensor))=0;
 
 % Get inds in tensor corresponding to these time bins
 indbin1=find(timepoints_for_tensor>=timebin1(1),1,'first'):find(timepoints_for_tensor<=timebin1(2),1,'last');
@@ -28,8 +31,13 @@ out_axis_vals=mean(mean(tensor([1 3],indbin3,:),1,'omitnan'),2,'omitnan')-mean(m
 c{1}='b'; c{2}='g'; c{3}='r'; c{4}='m';
 figure();
 unique_allLabels=unique(allLabels);
+meanOfAll=[nanmean(squeeze(out_axis_vals(:,:,:))) nanmean(squeeze(cue_axis_vals(:,:,:)))];
 for i=1:length(unique_allLabels)
-    scatter(squeeze(out_axis_vals(:,:,allLabels==unique_allLabels(i))),squeeze(cue_axis_vals(:,:,allLabels==unique_allLabels(i))),[],c{i},'filled'); hold on;
+    scatter(squeeze(out_axis_vals(:,:,allLabels==unique_allLabels(i))),squeeze(cue_axis_vals(:,:,allLabels==unique_allLabels(i))),[],c{i}); hold on;
+    scatter(nanmean(squeeze(out_axis_vals(:,:,allLabels==unique_allLabels(i)))),nanmean(squeeze(cue_axis_vals(:,:,allLabels==unique_allLabels(i)))),[],c{i},'filled');
+    line([meanOfAll(1) nanmean(squeeze(out_axis_vals(:,:,allLabels==unique_allLabels(i))))],[meanOfAll(2) nanmean(squeeze(cue_axis_vals(:,:,allLabels==unique_allLabels(i))))],'LineWidth',2,'Color',c{i});
 end
+xlabel('Outcome axis'); ylabel('Cue axis');
+legend({'cued succ','','','uncued succ','','','cued fail','','','uncued fail','',''});
 
 end

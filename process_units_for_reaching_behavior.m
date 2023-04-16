@@ -509,7 +509,7 @@ downSampBy=5; % downsamp 60 ms bins by this much
 takeNPointsAfterEvent=17; 
 takeNPointsBeforeEvent=0; %takeNPointsBeforeEvent=10; 
 tensor1=[]; allLabels1=[];
-whichSess=363; %335; 
+whichSess=364; %335; 
 for i=1:length(whichSess)
     [tensor, allLabels, timepoints_for_tensor]=getTensorsForOneSession(whichSess(i), downSampBy, takeNPointsAfterEvent, takeNPointsBeforeEvent, dd);
     if ~isempty(tensor1)
@@ -546,11 +546,15 @@ if length(whichSess)==1
         tensor=[tensorPart1; tensorPart2; tensorPart3; tensorPart4];
 %         morefortensor=cat(1,tensorPart1,tensorPart2);
 %         tensor=cat(1,tensor,morefortensor);
+        figure(); imagesc(nanmean(tensor(:,:,allLabels==0),3)); title('cued success');
+        figure(); imagesc(nanmean(tensor(:,:,allLabels==1),3)); title('uncued success');
+        figure(); imagesc(nanmean(tensor(:,:,allLabels==2),3)); title('cued failure');
+        figure(); imagesc(nanmean(tensor(:,:,allLabels==3),3)); title('uncued failure');
         trialTypeDecode(tensor,allLabels,timepoints_for_tensor); % Plot trial type decode
     elseif length(currnames)<size(tensor,1)
         disp(['length of currnames: ' num2str(length(currnames))]);
         disp(['length of neurons in tensor: ' num2str(size(tensor,1))]);
-        %error('neurons do not match');
+        error('neurons do not match');
         disp('Cutting tensor');
         %disp(currnames); 
         temp=table2cell(readtable('C:\Users\sabatini\Documents\currtens\tens_unit_names.csv','Format','%s','Delimiter', ',', 'HeaderLines', 0, 'ReadVariableNames', true));
