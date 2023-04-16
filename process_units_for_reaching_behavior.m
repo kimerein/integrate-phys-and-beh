@@ -509,7 +509,7 @@ downSampBy=5; % downsamp 60 ms bins by this much
 takeNPointsAfterEvent=17; 
 takeNPointsBeforeEvent=0; %takeNPointsBeforeEvent=10; 
 tensor1=[]; allLabels1=[];
-whichSess=364; %335; 
+whichSess=366; %335; 
 for i=1:length(whichSess)
     [tensor, allLabels, timepoints_for_tensor]=getTensorsForOneSession(whichSess(i), downSampBy, takeNPointsAfterEvent, takeNPointsBeforeEvent, dd);
     if ~isempty(tensor1)
@@ -538,10 +538,11 @@ if length(whichSess)==1
     if length(currnames)==size(tensor,1)
         % neurons match
 %         tensor=tensor(ismember(idx_from_glm(fromWhichSess_glm==whichSess),whichCellTypeToTake),:,:);
-        tensorPart1=nanmean(tensor(idx_from_glm(fromWhichSess_glm==whichSess)==1 & cueco(fromWhichSess_glm==whichSess)>2,:,:),1);
-        tensorPart2=nanmean(tensor(idx_from_glm(fromWhichSess_glm==whichSess)==2 & cueco(fromWhichSess_glm==whichSess)>2,:,:),1);
-        tensorPart3=nanmean(tensor(idx_from_glm(fromWhichSess_glm==whichSess)==1 & cueco(fromWhichSess_glm==whichSess)<=2,:,:),1);
-        tensorPart4=nanmean(tensor(idx_from_glm(fromWhichSess_glm==whichSess)==2 & cueco(fromWhichSess_glm==whichSess)<=2,:,:),1);
+        cuethresh=1;
+        tensorPart1=nanmean(tensor(idx_from_glm(fromWhichSess_glm==whichSess)==1 & cueco(fromWhichSess_glm==whichSess)>cuethresh,:,:),1);
+        tensorPart2=nanmean(tensor(idx_from_glm(fromWhichSess_glm==whichSess)==2 & cueco(fromWhichSess_glm==whichSess)>cuethresh,:,:),1);
+        tensorPart3=nanmean(tensor(idx_from_glm(fromWhichSess_glm==whichSess)==1 & cueco(fromWhichSess_glm==whichSess)<=cuethresh,:,:),1);
+        tensorPart4=nanmean(tensor(idx_from_glm(fromWhichSess_glm==whichSess)==2 & cueco(fromWhichSess_glm==whichSess)<=cuethresh,:,:),1);
 %         tensor=cat(1,tensorPart1,tensorPart2);
         tensor=[tensorPart1; tensorPart2; tensorPart3; tensorPart4];
 %         morefortensor=cat(1,tensorPart1,tensorPart2);
