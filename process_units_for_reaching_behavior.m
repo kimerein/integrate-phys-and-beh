@@ -506,10 +506,10 @@ whichSess=[81 60 75 5 11 22 31 47 62 63 65 66 67 68 70 82];
 whichSess=[81 75 11 22 47 62 63 65 67 82]; % with some cue responsive neuron(s), e.g., 47
 whichSess=[81 75];
 downSampBy=5; % downsamp 60 ms bins by this much
-takeNPointsAfterEvent=15; 
+takeNPointsAfterEvent=17; 
 takeNPointsBeforeEvent=0; %takeNPointsBeforeEvent=10; 
 tensor1=[]; allLabels1=[];
-whichSess=361; %335; 
+whichSess=363; %335; 
 for i=1:length(whichSess)
     [tensor, allLabels, timepoints_for_tensor]=getTensorsForOneSession(whichSess(i), downSampBy, takeNPointsAfterEvent, takeNPointsBeforeEvent, dd);
     if ~isempty(tensor1)
@@ -538,17 +538,20 @@ if length(whichSess)==1
     if length(currnames)==size(tensor,1)
         % neurons match
 %         tensor=tensor(ismember(idx_from_glm(fromWhichSess_glm==whichSess),whichCellTypeToTake),:,:);
-        tensorPart1=nanmean(tensor(idx_from_glm(fromWhichSess_glm==whichSess)==1,:,:),1);
-        tensorPart2=nanmean(tensor(idx_from_glm(fromWhichSess_glm==whichSess)==2,:,:),1);
-        tensor=cat(1,tensorPart1,tensorPart2);
+        tensorPart1=nanmean(tensor(idx_from_glm(fromWhichSess_glm==whichSess)==1 & cueco(fromWhichSess_glm==whichSess)>2,:,:),1);
+        tensorPart2=nanmean(tensor(idx_from_glm(fromWhichSess_glm==whichSess)==2 & cueco(fromWhichSess_glm==whichSess)>2,:,:),1);
+        tensorPart3=nanmean(tensor(idx_from_glm(fromWhichSess_glm==whichSess)==1 & cueco(fromWhichSess_glm==whichSess)<=2,:,:),1);
+        tensorPart4=nanmean(tensor(idx_from_glm(fromWhichSess_glm==whichSess)==2 & cueco(fromWhichSess_glm==whichSess)<=2,:,:),1);
+%         tensor=cat(1,tensorPart1,tensorPart2);
+        tensor=[tensorPart1; tensorPart2; tensorPart3; tensorPart4];
 %         morefortensor=cat(1,tensorPart1,tensorPart2);
 %         tensor=cat(1,tensor,morefortensor);
+        % Plot trial type decode
     else
         disp(['length of currnames: ' num2str(length(currnames))]);
         disp(['length of neurons in tensor: ' num2str(size(tensor,1))]);
         error('neurons do not match');
-        disp(currnames);
-        whichToTake=[0 0 0 1 1 1 1 1 0 1 0 0 1 1 1 1];
+        disp(currnames); %whichToTake=matchUpNames(temp,currnames);
         tensor=tensor(whichToTake==1,:,:);
     end
 end
