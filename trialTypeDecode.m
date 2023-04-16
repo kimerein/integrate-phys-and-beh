@@ -49,8 +49,8 @@ end
 % To orient in consistent way across sessions, project example vecs
 % This does nothing to the data, just changes axis labels and produces
 % consistent plot orientation
-example_vec_outPos=[1 0]; % x axis of input was outcome, y axis of input was cue
-example_vec_cuePos=[0 1];
+example_vec_outPos=[1 0]'; % x axis of input was outcome, y axis of input was cue
+example_vec_cuePos=[0 1]';
 projXaxis_ontoS1=example_vec_outPos.*V(:,1);
 projXaxis_ontoS2=example_vec_outPos.*V(:,2);
 projYaxis_ontoS1=example_vec_cuePos.*V(:,1);
@@ -62,6 +62,7 @@ if abs(projXaxis_ontoS1(1))>abs(projXaxis_ontoS2(1)) % outcome corresponds more 
         out_axis_vals=-out_axis_vals; % flip
     end
     if projYaxis_ontoS2(2)>0 % good, leave alone
+    else
         cue_axis_vals=-cue_axis_vals; % flip
     end
 else % outcome corresponds more to SV2 direction
