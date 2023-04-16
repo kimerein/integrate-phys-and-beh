@@ -39,7 +39,8 @@ for i=1:length(u)
     [alltbt,trialTypes,metadata,tookThese]=filtTbt(alltbt,trialTypes,tbt_filter.sortField,tbt_filter.range_values,metadata,tbt_filter.clock_progress);
     
     % get dprimes for this mouse
-    [isreaching_out,dprimes]=getCuedResponseVsSuppression(alltbt,metadata,trialTypes,'cueZone_onVoff','all_reachBatch',[],1,0,1.5,false,0);
+    settingsForDp=settingsForDprimes(alltbt,'cueZone_onVoff',false);
+    [isreaching_out,dprimes]=getCuedResponseVsSuppression(alltbt,metadata,trialTypes,'cueZone_onVoff','all_reachBatch',[],1,settingsForDp.reachAfterCueWindow_start,settingsForDp.reachAfterCueWindow_end,false,0);
     [metadata,alltbt,trialTypes]=add_dprimes_to_tbt(alltbt,trialTypes,metadata,dprimes);
     
     % add back to multi-mouse alltbt

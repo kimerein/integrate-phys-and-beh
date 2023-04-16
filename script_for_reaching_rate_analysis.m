@@ -6,9 +6,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt15Apr2023192314\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt16Apr2023134158\'; % directory containing experimental data
 behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log - Slimmed down table.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt15Apr2023192314\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt16Apr2023134158\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -18,7 +18,7 @@ end
 
 % only load these fields of alltbt
 disp('loading alltbt');
-whichFieldsToLoad={'cue','all_reachBatch','cueZone_onVoff','dprimes','isChewing','isHold','optoOn','optoZone','pawOnWheel','pelletPresent','reachBatch_all_pawOnWheel','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','reachBatch_success_reachStarts','reachStarts','pelletmissingreach_reachStarts','reachStarts_pelletPresent','times','times_wrt_trial_start','timesFromSessionStart'};
+whichFieldsToLoad={'cue','all_reachBatch','cueZone_onVoff','dprimes','isChewing','isHold','optoOn','optoZone','pawOnWheel','pelletPresent','reachBatch_all_pawOnWheel','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','reachBatch_success_reachStarts','reachStarts','pelletmissingreach_reachStarts','reachStarts_pelletPresent','times','times_wrt_trial_start','timesFromSessionStart','movie_distractor'};
 alltbt=loadStructFieldByField([exptDataDir sprtr 'alltbt'],whichFieldsToLoad); % load alltbt
 disp('loading out');
 trialTypes=loadStructFieldByField([exptDataDir sprtr 'out']); % load out
@@ -71,8 +71,10 @@ for i=1:length(u)
 end
 
 % Optional: dprimes for each mouse, each session
+settingsForDprimes(alltbt,'cueZone_onVoff',true); % Check settings in settingsForDprimes
 [alltbt,trialTypes,metadata]=get_dprime_per_mouse(alltbt,trialTypes,metadata);
-alltbt.dprimes(isinf(alltbt.dprimes))=3;
+[alltbt,trialTypes,metadata]=get_DistractorDprime_per_mouse(alltbt,trialTypes,metadata); % get dprime where hit is reach after distractor, saved to field distract_dprimes
+alltbt.dprimes(isinf(alltbt.dprimes))=3; alltbt.distract_dprimes(isinf(alltbt.distract_dprimes))=3;
 
 % Optional: how far through session is each trial
 excludeNonReachingBeginAndEnd=true;

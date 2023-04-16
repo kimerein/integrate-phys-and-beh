@@ -509,7 +509,7 @@ downSampBy=5; % downsamp 60 ms bins by this much
 takeNPointsAfterEvent=17; 
 takeNPointsBeforeEvent=0; %takeNPointsBeforeEvent=10; 
 tensor1=[]; allLabels1=[];
-whichSess=371; %335; 
+whichSess=374; %335; 
 for i=1:length(whichSess)
     [tensor, allLabels, timepoints_for_tensor]=getTensorsForOneSession(whichSess(i), downSampBy, takeNPointsAfterEvent, takeNPointsBeforeEvent, dd);
     if ~isempty(tensor1)

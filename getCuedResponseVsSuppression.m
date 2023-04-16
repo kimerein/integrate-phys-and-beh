@@ -5,14 +5,15 @@ if isempty(doPlot)
     doPlot=1;
 end
 doQuiver=1;
-preCueWindow_start1=0; % define start of time window from trial onset, in seconds -- for first window, assuming that trial onset is 0 sec
-preCueWindow_end1=1.5; % define end of time window from trial onset, in seconds -- for first window
+settingsForDp=settingsForDprimes(alltbt,nameOfCue,false);
+preCueWindow_start1=settingsForDp.preCueWindow_start1; % define start of time window from trial onset, in seconds -- for first window, assuming that trial onset is 0 sec
+preCueWindow_end1=settingsForDp.preCueWindow_end1; % define end of time window from trial onset, in seconds -- for first window
 % preCueWindow_start2=3.81; % define start of time window from trial onset, in seconds -- for second window
 % preCueWindow_end2=5.31; % define end of time window from trial onset, in seconds -- for second window
-[~,ma]=nanmax(nanmean(alltbt.(nameOfCue),1));
-cuetimeat=mode(diff(nanmean(alltbt.times,1)))*ma;
-preCueWindow_start2=cuetimeat+1.5; 
-preCueWindow_end2=cuetimeat+3;
+% [~,ma]=nanmax(nanmean(alltbt.(nameOfCue),1));
+% cuetimeat=mode(diff(nanmean(alltbt.times,1)))*ma;
+preCueWindow_start2=settingsForDp.preCueWindow_start2; 
+preCueWindow_end2=settingsForDp.preCueWindow_end2;
 
 % doRawReachRates=0;
 
