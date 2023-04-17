@@ -43,6 +43,16 @@ figure();
 plot(udays,lcminusdistract'); xlabel('days'); ylabel('dprime minus distract dprime'); hold on;
 plot(udays,mean(lcminusdistract,1,'omitnan'),'Color','k','LineWidth',2);
 
+figure();
+for i=1:size(lc,1)
+    endday_dp=lc(i,udays==20); 
+    if isnan(endday_dp)
+        flast=find(~isnan(lc(i,:)),1,'last');
+        endday_dp=lc(i,flast);
+    end
+    quiver(0,0,endday_dp-lc(i,udays==1),'Color','k');
+end
+
 end
 
 function data=interpMissing(data)
