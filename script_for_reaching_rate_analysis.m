@@ -144,6 +144,9 @@ learningThresh=0.1;
 alltbt=findSessWhereMouseLearned(alltbt,metadata,trialTypes,part1_fracThroughSess,part2_fracThroughSess,learningThresh);
 trialTypes.mouseLearned=alltbt.mouseLearned;
 
+%% learning curves
+learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1');
+
 %% build relevant data sets
 
 % settings for paired RT data set
