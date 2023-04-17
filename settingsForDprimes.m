@@ -1,13 +1,13 @@
 function settings=settingsForDprimes(alltbt,nameOfCue,display)
 
-settings.preCueWindow_start1=0.5; % define start of time window from trial onset, in seconds -- for first window, assuming that trial onset is 0 sec
-settings.preCueWindow_end1=1; % define end of time window from trial onset, in seconds -- for first window
+settings.preCueWindow_start1=0; % define start of time window from trial onset, in seconds -- for first window, assuming that trial onset is 0 sec
+settings.preCueWindow_end1=0.5; % define end of time window from trial onset, in seconds -- for first window
 % preCueWindow_start2=3.81; % define start of time window from trial onset, in seconds -- for second window
 % preCueWindow_end2=5.31; % define end of time window from trial onset, in seconds -- for second window
 [~,ma]=nanmax(nanmean(alltbt.(nameOfCue),1));
 cuetimeat=mode(diff(nanmean(alltbt.times,1)))*ma;
-settings.preCueWindow_start2=cuetimeat+3; 
-settings.preCueWindow_end2=cuetimeat+3.5;
+settings.preCueWindow_start2=cuetimeat+6; % past the chewing 
+settings.preCueWindow_end2=cuetimeat+6.5; % past the chewing
 settings.reachAfterCueWindow_start=-0.1; % after cue window in seconds, for hits, i.e., real cued reaching
 settings.reachAfterCueWindow_end=0.4; % after cue window in seconds, for hits, i.e., real cued reaching
 

@@ -147,7 +147,8 @@ switch mousename
     case 'Feb_3'
         placeForO2data=['Z:\MICROSCOPE\Kim\KER Behavior\By date\Low speed\' datestr '\' mousename '\O2 output\' aviName];
     case 'Feb_4'
-        placeForO2data=['Z:\MICROSCOPE\Kim\KER Behavior\By date\Low speed\' datestr '\' mousename '\O2 output\' aviName];
+%         placeForO2data=['Z:\MICROSCOPE\Kim\KER Behavior\By date\Low speed\' datestr '\' mousename '\O2 output\' aviName];
+        placeForO2data=['Z:\MICROSCOPE\Kim\KER Behavior\' mousename '\' datestr '\' aviName];
     case 'Nov_grey'
         placeForO2data=['Z:\MICROSCOPE\Kim\KER Behavior\By date\Low speed\' datestr '\' mousename '\O2 output\' aviName];
     case 'Dec_d'
