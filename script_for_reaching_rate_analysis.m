@@ -145,6 +145,8 @@ alltbt=findSessWhereMouseLearned(alltbt,metadata,trialTypes,part1_fracThroughSes
 trialTypes.mouseLearned=alltbt.mouseLearned;
 
 %% learning curves
+% Optional: discard preemptive
+[alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
 learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1');
 
 %% build relevant data sets
