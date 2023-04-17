@@ -1,4 +1,4 @@
-function [alltbt_backup,trialTypes_backup,metadata_backup]=get_dprime_per_mouse(alltbt,trialTypes,metadata)
+function [alltbt_backup,trialTypes_backup,metadata_backup,isreachout_permouse,u]=get_dprime_per_mouse(alltbt,trialTypes,metadata)
 
 % Assign unique sessids
 u=unique(metadata.mouseid);
@@ -13,7 +13,8 @@ trialTypes_backup=trialTypes;
 metadata_backup=metadata;
 
 % Per mouse
-u=unique(metadata.mouseid);
+u=unique(metadata.mouseid); % u is the mouseid
+isreachout_permouse=cell(length(u),1);
 for i=1:length(u)
     currMouseID=u(i);
     alltbt=alltbt_backup; 
@@ -41,6 +42,7 @@ for i=1:length(u)
     % get dprimes for this mouse
     settingsForDp=settingsForDprimes(alltbt,'cueZone_onVoff',false);
     [isreaching_out,dprimes]=getCuedResponseVsSuppression(alltbt,metadata,trialTypes,'cueZone_onVoff','all_reachBatch',[],1,settingsForDp.reachAfterCueWindow_start,settingsForDp.reachAfterCueWindow_end,false,0);
+    isreachout_permouse{i}=isreaching_out;
     [metadata,alltbt,trialTypes]=add_dprimes_to_tbt(alltbt,trialTypes,metadata,dprimes);
     
     % add back to multi-mouse alltbt

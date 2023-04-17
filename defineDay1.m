@@ -1,0 +1,38 @@
+function [day1,metadata]=defineDay1(alltbt,trialTypes,metadata,isreachout_permouse,permouse_mouseid)
+
+pelletPercThresh=60; % less than this percent pellets loaded per all wheel turns
+successThresh=20; % at least this many pellets successfully
+
+day1=nan(1,length(permouse_mouseid));
+metadata.sess_wrt_day1=metadata.nth_session;
+for i=1:length(permouse_mouseid)
+    % find day 1 for this mouse
+    % using following criteria:
+    %   1. Mouse successfully grabbed and consumed >30 pellets over the course of a >=45 minute session
+    %   2. Pellet was present after the cue less than 50% of the time
+    temp=isreachout_permouse{i};
+    [~,si]=sort(temp.nth_session);
+    nthsessions=temp.nth_session(si);
+    hasSuccess=temp.hasSuccess(si);
+    pelletPresentAtCue=temp.pelletPresent(si)./temp.totalTrials(si);
+    pelletPerc=nan(1,length(nthsessions));
+    for j=1:length(nthsessions)
+        pelletPerc(j)=mode(metadata.pelletPresentFromTable(metadata.mouseid==permouse_mouseid(i) & metadata.nth_session==nthsessions(j)));
+        if isnan(pelletPerc(j))
+            % some other way to estimate in what fraction of wheel turns
+            % pellet was presented
+            % use trial ITI to figure this out
+            cueStarts=alltbt.timesFromSessionStart(:,94);
+            ITIs=[diff(cueStarts); nan];
+            % greater than 18 sec is two wheel turns
+            thissessITIs=ITIs(metadata.mouseid==permouse_mouseid(i) & metadata.nth_session==nthsessions(j));
+            pelletPerc(j)=((nansum(thissessITIs<18)./length(thissessITIs))-0.05)*100; % -5 to account for some slop in this calculation
+        end
+    end
+    f=find(hasSuccess>successThresh & pelletPerc<pelletPercThresh,1,'first');
+    day1(i)=nthsessions(f);
+    % put into metadata
+    metadata.sess_wrt_day1(metadata.mouseid==permouse_mouseid(i))=metadata.sess_wrt_day1(metadata.mouseid==permouse_mouseid(i))-day1(i)+1;
+end
+
+end

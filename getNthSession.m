@@ -33,6 +33,10 @@ data_array=table2cell(readtable(dataTable,'Format','%s%s%s%s%s%s%s%s%s%s','Delim
 
 %data_array=clearEmptyRows(data_array);
 
+if ~isfield(metadata,'pelletPresentFromTable')
+    metadata.pelletPresentFromTable=nan(size(metadata.nth_session));
+end
+
 % save datetimes corresponding to dates in table
 warning('off');
 clear datetime_array
@@ -72,7 +76,7 @@ for i=1:length(table_mousenames)
         continue
     else
         % Exclude days on training rig!!!
-        [datesForThisMouse,optoAttachForThisMouse,percOptoForThisMouse]=whichDatesForThisMouse(datetime_array,data_array,currmousename,excludeTrainingRig);
+        [datesForThisMouse,optoAttachForThisMouse,percOptoForThisMouse,percPelletForThisMouse]=whichDatesForThisMouse(datetime_array,data_array,currmousename,excludeTrainingRig);
     end
     % Fix nth_session in metadata
     for j=1:length(datesForThisMouse)
@@ -92,15 +96,20 @@ for i=1:length(table_mousenames)
                     metadata.optoOnHere(eq(metadata.dateFromTextFile,datesForThisMouse(j)) & metadata.mouseid==correspondingMouseID)=0;
             end
         end
+        try
+            metadata.pelletPresentFromTable(eq(metadata.dateFromTextFile,datesForThisMouse(j)) & metadata.mouseid==correspondingMouseID)=str2double(percPelletForThisMouse{j});
+        catch
+            disp('could not convert str2num in getNthSession.m');
+        end
     end
 end
 
 end
 
-function [datesForThisMouse,optoAttachForThisMouse,percOptoForThisMouse]=whichDatesForThisMouse(datetime_array,data_array,currmousename,excludeTrainingRig)
+function [datesForThisMouse,optoAttachForThisMouse,percOptoForThisMouse,percPelletForThisMouse]=whichDatesForThisMouse(datetime_array,data_array,currmousename,excludeTrainingRig)
 
 datesForThisMouse(1)=datetime(1900,3,3); % just a placeholder to define
-optoOnForThisMouse={}; percOptoForThisMouse={};
+optoOnForThisMouse={}; percOptoForThisMouse={}; percPelletForThisMouse={};
 k=1;
 
 for i=1:size(data_array,1)
@@ -109,11 +118,11 @@ for i=1:size(data_array,1)
             if excludeTrainingRig==true
                 if ~strcmp(data_array{i,3},'Training')
                     datesForThisMouse=[datesForThisMouse; datetime_array(i)];
-                    optoAttachForThisMouse{k}=data_array{i,7}; percOptoForThisMouse{k}=data_array{i,9}; k=k+1;
+                    optoAttachForThisMouse{k}=data_array{i,7}; percOptoForThisMouse{k}=data_array{i,9}; percPelletForThisMouse{k}=data_array{i,8}; k=k+1;
                 end
             else
                 datesForThisMouse=[datesForThisMouse; datetime_array(i)]; 
-                optoAttachForThisMouse{k}=data_array{i,7}; percOptoForThisMouse{k}=data_array{i,9}; k=k+1;
+                optoAttachForThisMouse{k}=data_array{i,7}; percOptoForThisMouse{k}=data_array{i,9}; percPelletForThisMouse{k}=data_array{i,8}; k=k+1;
             end
         end
     end

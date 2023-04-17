@@ -72,9 +72,12 @@ end
 
 % Optional: dprimes for each mouse, each session
 settingsForDprimes(alltbt,'cueZone_onVoff',true); % Check settings in settingsForDprimes
-[alltbt,trialTypes,metadata]=get_dprime_per_mouse(alltbt,trialTypes,metadata);
+[alltbt,trialTypes,metadata,isreachout_permouse,permouse_mouseid]=get_dprime_per_mouse(alltbt,trialTypes,metadata);
 [alltbt,trialTypes,metadata]=get_DistractorDprime_per_mouse(alltbt,trialTypes,metadata); % get dprime where hit is reach after distractor, saved to field distract_dprimes
 alltbt.dprimes(isinf(alltbt.dprimes))=3; alltbt.distract_dprimes(isinf(alltbt.distract_dprimes))=3;
+
+% Optional: get day 1 for learning curves
+[day1,metadata]=defineDay1(alltbt,trialTypes,metadata,isreachout_permouse,permouse_mouseid);
 
 % Optional: how far through session is each trial
 excludeNonReachingBeginAndEnd=true;
