@@ -1,5 +1,7 @@
 function learningCurves(alltbt,trialTypes,metadata,dayField)
 
+fillInToEnd=true;
+
 u=unique(metadata.mouseid);
 dayField=metadata.(dayField);
 learnCurves=nan(length(u),200); 
@@ -22,6 +24,13 @@ for i=1:length(u)
         learnCurves_distract(i,f)=distract_dp(j);
     end
 end
+if fillInToEnd==true
+    for i=1:size(learnCurves,1)
+        temp=learnCurves(i,:);
+        f=find(~isnan(temp),1,'last');
+        learnCurves(i,end)=temp(f);
+    end
+end
 lc=learnCurves;
 lcminusdistract=learnCurves-learnCurves_distract;
 % linearly interpolate
@@ -42,16 +51,6 @@ plot(udays,mean(lc,1,'omitnan')-std(lc,[],1,'omitnan')./sqrt(size(lc,1)),'Color'
 figure(); 
 plot(udays,lcminusdistract'); xlabel('days'); ylabel('dprime minus distract dprime'); hold on;
 plot(udays,mean(lcminusdistract,1,'omitnan'),'Color','k','LineWidth',2);
-
-figure();
-for i=1:size(lc,1)
-    endday_dp=lc(i,udays==20); 
-    if isnan(endday_dp)
-        flast=find(~isnan(lc(i,:)),1,'last');
-        endday_dp=lc(i,flast);
-    end
-    quiver(0,0,endday_dp-lc(i,udays==1),'Color','k');
-end
 
 end
 

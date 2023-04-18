@@ -12,6 +12,7 @@ function [dprimes,hit_rates,FA_rates,out]=get_dprime_per_session(tbt,out,metadat
 
 if isempty(settings)
     settings=reachExpt_analysis_settings();
+    disp('USING SETTINGS FROM reachExpt_analysis_settings.m!!!!!!!!!!!!!!!!!!!!');
 end
 hitWindow_start=settings.reachAfterCueWindow_start; % wrt cue onset
 hitWindow_end=settings.reachAfterCueWindow_end; % wrt cue onset
@@ -116,15 +117,24 @@ end
 
 end
 
-function fractionTrialsInGroup=trials_per_session(metadata,in_group_trials,total_trials)
+function fractionTrialsInGroup_fixZeros=trials_per_session(metadata,in_group_trials,total_trials)
 
 [sessid,sessStartInd]=unique(metadata.sessid);
 fractionTrialsInGroup=nan(1,length(sessid));
+fractionTrialsInGroup_fixZeros=nan(1,length(sessid));
 sessStartInd=[sessStartInd; length(metadata.sessid)+1];
 for i=1:length(sessid)
     curr_sessStartInd=sessStartInd(i);
     sessinds=curr_sessStartInd:sessStartInd(i+1)-1;
     fractionTrialsInGroup(i)=sum(in_group_trials(sessinds)==1)/sum(total_trials(sessinds)==1);
+    if fractionTrialsInGroup(i)==0 
+        % one way to fix dprime if hit or FA rates are 0 or 1 is to account for finite length of dataset
+        fractionTrialsInGroup_fixZeros(i)=1/(sum(total_trials(sessinds)==1));
+    elseif fractionTrialsInGroup(i)==1
+        fractionTrialsInGroup_fixZeros(i)=1-(1/(sum(total_trials(sessinds)==1)));
+    else
+        fractionTrialsInGroup_fixZeros(i)=fractionTrialsInGroup(i);
+    end
 end
 
 end
