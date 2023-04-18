@@ -8,8 +8,8 @@ tims=0:timestep:(size(alltbt.times,2)-1)*timestep;
 disp(['Cue turns on at ' num2str(tims(ma)) ' seconds']);
 cuetimeat=tims(ma);
 
-settings.preCueWindow_start1=cuetimeat-0.14-1.3; %0; % define start of time window from trial onset, in seconds -- for first window, assuming that trial onset is 0 sec
-settings.preCueWindow_end1=cuetimeat-0.14-0.6; %1; % define end of time window from trial onset, in seconds -- for first window
+settings.preCueWindow_start1=cuetimeat-0.14-1.4; %0; % define start of time window from trial onset, in seconds -- for first window, assuming that trial onset is 0 sec
+settings.preCueWindow_end1=cuetimeat-0.14-0.7; %1; % define end of time window from trial onset, in seconds -- for first window
 % preCueWindow_start2=3.81; % define start of time window from trial onset, in seconds -- for second window
 % preCueWindow_end2=5.31; % define end of time window from trial onset, in seconds -- for second window
 settings.preCueWindow_start2=cuetimeat+8.3; %3; %8.5;  
