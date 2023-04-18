@@ -43,9 +43,9 @@ for i=1:length(permouse_mouseid)
         end
     end
     if useTouchedPellet==true
-        f=find(hasTouch>touchedPelletThresh & pelletPerc<pelletPercThresh,1,'first');
+        f=find(hasTouch>=touchedPelletThresh & pelletPerc<pelletPercThresh,1,'first');
     else
-        f=find(hasSuccess>successThresh & pelletPerc<pelletPercThresh,1,'first');
+        f=find(hasSuccess>=successThresh & pelletPerc<pelletPercThresh,1,'first');
     end
     day1(i)=nthsessions(f);
     % put into metadata
