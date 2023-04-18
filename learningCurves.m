@@ -1,4 +1,4 @@
-function learningCurves(alltbt,trialTypes,metadata,dayField)
+function [lc,udays]=learningCurves(alltbt,trialTypes,metadata,dayField)
 
 fillInToEnd=true;
 

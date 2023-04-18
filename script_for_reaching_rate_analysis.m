@@ -18,7 +18,7 @@ end
 
 % only load these fields of alltbt
 disp('loading alltbt');
-whichFieldsToLoad={'cue','all_reachBatch','cueZone_onVoff','dprimes','isChewing','isHold','optoOn','optoZone','pawOnWheel','pelletPresent','reachBatch_all_pawOnWheel','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','reachBatch_success_reachStarts','reachStarts','pelletmissingreach_reachStarts','reachStarts_pelletPresent','times','times_wrt_trial_start','timesFromSessionStart','movie_distractor'};
+whichFieldsToLoad={'cue','all_reachBatch','cueZone_onVoff','dprimes','isChewing','isHold','optoOn','optoZone','pawOnWheel','pelletPresent','reachBatch_all_pawOnWheel','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','reachBatch_success_reachStarts','reachStarts','pelletmissingreach_reachStarts','reachStarts_pelletPresent','times','timesFromSessionStart','movie_distractor'};
 alltbt=loadStructFieldByField([exptDataDir sprtr 'alltbt'],whichFieldsToLoad); % load alltbt
 disp('loading out');
 trialTypes=loadStructFieldByField([exptDataDir sprtr 'out']); % load out
@@ -69,6 +69,9 @@ for i=1:length(u)
     metadata.sessid(metadata.mouseid==u(i))=metadata.nth_session(metadata.mouseid==u(i))+j;
     j=j+nanmax(metadata.sessid(metadata.mouseid==u(i)));
 end
+
+% Optional: Exclude trials with paw on wheel
+[alltbt,metadata,trialTypes]=excludePawOnWheel(alltbt,metadata,trialTypes,'cueZone_onVoff');
 
 % Optional: dprimes for each mouse, each session
 settingsForDprimes(alltbt,'cueZone_onVoff',true); % Check settings in settingsForDprimes
@@ -147,7 +150,8 @@ trialTypes.mouseLearned=alltbt.mouseLearned;
 %% learning curves
 % Optional: discard preemptive
 % [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
-learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1');
+[learningC,days]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1');
+figure(); histogram(learningC(:,days==21),10);
 
 %% build relevant data sets
 
