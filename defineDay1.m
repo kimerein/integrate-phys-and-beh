@@ -2,7 +2,7 @@ function [day1,metadata]=defineDay1(alltbt,trialTypes,metadata,isreachout_permou
 
 pelletPercThresh=61; % less than this percent pellets loaded per all wheel turns
 successThresh=20; % at least this many pellets successfully
-touchedPelletThresh=30; % at least this many touches of pellet
+touchedPelletThresh=20; % at least this many touches of pellet
 useTouchedPellet=true;
 expectedNTrialsPerSess=150; % expect AT LEAST this many trials per session
 
@@ -43,7 +43,7 @@ for i=1:length(permouse_mouseid)
         end
     end
     if useTouchedPellet==true
-        f=find(hasTouch>=touchedPelletThresh & pelletPerc<pelletPercThresh,1,'first');
+        f=find((hasTouch>=touchedPelletThresh & pelletPerc<pelletPercThresh) | (hasSuccess>=successThresh & pelletPerc<pelletPercThresh),1,'first');
     else
         f=find(hasSuccess>=successThresh & pelletPerc<pelletPercThresh,1,'first');
     end
