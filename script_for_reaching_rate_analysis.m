@@ -1,4 +1,5 @@
-% runReactionTimeAnalysis.m
+% script_for_reaching_rate_analysis.m
+function script_for_reaching_rate_analysis()
 
 % script for running a frequently used subset of analyses
 
@@ -6,9 +7,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt18Apr2023102402\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt18Apr2023224336\'; % directory containing experimental data
 behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log - Slimmed down w old mice added.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt18Apr2023102402\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt18Apr2023224336\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -137,27 +138,27 @@ tbt_filter.clock_progress=true;
 % filter alltbt
 [alltbt,trialTypes,metadata]=filtTbt(alltbt,trialTypes,tbt_filter.sortField,tbt_filter.range_values,metadata,tbt_filter.clock_progress);
 
-%% check for opto-enhanced reaching
-alltbt.sessid=metadata.sessid;
-alltbt=checkForOptoEnhancedReach(alltbt,metadata,trialTypes,'all_reachBatch','trialTypes.led==1','cueZone_onVoff',[-0.25 0.5],20);
-trialTypes.opto_enhanced_reach=alltbt.opto_enhanced_reach;
-
-%% find sessions where mouse learned
-part1_fracThroughSess=[0 0.2];
-part2_fracThroughSess=[0.2 0.8];
-learningThresh=0.1;
-alltbt=findSessWhereMouseLearned(alltbt,metadata,trialTypes,part1_fracThroughSess,part2_fracThroughSess,learningThresh);
-trialTypes.mouseLearned=alltbt.mouseLearned;
+% %% check for opto-enhanced reaching
+% alltbt.sessid=metadata.sessid;
+% alltbt=checkForOptoEnhancedReach(alltbt,metadata,trialTypes,'all_reachBatch','trialTypes.led==1','cueZone_onVoff',[-0.25 0.5],20);
+% trialTypes.opto_enhanced_reach=alltbt.opto_enhanced_reach;
+% 
+% %% find sessions where mouse learned
+% part1_fracThroughSess=[0 0.2];
+% part2_fracThroughSess=[0.2 0.8];
+% learningThresh=0.1;
+% alltbt=findSessWhereMouseLearned(alltbt,metadata,trialTypes,part1_fracThroughSess,part2_fracThroughSess,learningThresh);
+% trialTypes.mouseLearned=alltbt.mouseLearned;
 
 %% learning curves
 [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
 % for dprime, ok to include day 1, because is within-session comparison
-[learningC,days]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1:2],[19:20]);
-% for cued and uncued reach rates, have to skip first days, because mice
+[learningC,days]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1],[20]); pause;
+% for cued and uncued reach rates, have to skip first day, because mice
 % just leave paws out constantly
 learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[2:3],[19:20]);
-% figure(); plot(nanmean(alltbt.all_reachBatch(~any(alltbt.movie_distractor(:,90:150),2),:),1),'Color','k'); hold on; plot(nanmean(alltbt.cueZone_onVoff,1),'Color','b');
 
+return
 % Optional: discard trials where distractor turns on immediately after cue
 
 
