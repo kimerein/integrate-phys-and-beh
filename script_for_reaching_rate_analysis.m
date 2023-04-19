@@ -7,9 +7,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt18Apr2023224336\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt19Apr2023110616\'; % directory containing experimental data
 behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log - Slimmed down w old mice added.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt18Apr2023224336\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt19Apr2023110616\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -158,6 +158,7 @@ trialTypes.mouseLearned=alltbt.mouseLearned;
 [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
 % for dprime, ok to include day 1, because is within-session comparison
 [learningC,days]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1],[20]);
+[learningC,days]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[2],[20]); % need to excluded day 1 for reach rates bcz paw out constantly
 
 % Optional: discard trials where distractor turns on immediately after cue
 
