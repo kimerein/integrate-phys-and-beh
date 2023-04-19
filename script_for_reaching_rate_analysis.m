@@ -49,7 +49,7 @@ backup.metadata=metadata;
 
 % fix weird bug where reach batch sometimes get stuck at 1 (in less than 0.1% of trials), possibly an
 % interp problem somewhere?? not sure
-% alltbt=fixReachesStuckAtOne(alltbt);
+alltbt=fixReachesStuckAtOne(alltbt);
 
 %% choose additional settings for reaction time analysis
 
@@ -157,12 +157,8 @@ trialTypes.mouseLearned=alltbt.mouseLearned;
 %% learning curves
 [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
 % for dprime, ok to include day 1, because is within-session comparison
-[learningC,days]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1],[20]); pause;
-% for cued and uncued reach rates, have to skip first day, because mice
-% just leave paws out constantly
-learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[2:3],[19:20]);
+[learningC,days]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1],[20]);
 
-return
 % Optional: discard trials where distractor turns on immediately after cue
 
 
