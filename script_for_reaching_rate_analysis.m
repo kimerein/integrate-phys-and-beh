@@ -79,7 +79,7 @@ settingsForDprimes(alltbt,'cueZone_onVoff',true); % Check settings in settingsFo
 [alltbt,trialTypes,metadata]=get_DistractorDprime_per_mouse(alltbt,trialTypes,metadata); % get dprime where hit is reach after distractor, saved to field distract_dprimes
 alltbt.dprimes(isinf(alltbt.dprimes))=3; alltbt.distract_dprimes(isinf(alltbt.distract_dprimes))=3;
 % Get cued vs uncued reach rates
-[alltbt,trialTypes,metadata,isreachout_permouse,permouse_mouseid]=get_dprime_per_mouse(alltbt,trialTypes,metadata,true); % last arg is whether to get rates instead
+[~,~,metadata]=get_dprime_per_mouse(alltbt,trialTypes,metadata,true); % last arg is whether to get rates instead
 
 % Optional: get day 1 for learning curves
 [day1,metadata]=defineDay1(alltbt,trialTypes,metadata,isreachout_permouse,permouse_mouseid);
@@ -150,13 +150,12 @@ alltbt=findSessWhereMouseLearned(alltbt,metadata,trialTypes,part1_fracThroughSes
 trialTypes.mouseLearned=alltbt.mouseLearned;
 
 %% learning curves
-% Optional: discard preemptive
 [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
 % for dprime, ok to include day 1, because is within-session comparison
-[learningC,days]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',1,20);
+[learningC,days]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1:2],[19:20]);
 % for cued and uncued reach rates, have to skip first days, because mice
 % just leave paws out constantly
-[learningC,days]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[2:6],[15:20]);
+learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[2:3],[19:20]);
 % figure(); plot(nanmean(alltbt.all_reachBatch(~any(alltbt.movie_distractor(:,90:150),2),:),1),'Color','k'); hold on; plot(nanmean(alltbt.cueZone_onVoff,1),'Color','b');
 
 % Optional: discard trials where distractor turns on immediately after cue

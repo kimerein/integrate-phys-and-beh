@@ -41,7 +41,14 @@ for i=1:length(u)
     
     % get dprimes for this mouse
     settingsForDp=settingsForDprimes(alltbt,'cueZone_onVoff',false);
-    [isreaching_out,dprimes,RRcued,RRuncued]=getCuedResponseVsSuppression(alltbt,metadata,trialTypes,'cueZone_onVoff','all_reachBatch',[],1,settingsForDp.reachAfterCueWindow_start,settingsForDp.reachAfterCueWindow_end,false,getRatesInstead);
+    [isreaching_out,dprimes]=getCuedResponseVsSuppression(alltbt,metadata,trialTypes,'cueZone_onVoff','all_reachBatch',[],1,settingsForDp.reachAfterCueWindow_start,settingsForDp.reachAfterCueWindow_end,false,getRatesInstead);
+    if isfield(isreaching_out,'cued_reach_rate')
+        RRcued=isreaching_out.cued_reach_rate;
+        RRuncued=isreaching_out.noncued_reach_rate;
+    else
+        RRcued=[];
+        RRuncued=[];
+    end
     metadata=addRR(metadata,RRcued,'reachrate_cued'); 
     metadata=addRR(metadata,RRuncued,'reachrate_uncued');
     isreachout_permouse{i}=isreaching_out;

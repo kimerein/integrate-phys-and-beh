@@ -1,4 +1,4 @@
-function [isreaching_out,dprimes,mean_cued_reach_rate,max_non_cued]=getCuedResponseVsSuppression(alltbt,metadata,out,nameOfCue,reachName,useTrials,firstSess,reachAfterCueWindow_start,reachAfterCueWindow_end,doPlot,doRawReachRates)
+function [isreaching_out,dprimes]=getCuedResponseVsSuppression(alltbt,metadata,out,nameOfCue,reachName,useTrials,firstSess,reachAfterCueWindow_start,reachAfterCueWindow_end,doPlot,doRawReachRates)
 
 % this code assumes that all sessions are from the same mouse
 if isempty(doPlot)
