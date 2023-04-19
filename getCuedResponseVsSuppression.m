@@ -77,8 +77,9 @@ if doRawReachRates==false
     settings.reachAfterCueWindow_start=reachAfterCueWindow_start; % in sec, wrt cue onset
     settings.reachAfterCueWindow_end=reachAfterCueWindow_end; % in sec, wrt cue onset
 
-    if settingsForDp.postCue_onlyWithDistractorTrials==true
-        [dprimes_postCue,~,FA_rates_postCue]=distractVNoDistract_dprime(alltbt,metadata,trialTypes);
+    if settingsForDp.distractVNoDistract==true
+        % Get the dprime cue rather than distractor
+        [dprimes_postCue,~,FA_rates_postCue]=distractVNoDistract_dprime(alltbt,metadata,out,settings,cuetimeat,ma,reachName,nameOfCue);
     else
         [dprimes_postCue,~,FA_rates_postCue]=get_dprime_per_session(alltbt,out,metadata,reachName,nameOfCue,settings);
     end
@@ -230,9 +231,9 @@ end
 
 end
 
-function [out_dprime,out_hit,out_FA]=distractVNoDistract_dprime(alltbt,metadata,trialTypes)
+function [out_dprime,out_hit,out_FA]=distractVNoDistract_dprime(alltbt,metadata,out,settings,cuetimeat,ma,reachName,nameOfCue)
 
-backups.alltbt=alltbt; backups.metadata=metadata; backups.trialTypes=trialTypes;
+backups.alltbt=alltbt; backups.metadata=metadata; backups.out=out;
 afterCueBins=floor((settings.preCueWindow_start-cuetimeat)./mode(diff(nanmean(alltbt.times,1))));
 useTrials=any(alltbt.movie_distractor(:,ma:ma+afterCueBins)>0.5,2);
 if ~isempty(useTrials)
@@ -266,7 +267,7 @@ if ~isempty(useTrials)
 end
 [dprimes_wDistract,hit_rates_wDistract,FA_rates_wDistract]=get_dprime_per_session(alltbt,out,metadata,reachName,nameOfCue,settings);
 
-alltbt=backups.alltbt; metadata=backups.metadata; trialTypes=backups.trialTypes;
+alltbt=backups.alltbt; metadata=backups.metadata; out=backups.out;
 useTrials=~any(alltbt.movie_distractor(:,ma:ma+afterCueBins)>0.5,2);
 if ~isempty(useTrials)
     f=fieldnames(alltbt);
@@ -298,16 +299,12 @@ if ~isempty(useTrials)
     end
 end
 [dprimes_noDistract,hit_rates_noDistract,FA_rates_noDistract]=get_dprime_per_session(alltbt,out,metadata,reachName,nameOfCue,settings);
+distractAdds_hit=hit_rates_wDistract-hit_rates_noDistract;
+distractAdds_FA=FA_rates_wDistract-FA_rates_noDistract;
 
-out_hit=hit_rates_noDistract-hit_rates_wDistract;
-out_FA=FA_rates_noDistract-FA_rates_wDistract;
+out_hit=nanmean([hit_rates_noDistract; hit_rates_wDistract],1)-distractAdds_hit;
+out_FA=nanmean([FA_rates_noDistract; FA_rates_wDistract],1)-distractAdds_FA;
 out_dprime=dprime(out_hit,out_FA);
-
-end
-
-function out=dprime(hit_rates,FA_rates)
-
-out=norminv(hit_rates)-norminv(FA_rates);
 
 end
 

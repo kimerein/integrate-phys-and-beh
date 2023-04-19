@@ -155,7 +155,7 @@ alltbt=findSessWhereMouseLearned(alltbt,metadata,trialTypes,part1_fracThroughSes
 trialTypes.mouseLearned=alltbt.mouseLearned;
 
 %% learning curves
-% [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
+[alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
 % for dprime, ok to include day 1, because is within-session comparison
 % [learningC,days]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1],[20]);
 % [learningC,days]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[2],[20]); % need to excluded day 1 for reach rates bcz paw out constantly
