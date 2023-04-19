@@ -6,9 +6,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt16Apr2023134158\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt18Apr2023102402\'; % directory containing experimental data
 behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log - Slimmed down w old mice added.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt16Apr2023134158\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt18Apr2023102402\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -75,9 +75,11 @@ end
 
 % Optional: dprimes for each mouse, each session
 settingsForDprimes(alltbt,'cueZone_onVoff',true); % Check settings in settingsForDprimes
-[alltbt,trialTypes,metadata,isreachout_permouse,permouse_mouseid]=get_dprime_per_mouse(alltbt,trialTypes,metadata);
+[alltbt,trialTypes,metadata,isreachout_permouse,permouse_mouseid]=get_dprime_per_mouse(alltbt,trialTypes,metadata,false); % last arg is whether to get rates instead
 [alltbt,trialTypes,metadata]=get_DistractorDprime_per_mouse(alltbt,trialTypes,metadata); % get dprime where hit is reach after distractor, saved to field distract_dprimes
 alltbt.dprimes(isinf(alltbt.dprimes))=3; alltbt.distract_dprimes(isinf(alltbt.distract_dprimes))=3;
+% Get cued vs uncued reach rates
+[alltbt,trialTypes,metadata,isreachout_permouse,permouse_mouseid]=get_dprime_per_mouse(alltbt,trialTypes,metadata,true); % last arg is whether to get rates instead
 
 % Optional: get day 1 for learning curves
 [day1,metadata]=defineDay1(alltbt,trialTypes,metadata,isreachout_permouse,permouse_mouseid);
@@ -150,8 +152,15 @@ trialTypes.mouseLearned=alltbt.mouseLearned;
 %% learning curves
 % Optional: discard preemptive
 [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
-[learningC,days]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1');
-figure(); histogram(learningC(:,days==21),10);
+% for dprime, ok to include day 1, because is within-session comparison
+[learningC,days]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',1,20);
+% for cued and uncued reach rates, have to skip first days, because mice
+% just leave paws out constantly
+[learningC,days]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[2:6],[15:20]);
+% figure(); plot(nanmean(alltbt.all_reachBatch(~any(alltbt.movie_distractor(:,90:150),2),:),1),'Color','k'); hold on; plot(nanmean(alltbt.cueZone_onVoff,1),'Color','b');
+
+% Optional: discard trials where distractor turns on immediately after cue
+
 
 %% build relevant data sets
 

@@ -1,4 +1,4 @@
-function [isreaching_out,dprimes]=getCuedResponseVsSuppression(alltbt,metadata,out,nameOfCue,reachName,useTrials,firstSess,reachAfterCueWindow_start,reachAfterCueWindow_end,doPlot,doRawReachRates)
+function [isreaching_out,dprimes,mean_cued_reach_rate,max_non_cued]=getCuedResponseVsSuppression(alltbt,metadata,out,nameOfCue,reachName,useTrials,firstSess,reachAfterCueWindow_start,reachAfterCueWindow_end,doPlot,doRawReachRates)
 
 % this code assumes that all sessions are from the same mouse
 if isempty(doPlot)
@@ -16,7 +16,8 @@ preCueWindow_start2=settingsForDp.preCueWindow_start2;
 preCueWindow_end2=settingsForDp.preCueWindow_end2;
 
 % doRawReachRates=0;
-
+mean_cued_reach_rate=[];
+max_non_cued=[]; 
 if doRawReachRates==0
     
     % useTrials only
@@ -171,7 +172,7 @@ else
     [mean_cued_reach_rate_postCue,mean_noncued_reach_rate_postCue]=reachRateCuedVsNonCued(alltbt,out,metadata,reachName,nameOfCue,settings);
     
     max_non_cued=max([mean_noncued_reach_rate; mean_noncued_reach_rate_postCue],[],1);
-    
+
     isreaching_out.cued_reach_rate=mean_cued_reach_rate;
     isreaching_out.noncued_reach_rate=max_non_cued;
     
@@ -189,7 +190,7 @@ else
             mean_cued_reach_rate=mean_cued_reach_rate(useSess);
         end
     end
-    
+
     % Plot noncued reaching vs cued reaching
     if doPlot==1
         if doQuiver==1

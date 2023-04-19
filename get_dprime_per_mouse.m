@@ -1,4 +1,4 @@
-function [alltbt_backup,trialTypes_backup,metadata_backup,isreachout_permouse,u]=get_dprime_per_mouse(alltbt,trialTypes,metadata)
+function [alltbt_backup,trialTypes_backup,metadata_backup,isreachout_permouse,u]=get_dprime_per_mouse(alltbt,trialTypes,metadata,getRatesInstead)
 
 % Assign unique sessids
 u=unique(metadata.mouseid);
@@ -41,34 +41,85 @@ for i=1:length(u)
     
     % get dprimes for this mouse
     settingsForDp=settingsForDprimes(alltbt,'cueZone_onVoff',false);
-    [isreaching_out,dprimes]=getCuedResponseVsSuppression(alltbt,metadata,trialTypes,'cueZone_onVoff','all_reachBatch',[],1,settingsForDp.reachAfterCueWindow_start,settingsForDp.reachAfterCueWindow_end,false,0);
+    [isreaching_out,dprimes,RRcued,RRuncued]=getCuedResponseVsSuppression(alltbt,metadata,trialTypes,'cueZone_onVoff','all_reachBatch',[],1,settingsForDp.reachAfterCueWindow_start,settingsForDp.reachAfterCueWindow_end,false,getRatesInstead);
+    metadata=addRR(metadata,RRcued,'reachrate_cued'); 
+    metadata=addRR(metadata,RRuncued,'reachrate_uncued');
     isreachout_permouse{i}=isreaching_out;
-    [metadata,alltbt,trialTypes]=add_dprimes_to_tbt(alltbt,trialTypes,metadata,dprimes);
-    
-    % add back to multi-mouse alltbt
-    if ~isfield(alltbt_backup,'dprimes')
-        alltbt_backup.dprimes=nan(size(alltbt.cue,1),1);
-    end
-    f={'dprimes'}; % just add dprimes, other fields OK
-    for j=1:length(f)
-        temp=alltbt_backup.(f{j});
-        if length(size(temp))>1
-            temp(tookThese,:)=alltbt.(f{j});
-        else
-            temp(tookThese)=alltbt.(f{j});
+
+    if ~isempty(dprimes)
+        [metadata,alltbt,trialTypes]=add_dprimes_to_tbt(alltbt,trialTypes,metadata,dprimes);
+
+        % add back to multi-mouse alltbt
+        if ~isfield(alltbt_backup,'dprimes')
+            alltbt_backup.dprimes=nan(size(alltbt.cue,1),1);
         end
-        alltbt_backup.(f{j})=temp;
+        f={'dprimes'}; % just add dprimes, other fields OK
+        for j=1:length(f)
+            temp=alltbt_backup.(f{j});
+            if length(size(temp))>1
+                temp(tookThese,:)=alltbt.(f{j});
+            else
+                temp(tookThese)=alltbt.(f{j});
+            end
+            alltbt_backup.(f{j})=temp;
+        end
+        f={'dprimes'}; % just add dprimes, other fields OK
+        for j=1:length(f)
+            temp=metadata_backup.(f{j});
+            temp(tookThese)=metadata.(f{j});
+            metadata_backup.(f{j})=temp;
+        end
+        f={'dprimes'}; % just add dprimes, other fields OK
+        for j=1:length(f)
+            temp=trialTypes_backup.(f{j});
+            temp(tookThese)=trialTypes.(f{j});
+            trialTypes_backup.(f{j})=temp;
+        end
     end
-    f={'dprimes'}; % just add dprimes, other fields OK
-    for j=1:length(f)
-        temp=metadata_backup.(f{j});
-        temp(tookThese)=metadata.(f{j});
-        metadata_backup.(f{j})=temp;
+
+    if ~isempty(RRcued)
+        % add to multi-mouse metadata
+        if ~isfield(metadata_backup,'reachrate_cued')
+            metadata_backup.reachrate_cued=nan(size(metadata_backup.sessid));
+        end
+        f={'reachrate_cued'}; 
+        for j=1:length(f)
+            temp=metadata_backup.(f{j});
+            temp(tookThese)=metadata.(f{j});
+            metadata_backup.(f{j})=temp;
+        end
     end
-    f={'dprimes'}; % just add dprimes, other fields OK
-    for j=1:length(f)
-        temp=trialTypes_backup.(f{j});
-        temp(tookThese)=trialTypes.(f{j});
-        trialTypes_backup.(f{j})=temp;
+    if ~isempty(RRuncued)
+        % add to multi-mouse metadata
+        if ~isfield(metadata_backup,'reachrate_uncued')
+            metadata_backup.reachrate_uncued=nan(size(metadata_backup.sessid));
+        end
+        f={'reachrate_uncued'}; 
+        for j=1:length(f)
+            temp=metadata_backup.(f{j});
+            temp(tookThese)=metadata.(f{j});
+            metadata_backup.(f{j})=temp;
+        end
     end
+end
+
+end
+
+function metadata=addRR(metadata,rr,fname)
+
+if isempty(rr)
+    return
+end
+
+% assume ordered by sess
+u=unique(metadata.sessid);
+if ~isfield(metadata,fname)
+    metadata.(fname)=nan(size(metadata.sessid));
+end
+for i=1:length(u)
+    temp=metadata.(fname);
+    temp(metadata.sessid==u(i))=rr(i);
+    metadata.(fname)=temp;
+end
+
 end
