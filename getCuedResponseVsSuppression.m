@@ -76,7 +76,12 @@ if doRawReachRates==false
     disp(['preCueWindow 2 is ' num2str(settings.preCueWindow_start-cuetimeat) ' to ' num2str(settings.preCueWindow_end-cuetimeat) ' secs from cue onset']);
     settings.reachAfterCueWindow_start=reachAfterCueWindow_start; % in sec, wrt cue onset
     settings.reachAfterCueWindow_end=reachAfterCueWindow_end; % in sec, wrt cue onset
-    [dprimes_postCue,hit_rates,FA_rates_postCue]=get_dprime_per_session(alltbt,out,metadata,reachName,nameOfCue,settings);
+
+    if settingsForDp.postCue_onlyWithDistractorTrials==true
+        [dprimes_postCue,~,FA_rates_postCue]=distractVNoDistract_dprime(alltbt,metadata,trialTypes);
+    else
+        [dprimes_postCue,~,FA_rates_postCue]=get_dprime_per_session(alltbt,out,metadata,reachName,nameOfCue,settings);
+    end
     
     max_FA=max([FA_rates_preCue; FA_rates_postCue],[],1);
     
@@ -222,6 +227,87 @@ else
         end
     end
 end
+
+end
+
+function [out_dprime,out_hit,out_FA]=distractVNoDistract_dprime(alltbt,metadata,trialTypes)
+
+backups.alltbt=alltbt; backups.metadata=metadata; backups.trialTypes=trialTypes;
+afterCueBins=floor((settings.preCueWindow_start-cuetimeat)./mode(diff(nanmean(alltbt.times,1))));
+useTrials=any(alltbt.movie_distractor(:,ma:ma+afterCueBins)>0.5,2);
+if ~isempty(useTrials)
+    f=fieldnames(alltbt);
+    for i=1:length(f)
+        temp=alltbt.(f{i});
+        if size(temp,1)~=length(useTrials)
+            continue
+        end
+        temp=temp(useTrials==1,:);
+        alltbt.(f{i})=temp;
+    end
+    f=fieldnames(out);
+    for i=1:length(f)
+        temp=out.(f{i});
+        if length(temp)~=length(useTrials)
+            continue
+        end
+        temp=temp(useTrials==1);
+        out.(f{i})=temp;
+    end
+    f=fieldnames(metadata);
+    for i=1:length(f)
+        temp=metadata.(f{i});
+        if length(temp)~=length(useTrials)
+            continue
+        end
+        temp=temp(useTrials==1);
+        metadata.(f{i})=temp;
+    end
+end
+[dprimes_wDistract,hit_rates_wDistract,FA_rates_wDistract]=get_dprime_per_session(alltbt,out,metadata,reachName,nameOfCue,settings);
+
+alltbt=backups.alltbt; metadata=backups.metadata; trialTypes=backups.trialTypes;
+useTrials=~any(alltbt.movie_distractor(:,ma:ma+afterCueBins)>0.5,2);
+if ~isempty(useTrials)
+    f=fieldnames(alltbt);
+    for i=1:length(f)
+        temp=alltbt.(f{i});
+        if size(temp,1)~=length(useTrials)
+            continue
+        end
+        temp=temp(useTrials==1,:);
+        alltbt.(f{i})=temp;
+    end
+    f=fieldnames(out);
+    for i=1:length(f)
+        temp=out.(f{i});
+        if length(temp)~=length(useTrials)
+            continue
+        end
+        temp=temp(useTrials==1);
+        out.(f{i})=temp;
+    end
+    f=fieldnames(metadata);
+    for i=1:length(f)
+        temp=metadata.(f{i});
+        if length(temp)~=length(useTrials)
+            continue
+        end
+        temp=temp(useTrials==1);
+        metadata.(f{i})=temp;
+    end
+end
+[dprimes_noDistract,hit_rates_noDistract,FA_rates_noDistract]=get_dprime_per_session(alltbt,out,metadata,reachName,nameOfCue,settings);
+
+out_hit=hit_rates_noDistract-hit_rates_wDistract;
+out_FA=FA_rates_noDistract-FA_rates_wDistract;
+out_dprime=dprime(out_hit,out_FA);
+
+end
+
+function out=dprime(hit_rates,FA_rates)
+
+out=norminv(hit_rates)-norminv(FA_rates);
 
 end
 
