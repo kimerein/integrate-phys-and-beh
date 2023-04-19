@@ -1,5 +1,5 @@
 % script_for_reaching_rate_analysis.m
-function script_for_reaching_rate_analysis()
+% function script_for_reaching_rate_analysis()
 
 % script for running a frequently used subset of analyses
 
@@ -28,6 +28,9 @@ metadata=loadStructFieldByField([exptDataDir sprtr 'metadata']); % load metadata
 a=load([exptDataDir sprtr 'reachExptAnalysis_settings.mat']); % load reach expt analysis settings 
 reachExptSettings=a.settings;
 
+% Set relevant fields to single
+alltbt=setToSingle(alltbt,{'all_reachBatch','cueZone_onVoff','isChewing','isHold','optoOn','pawOnWheel','pelletPresent','pelletmissingreach_reachStarts','reachBatch_all_pawOnWheel','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','reachBatch_success_reachStarts','reachStarts','reachStarts_pelletPresent'},0.1); % last argument is low threshold for conversion, below this will be 0, above this will be 1
+
 % Use behavior log table to fix nth_session, where possible
 a=load(mouseDBdir); mouse_database=a.mouse_database;
 metadata=getNthSession(behaviorLogDir,mouse_database,metadata,true,true); % last two args are alsoFixOptoOnHere, then excludeTrainingRig
@@ -46,7 +49,7 @@ backup.metadata=metadata;
 
 % fix weird bug where reach batch sometimes get stuck at 1 (in less than 0.1% of trials), possibly an
 % interp problem somewhere?? not sure
-alltbt=fixReachesStuckAtOne(alltbt);
+% alltbt=fixReachesStuckAtOne(alltbt);
 
 %% choose additional settings for reaction time analysis
 
@@ -77,7 +80,8 @@ end
 % Optional: dprimes for each mouse, each session
 settingsForDprimes(alltbt,'cueZone_onVoff',true); % Check settings in settingsForDprimes
 [alltbt,trialTypes,metadata,isreachout_permouse,permouse_mouseid]=get_dprime_per_mouse(alltbt,trialTypes,metadata,false); % last arg is whether to get rates instead
-[alltbt,trialTypes,metadata]=get_DistractorDprime_per_mouse(alltbt,trialTypes,metadata); % get dprime where hit is reach after distractor, saved to field distract_dprimes
+[~,~,met]=get_DistractorDprime_per_mouse(alltbt,trialTypes,metadata); % get dprime where hit is reach after distractor, saved to field distract_dprimes
+alltbt.distract_dprimes=met.distract_dprimes; metadata.distract_dprimes=met.distract_dprimes; trialTypes.distract_dprimes=met.distract_dprimes;
 alltbt.dprimes(isinf(alltbt.dprimes))=3; alltbt.distract_dprimes(isinf(alltbt.distract_dprimes))=3;
 % Get cued vs uncued reach rates
 [~,~,metadata]=get_dprime_per_mouse(alltbt,trialTypes,metadata,true); % last arg is whether to get rates instead
@@ -138,17 +142,17 @@ tbt_filter.clock_progress=true;
 % filter alltbt
 [alltbt,trialTypes,metadata]=filtTbt(alltbt,trialTypes,tbt_filter.sortField,tbt_filter.range_values,metadata,tbt_filter.clock_progress);
 
-% %% check for opto-enhanced reaching
-% alltbt.sessid=metadata.sessid;
-% alltbt=checkForOptoEnhancedReach(alltbt,metadata,trialTypes,'all_reachBatch','trialTypes.led==1','cueZone_onVoff',[-0.25 0.5],20);
-% trialTypes.opto_enhanced_reach=alltbt.opto_enhanced_reach;
-% 
-% %% find sessions where mouse learned
-% part1_fracThroughSess=[0 0.2];
-% part2_fracThroughSess=[0.2 0.8];
-% learningThresh=0.1;
-% alltbt=findSessWhereMouseLearned(alltbt,metadata,trialTypes,part1_fracThroughSess,part2_fracThroughSess,learningThresh);
-% trialTypes.mouseLearned=alltbt.mouseLearned;
+%% check for opto-enhanced reaching
+alltbt.sessid=metadata.sessid;
+alltbt=checkForOptoEnhancedReach(alltbt,metadata,trialTypes,'all_reachBatch','trialTypes.led==1','cueZone_onVoff',[-0.25 0.5],20);
+trialTypes.opto_enhanced_reach=alltbt.opto_enhanced_reach;
+
+%% find sessions where mouse learned
+part1_fracThroughSess=[0 0.2];
+part2_fracThroughSess=[0.2 0.8];
+learningThresh=0.1;
+alltbt=findSessWhereMouseLearned(alltbt,metadata,trialTypes,part1_fracThroughSess,part2_fracThroughSess,learningThresh);
+trialTypes.mouseLearned=alltbt.mouseLearned;
 
 %% learning curves
 [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);

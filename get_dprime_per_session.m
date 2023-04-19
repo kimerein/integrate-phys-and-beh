@@ -52,7 +52,7 @@ if ~isfield(settings,'lowThresh')
 end
 % cueInd=find(nanmean(tbt.(nameOfCue),1)>settings.lowThresh,1,'first');
 [~,cueInd]=nanmax(nanmean(tbt.(nameOfCue),1));
-startInds=floor(abs(hitWindow_start)/mode(diff(nanmean(tbt.times,1))));
+startInds=floor(abs(hitWindow_start)/mode(diff(nanmean(tbt.times,1))))-1;
 if hitWindow_start<0
     startInds=-startInds;
 end
@@ -70,6 +70,7 @@ if endInds>size(tbt.times,2)
 end
 
 temp=tbt.(whichReach);
+temp(temp<settings.lowThresh)=0; temp(temp>=settings.lowThresh)=1;
 hits=any(temp(:,startInds:endInds),2);
 % throw out all nan trials
 allnantrials=all(isnan(tbt.times),2);

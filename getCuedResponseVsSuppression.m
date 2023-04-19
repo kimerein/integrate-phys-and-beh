@@ -18,7 +18,7 @@ preCueWindow_end2=settingsForDp.preCueWindow_end2;
 % doRawReachRates=0;
 mean_cued_reach_rate=[];
 max_non_cued=[]; 
-if doRawReachRates==0
+if doRawReachRates==false
     
     % useTrials only
     if ~isempty(useTrials)
@@ -147,8 +147,9 @@ else
     
     % fix sessids in metadata, must be 1,2,3,4,etc.
     u=unique(metadata.sessid);
+    metasessid=metadata.sessid;
     for i=1:length(u)
-        metadata.sessid(metadata.sessid==u(i))=i;
+        metadata.sessid(metasessid==u(i))=i;
     end
     
     isreaching_out=countMouseSuccessDropMiss(alltbt,metadata,out);
@@ -251,7 +252,7 @@ if ~isfield(settings,'lowThresh')
 end
 % Convert time window wrt cue onset into indices into data
 cueInd=find(nanmean(tbt.(nameOfCue),1)>settings.lowThresh,1,'first');
-startInds=floor(abs(hitWindow_start)/mode(diff(nanmean(tbt.times,1))));
+startInds=floor(abs(hitWindow_start)/mode(diff(nanmean(tbt.times,1))))-1;
 if hitWindow_start<0
     startInds=-startInds;
 end
@@ -270,12 +271,14 @@ end
 
 timeBin=mode(diff(nanmean(tbt.times,1)));
 temp=tbt.(whichReach);
-cuedWindowTimeBin=length(startInds:endInds).*timeBin;
-cued_reach_rate=nansum(temp(:,startInds:endInds),2)./cuedWindowTimeBin;
+cuedWindowTimeBin=double(length(startInds:endInds).*timeBin);
+temp(temp<settings.lowThresh)=0; temp(temp>=settings.lowThresh)=1;
+cued_reach_rate=sum(temp(:,startInds:endInds),2,'omitnan'); %./cuedWindowTimeBin; % divide through later
 % throw out all nan trials
 allnantrials=all(isnan(tbt.times),2);
 cued_reach_rate(allnantrials==1)=nan;
 mean_cued_reach_rate=meanValue_per_session(metadata,cued_reach_rate);
+mean_cued_reach_rate=mean_cued_reach_rate./cuedWindowTimeBin;
 
 % calculate reach rate non-cued
 
@@ -308,7 +311,7 @@ else
 end
 
 FAWindowTimeBin=nansum(useInds==1).*timeBin;
-FA_reach_rate=nansum(temp(:,useInds==1),2)./FAWindowTimeBin;
+FA_reach_rate=sum(temp(:,useInds==1),2,'omitnan')./FAWindowTimeBin;
 % throw out all nan trials
 FA_reach_rate(allnantrials==1)=nan;
 mean_noncued_reach_rate=meanValue_per_session(metadata,FA_reach_rate);
