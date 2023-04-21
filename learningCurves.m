@@ -13,12 +13,16 @@ for i=1:length(u)
     currmouseid=u(i);
     subday=dayField(metadata.mouseid==currmouseid);
     subdprimes=metadata.dprimes(metadata.mouseid==currmouseid);
-    subdprimesdistract=metadata.distract_dprimes(metadata.mouseid==currmouseid);
+    if isfield(metadata,'distract_dprimes')
+        subdprimesdistract=metadata.distract_dprimes(metadata.mouseid==currmouseid);
+    end
     sub_rr_cued=metadata.reachrate_cued(metadata.mouseid==currmouseid);
     sub_rr_uncued=metadata.reachrate_uncued(metadata.mouseid==currmouseid);
     [udays_for_mouse,ui]=unique(subday);
     dp=subdprimes(ui);
-    distract_dp=subdprimesdistract(ui);
+    if isfield(metadata,'distract_dprimes')
+        distract_dp=subdprimesdistract(ui);
+    end
     rcue=sub_rr_cued(ui);
     runcue=sub_rr_uncued(ui);
     for j=1:length(udays_for_mouse)
@@ -27,7 +31,9 @@ for i=1:length(u)
             error(['Array missing day ' num2str(udays_for_mouse(j))]);
         end
         learnCurves(i,f)=dp(j);
-        learnCurves_distract(i,f)=distract_dp(j);
+        if isfield(metadata,'distract_dprimes')
+            learnCurves_distract(i,f)=distract_dp(j);
+        end
         rr_cued(i,f)=rcue(j);
         rr_uncued(i,f)=runcue(j);
     end
@@ -48,13 +54,17 @@ if fillInToEnd==true
     end
 end
 lc=learnCurves;
-lcminusdistract=learnCurves-learnCurves_distract;
+if isfield(metadata,'distract_dprimes')
+    lcminusdistract=learnCurves-learnCurves_distract;
+end
 rr_cued_interp=rr_cued;
 rr_uncued_interp=rr_uncued;
 % linearly interpolate
 for i=1:size(lc,1)
     lc(i,:)=interpMissing(lc(i,:));
-    lcminusdistract(i,:)=interpMissing(lcminusdistract(i,:));
+    if isfield(metadata,'distract_dprimes')
+        lcminusdistract(i,:)=interpMissing(lcminusdistract(i,:));
+    end
     rr_cued_interp(i,:)=interpMissing(rr_cued_interp(i,:));
     rr_uncued_interp(i,:)=interpMissing(rr_uncued_interp(i,:));
 end
@@ -68,21 +78,24 @@ plot(udays,mean(lc,1,'omitnan'),'Color','k','LineWidth',2); hold on; xlabel('day
 plot(udays,mean(lc,1,'omitnan')+std(lc,[],1,'omitnan')./sqrt(size(lc,1)),'Color','k','LineWidth',1);
 plot(udays,mean(lc,1,'omitnan')-std(lc,[],1,'omitnan')./sqrt(size(lc,1)),'Color','k','LineWidth',1);
 
-figure();
-plot(udays,mean(learnCurves_distract,1,'omitnan'),'Color','k','LineWidth',2); hold on; xlabel('days'); ylabel('distract dprime');
-plot(udays,mean(learnCurves_distract,1,'omitnan')+std(learnCurves_distract,[],1,'omitnan')./sqrt(size(lc,1)),'Color','k','LineWidth',1);
-plot(udays,mean(learnCurves_distract,1,'omitnan')-std(learnCurves_distract,[],1,'omitnan')./sqrt(size(lc,1)),'Color','k','LineWidth',1); 
+if isfield(metadata,'distract_dprimes')
+    figure();
+    plot(udays,mean(learnCurves_distract,1,'omitnan'),'Color','k','LineWidth',2); hold on; xlabel('days'); ylabel('distract dprime');
+    plot(udays,mean(learnCurves_distract,1,'omitnan')+std(learnCurves_distract,[],1,'omitnan')./sqrt(size(lc,1)),'Color','k','LineWidth',1);
+    plot(udays,mean(learnCurves_distract,1,'omitnan')-std(learnCurves_distract,[],1,'omitnan')./sqrt(size(lc,1)),'Color','k','LineWidth',1);
 
-figure(); 
-plot(udays,lcminusdistract'); xlabel('days'); ylabel('dprime minus distract dprime'); hold on;
-plot(udays,mean(lcminusdistract,1,'omitnan'),'Color','k','LineWidth',2);
+    figure();
+    plot(udays,lcminusdistract'); xlabel('days'); ylabel('dprime minus distract dprime'); hold on;
+    plot(udays,mean(lcminusdistract,1,'omitnan'),'Color','k','LineWidth',2);
 
-% figure(); 
-% plot(udays,max(cat(3,lc,lcminusdistract),[],3,'omitnan')'); xlabel('days'); ylabel('max(dprime,dprime minus distract)'); hold on;
-% plot(udays,mean(max(cat(3,lc,lcminusdistract),[],3,'omitnan'),1,'omitnan'),'Color','k','LineWidth',2);
+    % figure();
+    % plot(udays,max(cat(3,lc,lcminusdistract),[],3,'omitnan')'); xlabel('days'); ylabel('max(dprime,dprime minus distract)'); hold on;
+    % plot(udays,mean(max(cat(3,lc,lcminusdistract),[],3,'omitnan'),1,'omitnan'),'Color','k','LineWidth',2);
+end
 
 [lc_day1,lc_dayN]=getFirstAndLastRR(lc,lc,day1is,dayNis,udays);   
-figure(); histogram(lc_dayN-lc_day1,10); xlabel('Change in dprime'); ylabel('Count');
+% figure(); histogram(lc_dayN-lc_day1,10); xlabel('Change in dprime'); ylabel('Count');
+figure(); histogram(lc_dayN,10); xlabel('dprime day N'); ylabel('Count');
 
 [day1_rr_cued,dayN_rr_cued,day1_rr_uncued,dayN_rr_uncued]=getFirstAndLastRR(rr_cued_interp,rr_uncued_interp,day1is,dayNis,udays);
 quiverPlot(day1_rr_cued,dayN_rr_cued,day1_rr_uncued,dayN_rr_uncued);

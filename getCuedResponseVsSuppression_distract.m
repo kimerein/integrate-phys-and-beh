@@ -1,4 +1,4 @@
-function [isreaching_out,dprimes]=getCuedResponseVsSuppression(alltbt,metadata,out,nameOfCue,reachName,useTrials,firstSess,reachAfterCueWindow_start,reachAfterCueWindow_end,doPlot,doRawReachRates)
+function [isreaching_out,dprimes]=getCuedResponseVsSuppression_distract(alltbt,metadata,out,nameOfCue,reachName,useTrials,firstSess,reachAfterCueWindow_start,reachAfterCueWindow_end,doPlot,doRawReachRates)
 
 % this code assumes that all sessions are from the same mouse
 if isempty(doPlot)
@@ -6,14 +6,24 @@ if isempty(doPlot)
 end
 doQuiver=1;
 settingsForDp=settingsForDprimes(alltbt,nameOfCue,false);
-preCueWindow_start1=settingsForDp.preCueWindow_start1; % define start of time window from trial onset, in seconds -- for first window, assuming that trial onset is 0 sec
-preCueWindow_end1=settingsForDp.preCueWindow_end1; % define end of time window from trial onset, in seconds -- for first window
-% preCueWindow_start2=3.81; % define start of time window from trial onset, in seconds -- for second window
-% preCueWindow_end2=5.31; % define end of time window from trial onset, in seconds -- for second window
-% [~,ma]=nanmax(nanmean(alltbt.(nameOfCue),1));
-% cuetimeat=mode(diff(nanmean(alltbt.times,1)))*ma;
-preCueWindow_start2=settingsForDp.preCueWindow_start2;
-preCueWindow_end2=settingsForDp.preCueWindow_end2;
+
+settingsForDp.distractVNoDistract=true;
+
+if settingsForDp.distractVNoDistract==false
+    preCueWindow_start1=settingsForDp.preCueWindow_start1; % define start of time window from trial onset, in seconds -- for first window, assuming that trial onset is 0 sec
+    preCueWindow_end1=settingsForDp.preCueWindow_end1; % define end of time window from trial onset, in seconds -- for first window
+    % preCueWindow_start2=3.81; % define start of time window from trial onset, in seconds -- for second window
+    % preCueWindow_end2=5.31; % define end of time window from trial onset, in seconds -- for second window
+    % [~,ma]=nanmax(nanmean(alltbt.(nameOfCue),1));
+    % cuetimeat=mode(diff(nanmean(alltbt.times,1)))*ma;
+    preCueWindow_start2=settingsForDp.preCueWindow_start2;
+    preCueWindow_end2=settingsForDp.preCueWindow_end2;
+else
+    preCueWindow_start1=settingsForDp.distract.preCueWindow_start1; % define start of time window from trial onset, in seconds -- for first window, assuming that trial onset is 0 sec
+    preCueWindow_end1=settingsForDp.distract.preCueWindow_end1; % define end of time window from trial onset, in seconds -- for first window
+    preCueWindow_start2=settingsForDp.distract.preCueWindow_start2;
+    preCueWindow_end2=settingsForDp.distract.preCueWindow_end2;
+end
 
 % doRawReachRates=0;
 mean_cued_reach_rate=[];
@@ -59,31 +69,61 @@ if doRawReachRates==false
     
     isreaching_out=countMouseSuccessDropMiss(alltbt,metadata,out);
     
-    % Various methods for calculating dprimes
-    settings=RTanalysis_settings();
-    settings.preCueWindow_start=preCueWindow_start1; % define start of time window from trial onset, in seconds
-    settings.preCueWindow_end=preCueWindow_end1; % define end of time window from trial onset, in seconds
-    settings.reachAfterCueWindow_start=reachAfterCueWindow_start; % in sec, wrt cue onset
-    settings.reachAfterCueWindow_end=reachAfterCueWindow_end; % in sec, wrt cue onset
-    disp(['preCueWindow 1 is ' num2str(settings.preCueWindow_start) ' to ' num2str(settings.preCueWindow_end) ' secs from beginning of trial']);
-    [dprimes_preCue,hit_rates,FA_rates_preCue]=get_dprime_per_session(alltbt,out,metadata,reachName,nameOfCue,settings);
+    if settingsForDp.distractVNoDistract==true
+        settings=RTanalysis_settings();
+        settings.preCueWindow_start=preCueWindow_start1; % define start of time window from trial onset, in seconds
+        settings.preCueWindow_end=preCueWindow_end1; % define end of time window from trial onset, in seconds
+        [~,ma]=nanmax(nanmean(alltbt.(nameOfCue),1));
+        cuetimeat=mode(diff(nanmean(alltbt.times,1)))*ma;
+        settings.reachAfterCueWindow_start=reachAfterCueWindow_start; % in sec, wrt cue onset
+        settings.reachAfterCueWindow_end=reachAfterCueWindow_end; % in sec, wrt cue onset
+        disp(['DISTRACTOR D-PRIME: preCueWindow 1 is ' num2str(settings.preCueWindow_start) ' to ' num2str(settings.preCueWindow_end) ' secs from beginning of trial']);
+        [dprimes_preCue,~,FA_rates_preCue]=distractVNoDistract_dprime(alltbt,metadata,out,settings,cuetimeat,ma,reachName,nameOfCue);
 
-    settings=RTanalysis_settings();
-    settings.preCueWindow_start=preCueWindow_start2; % define start of time window from trial onset, in seconds
-    settings.preCueWindow_end=preCueWindow_end2; % define end of time window from trial onset, in seconds
-    [~,ma]=nanmax(nanmean(alltbt.(nameOfCue),1));
-    cuetimeat=mode(diff(nanmean(alltbt.times,1)))*ma;
-    disp(['preCueWindow 2 is ' num2str(settings.preCueWindow_start-cuetimeat) ' to ' num2str(settings.preCueWindow_end-cuetimeat) ' secs from cue onset']);
-    settings.reachAfterCueWindow_start=reachAfterCueWindow_start; % in sec, wrt cue onset
-    settings.reachAfterCueWindow_end=reachAfterCueWindow_end; % in sec, wrt cue onset
-    [dprimes_postCue,~,FA_rates_postCue]=get_dprime_per_session(alltbt,out,metadata,reachName,nameOfCue,settings);
+        settings=RTanalysis_settings();
+        settings.preCueWindow_start=preCueWindow_start2; % define start of time window from trial onset, in seconds
+        settings.preCueWindow_end=preCueWindow_end2; % define end of time window from trial onset, in seconds
+        [~,ma]=nanmax(nanmean(alltbt.(nameOfCue),1));
+        cuetimeat=mode(diff(nanmean(alltbt.times,1)))*ma;
+        disp(['DISTRACTOR D-PRIME: preCueWindow 2 is ' num2str(settings.preCueWindow_start-cuetimeat) ' to ' num2str(settings.preCueWindow_end-cuetimeat) ' secs from cue onset']);
+        settings.reachAfterCueWindow_start=reachAfterCueWindow_start; % in sec, wrt cue onset
+        settings.reachAfterCueWindow_end=reachAfterCueWindow_end; % in sec, wrt cue onset
+        [dprimes_postCue,~,FA_rates_postCue]=distractVNoDistract_dprime(alltbt,metadata,out,settings,cuetimeat,ma,reachName,nameOfCue);
 
-    max_FA=max([FA_rates_preCue; FA_rates_postCue],[],1);
+        max_FA=max([FA_rates_preCue; FA_rates_postCue],[],1);
 
-    isreaching_out.dprimes_preCue=dprimes_preCue;
-    isreaching_out.dprimes_postCue=dprimes_postCue;
-    isreaching_out.max_FA=max_FA;
-    dprimes=min([dprimes_preCue; dprimes_postCue],[],1);    
+        isreaching_out.dprimes_preCue=dprimes_preCue;
+        isreaching_out.dprimes_postCue=dprimes_postCue;
+        isreaching_out.max_FA=max_FA;
+        dprimes=min([dprimes_preCue; dprimes_postCue],[],1);
+    else
+        % Various methods for calculating dprimes
+        settings=RTanalysis_settings();
+        settings.preCueWindow_start=preCueWindow_start1; % define start of time window from trial onset, in seconds
+        settings.preCueWindow_end=preCueWindow_end1; % define end of time window from trial onset, in seconds
+        settings.reachAfterCueWindow_start=reachAfterCueWindow_start; % in sec, wrt cue onset
+        settings.reachAfterCueWindow_end=reachAfterCueWindow_end; % in sec, wrt cue onset
+        disp(['preCueWindow 1 is ' num2str(settings.preCueWindow_start) ' to ' num2str(settings.preCueWindow_end) ' secs from beginning of trial']);
+        [dprimes_preCue,hit_rates,FA_rates_preCue]=get_dprime_per_session(alltbt,out,metadata,reachName,nameOfCue,settings);
+
+        settings=RTanalysis_settings();
+        settings.preCueWindow_start=preCueWindow_start2; % define start of time window from trial onset, in seconds
+        settings.preCueWindow_end=preCueWindow_end2; % define end of time window from trial onset, in seconds
+        [~,ma]=nanmax(nanmean(alltbt.(nameOfCue),1));
+        cuetimeat=mode(diff(nanmean(alltbt.times,1)))*ma;
+        disp(['preCueWindow 2 is ' num2str(settings.preCueWindow_start-cuetimeat) ' to ' num2str(settings.preCueWindow_end-cuetimeat) ' secs from cue onset']);
+        settings.reachAfterCueWindow_start=reachAfterCueWindow_start; % in sec, wrt cue onset
+        settings.reachAfterCueWindow_end=reachAfterCueWindow_end; % in sec, wrt cue onset
+        [dprimes_postCue,~,FA_rates_postCue]=get_dprime_per_session(alltbt,out,metadata,reachName,nameOfCue,settings);
+    
+        max_FA=max([FA_rates_preCue; FA_rates_postCue],[],1);
+
+        isreaching_out.dprimes_preCue=dprimes_preCue;
+        isreaching_out.dprimes_postCue=dprimes_postCue;
+        isreaching_out.max_FA=max_FA;
+        dprimes=min([dprimes_preCue; dprimes_postCue],[],1);
+    end
+    
    
     if ~isempty(firstSess)
         if length(firstSess)==1
@@ -222,6 +262,85 @@ else
         end
     end
 end
+
+end
+
+function [out_dprime,out_hit,out_FA]=distractVNoDistract_dprime(alltbt,metadata,out,settings,cuetimeat,ma,reachName,nameOfCue)
+
+% Note that was already realigned to distractor, and cueZone_onVoff has
+% become movie_distractor onset
+backups.alltbt=alltbt; backups.metadata=metadata; backups.out=out;
+afterCueBins=floor((settings.preCueWindow_start-cuetimeat)./mode(diff(nanmean(alltbt.times,1))));
+useTrials=any(alltbt.movie_distractor(:,ma:ma+afterCueBins)>0.5,2);
+if ~isempty(useTrials)
+    f=fieldnames(alltbt);
+    for i=1:length(f)
+        temp=alltbt.(f{i});
+        if size(temp,1)~=length(useTrials)
+            continue
+        end
+        temp=temp(useTrials==1,:);
+        alltbt.(f{i})=temp;
+    end
+    f=fieldnames(out);
+    for i=1:length(f)
+        temp=out.(f{i});
+        if length(temp)~=length(useTrials)
+            continue
+        end
+        temp=temp(useTrials==1);
+        out.(f{i})=temp;
+    end
+    f=fieldnames(metadata);
+    for i=1:length(f)
+        temp=metadata.(f{i});
+        if length(temp)~=length(useTrials)
+            continue
+        end
+        temp=temp(useTrials==1);
+        metadata.(f{i})=temp;
+    end
+end
+[dprimes_wDistract,hit_rates_wDistract,FA_rates_wDistract]=get_dprime_per_session(alltbt,out,metadata,reachName,nameOfCue,settings);
+
+alltbt=backups.alltbt; metadata=backups.metadata; out=backups.out;
+useTrials=~any(alltbt.movie_distractor(:,ma:ma+afterCueBins)>0.5,2);
+if ~isempty(useTrials)
+    f=fieldnames(alltbt);
+    for i=1:length(f)
+        temp=alltbt.(f{i});
+        if size(temp,1)~=length(useTrials)
+            continue
+        end
+        temp=temp(useTrials==1,:);
+        alltbt.(f{i})=temp;
+    end
+    f=fieldnames(out);
+    for i=1:length(f)
+        temp=out.(f{i});
+        if length(temp)~=length(useTrials)
+            continue
+        end
+        temp=temp(useTrials==1);
+        out.(f{i})=temp;
+    end
+    f=fieldnames(metadata);
+    for i=1:length(f)
+        temp=metadata.(f{i});
+        if length(temp)~=length(useTrials)
+            continue
+        end
+        temp=temp(useTrials==1);
+        metadata.(f{i})=temp;
+    end
+end
+[dprimes_noDistract,hit_rates_noDistract,FA_rates_noDistract]=get_dprime_per_session(alltbt,out,metadata,reachName,nameOfCue,settings);
+distractAdds_hit=hit_rates_wDistract-hit_rates_noDistract;
+distractAdds_FA=FA_rates_wDistract-FA_rates_noDistract;
+
+out_hit=nanmean([hit_rates_noDistract; hit_rates_wDistract],1)-distractAdds_hit;
+out_FA=nanmean([FA_rates_noDistract; FA_rates_wDistract],1)-distractAdds_FA;
+out_dprime=dprime(out_hit,out_FA);
 
 end
 

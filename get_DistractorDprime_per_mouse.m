@@ -6,7 +6,7 @@ trialTypes.distract_dprimes=nan(size(trialTypes.dprimes));
 % Realign alltbt to distractor instead of cue
 alltbt=realignToADistractor(alltbt,'movie_distractor');
 % Change cueZone_onVoff field to be movie_distractor
-% alltbt.cueZone_onVoff=alltbt.movie_distractor;
+alltbt.cueZone_onVoff=alltbt.movie_distractor;
 
 % Assign unique sessids
 u=unique(metadata.mouseid);
