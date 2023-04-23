@@ -110,6 +110,9 @@ FAs=any(temp(:,useInds==1),2);
 FA_rates=trials_per_session(metadata,FAs==1,allnantrials==0);
 
 dprimes=dprime(hit_rates,FA_rates);
+if any(isnan(dprimes))
+    pause;
+end
 
 % dprime for session, organize per trial
 out.dprime=nan(size(out.led,1),1);
@@ -121,13 +124,17 @@ end
 
 function fractionTrialsInGroup_fixZeros=trials_per_session(metadata,in_group_trials,total_trials)
 
-[sessid,sessStartInd]=unique(metadata.sessid);
+sessid=unique(metadata.sessid);
+sessStartInd=nan(1,length(sessid));
+sessEndInd=nan(1,length(sessid));
+for i=1:length(sessid)
+    sessStartInd(i)=find(metadata.sessid==sessid(i),1,'first');
+    sessEndInd(i)=find(metadata.sessid==sessid(i),1,'last');
+end
 fractionTrialsInGroup=nan(1,length(sessid));
 fractionTrialsInGroup_fixZeros=nan(1,length(sessid));
-sessStartInd=[sessStartInd; length(metadata.sessid)+1];
 for i=1:length(sessid)
-    curr_sessStartInd=sessStartInd(i);
-    sessinds=curr_sessStartInd:sessStartInd(i+1)-1;
+    sessinds=sessStartInd(i):sessEndInd(i);
     fractionTrialsInGroup(i)=sum(in_group_trials(sessinds)==1)/sum(total_trials(sessinds)==1);
     if fractionTrialsInGroup(i)==0 
         % one way to fix dprime if hit or FA rates are 0 or 1 is to account for finite length of dataset

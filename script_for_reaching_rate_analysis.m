@@ -7,9 +7,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt20Apr2023222203\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt19Apr2023153325\'; % directory containing experimental data
 behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log - Slimmed down w old mice added.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt20Apr2023222203\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt19Apr2023153325\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -87,7 +87,7 @@ alltbt.dprimes(isinf(alltbt.dprimes))=3; %alltbt.distract_dprimes(isinf(alltbt.d
 [~,~,metadata]=get_dprime_per_mouse(alltbt,trialTypes,metadata,true); % last arg is whether to get rates instead
 
 % Optional: get day 1 for learning curves
-[day1,metadata]=defineDay1(alltbt,trialTypes,metadata,isreachout_permouse,permouse_mouseid);
+% [day1,metadata]=defineDay1(alltbt,trialTypes,metadata,isreachout_permouse,permouse_mouseid);
 
 % Optional: how far through session is each trial
 excludeNonReachingBeginAndEnd=true;
@@ -158,21 +158,19 @@ alltbt=findSessWhereMouseLearned(alltbt,metadata,trialTypes,part1_fracThroughSes
 trialTypes.mouseLearned=alltbt.mouseLearned;
 
 %% learning curves
-% [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
 
 % DURING SILENCING
-[learningC,days]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1],[20]); % for dprime, ok to include day 1, because is within-session comparison
-% [learningC,days]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1:20],[20]); % for dprime, ok to include day 1, because is within-session comparison
-% [learningC,days]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[2],[20]); % may need to excluded day 1 for reach rates bcz paw out constantly?
+% [learningC,days]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1],[20]); % for dprime, ok to include day 1, because is within-session comparison
 
 % ALIGN RECOVERY TO FIRST SESSION
-% metadata.sess_wrt_day1=metadata.nth_session; 
-% ui=unique(metadata.mouseid);
-% for i=1:length(ui)
-%     metadata.sess_wrt_day1(metadata.mouseid==ui(i))=metadata.sess_wrt_day1(metadata.mouseid==ui(i))-min(metadata.nth_session(metadata.mouseid==ui(i)),[],1,'omitnan')+1;
-% end
-% [learningC,days]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1],[20:40]);
+metadata.sess_wrt_day1=metadata.nth_session; 
+ui=unique(metadata.mouseid);
+for i=1:length(ui)
+    metadata.sess_wrt_day1(metadata.mouseid==ui(i))=metadata.sess_wrt_day1(metadata.mouseid==ui(i))-min(metadata.nth_session(metadata.mouseid==ui(i)),[],1,'omitnan')+1;
+end
+[learningC,days]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1','first','last');
 
+%% If want to remove trials where distractor turns on immediately after cue
 % Optional: discard trials where distractor turns on immediately after cue
 alltbt.distractor_immediate_after_cue=any(alltbt.movie_distractor(:,93:123)>0.5,2); % over 1 sec after cue
 trialTypes.distractor_immediate_after_cue=alltbt.distractor_immediate_after_cue; metadata.distractor_immediate_after_cue=alltbt.distractor_immediate_after_cue;
