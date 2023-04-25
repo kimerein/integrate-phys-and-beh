@@ -138,9 +138,9 @@ for i=1:length(sessid)
     fractionTrialsInGroup(i)=sum(in_group_trials(sessinds)==1)/sum(total_trials(sessinds)==1);
     if fractionTrialsInGroup(i)==0 
         % one way to fix dprime if hit or FA rates are 0 or 1 is to account for finite length of dataset
-        fractionTrialsInGroup_fixZeros(i)=1/(sum(total_trials(sessinds)==1));
+        fractionTrialsInGroup_fixZeros(i)=1/(sum(total_trials(sessinds)==1)+1);
     elseif fractionTrialsInGroup(i)==1
-        fractionTrialsInGroup_fixZeros(i)=1-(1/(sum(total_trials(sessinds)==1)));
+        fractionTrialsInGroup_fixZeros(i)=1-(1/(sum(total_trials(sessinds)==1)+1));
     else
         fractionTrialsInGroup_fixZeros(i)=fractionTrialsInGroup(i);
     end

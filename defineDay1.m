@@ -4,7 +4,7 @@ pelletPercThresh=61; % less than this percent pellets loaded per all wheel turns
 successThresh=20; % at least this many pellets successfully
 touchedPelletThresh=20; % at least this many touches of pellet
 useTouchedPellet=true;
-expectedNTrialsPerSess=150; % expect AT LEAST this many trials per session
+expectedNTrialsPerSess=260; % expect AT LEAST this many trials per session
 
 day1=nan(1,length(permouse_mouseid));
 metadata.sess_wrt_day1=metadata.nth_session;
@@ -28,6 +28,7 @@ for i=1:length(permouse_mouseid)
         if tottrials(j)<expectedNTrialsPerSess/2
             % only half a session here
             hasSuccess(j)=hasSuccess(j)*2;
+            hasTouch(j)=hasTouch(j)*2;
         end
         % Get pellet %
         pelletPerc(j)=mode(metadata.pelletPresentFromTable(metadata.mouseid==permouse_mouseid(i) & metadata.nth_session==nthsessions(j)));

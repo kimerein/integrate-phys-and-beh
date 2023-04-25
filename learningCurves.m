@@ -1,4 +1,4 @@
-function [lc,udays]=learningCurves(alltbt,trialTypes,metadata,dayField,day1is,dayNis)
+function [lc,udays]=learningCurves(alltbt,trialTypes,metadata,dayField,day1is,dayNis,subtractBiasTerm)
 
 fillInToEnd=true;
 
@@ -6,6 +6,7 @@ u=unique(metadata.mouseid);
 dayField=metadata.(dayField);
 learnCurves=nan(length(u),200); 
 learnCurves_distract=nan(length(u),200); 
+learnCurves_bias=nan(length(u),200); 
 rr_cued=nan(length(u),200); 
 rr_uncued=nan(length(u),200); 
 udays=-50:1:149;
@@ -16,12 +17,18 @@ for i=1:length(u)
     if isfield(metadata,'distract_dprimes')
         subdprimesdistract=metadata.distract_dprimes(metadata.mouseid==currmouseid);
     end
+    if isfield(metadata,'bias_dprimes')
+        subdprimesbias=metadata.bias_dprimes(metadata.mouseid==currmouseid);
+    end
     sub_rr_cued=metadata.reachrate_cued(metadata.mouseid==currmouseid);
     sub_rr_uncued=metadata.reachrate_uncued(metadata.mouseid==currmouseid);
     [udays_for_mouse,ui]=unique(subday);
     dp=subdprimes(ui);
     if isfield(metadata,'distract_dprimes')
         distract_dp=subdprimesdistract(ui);
+    end
+    if isfield(metadata,'bias_dprimes')
+        bias_dp=subdprimesbias(ui);
     end
     rcue=sub_rr_cued(ui);
     runcue=sub_rr_uncued(ui);
@@ -33,6 +40,9 @@ for i=1:length(u)
         learnCurves(i,f)=dp(j);
         if isfield(metadata,'distract_dprimes')
             learnCurves_distract(i,f)=distract_dp(j);
+        end
+        if isfield(metadata,'bias_dprimes')
+            learnCurves_bias(i,f)=bias_dp(j);
         end
         rr_cued(i,f)=rcue(j);
         rr_uncued(i,f)=runcue(j);
@@ -53,6 +63,25 @@ if fillInToEnd==true
         rr_uncued(i,end)=temp(f);
     end
 end
+
+% subtract day 1 bias term
+if isfield(metadata,'bias_dprimes') && subtractBiasTerm==true
+    % Find bias term for day 1 or first
+    for i=1:size(learnCurves,1) 
+        bias=learnCurves_bias(i,udays==1);
+        if isnan(bias)
+            % find first not nan
+            f=find(~isnan(learnCurves_bias(i,:)),1,'first');
+            bias=learnCurves_bias(i,f);
+        end
+        if isnan(bias)
+            bias=0;
+        end
+        learnCurves(i,:)=learnCurves(i,:)-bias;
+        learnCurves_distract(i,:)=learnCurves_distract(i,:)-bias;
+    end
+end
+
 lc=learnCurves;
 if isfield(metadata,'distract_dprimes')
     lcminusdistract=learnCurves-learnCurves_distract;

@@ -7,9 +7,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt19Apr2023153325\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt25Apr2023133709\'; % directory containing experimental data
 behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log - Slimmed down w old mice added.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt19Apr2023153325\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt25Apr2023133709\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -80,14 +80,21 @@ end
 % Optional: dprimes for each mouse, each session
 settingsForDprimes(alltbt,'cueZone_onVoff',true); % Check settings in settingsForDprimes
 [alltbt,trialTypes,metadata,isreachout_permouse,permouse_mouseid]=get_dprime_per_mouse(alltbt,trialTypes,metadata,false); % last arg is whether to get rates instead
-% [~,~,met]=get_DistractorDprime_per_mouse(alltbt,trialTypes,metadata); % get dprime where hit is reach after distractor, saved to field distract_dprimes
-% alltbt.distract_dprimes=met.distract_dprimes; metadata.distract_dprimes=met.distract_dprimes; trialTypes.distract_dprimes=met.distract_dprimes;
-alltbt.dprimes(isinf(alltbt.dprimes))=3; %alltbt.distract_dprimes(isinf(alltbt.distract_dprimes))=3;
+alltbt.dprimes(isinf(alltbt.dprimes))=3; 
 % Get cued vs uncued reach rates
 [~,~,metadata]=get_dprime_per_mouse(alltbt,trialTypes,metadata,true); % last arg is whether to get rates instead
 
+% Get initial bias term for each mouse
+settingsBias=settingsForBiasTerm(alltbt,'cueZone_onVoff',false);
+[~,~,met]=get_dprime_per_mouse(alltbt,trialTypes,metadata,false,settingsBias); met.dprimes(isinf(met.dprimes))=3;
+alltbt.bias_dprimes=met.dprimes; metadata.bias_dprimes=met.dprimes; trialTypes.bias_dprimes=met.dprimes;
+
+% Get dprimes after distractor
+% [~,~,met]=get_DistractorDprime_per_mouse(alltbt,trialTypes,metadata); alltbt.distract_dprimes(isinf(alltbt.distract_dprimes))=3;
+% alltbt.distract_dprimes=met.distract_dprimes; metadata.distract_dprimes=met.distract_dprimes; trialTypes.distract_dprimes=met.distract_dprimes;
+
 % Optional: get day 1 for learning curves
-% [day1,metadata]=defineDay1(alltbt,trialTypes,metadata,isreachout_permouse,permouse_mouseid);
+[day1,metadata]=defineDay1(alltbt,trialTypes,metadata,isreachout_permouse,permouse_mouseid);
 
 % Optional: how far through session is each trial
 excludeNonReachingBeginAndEnd=true;
@@ -118,9 +125,9 @@ saveDir=['/Volumes/Neurobio/MICROSCOPE/Kim/RT pairs data sets/' temp]; % where t
 alltbt.mouseid=metadata.mouseid;
 alltbt.sessid=metadata.sessid;
 trialTypes.sessid=metadata.sessid;
-tbt_filter.sortField='mouseid';
+% tbt_filter.sortField='mouseid';
 % tbt_filter.sortField='fractionThroughSess_adjusted';
-% tbt_filter.sortField='dprimes';
+tbt_filter.sortField='dprimes';
 % tbt_filter.sortField='distractor_immediate_after_cue';
 % tbt_filter.sortField='sess_wrt_day1';
 % tbt_filter.sortField='opto_enhanced_reach';
@@ -128,10 +135,10 @@ tbt_filter.sortField='mouseid';
 % tbt_filter.sortField='initiallyLowLEDsess';
 % tbt_filter.range_values=[1 6 7 8 10 14 18];
 % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
-% tbt_filter.range_values=[-100 100];
+tbt_filter.range_values=[-100 100];
 % tbt_filter.range_values=[14.5 20.5];
 % tbt_filter.range_values=[-0.5 0.5]; % maybe 2,6,7,12
-tbt_filter.range_values=[5.5 6.5]; % maybe 2,6,7,12
+% tbt_filter.range_values=[5.5 6.5]; % maybe 2,6,7,12
 % tbt_filter.range_values=[2 3 4 5 6 7 8 9 10 11 12 14 15 17 18 19]; % which mice start at non-learning 
 % tbt_filter.range_values=[1 2 4 5 6 7 8 9 10 11 12 17 18 19];
 % tbt_filter.range_values=[1     2     3     6     7     8     9    10    11    12    14    15    17    18];
@@ -160,15 +167,17 @@ trialTypes.mouseLearned=alltbt.mouseLearned;
 %% learning curves
 
 % DURING SILENCING
-% [learningC,days]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1],[20]); % for dprime, ok to include day 1, because is within-session comparison
+[learningC,days]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1],[20],true); % for dprime, ok to include day 1, because is within-session comparison
 
 % ALIGN RECOVERY TO FIRST SESSION
-metadata.sess_wrt_day1=metadata.nth_session; 
-ui=unique(metadata.mouseid);
-for i=1:length(ui)
-    metadata.sess_wrt_day1(metadata.mouseid==ui(i))=metadata.sess_wrt_day1(metadata.mouseid==ui(i))-min(metadata.nth_session(metadata.mouseid==ui(i)),[],1,'omitnan')+1;
-end
-[learningC,days]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1','first','last');
+% metadata.sess_wrt_day1=metadata.nth_session; 
+% ui=unique(metadata.mouseid);
+% for i=1:length(ui)
+%     metadata.sess_wrt_day1(metadata.mouseid==ui(i))=metadata.sess_wrt_day1(metadata.mouseid==ui(i))-min(metadata.nth_session(metadata.mouseid==ui(i)),[],1,'omitnan')+1;
+% end
+% [learningC,days]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1','first','last');
+% [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
+% [learningC,days]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1','first','last');
 
 %% If want to remove trials where distractor turns on immediately after cue
 % Optional: discard trials where distractor turns on immediately after cue

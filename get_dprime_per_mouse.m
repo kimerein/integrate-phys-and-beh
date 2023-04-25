@@ -1,4 +1,18 @@
-function [alltbt_backup,trialTypes_backup,metadata_backup,isreachout_permouse,u]=get_dprime_per_mouse(alltbt,trialTypes,metadata,getRatesInstead)
+function [alltbt_backup,trialTypes_backup,metadata_backup,isreachout_permouse,u]=get_dprime_per_mouse(varargin)
+
+if length(varargin)==4
+    settingsForDp=[];
+    alltbt=varargin{1};
+    trialTypes=varargin{2};
+    metadata=varargin{3};
+    getRatesInstead=varargin{4};
+else
+    alltbt=varargin{1};
+    trialTypes=varargin{2};
+    metadata=varargin{3};
+    getRatesInstead=varargin{4};
+    settingsForDp=varargin{5};
+end
 
 % Assign unique sessids
 u=unique(metadata.mouseid);
@@ -40,7 +54,9 @@ for i=1:length(u)
     [alltbt,trialTypes,metadata,tookThese]=filtTbt(alltbt,trialTypes,tbt_filter.sortField,tbt_filter.range_values,metadata,tbt_filter.clock_progress);
     
     % get dprimes for this mouse
-    settingsForDp=settingsForDprimes(alltbt,'cueZone_onVoff',false);
+    if isempty(settingsForDp)
+        settingsForDp=settingsForDprimes(alltbt,'cueZone_onVoff',false);
+    end
     [isreaching_out,dprimes]=getCuedResponseVsSuppression(alltbt,metadata,trialTypes,'cueZone_onVoff','all_reachBatch',[],1,settingsForDp.reachAfterCueWindow_start,settingsForDp.reachAfterCueWindow_end,false,getRatesInstead);
     if isfield(isreaching_out,'cued_reach_rate')
         RRcued=isreaching_out.cued_reach_rate;

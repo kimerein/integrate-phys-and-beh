@@ -19,7 +19,11 @@ for i=1:length(theseSess)
         temp=temp./nTrialsInSess;
         % subtract off first trial with touch
         ftouch=temp(find(touches==true,1,'first'));
-        temp=temp-ftouch;
+        if isempty(ftouch)
+            break
+        else
+            temp=temp-ftouch;
+        end
         % rescale using last trial with touch
         ltouch=temp(find(touches==true,1,'last'));
         temp=temp./ltouch;
