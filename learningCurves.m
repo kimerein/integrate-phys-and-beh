@@ -1,7 +1,7 @@
-function [lc,udays,rr_cued_interp,rr_uncued_interp,lc_dayN,quiverTips]=learningCurves(alltbt,trialTypes,metadata,dayField,day1is,dayNis,subtractBiasTerm)
+function [lc,udays,rr_cued_interp,rr_uncued_interp,lc_dayN,lc_day1,quiverTips]=learningCurves(alltbt,trialTypes,metadata,dayField,day1is,dayNis,subtractBiasTerm,bestWithinDays)
 
 fillInToEnd=true;
-bestWithinDays=true;
+% bestWithinDays=true;
 
 u=unique(metadata.mouseid);
 dayField=metadata.(dayField);
@@ -123,11 +123,11 @@ if isfield(metadata,'distract_dprimes')
     % plot(udays,mean(max(cat(3,lc,lcminusdistract),[],3,'omitnan'),1,'omitnan'),'Color','k','LineWidth',2);
 end
 
-[lc_day1,lc_dayN]=getFirstAndLastRR(lc,lc,day1is,dayNis,udays,bestWithinDays);   
+[lc_day1,lc_dayN]=getFirstAndLastRR(lc,lc,day1is,dayNis,udays,bestWithinDays,[]);   
 % figure(); histogram(lc_dayN-lc_day1,10); xlabel('Change in dprime'); ylabel('Count');
 figure(); histogram(lc_dayN,10); xlabel('dprime day N'); ylabel('Count');
 
-[day1_rr_cued,dayN_rr_cued,day1_rr_uncued,dayN_rr_uncued]=getFirstAndLastRR(rr_cued_interp,rr_uncued_interp,day1is,dayNis,udays,bestWithinDays);
+[day1_rr_cued,dayN_rr_cued,day1_rr_uncued,dayN_rr_uncued]=getFirstAndLastRR(rr_cued_interp,rr_uncued_interp,day1is,dayNis,udays,bestWithinDays,lc);
 quiverPlot(day1_rr_cued,dayN_rr_cued,day1_rr_uncued,dayN_rr_uncued);
 quiverTips=[dayN_rr_uncued-day1_rr_uncued dayN_rr_cued-day1_rr_cued];
 
@@ -147,6 +147,16 @@ plot(udays,mean(rr_cued_interp,1,'omitnan')-std(rr_cued_interp,[],1,'omitnan')./
 plot(udays,mean(rr_uncued_interp,1,'omitnan')+std(rr_uncued_interp,[],1,'omitnan')./sqrt(size(lc,1)),'Color','r','LineWidth',1);
 plot(udays,mean(rr_uncued_interp,1,'omitnan')-std(rr_uncued_interp,[],1,'omitnan')./sqrt(size(lc,1)),'Color','r','LineWidth',1);
 
+% Fill in nans
+if any(isnan(lc_day1))
+    whichwasnan=isnan(lc_day1);
+    [lc_day1_fornan,lc_dayN_fornan]=getFirstAndLastRR(lc,lc,'first',dayNis,udays,bestWithinDays,[]);
+    lc_day1(whichwasnan)=lc_day1_fornan(whichwasnan);
+
+    [day1_rr_cued_fornan,dayN_rr_cued_fornan,day1_rr_uncued_fornan,dayN_rr_uncued_fornan]=getFirstAndLastRR(rr_cued_interp,rr_uncued_interp,'first',dayNis,udays,bestWithinDays,lc);
+    quiverTips(whichwasnan,:)=[dayN_rr_uncued_fornan(whichwasnan)-day1_rr_uncued_fornan(whichwasnan) dayN_rr_cued_fornan(whichwasnan)-day1_rr_cued_fornan(whichwasnan)];
+end
+
 end
 
 function quiverPlot(day1_rr_cued,dayN_rr_cued,day1_rr_uncued,dayN_rr_uncued)
@@ -160,7 +170,7 @@ ylabel('Change in cued reach rate');
 
 end
 
-function [day1_rr_cued,dayN_rr_cued,day1_rr_uncued,dayN_rr_uncued]=getFirstAndLastRR(rr_cued,rr_uncued,day1is,dayNis,udays,bestWithinDays)
+function [day1_rr_cued,dayN_rr_cued,day1_rr_uncued,dayN_rr_uncued]=getFirstAndLastRR(rr_cued,rr_uncued,day1is,dayNis,udays,bestWithinDays,dp)
 
 day1_rr_cued=nan(size(rr_cued,1),1);
 dayN_rr_cued=nan(size(rr_cued,1),1);
@@ -187,13 +197,25 @@ for i=1:size(rr_cued,1)
     else
         temp=rr_cued(i,:);
         if bestWithinDays
-            day1_rr_cued(i)=nanmax(temp(ismember(udays,day1is)));
+            if isempty(dp)
+                day1_rr_cued(i)=nanmax(temp(ismember(udays,day1is)));
+            else
+                ff=find(ismember(udays,day1is));
+                [~,ma]=nanmax(dp(i,ff));
+                day1_rr_cued(i)=temp(ff(ma));
+            end
         else
             day1_rr_cued(i)=nanmean(temp(ismember(udays,day1is)));
         end
         temp=rr_uncued(i,:);
         if bestWithinDays
-            day1_rr_uncued(i)=nanmax(temp(ismember(udays,day1is)));
+            if isempty(dp)
+                day1_rr_uncued(i)=nanmax(temp(ismember(udays,day1is)));
+            else
+                ff=find(ismember(udays,day1is));
+                [~,ma]=nanmax(dp(i,ff));
+                day1_rr_uncued(i)=temp(ff(ma));
+            end
         else
             day1_rr_uncued(i)=nanmean(temp(ismember(udays,day1is)));
         end
@@ -219,13 +241,25 @@ for i=1:size(rr_cued,1)
     else
         temp=rr_cued(i,:);
         if bestWithinDays
-            dayN_rr_cued(i)=nanmax(temp(ismember(udays,dayNis)));
+            if isempty(dp)
+                dayN_rr_cued(i)=nanmax(temp(ismember(udays,dayNis)));
+            else
+                ff=find(ismember(udays,dayNis));
+                [~,ma]=nanmax(dp(i,ff));
+                dayN_rr_cued(i)=temp(ff(ma));
+            end
         else
             dayN_rr_cued(i)=nanmean(temp(ismember(udays,dayNis)));
         end
         temp=rr_uncued(i,:);
         if bestWithinDays
-            dayN_rr_uncued(i)=nanmax(temp(ismember(udays,dayNis)));
+            if isempty(dp)
+                dayN_rr_uncued(i)=nanmax(temp(ismember(udays,dayNis)));
+            else
+                ff=find(ismember(udays,dayNis));
+                [~,ma]=nanmax(dp(i,ff));
+                dayN_rr_uncued(i)=temp(ff(ma));
+            end
         else
             dayN_rr_uncued(i)=nanmean(temp(ismember(udays,dayNis)));
         end

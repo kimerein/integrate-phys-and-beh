@@ -7,9 +7,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt23Apr2023194532\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt25Apr2023131604\'; % directory containing experimental data
 behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log - Slimmed down w old mice added.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt23Apr2023194532\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt25Apr2023131604\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -165,10 +165,11 @@ alltbt=findSessWhereMouseLearned(alltbt,metadata,trialTypes,part1_fracThroughSes
 trialTypes.mouseLearned=alltbt.mouseLearned;
 
 %% learning curves
-% [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
+[alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
 
 % DURING SILENCING
-[learningC,days]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1],[20],true); % for dprime, ok to include day 1, because is within-session comparison
+[learningC,days,reachrate_cued,reachrate_uncued,dayNdprime,day1dprime,quiverTips]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1],[10:20],true,false);
+changeindprime=dayNdprime-day1dprime;
 
 % ALIGN RECOVERY TO FIRST SESSION
 % metadata.sess_wrt_day1=metadata.nth_session; 
@@ -177,9 +178,6 @@ trialTypes.mouseLearned=alltbt.mouseLearned;
 %     metadata.sess_wrt_day1(metadata.mouseid==ui(i))=metadata.sess_wrt_day1(metadata.mouseid==ui(i))-min(metadata.nth_session(metadata.mouseid==ui(i)),[],1,'omitnan')+1;
 % end
 % [learningC,days]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1','first','last',true);
-
-% FOR QUIVERS
-% [learningC,days,reachrate_cued,reachrate_uncued,dayNdprime,quiverTips]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1],[15:50],true);
 
 %% If want to remove trials where distractor turns on immediately after cue
 % Optional: discard trials where distractor turns on immediately after cue
