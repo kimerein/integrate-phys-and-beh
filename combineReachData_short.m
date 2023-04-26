@@ -33,7 +33,8 @@ metadata=howFarThroughSession(metadata,false,out);
 [metadata,alltbt,out]=add_dprimes_to_tbt(alltbt,out,metadata,[],'all_reachBatch','cueZone_onVoff',settings);
 
 % save field by field
-saveStructFieldByField(alltbt,saveDir); % save alltbt
-saveStructFieldByField(out,saveDir); % save out
-saveStructFieldByField(metadata,saveDir); % save metadata
+mkdir([saveDir '\alltbt\']); mkdir([saveDir '\out\']); mkdir([saveDir '\metadata\']);
+saveStructFieldByField(alltbt,[saveDir '\alltbt\']); % save alltbt
+saveStructFieldByField(out,[saveDir '\out\']); % save out
+saveStructFieldByField(metadata,[saveDir '\metadata\']); % save metadata
 save([saveDir '\reachExptAnalysis_settings.mat'],'settings'); % save reach expt analysis settings
