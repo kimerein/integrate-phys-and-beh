@@ -26,6 +26,19 @@ if ~isempty(dprimes)
     metadata.dprimes=alltbt.dprimes;
     out.dprimes=alltbt.dprimes;
 else
+    % Need to make sure sessid are continuous ints from 1 to number of
+    % unique sessions
+    % First assign unique sessids
+    u=unique(metadata.mouseid);
+    j=0;
+    for i=1:length(u)
+        metadata.sessid(metadata.mouseid==u(i))=metadata.nth_session(metadata.mouseid==u(i))+j;
+        j=j+nanmax(metadata.sessid(metadata.mouseid==u(i)));
+    end
+    u=unique(metadata.sessid); backup=metadata.sessid;
+    for i=1:length(u)
+        metadata.sessid(backup==u(i))=i;
+    end
     [dprimes]=get_dprime_per_session(alltbt,out,metadata,reachName,cueName,settings);
     
     metadata.dprimes=nan(size(metadata.sessid));
