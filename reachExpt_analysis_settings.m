@@ -31,6 +31,9 @@ if isempty(settings)
     settings.useOptoZone=0; % 1 if want to use manually defined optoZone in video instead of Arduino-based optoOn
     settings.maxDelayUntilOpto=9.5; % in seconds, max time from trial onset until opto turns on
     settings.isOrchestra=1; % will suppress figures if running on server
+    settings.putCueAtInd=94; % if, when doing cue realignment, want to put the cue onset (i.e., cueZone_onVoff max) at a specific index; only used if doRealign==1
+    % if putCueAtInd is empty, will just use first trial's cue position as
+    % the default
     settings.tryForFiles={'optoOnHere','nth_session','optoThresh','preemptCue','dateFromTextFile'}; % look for these files in each directory
 end
 
@@ -50,15 +53,16 @@ end
 if displ==true
     % Order in fldname must match order in prompt
     fldname={'nameOfCue','lowThresh','durationOfWheelTurn','wheelStopsThisManySecsBeforeCue','cueDuration','maxTrialDuration','timeSlop','reachAfterCueWindow_start','reachAfterCueWindow_end',...
-             'preCueWindow_start','preCueWindow_end','check_for_human','discardPreemptive','doRealign','useOptoZone','maxDelayUntilOpto'};
+             'preCueWindow_start','preCueWindow_end','check_for_human','discardPreemptive','doRealign','useOptoZone','maxDelayUntilOpto','putCueAtInd'};
     prompt={'name of cue:','tbt thresh:','duration of wheel turn (s):','time between wheel stop and cue (s):','cue duration (s):','max trial duration (s):',...
             'time uncertainty (s):','"reached after cue" window s from cue on START:','"reached after cue" window s from cue on END:',...
-            'pre-cue window from trial onset START (s):','pre-cue window from trial onset END (s):','1 if need human check to include data:','1 if discard days with preemptive reaching:','1 if realign all cues to cue onset:','1 if want to use movie opto zone instead of opto from Arduino:','max delay til opto (s):'};
+            'pre-cue window from trial onset START (s):','pre-cue window from trial onset END (s):','1 if need human check to include data:','1 if discard days with preemptive reaching:','1 if realign all cues to cue onset:','1 if want to use movie opto zone instead of opto from Arduino:','max delay til opto (s):',...
+            'if doRealign is true, will put cue onsets at this index from trial start (empty for default):'};
     dlgtitle='Check or modify experiment-specific settings';
-    dims=[1 35];
+    dims=[1 70];
     definput={settings.(fldname{1}),num2str(settings.(fldname{2})),num2str(settings.(fldname{3})),num2str(settings.(fldname{4})),num2str(settings.(fldname{5})),num2str(settings.(fldname{6})),...
               num2str(settings.(fldname{7})),num2str(settings.(fldname{8})),num2str(settings.(fldname{9})),...
-              num2str(settings.(fldname{10})),num2str(settings.(fldname{11})),num2str(settings.(fldname{12})),num2str(settings.(fldname{13})),num2str(settings.(fldname{14})),num2str(settings.(fldname{15})),num2str(settings.(fldname{16}))};
+              num2str(settings.(fldname{10})),num2str(settings.(fldname{11})),num2str(settings.(fldname{12})),num2str(settings.(fldname{13})),num2str(settings.(fldname{14})),num2str(settings.(fldname{15})),num2str(settings.(fldname{16})),num2str(settings.(fldname{17}))};
     answer=inputdlg(prompt,dlgtitle,dims,definput);
     for i=1:length(answer)
         if ischar(settings.(fldname{i}))

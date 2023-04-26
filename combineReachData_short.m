@@ -28,9 +28,9 @@ alltbt=getTimesWrtSessionStart(alltbt,metadata);
 
 % define and classify trial types
 % modify settings in trialTypeSettings.m to change trial types
-[out,alltbt]=getSweepsFromBeh(alltbt);
-metadata=howFarThroughSession(metadata);
-[metadata,alltbt,out]=add_dprimes_to_tbt(alltbt,out,metadata,'all_reachBatch','cueZone_onVoff',settings);
+[out,alltbt]=getSweepsFromBeh(alltbt,settings);
+metadata=howFarThroughSession(metadata,false,out);
+[metadata,alltbt,out]=add_dprimes_to_tbt(alltbt,out,metadata,[],'all_reachBatch','cueZone_onVoff',settings);
 
 % save field by field
 saveStructFieldByField(alltbt,saveDir); % save alltbt
