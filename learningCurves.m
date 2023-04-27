@@ -1,4 +1,4 @@
-function [lc,udays,rr_cued_interp,rr_uncued_interp,lc_dayN,lc_day1,quiverTips]=learningCurves(alltbt,trialTypes,metadata,dayField,day1is,dayNis,subtractBiasTerm,bestWithinDays)
+function [lc,udays,rr_cued_interp,rr_uncued_interp,lc_dayN,lc_day1,quiverTips]=learningCurves(alltbt,trialTypes,metadata,dayField,day1is,dayNis,bestWithinDays)
 
 fillInToEnd=true;
 subtractDay1_dprime=true;
@@ -96,7 +96,12 @@ plot(udays,lc'); xlabel('days'); ylabel('dprime'); hold on;
 plot(udays,mean(lc,1,'omitnan'),'Color','k','LineWidth',2);
 
 figure();
-plot(udays,mean(lc,1,'omitnan'),'Color','k','LineWidth',2); hold on; xlabel('days'); ylabel('dprime');
+plot(udays,mean(lc,1,'omitnan'),'Color','k','LineWidth',2); hold on; xlabel('days'); 
+if subtractDay1_dprime
+    ylabel('delta dprime');
+else
+    ylabel('dprime');
+end
 plot(udays,mean(lc,1,'omitnan')+std(lc,[],1,'omitnan')./sqrt(size(lc,1)),'Color','k','LineWidth',1);
 plot(udays,mean(lc,1,'omitnan')-std(lc,[],1,'omitnan')./sqrt(size(lc,1)),'Color','k','LineWidth',1);
 
@@ -117,7 +122,7 @@ end
 
 [lc_day1,lc_dayN]=getFirstAndLastRR(lc,lc,day1is,dayNis,udays,bestWithinDays,[]);   
 % figure(); histogram(lc_dayN-lc_day1,10); xlabel('Change in dprime'); ylabel('Count');
-figure(); histogram(lc_dayN,10); xlabel('dprime day N'); ylabel('Count');
+figure(); histogram(lc_dayN,10); ylabel('Count');
 
 [day1_rr_cued,dayN_rr_cued,day1_rr_uncued,dayN_rr_uncued]=getFirstAndLastRR(rr_cued_interp,rr_uncued_interp,day1is,dayNis,udays,bestWithinDays,lc);
 quiverPlot(day1_rr_cued,dayN_rr_cued,day1_rr_uncued,dayN_rr_uncued);
