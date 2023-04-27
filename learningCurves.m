@@ -1,13 +1,12 @@
 function [lc,udays,rr_cued_interp,rr_uncued_interp,lc_dayN,lc_day1,quiverTips]=learningCurves(alltbt,trialTypes,metadata,dayField,day1is,dayNis,subtractBiasTerm,bestWithinDays)
 
 fillInToEnd=true;
-% bestWithinDays=true;
+subtractDay1_dprime=true;
 
 u=unique(metadata.mouseid);
 dayField=metadata.(dayField);
 learnCurves=nan(length(u),200); 
 learnCurves_distract=nan(length(u),200); 
-learnCurves_bias=nan(length(u),200); 
 rr_cued=nan(length(u),200); 
 rr_uncued=nan(length(u),200); 
 udays=-50:1:149;
@@ -18,18 +17,12 @@ for i=1:length(u)
     if isfield(metadata,'distract_dprimes')
         subdprimesdistract=metadata.distract_dprimes(metadata.mouseid==currmouseid);
     end
-    if isfield(metadata,'bias_dprimes')
-        subdprimesbias=metadata.bias_dprimes(metadata.mouseid==currmouseid);
-    end
     sub_rr_cued=metadata.reachrate_cued(metadata.mouseid==currmouseid);
     sub_rr_uncued=metadata.reachrate_uncued(metadata.mouseid==currmouseid);
     [udays_for_mouse,ui]=unique(subday);
     dp=subdprimes(ui);
     if isfield(metadata,'distract_dprimes')
         distract_dp=subdprimesdistract(ui);
-    end
-    if isfield(metadata,'bias_dprimes')
-        bias_dp=subdprimesbias(ui);
     end
     rcue=sub_rr_cued(ui);
     runcue=sub_rr_uncued(ui);
@@ -41,9 +34,6 @@ for i=1:length(u)
         learnCurves(i,f)=dp(j);
         if isfield(metadata,'distract_dprimes')
             learnCurves_distract(i,f)=distract_dp(j);
-        end
-        if isfield(metadata,'bias_dprimes')
-            learnCurves_bias(i,f)=bias_dp(j);
         end
         rr_cued(i,f)=rcue(j);
         rr_uncued(i,f)=runcue(j);
@@ -65,17 +55,17 @@ if fillInToEnd==true
     end
 end
 
-% subtract day 1 bias term
-if isfield(metadata,'bias_dprimes') && subtractBiasTerm==true
-    % Find bias term
+% subtract day 1 bias
+if subtractDay1_dprime
+    % Find bias
     for i=1:size(learnCurves,1) 
 %         bias=nanmean(learnCurves_bias(i,udays<=1));
-        bias=nanmean(learnCurves_bias(i,udays==1));
+        bias=nanmean(learnCurves(i,udays==1));
         if isnan(bias)
             % find first not nan
-            f=find(~isnan(learnCurves_bias(i,:)),1,'first');
-%             bias=nanmean(learnCurves_bias(i,1:f));
-            bias=nanmean(learnCurves_bias(i,f));
+            f=find(~isnan(learnCurves(i,:)),1,'first');
+%             bias=nanmean(learnCurves(i,1:f));
+            bias=nanmean(learnCurves(i,f));
         end
         if isnan(bias)
             bias=0;

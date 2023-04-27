@@ -85,11 +85,6 @@ alltbt.dprimes(isinf(alltbt.dprimes))=3;
 settingsRR=settingsForReachRates(alltbt,'cueZone_onVoff',false);
 [~,~,metadata]=get_dprime_per_mouse(alltbt,trialTypes,metadata,true,settingsRR); % last arg is whether to get rates instead
 
-% Get initial bias term for each mouse
-settingsBias=settingsForBiasTerm(alltbt,'cueZone_onVoff',false);
-[~,~,met]=get_dprime_per_mouse(alltbt,trialTypes,metadata,false,settingsBias); met.dprimes(isinf(met.dprimes))=3;
-alltbt.bias_dprimes=met.dprimes; metadata.bias_dprimes=met.dprimes; trialTypes.bias_dprimes=met.dprimes;
-
 % Get dprimes after distractor
 % [~,~,met]=get_DistractorDprime_per_mouse(alltbt,trialTypes,metadata); alltbt.distract_dprimes(isinf(alltbt.distract_dprimes))=3;
 % alltbt.distract_dprimes=met.distract_dprimes; metadata.distract_dprimes=met.distract_dprimes; trialTypes.distract_dprimes=met.distract_dprimes;
