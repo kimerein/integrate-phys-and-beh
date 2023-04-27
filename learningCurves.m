@@ -67,13 +67,15 @@ end
 
 % subtract day 1 bias term
 if isfield(metadata,'bias_dprimes') && subtractBiasTerm==true
-    % Find bias term for day 1 or first
+    % Find bias term
     for i=1:size(learnCurves,1) 
-        bias=learnCurves_bias(i,udays==1);
+%         bias=nanmean(learnCurves_bias(i,udays<=1));
+        bias=nanmean(learnCurves_bias(i,udays==1));
         if isnan(bias)
             % find first not nan
             f=find(~isnan(learnCurves_bias(i,:)),1,'first');
-            bias=learnCurves_bias(i,f);
+%             bias=nanmean(learnCurves_bias(i,1:f));
+            bias=nanmean(learnCurves_bias(i,f));
         end
         if isnan(bias)
             bias=0;

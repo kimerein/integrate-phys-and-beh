@@ -1,11 +1,17 @@
-function [isreaching_out,dprimes]=getCuedResponseVsSuppression(alltbt,metadata,out,nameOfCue,reachName,useTrials,firstSess,reachAfterCueWindow_start,reachAfterCueWindow_end,doPlot,doRawReachRates)
+function [isreaching_out,dprimes]=getCuedResponseVsSuppression(alltbt,metadata,out,nameOfCue,reachName,useTrials,firstSess,reachAfterCueWindow_start,reachAfterCueWindow_end,doPlot,doRawReachRates,settingsForDp)
 
 % this code assumes that all sessions are from the same mouse
 if isempty(doPlot)
     doPlot=1;
 end
 doQuiver=1;
-settingsForDp=settingsForDprimes(alltbt,nameOfCue,false);
+if isempty(settingsForDp)
+    if doRawReachRates==false
+        settingsForDp=settingsForDprimes(alltbt,nameOfCue,false);
+    else
+        settingsForDp=settingsForReachRates(alltbt,nameOfCue,false);
+    end
+end
 preCueWindow_start1=settingsForDp.preCueWindow_start1; % define start of time window from trial onset, in seconds -- for first window, assuming that trial onset is 0 sec
 preCueWindow_end1=settingsForDp.preCueWindow_end1; % define end of time window from trial onset, in seconds -- for first window
 % preCueWindow_start2=3.81; % define start of time window from trial onset, in seconds -- for second window

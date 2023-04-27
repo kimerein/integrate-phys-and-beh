@@ -54,10 +54,7 @@ for i=1:length(u)
     [alltbt,trialTypes,metadata,tookThese]=filtTbt(alltbt,trialTypes,tbt_filter.sortField,tbt_filter.range_values,metadata,tbt_filter.clock_progress);
     
     % get dprimes for this mouse
-    if isempty(settingsForDp)
-        settingsForDp=settingsForDprimes(alltbt,'cueZone_onVoff',false);
-    end
-    [isreaching_out,dprimes]=getCuedResponseVsSuppression(alltbt,metadata,trialTypes,'cueZone_onVoff','all_reachBatch',[],1,settingsForDp.reachAfterCueWindow_start,settingsForDp.reachAfterCueWindow_end,false,getRatesInstead);
+    [isreaching_out,dprimes]=getCuedResponseVsSuppression(alltbt,metadata,trialTypes,'cueZone_onVoff','all_reachBatch',[],1,settingsForDp.reachAfterCueWindow_start,settingsForDp.reachAfterCueWindow_end,false,getRatesInstead,settingsForDp);
     if isfield(isreaching_out,'cued_reach_rate')
         RRcued=isreaching_out.cued_reach_rate;
         RRuncued=isreaching_out.noncued_reach_rate;

@@ -7,9 +7,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt25Apr2023131604\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt20Apr2023222203\'; % directory containing experimental data
 behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log - Slimmed down w old mice added.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt25Apr2023131604\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt20Apr2023222203\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -78,11 +78,12 @@ end
 % [alltbt,metadata,trialTypes]=excludePawOnWheel(alltbt,metadata,trialTypes,'cueZone_onVoff');
 
 % Optional: dprimes for each mouse, each session
-settingsForDprimes(alltbt,'cueZone_onVoff',true); % Check settings in settingsForDprimes
-[alltbt,trialTypes,metadata,isreachout_permouse,permouse_mouseid]=get_dprime_per_mouse(alltbt,trialTypes,metadata,false); % last arg is whether to get rates instead
+settingsDp=settingsForDprimes(alltbt,'cueZone_onVoff',true); % Check settings in settingsForDprimes
+[alltbt,trialTypes,metadata,isreachout_permouse,permouse_mouseid]=get_dprime_per_mouse(alltbt,trialTypes,metadata,false,settingsDp); % last arg is whether to get rates instead
 alltbt.dprimes(isinf(alltbt.dprimes))=3; 
 % Get cued vs uncued reach rates
-[~,~,metadata]=get_dprime_per_mouse(alltbt,trialTypes,metadata,true); % last arg is whether to get rates instead
+settingsRR=settingsForReachRates(alltbt,'cueZone_onVoff',false);
+[~,~,metadata]=get_dprime_per_mouse(alltbt,trialTypes,metadata,true,settingsRR); % last arg is whether to get rates instead
 
 % Get initial bias term for each mouse
 settingsBias=settingsForBiasTerm(alltbt,'cueZone_onVoff',false);
@@ -168,8 +169,7 @@ trialTypes.mouseLearned=alltbt.mouseLearned;
 [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
 
 % DURING SILENCING
-[learningC,days,reachrate_cued,reachrate_uncued,dayNdprime,day1dprime,quiverTips]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1],[10:20],true,false);
-changeindprime=dayNdprime-day1dprime;
+[learningC,days,reachrate_cued,reachrate_uncued,dayNdprime,day1dprime,quiverTips]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1],[15:20],true,false);
 
 % ALIGN RECOVERY TO FIRST SESSION
 % metadata.sess_wrt_day1=metadata.nth_session; 
