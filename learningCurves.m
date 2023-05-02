@@ -59,11 +59,11 @@ end
 if subtractDay1_dprime
     % Find bias
     for i=1:size(learnCurves,1) 
-        bias=nanmin(learnCurves(i,ismember(udays,1:5)));
+        bias=nanmean(learnCurves(i,ismember(udays,1)));
         if isnan(bias)
             % find first not nan
             f=find(~isnan(learnCurves(i,:)),1,'first');
-            bias=nanmin(learnCurves(i,1:f));
+            bias=nanmean(learnCurves(i,1:f));
         end
         if isnan(bias)
             bias=0;

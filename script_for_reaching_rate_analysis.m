@@ -7,9 +7,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt25Apr2023175330\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt20Apr2023222203\'; % directory containing experimental data
 behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log - Slimmed down w old mice added.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt25Apr2023175330\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt20Apr2023222203\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -35,6 +35,11 @@ alltbt=setToSingle(alltbt,{'all_reachBatch','cueZone_onVoff','isChewing','isHold
 a=load(mouseDBdir); mouse_database=a.mouse_database;
 metadata=getNthSession(behaviorLogDir,mouse_database,metadata,true,true); % last two args are alsoFixOptoOnHere, then excludeTrainingRig
 
+% Optional: get day 1 for learning curves
+trialTypes.mouseid=metadata.mouseid;
+[~,~,~,isreachout_permouse,permouse_mouseid]=get_dprime_per_mouse(alltbt,trialTypes,metadata,false,settingsForDprimes(alltbt,'cueZone_onVoff',false)); % last arg is filler, dprimes will be recalculated later
+[day1,metadata]=defineDay1(alltbt,trialTypes,metadata,isreachout_permouse,permouse_mouseid);
+
 % Optional
 % Back-up full, unfiltered alltbt in workspace
 backup.alltbt=alltbt;
@@ -45,7 +50,7 @@ backup.metadata=metadata;
 % [alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,[4 5 19]);
 
 % Optional: discard preemptive
-% [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
+[alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
 
 % fix weird bug where reach batch sometimes get stuck at 1 (in less than 0.1% of trials), possibly an
 % interp problem somewhere?? not sure
@@ -64,8 +69,6 @@ if ~isfield(trialTypes,'optoGroup')
 end
 trialTypes.led(~isnan(trialTypes.optoGroup))=1;
 
-trialTypes.mouseid=metadata.mouseid;
-
 % Optional: Fix sessids to match nth_sessions
 u=unique(metadata.mouseid);
 j=0;
@@ -79,7 +82,7 @@ end
 
 % Optional: dprimes for each mouse, each session
 settingsDp=settingsForDprimes(alltbt,'cueZone_onVoff',true); % Check settings in settingsForDprimes
-[alltbt,trialTypes,metadata,isreachout_permouse,permouse_mouseid]=get_dprime_per_mouse(alltbt,trialTypes,metadata,false,settingsDp); % last arg is whether to get rates instead
+[alltbt,trialTypes,metadata]=get_dprime_per_mouse(alltbt,trialTypes,metadata,false,settingsDp); % last arg is whether to get rates instead
 alltbt.dprimes(isinf(alltbt.dprimes))=3; 
 % Get cued vs uncued reach rates
 settingsRR=settingsForReachRates(alltbt,'cueZone_onVoff',false);
@@ -88,9 +91,6 @@ settingsRR=settingsForReachRates(alltbt,'cueZone_onVoff',false);
 % Get dprimes after distractor
 % [~,~,met]=get_DistractorDprime_per_mouse(alltbt,trialTypes,metadata); alltbt.distract_dprimes(isinf(alltbt.distract_dprimes))=3;
 % alltbt.distract_dprimes=met.distract_dprimes; metadata.distract_dprimes=met.distract_dprimes; trialTypes.distract_dprimes=met.distract_dprimes;
-
-% Optional: get day 1 for learning curves
-[day1,metadata]=defineDay1(alltbt,trialTypes,metadata,isreachout_permouse,permouse_mouseid);
 
 % Optional: how far through session is each trial
 excludeNonReachingBeginAndEnd=true;
@@ -161,9 +161,7 @@ alltbt=findSessWhereMouseLearned(alltbt,metadata,trialTypes,part1_fracThroughSes
 trialTypes.mouseLearned=alltbt.mouseLearned;
 
 %% learning curves
-[alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
-
-% DURING SILENCING
+% DURING INITIAL LEARNING CONTROL OR SILENCING
 [learningC,days,reachrate_cued,reachrate_uncued,dayNdprime,day1dprime,quiverTips]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1],[15:20],false);
 
 % ALIGN RECOVERY TO FIRST SESSION
