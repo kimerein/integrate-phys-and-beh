@@ -3,7 +3,7 @@ function fixMissGrabDropSuccess(datadir)
 usePrevChewingThresh=true;
 
 ls_base=dir(datadir);
-for mousen=4:length(ls_base)
+for mousen=3:length(ls_base)
     if ~isfolder([ls_base(mousen).folder sep ls_base(mousen).name])
         continue
     end
@@ -120,6 +120,12 @@ switch mousename
     case 'mitch_none'
 %         placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\O2 output\' aviName];
         placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\' aviName];
+    case 'ssm12'
+        placeForO2data=['Z:\MICROSCOPE\Senmiao\Behavior\' datestr '\' mousename '\O2 output\' aviName]; 
+    case 'ssm13'
+        placeForO2data=['Z:\MICROSCOPE\Senmiao\Behavior\' datestr '\' mousename '\O2 output\' aviName]; 
+    case 'ssm14'
+        placeForO2data=['Z:\MICROSCOPE\Senmiao\Behavior\' datestr '\' mousename '\O2 output\' aviName]; 
     case 'Oct_B'
         placeForO2data=['Z:\MICROSCOPE\Kim\KER Behavior\By date\Low speed\' datestr '\' mousename '\O2 output\' aviName]; 
     case 'July_3'

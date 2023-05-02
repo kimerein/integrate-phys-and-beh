@@ -2,7 +2,7 @@ function [day1,metadata]=defineDay1(alltbt,trialTypes,metadata,isreachout_permou
 
 pelletPercThresh=61; % less than this percent pellets loaded per all wheel turns
 successThresh=20; % at least this many pellets successfully
-touchedPelletThresh=20; % at least this many touches of pellet
+touchedPelletThresh=19; % at least this many touches of pellet
 useTouchedPellet=true;
 expectedNTrialsPerSess=260; % expect AT LEAST this many trials per session
 

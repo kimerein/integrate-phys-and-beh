@@ -89,7 +89,8 @@ if doRawReachRates==false
     isreaching_out.dprimes_preCue=dprimes_preCue;
     isreaching_out.dprimes_postCue=dprimes_postCue;
     isreaching_out.max_FA=max_FA;
-    dprimes=min([dprimes_preCue; dprimes_postCue],[],1);    
+    dprimes=min([dprimes_preCue; dprimes_postCue],[],1);  
+%     dprimes=mean([dprimes_preCue; dprimes_postCue],1);  
    
     if ~isempty(firstSess)
         if length(firstSess)==1
