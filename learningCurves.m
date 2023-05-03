@@ -1,4 +1,4 @@
-function [lc,udays,rr_cued_interp,rr_uncued_interp,lc_dayN,lc_day1,quiverTips]=learningCurves(alltbt,trialTypes,metadata,dayField,day1is,dayNis,bestWithinDays)
+function [lc,udays,rr_cued_interp,rr_uncued_interp,lc_dayN,lc_day1,quiverTips,biases]=learningCurves(alltbt,trialTypes,metadata,dayField,day1is,dayNis,bestWithinDays)
 
 fillInToEnd=true;
 subtractDay1_dprime=true;
@@ -56,6 +56,7 @@ if fillInToEnd==true
 end
 
 % subtract day 1 bias
+biases=nan(size(learnCurves,1),1);
 if subtractDay1_dprime
     % Find bias
     for i=1:size(learnCurves,1) 
@@ -75,6 +76,7 @@ if subtractDay1_dprime
         end
         learnCurves(i,:)=learnCurves(i,:)-bias;
         learnCurves_distract(i,:)=learnCurves_distract(i,:)-bias;
+        biases(i)=bias;
     end
 end
 
