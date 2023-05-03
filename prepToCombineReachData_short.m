@@ -1,7 +1,7 @@
 % script for preparing directory structure before combining data across videos and days
 
 % assign mouse and session numbers
-expt_dir='Z:\MICROSCOPE\Kim\Behavior Final Data Sets\Batch opto Nkx x ReaChR';
+expt_dir='Z:\MICROSCOPE\Kim\Behavior Final Data Sets\Other mice for interleaved Nkx x ReaChR not varied timing or batch';
 optoOnHere=1; % 1 if there was opto, else 0
 onlySaveOptoIfDoesNotExist=true;
 startMouseNumberingAt=1; % if want to start mouse numbers at some offset
