@@ -23,8 +23,11 @@ var2=sd2.^2;
 % 3. Combine variances
 varcombo=combineVar(var1,var2,plotReturn1.n,plotReturn2.n);
 
-% 4. Take sqrt to get combined standard error
-combo_se=sqrt(varcombo);
+% 4. Take sqrt to get combined standard deviation
+combo_sd=sqrt(varcombo);
+
+% 5. Divide through by sqrt(n trials) to get se
+combo_se=combo_sd./sqrt(plotReturn1.n + plotReturn2.n);
 
 % 5. Get trial-weighted combined mean
 temp1=plotReturn1.(['data' num2str(whichTrial1) '_mean']);
