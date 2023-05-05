@@ -40,12 +40,13 @@ if length(plotReturn1.time_for_x)~=length(plotReturn2.time_for_x)
 end
 figure();
 [n,x]=cityscape_hist(mecombo,plotReturn1.time_for_x);
-plot(x,n,'LineWidth',2,'Color',linecol);
+plot(x,n,'Color',linecol);
 hold on;
 [n,x]=cityscape_hist(mecombo-combo_se,plotReturn1.time_for_x);
 plot(x,n,'Color',linecol);
 [n,x]=cityscape_hist(mecombo+combo_se,plotReturn1.time_for_x);
 plot(x,n,'Color',linecol);
+xlabel('Time (sec)'); ylabel(['Reach rate (reaches per sec) ' num2str(plotReturn1.n+plotReturn2.n) ' trials']);
 
 end
 
