@@ -146,6 +146,7 @@ if plot_rawReaching==true
     returnThisRef.data1_se=data1_se;
     returnThisRef.data2_se=data2_se;
     returnThisRef.time_for_x=time_for_x;
+    returnThisRef.n=dataset.ns.cond1;
     data1_mean=cell(length(dataset.rawReaching_event_trial1InSeq),1);
     data2_mean=cell(length(dataset.rawReaching_event_trial1InSeq),1);
     data1_se=cell(length(dataset.rawReaching_event_trial1InSeq),1);
@@ -163,6 +164,7 @@ if plot_rawReaching==true
     returnThis.data1_se=data1_se;
     returnThis.data2_se=data2_se;
     returnThis.time_for_x=time_for_x;
+    returnThis.n=dataset.ns.cond2;
 end
 
 % Plot raw reaching CDF
