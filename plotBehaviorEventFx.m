@@ -131,20 +131,38 @@ nBinsFor2Dhist=100;
 if plot_rawReaching==true
     timeStep=mode(diff(nanmean(alltbt.times,1)));
     timeBinsForReaching=0:timeStep:(size(dataset.rawReaching_allTrialsSequence_trial1InSeq{1},2)-1)*timeStep;
+    data1_mean=cell(length(dataset.rawReaching_allTrialsSequence_trial1InSeq),1);
+    data2_mean=cell(length(dataset.rawReaching_allTrialsSequence_trial1InSeq),1);
+    data1_se=cell(length(dataset.rawReaching_allTrialsSequence_trial1InSeq),1);
+    data2_se=cell(length(dataset.rawReaching_allTrialsSequence_trial1InSeq),1);
     for i=1:length(dataset.rawReaching_allTrialsSequence_trial1InSeq)
-        plotTimeseries(dataset.rawReaching_allTrialsSequence_trial1InSeq{i},dataset.se_rawReaching_allTrialsSequence_trial1InSeq{i},'k',dataset.rawReaching_allTrialsSequence_trialiInSeq{i},dataset.se_rawReaching_allTrialsSequence_trialiInSeq{i},'m',timeBinsForReaching);
+        [data1_mean{i},data2_mean{i},data1_se{i},data2_se{i},time_for_x]=plotTimeseries(dataset.rawReaching_allTrialsSequence_trial1InSeq{i},dataset.se_rawReaching_allTrialsSequence_trial1InSeq{i},'k',dataset.rawReaching_allTrialsSequence_trialiInSeq{i},dataset.se_rawReaching_allTrialsSequence_trialiInSeq{i},'m',timeBinsForReaching);
         title(['Reference data (all trials) first trial (black) vs trial ' num2str(dataset.nInSequence(i)-1) ' later (magenta)']);
         %legend({'me+-se','first trial','','','me+-se',['trial ' num2str(dataset.nInSequence(i)-1) ' later'],'',''});
         legend({'first trial','','',['trial ' num2str(dataset.nInSequence(i)-1) ' later'],'',''});
     end
+    returnThisRef.data1_mean=data1_mean;
+    returnThisRef.data2_mean=data2_mean;
+    returnThisRef.data1_se=data1_se;
+    returnThisRef.data2_se=data2_se;
+    returnThisRef.time_for_x=time_for_x;
+    data1_mean=cell(length(dataset.rawReaching_event_trial1InSeq),1);
+    data2_mean=cell(length(dataset.rawReaching_event_trial1InSeq),1);
+    data1_se=cell(length(dataset.rawReaching_event_trial1InSeq),1);
+    data2_se=cell(length(dataset.rawReaching_event_trial1InSeq),1);
     for i=1:length(dataset.rawReaching_event_trial1InSeq)
-        plotTimeseries(dataset.rawReaching_event_trial1InSeq{i},dataset.se_rawReaching_event_trial1InSeq{i},'k',dataset.rawReaching_event_trialiInSeq{i},dataset.se_rawReaching_event_trialiInSeq{i},'m',timeBinsForReaching);
+        [data1_mean{i},data2_mean{i},data1_se{i},data2_se{i},time_for_x]=plotTimeseries(dataset.rawReaching_event_trial1InSeq{i},dataset.se_rawReaching_event_trial1InSeq{i},'k',dataset.rawReaching_event_trialiInSeq{i},dataset.se_rawReaching_event_trialiInSeq{i},'m',timeBinsForReaching);
         temp=dataset.event_name;
         temp(regexp(temp,'_'))=' ';
         title(['Fx of ' temp ' first trial (black) vs trial ' num2str(dataset.nInSequence(i)-1) ' later (magenta)']);
         %legend({'me+-se','first trial','','','me+-se',['trial ' num2str(dataset.nInSequence(i)-1) ' later'],'',''});
         legend({'first trial','','',['trial ' num2str(dataset.nInSequence(i)-1) ' later'],'',''});
     end
+    returnThis.data1_mean=data1_mean;
+    returnThis.data2_mean=data2_mean;
+    returnThis.data1_se=data1_se;
+    returnThis.data2_se=data2_se;
+    returnThis.time_for_x=time_for_x;
 end
 
 % Plot raw reaching CDF
@@ -531,7 +549,7 @@ y=bin_c{2};
 
 end
 
-function plotTimeseries(data1_mean,data1_se,color1,data2_mean,data2_se,color2,timeBins)
+function [data1_mean,data2_mean,data1_se,data2_se,timeBins]=plotTimeseries(data1_mean,data1_se,color1,data2_mean,data2_se,color2,timeBins)
 
 suppPlots=whetherToSuppressPlots();
 

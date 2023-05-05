@@ -123,16 +123,16 @@ alltbt.sessid=metadata.sessid;
 trialTypes.sessid=metadata.sessid;
 % tbt_filter.sortField='mouseid';
 % tbt_filter.sortField='fractionThroughSess_adjusted';
-% tbt_filter.sortField='dprimes';
+tbt_filter.sortField='dprimes';
 % tbt_filter.sortField='distractor_immediate_after_cue';
-tbt_filter.sortField='sess_wrt_day1';
+% tbt_filter.sortField='sess_wrt_day1';
 % tbt_filter.sortField='opto_enhanced_reach';
 % tbt_filter.sortField='mouseLearned';
 % tbt_filter.sortField='initiallyLowLEDsess';
 % tbt_filter.range_values=[1 6 7 8 10 14 18];
 % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
-% tbt_filter.range_values=[-100 100];
-tbt_filter.range_values=[14.5 20.5];
+tbt_filter.range_values=[-100 100];
+% tbt_filter.range_values=[14.5 20.5];
 % tbt_filter.range_values=[-0.5 0.5]; % maybe 2,6,7,12
 % tbt_filter.range_values=[5.5 6.5]; % maybe 2,6,7,12
 % tbt_filter.range_values=[2 3 4 5 6 7 8 9 10 11 12 14 15 17 18 19]; % which mice start at non-learning 
@@ -182,7 +182,7 @@ trialTypes.sess_wrt_day1=metadata.sess_wrt_day1; alltbt.sess_wrt_day1=metadata.s
 %% build relevant data sets
 
 % settings for paired RT data set
-test.nInSequence=[3]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
+test.nInSequence=[2]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
 % requirement for first trial in pair
 trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
 trialTypes.isLongITI_1forward=[trialTypes.isLongITI(2:end); 0];
@@ -241,7 +241,7 @@ plotBehaviorSessEvents_wrapper(alltbt,metadata,trialTypes,[1500.5 1501.5]); % la
 
 % last argument chooses type of plot
 % see function plotBehaviorEventFx.m for options
-plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching');
+[returnThis,returnThisRef]=plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching');
 % plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching_cdf'); 
 
 %% plot trial to trial change in reach CDF
