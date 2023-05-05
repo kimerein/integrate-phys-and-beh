@@ -1,4 +1,4 @@
-function combineReachPlotDatasets(plotReturn1,whichTrial1,plotReturn2,whichTrial2)
+function [mecombo,combo_se]=combineReachPlotDatasets(plotReturn1,whichTrial1,plotReturn2,whichTrial2,linecol)
 
 if ~ismember(whichTrial1,[1 2])
     error('whichTrial1 must be 1 or 2');
@@ -30,6 +30,19 @@ combo_se=sqrt(varcombo);
 temp1=plotReturn1.(['data' num2str(whichTrial1) '_mean']);
 temp2=plotReturn2.(['data' num2str(whichTrial2) '_mean']);
 mecombo=combineMean(temp1{1},temp2{1},plotReturn1.n,plotReturn2.n);
+
+% 6. Plot combo
+if length(plotReturn1.time_for_x)~=length(plotReturn2.time_for_x)
+    error('Assumed times were the same for plotReturn1 and plotReturn2');
+end
+figure();
+[n,x]=cityscape_hist(mecombo,plotReturn1.time_for_x);
+plot(x,n,'LineWidth',2,'Color',linecol);
+hold on;
+[n,x]=cityscape_hist(mecombo-combo_se,plotReturn1.time_for_x);
+plot(x,n,'Color',linecol);
+[n,x]=cityscape_hist(mecombo+combo_se,plotReturn1.time_for_x);
+plot(x,n,'Color',linecol);
 
 end
 

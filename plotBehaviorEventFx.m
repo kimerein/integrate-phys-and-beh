@@ -567,6 +567,9 @@ end
 
 data1_mean=nanmean(data1_mean,1);
 data2_mean=nanmean(data2_mean,1);
+% Note that already did standard error calculation in buildReachingRTModel.m
+% However, because the number of rows of data1_se was 1, if already did
+% calculation, this changes nothing
 data1_se=sqrt(nansum(data1_se.^2,1));
 data2_se=sqrt(nansum(data2_se.^2,1));
 
