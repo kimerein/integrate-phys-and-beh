@@ -3,6 +3,7 @@ import pandas as pd
 from scipy.io import savemat
 import numpy as np
 import matplotlib.pyplot as plt 
+import cv2
 
 def getPawPosition(
 ):
@@ -22,7 +23,7 @@ def getPawPosition(
     p_cutoff=0.04
 
     # For each .h5 file, get horizontal and vertical position of each bodypart
-    directory=r'Z:\MICROSCOPE\Kim\2023 DLC labeled videos\dLight2_2021-02-10'
+    directory=r'Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20190530\March_C\test'
     for filename in sorted(os.listdir(directory)):
         if filename.endswith(".h5"):
             # If filename contains side, then use bodyparts_side
@@ -45,9 +46,23 @@ def getPawPosition(
                 # Save to .mat file
                 savemat(os.path.join(directory, filename[:-4]+'side'+'.mat'),{'pawPos_x':pawPos_x,'pawPos_y':pawPos_y})
                 pp = getPawPosData(directory,filename,bodyparts_under,p_cutoff)
-                pawPos_x_under = pp[0]
-                pawPos_y_under = pp[1]
+                pawPos_x = pp[0]
+                pawPos_y = pp[1]
                 savemat(os.path.join(directory, filename[:-4]+'under'+'.mat'),{'pawPos_x':pawPos_x,'pawPos_y':pawPos_y})
+        elif filename.endswith(".avi"):
+            # If there is no corresponding .h5 file with the same name, then create a .mat file with nan
+            if os.path.exists(os.path.join(directory, filename[:-4]+'DLC_resnet50_Testing2DJan4shuffle1_500000.h5')):
+                continue
+            # Count how many frames in this .avi file
+            cap = cv2.VideoCapture(os.path.join(directory, filename))
+            length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            cap.release()
+            # Fill in pawPos_x and pawPos_y with nan
+            pawPos_x = np.full((length,1),np.nan)
+            pawPos_y = np.full((length,1),np.nan)
+            # Save to .mat file
+            savemat(os.path.join(directory, filename[:-4]+'side'+'.mat'),{'pawPos_x':pawPos_x,'pawPos_y':pawPos_y})
+            savemat(os.path.join(directory, filename[:-4]+'under'+'.mat'),{'pawPos_x':pawPos_x,'pawPos_y':pawPos_y})
         else:
             continue
 

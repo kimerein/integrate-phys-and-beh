@@ -46,7 +46,7 @@ def getRigEvents(
     cueZone = [75, 125, 450, 525] # [x_start, x_end, y_start, y_end]
     distractorZone = [1, 30, 340, 375] # [x_start, x_end, y_start, y_end]
     cueThresh = 20
-    wheelThresh = 20
+    wheelThresh = 5
     rawThresh = 3
     distractorThresh = 20
 
@@ -157,8 +157,8 @@ def getRigEvents(
     plt.figure()
     plt.plot(wheelDiffs)
     # Plot rawThresh as line
-    plt.plot([0, len(wheelDiffs)], [wheelThresh, rawThresh], 'r-')
-    plt.plot([0, len(wheelDiffs)], [-rawThresh, -rawThresh], 'r-')
+    plt.plot([0, len(wheelDiffs)], [wheelThresh, wheelThresh], 'r-')
+    plt.plot([0, len(wheelDiffs)], [-wheelThresh, -wheelThresh], 'r-')
     plt.title('wheelDiffs')
     plt.show()
     # Plot cueDiffs
