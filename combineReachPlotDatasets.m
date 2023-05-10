@@ -1,4 +1,4 @@
-function [mecombo,combo_se]=combineReachPlotDatasets(plotReturn1,whichTrial1,plotReturn2,whichTrial2,linecol)
+function [mecombo,combo_se,returnout]=combineReachPlotDatasets(plotReturn1,whichTrial1,plotReturn2,whichTrial2,linecol)
 
 if ~ismember(whichTrial1,[1 2])
     error('whichTrial1 must be 1 or 2');
@@ -47,6 +47,11 @@ plot(x,n,'Color',linecol);
 [n,x]=cityscape_hist(mecombo+combo_se,plotReturn1.time_for_x);
 plot(x,n,'Color',linecol);
 xlabel('Time (sec)'); ylabel(['Reach rate (reaches per sec) ' num2str(plotReturn1.n+plotReturn2.n) ' trials']);
+
+returnout.data1_mean{1}=mecombo;
+returnout.data1_se{1}=combo_se;
+returnout.time_for_x=plotReturn1.time_for_x;
+returnout.n=plotReturn1.n+plotReturn2.n;
 
 end
 

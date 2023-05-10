@@ -8,9 +8,10 @@ Created on Mon Jan 24 10:48:54 2022
 import os
 import numpy as np
 import cv2
+import matplotlib.pyplot as plt
 from tqdm import tqdm
 from scipy.io import savemat
-from deeplabcut.utils import auxiliaryfunctions
+#from deeplabcut.utils import auxiliaryfunctions
 from pathlib import Path
 
 def getRigEvents(
@@ -26,24 +27,38 @@ def getRigEvents(
     
     # codedir = r'C:\Users\sabatini\Documents\GitHub\integrate-phys-and-beh'
     codedir = os.getcwd()
-    videos = [r'Z:\Kim\for_orchestra\deeplabcut test vids\dLight2_2021-02-10']
+    videos = r'Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20190530\March_C\test'
     # videos: list
     #    A list of strings containing the full paths to videos for analysis or a path to the directory, where all the videos with same extension are stored.
     getDifferenceEventsBeforeSaving = True
-    cueThresh = 100
-    rawThresh = 1
-    distractorThresh = 100
     
     videotype = ".avi"
-    wheelZone = [139, 223, 1, 91] # [x_start, x_end, y_start, y_end]
-    cueZone = [1, 71, 295, 420] # [x_start, x_end, y_start, y_end]
-    distractorZone = [1, 30, 452, 478] # [x_start, x_end, y_start, y_end]
-    
+    # dLight2_2021-02-10_00001.avi
+    #wheelZone = [139, 223, 1, 91] # [x_start, x_end, y_start, y_end]
+    #cueZone = [1, 71, 295, 420] # [x_start, x_end, y_start, y_end]
+    #distractorZone = [1, 30, 452, 478] # [x_start, x_end, y_start, y_end]
+    #cueThresh = 100
+    #rawThresh = 3
+    #wheelThresh = 20
+    #distractorThresh = 100
+    # March_C
+    wheelZone = [200, 300, 1, 125] # [x_start, x_end, y_start, y_end]
+    cueZone = [75, 125, 450, 525] # [x_start, x_end, y_start, y_end]
+    distractorZone = [1, 30, 340, 375] # [x_start, x_end, y_start, y_end]
+    cueThresh = 20
+    wheelThresh = 20
+    rawThresh = 3
+    distractorThresh = 20
+
     ##################################################
     # Looping over videos
     ##################################################
     print("Finding videos")
-    Videos = auxiliaryfunctions.Getlistofvideos(videos, videotype)
+    Videos = []
+    for filename in os.listdir(videos):
+        if filename.endswith(videotype):
+            Videos.append(filename)
+    #Videos = auxiliaryfunctions.Getlistofvideos(videos, videotype)
     Videos = sorted(Videos)
     
     if len(Videos) > 0:
@@ -51,15 +66,21 @@ def getRigEvents(
         cueDiffs = []
         distractorDiffs = []
         wheelDiffs = []
+        # Go to location of videos
+        os.chdir(videos)
         for video in Videos:
+            ##################################################
+            # Show zones on example frame
+            ##################################################
+            # If this is the first video
+            if len(rawDiffs) == 0:
+                plotZonesOnExampleFrame(video, wheelZone, cueZone, distractorZone)
+
             ##################################################
             # Loading the video
             ##################################################
-            print("Starting to analyze % ", video)
-            destfolder = None
-            if destfolder is None:
-                destfolder = str(Path(video).parents[0])
-            auxiliaryfunctions.attempttomakefolder(destfolder)
+            print("Starting to analyze ", video)
+            #auxiliaryfunctions.attempttomakefolder(destfolder)
             print("Loading ", video)
             cap = cv2.VideoCapture(video)
             if not cap.isOpened():
@@ -124,32 +145,104 @@ def getRigEvents(
                     break
                 counter += 1
             pbar.close()
+    # Plot rawDiffs
+    plt.figure()
+    plt.plot(rawDiffs)
+    # Plot rawThresh as line
+    plt.plot([0, len(rawDiffs)], [rawThresh, rawThresh], 'r-')
+    plt.plot([0, len(rawDiffs)], [-rawThresh, -rawThresh], 'r-')
+    plt.title('rawDiffs')
+    plt.show()
+    # Plot wheelDiffs
+    plt.figure()
+    plt.plot(wheelDiffs)
+    # Plot rawThresh as line
+    plt.plot([0, len(wheelDiffs)], [wheelThresh, rawThresh], 'r-')
+    plt.plot([0, len(wheelDiffs)], [-rawThresh, -rawThresh], 'r-')
+    plt.title('wheelDiffs')
+    plt.show()
+    # Plot cueDiffs
+    plt.figure()
+    plt.plot(cueDiffs)
+    # Plot cueThresh as line
+    plt.plot([0, len(cueDiffs)], [cueThresh, cueThresh], 'r-')
+    plt.plot([0, len(cueDiffs)], [-cueThresh, -cueThresh], 'r-')
+    plt.title('cueDiffs')
+    plt.show()
+    # Plot distractorDiffs
+    plt.figure()
+    plt.plot(distractorDiffs)
+    # Plot distractorThresh as line
+    plt.plot([0, len(distractorDiffs)], [distractorThresh, distractorThresh], 'r-')
+    plt.plot([0, len(distractorDiffs)], [-distractorThresh, -distractorThresh], 'r-')
+    plt.title('distractorDiffs')
+    plt.show()
     # once have tested a video so know the right thresholds, can set getDifferenceEventsBeforeSaving to True
     # in order to save smaller files for Matlab
     if getDifferenceEventsBeforeSaving:
         def condition(x, thresh): return x > thresh
         def condminus(x, thresh): return x < -thresh
         rawDiffEvs_plus = [idx for idx, element in enumerate(rawDiffs) if condition(element, rawThresh)]
+        wheelDiffEvs_plus = [idx for idx, element in enumerate(wheelDiffs) if condition(element, wheelThresh)]
         cueDiffEvs_plus = [idx for idx, element in enumerate(cueDiffs) if condition(element, cueThresh)]
         distractorDiffEvs_plus = [idx for idx, element in enumerate(distractorDiffs) if condition(element, distractorThresh)]
         rawDiffEvs_minus = [idx for idx, element in enumerate(rawDiffs) if condminus(element, rawThresh)]
+        wheelDiffEvs_minus = [idx for idx, element in enumerate(wheelDiffs) if condminus(element, wheelThresh)]
         cueDiffEvs_minus = [idx for idx, element in enumerate(cueDiffs) if condminus(element, cueThresh)]
         distractorDiffEvs_minus = [idx for idx, element in enumerate(distractorDiffs) if condminus(element, distractorThresh)]
         howmanyframes = len(cueDiffs)
         # save event indices
-        outp = {"rawDiffEvs_plus": rawDiffEvs_plus, "cueDiffEvs_plus": cueDiffEvs_plus, "distractorDiffEvs_plus": distractorDiffEvs_plus,
-                "rawDiffEvs_minus": rawDiffEvs_minus, "cueDiffEvs_minus": cueDiffEvs_minus, "distractorDiffEvs_minus": distractorDiffEvs_minus, "howmanyframes": howmanyframes}
+        outp = {"rawDiffEvs_plus": rawDiffEvs_plus, "cueDiffEvs_plus": cueDiffEvs_plus, "distractorDiffEvs_plus": distractorDiffEvs_plus, "wheelDiffEvs_plus": wheelDiffEvs_plus,
+                "rawDiffEvs_minus": rawDiffEvs_minus, "cueDiffEvs_minus": cueDiffEvs_minus, "distractorDiffEvs_minus": distractorDiffEvs_minus, "wheelDiffEvs_minus": wheelDiffEvs_minus, "howmanyframes": howmanyframes}
     else:
         # save results
         outp = {"rawDiffs": rawDiffs, "cueDiffs": cueDiffs, "distractorDiffs": distractorDiffs, "wheelDiffs": wheelDiffs}
     savemat("rig_events.mat", outp)
+    # Print location of output file
+    print("Saved rig_events.mat to ", os.getcwd())
     os.chdir(codedir)
     return nframes, rawDiffs, cueDiffs, distractorDiffs, wheelDiffs
             
+
+def plotZonesOnExampleFrame(video, wheelZone, cueZone, distractorZone):
+    # Load example frame
+    cap = cv2.VideoCapture(video)
+    ret, frame = cap.read()
+    # Plot wheel zone
+    plt.figure()
+    plt.imshow(frame)
+    plt.plot([wheelZone[2], wheelZone[2]], [wheelZone[0], wheelZone[1]], 'r-')
+    plt.plot([wheelZone[3], wheelZone[3]], [wheelZone[0], wheelZone[1]], 'r-')
+    plt.plot([wheelZone[2], wheelZone[3]], [wheelZone[0], wheelZone[0]], 'r-')
+    plt.plot([wheelZone[2], wheelZone[3]], [wheelZone[1], wheelZone[1]], 'r-')
+    plt.title('wheelZone')
+    plt.show()
+    # Plot cue zone
+    plt.figure()
+    plt.imshow(frame)
+    plt.plot([cueZone[2], cueZone[2]], [cueZone[0], cueZone[1]], 'r-')
+    plt.plot([cueZone[3], cueZone[3]], [cueZone[0], cueZone[1]], 'r-')
+    plt.plot([cueZone[2], cueZone[3]], [cueZone[0], cueZone[0]], 'r-')
+    plt.plot([cueZone[2], cueZone[3]], [cueZone[1], cueZone[1]], 'r-')
+    plt.title('cueZone')
+    plt.show()
+    # Plot distractor zone
+    plt.figure()
+    plt.imshow(frame)
+    plt.plot([distractorZone[2], distractorZone[2]], [distractorZone[0], distractorZone[1]], 'r-')
+    plt.plot([distractorZone[3], distractorZone[3]], [distractorZone[0], distractorZone[1]], 'r-')
+    plt.plot([distractorZone[2], distractorZone[3]], [distractorZone[0], distractorZone[0]], 'r-')
+    plt.plot([distractorZone[2], distractorZone[3]], [distractorZone[1], distractorZone[1]], 'r-')
+    plt.title('distractorZone')
+    plt.show()
+    # Close video
+    cap.release()
+
 
 def rgb2gray(rgb):
     r, g, b = rgb[:,:,0], rgb[:,:,1], rgb[:,:,2]
     gray = 0.2989 * r + 0.5870 * g + 0.1140 * b
     return gray
+
 
 getRigEvents()

@@ -22,7 +22,7 @@ def getPawPosition(
     p_cutoff=0.04
 
     # For each .h5 file, get horizontal and vertical position of each bodypart
-    directory=r'Z:\MICROSCOPE\Kim\for_orchestra\DLC_testvids\curr'
+    directory=r'Z:\MICROSCOPE\Kim\2023 DLC labeled videos\dLight2_2021-02-10'
     for filename in sorted(os.listdir(directory)):
         if filename.endswith(".h5"):
             # If filename contains side, then use bodyparts_side
@@ -34,6 +34,20 @@ def getPawPosition(
                 pp = getPawPosData(directory,filename,bodyparts_under,p_cutoff)
                 pawPos_x = pp[0]
                 pawPos_y = pp[1]
+            # If neither under nor side, then use bodyparts, first side then under
+            if ~('side' in filename) and ~('under' in filename):
+                # Concatenate "Side" and "Bottom" to bodyparts
+                bodyparts_side = [b+'Side' for b in bodyparts]
+                bodyparts_under = [b+'Bottom' for b in bodyparts]
+                pp = getPawPosData(directory,filename,bodyparts_side,p_cutoff)
+                pawPos_x = pp[0]
+                pawPos_y = pp[1]
+                # Save to .mat file
+                savemat(os.path.join(directory, filename[:-4]+'side'+'.mat'),{'pawPos_x':pawPos_x,'pawPos_y':pawPos_y})
+                pp = getPawPosData(directory,filename,bodyparts_under,p_cutoff)
+                pawPos_x_under = pp[0]
+                pawPos_y_under = pp[1]
+                savemat(os.path.join(directory, filename[:-4]+'under'+'.mat'),{'pawPos_x':pawPos_x,'pawPos_y':pawPos_y})
         else:
             continue
 
