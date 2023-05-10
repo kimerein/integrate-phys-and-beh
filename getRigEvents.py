@@ -66,6 +66,8 @@ def getRigEvents(
         cueDiffs = []
         distractorDiffs = []
         wheelDiffs = []
+        vidStarts = []
+        vidEnds = []
         # Go to location of videos
         os.chdir(videos)
         for video in Videos:
@@ -82,6 +84,7 @@ def getRigEvents(
             print("Starting to analyze ", video)
             #auxiliaryfunctions.attempttomakefolder(destfolder)
             print("Loading ", video)
+            vidStarts.append(len(rawDiffs))
             cap = cv2.VideoCapture(video)
             if not cap.isOpened():
                 raise IOError(
@@ -136,12 +139,14 @@ def getRigEvents(
                     if prevFrame is None:
                         prevFrame = frame
                     else:
+                        
                         rawDiffs.append(np.mean(frame - prevFrame))
                         cueDiffs.append(np.mean(frame[cueZone[0]:cueZone[1], cueZone[2]:cueZone[3]]  - prevFrame[cueZone[0]:cueZone[1], cueZone[2]:cueZone[3]]))
                         distractorDiffs.append(np.mean(frame[distractorZone[0]:distractorZone[1], distractorZone[2]:distractorZone[3]]  - prevFrame[distractorZone[0]:distractorZone[1], distractorZone[2]:distractorZone[3]]))
                         wheelDiffs.append(np.mean(frame[wheelZone[0]:wheelZone[1], wheelZone[2]:wheelZone[3]]  - prevFrame[wheelZone[0]:wheelZone[1], wheelZone[2]:wheelZone[3]]))
                         prevFrame = frame
                 elif counter >= nframes:
+                    vidEnds.append(len(rawDiffs))
                     break
                 counter += 1
             pbar.close()
@@ -193,10 +198,11 @@ def getRigEvents(
         howmanyframes = len(cueDiffs)
         # save event indices
         outp = {"rawDiffEvs_plus": rawDiffEvs_plus, "cueDiffEvs_plus": cueDiffEvs_plus, "distractorDiffEvs_plus": distractorDiffEvs_plus, "wheelDiffEvs_plus": wheelDiffEvs_plus,
-                "rawDiffEvs_minus": rawDiffEvs_minus, "cueDiffEvs_minus": cueDiffEvs_minus, "distractorDiffEvs_minus": distractorDiffEvs_minus, "wheelDiffEvs_minus": wheelDiffEvs_minus, "howmanyframes": howmanyframes}
+                "rawDiffEvs_minus": rawDiffEvs_minus, "cueDiffEvs_minus": cueDiffEvs_minus, "distractorDiffEvs_minus": distractorDiffEvs_minus, "wheelDiffEvs_minus": wheelDiffEvs_minus, "howmanyframes": howmanyframes,
+                "vidStarts": vidStarts, "vidEnds": vidEnds}
     else:
         # save results
-        outp = {"rawDiffs": rawDiffs, "cueDiffs": cueDiffs, "distractorDiffs": distractorDiffs, "wheelDiffs": wheelDiffs}
+        outp = {"rawDiffs": rawDiffs, "cueDiffs": cueDiffs, "distractorDiffs": distractorDiffs, "wheelDiffs": wheelDiffs, "vidStarts": vidStarts, "vidEnds": vidEnds}
     savemat("rig_events.mat", outp)
     # Print location of output file
     print("Saved rig_events.mat to ", os.getcwd())
