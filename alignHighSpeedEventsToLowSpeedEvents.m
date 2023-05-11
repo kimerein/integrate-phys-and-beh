@@ -1,6 +1,7 @@
 function alignHighSpeedEventsToLowSpeedEvents(lowspeed_tbt,location_of_rig_events,fps,cue_duration,distractor_duration,alignment)
 
 dsby=10;
+minTrialLength=9; % in seconds
 
 % timestep on Kim's rig is usually 0.0039, Fs = 256 fps
 timestep=1/fps;
@@ -14,43 +15,45 @@ load(location_of_rig_events);
 distractor=zeros(1,ceil(nanmax(distractorDiffEvs_minus/dsby)));
 cue=zeros(1,ceil(nanmax(distractorDiffEvs_minus/dsby)));
 wheel=zeros(1,ceil(nanmax(distractorDiffEvs_minus/dsby)));
+reach=zeros(1,ceil(nanmax(distractorDiffEvs_minus/dsby)));
 
 cuediff=floor(cueDiffEvs_plus./dsby);
 distractordiff=floor(distractorDiffEvs_plus./dsby);
 wheeldiff=floor(wheelDiffEvs_plus./dsby);
+reachdiff=floor(reachDiffEvs_plus./dsby);
 
 cue(cuediff)=1;
 distractor(distractordiff)=1;
 wheel(wheeldiff)=1;
+reach(reachdiff)=1;
 
-distractor=distractor+cue;
-figure(); plot(distractor); title('distractor plus cue');
-
+% figure(); plot(distractor); title('distractor');
 % Start with big alignment
-fractionThrough=[];
-isInBackHalf=false;
-distract_thresh_movie=0.5;
-distract_thresh_paw=0.5;
-settings.photo_fs=floor(fps/dsby); 
-ard_ts=diff(alignment.timesfromarduino);
-ard_ts(ard_ts==0)=nan;
-ard_ts=mode(ard_ts); % is in ms
-settings.movie_fs=1/(ard_ts/1000); % movie data sampling rate in Hz
-ard_ts=ard_ts./1000;
-disp(['Check this. Movie data sampling rate is ' num2str(settings.movie_fs)]);
-pause;
-settings.scale_factor=floor(settings.photo_fs/settings.movie_fs);
-settings.photo_dec=1;
-settings.movie_dec=1;
-% discard this many frames from beginning
-settings.minlagForInitialAlign=[];
-settings.maxlagForInitialAlign=[]; % [] is don't want to constrain alignment
-settings.try_delay1=0;
-settings.try_delay2=0;
-if ~isempty(settings.minlagForInitialAlign) || ~isempty(settings.maxlagForInitialAlign)
-    questdlg('Preset min and max lag. Continue?');
-end
-alignDistractors(alignment.movie_distractor+alignment.cue,distractor,distract_thresh_movie,distract_thresh_paw,0:ard_ts:(length(alignment.movie_distractor)-1)*ard_ts,0:ds_timestep:(length(distractor)-1)*ds_timestep,settings,isInBackHalf,fractionThrough);
+% fractionThrough=[];
+% isInBackHalf=false;
+% distract_thresh_movie=0.5;
+% distract_thresh_paw=0.5;
+% settings.photo_fs=floor(fps/dsby); 
+% ard_ts=diff(alignment.timesfromarduino);
+% ard_ts(ard_ts==0)=nan;
+% ard_ts=mode(ard_ts); % is in ms
+% settings.movie_fs=1/(ard_ts/1000); % movie data sampling rate in Hz
+% ard_ts=ard_ts./1000;
+% disp(['Check this. Movie data sampling rate is ' num2str(settings.movie_fs)]);
+% pause;
+% settings.scale_factor=floor(settings.photo_fs/settings.movie_fs);
+% settings.photo_dec=1;
+% settings.movie_dec=1;
+% % discard this many frames from beginning
+% settings.minlagForInitialAlign=[];
+% settings.maxlagForInitialAlign=[]; % [] is don't want to constrain alignment
+% settings.try_delay1=0;
+% settings.try_delay2=0;
+% if ~isempty(settings.minlagForInitialAlign) || ~isempty(settings.maxlagForInitialAlign)
+%     questdlg('Preset min and max lag. Continue?');
+% end
+% %alignDistractors(alignment.movie_distractor,distractor,distract_thresh_movie,distract_thresh_paw,0:ard_ts:(length(alignment.movie_distractor)-1)*ard_ts,0:ds_timestep:(length(distractor)-1)*ds_timestep,settings,isInBackHalf,fractionThrough);
+% alignDistractors(distractor,alignment.movie_distractor,distract_thresh_paw,distract_thresh_movie,0:ds_timestep:(length(distractor)-1)*ds_timestep,0:ard_ts:(length(alignment.movie_distractor)-1)*ard_ts,settings,isInBackHalf,fractionThrough);
 
 % Finer trial-by-trial alignment
 t=nanmean(lowspeed_tbt.times_wrt_trial_start,1);
@@ -58,10 +61,23 @@ t=nanmean(lowspeed_tbt.times_wrt_trial_start,1);
 cuedelay=t(f);
 cueindsbefore=floor(cuedelay/ds_timestep);
 trialLength=nanmax(nanmean(lowspeed_tbt.times_wrt_trial_start,1));
+% Use trialLength to clean up cues
+f=find(cue>0.5);
+triallengthinds=floor(minTrialLength/ds_timestep);
+for i=1:length(f)
+    if cue(f)<0.5 
+        continue
+    end
+    cue(f:f+triallengthinds)=0;
+end
+figure();
+plot(cue); title('Cleaned up cue from high speed video');
+cuediff=find(cue>0.5);
 highspeed_tbt.cue=zeros(length(cuediff),floor(trialLength/ds_timestep));
 highspeed_tbt.distractor=zeros(length(cuediff),floor(trialLength/ds_timestep));
 highspeed_tbt.wheel=zeros(length(cuediff),floor(trialLength/ds_timestep));
 highspeed_tbt.times=zeros(length(cuediff),floor(trialLength/ds_timestep));
+highspeed_tbt.reach=zeros(length(cuediff),floor(trialLength/ds_timestep));
 for i=1:length(cuediff)
     currcueind=cuediff(i);
     tempinds=currcueind-cueindsbefore:currcueind-cueindsbefore+size(highspeed_tbt.cue,2)-1;
@@ -78,12 +94,17 @@ for i=1:length(cuediff)
     highspeed_tbt.cue(i,:)=[nan(1,addnanatfront) cue(tempinds) nan(1,addnanatback)];
     highspeed_tbt.distractor(i,:)=[nan(1,addnanatfront) distractor(tempinds) nan(1,addnanatback)];
     highspeed_tbt.wheel(i,:)=[nan(1,addnanatfront) wheel(tempinds) nan(1,addnanatback)]; 
+    highspeed_tbt.reach(i,:)=[nan(1,addnanatfront) reach(tempinds) nan(1,addnanatback)]; 
     highspeed_tbt.times(i,:)=0:ds_timestep:(size(highspeed_tbt.times,2)-1)*ds_timestep;
 end
 
 % Fill out distractor and cue with true durations
 highspeed_tbt=fleshOutDuration(highspeed_tbt,'cue',floor(cue_duration./ds_timestep));
 highspeed_tbt=fleshOutDuration(highspeed_tbt,'distractor',floor(distractor_duration./ds_timestep));
+
+% Plot behavior from high speed vs low speed video
+plotBehFromLowSpeedMovie(lowspeed_tbt);
+plotBehFromHighSpeedMovie(highspeed_tbt);
 
 [beh2_tbt,physiology_tbt]=useDistractorAlignment(lowspeed_tbt,'times_wrt_trial_start','movie_distractor',highspeed_tbt,'times','distractor','data2',false,'cueZone_onVoff','cue');
 
@@ -101,6 +122,45 @@ for i=1:size(temp,1)
     temp(i,:)=temprow;
 end
 tbt.(whichField)=temp;
+
+end
+
+function plotBehFromHighSpeedMovie(alltbt)
+
+settings=plotCueTriggered_settings();
+settings.plotfields={'cue','distractor','wheel','reach'};
+settings.plotevents=settings.plotfields;
+settings.eventOutlines={'b','y','k','g'};
+settings.eventThresh={[0.5],[0.5],[0.5],[0.5]};
+settings.eventColors={'b','y','k','g'};
+settings.firstN={10,10,10,10};
+settings.histoplotfields={'cue','reach'};
+settings.shading_type=[];
+plotBehavior(alltbt,'cue',false,1:size(alltbt.cue,1),settings);
+
+end
+
+function plotBehFromLowSpeedMovie(alltbt)
+
+settings=plotCueTriggered_settings();
+settings.plotfields={'cueZone_onVoff','optoZone','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts','movie_distractor'};
+settings.plotevents=settings.plotfields;
+settings.eventOutlines={'b','m',[0 0.7500 0],'r','c',[0.8 0.8 0.8],'y'};
+figure(); plot(alltbt.optoZone(1:20,:)');
+temp=input('Thresh for optoZone: ',"s");
+if strcmp(temp,'optoOn')
+    temp=0.5;
+    settings.plotfields{2}='optoOn';
+    settings.plotevents{2}=settings.plotfields{2};
+else
+    temp=eval(temp);
+end
+settings.eventThresh={[0.5],[temp],[0.5],[0.5],[0.5],[0.5],[0.5]};
+settings.eventColors={'b','none',[0 0.7500 0],'r','c',[0.8 0.8 0.8],'y'};
+settings.firstN={'all',[5],'all','all','all','all','all'};
+settings.histoplotfields={'cueZone_onVoff','all_reachBatch'};
+settings.shading_type=[];
+plotBehavior(alltbt,'cueZone_onVoff',false,1:size(alltbt.cueZone_onVoff,1),settings);
 
 end
 
