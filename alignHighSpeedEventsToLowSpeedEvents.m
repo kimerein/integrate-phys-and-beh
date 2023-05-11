@@ -25,6 +25,7 @@ cue=zeros(1,ceil(nanmax(distractorDiffEvs_minus/dsby)));
 wheel=zeros(1,ceil(nanmax(distractorDiffEvs_minus/dsby)));
 reach=zeros(1,ceil(nanmax(distractorDiffEvs_minus/dsby)));
 whichVid=zeros(1,ceil(nanmax(distractorDiffEvs_minus/dsby)));
+whichFrame=zeros(1,ceil(nanmax(distractorDiffEvs_minus/dsby)));
 
 cuediff=floor(cueDiffEvs_plus./dsby);
 distractordiff=floor(distractorDiffEvs_plus./dsby);
@@ -34,14 +35,15 @@ vidStartsds=floor(vidStarts./dsby);
 vidEndsds=floor(vidEnds./dsby);
 
 for i=1:length(vidStartsds)-1
-    currstart=vidStarts(i);
-    currend=vidStarts(i+1)-1;
+    currstart=vidStartsds(i);
+    currend=vidStartsds(i+1)-1;
     if currstart<1
         currstart=1;
     elseif currend>length(whichVid)
         currend=length(whichVid);
     end
-    whichVids(currstart:currend)=i;
+    whichVid(currstart:currend)=i;
+    whichFrame(currstart:currend)=1:dsby:length(currstart:currend)*dsby;
 end
 
 cue(cuediff)=1;
@@ -118,6 +120,7 @@ highspeed_tbt.wheel=zeros(length(cuediff),floor(trialLength/ds_timestep));
 highspeed_tbt.times=zeros(length(cuediff),floor(trialLength/ds_timestep));
 highspeed_tbt.reach=zeros(length(cuediff),floor(trialLength/ds_timestep));
 highspeed_tbt.whichVid=zeros(length(cuediff),floor(trialLength/ds_timestep));
+highspeed_tbt.whichFrame=zeros(length(cuediff),floor(trialLength/ds_timestep));
 for i=1:length(cuediff)
     currcueind=cuediff(i);
     tempinds=currcueind-cueindsbefore:currcueind-cueindsbefore+size(highspeed_tbt.cue,2)-1;
@@ -135,7 +138,8 @@ for i=1:length(cuediff)
     highspeed_tbt.distractor(i,:)=[nan(1,addnanatfront) distractor(tempinds) nan(1,addnanatback)];
     highspeed_tbt.wheel(i,:)=[nan(1,addnanatfront) wheel(tempinds) nan(1,addnanatback)]; 
     highspeed_tbt.reach(i,:)=[nan(1,addnanatfront) reach(tempinds) nan(1,addnanatback)]; 
-    highspeed_tbt.whichVid(i,:)=[nan(1,addnanatfront) whichVids(tempinds) nan(1,addnanatback)]; 
+    highspeed_tbt.whichVid(i,:)=[nan(1,addnanatfront) whichVid(tempinds) nan(1,addnanatback)]; 
+    highspeed_tbt.whichFrame(i,:)=[nan(1,addnanatfront) whichFrame(tempinds) nan(1,addnanatback)]; 
     highspeed_tbt.times(i,:)=0:ds_timestep:(size(highspeed_tbt.times,2)-1)*ds_timestep;
 end
 
