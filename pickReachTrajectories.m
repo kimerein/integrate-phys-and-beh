@@ -4,7 +4,9 @@ function [allX,allY,allZ,allX_from_under,reachTrajTimes]=pickReachTrajectories(l
 
 timeBeforeReach=1;
 timeAfterReach=1;
-nReachesFromEachTrial=1;
+nReachesFromEachTrial='all';
+spaceOutReaches=true;
+spaceOutByTime=1; % in seconds
 noReachesBeforeTime=-0.3; % wrt cue, to be sure have enough frames around reach
 noReachesAfterTime=9; % wrt cue, to be sure have enough frames around reach
 
@@ -39,12 +41,21 @@ allZ=nan(maxNReaches,framesBefore+framesAfter+1);
 allX_from_under=nan(maxNReaches,framesBefore+framesAfter+1);
 reachTrajTimes=0:timestep_hs:(size(allX,2)-1)*timestep_hs;
 reachcounter=1;
+withinNInds_forSpaceOut=floor(spaceOutByTime/mode(diff(nanmean(reachtimes,1))));
 for i=1:size(reaches,1)
     f=find(reaches(i,:)>0.5);
     % Discard reaches outside of range 
     toDiscard=reachtimes(i,f)-avcuetime<noReachesBeforeTime;
     toDiscard2=reachtimes(i,f)-avcuetime>noReachesAfterTime;
     f=f(~toDiscard & ~toDiscard2);
+    if spaceOutReaches
+        donottake=zeros(size(f));
+        for j=1:length(f)-1
+            donttake=f(j+1:end)-f(j)<withinNInds_forSpaceOut;
+            donottake(j+1:end)=donottake(j+1:end)+donttake;
+        end
+        f=f(donottake<0.5);
+    end
     if strcmp(nReachesFromEachTrial,'all')
         n=length(f);
     else
