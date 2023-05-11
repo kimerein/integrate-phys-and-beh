@@ -21,7 +21,7 @@ def getPawPosition(
     # Add Side to all bodyparts
     # bodyparts_side = [b+'Side' for b in bodyparts]
     bodyparts_side = bodyparts
-    p_cutoff=0.04
+    p_cutoff=0.1 #0.04
 
     # For each .h5 file, get horizontal and vertical position of each bodypart
     directory=r'Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20190530\March_C\DLC vids'
