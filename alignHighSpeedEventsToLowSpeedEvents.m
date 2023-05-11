@@ -70,7 +70,7 @@ cueindsbefore=floor(cuedelay/ds_timestep);
 trialLength=nanmax(nanmean(lowspeed_tbt.times_wrt_trial_start,1));
 % Use trialLength to clean up cues
 f=find(cue>0.5);
-triallengthinds=floor(minTrialLength/ds_timestep);
+triallengthinds=floor((minTrialLength/2)/ds_timestep);
 for i=1:length(f)
     if cue(f)<0.5 
         continue
