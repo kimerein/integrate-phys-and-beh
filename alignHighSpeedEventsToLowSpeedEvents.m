@@ -1,4 +1,4 @@
-function alignHighSpeedEventsToLowSpeedEvents(lowspeed_tbt,location_of_rig_events,fps,cue_duration,distractor_duration,alignment)
+function alignHighSpeedEventsToLowSpeedEvents(lowspeed_tbt,location_of_rig_events,fps,cue_duration,distractor_duration,alignment,nHighSpeedVidFiles,framesPerHighSpeedVid,nLowSpeedFrames)
 
 dsby=10;
 minTrialLength=9; % in seconds
@@ -8,6 +8,13 @@ timestep=1/fps;
 ds_timestep=timestep*dsby;
 
 load(location_of_rig_events);
+
+% Guess at initial alignment
+durationOfHighSpeedAcq=nHighSpeedVidFiles*framesPerHighSpeedVid*timestep;
+temp=lowspeed_tbt.times_wrt_trial_start; temp=temp'; timestepls=mode(diff(temp(1:end)));
+durationOfLowSpeedAcq=nLowSpeedFrames*timestepls;
+disp(['duration of low speed acquisition: ' num2str(durationOfLowSpeedAcq) ' seconds']);
+disp(['duration of high speed acquisition: ' num2str(durationOfHighSpeedAcq) ' seconds']);
 
 % Make high speed tbt, downsampling 10 times
 % This is just for initial alignment
@@ -68,7 +75,7 @@ for i=1:length(f)
     if cue(f)<0.5 
         continue
     end
-    cue(f:f+triallengthinds)=0;
+    cue(f(i)+1:f(i)+triallengthinds)=0;
 end
 figure();
 plot(cue); title('Cleaned up cue from high speed video');
@@ -106,6 +113,7 @@ highspeed_tbt=fleshOutDuration(highspeed_tbt,'distractor',floor(distractor_durat
 plotBehFromLowSpeedMovie(lowspeed_tbt);
 plotBehFromHighSpeedMovie(highspeed_tbt);
 
+return
 [beh2_tbt,physiology_tbt]=useDistractorAlignment(lowspeed_tbt,'times_wrt_trial_start','movie_distractor',highspeed_tbt,'times','distractor','data2',false,'cueZone_onVoff','cue');
 
 end
@@ -117,7 +125,11 @@ for i=1:size(temp,1)
     temprow=temp(i,:);
     f=find(temprow>0.5);
     for j=1:length(f)
-        temprow(f(j):f(j)+indsToFill)=1;
+        if f(j)+indsToFill>length(temprow)
+            temprow(f(j):end)=1;
+        else
+            temprow(f(j):f(j)+indsToFill)=1;
+        end
     end
     temp(i,:)=temprow;
 end
@@ -133,7 +145,7 @@ settings.plotevents=settings.plotfields;
 settings.eventOutlines={'b','y','k','g'};
 settings.eventThresh={[0.5],[0.5],[0.5],[0.5]};
 settings.eventColors={'b','y','k','g'};
-settings.firstN={10,10,10,10};
+settings.firstN={1,10,1,10};
 settings.histoplotfields={'cue','reach'};
 settings.shading_type=[];
 plotBehavior(alltbt,'cue',false,1:size(alltbt.cue,1),settings);
@@ -143,9 +155,9 @@ end
 function plotBehFromLowSpeedMovie(alltbt)
 
 settings=plotCueTriggered_settings();
-settings.plotfields={'cueZone_onVoff','optoZone','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts','movie_distractor'};
+settings.plotfields={'movie_distractor','cueZone_onVoff','optoZone','reachBatch_success_reachStarts','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','pelletmissingreach_reachStarts'};
 settings.plotevents=settings.plotfields;
-settings.eventOutlines={'b','m',[0 0.7500 0],'r','c',[0.8 0.8 0.8],'y'};
+settings.eventOutlines={'y','b','m','g','g','g','g'};
 figure(); plot(alltbt.optoZone(1:20,:)');
 temp=input('Thresh for optoZone: ',"s");
 if strcmp(temp,'optoOn')
@@ -155,9 +167,9 @@ if strcmp(temp,'optoOn')
 else
     temp=eval(temp);
 end
-settings.eventThresh={[0.5],[temp],[0.5],[0.5],[0.5],[0.5],[0.5]};
-settings.eventColors={'b','none',[0 0.7500 0],'r','c',[0.8 0.8 0.8],'y'};
-settings.firstN={'all',[5],'all','all','all','all','all'};
+settings.eventThresh={[0.5],[0.5],[temp],[0.5],[0.5],[0.5],[0.5]};
+settings.eventColors={'y','b','none','g','g','g','g'};
+settings.firstN={'all',1,[5],'all','all','all','all'};
 settings.histoplotfields={'cueZone_onVoff','all_reachBatch'};
 settings.shading_type=[];
 plotBehavior(alltbt,'cueZone_onVoff',false,1:size(alltbt.cueZone_onVoff,1),settings);
