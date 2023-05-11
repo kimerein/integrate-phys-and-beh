@@ -3,7 +3,7 @@ function [allX,allY,allZ,allX_from_under,reachTrajTimes]=pickReachTrajectories(l
 % fps is frames per second of high speed movie
 
 timeBeforeReach=1;
-timeAfterReach=1;
+timeAfterReach=2;
 nReachesFromEachTrial='all';
 spaceOutReaches=true;
 spaceOutByTime=1; % in seconds
@@ -113,6 +113,7 @@ end
 currvidname=[firstHalf vid_s secondHalf];
 if exist([DLCoutput_location '\' currvidname],'file')
     a=load([DLCoutput_location '\' currvidname]);
+    disp(['Adding reach from ' DLCoutput_location '\' currvidname]);
     % expect X, Y, Z, X_from_under
     indstotake=frame-framesBefore:frame+framesAfter;
     padAtFront=0;

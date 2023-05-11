@@ -27,7 +27,7 @@ def getRigEvents(
     
     # codedir = r'C:\Users\sabatini\Documents\GitHub\integrate-phys-and-beh'
     codedir = os.getcwd()
-    videos = r'Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20190530\March_C\test'
+    videos = r'Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20190605\March_C\DLC vids'
     # videos: list
     #    A list of strings containing the full paths to videos for analysis or a path to the directory, where all the videos with same extension are stored.
     getDifferenceEventsBeforeSaving = True
@@ -41,8 +41,18 @@ def getRigEvents(
     #rawThresh = 3
     #wheelThresh = 20
     #distractorThresh = 100
-    # March_C
-    wheelZone = [200, 300, 1, 125] # [x_start, x_end, y_start, y_end]
+    # March_C first day
+    #wheelZone = [200, 300, 1, 125] # [x_start, x_end, y_start, y_end]
+    #cueZone = [75, 125, 450, 525] # [x_start, x_end, y_start, y_end]
+    #distractorZone = [1, 30, 340, 375] # [x_start, x_end, y_start, y_end]
+    #reachZone = [106, 148, 98, 144] # [x_start, x_end, y_start, y_end]
+    #cueThresh = 10
+    #wheelThresh = 2
+    #rawThresh = 3
+    #distractorThresh = 5
+    #reachThresh = 3
+    # March_C second day
+    wheelZone = [200, 300, 1, 185] # [x_start, x_end, y_start, y_end]
     cueZone = [75, 125, 450, 525] # [x_start, x_end, y_start, y_end]
     distractorZone = [1, 30, 340, 375] # [x_start, x_end, y_start, y_end]
     reachZone = [106, 148, 98, 144] # [x_start, x_end, y_start, y_end]

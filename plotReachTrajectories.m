@@ -1,13 +1,29 @@
-function plotReachTrajectories(X,Y,Z,X_from_under,reachTrajTimes,smoobin)
+function plotReachTrajectories(X,Y,Z,X_from_under,reachTrajTimes,smoobin,fps)
 
-Xdelta_thresh=2;
+Xdelta_thresh=1;
 atleastthismany_notnan_points=200;
+scaleY=0.25;
+startsinrange_X=[90 110];
+startsinrange_Y=[200 450];
+startsinrange_Z=[200 350];
+startTime=0.25; % in seconds
 
 % Toss outliers
 X=toss(X); X=fillNans(X);
 Y=toss(Y); Y=fillNans(Y);
 Z=toss(Z); Z=fillNans(Z);
 X_from_under=toss(X_from_under); X_from_under=fillNans(X_from_under);
+
+% Take only reaches that start in zone defined by "startsinrange"
+startInds=ceil(startTime/(1/fps));
+startsatperch_X=any(X(:,1:startInds)>startsinrange_X(1),2) & any(X(:,1:startInds)<startsinrange_X(2),2);
+startsatperch_Y=any(Y(:,1:startInds)>startsinrange_Y(1),2) & any(Y(:,1:startInds)<startsinrange_Y(2),2);
+startsatperch_Z=any(Z(:,1:startInds)>startsinrange_Z(1),2) & any(Z(:,1:startInds)<startsinrange_Z(2),2);
+startsatperch=startsatperch_X & startsatperch_Y & startsatperch_Z;
+X=X(startsatperch,:);
+Y=Y(startsatperch,:);
+Z=Z(startsatperch,:);
+X_from_under=X_from_under(startsatperch,:);
 
 % Take only the reaches with delta X greater than Xdelta_thresh
 bigenoughreach=(max(X,[],2,'omitnan')-min(X,[],2,'omitnan'))>Xdelta_thresh;
@@ -46,14 +62,15 @@ for i=1:size(X,1)
 %     hold all; 
 %     plot3(X(i,1:100),Y(i,1:100),Z(i,1:100),'Color','b'); hold on; 
 % %     plot3(X(i,end-100:end),Y(i,end-100:end),Z(i,end-100:end),'Color','r'); hold on; 
-    scatter3(X(i,:),Y(i,:),Z(i,:),30,cmap); hold on;
+    scatter3(X(i,:),Y(i,:).*scaleY,Z(i,:),30,cmap); hold on;
 end
 xlabel('X'); ylabel('Y'); zlabel('Z');
 
 figure();
-plot3(nanmean(X,1),nanmean(Y,1),nanmean(Z,1),'Color','k');
-hold all
-plot3(nanmean(X(:,1:50),1),nanmean(Y(:,1:50),1),nanmean(Z(:,1:50),1),'Color','b');
+scatter3(nanmean(X,1),nanmean(Y,1).*scaleY,nanmean(Z,1),30,cmap);
+% plot3(nanmean(X,1),nanmean(Y,1),nanmean(Z,1),'Color','k');
+% hold all
+% plot3(nanmean(X(:,1:50),1),nanmean(Y(:,1:50),1),nanmean(Z(:,1:50),1),'Color','b');
 xlabel('X'); ylabel('Y'); zlabel('Z');
 title('Average');
 
