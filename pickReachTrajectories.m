@@ -100,17 +100,17 @@ if exist([DLCoutput_location '\' currvidname],'file')
     padAtFront=0;
     padAtBack=0;
     if indstotake(1)<1
-        indstotake=1:indstotake(end);
         padAtFront=nansum(indstotake<1);
+        indstotake=1:indstotake(end);
     end
     if indstotake(end)>length(a.X)
-        indstotake=indstotake(1):length(a.X);
         padAtBack=nansum(indstotake>length(a.X));
+        indstotake=indstotake(1):length(a.X);
     end
-    X=[nan(1,padAtFront) a.X(indstotake) nan(1,padAtBack)];
-    Y=[nan(1,padAtFront) a.Y(indstotake) nan(1,padAtBack)];
-    Z=[nan(1,padAtFront) a.Z(indstotake) nan(1,padAtBack)];
-    X_from_under=[nan(1,padAtFront) a.X_from_under(indstotake) nan(1,padAtBack)];
+    X=[nan(1,padAtFront) a.X(indstotake)' nan(1,padAtBack)];
+    Y=[nan(1,padAtFront) a.Y(indstotake)' nan(1,padAtBack)];
+    Z=[nan(1,padAtFront) a.Z(indstotake)' nan(1,padAtBack)];
+    X_from_under=[nan(1,padAtFront) a.X_from_under(indstotake)' nan(1,padAtBack)];
 else
     return
 end
