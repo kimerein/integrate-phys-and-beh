@@ -2,11 +2,11 @@ function [allX,allY,allZ,allX_from_under,reachTrajTimes]=pickReachTrajectories(l
 
 % fps is frames per second of high speed movie
 
-timeBeforeReach=0.2;
+timeBeforeReach=1;
 timeAfterReach=1;
-nReachesFromEachTrial='all';
+nReachesFromEachTrial=1;
 noReachesBeforeTime=-0.3; % wrt cue, to be sure have enough frames around reach
-noReachesAfterTime=7.5; % wrt cue, to be sure have enough frames around reach
+noReachesAfterTime=9; % wrt cue, to be sure have enough frames around reach
 
 if fromWhichArg==1
     reaches=lowspeed_tbt.(whichReachField);
@@ -41,10 +41,17 @@ reachTrajTimes=0:timestep_hs:(size(allX,2)-1)*timestep_hs;
 reachcounter=1;
 for i=1:size(reaches,1)
     f=find(reaches(i,:)>0.5);
+    % Discard reaches outside of range 
+    toDiscard=reachtimes(i,f)-avcuetime<noReachesBeforeTime;
+    toDiscard2=reachtimes(i,f)-avcuetime>noReachesAfterTime;
+    f=f(~toDiscard & ~toDiscard2);
     if strcmp(nReachesFromEachTrial,'all')
         n=length(f);
     else
         n=nReachesFromEachTrial;
+    end
+    if isempty(f)
+        continue
     end
     for j=1:n
         if reachtimes(i,f(j))-avcuetime<noReachesBeforeTime
