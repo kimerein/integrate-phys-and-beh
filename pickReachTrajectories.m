@@ -37,7 +37,7 @@ allX=nan(maxNReaches,framesBefore+framesAfter+1);
 allY=nan(maxNReaches,framesBefore+framesAfter+1);
 allZ=nan(maxNReaches,framesBefore+framesAfter+1);
 allX_from_under=nan(maxNReaches,framesBefore+framesAfter+1);
-reachTrajTimes=0:timestep:(size(allX,2)-1)*timestep;
+reachTrajTimes=0:timestep_hs:(size(allX,2)-1)*timestep_hs;
 reachcounter=1;
 for i=1:size(reaches,1)
     f=find(reaches(i,:)>0.5);
@@ -97,16 +97,20 @@ if exist([DLCoutput_location '\' currvidname],'file')
     a=load([DLCoutput_location '\' currvidname]);
     % expect X, Y, Z, X_from_under
     indstotake=frame-framesBefore:frame+framesAfter;
+    padAtFront=0;
+    padAtBack=0;
     if indstotake(1)<1
         indstotake=1:indstotake(end);
+        padAtFront=nansum(indstotake<1);
     end
     if indstotake(end)>length(a.X)
         indstotake=indstotake(1):length(a.X);
+        padAtBack=nansum(indstotake>length(a.X));
     end
-    X=a.X(indstotake);
-    Y=a.Y(indstotake);
-    Z=a.Z(indstotake);
-    X_from_under=a.X_from_under(indstotake);
+    X=[nan(1,padAtFront) a.X(indstotake) nan(1,padAtBack)];
+    Y=[nan(1,padAtFront) a.Y(indstotake) nan(1,padAtBack)];
+    Z=[nan(1,padAtFront) a.Z(indstotake) nan(1,padAtBack)];
+    X_from_under=[nan(1,padAtFront) a.X_from_under(indstotake) nan(1,padAtBack)];
 else
     return
 end
