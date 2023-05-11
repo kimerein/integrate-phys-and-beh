@@ -1,4 +1,4 @@
-function pickReachTrajectories(lowspeed_tbt,highspeed_tbt,whichReachField,fromWhichArg,DLCoutput_location,fps)
+function [allX,allY,allZ,allX_from_under,reachTrajTimes]=pickReachTrajectories(lowspeed_tbt,highspeed_tbt,whichReachField,fromWhichArg,DLCoutput_location,vidName,fps)
 
 % fps is frames per second of high speed movie
 
@@ -32,6 +32,13 @@ framesAfter=ceil(timeAfterReach/timestep_hs);
 
 % for each reach, see if DLC made paw tracking output
 % if yes, read in paw position during this reach
+maxNReaches=10*size(reaches,1);
+allX=nan(maxNReaches,framesBefore+framesAfter+1);
+allY=nan(maxNReaches,framesBefore+framesAfter+1);
+allZ=nan(maxNReaches,framesBefore+framesAfter+1);
+allX_from_under=nan(maxNReaches,framesBefore+framesAfter+1);
+reachTrajTimes=0:timestep:(size(allX,2)-1)*timestep;
+reachcounter=1;
 for i=1:size(reaches,1)
     f=find(reaches(i,:)>0.5);
     if strcmp(nReachesFromEachTrial,'all')
@@ -48,14 +55,61 @@ for i=1:size(reaches,1)
         end
         % for each reach, each trial
         [vid,frame]=getVidAndFrame_fromTimeAfterCue(reachtimes(i,f(j))-avcuetime,highspeed_tbt,i);
+        [X,Y,Z,X_from_under]=getPawTrajectory(DLCoutput_location,vidName,vid,frame,framesBefore,framesAfter);
+        if ~isempty(X)
+            allX(reachcounter,:)=X;
+            allY(reachcounter,:)=Y;
+            allZ(reachcounter,:)=Z;
+            allX_from_under(reachcounter,:)=X_from_under;
+            reachcounter=reachcounter+1;
+        end
     end
 end
 
+allX=allX(1:reachcounter-1,:);
+allY=allY(1:reachcounter-1,:);
+allZ=allZ(1:reachcounter-1,:);
+allX_from_under=allX_from_under(1:reachcounter-1,:);
+
 end
 
-function getPawTrajectory(DLCoutput_location,vid,frame,framesBefore,framesAfter)
+function [X,Y,Z,X_from_under]=getPawTrajectory(DLCoutput_location,vidName,vid,frame,framesBefore,framesAfter)
 
+X=[]; Y=[]; Z=[]; X_from_under=[];
 
+r=regexp(vidName,'0000');
+firstHalf=vidName(1:r-1);
+secondHalf=vidName(r+4:end);
+vid_s=num2str(vid);
+if length(vid_s)==1
+    vid_s=['000' vid_s];
+elseif length(vid_s)==2
+    vid_s=['00' vid_s];
+elseif length(vid_s)==3
+    vid_s=['0' vid_s];
+elseif length(vid_s)==4
+    vid_s=[vid_s];
+elseif length(vid_s)>4
+    error('Need to fix code to accomodate more than 1000 highspeed videos');
+end
+currvidname=[firstHalf vid_s secondHalf];
+if exist([DLCoutput_location '\' currvidname],'file')
+    a=load([DLCoutput_location '\' currvidname]);
+    % expect X, Y, Z, X_from_under
+    indstotake=frame-framesBefore:frame+framesAfter;
+    if indstotake(1)<1
+        indstotake=1:indstotake(end);
+    end
+    if indstotake(end)>length(a.X)
+        indstotake=indstotake(1):length(a.X);
+    end
+    X=a.X(indstotake);
+    Y=a.Y(indstotake);
+    Z=a.Z(indstotake);
+    X_from_under=a.X_from_under(indstotake);
+else
+    return
+end
 
 end
 
