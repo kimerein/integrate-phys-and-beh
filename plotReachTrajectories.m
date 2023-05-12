@@ -1,5 +1,7 @@
 function plotReachTrajectories(X,Y,Z,X_from_under,reachTrajTimes,smoobin,fps)
 
+% NEED TO FIGURE OUT SCALE_Y!
+
 % Need to realign to reach starts
 
 Xdelta_thresh=0;
@@ -9,10 +11,10 @@ nindsAboveForZ=10;
 realToInd=floor(2./(1/fps));
 atleastthismany_notnan_points=200;
 scaleY=0.25;
-startsinrange_X=[]; %[0 110]; %[90 110];
-startsinrange_Y=[]; %[0 450]; %[200 450];
-startsinrange_Z=[]; %[0 350]; %[200 350];
-startTime=0.25; % in seconds
+startsinrange_X=[0 110]; %[90 110];
+startsinrange_Y=[0 680]; %[200 450];
+startsinrange_Z=[160 1000]; %[200 350];
+startTime=2; % in seconds
 
 % Toss outliers
 X=toss(X); X=fillNans(X);
