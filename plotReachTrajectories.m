@@ -6,7 +6,7 @@ Xdelta_thresh=0;
 Zdelta_thresh=0; %25;
 Z_diff_thresh=0.5;
 nindsAboveForZ=10;
-realToInd=floor(3./(1/fps));
+realToInd=floor(2./(1/fps));
 atleastthismany_notnan_points=200;
 scaleY=0.25;
 startsinrange_X=[]; %[0 110]; %[90 110];
@@ -50,15 +50,21 @@ if ~isempty(startsinrange_X)
 end
 
 % Take only the reaches with delta X greater than Xdelta_thresh
+bigenoughreach=ones(size(X,1),1);
 if Xdelta_thresh>0
     bigenoughreach=(max(X,[],2,'omitnan')-min(X,[],2,'omitnan'))>Xdelta_thresh;
 elseif Zdelta_thresh>0
     bigenoughreach=(max(Z,[],2,'omitnan')-min(Z,[],2,'omitnan'))>Zdelta_thresh;
 end
-X=X(bigenoughreach,:);
-Y=Y(bigenoughreach,:);
-Z=Z(bigenoughreach,:);
-X_from_under=X_from_under(bigenoughreach,:);
+X=X(bigenoughreach==1,:);
+Y=Y(bigenoughreach==1,:);
+Z=Z(bigenoughreach==1,:);
+X_from_under=X_from_under(bigenoughreach==1,:);
+
+X=fillNans(X);
+Y=fillNans(Y);
+Z=fillNans(Z);
+X_from_under=fillNans(X_from_under);
 
 % Enough points
 notnan=~isnan(X) & ~isnan(Y) & ~isnan(Z);
@@ -150,7 +156,7 @@ temp=currfield(i,:);
 if reachBegins(i)<realToInd
     % shift back in time
     temp=[nan(1,realToInd-reachBegins(i)) currfield(i,1:end-(realToInd-reachBegins(i)))];
-elseif reachBegins(i)>cueind
+elseif reachBegins(i)>realToInd
     % shift forward in time
     temp=[currfield(i,1+(reachBegins(i)-realToInd):end) nan(1,reachBegins(i)-realToInd)];
 end
