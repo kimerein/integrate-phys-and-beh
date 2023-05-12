@@ -20,12 +20,14 @@ disp(['duration of high speed acquisition: ' num2str(durationOfHighSpeedAcq) ' s
 % Make high speed tbt, downsampling 10 times
 % This is just for initial alignment
 % Then will precisely align to each cue
+maxsize=nanmax([distractorDiffEvs_minus/dsby cueDiffEvs_minus/dsby wheelDiffEvs_minus/dsby reachDiffEvs_minus/dsby ...
+                distractorDiffEvs_plus/dsby cueDiffEvs_plus/dsby wheelDiffEvs_plus/dsby reachDiffEvs_plus/dsby]);
 distractor=zeros(1,ceil(nanmax(distractorDiffEvs_minus/dsby)));
-cue=zeros(1,ceil(nanmax(distractorDiffEvs_minus/dsby)));
-wheel=zeros(1,ceil(nanmax(distractorDiffEvs_minus/dsby)));
-reach=zeros(1,ceil(nanmax(distractorDiffEvs_minus/dsby)));
-whichVid=zeros(1,ceil(nanmax(distractorDiffEvs_minus/dsby)));
-whichFrame=zeros(1,ceil(nanmax(distractorDiffEvs_minus/dsby)));
+cue=zeros(1,ceil(maxsize));
+wheel=zeros(1,ceil(maxsize));
+reach=zeros(1,ceil(maxsize));
+whichVid=zeros(1,ceil(maxsize));
+whichFrame=zeros(1,ceil(maxsize));
 
 cuediff=floor(cueDiffEvs_plus./dsby);
 distractordiff=floor(distractorDiffEvs_plus./dsby);
@@ -63,7 +65,11 @@ for i=1:length(f)
     if cue(f)<0.5 
         continue
     end
-    cue(f(i)+1:f(i)+triallengthinds)=0;
+    currinds=f(i)+1:f(i)+triallengthinds;
+    if any(currinds>size(cue,2))
+        currinds=currinds(1):size(cue,2);
+    end
+    cue(currinds)=0;
 end
 figure();
 plot(cue); title('Cleaned up cue from high speed video');
@@ -76,7 +82,11 @@ for i=1:length(f)
     if distractor(f)<0.5 
         continue
     end
-    distractor(f(i)+1:f(i)+distractorLengthinds)=0;
+    currinds=f(i)+1:f(i)+distractorLengthinds;
+    if any(currinds>size(distractor,2))
+        currinds=currinds(1):size(distractor,2);
+    end
+    distractor(currinds)=0;
 end
 figure();
 plot(distractor); title('Cleaned up distractor from high speed video');
