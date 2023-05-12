@@ -1,32 +1,39 @@
 function plotReachTrajectories(X,Y,Z,X_from_under,reachTrajTimes,smoobin,fps)
 
-Xdelta_thresh=1;
+Xdelta_thresh=0;
+Zdelta_thresh=25;
 atleastthismany_notnan_points=200;
 scaleY=0.25;
-startsinrange_X=[90 110];
-startsinrange_Y=[200 450];
-startsinrange_Z=[200 350];
+startsinrange_X=[]; %[0 110]; %[90 110];
+startsinrange_Y=[]; %[0 450]; %[200 450];
+startsinrange_Z=[]; %[0 350]; %[200 350];
 startTime=0.25; % in seconds
 
 % Toss outliers
-X=toss(X); X=fillNans(X);
-Y=toss(Y); Y=fillNans(Y);
-Z=toss(Z); Z=fillNans(Z);
-X_from_under=toss(X_from_under); X_from_under=fillNans(X_from_under);
+X=toss(X); %X=fillNans(X);
+Y=toss(Y); %Y=fillNans(Y);
+Z=toss(Z); %Z=fillNans(Z);
+X_from_under=toss(X_from_under); %X_from_under=fillNans(X_from_under);
 
 % Take only reaches that start in zone defined by "startsinrange"
-startInds=ceil(startTime/(1/fps));
-startsatperch_X=any(X(:,1:startInds)>startsinrange_X(1),2) & any(X(:,1:startInds)<startsinrange_X(2),2);
-startsatperch_Y=any(Y(:,1:startInds)>startsinrange_Y(1),2) & any(Y(:,1:startInds)<startsinrange_Y(2),2);
-startsatperch_Z=any(Z(:,1:startInds)>startsinrange_Z(1),2) & any(Z(:,1:startInds)<startsinrange_Z(2),2);
-startsatperch=startsatperch_X & startsatperch_Y & startsatperch_Z;
-X=X(startsatperch,:);
-Y=Y(startsatperch,:);
-Z=Z(startsatperch,:);
-X_from_under=X_from_under(startsatperch,:);
+if ~isempty(startsinrange_X)
+    startInds=ceil(startTime/(1/fps));
+    startsatperch_X=any(X(:,1:startInds)>startsinrange_X(1),2) & any(X(:,1:startInds)<startsinrange_X(2),2);
+    startsatperch_Y=any(Y(:,1:startInds)>startsinrange_Y(1),2) & any(Y(:,1:startInds)<startsinrange_Y(2),2);
+    startsatperch_Z=any(Z(:,1:startInds)>startsinrange_Z(1),2) & any(Z(:,1:startInds)<startsinrange_Z(2),2);
+    startsatperch=startsatperch_X & startsatperch_Y & startsatperch_Z;
+    X=X(startsatperch,:);
+    Y=Y(startsatperch,:);
+    Z=Z(startsatperch,:);
+    X_from_under=X_from_under(startsatperch,:);
+end
 
 % Take only the reaches with delta X greater than Xdelta_thresh
-bigenoughreach=(max(X,[],2,'omitnan')-min(X,[],2,'omitnan'))>Xdelta_thresh;
+if Xdelta_thresh>0
+    bigenoughreach=(max(X,[],2,'omitnan')-min(X,[],2,'omitnan'))>Xdelta_thresh;
+elseif Zdelta_thresh>0
+    bigenoughreach=(max(Z,[],2,'omitnan')-min(Z,[],2,'omitnan'))>Zdelta_thresh;
+end
 X=X(bigenoughreach,:);
 Y=Y(bigenoughreach,:);
 Z=Z(bigenoughreach,:);

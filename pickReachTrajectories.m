@@ -3,7 +3,7 @@ function [allX,allY,allZ,allX_from_under,reachTrajTimes]=pickReachTrajectories(l
 % fps is frames per second of high speed movie
 
 timeBeforeReach=1;
-timeAfterReach=2;
+timeAfterReach=0.5;
 nReachesFromEachTrial='all';
 spaceOutReaches=true;
 spaceOutByTime=1; % in seconds

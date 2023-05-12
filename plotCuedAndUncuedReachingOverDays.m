@@ -1,6 +1,6 @@
 function plotCuedAndUncuedReachingOverDays(all_rr_cued,all_rr_uncued,days,whichdays)
 
-colorsUpTo=22;
+colorsUpTo=20;
 % colorsUpTo=40;
 
 cmap=colormap(cool(colorsUpTo));
@@ -23,7 +23,7 @@ for i=1:size(all_rr_cued,2)
     else
         currc=cmap(days(i),:);
     end
-    scatter(me_uncued,me_cued,75,currc,'filled'); hold on;
+%     scatter(me_uncued,me_cued,75,currc,'filled'); hold on;
     line([me_uncued-se_uncued me_uncued+se_uncued],[me_cued me_cued],'Color',currc); hold on;
     line([me_uncued me_uncued],[me_cued-se_cued me_cued+se_cued],'Color',currc);
 end
