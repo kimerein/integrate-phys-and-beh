@@ -1,7 +1,12 @@
 function plotReachTrajectories(X,Y,Z,X_from_under,reachTrajTimes,smoobin,fps)
 
+% Need to realign to reach starts
+
 Xdelta_thresh=0;
-Zdelta_thresh=25;
+Zdelta_thresh=0; %25;
+Z_diff_thresh=0.5;
+nindsAboveForZ=10;
+realToInd=floor(3./(1/fps));
 atleastthismany_notnan_points=200;
 scaleY=0.25;
 startsinrange_X=[]; %[0 110]; %[90 110];
@@ -10,10 +15,26 @@ startsinrange_Z=[]; %[0 350]; %[200 350];
 startTime=0.25; % in seconds
 
 % Toss outliers
-X=toss(X); %X=fillNans(X);
-Y=toss(Y); %Y=fillNans(Y);
-Z=toss(Z); %Z=fillNans(Z);
-X_from_under=toss(X_from_under); %X_from_under=fillNans(X_from_under);
+X=toss(X); X=fillNans(X);
+Y=toss(Y); Y=fillNans(Y);
+Z=toss(Z); Z=fillNans(Z);
+X_from_under=toss(X_from_under); X_from_under=fillNans(X_from_under);
+
+% Smooth
+if ~isempty(smoobin)
+    for i=1:size(X,1)
+        X(i,:)=smooth(X(i,:)',smoobin);
+        Y(i,:)=smooth(Y(i,:)',smoobin);
+        Z(i,:)=smooth(Z(i,:)',smoobin);
+        X_from_under(i,:)=smooth(X_from_under(i,:)',smoobin);
+    end
+end
+
+[X,Y,Z,X_from_under,Z_deviates]=realignToReachStarts(X,Y,Z,X_from_under,Z_diff_thresh,nindsAboveForZ,realToInd);
+X=X(~isnan(Z_deviates),:);
+Y=Y(~isnan(Z_deviates),:);
+Z=Z(~isnan(Z_deviates),:);
+X_from_under=X_from_under(~isnan(Z_deviates),:);
 
 % Take only reaches that start in zone defined by "startsinrange"
 if ~isempty(startsinrange_X)
@@ -51,16 +72,6 @@ figure(); plot(reachTrajTimes,X'); title('X');
 figure(); plot(reachTrajTimes,Y'); title('Y');
 figure(); plot(reachTrajTimes,Z'); title('Z');
 
-% Smooth
-if ~isempty(smoobin)
-    for i=1:size(X,1)
-        X(i,:)=smooth(X(i,:)',smoobin);
-        Y(i,:)=smooth(Y(i,:)',smoobin);
-        Z(i,:)=smooth(Z(i,:)',smoobin);
-        X_from_under(i,:)=smooth(X_from_under(i,:)',smoobin);
-    end
-end
-
 figure(); 
 colorsUpTo=size(X,2);
 cmap=colormap(cool(colorsUpTo));
@@ -80,6 +91,69 @@ scatter3(nanmean(X,1),nanmean(Y,1).*scaleY,nanmean(Z,1),30,cmap);
 % plot3(nanmean(X(:,1:50),1),nanmean(Y(:,1:50),1),nanmean(Z(:,1:50),1),'Color','b');
 xlabel('X'); ylabel('Y'); zlabel('Z');
 title('Average');
+
+end
+
+function [X,Y,Z,X_from_under,reachBegins]=realignToReachStarts(X,Y,Z,X_from_under,Z_diff_thresh,nindsAboveForZ,realToInd)
+
+% Z_diff_thresh=0.5
+% nindsAboveForZ=10
+
+figure(); 
+plot(diff(Z,1,2)'); title('Before alignment');
+
+% Find reach beginnings, using Z
+reachBegins=nan(size(Z,1),1);
+for i=1:size(Z,1)
+    temp=diff(Z(i,:),1,2);
+    % Find first when -diff Z > Z_diff_thresh and stays high for at least
+    % nindsAboveforZ
+    ishigh=-temp>Z_diff_thresh;
+    reachbegin=nan;
+    for j=1:length(ishigh)
+        if j+nindsAboveForZ>length(ishigh)
+            break
+        end
+        % check whether stays high
+        if all(ishigh(j:j+nindsAboveForZ))
+            reachbegin=j;
+            break
+        end
+    end
+    reachBegins(i)=reachbegin;
+end
+
+[X,Y,Z,X_from_under]=real(X,Y,Z,X_from_under,reachBegins,realToInd);
+
+figure(); 
+plot(diff(Z,1,2)'); title('After alignment');
+
+end
+
+function [X,Y,Z,X_from_under]=real(X,Y,Z,X_from_under,reachBegins,realToInd)
+
+for i=1:size(X,1)
+    if isnan(reachBegins(i))
+        continue
+    end
+    X(i,:)=realignEachRow(X,reachBegins,i,realToInd);
+    Y(i,:)=realignEachRow(Y,reachBegins,i,realToInd);
+    Z(i,:)=realignEachRow(Z,reachBegins,i,realToInd);
+    X_from_under(i,:)=realignEachRow(X_from_under,reachBegins,i,realToInd);
+end
+
+end
+
+function temp=realignEachRow(currfield,reachBegins,i,realToInd)
+
+temp=currfield(i,:);
+if reachBegins(i)<realToInd
+    % shift back in time
+    temp=[nan(1,realToInd-reachBegins(i)) currfield(i,1:end-(realToInd-reachBegins(i)))];
+elseif reachBegins(i)>cueind
+    % shift forward in time
+    temp=[currfield(i,1+(reachBegins(i)-realToInd):end) nan(1,reachBegins(i)-realToInd)];
+end
 
 end
 
