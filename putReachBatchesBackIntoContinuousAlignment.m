@@ -8,7 +8,7 @@ for i=1:length(batchfields)
     for j=1:size(curr,1)
         f=find(curr(j,:)>0.5);
         for k=1:length(f)
-            alignment=putBack(alignment,frames(f(k)),batchfields{i});
+            alignment=putBack(alignment,frames(j,f(k)),batchfields{i});
         end
     end
 end
