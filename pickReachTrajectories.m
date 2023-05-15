@@ -1,4 +1,4 @@
-function [allX,allY,allZ,allX_from_under,reachTrajTimes]=pickReachTrajectories(lowspeed_tbt,highspeed_tbt,whichReachField,fromWhichArg,DLCoutput_location,vidName,fps)
+function [allX,allY,allZ,allX_from_under,reachTrajTimes]=pickReachTrajectories(lowspeed_tbt,highspeed_tbt,whichReachField,fromWhichArg,DLCoutput_location,vidName,fps,onlyLED)
 
 % fps is frames per second of high speed movie
 
@@ -9,6 +9,31 @@ spaceOutReaches=true;
 spaceOutByTime=1; % in seconds
 noReachesBeforeTime=-0.3; % wrt cue, to be sure have enough frames around reach
 noReachesAfterTime=9; % wrt cue, to be sure have enough frames around reach
+
+switch onlyLED
+    case 'noLED'
+        % zero out the reach field for any trial where LED was on
+        if fromWhichArg==1
+            reaches=lowspeed_tbt.(whichReachField);
+            reaches(any(lowspeed_tbt.optoOn(:,10:200)>0.5,2),:)=0;
+            lowspeed_tbt.(whichReachField)=reaches;
+        elseif fromWhichArg==2
+            error('Not yet implemented for pick reach from high speed');
+        end
+    case 'LED'
+        % zero out the reach field for any trial where LED was NOT on
+        if fromWhichArg==1
+            reaches=lowspeed_tbt.(whichReachField);
+            reaches(~any(lowspeed_tbt.optoOn(:,10:200)>0.5,2),:)=0;
+            lowspeed_tbt.(whichReachField)=reaches;
+        elseif fromWhichArg==2
+            error('Not yet implemented for pick reach from high speed');
+        end
+    case []
+        % do nothing
+    otherwise 
+        error('Do not recognize onlyLED parameter value');
+end
 
 if fromWhichArg==1
     reaches=lowspeed_tbt.(whichReachField);
