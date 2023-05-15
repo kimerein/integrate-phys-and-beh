@@ -1,4 +1,4 @@
-function plotReachTrajectories(X,Y,Z,X_from_under,reachTrajTimes,smoobin,fps)
+function [X,Y,Z]=plotReachTrajectories(X,Y,Z,X_from_under,reachTrajTimes,smoobin,fps)
 
 % NEED TO FIGURE OUT SCALE_Y!
 
@@ -87,6 +87,10 @@ Y=Y(enoughpoints,:);
 Z=Z(enoughpoints,:);
 X_from_under=X_from_under(enoughpoints,:);
 
+if isempty(X)
+    disp('No reaches left');
+    return
+end
 figure(); plot(reachTrajTimes,X'); title('X');
 figure(); plot(reachTrajTimes,Y'); title('Y');
 figure(); plot(reachTrajTimes,Z'); title('Z');
@@ -110,6 +114,27 @@ scatter3(nanmean(X,1),nanmean(Y,1).*scaleY,nanmean(Z,1),30,cmap);
 % plot3(nanmean(X(:,1:50),1),nanmean(Y(:,1:50),1),nanmean(Z(:,1:50),1),'Color','b');
 xlabel('X'); ylabel('Y'); zlabel('Z');
 title('Average');
+
+% load('Z:\MICROSCOPE\Kim\Final Figs\Fig1\reach trajectories\March_C\all_noOpto_reachTrajectories.mat')
+% [Xout,Yout,Zout]=plotReachTrajectories(all_X,all_Y,all_Z,all_X_from_under,reachTrajTimes,100,256);
+% Xnoopto=nanmean(Xout,1);
+% Ynoopto=nanmean(Yout,1);
+% Znoopto=nanmean(Zout,1);
+% close all
+% load('Z:\MICROSCOPE\Kim\Final Figs\Fig1\reach trajectories\March_C\all_opto_reachTrajectories.mat')
+% [Xout,Yout,Zout]=plotReachTrajectories(all_X,all_Y,all_Z,all_X_from_under,reachTrajTimes,100,256);
+% Xopto=nanmean(Xout,1);
+% Yopto=nanmean(Yout,1);
+% Zopto=nanmean(Zout,1);
+% close all
+% figure();
+% colorsUpTo=size(Xnoopto,2);
+% cmap=colormap(cool(colorsUpTo));
+% scatter3(Xnoopto,Ynoopto.*0.25,Znoopto,30,cmap,'MarkerFaceColor','k');
+% hold on;
+% scatter3(Xopto,Yopto.*0.25,Zopto,30,cmap,'MarkerFaceColor','r');
+% xlabel('X'); ylabel('Y'); zlabel('Z');
+% title('Average');
 
 end
 

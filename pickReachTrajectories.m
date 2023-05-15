@@ -20,6 +20,8 @@ switch onlyLED
         elseif fromWhichArg==2
             error('Not yet implemented for pick reach from high speed');
         end
+        noReachesBeforeTime=0; % wrt cue, to be sure have enough frames around reach
+        noReachesAfterTime=1; % wrt cue, to be sure have enough frames around reach
     case 'LED'
         % zero out the reach field for any trial where LED was NOT on
         if fromWhichArg==1
@@ -29,6 +31,8 @@ switch onlyLED
         elseif fromWhichArg==2
             error('Not yet implemented for pick reach from high speed');
         end
+        noReachesBeforeTime=0; % wrt cue, to be sure have enough frames around reach
+        noReachesAfterTime=1; % wrt cue, to be sure have enough frames around reach
     case []
         % do nothing
     otherwise 
