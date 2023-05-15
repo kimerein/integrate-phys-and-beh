@@ -1,7 +1,7 @@
 function [lc,udays,rr_cued_interp,rr_uncued_interp,lc_dayN,lc_day1,quiverTips,biases]=learningCurves(alltbt,trialTypes,metadata,dayField,day1is,dayNis,bestWithinDays)
 
 fillInToEnd=true;
-subtractDay1_dprime=true;
+subtractDay1_dprime=false;
 
 u=unique(metadata.mouseid);
 dayField=metadata.(dayField);

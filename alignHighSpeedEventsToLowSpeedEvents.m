@@ -10,6 +10,11 @@ ds_timestep=timestep*dsby;
 
 load(location_of_rig_events);
 
+% If did not add reachBatch, do it now
+if ~isfield(lowspeed_tbt,'reachBatch_success_reachStarts')
+    lowspeed_tbt=addReachBatchesToSingleTbt(lowspeed_tbt,'cueZone_onVoff',0.25,0,[]);
+end
+
 % Guess at initial alignment
 durationOfHighSpeedAcq=nHighSpeedVidFiles*framesPerHighSpeedVid*timestep;
 temp=lowspeed_tbt.times_wrt_trial_start; temp=temp'; timestepls=mode(diff(temp(1:end)));
@@ -20,9 +25,11 @@ disp(['duration of high speed acquisition: ' num2str(durationOfHighSpeedAcq) ' s
 % Make high speed tbt, downsampling 10 times
 % This is just for initial alignment
 % Then will precisely align to each cue
+triallengthinds=floor((minTrialLength/2)/ds_timestep);
 maxsize=nanmax([distractorDiffEvs_minus/dsby cueDiffEvs_minus/dsby wheelDiffEvs_minus/dsby reachDiffEvs_minus/dsby ...
                 distractorDiffEvs_plus/dsby cueDiffEvs_plus/dsby wheelDiffEvs_plus/dsby reachDiffEvs_plus/dsby]);
-distractor=zeros(1,ceil(nanmax(distractorDiffEvs_minus/dsby)));
+maxsize=maxsize+triallengthinds;
+distractor=zeros(1,ceil(maxsize));
 cue=zeros(1,ceil(maxsize));
 wheel=zeros(1,ceil(maxsize));
 reach=zeros(1,ceil(maxsize));
@@ -60,7 +67,6 @@ cueindsbefore=floor(cuedelay/ds_timestep);
 trialLength=nanmax(nanmean(lowspeed_tbt.times_wrt_trial_start,1));
 % Use trialLength to clean up cues
 f=find(cue>0.5);
-triallengthinds=floor((minTrialLength/2)/ds_timestep);
 for i=1:length(f)
     if cue(f)<0.5 
         continue
@@ -117,6 +123,8 @@ distractordiff=find(distractor>0.5);
 %     questdlg('Preset min and max lag. Continue?');
 % end
 
+size(distractor)
+size(cue)
 distractor=distractor-cue;
 distractor(distractor<0)=0;
 
@@ -158,7 +166,8 @@ highspeed_tbt=fleshOutDuration(highspeed_tbt,'cue',floor(cue_duration./ds_timest
 highspeed_tbt=fleshOutDuration(highspeed_tbt,'distractor',floor(distractor_duration./ds_timestep));
 
 %%%%%%%%%%% USER SETS THIS
-lowspeed_tbt=moveRedForwardOrBack(lowspeed_tbt,[3:size(lowspeed_tbt.cue,1)],[],'drop');
+% lowspeed_tbt=moveRedForwardOrBack(lowspeed_tbt,[3:size(lowspeed_tbt.cue,1)],[],'drop');
+highspeed_tbt=moveRedForwardOrBack(highspeed_tbt,[103:size(highspeed_tbt.cue,1)],[],'drop');
 
 % Plot behavior from high speed vs low speed video
 plotBehFromLowSpeedMovie(lowspeed_tbt);

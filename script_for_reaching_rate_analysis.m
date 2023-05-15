@@ -51,7 +51,7 @@ backup.metadata=metadata;
 % [alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,[4 5 19]);
 
 % Optional: discard preemptive
-% [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
+[alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
 
 % fix weird bug where reach batch sometimes get stuck at 1 (in less than 0.1% of trials), possibly an
 % interp problem somewhere?? not sure
@@ -165,6 +165,11 @@ trialTypes.mouseLearned=alltbt.mouseLearned;
 %% learning curves
 % DURING INITIAL LEARNING CONTROL OR SILENCING
 [learningC,days,reachrate_cued,reachrate_uncued,dayNdprime,day1dprime,quiverTips,biases]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1],[15:20],false);
+% for i=1:size(reachrate_cued,1)
+%     reachrate_cued(i,days==1)=nanmean(reachrate_cued(i,days<=1),2);
+%     reachrate_uncued(i,days==1)=nanmean(reachrate_uncued(i,days<=1),2);
+% end
+% plotCuedAndUncuedReachingOverDays(reachrate_cued,reachrate_uncued,days,1:20);
 
 % ALIGN RECOVERY TO FIRST SESSION
 % metadata.sess_wrt_day1=metadata.nth_session; 
