@@ -12,7 +12,7 @@ switch justAvsOrTuning
         chopOutliers=false;
         smoo=30; %30; %6; %smoo=3; %smoo=42;
         smoothBeforeResids=true; 
-        smooBef=30; %83;
+        smooBef=15; %30; %83;
         getResiduals=false; % but need this to get rid of mid-range
         ds=1;
         removeInsufficientBaseline=true; % will nan out units that don't have at least X seconds of baseline before aligncomp max
@@ -166,6 +166,9 @@ switch justAvsOrTuning
         r.response1=outCuedSucc.response2; r.response2=outCuedFail.response2; plotOverlayedResponses(r,'g','r'); title('Cued grp 2');
         r.response1=outUncuedSucc.response1; r.response2=outUncuedFail.response1; plotOverlayedResponses(r,'g','r'); title('Uncued grp 1');
         r.response1=outUncuedSucc.response2; r.response2=outUncuedFail.response2; plotOverlayedResponses(r,'g','r'); title('Uncued grp 2');
+        
+        makeDirectionQuiverPlot(outCuedSucc,outCuedFail,outUncuedSucc,outUncuedFail,'response1',[1 5]);
+
     case 'tuning'
         % failure_off={'unit91onCh1_A2atagged','unit97onCh28_A2atagged','unit98onCh31_A2atagged','unit99onCh28_A2atagged','unit147onCh22_A2atagged','unit159onCh27_A2atagged','unit160onCh27_A2atagged','unit162onCh27_A2atagged','unit163onCh27_A2atagged','unit208onCh23_A2atagged','unit208onCh25_A2atagged','unit209onCh21_A2atagged','unit209onCh23_A2atagged','unit215onCh27_A2atagged','unit217onCh27_A2atagged','unit227onCh30_A2atagged','unit233onCh30_A2atagged'};
         % plotSU_contextAndOutcome('Z:\MICROSCOPE\Kim\WHISPER recs\Mar_1\20210803\SU aligned to behavior',failure_off);
@@ -197,6 +200,38 @@ switch justAvsOrTuning
 
         plotOutsOverlayed(grp2_fail,grp2_fail_uncue);
 end
+
+end
+
+function makeDirectionQuiverPlot(outCuedSucc,outCuedFail,outUncuedSucc,outUncuedFail,whichResp,plotWindow)
+
+if ~strcmp(whichResp,'response1')
+    error('not yet implemented response2 plot');
+end
+[~,mi]=nanmin(abs(outCuedFail.response1.unittimes-plotWindow(1)));
+plotInds(1)=mi;
+[~,mi]=nanmin(abs(outCuedFail.response1.unittimes-plotWindow(2)));
+plotInds(2)=mi;
+dir1_av=nanmean(outCuedSucc.response1.me(plotInds(1):plotInds(2)));
+dir1_ubyu=nanmean(outCuedSucc.response1.unitbyunit(:,plotInds(1):plotInds(2)),2);
+dir2_av=nanmean(outUncuedSucc.response1.me(plotInds(1):plotInds(2)));
+dir2_ubyu=nanmean(outUncuedSucc.response1.unitbyunit(:,plotInds(1):plotInds(2)),2);
+dir3_av=nanmean(outCuedFail.response1.me(plotInds(1):plotInds(2)));
+dir3_ubyu=nanmean(outCuedFail.response1.unitbyunit(:,plotInds(1):plotInds(2)),2);
+dir4_av=nanmean(outUncuedFail.response1.me(plotInds(1):plotInds(2)));
+dir4_ubyu=nanmean(outUncuedFail.response1.unitbyunit(:,plotInds(1):plotInds(2)),2);
+
+figure();
+quiver(0,0,0,dir1_av,'Color',[0.5 0.5 0.5]); hold on;
+quiver(0,0,dir2_av,0,'Color',[0.5 0.5 0.5]);
+quiver(0,0,-dir3_av,0,'Color',[0.5 0.5 0.5]);
+quiver(0,0,0,-dir4_av,'Color',[0.5 0.5 0.5]);
+quiver(0,0,[dir2_av-dir3_av],[dir1_av-dir4_av],'Color','k');
+for i=1:size(dir1_ubyu)
+    scatter([dir2_ubyu(i,:)-dir3_ubyu(i,:)],[dir1_ubyu(i,:)-dir4_ubyu(i,:)],[],'k');
+end
+xlabel('Uncued success positive, cued failure negative'); 
+ylabel('Cued success positive, uncued failure negative'); 
 
 end
 
