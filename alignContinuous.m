@@ -1,4 +1,4 @@
-function alignContinuous(alignment,data)
+function alignment=alignContinuous(alignment,data)
 
 % Fs of photometry 2000
 % Fs of movie 30 fps
@@ -64,6 +64,53 @@ end
 framechunks=framechunks(1:endedat,:);
 delay_small=delay_small(1:endedat);
 
+% movie_distract=alignByDelaySmall(movie_distract,delay_small,framechunks);
+% plot output
+% figure();
+% plot(movie_distract,'Color','k'); hold on;
+% plot(photo_distract,'Color','r');
+
+% Align everything
+f=fieldnames(alignment);
+zeroOrOneFields={'all_reachBatch','reachBatch_drop_reachStarts','reachBatch_success_reachStarts','reachBatch_miss_reachStarts_pawOnWheel','reachBatch_success_reachStarts_pawOnWheel',...
+    'reachBatch_miss_reachStarts','drop_reachStarts_pawOnWheel_backup','success_reachStarts_pawOnWheel_backup','drop_reachStarts_backup','success_reachStarts_backup',...
+    'reachFidgetBegins','lickStarts','reach_ongoing','miss_reachStarts_pawOnWheel','drop_reachStarts_pawOnWheel','success_reachStarts_pawOnWheel','pawOnWheel',...
+    'eating','pelletmissingreach_reachStarts','miss_reachStarts','drop_reachStarts','success_reachStarts','reachStarts_pelletPresent','reachEnds','reachStarts','isHold',...
+    'isChewing'};
+for i=1:length(f)
+    temp=alignment.(f{i});
+    temp=resample(temp,66,1);
+    temp=alignByDelayBig(temp,delay_big);
+    temp=alignByDelaySmall(temp,delay_small,framechunks);
+    if ismember(f{i},zeroOrOneFields) % clean up 0 or 1 fields
+        temp=double(temp>0.5);
+    end
+    alignment.(f{i})=temp;
+end
+
+% Plot distractors as sanity check
+figure();
+plot(alignment.movie_distractor,'Color','k'); hold on;
+plot(data.distractor,'Color','r');
+
+end
+
+function movie_distract=alignByDelayBig(movie_distract,delay_big)
+
+temp=movie_distract(1:end);
+D=delay_big;
+if D>0
+    movie_distract=[nan(1,abs(D)-1) temp(1:end-abs(D)+1)];
+elseif D<0
+    movie_distract=[temp(abs(D):end) nan(1,abs(D)-1)];
+else
+    movie_distract=temp;
+end
+
+end
+
+function movie_distract=alignByDelaySmall(movie_distract,delay_small,framechunks)
+
 % align distractor according to delay_small
 for i=1:length(delay_small)
     temp=movie_distract(framechunks(i,1):framechunks(i,2));
@@ -76,12 +123,5 @@ for i=1:length(delay_small)
         movie_distract(framechunks(i,1):framechunks(i,2))=temp;
     end
 end
-
-% plot output
-figure();
-plot(movie_distract,'Color','k'); hold on;
-plot(photo_distract,'Color','r');
-
-
 
 end
