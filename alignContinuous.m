@@ -39,20 +39,24 @@ for i=1:maxvids
     framechunks(i,:)=[currchunk_firstframe f];
     if f>length(photo_distract)
         f=length(photo_distract);
-        [xa,ya,delay_small(i)]=alignsignals(movie_distract(currchunk_firstframe:f),photo_distract(currchunk_firstframe:f));
-        frames_notyet_aligned(currchunk_firstframe:f)=nan;
-        currchunk_firstframe=f+1;
+        framechunks(i,:)=[currchunk_firstframe f];
+        temp1=movie_distract(currchunk_firstframe:f); temp1(isnan(temp1))=0;
+        temp2=photo_distract(currchunk_firstframe:f); temp2(isnan(temp2))=0;
+        [xa,ya,delay_small(i)]=alignsignals(temp1,temp2);
         endedat=i;
         break
     elseif f>length(movie_distract)
         f=length(movie_distract);
-        [xa,ya,delay_small(i)]=alignsignals(movie_distract(currchunk_firstframe:f),photo_distract(currchunk_firstframe:f));
-        frames_notyet_aligned(currchunk_firstframe:f)=nan;
-        currchunk_firstframe=f+1;
+        framechunks(i,:)=[currchunk_firstframe f];
+        temp1=movie_distract(currchunk_firstframe:f); temp1(isnan(temp1))=0;
+        temp2=photo_distract(currchunk_firstframe:f); temp2(isnan(temp2))=0;
+        [xa,ya,delay_small(i)]=alignsignals(temp1,temp2);
         endedat=i;
         break
     end
-    [xa,ya,delay_small(i)]=alignsignals(movie_distract(currchunk_firstframe:f),photo_distract(currchunk_firstframe:f));
+    temp1=movie_distract(currchunk_firstframe:f); temp1(isnan(temp1))=0;
+    temp2=photo_distract(currchunk_firstframe:f); temp2(isnan(temp2))=0;
+    [xa,ya,delay_small(i)]=alignsignals(temp1,temp2);
     frames_notyet_aligned(currchunk_firstframe:f)=nan;
     currchunk_firstframe=f+1;
     endedat=i;
