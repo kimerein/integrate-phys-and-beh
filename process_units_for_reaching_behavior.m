@@ -813,7 +813,10 @@ if usingGLMidx==true
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\py_metrics_butIndexedIntoMatCoefs.mat');
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\unitnames_glm.mat');
 
-    temp=py_metrics.allSucc_sustained+py_metrics.cXsucc_sustained>0.01; %-py_metrics.cXsucc_sustained>0;
+%     temp=py_metrics.allDrop_sustained-py_metrics.allSucc_sustained>=0; %-py_metrics.cXsucc_sustained>0;
+    temp=ones(size(py_metrics.allDrop_sustained))==1; %-py_metrics.cXsucc_sustained>0;
+    [n,x]=histcounts(py_metrics.allDrop_sustained-py_metrics.allSucc_sustained,-1-0.005:0.01:1+0.005);
+    [n,x]=cityscape_hist(n,x); figure(); plot(x,n,'Color','k'); ylim([0 50]);
     idx_from_glm(~temp)=2; % failure-continuing
     idx_from_glm(temp)=1; % success-continuing
 %     temp=py_metrics.cXsucc_sustained-py_metrics.cXfail_sustained;
@@ -907,7 +910,7 @@ uncued_drop_Response=r{6};
 if usingGLMidx==true
     % Remove units with firing rates too low??
     toolow=zeros(size(nanmean(cued_success_Response.unitbyunit_y,2)));
-%     toolow=nanmean(cued_success_Response.unitbyunit_y,2)+nanmean(uncued_success_Response.unitbyunit_y,2)+nanmean(cued_drop_Response.unitbyunit_y,2)+nanmean(uncued_drop_Response.unitbyunit_y,2)<2;
+%     toolow=nanmean(cued_success_Response.unitbyunit_y,2)+nanmean(uncued_success_Response.unitbyunit_y,2)+nanmean(cued_drop_Response.unitbyunit_y,2)+nanmean(uncued_drop_Response.unitbyunit_y,2)<2; 
     
     % remove all units with nan classification
     f=find(cued_success_Response.excluded==0); 

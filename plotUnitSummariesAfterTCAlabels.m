@@ -233,6 +233,13 @@ end
 xlabel('Uncued success positive, cued failure negative'); 
 ylabel('Cued success positive, uncued failure negative'); 
 
+% figure();
+% for i=1:size(dir1_ubyu)
+%     s=scatter([dir2_ubyu(i,:)-dir3_ubyu(i,:)],[dir1_ubyu(i,:)-dir4_ubyu(i,:)],[],'filled','k'); hold on;
+%     s.AlphaData=0.2;
+%     s.MarkerFaceAlpha='flat';
+% end
+
 end
 
 function [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=removeInsufPostBase(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,atLeastXBaseline)
