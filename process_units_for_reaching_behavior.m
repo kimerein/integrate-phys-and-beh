@@ -813,12 +813,14 @@ if usingGLMidx==true
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\py_metrics_butIndexedIntoMatCoefs.mat');
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\unitnames_glm.mat');
 
-%     temp=py_metrics.allDrop_sustained-py_metrics.allSucc_sustained>=0; %-py_metrics.cXsucc_sustained>0;
-    temp=ones(size(py_metrics.allDrop_sustained))==1; %-py_metrics.cXsucc_sustained>0;
-    [n,x]=histcounts(py_metrics.allDrop_sustained-py_metrics.allSucc_sustained,-1-0.005:0.01:1+0.005);
+    temp=py_metrics.allSucc_sustained+py_metrics.cXsucc_sustained>0.01;
+%     temp=ones(size(py_metrics.allDrop_sustained))==1; %-py_metrics.cXsucc_sustained>0;
+    [n,x]=histcounts(py_metrics.allSucc_sustained+py_metrics.cXsucc_sustained>0.01,-1-0.005:0.01:1+0.005);
     [n,x]=cityscape_hist(n,x); figure(); plot(x,n,'Color','k'); ylim([0 50]);
     idx_from_glm(~temp)=2; % failure-continuing
     idx_from_glm(temp)=1; % success-continuing
+    cued_success_Response.carrythroughindsintowhich_units=nan(size(cued_success_Response.fromWhichSess));
+    cued_success_Response.carrythroughindsintowhich_units(py_metrics.allSucc_sustained+py_metrics.cXsucc_sustained>0.01)=1:length(names_of_units);
 %     temp=py_metrics.cXsucc_sustained-py_metrics.cXfail_sustained;
 %     idx_from_glm=temp;
 
@@ -839,20 +841,22 @@ if usingGLMidx==true
     cued_success_Response=addMetricsToResponse(cued_success_Response,py_metrics,py_all_glm_coef,indexGLMcellsIntoUnitNames,whichGLMinds);
 
 %     temp=cued_success_Response.glmcoef_index21+cued_success_Response.glmcoef_index22+cued_success_Response.glmcoef_index23+cued_success_Response.glmcoef_index24+cued_success_Response.glmcoef_index25+cued_success_Response.glmcoef_index26;
-% %     figure(); scatter(temp,cued_success_Response.idx); xlabel('Cue responsive'); ylabel('Success sustained over failure sustained');
-%     grp1=temp>=0.15 & cued_success_Response.idx==1;
-%     grp2=temp>=0.15 & cued_success_Response.idx==2;
-%     cued_success_Response.idx(:)=nan;
-%     cued_success_Response.idx(grp2)=2; 
-%     cued_success_Response.idx(grp1)=1;
+%     grp1=temp>0.1 & idx==1;
+%     grp2=temp>0.1 & idx==2;
+% %     grp1=~(temp>0) & cued_success_Response.idx==1;
+% %     grp2=~(temp>0) & cued_success_Response.idx==2;
+%     idx(:)=nan;
+%     idx(grp2)=2; 
+%     idx(grp1)=1;
+%     cued_success_Response.idx=idx;
 
     r{1}=cued_success_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_failure_Response.mat'); cued_failure_Response.idx=idx; r{2}=cued_failure_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_failure_Response.mat'); uncued_failure_Response.idx=idx; r{3}=uncued_failure_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_success_Response.mat'); uncued_success_Response.idx=idx; r{4}=uncued_success_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\cued_drop_Response.mat'); r{5}=cued_drop_Response;
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_drop_Response.mat'); r{5}=cued_drop_Response;
 %     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\cued_failureNotDrop_Response.mat'); r{6}=cued_failureNotDrop_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\uncued_drop_Response.mat'); r{6}=uncued_drop_Response;
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_drop_Response.mat'); r{6}=uncued_drop_Response;
 %     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\uncued_failureNotDrop_Response.mat'); r{8}=uncued_failureNotDrop_Response;
 %     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\cued_reach_Response.mat'); r{9}=cued_reach_Response;
 %     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\uncued_reach_Response.mat'); r{10}=uncued_reach_Response;
@@ -1029,7 +1033,9 @@ plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cued_success_Response.
 plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cued_success_Response.cXsucc_over1sec-cued_success_Response.allSucc_over1sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning');
 plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cued_success_Response.cuecoef_over1sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning');
 
-plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cued_success_Response.glmcoef_index21+cued_success_Response.glmcoef_index22+cued_success_Response.glmcoef_index23+cued_success_Response.glmcoef_index24+cued_success_Response.glmcoef_index25+cued_success_Response.glmcoef_index26,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning');
+plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,(cued_success_Response.glmcoef_index21+cued_success_Response.glmcoef_index22+cued_success_Response.glmcoef_index23+cued_success_Response.glmcoef_index24+cued_success_Response.glmcoef_index25+cued_success_Response.glmcoef_index26),cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning');
+plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,(cued_success_Response.glmcoef_index21+cued_success_Response.glmcoef_index22+cued_success_Response.glmcoef_index23+cued_success_Response.glmcoef_index24+cued_success_Response.glmcoef_index25+cued_success_Response.glmcoef_index26)-...
+                                                          (cued_success_Response.glmcoef_index20+cued_success_Response.glmcoef_index19+cued_success_Response.glmcoef_index18+cued_success_Response.glmcoef_index17+cued_success_Response.glmcoef_index16+cued_success_Response.glmcoef_index16),cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning');
 
 % cuez=getCueTunedUnits(uncuedReach_Response,cuedReach_Response,'justcue_v_justuncue','mean',1,[4 12],[-2 0],[4 12],[-2 0]); 
 % plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued');

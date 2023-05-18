@@ -85,6 +85,8 @@ for i=1:length(f)
     if ismember(f{i},zeroOrOneFields) % clean up 0 or 1 fields
         temp=double(temp>0.5);
     end
+    % chop to match photo length
+    temp=temp(1:length(data.distractor));
     alignment.(f{i})=temp;
 end
 

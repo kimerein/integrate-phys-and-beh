@@ -84,8 +84,8 @@ switch doingCued
 %         temp=prctile(cuez(groupLabelsFromTCA==2),[0 10 20 50 60 70 95 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; 
 %         temp=prctile(cuez(groupLabelsFromTCA==1),[0 6 12 50 88 94 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; temp=sort(unique(temp)); cuezbins{1}=temp;
 %         temp=prctile(cuez(groupLabelsFromTCA==2),[0 6 12 50 88 94 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; temp=sort(unique(temp)); cuezbins{2}=temp; 
-        temp=prctile(cuez(groupLabelsFromTCA==1),[0 50 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; temp=sort(unique(temp)); cuezbins{1}=temp;
-        temp=prctile(cuez(groupLabelsFromTCA==2),[0 50 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; temp=sort(unique(temp)); cuezbins{2}=temp; 
+        temp=prctile(cuez(groupLabelsFromTCA==1),[0 50 100]); temp(2)=0; temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; temp=sort(unique(temp)); cuezbins{1}=temp;
+        temp=prctile(cuez(groupLabelsFromTCA==2),[0 50 100]); temp(2)=0; temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; temp=sort(unique(temp)); cuezbins{2}=temp; 
 %         temp=prctile(cuez(groupLabelsFromTCA==2),[0 45 55 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; temp=sort(unique(temp)); cuezbins{2}=temp; 
 %         temp=prctile(cuez(groupLabelsFromTCA==1),[0 17 22 40 60 82 90 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 42th prctile is 0 cuez for grp 1
 %         temp=prctile(cuez(groupLabelsFromTCA==2),[0 17 22 40 60 82 90 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
@@ -779,6 +779,8 @@ if iscell(backup_cuezbins)
 end
 
 bycuez=cell(length(cuezbins)-1,1);
+bycuez_plusse=cell(length(cuezbins)-1,1);
+bycuez_minusse=cell(length(cuezbins)-1,1);
 time=cell(length(cuezbins)-1,1);
 gpLab=1;
 for i=1:length(cuezbins)-1
@@ -821,6 +823,8 @@ for i=1:length(cuezbins)-1
         time{i}=out.unittimes;
     else
         bycuez{i}=out.me;
+        bycuez_plusse{i}=out.plusSe;
+        bycuez_minusse{i}=out.minusSe;
         time{i}=out.t;
     end
 end
@@ -852,6 +856,10 @@ else
             continue
         end
         h=plot(time{i},bycuez{i},'Color',cmap(i,:)); hold on;
+        if plotAll==false
+            plot(time{i},bycuez_plusse{i},'Color',cmap(i,:)); 
+            plot(time{i},bycuez_minusse{i},'Color',cmap(i,:)); 
+        end
         if plotAll==true
             % h = findobj(gca,'Type','line');
             for j=1:length(h)
@@ -908,6 +916,8 @@ for i=1:length(cuezbins)-1
         time{i}=out.unittimes;
     else
         bycuez{i}=out.me;
+        bycuez_plusse{i}=out.plusSe;
+        bycuez_minusse{i}=out.minusSe;
         time{i}=out.t;
     end
 end
@@ -939,6 +949,10 @@ else
             continue
         end
         h=plot(time{i},bycuez{i},'Color',cmap(i,:)); hold on;
+        if plotAll==false
+            plot(time{i},bycuez_plusse{i},'Color',cmap(i,:)); 
+            plot(time{i},bycuez_minusse{i},'Color',cmap(i,:)); 
+        end
         if plotAll==true
             % h = findobj(gca,'Type','line');
             for j=1:length(h)
