@@ -949,10 +949,10 @@ plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Respon
 % plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Response,cued_failure_noReach_Response,uncued_success_Response,uncued_failure_noReach_Response,[],'justAvs','justAvs');
 
 fi=find(~isnan(cued_success_Response.carrythroughindsintowhich_units)); 
-i=1;
-figure(); plot(cued_drop_Response.unitbyunit_x(fi(i),:),cued_drop_Response.unitbyunit_y(fi(i),:)); 
+i=1; 
+figure(); plot(cued_drop_Response.unitbyunit_x(fi(i),:),smoothdata(cued_drop_Response.unitbyunit_y(fi(i),:),'gaussian',10)); 
 hold on; plot(cued_drop_Response.aligncomp_x(fi(i),:),cued_drop_Response.aligncomp_y(fi(i),:),'Color','b');
-disp(['Doing ' names_of_units{fi(i)} ' from session ' num2str(sessions_of_units(fi(i)))]);
+disp(['Doing ' names_of_units{i} ' from session ' num2str(sessions_of_units(i))]);
 
 %% TUNING OF PERSISTENT ACTIVITY
 clear r
