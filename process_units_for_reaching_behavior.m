@@ -819,6 +819,9 @@ if usingGLMidx==true
     [n,x]=cityscape_hist(n,x); figure(); plot(x,n,'Color','k'); ylim([0 50]);
     idx_from_glm(~temp)=2; % failure-continuing
     idx_from_glm(temp)=1; % success-continuing
+    f=find(py_metrics.allSucc_sustained+py_metrics.cXsucc_sustained>0.01);
+    names_of_units=unitnames_glm(f);
+    sessions_of_units=cued_success_Response.fromWhichSess(indexGLMcellsIntoUnitNames(f));
     cued_success_Response.carrythroughindsintowhich_units=nan(size(cued_success_Response.fromWhichSess));
     cued_success_Response.carrythroughindsintowhich_units(py_metrics.allSucc_sustained+py_metrics.cXsucc_sustained>0.01)=1:length(names_of_units);
 %     temp=py_metrics.cXsucc_sustained-py_metrics.cXfail_sustained;
@@ -944,6 +947,12 @@ end
 plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Response,cued_drop_Response,uncued_success_Response,uncued_drop_Response,[],'justAvs','justAvs');
 % plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Response,cued_failureNotDrop_Response,uncued_success_Response,uncued_failureNotDrop_Response,[],'justAvs','justAvs');
 % plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Response,cued_failure_noReach_Response,uncued_success_Response,uncued_failure_noReach_Response,[],'justAvs','justAvs');
+
+fi=find(~isnan(cued_success_Response.carrythroughindsintowhich_units)); 
+i=1;
+figure(); plot(cued_drop_Response.unitbyunit_x(fi(i),:),cued_drop_Response.unitbyunit_y(fi(i),:)); 
+hold on; plot(cued_drop_Response.aligncomp_x(fi(i),:),cued_drop_Response.aligncomp_y(fi(i),:),'Color','b');
+disp(['Doing ' names_of_units{fi(i)} ' from session ' num2str(sessions_of_units(fi(i)))]);
 
 %% TUNING OF PERSISTENT ACTIVITY
 clear r
