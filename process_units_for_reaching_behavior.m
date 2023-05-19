@@ -813,21 +813,22 @@ if usingGLMidx==true
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\py_metrics_butIndexedIntoMatCoefs.mat');
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\unitnames_glm.mat');
 
-    temp=py_metrics.allSucc_sustained+py_metrics.cXsucc_sustained>0.01;
-%     temp=ones(size(py_metrics.allDrop_sustained))==1; %-py_metrics.cXsucc_sustained>0;
-    [n,x]=histcounts(py_metrics.allSucc_sustained+py_metrics.cXsucc_sustained>0.01,-1-0.005:0.01:1+0.005);
-    [n,x]=cityscape_hist(n,x); figure(); plot(x,n,'Color','k'); ylim([0 50]);
-    idx_from_glm(~temp)=2; % failure-continuing
-    idx_from_glm(temp)=1; % success-continuing
-    f=find(py_metrics.allSucc_sustained+py_metrics.cXsucc_sustained>0.01);
-    names_of_units=unitnames_glm(f);
-    sessions_of_units=cued_success_Response.fromWhichSess(indexGLMcellsIntoUnitNames(f));
-    cued_success_Response.carrythroughindsintowhich_units=nan(size(cued_success_Response.fromWhichSess));
-    cued_success_Response.carrythroughindsintowhich_units(py_metrics.allSucc_sustained+py_metrics.cXsucc_sustained>0.01)=1:length(names_of_units);
+%     temp=py_metrics.allSucc_sustained+py_metrics.cXsucc_sustained>0.01;
+% %     temp=ones(size(py_metrics.allDrop_sustained))==1; %-py_metrics.cXsucc_sustained>0;
+%     [n,x]=histcounts(py_metrics.allSucc_sustained+py_metrics.cXsucc_sustained>0.01,-1-0.005:0.01:1+0.005);
+%     [n,x]=cityscape_hist(n,x); figure(); plot(x,n,'Color','k'); ylim([0 50]);
+%     idx_from_glm(~temp)=2; % failure-continuing
+%     idx_from_glm(temp)=1; % success-continuing
+%     f=find(py_metrics.allSucc_sustained+py_metrics.cXsucc_sustained>0.01);
 %     temp=py_metrics.cXsucc_sustained-py_metrics.cXfail_sustained;
 %     idx_from_glm=temp;
-
-    indexGLMcellsIntoUnitNames=getNamesIndexIntoNamesList(unitnames_glm,unitbyunit_names);
+    
+    conditionNow=idx_from_glm==1; 
+    names_of_units=unitnames_glm(conditionNow & ~isnan(indexGLMcellsIntoUnitNames));
+    indexGLMcellsIntoUnitNames=getNamesIndexIntoNamesList(unitnames_glm,unitbyunit_names); 
+    sessions_of_units=cued_success_Response.fromWhichSess(indexGLMcellsIntoUnitNames(conditionNow & ~isnan(indexGLMcellsIntoUnitNames)));
+    cued_success_Response.carrythroughindsintowhich_units=nan(size(cued_success_Response.fromWhichSess));
+    cued_success_Response.carrythroughindsintowhich_units(indexGLMcellsIntoUnitNames(conditionNow & ~isnan(indexGLMcellsIntoUnitNames)))=1:length(names_of_units);
     py_metrics.activeMoreBeforeCuedReach=nansum(py_all_glm_coef(:,[1:16 427:427+20 498:498+20 569:569+20]),2);
     py_metrics.activeMoreBeforeAnyReach=nansum(py_all_glm_coef(:,[214:214+20 285:285+20 356:356+20]),2);
     py_metrics.cuecoef_over1sec=nansum(py_all_glm_coef(:,[20:30]),2);
@@ -948,11 +949,20 @@ plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Respon
 % plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Response,cued_failureNotDrop_Response,uncued_success_Response,uncued_failureNotDrop_Response,[],'justAvs','justAvs');
 % plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Response,cued_failure_noReach_Response,uncued_success_Response,uncued_failure_noReach_Response,[],'justAvs','justAvs');
 
-fi=find(~isnan(cued_success_Response.carrythroughindsintowhich_units)); 
-i=1; 
-figure(); plot(cued_drop_Response.unitbyunit_x(fi(i),:),smoothdata(cued_drop_Response.unitbyunit_y(fi(i),:),'gaussian',10)); 
-hold on; plot(cued_drop_Response.aligncomp_x(fi(i),:),cued_drop_Response.aligncomp_y(fi(i),:),'Color','b');
-disp(['Doing ' names_of_units{i} ' from session ' num2str(sessions_of_units(i))]);
+% fi=find(~isnan(cued_success_Response.carrythroughindsintowhich_units)); 
+% i=1; 
+% figure(); plot(cued_drop_Response.unitbyunit_x(fi(i),:),smoothdata(cued_drop_Response.unitbyunit_y(fi(i),:),'gaussian',10)); 
+% hold on; plot(cued_drop_Response.aligncomp_x(fi(i),:),cued_drop_Response.aligncomp_y(fi(i),:),'Color','b');
+% disp(['Doing ' names_of_units{i} ' from session ' num2str(sessions_of_units(i))]);
+
+%%%%%%%%%%%%% Inspect units one by one
+% plotGLMcoef(consensus_glm_coef(f(156),:),0,feature_names,10*0.01,nansum(shifts<0),'mean',false,[]); title('python glm');
+% i=find(ismember(names_of_units,unitnames_glm{f(156)}));
+% figure(); plot(uncued_drop_Response.unitbyunit_x(i,:),smoothdata(uncued_drop_Response.unitbyunit_y(i,:),'gaussian',10),'Color','r');
+% hold on; plot(uncued_drop_Response.aligncomp_x(i,:),uncued_drop_Response.aligncomp_y(i,:),'Color','b');
+% figure(); plot(uncued_success_Response.unitbyunit_x(i,:),smoothdata(uncued_success_Response.unitbyunit_y(i,:),'gaussian',10),'Color','g');
+% hold on; plot(uncued_success_Response.aligncomp_x(i,:),uncued_success_Response.aligncomp_y(i,:),'Color','b');
+% disp(['Doing ' names_of_units{i} ' from session ' num2str(sessions_of_units(i))]);
 
 %% TUNING OF PERSISTENT ACTIVITY
 clear r
