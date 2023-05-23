@@ -797,16 +797,17 @@ boot=1; % num iterations for bootstrap
 % cuez=getCueTunedUnits(cue_noReach_Response,uncuedReach_Response,'vs_uncued_reach','max'); % method 3rd arg can be 'vs_uncued_reach' or 'cue_vs_baseline' or 'justcue'
 
 clear r
-load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\TCA\idx_groupLabelsFromTCA.mat');
+% load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\TCA\idx_groupLabelsFromTCA.mat');
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\tensor regression\rank 2\idx.mat'); 
 
-usingGLMidx=true;
+usingGLMidx=false;
 if usingGLMidx==true
 
     % CONSIDER THROWING OUT CUED TRIALS WHERE REACH SEEMS
     % PREEMPTIVE!!!!!!!!!!!!!!!!!!!!!!!!
 
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\unitbyunit_names_to_match_cued_success_Response.mat');
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\combine mat and python glms\consensus_idx_from_glm_when_normByGLMcoefIntegral.mat');
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\combine mat and python glms\consensus_idx_from_glm_when_normByGLMcoefIntegral.mat');
 %     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\combine mat and python glms\consensus_idx_from_glm_outliers_removed.mat');
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_success_Response.mat');
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\py_all_glm_coef_butIndexedIntoMatCoefs.mat');
@@ -823,7 +824,7 @@ if usingGLMidx==true
 %     temp=py_metrics.cXsucc_sustained-py_metrics.cXfail_sustained;
 %     idx_from_glm=temp;
     
-    conditionNow=idx_from_glm==1; 
+    conditionNow=idx_from_glm==2; 
     names_of_units=unitnames_glm(conditionNow & ~isnan(indexGLMcellsIntoUnitNames));
     indexGLMcellsIntoUnitNames=getNamesIndexIntoNamesList(unitnames_glm,unitbyunit_names); 
     sessions_of_units=cued_success_Response.fromWhichSess(indexGLMcellsIntoUnitNames(conditionNow & ~isnan(indexGLMcellsIntoUnitNames)));
@@ -869,18 +870,51 @@ if usingGLMidx==true
 %     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\all_success_Response.mat'); r{13}=all_success_Response;
 %     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\all_failure_Response.mat'); r{14}=all_failure_Response;
 else
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_success_Response.mat'); cued_success_Response.idx=idx; r{1}=cued_success_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_failure_Response.mat'); cued_failure_Response.idx=idx; r{2}=cued_failure_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\uncued_failure_Response.mat'); uncued_failure_Response.idx=idx; r{3}=uncued_failure_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\uncued_success_Response.mat'); uncued_success_Response.idx=idx; r{4}=uncued_success_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_drop_Response.mat'); r{5}=cued_drop_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_failureNotDrop_Response.mat'); r{6}=cued_failureNotDrop_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\uncued_drop_Response.mat'); r{7}=uncued_drop_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\uncued_failureNotDrop_Response.mat'); r{8}=uncued_failureNotDrop_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\cued_reach_Response.mat'); r{9}=cued_reach_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\uncued_reach_Response.mat'); r{10}=uncued_reach_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_failure_noReach_Response.mat'); r{11}=cued_failure_noReach_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\uncued_failure_noReach_Response.mat'); r{12}=uncued_failure_noReach_Response;
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\unitbyunit_names_to_match_cued_success_Response.mat');
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_success_Response.mat');
+    cued_success_Response.idx=idx;
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\py_all_glm_coef_butIndexedIntoMatCoefs.mat');
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\py_metrics_butIndexedIntoMatCoefs.mat');
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\unitnames_glm.mat');
+    indexGLMcellsIntoUnitNames=getNamesIndexIntoNamesList(unitnames_glm,unitbyunit_names); 
+    py_metrics.activeMoreBeforeCuedReach=nansum(py_all_glm_coef(:,[1:16 427:427+20 498:498+20 569:569+20]),2);
+    py_metrics.activeMoreBeforeAnyReach=nansum(py_all_glm_coef(:,[214:214+20 285:285+20 356:356+20]),2);
+    py_metrics.cuecoef_over1sec=nansum(py_all_glm_coef(:,[20:30]),2);
+    py_metrics.cuecoef_overall=nansum(py_all_glm_coef(:,[19:71]),2);
+    py_metrics.cuecoef_at1sec=nansum(py_all_glm_coef(:,[30:33]),2);
+    py_metrics.cXsucc_over1sec=nansum(py_all_glm_coef(:,[427:427+19]),2);
+    py_metrics.allSucc_over1sec=nansum(py_all_glm_coef(:,[214:214+19]),2);
+    py_metrics.cXsucc_overpoint5sec=nansum(py_all_glm_coef(:,[427:427+10]),2);
+    py_metrics.allSucc_overpoint5sec=nansum(py_all_glm_coef(:,[214:214+10]),2);
+    whichGLMinds=[1:71];
+    cued_success_Response=addMetricsToResponse(cued_success_Response,py_metrics,py_all_glm_coef,indexGLMcellsIntoUnitNames,whichGLMinds);
+    r{1}=cued_success_Response;
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_failure_Response.mat'); cued_failure_Response.idx=idx; r{2}=cued_failure_Response;
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_failure_Response.mat'); uncued_failure_Response.idx=idx; r{3}=uncued_failure_Response;
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_success_Response.mat'); uncued_success_Response.idx=idx; r{4}=uncued_success_Response;
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_drop_Response.mat'); r{5}=cued_drop_Response;
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\cued_failureNotDrop_Response.mat'); r{6}=cued_failureNotDrop_Response;
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_drop_Response.mat'); r{6}=uncued_drop_Response;
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\uncued_failureNotDrop_Response.mat'); r{8}=uncued_failureNotDrop_Response;
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\cued_reach_Response.mat'); r{9}=cued_reach_Response;
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\uncued_reach_Response.mat'); r{10}=uncued_reach_Response;
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\cued_failure_noReach_Response.mat'); r{11}=cued_failure_noReach_Response;
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\uncued_failure_noReach_Response.mat'); r{12}=uncued_failure_noReach_Response;
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\all_success_Response.mat'); r{13}=all_success_Response;
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\all_failure_Response.mat'); r{14}=all_failure_Response;
+
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_success_Response.mat'); cued_success_Response.idx=idx; r{1}=cued_success_Response;
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_failure_Response.mat'); cued_failure_Response.idx=idx; r{2}=cued_failure_Response;
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\uncued_failure_Response.mat'); uncued_failure_Response.idx=idx; r{3}=uncued_failure_Response;
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\uncued_success_Response.mat'); uncued_success_Response.idx=idx; r{4}=uncued_success_Response;
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_drop_Response.mat'); r{5}=cued_drop_Response;
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_failureNotDrop_Response.mat'); r{6}=cued_failureNotDrop_Response;
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\uncued_drop_Response.mat'); r{7}=uncued_drop_Response;
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\uncued_failureNotDrop_Response.mat'); r{8}=uncued_failureNotDrop_Response;
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\cued_reach_Response.mat'); r{9}=cued_reach_Response;
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\uncued_reach_Response.mat'); r{10}=uncued_reach_Response;
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_failure_noReach_Response.mat'); r{11}=cued_failure_noReach_Response;
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\uncued_failure_noReach_Response.mat'); r{12}=uncued_failure_noReach_Response;
 end
 r=matchAllUnits(r);
 cued_success_Response=r{1};

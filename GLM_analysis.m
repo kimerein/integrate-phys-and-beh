@@ -439,6 +439,8 @@ for neuronIndex=testNeuron
     scatter(pvalbins,fracBelow);
     xlabel('pval bins'); ylabel('fraction below this pval');
     line([0 1],[0 1]);
+
+    close all;
 end
 
 end

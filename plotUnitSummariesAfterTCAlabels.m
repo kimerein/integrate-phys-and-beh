@@ -198,6 +198,7 @@ switch justAvsOrTuning
 %         [grp1_succ_uncuesig,grp2_succ_uncuesig]=plotByCuez(uncued_success_Response,nonsigcuez,groupLabelsFromTCA,'uncued success',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
 %         [grp1_fail_uncuesig,grp2_fail_uncuesig]=plotByCuez(uncued_failure_Response,nonsigcuez,groupLabelsFromTCA,'uncued failure',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
 
+        plotOutsOverlayed(grp1_succ,grp1_succ_uncue);
         plotOutsOverlayed(grp2_fail,grp2_fail_uncue);
 end
 
