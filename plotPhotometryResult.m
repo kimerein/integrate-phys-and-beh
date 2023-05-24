@@ -58,13 +58,16 @@ end
 
 thesePhotoFieldsUseTimeField1={'green_mod','red_mod','opto','cue','cue_times','distractor','from_first_video','from_second_video'};
 timeField1='cue_times';
-thesePhotoFieldsUseTimeField2={'green_ch','red_ch','nan_out_red_ch','green_time','raw_green_ch','red_time','raw_red_ch','recalc_green_ch','recalc_red_ch','all_reachBatch'};
+thesePhotoFieldsUseTimeField2={'green_ch','red_ch','nan_out_red_ch','green_time','raw_green_ch','red_time','raw_red_ch','recalc_green_ch','recalc_red_ch'};
 timeField2='red_time';
+theseBehFieldsUseTimeField3={'testField'};
+timeField3='times_wrt_trial_start';
 
 temp=photometry_tbt.(timeField1);
 photometry_tbt.([timeField1 '_wrt_trial_start'])=temp-repmat(temp(:,1),1,size(temp,2));
 temp=photometry_tbt.(timeField2);
 photometry_tbt.([timeField2 '_wrt_trial_start'])=temp-repmat(temp(:,1),1,size(temp,2));
+% skip this step if is behavior
 
 if doRealignToCue==true
     error('Currently doRealignToCue==true DOES NOT WORK and causes a several hundred millisecond delay, need to fix');
@@ -101,6 +104,9 @@ if ismember(plotPhotoField,thesePhotoFieldsUseTimeField1)
 elseif ismember(plotPhotoField,thesePhotoFieldsUseTimeField2)
     getCorrectTime=timeField2;
     getCorrectTime_wrtTrialStart=[timeField2 '_wrt_trial_start'];
+elseif ismember(plotPhotoField,theseBehFieldsUseTimeField3)
+    getCorrectTime=timeField3;
+    getCorrectTime_wrtTrialStart=timeField3;
 else
     error('Do not recognize this photometry_tbt field name.');
 end
@@ -109,7 +115,8 @@ temp=photometry_tbt.(getCorrectTime);
 f=find(~isnan(temp(1,:)),1,'first');
 phototimes=nanmean(photometry_tbt.(getCorrectTime)-repmat(temp(:,f),1,size(temp,2)),1);
 
-if cutBeforeNextCue==true
+if ismember(plotPhotoField,theseBehFieldsUseTimeField3)
+elseif cutBeforeNextCue==true
     % find second cue time
     temp=mode(photometry_tbt.cue_times(2,2:end)-photometry_tbt.cue_times(2,1:end-1));
     if temp==0
@@ -130,7 +137,7 @@ if cutBeforeNextCue==true
     if ismember(plotPhotoField,thesePhotoFieldsUseTimeField1)
         plotUntilInd=f;
     elseif ismember(plotPhotoField,thesePhotoFieldsUseTimeField2)
-        plotUntilInd=f_photometry_ind;
+        plotUntilInd=f_photometry_ind;  
     else
         error('Do not recognize this photometry_tbt field name.');
     end
@@ -145,7 +152,7 @@ if cutBeforeNextCue==true
         ts=mode(temp);
     else
         error('Do not recognize this photometry_tbt field name.');
-    end
+    end 
     phototimes=0:ts:(length(phototimes)-1)*ts;
 else
     plotUntilInd=[];

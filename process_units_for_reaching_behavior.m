@@ -1205,9 +1205,7 @@ analyzeProbabilityOfOnAfterOutcome(dd,[],[],[],'cued_failure','uncued_failure','
 % analyzeProbabilityOfOnAfterOutcome(dd,[0 2],[],[]);
 
 %% Attempt trial by trial classification, using labels from training set
-cueGLMcoef=(cued_success_Response.glmcoef_index21+cued_success_Response.glmcoef_index22+cued_success_Response.glmcoef_index23+cued_success_Response.glmcoef_index24+cued_success_Response.glmcoef_index25+cued_success_Response.glmcoef_index26);
-figure(); histogram(cueGLMcoef,200); isCued=cueGLMcoef>prctile(cueGLMcoef,50);
-attemptTrialByTrialClassification(dd,[],[],'cued_failure','uncued_failure',[1 5]);
+attemptTrialByTrialClassification(dd,[],[],'cued_failure','uncued_failure',[1.25 5]); % consider 0 as starting timepoint for success
 
 %% Behavior controls
 beh2_tbt.cue_times=beh2_tbt.times_wrt_trial_start; beh2_tbt.red_time=beh2_tbt.times_wrt_trial_start; beh2_tbt.green_time=beh2_tbt.times_wrt_trial_start;
