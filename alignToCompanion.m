@@ -247,9 +247,11 @@ for j=1:length(dd)
                     minTrialInds=floor(settings.minTrialLength./mode(diff(nanmean(tempOpto.physiology_tbt.cuetimes_wrt_trial_start,1))));
                     isOverlapping=any(tempOpto.physiology_tbt.opto(:,1:minTrialInds)==1 & tempOpto.physiology_tbt.cue(:,1:minTrialInds)==1,2);
                     a.dataout.y(~isOverlapping(usingTrialsInds)==1,:)=nan;
+                    a.alignComp.y(~isOverlapping(usingTrialsInds)==1,:)=nan;
                 else
                     % can't use any trials
                     a.dataout.y(1:size(a.dataout.y,1),:)=nan;
+                    a.alignComp.y(1:size(a.dataout.y,1),:)=nan;
                 end
             end
 
@@ -262,6 +264,7 @@ for j=1:length(dd)
                     minTrialInds=floor(settings.minTrialLength./mode(diff(nanmean(tempOpto.physiology_tbt.cuetimes_wrt_trial_start,1))));
                     isOverlapping=any(tempOpto.physiology_tbt.opto(:,1:minTrialInds)==1 & tempOpto.physiology_tbt.cue(:,1:minTrialInds)==1,2);
                     a.dataout.y(isOverlapping(usingTrialsInds)==1,:)=nan;
+                    a.alignComp.y(isOverlapping(usingTrialsInds)==1,:)=nan;
                 end
             end
 
@@ -274,6 +277,7 @@ for j=1:length(dd)
                     minTrialInds=floor(settings.minTrialLength./mode(diff(nanmean(tempOpto.physiology_tbt.cuetimes_wrt_trial_start,1))));
                     isOverlapping=any(tempOpto.physiology_tbt.opto(:,1:minTrialInds)==1,2);
                     a.dataout.y(isOverlapping(usingTrialsInds)==1,:)=nan;
+                    a.alignComp.y(isOverlapping(usingTrialsInds)==1,:)=nan;
                 end
             end
             
@@ -382,24 +386,29 @@ for j=1:length(dd)
             else
                 if settings.useTestSet==true && settings.useSameTrainingSetForAllNeurons==true
                     a.dataout.y(ismember(1:size(a.dataout.y,1),currTrainingSet),:)=nan;
+                    a.alignComp.y(ismember(1:size(a.dataout.y,1),currTrainingSet),:)=nan;
                 elseif settings.useSameTrainingSetForAllNeurons==true && settings.useTrainingSet==true
                     if isempty(currTrainingSet)
                         b=load([ls(i).folder sep ls(i).name(1:regexp(ls(i).name,'.mat','once')-1) '_trainingSet.mat']);
                         a.dataout.y(~ismember(1:size(a.dataout.y,1),b.trainingSetTrials),:)=nan;
+                        a.alignComp.y(~ismember(1:size(a.dataout.y,1),b.trainingSetTrials),:)=nan;
                         currTrainingSet=b.trainingSetTrials;
                         save([ls(i).folder sep 'COMMONtrainingSet.mat'],'currTrainingSet');
                     else
                         a.dataout.y(~ismember(1:size(a.dataout.y,1),currTrainingSet),:)=nan;
+                        a.alignComp.y(~ismember(1:size(a.dataout.y,1),currTrainingSet),:)=nan;
                     end
                 elseif settings.useTrainingSet==true && settings.useSameTrainingSetForAllNeurons==false
                     b=load([ls(i).folder sep ls(i).name(1:regexp(ls(i).name,'.mat','once')-1) '_trainingSet.mat']);
                     a.dataout.y(~ismember(1:size(a.dataout.y,1),b.trainingSetTrials),:)=nan;
+                    a.alignComp.y(~ismember(1:size(a.dataout.y,1),b.trainingSetTrials),:)=nan;
                 elseif settings.useTestSet==true && settings.useSameTrainingSetForAllNeurons==false
                     error('Have not yet implemented settings.useTestSet==true && settings.useSameTrainingSetForAllNeurons==false && keepAllSingleTrials==true');
                 end
                 unitbyunit_x(trials_count:trials_count+size(a.dataout.y,1)-1,:)=repmat(a.dataout.x(1:upTo),size(a.dataout.y,1),1);
                 unitbyunit_y(trials_count:trials_count+size(a.dataout.y,1)-1,:)=[a.dataout.y(:,1:upTo)];
             end
+            eventHappens=any(~isnan(a.alignComp.y),2);
             fromWhichUnit(trials_count:trials_count+size(a.dataout.y,1)-1)=units_count;
             fromWhichTrial(trials_count:trials_count+size(a.dataout.y,1)-1)=usingTrialsInds;
             isEventInThisTrial(trials_count:trials_count+size(a.dataout.y,1)-1)=eventHappens;
@@ -411,6 +420,9 @@ for j=1:length(dd)
 
         disp(['Added ' ls(i).name]);
         units_count=units_count+1;
+        if any(~ismember(fromWhichUnit,1:nansum(excluded==0)))
+            pause;
+        end
     end
 end
 excluded_count=excluded_count-1;
@@ -442,7 +454,6 @@ else
     unitbyunit_y=unitbyunit_y(1:trials_count,:);
     aligncomp_x=aligncomp_x(1:trials_count,:);
     aligncomp_y=aligncomp_y(1:trials_count,:);
-
 end
 
 
