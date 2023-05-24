@@ -125,6 +125,7 @@ temp=photometry_tbt.(timeField2);
 photometry_tbt.([timeField2 '_wrt_trial_start'])=temp-repmat(temp(:,1),1,size(temp,2));
 
 if strcmp(alignTo,'cue') || alwaysRealignToCue==true
+    error('Currently alwaysRealignToCue==true DOES NOT WORK and causes a several hundred millisecond delay, need to fix');
     try
         [photometry_tbt,alignedCueTo]=realignToCue(photometry_tbt,'cue',thesePhotoFieldsUseTimeField1,timeField1,timeField2,minITI);
     catch

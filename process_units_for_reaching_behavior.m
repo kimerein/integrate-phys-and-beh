@@ -1209,6 +1209,10 @@ cueGLMcoef=(cued_success_Response.glmcoef_index21+cued_success_Response.glmcoef_
 figure(); histogram(cueGLMcoef,200); isCued=cueGLMcoef>prctile(cueGLMcoef,50);
 attemptTrialByTrialClassification(dd,[],[],'cued_failure','uncued_failure','justTimeWindow',[1 5]);
 
+%% Behavior controls
+beh2_tbt.cue_times=beh2_tbt.times_wrt_trial_start; beh2_tbt.red_time=beh2_tbt.times_wrt_trial_start; beh2_tbt.green_time=beh2_tbt.times_wrt_trial_start;
+plotPhotometryResult(beh2_tbt,beh2_tbt,[],'all_reachBatch','all_reachBatch','cueZone_onVoff','first',[-1.5 16],[]);
+
 %% colormaps
 % SUCCESS V FAILURE 
 % or consider figure(); imagesc(1:100); colormap(brewermap(100,"PiYG")); to

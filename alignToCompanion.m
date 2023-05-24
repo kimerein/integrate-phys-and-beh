@@ -36,7 +36,7 @@ unitbyunit_y=[];
 ns=nan(maxUnitsPerSess*length(dd),1);
 aligncomp_x=[];
 aligncomp_y=[];
-excluded=zeros(maxUnitsPerSess*length(dd),1);
+excluded=nan(maxUnitsPerSess*length(dd),1);
 D1orD2taggingExpt=nan(length(dd),1); % will be 1 for D1, 2 for A2a tagging session
 fromWhichSess=nan(maxUnitsPerSess*length(dd),1);
 fromWhichSess_forTrials=nan(maxUnitsPerSess*length(dd),1);
@@ -129,6 +129,7 @@ for j=1:length(dd)
             disp('dontUseTrials length does not match size of a.dataout.y in line 91 of alignToCompanion.m, but taking all trials');
             dontUseTrials=zeros(size(a.dataout.y,1),1);
         end
+        excluded(excluded_count)=0; % if got here, use this unit
         excluded_count=excluded_count+1;
 
         % throw out trials where unit dead or out of range
@@ -420,9 +421,6 @@ for j=1:length(dd)
 
         disp(['Added ' ls(i).name]);
         units_count=units_count+1;
-        if any(~ismember(fromWhichUnit(~isnan(fromWhichUnit)),1:nansum(excluded(1:excluded_count-1)==0)))
-            pause;
-        end
     end
 end
 excluded_count=excluded_count-1;
@@ -447,6 +445,10 @@ else
     unitbyunit_y=unitbyunit_y(1:trials_count,:);
     aligncomp_x=aligncomp_x(1:trials_count,:);
     aligncomp_y=aligncomp_y(1:trials_count,:);
+end
+
+if nansum(excluded==0)~=length(unique(fromWhichUnit))
+    pause;
 end
 
 

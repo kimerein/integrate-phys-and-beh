@@ -9,7 +9,7 @@ phys_timepointsCompanion=[];
 f_heatmap=[];
 plotBehFieldOut=[];
 suppressAllButLastFig=true;
-doRealignToCue=true;
+doRealignToCue=false;
 if suppressAllButLastFig==true
     suppressFigs=true;
 end
@@ -56,7 +56,7 @@ if downSamp==true
     end
 end
 
-thesePhotoFieldsUseTimeField1={'green_mod','red_mod','opto','cue','cue_times','distractor','from_first_video','from_second_video'};
+thesePhotoFieldsUseTimeField1={'green_mod','red_mod','opto','cue','cue_times','distractor','from_first_video','from_second_video','all_reachBatch'};
 timeField1='cue_times';
 thesePhotoFieldsUseTimeField2={'green_ch','red_ch','nan_out_red_ch','green_time','raw_green_ch','red_time','raw_red_ch','recalc_green_ch','recalc_red_ch'};
 timeField2='red_time';
@@ -67,6 +67,7 @@ temp=photometry_tbt.(timeField2);
 photometry_tbt.([timeField2 '_wrt_trial_start'])=temp-repmat(temp(:,1),1,size(temp,2));
 
 if doRealignToCue==true
+    error('Currently doRealignToCue==true DOES NOT WORK and causes a several hundred millisecond delay, need to fix');
     try
         [photometry_tbt,alignedCueTo]=realignToCue(photometry_tbt,'cue',thesePhotoFieldsUseTimeField1,timeField1,timeField2,minITI);
         [~,fpe]=nanmax(nanmean(behavior_tbt.cueZone_onVoff,1));
