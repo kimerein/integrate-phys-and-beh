@@ -807,8 +807,7 @@ if usingGLMidx==true
     % PREEMPTIVE!!!!!!!!!!!!!!!!!!!!!!!!
 
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\unitbyunit_names_to_match_cued_success_Response.mat');
-%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\combine mat and python glms\consensus_idx_from_glm_when_normByGLMcoefIntegral.mat');
-%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\combine mat and python glms\consensus_idx_from_glm_outliers_removed.mat');
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\combine mat and python glms\consensus_idx_from_glm_when_normByGLMcoefIntegral.mat');
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_success_Response.mat');
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\py_all_glm_coef_butIndexedIntoMatCoefs.mat');
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\py_metrics_butIndexedIntoMatCoefs.mat');
@@ -1205,11 +1204,11 @@ analyzeProbabilityOfOnAfterOutcome(dd,[],[],[],'cued_failure','uncued_failure','
 % analyzeProbabilityOfOnAfterOutcome(dd,[0 2],[],[]);
 
 %% Attempt trial by trial classification, using labels from training set
-attemptTrialByTrialClassification(dd,[],[],'cued_failure','uncued_failure',[1.25 5]); % consider 0 as starting timepoint for success
+attemptTrialByTrialClassification(dd,[],[],'cued_failure','uncued_failure',[0 5]); % consider 0 as starting timepoint for success
 
 %% Behavior controls
-beh2_tbt.cue_times=beh2_tbt.times_wrt_trial_start; beh2_tbt.red_time=beh2_tbt.times_wrt_trial_start; beh2_tbt.green_time=beh2_tbt.times_wrt_trial_start;
-plotPhotometryResult(beh2_tbt,beh2_tbt,[],'all_reachBatch','all_reachBatch','cueZone_onVoff','first',[-1.5 16],[]);
+% load some behavior data
+plotPhotometryResult(beh2_tbt,beh2_tbt,[],'all_reachBatch','isChewing','cueZone_onVoff','first',[0 3],[]);
 
 %% colormaps
 % SUCCESS V FAILURE 

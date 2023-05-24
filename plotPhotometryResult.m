@@ -60,7 +60,7 @@ thesePhotoFieldsUseTimeField1={'green_mod','red_mod','opto','cue','cue_times','d
 timeField1='cue_times';
 thesePhotoFieldsUseTimeField2={'green_ch','red_ch','nan_out_red_ch','green_time','raw_green_ch','red_time','raw_red_ch','recalc_green_ch','recalc_red_ch'};
 timeField2='red_time';
-theseBehFieldsUseTimeField3={'testField'};
+theseBehFieldsUseTimeField3={'isChewing'};
 timeField3='times_wrt_trial_start';
 
 temp=photometry_tbt.(timeField1);
