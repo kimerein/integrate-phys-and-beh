@@ -56,7 +56,7 @@ if downSamp==true
     end
 end
 
-thesePhotoFieldsUseTimeField1={'green_mod','red_mod','opto','cue','cue_times','distractor','from_first_video','from_second_video','all_reachBatch'};
+thesePhotoFieldsUseTimeField1={'green_mod','red_mod','opto','cue','cue_times','distractor','from_first_video','from_second_video','reachBatch_success_reachStarts'};
 timeField1='cue_times';
 thesePhotoFieldsUseTimeField2={'green_ch','red_ch','nan_out_red_ch','green_time','raw_green_ch','red_time','raw_red_ch','recalc_green_ch','recalc_red_ch'};
 timeField2='red_time';

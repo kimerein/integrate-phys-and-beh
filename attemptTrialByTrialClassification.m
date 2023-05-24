@@ -2,6 +2,7 @@ function attemptTrialByTrialClassification(dd,success_Response,failure_Response,
 
 % timeWindow is in seconds wrt peak of aligncomp
 
+disp('Using Z:\MICROSCOPE\Kim\Physiology Final Data Sets\tensor regression\rank 2\idx.mat');
 load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\tensor regression\rank 2\idx.mat');
 a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_success_Response.mat');
 r{1}=a.cued_success_Response;
@@ -38,6 +39,8 @@ r{2}=success_Response;
 r{3}=failure_Response;
 r=matchAllUnits(r);
 success_Response=removeUnitFromResponse(success_Response,r{1}.excluded==1);
+failure_Response=removeUnitFromResponse(failure_Response,r{1}.excluded==1);
+clear r
 
 % make aligncomp peaks the same
 ti=nanmean(success_Response.aligncomp_x,1);
@@ -69,20 +72,57 @@ switch overTimeOrJustTimeWindow
 
         unitfr_success=sum(success_Response.unitbyunit_y(:,successRange(1):successRange(2)),2,'omitnan');
         fromWhichUnit_success=success_Response.fromWhichUnit;
+        fromWhichTrial_success=success_Response.fromWhichTrial;
+        fromWhichSess_success=success_Response.fromWhichSess_forTrials;
         unitfr_success=unitfr_success(success_Response.isEventInThisTrial==1);
         fromWhichUnit_success=fromWhichUnit_success(success_Response.isEventInThisTrial==1);
+        fromWhichTrial_success=fromWhichTrial_success(success_Response.isEventInThisTrial==1);
+        fromWhichSess_success=fromWhichSess_success(success_Response.isEventInThisTrial==1);
         unitfr_failure=sum(failure_Response.unitbyunit_y(:,failureRange(1):failureRange(2)),2,'omitnan');
         fromWhichUnit_failure=failure_Response.fromWhichUnit;
+        fromWhichTrial_failure=failure_Response.fromWhichTrial;
+        fromWhichSess_failure=failure_Response.fromWhichSess_forTrials;
         unitfr_failure=unitfr_failure(failure_Response.isEventInThisTrial==1);
         fromWhichUnit_failure=fromWhichUnit_failure(failure_Response.isEventInThisTrial==1);
+        fromWhichTrial_failure=fromWhichTrial_failure(failure_Response.isEventInThisTrial==1);
+        fromWhichSess_failure=fromWhichSess_failure(success_Response.isEventInThisTrial==1);
+
+        % Make unit trial IDs for trials from different sessions
+        trialoffset=nanmax([fromWhichTrial_success; fromWhichTrial_failure])+1;
+        sessids=unique([fromWhichSess_success; fromWhichSess_failure]);
+        fromWhichTrialID_success=nan(size(fromWhichTrial_success));
+        fromWhichTrialID_failure=nan(size(fromWhichTrial_failure));
+        for i=1:length(unique(sessids))
+            fromWhichTrialID_success(fromWhichSess_success==sessids(i))=fromWhichTrial_success(fromWhichSess_success==sessids(i))+(i-1)*trialoffset;
+            fromWhichTrialID_failure(fromWhichSess_failure==sessids(i))=fromWhichTrial_failure(fromWhichSess_failure==sessids(i))+(i-1)*trialoffset;
+        end
 
         units=unique(success_Response.fromWhichUnit);
 
-        
-        [fr_success_unitbyunit,fr_failure_unitbyunit]=getFROfResponse(units,unitfr_success,unitfr_failure,fromWhichUnit_success,fromWhichUnit_failure);
+        % For each trial, put together units belonging to idx==1 or idx==2
+        isidx1unit=units(idx==1);
+        isidx2unit=units(idx==2);
+        uniqueTrialIDs=unique(fromWhichTrialID_success);
+        idx1_fr_success=nan(length(uniqueTrialIDs),1);
+        idx2_fr_success=nan(length(uniqueTrialIDs),1);
+        for i=1:length(uniqueTrialIDs)
+            idx1_fr_success(i)=nanmean(unitfr_success(ismember(fromWhichUnit_success,isidx1unit) & ismember(fromWhichTrialID_success,uniqueTrialIDs(i))));
+            idx2_fr_success(i)=nanmean(unitfr_success(ismember(fromWhichUnit_success,isidx2unit) & ismember(fromWhichTrialID_success,uniqueTrialIDs(i))));
+        end
+        uniqueTrialIDs=unique(fromWhichTrialID_failure);
+        idx1_fr_failure=nan(length(uniqueTrialIDs),1);
+        idx2_fr_failure=nan(length(uniqueTrialIDs),1);
+        for i=1:length(uniqueTrialIDs)
+            idx1_fr_failure(i)=nanmean(unitfr_failure(ismember(fromWhichUnit_failure,isidx1unit) & ismember(fromWhichTrialID_failure,uniqueTrialIDs(i))));
+            idx2_fr_failure(i)=nanmean(unitfr_failure(ismember(fromWhichUnit_failure,isidx2unit) & ismember(fromWhichTrialID_failure,uniqueTrialIDs(i))));
+        end
+
+        figure(); scatter(idx1_fr_success,idx2_fr_success,[],'k'); hold on; scatter(idx1_fr_failure,idx2_fr_failure,[],'r');
 
         pause;
-        
+
+
+%         [fr_success_unitbyunit,fr_failure_unitbyunit]=getFROfResponse(units,unitfr_success,unitfr_failure,fromWhichUnit_success,fromWhichUnit_failure);        
 %         [p_success_unitbyunit,p_failure_unitbyunit]=getProbOfResponse(units,unitfr_success,unitfr_failure,fromWhichUnit_success,fromWhichUnit_failure);
 % 
 %         figure();
