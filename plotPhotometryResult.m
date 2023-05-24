@@ -60,7 +60,7 @@ thesePhotoFieldsUseTimeField1={'green_mod','red_mod','opto','cue','cue_times','d
 timeField1='cue_times';
 thesePhotoFieldsUseTimeField2={'green_ch','red_ch','nan_out_red_ch','green_time','raw_green_ch','red_time','raw_red_ch','recalc_green_ch','recalc_red_ch'};
 timeField2='red_time';
-theseBehFieldsUseTimeField3={'isChewing'};
+theseBehFieldsUseTimeField3={};
 timeField3='times_wrt_trial_start';
 
 temp=photometry_tbt.(timeField1);
@@ -104,11 +104,21 @@ if ismember(plotPhotoField,thesePhotoFieldsUseTimeField1)
 elseif ismember(plotPhotoField,thesePhotoFieldsUseTimeField2)
     getCorrectTime=timeField2;
     getCorrectTime_wrtTrialStart=[timeField2 '_wrt_trial_start'];
-elseif ismember(plotPhotoField,theseBehFieldsUseTimeField3)
-    getCorrectTime=timeField3;
-    getCorrectTime_wrtTrialStart=timeField3;
 else
-    error('Do not recognize this photometry_tbt field name.');
+    if ismember(plotPhotoField,theseBehFieldsUseTimeField3)
+        getCorrectTime=timeField3;
+        getCorrectTime_wrtTrialStart=timeField3;
+    else
+        % is this field in the behavior tbt?
+        fbeht=fieldnames(behavior_tbt);
+        if ismember(plotPhotoField,fbeht)
+            theseBehFieldsUseTimeField3{length(theseBehFieldsUseTimeField3)+1}=plotPhotoField;
+            getCorrectTime=timeField3;
+            getCorrectTime_wrtTrialStart=timeField3;
+        else
+            error('Do not recognize this photometry_tbt field name.');
+        end
+    end
 end
 temp=photometry_tbt.(getCorrectTime);
 % find first non-nan column
