@@ -447,10 +447,6 @@ else
     aligncomp_y=aligncomp_y(1:trials_count,:);
 end
 
-if nansum(excluded==0)~=length(unique(fromWhichUnit))
-    pause;
-end
-
 
 % if settings.studyOptoTag==true
 %     [firstValNtimesBaseVar,optoFRoverBaseline,indsForAnalysisPerSess]=studyOptoTagging(unitbyunit_y, unitbyunit_x, settings, fromWhichSess, indsForAnalysisPerSess);
