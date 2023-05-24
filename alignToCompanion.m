@@ -274,6 +274,9 @@ for j=1:length(dd)
                                 minTrialInds=floor(settings.minTrialLength./mode(diff(nanmean(tempOpto.physiology_tbt.cuetimes_wrt_trial_start,1))));
                                 isOverlapping=any(tempOpto.physiology_tbt.opto(:,1:minTrialInds)==1 & tempOpto.physiology_tbt.cue(:,1:minTrialInds)==1,2);
                                 a.dataout.y(~isOverlapping(usingTrialsInds)==1,:)=nan;
+                            else
+                                % can't use any trials
+                                a.dataout.y(1:size(a.dataout.y,1),:)=nan;
                             end
                         elseif settings.discardTrialsIfAnyOpto==true
                             rlastslash=regexp(ls(i).folder,sep);
