@@ -238,68 +238,69 @@ for j=1:length(dd)
             fromWhichSess_forTrials(trials_count)=j*ones(size(curr_n));
             trials_count=trials_count+1;
         else
-            if keepAllSingleTrials==false
-                if settings.useSameTrainingSetForAllNeurons==true
-                    if settings.useTestSet==true
-                        % discard drops
-                        if settings.discardDrops==true
-                            rlastslash=regexp(ls(i).folder,sep);
-                            lastunderscore=regexp(ls(i).name,'_');
-                            tempDrop=load([ls(i).folder(1:rlastslash(end)) settings.dropFolderName sep ls(i).name(1:lastunderscore(end)) settings.dropFileName '.mat']);
-                            if ~isempty(tempDrop.dataout)
-                                tempDrop.dataout.y=tempDrop.dataout.y(usingTrialsInds,:);
-                                tempDrop.alignComp.y=tempDrop.alignComp.y(usingTrialsInds,:);
-                                dropHappens=any(~isnan(tempDrop.alignComp.y),2);
-                                % nan out the drops
-                                a.dataout.y(dropHappens==1,:)=nan;
-                                a.alignComp.y(dropHappens==1,:)=nan;
-                            end
-                        end
+            % only trials where opto on
+            if settings.onlyTrialsWhereOptoDuringCue==true
+                rlastslash=regexp(ls(i).folder,sep);
+                if exist([ls(i).folder(1:rlastslash(end-1)) 'tbt' sep 'opto_was_on.txt'],'file')
+                    % then continue
+                    tempOpto=load([ls(i).folder(1:rlastslash(end-1)) 'tbt' sep 'physiology_tbt.mat']);
+                    minTrialInds=floor(settings.minTrialLength./mode(diff(nanmean(tempOpto.physiology_tbt.cuetimes_wrt_trial_start,1))));
+                    isOverlapping=any(tempOpto.physiology_tbt.opto(:,1:minTrialInds)==1 & tempOpto.physiology_tbt.cue(:,1:minTrialInds)==1,2);
+                    a.dataout.y(~isOverlapping(usingTrialsInds)==1,:)=nan;
+                else
+                    % can't use any trials
+                    a.dataout.y(1:size(a.dataout.y,1),:)=nan;
+                end
+            end
 
-                        % discard opto trials if opto was on during cue
-                        if settings.discardTrialsWhereOptoDuringCue==true
-                            rlastslash=regexp(ls(i).folder,sep);
-                            if exist([ls(i).folder(1:rlastslash(end-1)) 'tbt' sep 'opto_was_on.txt'],'file')
-                                % then continue
-                                tempOpto=load([ls(i).folder(1:rlastslash(end-1)) 'tbt' sep 'physiology_tbt.mat']);
-                                minTrialInds=floor(settings.minTrialLength./mode(diff(nanmean(tempOpto.physiology_tbt.cuetimes_wrt_trial_start,1))));
-                                isOverlapping=any(tempOpto.physiology_tbt.opto(:,1:minTrialInds)==1 & tempOpto.physiology_tbt.cue(:,1:minTrialInds)==1,2);
-                                a.dataout.y(isOverlapping(usingTrialsInds)==1,:)=nan;
-                            end
-                        elseif settings.onlyTrialsWhereOptoDuringCue==true
-                            rlastslash=regexp(ls(i).folder,sep);
-                            if exist([ls(i).folder(1:rlastslash(end-1)) 'tbt' sep 'opto_was_on.txt'],'file')
-                                % then continue
-                                tempOpto=load([ls(i).folder(1:rlastslash(end-1)) 'tbt' sep 'physiology_tbt.mat']);
-                                minTrialInds=floor(settings.minTrialLength./mode(diff(nanmean(tempOpto.physiology_tbt.cuetimes_wrt_trial_start,1))));
-                                isOverlapping=any(tempOpto.physiology_tbt.opto(:,1:minTrialInds)==1 & tempOpto.physiology_tbt.cue(:,1:minTrialInds)==1,2);
-                                a.dataout.y(~isOverlapping(usingTrialsInds)==1,:)=nan;
-                            else
-                                % can't use any trials
-                                a.dataout.y(1:size(a.dataout.y,1),:)=nan;
-                            end
-                        elseif settings.discardTrialsIfAnyOpto==true
-                            rlastslash=regexp(ls(i).folder,sep);
-                            if exist([ls(i).folder(1:rlastslash(end-1)) 'tbt' sep 'opto_was_on.txt'],'file')
-                                % then continue
-                                tempOpto=load([ls(i).folder(1:rlastslash(end-1)) 'tbt' sep 'physiology_tbt.mat']);
-                                minTrialInds=floor(settings.minTrialLength./mode(diff(nanmean(tempOpto.physiology_tbt.cuetimes_wrt_trial_start,1))));
-                                isOverlapping=any(tempOpto.physiology_tbt.opto(:,1:minTrialInds)==1,2);
-                                a.dataout.y(isOverlapping(usingTrialsInds)==1,:)=nan;
-                            end
-                        end
-                        
-                        a.dataout.y(ismember(1:size(a.dataout.y,1),currTrainingSet),:)=nan;
-                        unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
-                        unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(:,1:upTo),1)];
-                    else
-                        if settings.discardDrops==true || settings.discardTrialsWhereOptoDuringCue==true
-                            error('settings.discardDrops==true || settings.discardTrialsWhereOptoDuringCue==true functionality not implemented for settings.useSameTrainingSetForAllNeurons==true and settings.useTestSet==false');
-                        end
+            % discard opto trials if opto was on during cue
+            if settings.discardTrialsWhereOptoDuringCue==true
+                rlastslash=regexp(ls(i).folder,sep);
+                if exist([ls(i).folder(1:rlastslash(end-1)) 'tbt' sep 'opto_was_on.txt'],'file')
+                    % then continue
+                    tempOpto=load([ls(i).folder(1:rlastslash(end-1)) 'tbt' sep 'physiology_tbt.mat']);
+                    minTrialInds=floor(settings.minTrialLength./mode(diff(nanmean(tempOpto.physiology_tbt.cuetimes_wrt_trial_start,1))));
+                    isOverlapping=any(tempOpto.physiology_tbt.opto(:,1:minTrialInds)==1 & tempOpto.physiology_tbt.cue(:,1:minTrialInds)==1,2);
+                    a.dataout.y(isOverlapping(usingTrialsInds)==1,:)=nan;
+                end
+            end
+
+            % discard trials if any opto
+            if settings.discardTrialsIfAnyOpto==true
+                rlastslash=regexp(ls(i).folder,sep);
+                if exist([ls(i).folder(1:rlastslash(end-1)) 'tbt' sep 'opto_was_on.txt'],'file')
+                    % then continue
+                    tempOpto=load([ls(i).folder(1:rlastslash(end-1)) 'tbt' sep 'physiology_tbt.mat']);
+                    minTrialInds=floor(settings.minTrialLength./mode(diff(nanmean(tempOpto.physiology_tbt.cuetimes_wrt_trial_start,1))));
+                    isOverlapping=any(tempOpto.physiology_tbt.opto(:,1:minTrialInds)==1,2);
+                    a.dataout.y(isOverlapping(usingTrialsInds)==1,:)=nan;
+                end
+            end
+            
+            % discard drops
+            if settings.discardDrops==true
+                rlastslash=regexp(ls(i).folder,sep);
+                lastunderscore=regexp(ls(i).name,'_');
+                tempDrop=load([ls(i).folder(1:rlastslash(end)) settings.dropFolderName sep ls(i).name(1:lastunderscore(end)) settings.dropFileName '.mat']);
+                if ~isempty(tempDrop.dataout)
+                    tempDrop.dataout.y=tempDrop.dataout.y(usingTrialsInds,:);
+                    tempDrop.alignComp.y=tempDrop.alignComp.y(usingTrialsInds,:);
+                    dropHappens=any(~isnan(tempDrop.alignComp.y),2);
+                    % nan out the drops
+                    a.dataout.y(dropHappens==1,:)=nan;
+                    a.alignComp.y(dropHappens==1,:)=nan;
+                end
+            end
+
+            if keepAllSingleTrials==false
+                if settings.useSameTrainingSetForAllNeurons==true && settings.useTestSet==true
+                    a.dataout.y(ismember(1:size(a.dataout.y,1),currTrainingSet),:)=nan;
+                    unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
+                    unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(:,1:upTo),1)];
+                elseif settings.useSameTrainingSetForAllNeurons==true && settings.useTrainingSet==true
                         a.dataout.y(~ismember(1:size(a.dataout.y,1),currTrainingSet),:)=nan;
                         unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
                         unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(:,1:upTo),1)];
-                    end
                 elseif settings.makeTrainingSet==true
                     f=find(eventHappens==1);
                     temp=randperm(nansum(eventHappens==1));
@@ -322,7 +323,7 @@ for j=1:length(dd)
                     save([ls(i).folder sep ls(i).name(1:regexp(ls(i).name,'.mat','once')-1) '_trainingSet.mat'],'trainingSet','trainingSetTrials');
                     unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
                     unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(trainingSetTrials,1:upTo),1)];
-                elseif settings.useTestSet==true
+                elseif settings.useTestSet==true && settings.useSameTrainingSetForAllNeurons==false
                     if ~isempty(settings.useTheseTestSets)
                         b.testSet=[]; b.testSetTrials=[];
                         for itthroughtest=1:length(settings.useTheseTestSets)
@@ -362,22 +363,6 @@ for j=1:length(dd)
                         end
                     else
                         b=load([ls(i).folder sep ls(i).name(1:regexp(ls(i).name,'.mat','once')-1) '_testSet.mat']);
-
-                        % discard drops
-                        if settings.discardDrops==true
-                            rlastslash=regexp(ls(i).folder,sep);
-                            lastunderscore=regexp(ls(i).name,'_');
-                            tempDrop=load([ls(i).folder(1:rlastslash(end)) settings.dropFolderName sep ls(i).name(1:lastunderscore(end)) settings.dropFileName '.mat']);
-                            if ~isempty(tempDrop.dataout)
-                                tempDrop.dataout.y=tempDrop.dataout.y(usingTrialsInds,:);
-                                tempDrop.alignComp.y=tempDrop.alignComp.y(usingTrialsInds,:);
-                                dropHappens=any(~isnan(tempDrop.alignComp.y),2);
-                                % nan out the drops
-                                a.dataout.y(dropHappens==1,:)=nan;
-                                a.alignComp.y(dropHappens==1,:)=nan;
-                            end
-                        end
-
                         unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
                         if isempty(b.testSet) % only one trial
                             unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
@@ -386,7 +371,7 @@ for j=1:length(dd)
                             unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(b.testSetTrials,1:upTo),1)];
                         end
                     end
-                elseif settings.useTrainingSet==true
+                elseif settings.useTrainingSet==true && settings.useSameTrainingSetForAllNeurons==false
                     b=load([ls(i).folder sep ls(i).name(1:regexp(ls(i).name,'.mat','once')-1) '_trainingSet.mat']);
                     unitbyunit_x(units_count,:)=[a.dataout.x(1:upTo)];
                     unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(b.trainingSetTrials,1:upTo),1)];
@@ -395,15 +380,9 @@ for j=1:length(dd)
                     unitbyunit_y(units_count,:)=[nanmean(a.dataout.y(:,1:upTo),1)];
                 end
             else
-%                 if settings.makeTrainingSet==true || settings.useTestSet==true
-%                     error('Error in alignToCompanion.m: makeTrainingSet and useTestSet functionality not implemented when keep single trials');
-%                 end
                 if settings.useTestSet==true && settings.useSameTrainingSetForAllNeurons==true
                     a.dataout.y(ismember(1:size(a.dataout.y,1),currTrainingSet),:)=nan;
-                    unitbyunit_x(trials_count:trials_count+size(a.dataout.y,1)-1,:)=repmat(a.dataout.x(1:upTo),size(a.dataout.y,1),1);
-                    unitbyunit_y(trials_count:trials_count+size(a.dataout.y,1)-1,:)=[a.dataout.y(:,1:upTo)];
-                end
-                if settings.useSameTrainingSetForAllNeurons==true && settings.useTrainingSet==true
+                elseif settings.useSameTrainingSetForAllNeurons==true && settings.useTrainingSet==true
                     if isempty(currTrainingSet)
                         b=load([ls(i).folder sep ls(i).name(1:regexp(ls(i).name,'.mat','once')-1) '_trainingSet.mat']);
                         a.dataout.y(~ismember(1:size(a.dataout.y,1),b.trainingSetTrials),:)=nan;
@@ -412,9 +391,11 @@ for j=1:length(dd)
                     else
                         a.dataout.y(~ismember(1:size(a.dataout.y,1),currTrainingSet),:)=nan;
                     end
-                elseif settings.useTrainingSet==true
+                elseif settings.useTrainingSet==true && settings.useSameTrainingSetForAllNeurons==false
                     b=load([ls(i).folder sep ls(i).name(1:regexp(ls(i).name,'.mat','once')-1) '_trainingSet.mat']);
                     a.dataout.y(~ismember(1:size(a.dataout.y,1),b.trainingSetTrials),:)=nan;
+                elseif settings.useTestSet==true && settings.useSameTrainingSetForAllNeurons==false
+                    error('Have not yet implemented settings.useTestSet==true && settings.useSameTrainingSetForAllNeurons==false && keepAllSingleTrials==true');
                 end
                 unitbyunit_x(trials_count:trials_count+size(a.dataout.y,1)-1,:)=repmat(a.dataout.x(1:upTo),size(a.dataout.y,1),1);
                 unitbyunit_y(trials_count:trials_count+size(a.dataout.y,1)-1,:)=[a.dataout.y(:,1:upTo)];
