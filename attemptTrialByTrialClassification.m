@@ -2,9 +2,9 @@ function attemptTrialByTrialClassification(dd,success_Response,failure_Response,
 
 % timeWindow is in seconds wrt peak of aligncomp
 
-nBoots=100;
-
-%aboveBaseHz=baseFiringRate*(timeWindow(2)-timeWindow(1));
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\tensor regression\rank 2\idx.mat');
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_success_Response.mat');
+r{1}=a.cued_success_Response;
 
 if isempty(success_Response)
     % choose type of response to plot
@@ -33,6 +33,11 @@ if isempty(failure_Response)
     end
     failure_Response=getAndSaveResponse(dd_more,whichUnitsToGrab,settings,[]);
 end
+
+r{2}=success_Response;
+r{3}=failure_Response;
+r=matchAllUnits(r);
+success_Response=removeUnitFromResponse(success_Response,r{1}.excluded==1);
 
 % make aligncomp peaks the same
 ti=nanmean(success_Response.aligncomp_x,1);
@@ -73,7 +78,7 @@ switch overTimeOrJustTimeWindow
 
         units=unique(success_Response.fromWhichUnit);
 
-        load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\tensor regression\rank 2\idx.mat');
+        
         [fr_success_unitbyunit,fr_failure_unitbyunit]=getFROfResponse(units,unitfr_success,unitfr_failure,fromWhichUnit_success,fromWhichUnit_failure);
 
         pause;

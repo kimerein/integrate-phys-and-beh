@@ -420,20 +420,13 @@ for j=1:length(dd)
 
         disp(['Added ' ls(i).name]);
         units_count=units_count+1;
-        if any(~ismember(fromWhichUnit,1:nansum(excluded==0)))
+        if any(~ismember(fromWhichUnit(~isnan(fromWhichUnit)),1:nansum(excluded(1:excluded_count-1)==0)))
             pause;
         end
     end
 end
 excluded_count=excluded_count-1;
 units_count=units_count-1;
-if ~isempty(a)
-    if isempty(a.dataout)
-        trials_count=trials_count-1;
-    end
-else
-    trials_count=trials_count-1;
-end
 trials_count=trials_count-1;
 ns=ns(1:units_count);
 fromWhichSess=fromWhichSess(1:units_count);
