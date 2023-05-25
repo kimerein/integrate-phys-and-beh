@@ -101,9 +101,17 @@ end
 if ismember(plotPhotoField,thesePhotoFieldsUseTimeField1)
     getCorrectTime=timeField1;
     getCorrectTime_wrtTrialStart=[timeField1 '_wrt_trial_start'];
+    temp=photometry_tbt.(getCorrectTime);
+    % find first non-nan column
+    f=find(~isnan(temp(1,:)),1,'first');
+    phototimes=nanmean(photometry_tbt.(getCorrectTime)-repmat(temp(:,f),1,size(temp,2)),1);
 elseif ismember(plotPhotoField,thesePhotoFieldsUseTimeField2)
     getCorrectTime=timeField2;
     getCorrectTime_wrtTrialStart=[timeField2 '_wrt_trial_start'];
+    temp=photometry_tbt.(getCorrectTime);
+    % find first non-nan column
+    f=find(~isnan(temp(1,:)),1,'first');
+    phototimes=nanmean(photometry_tbt.(getCorrectTime)-repmat(temp(:,f),1,size(temp,2)),1);
 else
     if ismember(plotPhotoField,theseBehFieldsUseTimeField3)
         getCorrectTime=timeField3;
@@ -119,11 +127,8 @@ else
             error('Do not recognize this photometry_tbt field name.');
         end
     end
+    phototimes=photometry_tbt.(getCorrectTime);
 end
-temp=photometry_tbt.(getCorrectTime);
-% find first non-nan column
-f=find(~isnan(temp(1,:)),1,'first');
-phototimes=nanmean(photometry_tbt.(getCorrectTime)-repmat(temp(:,f),1,size(temp,2)),1);
 
 if ismember(plotPhotoField,theseBehFieldsUseTimeField3)
 elseif cutBeforeNextCue==true
