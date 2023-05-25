@@ -89,17 +89,15 @@ plotSingleHist(alltog.uncueSucc_postoutcome_reaches,[0:1:15],'k');
 plotSingleHist(alltog.uncueFail_postoutcome_reaches,[0:1:15],'b');
 title('Number of confirmatory reaches');
 
-figure();
-plotSingleHist(postOutcome_reaches.dp_per_sess_cuedSucc_v_cuedFail,[-3-0.05:0.1:3+0.05],'k'); title('Confirmatory reaches Dprimes cuedSucc v cuedFail');
-plotSingleHist(postOutcome_reaches.dp_per_sess_uncuedSucc_v_uncuedFail,[-3-0.05:0.1:3+0.05],'k'); title('Confirmatory reaches Dprimes uncuedSucc v uncuedFail');
-plotSingleHist(postOutcome_reaches.dp_per_sess_cuedSucc_v_uncuedSucc,[-3-0.05:0.1:3+0.05],'k'); title('Confirmatory reaches Dprimes cuedSucc v uncuedSucc');
-plotSingleHist(postOutcome_reaches.dp_per_sess_cuedFail_v_uncuedFail,[-3-0.05:0.1:3+0.05],'k'); title('Confirmatory reaches Dprimes cuedFail v uncuedFail');
+figure(); plotSingleHist(postOutcome_reaches.dp_per_sess_cuedSucc_v_cuedFail,[-1-0.005:0.01:3+0.005],'k'); title('Confirmatory reaches Dprimes cuedSucc v cuedFail');
+figure(); plotSingleHist(postOutcome_reaches.dp_per_sess_uncuedSucc_v_uncuedFail,[-3-0.005:0.01:3+0.005],'k'); title('Confirmatory reaches Dprimes uncuedSucc v uncuedFail');
+figure(); plotSingleHist(postOutcome_reaches.dp_per_sess_cuedSucc_v_uncuedSucc,[-3-0.005:0.01:3+0.005],'k'); title('Confirmatory reaches Dprimes cuedSucc v uncuedSucc');
+figure(); plotSingleHist(postOutcome_reaches.dp_per_sess_cuedFail_v_uncuedFail,[-3-0.005:0.01:3+0.005],'k'); title('Confirmatory reaches Dprimes cuedFail v uncuedFail');
 
-figure();
-plotSingleHist(chewDurations.dp_per_sess_cuedSucc_v_cuedFail,[-3-0.05:0.1:3+0.05],'k'); title('Chew durations Dprimes cuedSucc v cuedFail');
-plotSingleHist(chewDurations.dp_per_sess_uncuedSucc_v_uncuedFail,[-3-0.05:0.1:3+0.05],'k'); title('Chew durations Dprimes uncuedSucc v uncuedFail');
-plotSingleHist(chewDurations.dp_per_sess_cuedSucc_v_uncuedSucc,[-3-0.05:0.1:3+0.05],'k'); title('Chew durations Dprimes cuedSucc v uncuedSucc');
-plotSingleHist(chewDurations.dp_per_sess_cuedFail_v_uncuedFail,[-3-0.05:0.1:3+0.05],'k'); title('Chew durations Dprimes cuedFail v uncuedFail');
+figure(); plotSingleHist(chewDurations.dp_per_sess_cuedSucc_v_cuedFail,[-3-0.05:0.1:3+0.05],'k'); title('Chew durations Dprimes cuedSucc v cuedFail');
+figure(); plotSingleHist(chewDurations.dp_per_sess_uncuedSucc_v_uncuedFail,[-3-0.05:0.1:3+0.05],'k'); title('Chew durations Dprimes uncuedSucc v uncuedFail');
+figure(); plotSingleHist(chewDurations.dp_per_sess_cuedSucc_v_uncuedSucc,[-3-0.05:0.1:3+0.05],'k'); title('Chew durations Dprimes cuedSucc v uncuedSucc');
+figure(); plotSingleHist(chewDurations.dp_per_sess_cuedFail_v_uncuedFail,[-3-0.05:0.1:3+0.05],'k'); title('Chew durations Dprimes cuedFail v uncuedFail');
 
 end
 

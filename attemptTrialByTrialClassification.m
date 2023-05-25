@@ -233,35 +233,160 @@ if isempty(loadIn)
     save('C:\Users\sabatini\Documents\trialbytrial classification\before exclude\successRange.mat','successRange');
     save('C:\Users\sabatini\Documents\trialbytrial classification\before exclude\failureRange.mat','failureRange');
 else
-    load([loadIn '\idx1_fr_failure_cue.mat']);
-    load([loadIn '\idx1_fr_failure_uncue.mat']);
-    load([loadIn '\idx1_fr_success_cue.mat']);
-    load([loadIn '\idx1_fr_success_uncue.mat']);
-    load([loadIn '\idx1_n_failure_cue.mat']);
-    load([loadIn '\idx1_n_failure_uncue.mat']);
-    load([loadIn '\idx1_n_success_cue.mat']);
-    load([loadIn '\idx1_n_success_uncue.mat']);
-    load([loadIn '\idx2_fr_failure_cue.mat']);
-    load([loadIn '\idx2_fr_failure_uncue.mat']);
-    load([loadIn '\idx2_fr_success_cue.mat']);
-    load([loadIn '\idx2_fr_success_uncue.mat']);
-    load([loadIn '\idx2_n_failure_cue.mat']);
-    load([loadIn '\idx2_n_failure_uncue.mat']);
-    load([loadIn '\idx2_n_success_cue.mat']);
-    load([loadIn '\idx2_n_success_uncue.mat']);
-    load([loadIn '\successRange.mat']);
-    load([loadIn '\failureRange.mat']);
+    tes=load([loadIn '\idx1_fr_failure_cue.mat']);
+    f=fieldnames(tes); 
+    if ~ismember('idx1_fr_failure_cue',f)
+        idx1_fr_failure_cue=tes.idx1_fr_success_cue;
+        idx1_fr_failure_cueSHUFFLE=tes.idx1_fr_success_cueSHUFFLE;
+    else
+        load([loadIn '\idx1_fr_failure_cue.mat']);
+    end
+    tes=load([loadIn '\idx1_fr_failure_uncue.mat']);
+    f=fieldnames(tes); 
+    if ~ismember('idx1_fr_failure_uncue',f)
+        idx1_fr_failure_uncue=tes.idx1_fr_success_uncue;
+        idx1_fr_failure_uncueSHUFFLE=tes.idx1_fr_success_uncueSHUFFLE;
+    else
+        load([loadIn '\idx1_fr_failure_uncue.mat']);
+    end
+    tes=load([loadIn '\idx1_fr_success_cue.mat']);
+    f=fieldnames(tes); 
+    if ~ismember('idx1_fr_success_cue',f)
+        idx1_fr_success_cue=tes.idx1_fr_failure_cue;
+        idx1_fr_success_cueSHUFFLE=tes.idx1_fr_failure_cueSHUFFLE;
+    else
+        load([loadIn '\idx1_fr_success_cue.mat']);
+    end
+    tes=load([loadIn '\idx1_fr_success_uncue.mat']);
+    f=fieldnames(tes); 
+    if ~ismember('idx1_fr_success_uncue',f)
+        idx1_fr_success_uncue=tes.idx1_fr_failure_uncue;
+        idx1_fr_success_uncueSHUFFLE=tes.idx1_fr_failure_uncueSHUFFLE;
+    else
+        load([loadIn '\idx1_fr_success_uncue.mat']);
+    end
+    tes=load([loadIn '\idx1_n_failure_cue.mat']);
+    f=fieldnames(tes); 
+    if ~ismember('idx1_n_failure_cue',f)
+        idx1_n_failure_cue=tes.idx1_n_success_cue;
+        idx1_n_failure_cueSHUFFLE=tes.idx1_n_success_cueSHUFFLE;
+    else
+        load([loadIn '\idx1_n_failure_cue.mat']);
+    end
+    tes=load([loadIn '\idx1_n_failure_uncue.mat']);
+    f=fieldnames(tes); 
+    if ~ismember('idx1_n_failure_uncue',f)
+        idx1_n_failure_uncue=tes.idx1_n_success_uncue;
+        idx1_n_failure_uncueSHUFFLE=tes.idx1_n_success_uncueSHUFFLE;
+    else
+        load([loadIn '\idx1_n_failure_uncue.mat']);
+    end
+    tes=load([loadIn '\idx1_n_success_cue.mat']);
+    f=fieldnames(tes); 
+    if ~ismember('idx1_n_success_cue',f)
+        idx1_n_success_cue=tes.idx1_n_failure_cue;
+        idx1_n_success_cueSHUFFLE=tes.idx1_n_failure_cueSHUFFLE;
+    else
+        load([loadIn '\idx1_n_success_cue.mat']);
+    end
+    tes=load([loadIn '\idx1_n_success_uncue.mat']);
+    f=fieldnames(tes); 
+    if ~ismember('idx1_n_success_uncue',f)
+        idx1_n_success_uncue=tes.idx1_n_failure_uncue;
+        idx1_n_success_uncueSHUFFLE=tes.idx1_n_failure_uncueSHUFFLE;
+    else
+        load([loadIn '\idx1_n_success_uncue.mat']);
+    end
+    tes=load([loadIn '\idx2_fr_failure_cue.mat']);
+    f=fieldnames(tes); 
+    if ~ismember('idx2_fr_failure_cue',f)
+        idx2_fr_failure_cue=tes.idx2_fr_success_cue;
+        idx2_fr_failure_cueSHUFFLE=tes.idx2_fr_success_cueSHUFFLE;
+    else
+        load([loadIn '\idx2_fr_failure_cue.mat']);
+    end
+    tes=load([loadIn '\idx2_fr_failure_uncue.mat']);
+    f=fieldnames(tes); 
+    if ~ismember('idx2_fr_failure_uncue',f)
+        idx2_fr_failure_uncue=tes.idx2_fr_success_uncue;
+        idx2_fr_failure_uncueSHUFFLE=tes.idx2_fr_success_uncueSHUFFLE;
+    else
+        load([loadIn '\idx2_fr_failure_uncue.mat']);
+    end
+    tes=load([loadIn '\idx2_fr_success_cue.mat']);
+    f=fieldnames(tes); 
+    if ~ismember('idx2_fr_success_cue',f)
+        idx2_fr_success_cue=tes.idx2_fr_failure_cue;
+        idx2_fr_success_cueSHUFFLE=tes.idx2_fr_failure_cueSHUFFLE;
+    else
+        load([loadIn '\idx2_fr_success_cue.mat']);
+    end
+    tes=load([loadIn '\idx2_fr_success_uncue.mat']);
+    f=fieldnames(tes); 
+    if ~ismember('idx2_fr_success_uncue',f)
+        idx2_fr_success_uncue=tes.idx2_fr_failure_uncue;
+        idx2_fr_success_uncueSHUFFLE=tes.idx2_fr_failure_uncueSHUFFLE;
+    else
+        load([loadIn '\idx2_fr_success_uncue.mat']);
+    end
+    tes=load([loadIn '\idx2_n_failure_cue.mat']);
+    f=fieldnames(tes); 
+    if ~ismember('idx2_n_failure_cue',f)
+        idx2_n_failure_cue=tes.idx2_n_success_cue;
+        idx2_n_failure_cueSHUFFLE=tes.idx2_n_success_cueSHUFFLE;
+    else
+        load([loadIn '\idx2_n_failure_cue.mat']);
+    end
+    tes=load([loadIn '\idx2_n_failure_uncue.mat']);
+    f=fieldnames(tes); 
+    if ~ismember('idx2_n_failure_uncue',f)
+        idx2_n_failure_uncue=tes.idx2_n_success_uncue;
+        idx2_n_failure_uncueSHUFFLE=tes.idx2_n_success_uncueSHUFFLE;
+    else
+        load([loadIn '\idx2_n_failure_uncue.mat']);
+    end
+    tes=load([loadIn '\idx2_n_success_cue.mat']);
+    f=fieldnames(tes); 
+    if ~ismember('idx2_n_success_cue',f)
+        idx2_n_success_cue=tes.idx2_n_failure_cue;
+        idx2_n_success_cueSHUFFLE=tes.idx2_n_failure_cueSHUFFLE;
+    else
+        load([loadIn '\idx2_n_success_cue.mat']);
+    end
+    tes=load([loadIn '\idx2_n_success_uncue.mat']);
+    f=fieldnames(tes); 
+    if ~ismember('idx2_n_success_uncue',f)
+        idx2_n_success_uncue=tes.idx2_n_failure_uncue;
+        idx2_n_success_uncueSHUFFLE=tes.idx2_n_failure_uncueSHUFFLE;
+    else
+        load([loadIn '\idx2_n_success_uncue.mat']);
+    end
+    tes=load([loadIn '\successRange.mat']);
+    f=fieldnames(tes); 
+    if ~ismember('successRange',f)
+        successRange=tes.failureRange;
+    else
+        load([loadIn '\successRange.mat']);
+    end
+    tes=load([loadIn '\failureRange.mat']);
+    f=fieldnames(tes); 
+    if ~ismember('failureRange',f)
+        failureRange=tes.successRange;
+    else
+        load([loadIn '\failureRange.mat']);
+    end
 end
 
 % Enough units
-nunitthresh=0;
+nunitthresh=-1;
 enough_success=idx1_n_success_cue>nunitthresh & idx2_n_success_cue>nunitthresh & idx1_n_success_uncue>nunitthresh & idx2_n_success_uncue>nunitthresh;
 enough_failure=idx1_n_failure_cue>nunitthresh & idx2_n_failure_cue>nunitthresh & idx1_n_failure_uncue>nunitthresh & idx2_n_failure_uncue>nunitthresh;
 % Enough spikes
-enoughspikes_success=idx1_fr_success_cue~=0 & idx2_fr_success_cue~=0 & idx1_fr_success_uncue~=0 & idx2_fr_success_uncue~=0;
-enoughspikes_failure=idx1_fr_failure_cue~=0 & idx2_fr_failure_cue~=0 & idx1_fr_failure_uncue~=0 & idx2_fr_failure_uncue~=0;
-enough_success=enough_success & enoughspikes_success;
-enough_failure=enough_failure & enoughspikes_failure;
+spikethresh=-10;
+% enoughspikes_success=idx1_fr_success_cue>=spikethresh & idx2_fr_success_cue>=spikethresh & idx1_fr_success_uncue>=spikethresh & idx2_fr_success_uncue>=spikethresh;
+% enoughspikes_failure=idx1_fr_failure_cue>=spikethresh & idx2_fr_failure_cue>=spikethresh & idx1_fr_failure_uncue>=spikethresh & idx2_fr_failure_uncue>=spikethresh;
+% enough_success=enough_success & enoughspikes_success;
+% enough_failure=enough_failure & enoughspikes_failure;
 idx1_fr_success_cue=idx1_fr_success_cue(enough_success);
 idx2_fr_success_cue=idx2_fr_success_cue(enough_success);
 idx1_fr_success_uncue=idx1_fr_success_uncue(enough_success);
@@ -274,10 +399,10 @@ idx2_fr_failure_uncue=idx2_fr_failure_uncue(enough_failure);
 enough_successSHUFFLE=idx1_n_success_cueSHUFFLE>nunitthresh & idx2_n_success_cueSHUFFLE>nunitthresh & idx1_n_success_uncueSHUFFLE>nunitthresh & idx2_n_success_uncueSHUFFLE>nunitthresh;
 enough_failureSHUFFLE=idx1_n_failure_cueSHUFFLE>nunitthresh & idx2_n_failure_cueSHUFFLE>nunitthresh & idx1_n_failure_uncueSHUFFLE>nunitthresh & idx2_n_failure_uncueSHUFFLE>nunitthresh;
 % Enough spikes
-enoughspikes_successSHUFFLE=idx1_fr_success_cueSHUFFLE~=0 & idx2_fr_success_cueSHUFFLE~=0 & idx1_fr_success_uncueSHUFFLE~=0 & idx2_fr_success_uncueSHUFFLE~=0;
-enoughspikes_failureSHUFFLE=idx1_fr_failure_cueSHUFFLE~=0 & idx2_fr_failure_cueSHUFFLE~=0 & idx1_fr_failure_uncueSHUFFLE~=0 & idx2_fr_failure_uncueSHUFFLE~=0;
-enough_successSHUFFLE=enough_successSHUFFLE & enoughspikes_successSHUFFLE;
-enough_failureSHUFFLE=enough_failureSHUFFLE & enoughspikes_failureSHUFFLE;
+% enoughspikes_successSHUFFLE=idx1_fr_success_cueSHUFFLE>=spikethresh & idx2_fr_success_cueSHUFFLE>=spikethresh & idx1_fr_success_uncueSHUFFLE>=spikethresh & idx2_fr_success_uncueSHUFFLE>=spikethresh;
+% enoughspikes_failureSHUFFLE=idx1_fr_failure_cueSHUFFLE>=spikethresh & idx2_fr_failure_cueSHUFFLE>=spikethresh & idx1_fr_failure_uncueSHUFFLE>=spikethresh & idx2_fr_failure_uncueSHUFFLE>=spikethresh;
+% enough_successSHUFFLE=enough_successSHUFFLE & enoughspikes_successSHUFFLE;
+% enough_failureSHUFFLE=enough_failureSHUFFLE & enoughspikes_failureSHUFFLE;
 idx1_fr_success_cueSHUFFLE=idx1_fr_success_cueSHUFFLE(enough_successSHUFFLE);
 idx2_fr_success_cueSHUFFLE=idx2_fr_success_cueSHUFFLE(enough_successSHUFFLE);
 idx1_fr_success_uncueSHUFFLE=idx1_fr_success_uncueSHUFFLE(enough_successSHUFFLE);
@@ -291,69 +416,91 @@ idx2_fr_failure_uncueSHUFFLE=idx2_fr_failure_uncueSHUFFLE(enough_failureSHUFFLE)
 % Decode "cued vs uncued" if passed in, e.g., cued_failure and
 % uncued_failure
 % bestSigns=[+1,-1,+1,-1];
-[n,x]=histcounts((idx2_fr_success_cue-idx1_fr_success_cue)-(idx2_fr_success_uncue-idx1_fr_success_uncue),-2000-40:80:2000+40);
-[n,x]=cityscape_hist(n,x); figure(); plot(x,n./nansum(n),'Color','k');
-[n,x]=histcounts((idx2_fr_failure_cue-idx1_fr_failure_cue)-(idx2_fr_failure_uncue-idx1_fr_failure_uncue),-2000-40:80:2000+40);
-[n,x]=cityscape_hist(n,x); hold on; plot(x,n./nansum(n),'Color','r');
-% [n,x]=histcounts((idx1_fr_success_cue - idx1_fr_success_uncue) + (idx2_fr_success_cue - idx2_fr_success_uncue),-2000-40:80:2000+40);
+% [n,x]=histcounts((idx2_fr_success_cue-idx1_fr_success_cue)-(idx2_fr_success_uncue-idx1_fr_success_uncue),-2000-40:80:2000+40);
 % [n,x]=cityscape_hist(n,x); figure(); plot(x,n./nansum(n),'Color','k');
-% [n,x]=histcounts((idx1_fr_failure_cue - idx1_fr_failure_uncue) + (idx2_fr_failure_cue - idx2_fr_failure_uncue),-2000-40:80:2000+40);
+% [n,x]=histcounts((idx2_fr_failure_cue-idx1_fr_failure_cue)-(idx2_fr_failure_uncue-idx1_fr_failure_uncue),-2000-40:80:2000+40);
 % [n,x]=cityscape_hist(n,x); hold on; plot(x,n./nansum(n),'Color','r');
+[n,x]=histcounts((idx1_fr_success_uncue - idx2_fr_success_uncue) - (idx1_fr_success_cue - idx2_fr_success_cue),-2000-40:80:2000+40);  
+[n,x]=cityscape_hist(n,x); figure(); plot(x,n./nansum(n),'Color','k');
+[n,x]=histcounts((idx1_fr_failure_uncue - idx2_fr_failure_uncue) - (idx1_fr_failure_cue - idx2_fr_failure_cue),-2000-40:80:2000+40);   
+[n,x]=cityscape_hist(n,x); hold on; plot(x,n./nansum(n),'Color','r');
 
 % X AXIS
 % Decode "success vs failure"
 % bestSigns=[-1,+1,+1,+1];
-[n,x]=histcounts((idx2_fr_success_cue+idx2_fr_success_uncue)-(idx1_fr_success_cue+idx1_fr_success_uncue),-2000-40:80:2000+40);
-[n,x]=cityscape_hist(n,x); figure(); plot(x,n./nansum(n),'Color','k');
-[n,x]=histcounts((idx2_fr_failure_cue+idx2_fr_failure_uncue)-(idx1_fr_failure_cue+idx1_fr_failure_uncue),-2000-40:80:2000+40);
-[n,x]=cityscape_hist(n,x); hold on; plot(x,n./nansum(n),'Color','r');
-% [n,x]=histcounts((idx1_fr_success_cue + idx1_fr_success_uncue) - (idx2_fr_success_cue + idx2_fr_success_uncue),-2000-40:80:2000+40);
+% [n,x]=histcounts((idx2_fr_success_cue+idx2_fr_success_uncue)-(idx1_fr_success_cue+idx1_fr_success_uncue),-2000-40:80:2000+40);
 % [n,x]=cityscape_hist(n,x); figure(); plot(x,n./nansum(n),'Color','k');
-% [n,x]=histcounts((idx1_fr_failure_cue + idx1_fr_failure_uncue) - (idx2_fr_failure_cue + idx2_fr_failure_uncue),-2000-40:80:2000+40);
+% [n,x]=histcounts((idx2_fr_failure_cue+idx2_fr_failure_uncue)-(idx1_fr_failure_cue+idx1_fr_failure_uncue),-2000-40:80:2000+40);
 % [n,x]=cityscape_hist(n,x); hold on; plot(x,n./nansum(n),'Color','r');
+[n,x]=histcounts((idx2_fr_success_cue - idx2_fr_success_uncue) + (idx1_fr_success_cue - idx1_fr_success_uncue),-2000-40:80:2000+40);
+[n,x]=cityscape_hist(n,x); figure(); plot(x,n./nansum(n),'Color','k');
+[n,x]=histcounts((idx2_fr_failure_cue - idx2_fr_failure_uncue) + (idx1_fr_failure_cue - idx1_fr_failure_uncue),-2000-40:80:2000+40);
+[n,x]=cityscape_hist(n,x); hold on; plot(x,n./nansum(n),'Color','r');
 
 % dprime
-temp1=(idx2_fr_success_cue-idx1_fr_success_cue)-(idx2_fr_success_uncue-idx1_fr_success_uncue);
-temp2=(idx2_fr_failure_cue-idx1_fr_failure_cue)-(idx2_fr_failure_uncue-idx1_fr_failure_uncue);
-% temp1=(idx1_fr_success_cue - idx1_fr_success_uncue) + (idx2_fr_success_cue - idx2_fr_success_uncue);
-% temp2=(idx1_fr_failure_cue - idx1_fr_failure_uncue) + (idx2_fr_failure_cue - idx2_fr_failure_uncue);
+% temp1=(idx2_fr_success_cue-idx1_fr_success_cue)-(idx2_fr_success_uncue-idx1_fr_success_uncue);
+% temp2=(idx2_fr_failure_cue-idx1_fr_failure_cue)-(idx2_fr_failure_uncue-idx1_fr_failure_uncue);
+temp1=(idx1_fr_success_uncue - idx2_fr_success_uncue) - (idx1_fr_success_cue - idx2_fr_success_cue);
+temp2=(idx1_fr_failure_uncue - idx2_fr_failure_uncue)  - (idx1_fr_failure_cue - idx2_fr_failure_cue);
 dp=(nanmean(temp1)-nanmean(temp2))./sqrt(nanstd(temp1,[],1).^2+nanstd(temp2,[],1).^2); disp(dp);
-temp3=(idx2_fr_success_cue+idx2_fr_success_uncue)-(idx1_fr_success_cue+idx1_fr_success_uncue);
-temp4=(idx2_fr_failure_cue+idx2_fr_failure_uncue)-(idx1_fr_failure_cue+idx1_fr_failure_uncue);
-% temp3=(idx1_fr_success_cue + idx1_fr_success_uncue) - (idx2_fr_success_cue + idx2_fr_success_uncue);
-% temp4=(idx1_fr_failure_cue + idx1_fr_failure_uncue) - (idx2_fr_failure_cue + idx2_fr_failure_uncue);
+% temp3=(idx2_fr_success_cue+idx2_fr_success_uncue)-(idx1_fr_success_cue+idx1_fr_success_uncue);
+% temp4=(idx2_fr_failure_cue+idx2_fr_failure_uncue)-(idx1_fr_failure_cue+idx1_fr_failure_uncue);
+temp3=(idx2_fr_success_cue - idx2_fr_success_uncue) + (idx1_fr_success_cue - idx1_fr_success_uncue);
+temp4=(idx2_fr_failure_cue - idx2_fr_failure_uncue) + (idx1_fr_failure_cue - idx1_fr_failure_uncue);
 dp=(nanmean(temp3)-nanmean(temp4))./sqrt(nanstd(temp3,[],1).^2+nanstd(temp4,[],1).^2); disp(dp);
+% temp5=(idx1_fr_success_uncue - idx2_fr_success_uncue);
+% temp6=(idx1_fr_failure_uncue - idx2_fr_failure_uncue);
 
 % scatter
 figure(); s=scatter(temp3./length(successRange(1):successRange(2)),temp1./length(successRange(1):successRange(2)),60,'filled','MarkerFaceColor','k','MarkerFaceAlpha',0.4); hold on;
 line([-5 5],[-5 5]); line([5 -5],[-5 5]);
+line([nanmean(temp3./length(successRange(1):successRange(2)))-nanstd(temp3./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp3))) nanmean(temp3./length(successRange(1):successRange(2)))+nanstd(temp3./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp3)))],...
+     [nanmean(temp1./length(successRange(1):successRange(2))) nanmean(temp1./length(successRange(1):successRange(2)))],'Color','b');
+line([nanmean(temp3./length(successRange(1):successRange(2))) nanmean(temp3./length(successRange(1):successRange(2)))],...
+     [nanmean(temp1./length(successRange(1):successRange(2)))-nanstd(temp1./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp1))) nanmean(temp1./length(successRange(1):successRange(2)))+nanstd(temp1./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp1)))],'Color','b');
+
 figure(); s=scatter(temp4./length(failureRange(1):failureRange(2)),temp2./length(failureRange(1):failureRange(2)),60,'filled','MarkerFaceColor','r','MarkerFaceAlpha',0.4); hold on;
 line([-5 5],[-5 5]); line([5 -5],[-5 5]);
+line([nanmean(temp4./length(successRange(1):successRange(2)))-nanstd(temp4./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp4))) nanmean(temp4./length(successRange(1):successRange(2)))+nanstd(temp4./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp4)))],...
+     [nanmean(temp2./length(successRange(1):successRange(2))) nanmean(temp2./length(successRange(1):successRange(2)))],'Color','b');
+line([nanmean(temp4./length(successRange(1):successRange(2))) nanmean(temp4./length(successRange(1):successRange(2)))],...
+     [nanmean(temp2./length(successRange(1):successRange(2)))-nanstd(temp2./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp2))) nanmean(temp2./length(successRange(1):successRange(2)))+nanstd(temp2./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp2)))],'Color','b');
+
+% figure(); scatter3(temp3./length(successRange(1):successRange(2)),temp1./length(successRange(1):successRange(2)),temp5./length(successRange(1):successRange(2))); xlabel('x'); ylabel('y'); zlabel('z');
+% figure(); scatter3(temp4./length(failureRange(1):failureRange(2)),temp2./length(failureRange(1):failureRange(2)),temp6./length(failureRange(1):successRange(2))); xlabel('x'); ylabel('y'); zlabel('z');
 
 
 % SHUFFLE dprime
-temp1=(idx2_fr_success_cueSHUFFLE-idx1_fr_success_cueSHUFFLE)-(idx2_fr_success_uncueSHUFFLE-idx1_fr_success_uncueSHUFFLE);
-temp2=(idx2_fr_failure_cueSHUFFLE-idx1_fr_failure_cueSHUFFLE)-(idx2_fr_failure_uncueSHUFFLE-idx1_fr_failure_uncueSHUFFLE);
-% temp1=(idx1_fr_success_cueSHUFFLE - idx1_fr_success_uncueSHUFFLE) + (idx2_fr_success_cueSHUFFLE - idx2_fr_success_uncueSHUFFLE);
-% temp2=(idx1_fr_failure_cueSHUFFLE - idx1_fr_failure_uncueSHUFFLE) + (idx2_fr_failure_cueSHUFFLE - idx2_fr_failure_uncueSHUFFLE);
+% temp1=(idx2_fr_success_cueSHUFFLE-idx1_fr_success_cueSHUFFLE)-(idx2_fr_success_uncueSHUFFLE-idx1_fr_success_uncueSHUFFLE);
+% temp2=(idx2_fr_failure_cueSHUFFLE-idx1_fr_failure_cueSHUFFLE)-(idx2_fr_failure_uncueSHUFFLE-idx1_fr_failure_uncueSHUFFLE);
+temp1=(idx1_fr_success_uncueSHUFFLE - idx2_fr_success_uncueSHUFFLE)  - (idx1_fr_success_cueSHUFFLE - idx2_fr_success_cueSHUFFLE);
+temp2=(idx1_fr_failure_uncueSHUFFLE - idx2_fr_failure_uncueSHUFFLE)  - (idx1_fr_failure_cueSHUFFLE - idx2_fr_failure_cueSHUFFLE);
 dp=(nanmean(temp1)-nanmean(temp2))./sqrt(nanstd(temp1,[],1).^2+nanstd(temp2,[],1).^2); disp(dp);
-temp3=(idx2_fr_success_cueSHUFFLE+idx2_fr_success_uncueSHUFFLE)-(idx1_fr_success_cueSHUFFLE+idx1_fr_success_uncueSHUFFLE);
-temp4=(idx2_fr_failure_cueSHUFFLE+idx2_fr_failure_uncueSHUFFLE)-(idx1_fr_failure_cueSHUFFLE+idx1_fr_failure_uncueSHUFFLE);
-% temp3=(idx1_fr_success_cueSHUFFLE + idx1_fr_success_uncueSHUFFLE) - (idx2_fr_success_cueSHUFFLE + idx2_fr_success_uncueSHUFFLE);
-% temp4=(idx1_fr_failure_cueSHUFFLE + idx1_fr_failure_uncueSHUFFLE) - (idx2_fr_failure_cueSHUFFLE + idx2_fr_failure_uncueSHUFFLE);
+% temp3=(idx2_fr_success_cueSHUFFLE+idx2_fr_success_uncueSHUFFLE)-(idx1_fr_success_cueSHUFFLE+idx1_fr_success_uncueSHUFFLE);
+% temp4=(idx2_fr_failure_cueSHUFFLE+idx2_fr_failure_uncueSHUFFLE)-(idx1_fr_failure_cueSHUFFLE+idx1_fr_failure_uncueSHUFFLE);
+temp3=(idx2_fr_success_cueSHUFFLE - idx2_fr_success_uncueSHUFFLE) + (idx1_fr_success_cueSHUFFLE - idx1_fr_success_uncueSHUFFLE);
+temp4=(idx2_fr_failure_cueSHUFFLE - idx2_fr_failure_uncueSHUFFLE) + (idx1_fr_failure_cueSHUFFLE - idx1_fr_failure_uncueSHUFFLE);
 dp=(nanmean(temp3)-nanmean(temp4))./sqrt(nanstd(temp3,[],1).^2+nanstd(temp4,[],1).^2); disp(dp);
 % SHUFFLE scatter
 figure(); s=scatter(temp3./length(successRange(1):successRange(2)),temp1./length(successRange(1):successRange(2)),60,'filled','MarkerFaceColor','k','MarkerFaceAlpha',0.4); hold on;
 line([-5 5],[-5 5]); line([5 -5],[-5 5]); title('SHUFFLE');
+line([nanmean(temp3./length(successRange(1):successRange(2)))-nanstd(temp3./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp3))) nanmean(temp3./length(successRange(1):successRange(2)))+nanstd(temp3./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp3)))],...
+     [nanmean(temp1./length(successRange(1):successRange(2))) nanmean(temp1./length(successRange(1):successRange(2)))],'Color','b');
+line([nanmean(temp3./length(successRange(1):successRange(2))) nanmean(temp3./length(successRange(1):successRange(2)))],...
+     [nanmean(temp1./length(successRange(1):successRange(2)))-nanstd(temp1./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp1))) nanmean(temp1./length(successRange(1):successRange(2)))+nanstd(temp1./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp1)))],'Color','b');
 figure(); s=scatter(temp4./length(failureRange(1):failureRange(2)),temp2./length(failureRange(1):failureRange(2)),60,'filled','MarkerFaceColor','r','MarkerFaceAlpha',0.4); hold on;
 line([-5 5],[-5 5]); line([5 -5],[-5 5]);
+line([nanmean(temp4./length(successRange(1):successRange(2)))-nanstd(temp4./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp4))) nanmean(temp4./length(successRange(1):successRange(2)))+nanstd(temp4./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp4)))],...
+     [nanmean(temp2./length(successRange(1):successRange(2))) nanmean(temp2./length(successRange(1):successRange(2)))],'Color','b');
+line([nanmean(temp4./length(successRange(1):successRange(2))) nanmean(temp4./length(successRange(1):successRange(2)))],...
+     [nanmean(temp2./length(successRange(1):successRange(2)))-nanstd(temp2./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp2))) nanmean(temp2./length(successRange(1):successRange(2)))+nanstd(temp2./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp2)))],'Color','b');
 title('SHUFFLE');
 
 % vals_x_axis=temp4; vals_y_axis=temp2;
 %%% [~,trmx]=rmoutliers(vals_x_axis); [~,trmy]=rmoutliers(vals_y_axis);
 %%% vals_x_axis=vals_x_axis(~trmx & ~trmy); vals_y_axis=vals_y_axis(~trmx & ~trmy);
 
-% return
+return
 
 pause;
 close all;
