@@ -1204,7 +1204,7 @@ analyzeProbabilityOfOnAfterOutcome(dd,[],[],[],'cued_failure','uncued_failure','
 % analyzeProbabilityOfOnAfterOutcome(dd,[0 2],[],[]);
 
 %% Attempt trial by trial classification, using labels from training set
-attemptTrialByTrialClassification(dd,[],[],'cued_failure','uncued_failure',[0 5]); % consider 0 as starting timepoint for success
+attemptTrialByTrialClassification(dd,[],[],'cued_success','cued_failure',[0 5],[]);
 
 %% Behavior controls
 % load some behavior data
