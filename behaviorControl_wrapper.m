@@ -1,34 +1,31 @@
 function behaviorControl_wrapper(data_loc_array)
 
-cueOffset=-0.16;
-
+cueOffset=-0.16; % match what used for physiology
+behReadoutTimeWindow=[0 5]; % in sec from alignCompanion
 maxTrialsPerSess=250; % cannot be more than this many trials of any type
-chewendings_cueSucc=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
-postoutcome_reaches_cueSucc=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
-fromwhichsess_cueSucc=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
-chewendings_cueSucc_counter=1;
-chewendings_cueSucc_counter=1;
-
-chewendings_cueFail=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
-postoutcome_reaches_cueFail=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
-fromwhichsess_cueFail=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
-trialsCounter_cueFail=1;
-
-chewendings_uncueSucc=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
-postoutcome_reaches_uncueSucc=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
-fromwhichsess_uncueSucc=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
-trialsCounter_uncueSucc=1;
-
-chewendings_uncueFail=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
-postoutcome_reaches_uncueFail=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
-fromwhichsess_uncueFail=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
-trialsCounter_uncueFail=1;
 
 dp_per_sess_cuedSucc_v_cuedFail=nan(size(data_loc_array,1),1);
 dp_per_sess_uncuedSucc_v_uncuedFail=nan(size(data_loc_array,1),1);
 dp_per_sess_cuedSucc_v_uncuedSucc=nan(size(data_loc_array,1),1);
 dp_per_sess_cuedFail_v_uncuedFail=nan(size(data_loc_array,1),1);
 
+% Cued success
+event='success_fromPerchOrWheel';
+timeWindow=[0+cueOffset 3]; % in seconds from cue onset
+[chewendings,postoutcome_reaches,fromwhichsess_reaches,fromwhichsess_chews]=getChewsAndReachFromAllSess(data_loc_array,maxTrialsPerSess,event,cueOffset,timeWindow,behReadoutTimeWindow);
+
+end
+
+function [chewendings,postoutcome_reaches,fromwhichsess_reaches,fromwhichsess_chews]=getChewsAndReachFromAllSess(data_loc_array,maxTrialsPerSess,whichReach,cueOffset,behTriggerTimeWindow,behReadoutTimeWindow)
+
+chewendings=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
+postoutcome_reaches=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
+fromwhichsess_reaches=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
+fromwhichsess_chews=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
+chewendings_counter=1;
+reach_counter=1;
+reach_sess_counter=1;
+chew_sess_counter=1;
 for i=1:size(data_loc_array,1)
     if strcmp(data_loc_array{i,3},'no_spikes')
         continue
@@ -38,12 +35,26 @@ for i=1:size(data_loc_array,1)
     beh2_tbt=getChewingEnds(beh2_tbt);
     % for this session
     % get number of confirmatory reaches
-    reaches=getConfirmReaches(beh2_tbt,'success_fromPerchOrWheel',[0+cueOffset 3],[0 5]);
-    postoutcome_reaches_cueSucc()
+    reaches=getConfirmReaches(beh2_tbt,whichReach,behTriggerTimeWindow,behReadoutTimeWindow);
+    postoutcome_reaches(reach_counter:reach_counter+length(reaches)-1)=reaches;
+    reach_counter=reach_counter+length(reaches);
+    fromwhichsess_reaches(reach_sess_counter:reach_sess_counter+length(reaches)-1)=ones(size(reaches))*i;
+    reach_sess_counter=reach_sess_counter+length(reaches);
     % get duration of chewing
-    chewendtimes=getChewEnd(beh2_tbt,'success_fromPerchOrWheel',[0+cueOffset 3],[0 5]);
-   
+    chewendtimes=getChewEnd(beh2_tbt,whichReach,[0+cueOffset 3],[0 5]);
+    chewendings(chewendings_counter:chewendings_counter+length(chewendtimes)-1)=chewendtimes;
+    chewendings_counter=chewendings_counter+length(chewendtimes);
+    fromwhichsess_chews(chew_sess_counter:chew_sess_counter+length(chewendtimes)-1)=ones(size(chewendtimes))*i;
+    chew_sess_counter=chew_sess_counter+length(chewendtimes);
 end
+reach_counter=reach_counter-1;
+reach_sess_counter=reach_sess_counter-1;
+chewendings_counter=chewendings_counter-1;
+chew_sess_counter=chew_sess_counter-1;
+chewendings=chewendings(1:chewendings_counter);
+postoutcome_reaches=postoutcome_reaches(1:reach_counter);
+fromwhichsess_reaches=fromwhichsess_reaches(1:reach_sess_counter);
+fromwhichsess_chews=fromwhichsess_chews(1:chew_sess_counter);
 
 end
 
