@@ -6,7 +6,8 @@ maxTrialsPerSess=250; % cannot be more than this many trials of any type
 chewendings_cueSucc=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
 postoutcome_reaches_cueSucc=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
 fromwhichsess_cueSucc=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
-trialsCounter_cueSucc=1;
+chewendings_cueSucc_counter=1;
+chewendings_cueSucc_counter=1;
 
 chewendings_cueFail=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
 postoutcome_reaches_cueFail=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
@@ -33,11 +34,13 @@ for i=1:size(data_loc_array,1)
         continue
     end
     % load behavior tbt
-    load([data_loc_array{355,6} sep 'beh2_tbt.mat']);
+    load([data_loc_array{i,6} sep 'beh2_tbt.mat']);
     beh2_tbt=getChewingEnds(beh2_tbt);
     % for this session
     % get number of confirmatory reaches
-     % get duration of chewing
+    reaches=getConfirmReaches(beh2_tbt,'success_fromPerchOrWheel',[0+cueOffset 3],[0 5]);
+    postoutcome_reaches_cueSucc()
+    % get duration of chewing
     chewendtimes=getChewEnd(beh2_tbt,'success_fromPerchOrWheel',[0+cueOffset 3],[0 5]);
    
 end
