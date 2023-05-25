@@ -1,5 +1,33 @@
 function behaviorControl_wrapper(data_loc_array)
 
+cueOffset=-0.16;
+
+maxTrialsPerSess=250; % cannot be more than this many trials of any type
+chewendings_cueSucc=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
+postoutcome_reaches_cueSucc=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
+fromwhichsess_cueSucc=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
+trialsCounter_cueSucc=1;
+
+chewendings_cueFail=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
+postoutcome_reaches_cueFail=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
+fromwhichsess_cueFail=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
+trialsCounter_cueFail=1;
+
+chewendings_uncueSucc=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
+postoutcome_reaches_uncueSucc=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
+fromwhichsess_uncueSucc=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
+trialsCounter_uncueSucc=1;
+
+chewendings_uncueFail=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
+postoutcome_reaches_uncueFail=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
+fromwhichsess_uncueFail=nan(size(data_loc_array,1)*maxTrialsPerSess,1);
+trialsCounter_uncueFail=1;
+
+dp_per_sess_cuedSucc_v_cuedFail=nan(size(data_loc_array,1),1);
+dp_per_sess_uncuedSucc_v_uncuedFail=nan(size(data_loc_array,1),1);
+dp_per_sess_cuedSucc_v_uncuedSucc=nan(size(data_loc_array,1),1);
+dp_per_sess_cuedFail_v_uncuedFail=nan(size(data_loc_array,1),1);
+
 for i=1:size(data_loc_array,1)
     if strcmp(data_loc_array{i,3},'no_spikes')
         continue
@@ -7,9 +35,19 @@ for i=1:size(data_loc_array,1)
     % load behavior tbt
     load([data_loc_array{355,6} sep 'beh2_tbt.mat']);
     beh2_tbt=getChewingEnds(beh2_tbt);
+    % for this session
     % get number of confirmatory reaches
-    % get duration of chewing
+     % get duration of chewing
+    chewendtimes=getChewEnd(beh2_tbt,'success_fromPerchOrWheel',[0+cueOffset 3],[0 5]);
+   
 end
+
+end
+
+function dp=rms_dprime(temp1,temp2)
+
+% nonoptimal but simple
+dp=(nanmean(temp1)-nanmean(temp2))./sqrt(nanstd(temp1,[],1).^2+nanstd(temp2,[],1).^2);
 
 end
 
