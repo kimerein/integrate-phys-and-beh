@@ -1,4 +1,4 @@
-function attemptTrialByTrialClassification(dd,success_Response,failure_Response,response_to_plot1,response_to_plot2,timeWindow,squishToSess,loadIn)
+function attemptTrialByTrialClassification(dd,success_Response,failure_Response,response_to_plot1,response_to_plot2,timeWindow,squishToSess,useFirstMapping,loadIn)
 
 % timeWindow is in seconds wrt peak of aligncomp
 
@@ -412,6 +412,10 @@ if squishToSess==true
     [idx1_fr_success_cue,idx2_fr_success_cue,idx1_fr_success_uncue,idx2_fr_success_uncue,idx1_fr_success_cueSHUFFLE,idx2_fr_success_cueSHUFFLE,idx1_fr_success_uncueSHUFFLE,idx2_fr_success_uncueSHUFFLE,idx1_n_success_cue,idx2_n_success_cue,idx1_n_success_uncue,idx2_n_success_uncue,idx1_n_success_cueSHUFFLE,idx2_n_success_cueSHUFFLE,idx1_n_success_uncueSHUFFLE,idx2_n_success_uncueSHUFFLE]...
         =squishToSessions(idx1_sess_success_cue,idx2_sess_success_cue,idx1_sess_success_uncue,idx2_sess_success_uncue,idx1_fr_success_cue,idx2_fr_success_cue,idx1_fr_success_uncue,idx2_fr_success_uncue,idx1_fr_success_cueSHUFFLE,idx2_fr_success_cueSHUFFLE,idx1_fr_success_uncueSHUFFLE,idx2_fr_success_uncueSHUFFLE,...
             idx1_n_success_cue,idx2_n_success_cue,idx1_n_success_uncue,idx2_n_success_uncue,idx1_n_success_cueSHUFFLE,idx2_n_success_cueSHUFFLE,idx1_n_success_uncueSHUFFLE,idx2_n_success_uncueSHUFFLE);
+
+    [idx1_fr_failure_cue,idx2_fr_failure_cue,idx1_fr_failure_uncue,idx2_fr_failure_uncue,idx1_fr_failure_cueSHUFFLE,idx2_fr_failure_cueSHUFFLE,idx1_fr_failure_uncueSHUFFLE,idx2_fr_failure_uncueSHUFFLE,idx1_n_failure_cue,idx2_n_failure_cue,idx1_n_failure_uncue,idx2_n_failure_uncue,idx1_n_failure_cueSHUFFLE,idx2_n_failure_cueSHUFFLE,idx1_n_failure_uncueSHUFFLE,idx2_n_failure_uncueSHUFFLE]...
+        =squishToSessions(idx1_sess_failure_cue,idx2_sess_failure_cue,idx1_sess_failure_uncue,idx2_sess_failure_uncue,idx1_fr_failure_cue,idx2_fr_failure_cue,idx1_fr_failure_uncue,idx2_fr_failure_uncue,idx1_fr_failure_cueSHUFFLE,idx2_fr_failure_cueSHUFFLE,idx1_fr_failure_uncueSHUFFLE,idx2_fr_failure_uncueSHUFFLE,...
+            idx1_n_failure_cue,idx2_n_failure_cue,idx1_n_failure_uncue,idx2_n_failure_uncue,idx1_n_failure_cueSHUFFLE,idx2_n_failure_cueSHUFFLE,idx1_n_failure_uncueSHUFFLE,idx2_n_failure_uncueSHUFFLE);
 end
 
 % Enough units
@@ -452,41 +456,49 @@ idx2_fr_failure_uncueSHUFFLE=idx2_fr_failure_uncueSHUFFLE(enough_failureSHUFFLE)
 % Y AXIS
 % Decode "cued vs uncued" if passed in, e.g., cued_failure and
 % uncued_failure
-% bestSigns=[+1,-1,+1,-1];
-% [n,x]=histcounts((idx2_fr_success_cue-idx1_fr_success_cue)-(idx2_fr_success_uncue-idx1_fr_success_uncue),-2000-40:80:2000+40);
-% [n,x]=cityscape_hist(n,x); figure(); plot(x,n./nansum(n),'Color','k');
-% [n,x]=histcounts((idx2_fr_failure_cue-idx1_fr_failure_cue)-(idx2_fr_failure_uncue-idx1_fr_failure_uncue),-2000-40:80:2000+40);
-% [n,x]=cityscape_hist(n,x); hold on; plot(x,n./nansum(n),'Color','r');
-[n,x]=histcounts(0.5*(idx1_fr_success_uncue - idx2_fr_success_uncue) - (idx1_fr_success_cue - idx2_fr_success_cue),-2000-40:80:2000+40);  
-[n,x]=cityscape_hist(n,x); figure(); plot(x,n./nansum(n),'Color','k');
-[n,x]=histcounts(0.5*(idx1_fr_failure_uncue - idx2_fr_failure_uncue) - (idx1_fr_failure_cue - idx2_fr_failure_cue),-2000-40:80:2000+40);  
-[n,x]=cityscape_hist(n,x); hold on; plot(x,n./nansum(n),'Color','r');
+if useFirstMapping==true
+    [n,x]=histcounts((idx2_fr_success_cue-idx1_fr_success_cue)-(idx2_fr_success_uncue-idx1_fr_success_uncue),-2000-40:80:2000+40);
+    [n,x]=cityscape_hist(n,x); figure(); plot(x,n./nansum(n),'Color','k');
+    [n,x]=histcounts((idx2_fr_failure_cue-idx1_fr_failure_cue)-(idx2_fr_failure_uncue-idx1_fr_failure_uncue),-2000-40:80:2000+40);
+    [n,x]=cityscape_hist(n,x); hold on; plot(x,n./nansum(n),'Color','r');
+else
+    [n,x]=histcounts((idx1_fr_success_uncue - idx2_fr_success_uncue) - (idx1_fr_success_cue - idx2_fr_success_cue),-2000-40:80:2000+40);
+    [n,x]=cityscape_hist(n,x); figure(); plot(x,n./nansum(n),'Color','k');
+    [n,x]=histcounts((idx1_fr_failure_uncue - idx2_fr_failure_uncue) - (idx1_fr_failure_cue - idx2_fr_failure_cue),-2000-40:80:2000+40);
+    [n,x]=cityscape_hist(n,x); hold on; plot(x,n./nansum(n),'Color','r');
+end
 
 % X AXIS
 % Decode "success vs failure"
-% bestSigns=[-1,+1,+1,+1];
-% [n,x]=histcounts((idx2_fr_success_cue+idx2_fr_success_uncue)-(idx1_fr_success_cue+idx1_fr_success_uncue),-2000-40:80:2000+40);
-% [n,x]=cityscape_hist(n,x); figure(); plot(x,n./nansum(n),'Color','k');
-% [n,x]=histcounts((idx2_fr_failure_cue+idx2_fr_failure_uncue)-(idx1_fr_failure_cue+idx1_fr_failure_uncue),-2000-40:80:2000+40);
-% [n,x]=cityscape_hist(n,x); hold on; plot(x,n./nansum(n),'Color','r');
-[n,x]=histcounts((idx2_fr_success_cue - idx2_fr_success_uncue) + (idx1_fr_success_cue - idx1_fr_success_uncue),-2000-40:80:2000+40);
-[n,x]=cityscape_hist(n,x); figure(); plot(x,n./nansum(n),'Color','k');
-[n,x]=histcounts((idx2_fr_failure_cue - idx2_fr_failure_uncue) + (idx1_fr_failure_cue - idx1_fr_failure_uncue),-2000-40:80:2000+40);
-[n,x]=cityscape_hist(n,x); hold on; plot(x,n./nansum(n),'Color','r');
+if useFirstMapping==true
+    [n,x]=histcounts((idx2_fr_success_cue+idx2_fr_success_uncue)-(idx1_fr_success_cue+idx1_fr_success_uncue),-2000-40:80:2000+40);
+    [n,x]=cityscape_hist(n,x); figure(); plot(x,n./nansum(n),'Color','k');
+    [n,x]=histcounts((idx2_fr_failure_cue+idx2_fr_failure_uncue)-(idx1_fr_failure_cue+idx1_fr_failure_uncue),-2000-40:80:2000+40);
+    [n,x]=cityscape_hist(n,x); hold on; plot(x,n./nansum(n),'Color','r');
+else
+    [n,x]=histcounts((idx2_fr_success_cue - idx2_fr_success_uncue) + (idx1_fr_success_cue - idx1_fr_success_uncue),-2000-40:80:2000+40);
+    [n,x]=cityscape_hist(n,x); figure(); plot(x,n./nansum(n),'Color','k');
+    [n,x]=histcounts((idx2_fr_failure_cue - idx2_fr_failure_uncue) + (idx1_fr_failure_cue - idx1_fr_failure_uncue),-2000-40:80:2000+40);
+    [n,x]=cityscape_hist(n,x); hold on; plot(x,n./nansum(n),'Color','r');
+end
 
 % dprime
-% temp1=(idx2_fr_success_cue-idx1_fr_success_cue)-(idx2_fr_success_uncue-idx1_fr_success_uncue);
-% temp2=(idx2_fr_failure_cue-idx1_fr_failure_cue)-(idx2_fr_failure_uncue-idx1_fr_failure_uncue);
-temp1=0.5*(idx1_fr_success_uncue - idx2_fr_success_uncue) - (idx1_fr_success_cue - idx2_fr_success_cue);
-temp2=0.5*(idx1_fr_failure_uncue - idx2_fr_failure_uncue) - (idx1_fr_failure_cue - idx2_fr_failure_cue);
+if useFirstMapping==true
+    temp1=(idx2_fr_success_cue-idx1_fr_success_cue)-(idx2_fr_success_uncue-idx1_fr_success_uncue);
+    temp2=(idx2_fr_failure_cue-idx1_fr_failure_cue)-(idx2_fr_failure_uncue-idx1_fr_failure_uncue);
+else
+    temp1=(idx1_fr_success_uncue - idx2_fr_success_uncue) - (idx1_fr_success_cue - idx2_fr_success_cue);
+    temp2=(idx1_fr_failure_uncue - idx2_fr_failure_uncue) - (idx1_fr_failure_cue - idx2_fr_failure_cue);
+end
 dp=(nanmean(temp1)-nanmean(temp2))./sqrt(nanstd(temp1,[],1).^2+nanstd(temp2,[],1).^2); disp(dp);
-% temp3=(idx2_fr_success_cue+idx2_fr_success_uncue)-(idx1_fr_success_cue+idx1_fr_success_uncue);
-% temp4=(idx2_fr_failure_cue+idx2_fr_failure_uncue)-(idx1_fr_failure_cue+idx1_fr_failure_uncue);
-temp3=(idx2_fr_success_cue - idx2_fr_success_uncue) + (idx1_fr_success_cue - idx1_fr_success_uncue);
-temp4=(idx2_fr_failure_cue - idx2_fr_failure_uncue) + (idx1_fr_failure_cue - idx1_fr_failure_uncue);
+if useFirstMapping==true
+    temp3=(idx2_fr_success_cue+idx2_fr_success_uncue)-(idx1_fr_success_cue+idx1_fr_success_uncue);
+    temp4=(idx2_fr_failure_cue+idx2_fr_failure_uncue)-(idx1_fr_failure_cue+idx1_fr_failure_uncue);
+else
+    temp3=(idx2_fr_success_cue - idx2_fr_success_uncue) + (idx1_fr_success_cue - idx1_fr_success_uncue);
+    temp4=(idx2_fr_failure_cue - idx2_fr_failure_uncue) + (idx1_fr_failure_cue - idx1_fr_failure_uncue);
+end
 dp=(nanmean(temp3)-nanmean(temp4))./sqrt(nanstd(temp3,[],1).^2+nanstd(temp4,[],1).^2); disp(dp);
-% temp5=(idx1_fr_success_uncue - idx2_fr_success_uncue);
-% temp6=(idx1_fr_failure_uncue - idx2_fr_failure_uncue);
 
 % scatter
 figure(); s=scatter(temp3./length(successRange(1):successRange(2)),temp1./length(successRange(1):successRange(2)),60,'filled','MarkerFaceColor','k','MarkerFaceAlpha',0.4); hold on;
@@ -494,84 +506,85 @@ line([-5 5],[-5 5]); line([5 -5],[-5 5]);
 vals_x_axis=temp3./length(failureRange(1):failureRange(2)); vals_y_axis=temp1./length(failureRange(1):failureRange(2));
 % [~,trmx]=rmoutliers(vals_x_axis,"ThresholdFactor",3); [~,trmy]=rmoutliers(vals_y_axis,"ThresholdFactor",2);
 % vals_x_axis=vals_x_axis(~trmx & ~trmy); vals_y_axis=vals_y_axis(~trmx & ~trmy);
-% line([nanmean(temp3./length(successRange(1):successRange(2)))-nanstd(temp3./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp3))) nanmean(temp3./length(successRange(1):successRange(2)))+nanstd(temp3./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp3)))],...
-%      [nanmean(temp1./length(successRange(1):successRange(2))) nanmean(temp1./length(successRange(1):successRange(2)))],'Color','b');
-% line([nanmean(temp3./length(successRange(1):successRange(2))) nanmean(temp3./length(successRange(1):successRange(2)))],...
-%      [nanmean(temp1./length(successRange(1):successRange(2)))-nanstd(temp1./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp1))) nanmean(temp1./length(successRange(1):successRange(2)))+nanstd(temp1./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp1)))],'Color','b');
+line([nanmean(temp3./length(successRange(1):successRange(2)))-nanstd(temp3./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp3))) nanmean(temp3./length(successRange(1):successRange(2)))+nanstd(temp3./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp3)))],...
+     [nanmean(temp1./length(successRange(1):successRange(2))) nanmean(temp1./length(successRange(1):successRange(2)))],'Color','k');
+line([nanmean(temp3./length(successRange(1):successRange(2))) nanmean(temp3./length(successRange(1):successRange(2)))],...
+     [nanmean(temp1./length(successRange(1):successRange(2)))-nanstd(temp1./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp1))) nanmean(temp1./length(successRange(1):successRange(2)))+nanstd(temp1./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp1)))],'Color','k');
 
 figure(); s=scatter(temp4./length(failureRange(1):failureRange(2)),temp2./length(failureRange(1):failureRange(2)),60,'filled','MarkerFaceColor','r','MarkerFaceAlpha',0.4); hold on;
 line([-5 5],[-5 5]); line([5 -5],[-5 5]);
 vals_x_axis=temp4./length(failureRange(1):failureRange(2)); vals_y_axis=temp2./length(failureRange(1):failureRange(2));
 % [~,trmx]=rmoutliers(vals_x_axis,"ThresholdFactor",3); [~,trmy]=rmoutliers(vals_y_axis,"ThresholdFactor",2);
 % vals_x_axis=vals_x_axis(~trmx & ~trmy); vals_y_axis=vals_y_axis(~trmx & ~trmy);
-% line([nanmean(temp4./length(successRange(1):successRange(2)))-nanstd(temp4./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp4))) nanmean(temp4./length(successRange(1):successRange(2)))+nanstd(temp4./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp4)))],...
-%      [nanmean(temp2./length(successRange(1):successRange(2))) nanmean(temp2./length(successRange(1):successRange(2)))],'Color','b');
-% line([nanmean(temp4./length(successRange(1):successRange(2))) nanmean(temp4./length(successRange(1):successRange(2)))],...
-%      [nanmean(temp2./length(successRange(1):successRange(2)))-nanstd(temp2./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp2))) nanmean(temp2./length(successRange(1):successRange(2)))+nanstd(temp2./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp2)))],'Color','b');
-
-% figure(); scatter3(temp3./length(successRange(1):successRange(2)),temp1./length(successRange(1):successRange(2)),temp5./length(successRange(1):successRange(2))); xlabel('x'); ylabel('y'); zlabel('z');
-% figure(); scatter3(temp4./length(failureRange(1):failureRange(2)),temp2./length(failureRange(1):failureRange(2)),temp6./length(failureRange(1):successRange(2))); xlabel('x'); ylabel('y'); zlabel('z');
-
+line([nanmean(temp4./length(successRange(1):successRange(2)))-nanstd(temp4./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp4))) nanmean(temp4./length(successRange(1):successRange(2)))+nanstd(temp4./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp4)))],...
+     [nanmean(temp2./length(successRange(1):successRange(2))) nanmean(temp2./length(successRange(1):successRange(2)))],'Color','r');
+line([nanmean(temp4./length(successRange(1):successRange(2))) nanmean(temp4./length(successRange(1):successRange(2)))],...
+     [nanmean(temp2./length(successRange(1):successRange(2)))-nanstd(temp2./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp2))) nanmean(temp2./length(successRange(1):successRange(2)))+nanstd(temp2./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp2)))],'Color','r');
 
 % SHUFFLE dprime
-% temp1=(idx2_fr_success_cueSHUFFLE-idx1_fr_success_cueSHUFFLE)-(idx2_fr_success_uncueSHUFFLE-idx1_fr_success_uncueSHUFFLE);
-% temp2=(idx2_fr_failure_cueSHUFFLE-idx1_fr_failure_cueSHUFFLE)-(idx2_fr_failure_uncueSHUFFLE-idx1_fr_failure_uncueSHUFFLE);
-temp1=0.5*(idx1_fr_success_uncueSHUFFLE - idx2_fr_success_uncueSHUFFLE) - (idx1_fr_success_cueSHUFFLE - idx2_fr_success_cueSHUFFLE);
-temp2=0.5*(idx1_fr_failure_uncueSHUFFLE - idx2_fr_failure_uncueSHUFFLE) - (idx1_fr_failure_cueSHUFFLE - idx2_fr_failure_cueSHUFFLE);
+if useFirstMapping==true
+    temp1=(idx2_fr_success_cueSHUFFLE-idx1_fr_success_cueSHUFFLE)-(idx2_fr_success_uncueSHUFFLE-idx1_fr_success_uncueSHUFFLE);
+    temp2=(idx2_fr_failure_cueSHUFFLE-idx1_fr_failure_cueSHUFFLE)-(idx2_fr_failure_uncueSHUFFLE-idx1_fr_failure_uncueSHUFFLE);
+else
+    temp1=(idx1_fr_success_uncueSHUFFLE - idx2_fr_success_uncueSHUFFLE) - (idx1_fr_success_cueSHUFFLE - idx2_fr_success_cueSHUFFLE);
+    temp2=(idx1_fr_failure_uncueSHUFFLE - idx2_fr_failure_uncueSHUFFLE) - (idx1_fr_failure_cueSHUFFLE - idx2_fr_failure_cueSHUFFLE);
+end
 dp=(nanmean(temp1)-nanmean(temp2))./sqrt(nanstd(temp1,[],1).^2+nanstd(temp2,[],1).^2); disp(dp);
-% temp3=(idx2_fr_success_cueSHUFFLE+idx2_fr_success_uncueSHUFFLE)-(idx1_fr_success_cueSHUFFLE+idx1_fr_success_uncueSHUFFLE);
-% temp4=(idx2_fr_failure_cueSHUFFLE+idx2_fr_failure_uncueSHUFFLE)-(idx1_fr_failure_cueSHUFFLE+idx1_fr_failure_uncueSHUFFLE);
-temp3=(idx2_fr_success_cueSHUFFLE - idx2_fr_success_uncueSHUFFLE) + (idx1_fr_success_cueSHUFFLE - idx1_fr_success_uncueSHUFFLE);
-temp4=(idx2_fr_failure_cueSHUFFLE - idx2_fr_failure_uncueSHUFFLE) + (idx1_fr_failure_cueSHUFFLE - idx1_fr_failure_uncueSHUFFLE);
+if useFirstMapping==true
+    temp3=(idx2_fr_success_cueSHUFFLE+idx2_fr_success_uncueSHUFFLE)-(idx1_fr_success_cueSHUFFLE+idx1_fr_success_uncueSHUFFLE);
+    temp4=(idx2_fr_failure_cueSHUFFLE+idx2_fr_failure_uncueSHUFFLE)-(idx1_fr_failure_cueSHUFFLE+idx1_fr_failure_uncueSHUFFLE);
+else
+    temp3=(idx2_fr_success_cueSHUFFLE - idx2_fr_success_uncueSHUFFLE) + (idx1_fr_success_cueSHUFFLE - idx1_fr_success_uncueSHUFFLE);
+    temp4=(idx2_fr_failure_cueSHUFFLE - idx2_fr_failure_uncueSHUFFLE) + (idx1_fr_failure_cueSHUFFLE - idx1_fr_failure_uncueSHUFFLE);
+end
 dp=(nanmean(temp3)-nanmean(temp4))./sqrt(nanstd(temp3,[],1).^2+nanstd(temp4,[],1).^2); disp(dp);
 % SHUFFLE scatter
 figure(); s=scatter(temp3./length(successRange(1):successRange(2)),temp1./length(successRange(1):successRange(2)),60,'filled','MarkerFaceColor','k','MarkerFaceAlpha',0.4); hold on;
 line([-5 5],[-5 5]); line([5 -5],[-5 5]); title('SHUFFLE');
-% line([nanmean(temp3./length(successRange(1):successRange(2)))-nanstd(temp3./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp3))) nanmean(temp3./length(successRange(1):successRange(2)))+nanstd(temp3./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp3)))],...
-%      [nanmean(temp1./length(successRange(1):successRange(2))) nanmean(temp1./length(successRange(1):successRange(2)))],'Color','b');
-% line([nanmean(temp3./length(successRange(1):successRange(2))) nanmean(temp3./length(successRange(1):successRange(2)))],...
-%      [nanmean(temp1./length(successRange(1):successRange(2)))-nanstd(temp1./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp1))) nanmean(temp1./length(successRange(1):successRange(2)))+nanstd(temp1./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp1)))],'Color','b');
+line([nanmean(temp3./length(successRange(1):successRange(2)))-nanstd(temp3./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp3))) nanmean(temp3./length(successRange(1):successRange(2)))+nanstd(temp3./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp3)))],...
+     [nanmean(temp1./length(successRange(1):successRange(2))) nanmean(temp1./length(successRange(1):successRange(2)))],'Color','k');
+line([nanmean(temp3./length(successRange(1):successRange(2))) nanmean(temp3./length(successRange(1):successRange(2)))],...
+     [nanmean(temp1./length(successRange(1):successRange(2)))-nanstd(temp1./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp1))) nanmean(temp1./length(successRange(1):successRange(2)))+nanstd(temp1./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp1)))],'Color','k');
 figure(); s=scatter(temp4./length(failureRange(1):failureRange(2)),temp2./length(failureRange(1):failureRange(2)),60,'filled','MarkerFaceColor','r','MarkerFaceAlpha',0.4); hold on;
 line([-5 5],[-5 5]); line([5 -5],[-5 5]);
-% line([nanmean(temp4./length(successRange(1):successRange(2)))-nanstd(temp4./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp4))) nanmean(temp4./length(successRange(1):successRange(2)))+nanstd(temp4./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp4)))],...
-%      [nanmean(temp2./length(successRange(1):successRange(2))) nanmean(temp2./length(successRange(1):successRange(2)))],'Color','b');
-% line([nanmean(temp4./length(successRange(1):successRange(2))) nanmean(temp4./length(successRange(1):successRange(2)))],...
-%      [nanmean(temp2./length(successRange(1):successRange(2)))-nanstd(temp2./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp2))) nanmean(temp2./length(successRange(1):successRange(2)))+nanstd(temp2./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp2)))],'Color','b');
+line([nanmean(temp4./length(successRange(1):successRange(2)))-nanstd(temp4./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp4))) nanmean(temp4./length(successRange(1):successRange(2)))+nanstd(temp4./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp4)))],...
+     [nanmean(temp2./length(successRange(1):successRange(2))) nanmean(temp2./length(successRange(1):successRange(2)))],'Color','r');
+line([nanmean(temp4./length(successRange(1):successRange(2))) nanmean(temp4./length(successRange(1):successRange(2)))],...
+     [nanmean(temp2./length(successRange(1):successRange(2)))-nanstd(temp2./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp2))) nanmean(temp2./length(successRange(1):successRange(2)))+nanstd(temp2./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp2)))],'Color','r');
 title('SHUFFLE');
 
 % vals_x_axis=temp4; vals_y_axis=temp2;
 %%% [~,trmx]=rmoutliers(vals_x_axis); [~,trmy]=rmoutliers(vals_y_axis);
 %%% vals_x_axis=vals_x_axis(~trmx & ~trmy); vals_y_axis=vals_y_axis(~trmx & ~trmy);
 
-return
-
-pause;
-close all;
-
 % Try all decodes
 currSigns=[1 1 1 1;...
-           1 1 1 -1;...
-           1 1 -1 1;...
-           1 1 -1 -1;...
-           1 -1 1 1;...
-           1 -1 1 -1;...
-           1 -1 -1 1;...
-           1 -1 -1 -1;...
-           -1 1 1 1;...
-           -1 1 1 -1;...
-           -1 1 -1 1;...
-           -1 1 -1 -1;...
-           -1 -1 1 1;...
-           -1 -1 1 -1;...
-           -1 -1 -1 1;...
-           -1 -1 -1 -1];   
+    1 1 1 -1;...
+    1 1 -1 1;...
+    1 1 -1 -1;...
+    1 -1 1 1;...
+    1 -1 1 -1;...
+    1 -1 -1 1;...
+    1 -1 -1 -1;...
+    -1 1 1 1;...
+    -1 1 1 -1;...
+    -1 1 -1 1;...
+    -1 1 -1 -1;...
+    -1 -1 1 1;...
+    -1 -1 1 -1;...
+    -1 -1 -1 1;...
+    -1 -1 -1 -1];
 dps=nan(size(currSigns,1),2);
-for i=1:size(currSigns,1)
-    [dp_x,dp_y]=tryOtherDecodes(idx2_fr_success_cue,idx1_fr_success_cue,idx2_fr_success_uncue,idx1_fr_success_uncue,idx2_fr_failure_cue,idx1_fr_failure_cue,idx2_fr_failure_uncue,idx1_fr_failure_uncue,currSigns(i,:),successRange,failureRange);
-    dps(i,1)=dp_x; dps(i,2)=dp_y;
+if useFirstMapping==true
+    close all;
+    
+    for i=1:size(currSigns,1)
+        [dp_x,dp_y]=tryOtherDecodes(idx2_fr_success_cue,idx1_fr_success_cue,idx2_fr_success_uncue,idx1_fr_success_uncue,idx2_fr_failure_cue,idx1_fr_failure_cue,idx2_fr_failure_uncue,idx1_fr_failure_uncue,currSigns(i,:),successRange,failureRange);
+        dps(i,1)=dp_x; dps(i,2)=dp_y;
+    end
+    figure();
+    imagesc([-1 -1; dps; 1 1]); % just for colorbar range
 end
-figure();
-imagesc([-1 -1; dps; 1 1]); % just for colorbar range
 
 % save
 save('C:\Users\sabatini\Documents\trialbytrial classification\idx2_fr_success_cue.mat','idx2_fr_success_cue','idx2_fr_success_cueSHUFFLE');
