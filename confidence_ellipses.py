@@ -7,11 +7,11 @@ import matplotlib.transforms as transforms
 def confidence_ellipses():
     print("Plotting confidence ellipses")
 
-    currcolor='red'
+    currcolor='black'
     
     # Read in .mat data
-    vals_x_axis = scipy.io.loadmat(r'C:\Users\sabatini\Documents\confidence ellipse\vals_x_axis.mat')
-    vals_y_axis = scipy.io.loadmat(r'C:\Users\sabatini\Documents\confidence ellipse\vals_y_axis.mat')
+    vals_x_axis = scipy.io.loadmat(r'C:\Users\sabatini\Documents\confidence ellipse\vals_x_axis1.mat')
+    vals_y_axis = scipy.io.loadmat(r'C:\Users\sabatini\Documents\confidence ellipse\vals_y_axis1.mat')
 
     # Discard if nan in vals_x_axis or vals_y_axis
     vals_x_axis = vals_x_axis['vals_x_axis']
@@ -26,13 +26,143 @@ def confidence_ellipses():
     ax = plt.gca()
     plt.xlabel('vals_x_axis')
     plt.ylabel('vals_y_axis')
-    
-    #confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=2.0, edgecolor=currcolor)
+
+    # Plot confidence ellipses
+    # Note that changed std to standard error
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=10, facecolor=currcolor, zorder=0, alpha=0.05)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=3, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=2.5, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=2, facecolor=currcolor, zorder=0, alpha=0.1)
     confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=1.5, facecolor=currcolor, zorder=0, alpha=0.1)
     confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=1, facecolor=currcolor, zorder=0, alpha=0.1)
     confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=0.5, facecolor=currcolor, zorder=0, alpha=0.1)
     confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=0.25, facecolor=currcolor, zorder=0, alpha=0.1)
-    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=0.1, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=0.125, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=0.06, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=0.03, facecolor=currcolor, zorder=0, alpha=0.1)
+
+    
+
+
+
+
+
+
+
+
+    currcolor='red'
+    
+    # Read in .mat data
+    vals_x_axis = scipy.io.loadmat(r'C:\Users\sabatini\Documents\confidence ellipse\vals_x_axis2.mat')
+    vals_y_axis = scipy.io.loadmat(r'C:\Users\sabatini\Documents\confidence ellipse\vals_y_axis2.mat')
+
+    # Discard if nan in vals_x_axis or vals_y_axis
+    vals_x_axis = vals_x_axis['vals_x_axis']
+    vals_y_axis = vals_y_axis['vals_y_axis']
+    tokeep = ~np.isnan(vals_x_axis) & ~np.isnan(vals_y_axis)
+    vals_x_axis = vals_x_axis[tokeep]
+    vals_y_axis = vals_y_axis[tokeep]
+
+    # Plot scatter plot of vals_x_axis versus vals_y_axis
+    plt.scatter(vals_x_axis, vals_y_axis, s=10, c=currcolor, alpha=0.2)
+    # Get axes of scatter plot
+    ax = plt.gca()
+    plt.xlabel('vals_x_axis')
+    plt.ylabel('vals_y_axis')
+
+    # Plot confidence ellipses
+    # Note that changed std to standard error
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=10, facecolor=currcolor, zorder=0, alpha=0.05)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=3, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=2.5, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=2, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=1.5, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=1, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=0.5, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=0.25, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=0.125, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=0.06, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=0.03, facecolor=currcolor, zorder=0, alpha=0.1)
+
+
+
+
+
+
+    currcolor='blue'
+    
+    # Read in .mat data
+    vals_x_axis = scipy.io.loadmat(r'C:\Users\sabatini\Documents\confidence ellipse\vals_x_axis3.mat')
+    vals_y_axis = scipy.io.loadmat(r'C:\Users\sabatini\Documents\confidence ellipse\vals_y_axis3.mat')
+
+    # Discard if nan in vals_x_axis or vals_y_axis
+    vals_x_axis = vals_x_axis['vals_x_axis']
+    vals_y_axis = vals_y_axis['vals_y_axis']
+    tokeep = ~np.isnan(vals_x_axis) & ~np.isnan(vals_y_axis)
+    vals_x_axis = vals_x_axis[tokeep]
+    vals_y_axis = vals_y_axis[tokeep]
+
+    # Plot scatter plot of vals_x_axis versus vals_y_axis
+    plt.scatter(vals_x_axis, vals_y_axis, s=10, c=currcolor, alpha=0.2)
+    # Get axes of scatter plot
+    ax = plt.gca()
+    plt.xlabel('vals_x_axis')
+    plt.ylabel('vals_y_axis')
+
+    # Plot confidence ellipses
+    # Note that changed std to standard error
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=10, facecolor=currcolor, zorder=0, alpha=0.05)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=3, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=2.5, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=2, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=1.5, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=1, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=0.5, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=0.25, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=0.125, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=0.06, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=0.03, facecolor=currcolor, zorder=0, alpha=0.1)
+
+
+
+
+
+
+    currcolor='green'
+    
+    # Read in .mat data
+    vals_x_axis = scipy.io.loadmat(r'C:\Users\sabatini\Documents\confidence ellipse\vals_x_axis4.mat')
+    vals_y_axis = scipy.io.loadmat(r'C:\Users\sabatini\Documents\confidence ellipse\vals_y_axis4.mat')
+
+    # Discard if nan in vals_x_axis or vals_y_axis
+    vals_x_axis = vals_x_axis['vals_x_axis']
+    vals_y_axis = vals_y_axis['vals_y_axis']
+    tokeep = ~np.isnan(vals_x_axis) & ~np.isnan(vals_y_axis)
+    vals_x_axis = vals_x_axis[tokeep]
+    vals_y_axis = vals_y_axis[tokeep]
+
+    # Plot scatter plot of vals_x_axis versus vals_y_axis
+    plt.scatter(vals_x_axis, vals_y_axis, s=10, c=currcolor, alpha=0.2)
+    # Get axes of scatter plot
+    ax = plt.gca()
+    plt.xlabel('vals_x_axis')
+    plt.ylabel('vals_y_axis')
+
+    # Plot confidence ellipses
+    # Note that changed std to standard error
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=10, facecolor=currcolor, zorder=0, alpha=0.05)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=3, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=2.5, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=2, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=1.5, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=1, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=0.5, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=0.25, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=0.125, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=0.06, facecolor=currcolor, zorder=0, alpha=0.1)
+    confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=0.03, facecolor=currcolor, zorder=0, alpha=0.1)
+
+
 
     # Show plot
     plt.show()
@@ -76,11 +206,12 @@ def confidence_ellipse(x, y, ax, n_std=3.0, facecolor='none', **kwargs):
     # Calculating the standard deviation of x from
     # the squareroot of the variance and multiplying
     # with the given number of standard deviations.
-    scale_x = np.sqrt(cov[0, 0]) * n_std
+    #scale_x = np.sqrt(cov[0, 0]) * n_std
+    scale_x = np.sqrt(cov[0, 0]) * (n_std / np.sqrt(x.size))
     mean_x = np.mean(x)
 
     # calculating the standard deviation of y ...
-    scale_y = np.sqrt(cov[1, 1]) * n_std
+    scale_y = np.sqrt(cov[1, 1]) * (n_std / np.sqrt(y.size))
     mean_y = np.mean(y)
 
     transf = transforms.Affine2D() \
