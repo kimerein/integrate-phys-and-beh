@@ -141,7 +141,7 @@ for i=1:size(data_loc_array,1)
     fromwhichsess_reaches(reach_sess_counter:reach_sess_counter+length(reaches)-1)=ones(size(reaches))*i;
     reach_sess_counter=reach_sess_counter+length(reaches);
     % get duration of chewing
-    chewendtimes=getChewEnd(beh2_tbt,whichReach,[0+cueOffset 3],[0 5]);
+    chewendtimes=getChewEnd(beh2_tbt,whichReach,behTriggerTimeWindow,behReadoutTimeWindow);
     chewendings(chewendings_counter:chewendings_counter+length(chewendtimes)-1)=chewendtimes;
     chewendings_counter=chewendings_counter+length(chewendtimes);
     fromwhichsess_chews(chew_sess_counter:chew_sess_counter+length(chewendtimes)-1)=ones(size(chewendtimes))*i;
