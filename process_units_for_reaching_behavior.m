@@ -800,7 +800,7 @@ clear r
 % load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\TCA\idx_groupLabelsFromTCA.mat'); temp=idx; idx(temp==2)=1; idx(temp==1)=2; % labels flipped for this TCA
 load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\tensor regression\rank 2\idx.mat'); 
 
-usingGLMidx=false;
+usingGLMidx=true;
 if usingGLMidx==true
 
     % CONSIDER THROWING OUT CUED TRIALS WHERE REACH SEEMS

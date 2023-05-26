@@ -733,6 +733,15 @@ else
     else
         load([loadIn '\failureRange.mat']);
     end
+    load([loadIn '\idx1_sess_failure_cue.mat']);
+    load([loadIn '\idx1_sess_failure_uncue.mat']);
+    load([loadIn '\idx1_sess_success_cue.mat']);
+    load([loadIn '\idx1_sess_success_uncue.mat']);
+
+    load([loadIn '\idx2_sess_failure_cue.mat']);
+    load([loadIn '\idx2_sess_failure_uncue.mat']);
+    load([loadIn '\idx2_sess_success_cue.mat']);
+    load([loadIn '\idx2_sess_success_uncue.mat']);
 end
 
 % Squish to session
@@ -783,8 +792,6 @@ idx1_fr_failure_uncueSHUFFLE=idx1_fr_failure_uncueSHUFFLE(enough_failureSHUFFLE)
 idx2_fr_failure_uncueSHUFFLE=idx2_fr_failure_uncueSHUFFLE(enough_failureSHUFFLE);
 
 % Y AXIS
-% Decode "cued vs uncued" if passed in, e.g., cued_failure and
-% uncued_failure
 if useFirstMapping==true
     [n,x]=histcounts((idx2_fr_success_cue-idx1_fr_success_cue)-(idx2_fr_success_uncue-idx1_fr_success_uncue),-2000-40:80:2000+40);
     [n,x]=cityscape_hist(n,x); figure(); plot(x,n./nansum(n),'Color','k');
@@ -798,7 +805,6 @@ else
 end
 
 % X AXIS
-% Decode "success vs failure"
 if useFirstMapping==true
     [n,x]=histcounts((idx2_fr_success_cue+idx2_fr_success_uncue)-(idx1_fr_success_cue+idx1_fr_success_uncue),-2000-40:80:2000+40);
     [n,x]=cityscape_hist(n,x); figure(); plot(x,n./nansum(n),'Color','k');
@@ -842,7 +848,7 @@ line([nanmean(temp3./length(successRange(1):successRange(2)))-nanstd(temp3./leng
 line([nanmean(temp3./length(successRange(1):successRange(2))) nanmean(temp3./length(successRange(1):successRange(2)))],...
      [nanmean(temp1./length(successRange(1):successRange(2)))-nanstd(temp1./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp1))) nanmean(temp1./length(successRange(1):successRange(2)))+nanstd(temp1./length(successRange(1):successRange(2)),[],1)./sqrt(nansum(~isnan(temp1)))],'Color','k');
 
-figure(); s=scatter(temp4./length(failureRange(1):failureRange(2)),temp2./length(failureRange(1):failureRange(2)),60,'filled','MarkerFaceColor','r','MarkerFaceAlpha',0.4); hold on;
+s=scatter(temp4./length(failureRange(1):failureRange(2)),temp2./length(failureRange(1):failureRange(2)),60,'filled','MarkerFaceColor','r','MarkerFaceAlpha',0.4); hold on;
 line([-5 5],[-5 5]); line([5 -5],[-5 5]);
 vals_x_axis=temp4./length(failureRange(1):failureRange(2)); vals_y_axis=temp2./length(failureRange(1):failureRange(2));
 % [~,trmx]=rmoutliers(vals_x_axis,"ThresholdFactor",3); [~,trmy]=rmoutliers(vals_y_axis,"ThresholdFactor",2);
@@ -957,7 +963,7 @@ idx2_fr_success_cueSHUFFLE=nan(length(uniqueTrialIDs),1);
 idx1_fr_success_uncueSHUFFLE=nan(length(uniqueTrialIDs),1);
 idx2_fr_success_uncueSHUFFLE=nan(length(uniqueTrialIDs),1);
 
-for i=1:length(usess)
+for i=1:length(uniqueTrialIDs)
     idx1_fr_success_cue(i)=nanmean(idx1_fr_success_cueINPUT(ismember(idx1_sess_success_cue,uniqueTrialIDs(i))));
     idx2_fr_success_cue(i)=nanmean(idx2_fr_success_cueINPUT(ismember(idx2_sess_success_cue,uniqueTrialIDs(i))));
     idx1_fr_success_uncue(i)=nanmean(idx1_fr_success_uncueINPUT(ismember(idx1_sess_success_uncue,uniqueTrialIDs(i))));
