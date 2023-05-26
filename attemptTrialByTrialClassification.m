@@ -1,4 +1,4 @@
-function attemptTrialByTrialClassification(dd,success_Response,failure_Response,response_to_plot1,response_to_plot2,timeWindow,loadIn)
+function attemptTrialByTrialClassification(dd,success_Response,failure_Response,response_to_plot1,response_to_plot2,timeWindow,squishToSess,loadIn)
 
 % timeWindow is in seconds wrt peak of aligncomp
 
@@ -153,6 +153,10 @@ if isempty(loadIn)
     idx2_n_success_cueSHUFFLE=nan(length(uniqueTrialIDs),1);
     idx1_n_success_uncueSHUFFLE=nan(length(uniqueTrialIDs),1);
     idx2_n_success_uncueSHUFFLE=nan(length(uniqueTrialIDs),1);
+    idx1_sess_success_cue=nan(length(uniqueTrialIDs),1);
+    idx2_sess_success_cue=nan(length(uniqueTrialIDs),1);
+    idx1_sess_success_uncue=nan(length(uniqueTrialIDs),1);
+    idx2_sess_success_uncue=nan(length(uniqueTrialIDs),1);
     for i=1:length(uniqueTrialIDs)
         idx1_fr_success_cue(i)=nanmean(unitfr_success(ismember(fromWhichUnit_success,isidx1unit_cue) & ismember(fromWhichTrialID_success,uniqueTrialIDs(i))));
         idx2_fr_success_cue(i)=nanmean(unitfr_success(ismember(fromWhichUnit_success,isidx2unit_cue) & ismember(fromWhichTrialID_success,uniqueTrialIDs(i))));
@@ -163,6 +167,11 @@ if isempty(loadIn)
         idx2_n_success_cue(i)=nansum(ismember(fromWhichUnit_success,isidx2unit_cue) & ismember(fromWhichTrialID_success,uniqueTrialIDs(i)));
         idx1_n_success_uncue(i)=nansum(ismember(fromWhichUnit_success,isidx1unit_uncue) & ismember(fromWhichTrialID_success,uniqueTrialIDs(i)));
         idx2_n_success_uncue(i)=nansum(ismember(fromWhichUnit_success,isidx2unit_uncue) & ismember(fromWhichTrialID_success,uniqueTrialIDs(i)));
+
+        idx1_sess_success_cue(i)=nanmean(fromWhichSess_success(ismember(fromWhichUnit_success,isidx1unit_cue) & ismember(fromWhichTrialID_success,uniqueTrialIDs(i))));
+        idx2_sess_success_cue(i)=nanmean(fromWhichSess_success(ismember(fromWhichUnit_success,isidx2unit_cue) & ismember(fromWhichTrialID_success,uniqueTrialIDs(i))));
+        idx1_sess_success_uncue(i)=nanmean(fromWhichSess_success(ismember(fromWhichUnit_success,isidx1unit_uncue) & ismember(fromWhichTrialID_success,uniqueTrialIDs(i))));
+        idx2_sess_success_uncue(i)=nanmean(fromWhichSess_success(ismember(fromWhichUnit_success,isidx2unit_uncue) & ismember(fromWhichTrialID_success,uniqueTrialIDs(i))));
 
         idx1_fr_success_cueSHUFFLE(i)=nanmean(unitfr_success(ismember(fromWhichUnit_success,isidx1unit_cueSHUFFLE) & ismember(fromWhichTrialID_success,uniqueTrialIDs(i))));
         idx2_fr_success_cueSHUFFLE(i)=nanmean(unitfr_success(ismember(fromWhichUnit_success,isidx2unit_cueSHUFFLE) & ismember(fromWhichTrialID_success,uniqueTrialIDs(i))));
@@ -191,6 +200,10 @@ if isempty(loadIn)
     idx2_n_failure_cueSHUFFLE=nan(length(uniqueTrialIDs),1);
     idx1_n_failure_uncueSHUFFLE=nan(length(uniqueTrialIDs),1);
     idx2_n_failure_uncueSHUFFLE=nan(length(uniqueTrialIDs),1);
+    idx1_sess_failure_cue=nan(length(uniqueTrialIDs),1);
+    idx2_sess_failure_cue=nan(length(uniqueTrialIDs),1);
+    idx1_sess_failure_uncue=nan(length(uniqueTrialIDs),1);
+    idx2_sess_failure_uncue=nan(length(uniqueTrialIDs),1);
     for i=1:length(uniqueTrialIDs)
         idx1_fr_failure_cue(i)=nanmean(unitfr_failure(ismember(fromWhichUnit_failure,isidx1unit_cue) & ismember(fromWhichTrialID_failure,uniqueTrialIDs(i))));
         idx2_fr_failure_cue(i)=nanmean(unitfr_failure(ismember(fromWhichUnit_failure,isidx2unit_cue) & ismember(fromWhichTrialID_failure,uniqueTrialIDs(i))));
@@ -201,6 +214,11 @@ if isempty(loadIn)
         idx2_n_failure_cue(i)=nansum(ismember(fromWhichUnit_failure,isidx2unit_cue) & ismember(fromWhichTrialID_failure,uniqueTrialIDs(i)));
         idx1_n_failure_uncue(i)=nansum(ismember(fromWhichUnit_failure,isidx1unit_uncue) & ismember(fromWhichTrialID_failure,uniqueTrialIDs(i)));
         idx2_n_failure_uncue(i)=nansum(ismember(fromWhichUnit_failure,isidx2unit_uncue) & ismember(fromWhichTrialID_failure,uniqueTrialIDs(i)));
+
+        idx1_sess_failure_cue(i)=nanmean(fromWhichSess_failure(ismember(fromWhichUnit_failure,isidx1unit_cue) & ismember(fromWhichTrialID_failure,uniqueTrialIDs(i))));
+        idx2_sess_failure_cue(i)=nanmean(fromWhichSess_failure(ismember(fromWhichUnit_failure,isidx2unit_cue) & ismember(fromWhichTrialID_failure,uniqueTrialIDs(i))));
+        idx1_sess_failure_uncue(i)=nanmean(fromWhichSess_failure(ismember(fromWhichUnit_failure,isidx1unit_uncue) & ismember(fromWhichTrialID_failure,uniqueTrialIDs(i))));
+        idx2_sess_failure_uncue(i)=nanmean(fromWhichSess_failure(ismember(fromWhichUnit_failure,isidx2unit_uncue) & ismember(fromWhichTrialID_failure,uniqueTrialIDs(i))));
 
         idx1_fr_failure_cueSHUFFLE(i)=nanmean(unitfr_failure(ismember(fromWhichUnit_failure,isidx1unit_cueSHUFFLE) & ismember(fromWhichTrialID_failure,uniqueTrialIDs(i))));
         idx2_fr_failure_cueSHUFFLE(i)=nanmean(unitfr_failure(ismember(fromWhichUnit_failure,isidx2unit_cueSHUFFLE) & ismember(fromWhichTrialID_failure,uniqueTrialIDs(i))));
@@ -221,6 +239,16 @@ if isempty(loadIn)
     save('C:\Users\sabatini\Documents\trialbytrial classification\before exclude\idx1_n_success_cue.mat','idx1_n_success_cue','idx1_n_success_cueSHUFFLE');
     save('C:\Users\sabatini\Documents\trialbytrial classification\before exclude\idx2_n_success_uncue.mat','idx2_n_success_uncue','idx2_n_success_uncueSHUFFLE');
     save('C:\Users\sabatini\Documents\trialbytrial classification\before exclude\idx1_n_success_uncue.mat','idx1_n_success_uncue','idx1_n_success_uncueSHUFFLE');
+    
+    save('C:\Users\sabatini\Documents\trialbytrial classification\before exclude\idx1_sess_success_cue.mat','idx1_sess_success_cue');
+    save('C:\Users\sabatini\Documents\trialbytrial classification\before exclude\idx2_sess_success_cue.mat','idx2_sess_success_cue');
+    save('C:\Users\sabatini\Documents\trialbytrial classification\before exclude\idx1_sess_success_uncue.mat','idx1_sess_success_uncue');
+    save('C:\Users\sabatini\Documents\trialbytrial classification\before exclude\idx2_sess_success_uncue.mat','idx2_sess_success_uncue');
+
+    save('C:\Users\sabatini\Documents\trialbytrial classification\before exclude\idx1_sess_failure_cue.mat','idx1_sess_failure_cue');
+    save('C:\Users\sabatini\Documents\trialbytrial classification\before exclude\idx2_sess_failure_cue.mat','idx2_sess_failure_cue');
+    save('C:\Users\sabatini\Documents\trialbytrial classification\before exclude\idx1_sess_failure_uncue.mat','idx1_sess_failure_uncue');
+    save('C:\Users\sabatini\Documents\trialbytrial classification\before exclude\idx2_sess_failure_uncue.mat','idx2_sess_failure_uncue');
 
     save('C:\Users\sabatini\Documents\trialbytrial classification\before exclude\idx2_fr_failure_cue.mat','idx2_fr_failure_cue','idx2_fr_failure_cueSHUFFLE');
     save('C:\Users\sabatini\Documents\trialbytrial classification\before exclude\idx1_fr_failure_cue.mat','idx1_fr_failure_cue','idx1_fr_failure_cueSHUFFLE');
@@ -232,6 +260,7 @@ if isempty(loadIn)
     save('C:\Users\sabatini\Documents\trialbytrial classification\before exclude\idx1_n_failure_uncue.mat','idx1_n_failure_uncue','idx1_n_failure_uncueSHUFFLE');
     save('C:\Users\sabatini\Documents\trialbytrial classification\before exclude\successRange.mat','successRange');
     save('C:\Users\sabatini\Documents\trialbytrial classification\before exclude\failureRange.mat','failureRange');
+
 else
     tes=load([loadIn '\idx1_fr_failure_cue.mat']);
     f=fieldnames(tes); 
@@ -375,6 +404,14 @@ else
     else
         load([loadIn '\failureRange.mat']);
     end
+end
+
+% Squish to session
+if squishToSess==true
+    % average together all trials from same session, keeping unit types separate
+    [idx1_fr_success_cue,idx2_fr_success_cue,idx1_fr_success_uncue,idx2_fr_success_uncue,idx1_fr_success_cueSHUFFLE,idx2_fr_success_cueSHUFFLE,idx1_fr_success_uncueSHUFFLE,idx2_fr_success_uncueSHUFFLE,idx1_n_success_cue,idx2_n_success_cue,idx1_n_success_uncue,idx2_n_success_uncue,idx1_n_success_cueSHUFFLE,idx2_n_success_cueSHUFFLE,idx1_n_success_uncueSHUFFLE,idx2_n_success_uncueSHUFFLE]...
+        =squishToSessions(idx1_sess_success_cue,idx2_sess_success_cue,idx1_sess_success_uncue,idx2_sess_success_uncue,idx1_fr_success_cue,idx2_fr_success_cue,idx1_fr_success_uncue,idx2_fr_success_uncue,idx1_fr_success_cueSHUFFLE,idx2_fr_success_cueSHUFFLE,idx1_fr_success_uncueSHUFFLE,idx2_fr_success_uncueSHUFFLE,...
+            idx1_n_success_cue,idx2_n_success_cue,idx1_n_success_uncue,idx2_n_success_uncue,idx1_n_success_cueSHUFFLE,idx2_n_success_cueSHUFFLE,idx1_n_success_uncueSHUFFLE,idx2_n_success_uncueSHUFFLE);
 end
 
 % Enough units
@@ -547,6 +584,54 @@ save('C:\Users\sabatini\Documents\trialbytrial classification\idx2_fr_failure_un
 save('C:\Users\sabatini\Documents\trialbytrial classification\idx1_fr_failure_uncue.mat','idx1_fr_failure_uncue','idx1_fr_failure_uncueSHUFFLE');
 save('C:\Users\sabatini\Documents\trialbytrial classification\currSigns.mat','currSigns');
 save('C:\Users\sabatini\Documents\trialbytrial classification\dps.mat','dps');
+
+end
+
+function [idx1_fr_success_cue,idx2_fr_success_cue,idx1_fr_success_uncue,idx2_fr_success_uncue,idx1_fr_success_cueSHUFFLE,idx2_fr_success_cueSHUFFLE,idx1_fr_success_uncueSHUFFLE,idx2_fr_success_uncueSHUFFLE,idx1_n_success_cue,idx2_n_success_cue,idx1_n_success_uncue,idx2_n_success_uncue,idx1_n_success_cueSHUFFLE,idx2_n_success_cueSHUFFLE,idx1_n_success_uncueSHUFFLE,idx2_n_success_uncueSHUFFLE]=squishToSessions(idx1_sess_success_cue,idx2_sess_success_cue,idx1_sess_success_uncue,idx2_sess_success_uncue,idx1_fr_success_cueINPUT,idx2_fr_success_cueINPUT,idx1_fr_success_uncueINPUT,idx2_fr_success_uncueINPUT,idx1_fr_success_cueSHUFFLEINPUT,idx2_fr_success_cueSHUFFLEINPUT,idx1_fr_success_uncueSHUFFLEINPUT,idx2_fr_success_uncueSHUFFLEINPUT,...
+    idx1_n_success_cueINPUT,idx2_n_success_cueINPUT,idx1_n_success_uncueINPUT,idx2_n_success_uncueINPUT,idx1_n_success_cueINPUTSHUFFLE,idx2_n_success_cueINPUTSHUFFLE,idx1_n_success_uncueINPUTSHUFFLE,idx2_n_success_uncueINPUTSHUFFLE)
+
+uniqueTrialIDs=unique([idx1_sess_success_cue; idx2_sess_success_cue; idx1_sess_success_uncue; idx2_sess_success_uncue]);
+idx1_fr_success_cue=nan(length(uniqueTrialIDs),1);
+idx2_fr_success_cue=nan(length(uniqueTrialIDs),1);
+idx1_fr_success_uncue=nan(length(uniqueTrialIDs),1);
+idx2_fr_success_uncue=nan(length(uniqueTrialIDs),1);
+
+idx1_n_success_cue=nan(length(uniqueTrialIDs),1);
+idx2_n_success_cue=nan(length(uniqueTrialIDs),1);
+idx1_n_success_uncue=nan(length(uniqueTrialIDs),1);
+idx2_n_success_uncue=nan(length(uniqueTrialIDs),1);
+
+idx1_n_success_cueSHUFFLE=nan(length(uniqueTrialIDs),1);
+idx2_n_success_cueSHUFFLE=nan(length(uniqueTrialIDs),1);
+idx1_n_success_uncueSHUFFLE=nan(length(uniqueTrialIDs),1);
+idx2_n_success_uncueSHUFFLE=nan(length(uniqueTrialIDs),1);
+
+idx1_fr_success_cueSHUFFLE=nan(length(uniqueTrialIDs),1);
+idx2_fr_success_cueSHUFFLE=nan(length(uniqueTrialIDs),1);
+idx1_fr_success_uncueSHUFFLE=nan(length(uniqueTrialIDs),1);
+idx2_fr_success_uncueSHUFFLE=nan(length(uniqueTrialIDs),1);
+
+for i=1:length(usess)
+    idx1_fr_success_cue(i)=nanmean(idx1_fr_success_cueINPUT(ismember(idx1_sess_success_cue,uniqueTrialIDs(i))));
+    idx2_fr_success_cue(i)=nanmean(idx2_fr_success_cueINPUT(ismember(idx2_sess_success_cue,uniqueTrialIDs(i))));
+    idx1_fr_success_uncue(i)=nanmean(idx1_fr_success_uncueINPUT(ismember(idx1_sess_success_uncue,uniqueTrialIDs(i))));
+    idx2_fr_success_uncue(i)=nanmean(idx2_fr_success_uncueINPUT(ismember(idx2_sess_success_uncue,uniqueTrialIDs(i))));
+
+    idx1_n_success_cue(i)=nanmean(idx1_n_success_cueINPUT(ismember(idx1_sess_success_cue,uniqueTrialIDs(i))));
+    idx2_n_success_cue(i)=nanmean(idx2_n_success_cueINPUT(ismember(idx2_sess_success_cue,uniqueTrialIDs(i))));
+    idx1_n_success_uncue(i)=nanmean(idx1_n_success_uncueINPUT(ismember(idx1_sess_success_uncue,uniqueTrialIDs(i))));
+    idx2_n_success_uncue(i)=nanmean(idx2_n_success_uncueINPUT(ismember(idx2_sess_success_uncue,uniqueTrialIDs(i))));
+
+    idx1_fr_success_cueSHUFFLE(i)=nanmean(idx1_fr_success_cueSHUFFLEINPUT(ismember(idx1_sess_success_cue,uniqueTrialIDs(i))));
+    idx2_fr_success_cueSHUFFLE(i)=nanmean(idx2_fr_success_cueSHUFFLEINPUT(ismember(idx2_sess_success_cue,uniqueTrialIDs(i))));
+    idx1_fr_success_uncueSHUFFLE(i)=nanmean(idx1_fr_success_uncueSHUFFLEINPUT(ismember(idx1_sess_success_uncue,uniqueTrialIDs(i))));
+    idx2_fr_success_uncueSHUFFLE(i)=nanmean(idx2_fr_success_uncueSHUFFLEINPUT(ismember(idx2_sess_success_uncue,uniqueTrialIDs(i))));
+
+    idx1_n_success_cueSHUFFLE(i)=nanmean(idx1_n_success_cueINPUTSHUFFLE(ismember(idx1_sess_success_cue,uniqueTrialIDs(i))));
+    idx2_n_success_cueSHUFFLE(i)=nanmean(idx2_n_success_cueINPUTSHUFFLE(ismember(idx2_sess_success_cue,uniqueTrialIDs(i))));
+    idx1_n_success_uncueSHUFFLE(i)=nanmean(idx1_n_success_uncueINPUTSHUFFLE(ismember(idx1_sess_success_uncue,uniqueTrialIDs(i))));
+    idx2_n_success_uncueSHUFFLE(i)=nanmean(idx2_n_success_uncueINPUTSHUFFLE(ismember(idx2_sess_success_uncue,uniqueTrialIDs(i))));
+end
 
 end
 
