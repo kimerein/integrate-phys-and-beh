@@ -122,6 +122,8 @@ if isempty(loadIn)
     cuecoef=r{1}.glmcoef_index21+r{1}.glmcoef_index22+r{1}.glmcoef_index23+r{1}.glmcoef_index24+r{1}.glmcoef_index25+r{1}.glmcoef_index26;
     cuecoef_thresh_above=prctile(cuecoef,70);
     cuecoef_thresh_below=prctile(cuecoef,30);
+%     cuecoef_thresh_above=prctile(cuecoef,50);
+%     cuecoef_thresh_below=prctile(cuecoef,50);
 
     % For each trial, put together units belonging to idx==1 or idx==2
     isidx1unit_cue=units(idx==1 & cuecoef>cuecoef_thresh_above);

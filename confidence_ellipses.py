@@ -85,9 +85,10 @@ def confidence_ellipses():
     confidence_ellipse(vals_x_axis, vals_y_axis, ax, n_std=0.03, facecolor=currcolor, zorder=0, alpha=0.1)
 
 
+    # Show plot
+    plt.show()
 
-
-
+    return
 
     currcolor='blue'
     

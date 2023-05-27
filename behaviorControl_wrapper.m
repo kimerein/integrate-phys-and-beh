@@ -24,7 +24,7 @@ alltog.cueFail_fromwhichsess_chews=cueFail_fromwhichsess_chews;
 
 % Uncued success
 event='success_fromPerchOrWheel';
-timeWindow=[3 16]; % in seconds from cue onset
+timeWindow=[3 7]; % in seconds from cue onset
 [uncueSucc_chewendings,uncueSucc_postoutcome_reaches,uncueSucc_fromwhichsess_reaches,uncueSucc_fromwhichsess_chews]=getChewsAndReachFromAllSess(data_loc_array,maxTrialsPerSess,event,cueOffset,timeWindow,behReadoutTimeWindow);
 alltog.uncueSucc_chewendings=uncueSucc_chewendings;
 alltog.uncueSucc_postoutcome_reaches=uncueSucc_postoutcome_reaches;
@@ -33,7 +33,7 @@ alltog.uncueSucc_fromwhichsess_chews=uncueSucc_fromwhichsess_chews;
 
 % Uncued failure and no reaching afterward
 event='failure_noSuccessBeforeAndNoReachingAfter';
-timeWindow=[3 16]; % in seconds from cue onset
+timeWindow=[3 7]; % in seconds from cue onset
 [uncueFail_chewendings,uncueFail_postoutcome_reaches,uncueFail_fromwhichsess_reaches,uncueFail_fromwhichsess_chews]=getChewsAndReachFromAllSess(data_loc_array,maxTrialsPerSess,event,cueOffset,timeWindow,behReadoutTimeWindow);
 alltog.uncueFail_chewendings=uncueFail_chewendings;
 alltog.uncueFail_postoutcome_reaches=uncueFail_postoutcome_reaches;
@@ -192,7 +192,8 @@ end
 
 function reaches=getConfirmReaches(beh2_tbt,reachType,reachWindow,behWindow)
 
-[fout,dataout,n_events_in_av,alignmentCompanion,f_heatmap,plotBehFieldOut,phys_timepointsCompanion]=plotPhotometryResult(beh2_tbt,beh2_tbt,[],reachType,'all_reachBatch','cueZone_onVoff','first',reachWindow,[]);
+[fout,dataout,n_events_in_av,alignmentCompanion,f_heatmap,plotBehFieldOut,phys_timepointsCompanion]=plotPhotometryResult(beh2_tbt,beh2_tbt,[],reachType,'reachStarts','cueZone_onVoff','first',reachWindow,[]);
+% [fout,dataout,n_events_in_av,alignmentCompanion,f_heatmap,plotBehFieldOut,phys_timepointsCompanion]=plotPhotometryResult(beh2_tbt,beh2_tbt,[],reachType,'all_reachBatch','cueZone_onVoff','first',reachWindow,[]);
 close all;
 if isempty(dataout)
     reaches=[];

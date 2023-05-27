@@ -695,10 +695,10 @@ anyIsSig=any(isSig==1,2);
 %% Set up data matrix
 % Units X conditions (alignments to beh events) X time
 % a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\cue.mat'); cue_Response=a.Response; 
-a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\cued_success_Response.mat'); cued_success_Response=a.cued_success_Response;  
-a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\cued_failure_Response.mat'); cued_failure_Response=a.cued_failure_Response; 
-a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\uncued_success_Response.mat'); uncued_success_Response=a.uncued_success_Response; 
-a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\uncued_failure_Response.mat'); uncued_failure_Response=a.uncued_failure_Response;
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\cued_success_Response.mat'); cued_success_Response=a.cued_success_Response;  
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\cued_failureNotDrop_Response.mat'); cued_failure_Response=a.cued_failureNotDrop_Response; 
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\uncued_success_Response.mat'); uncued_success_Response=a.uncued_success_Response; 
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\uncued_failureNotDrop_Response.mat'); uncued_failure_Response=a.uncued_failureNotDrop_Response;
 % a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\cue_noReach.mat'); cue_noReach_Response=a.Response;
 %a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\uncued_reach.mat'); uncued_reach_Response=a.Response;
 trial_n_cutoff=0;
@@ -709,7 +709,7 @@ cued_success_Response=out.Response2; cued_failure_Response=out.Response3; uncued
 % out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',excludeTooFewTrials(cue_noReach_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false));
 % cue_noReach_Response=out.Response1;  cued_success_Response=out.Response2; cued_failure_Response=out.Response3; uncued_success_Response=out.Response4; uncued_failure_Response=out.Response5;
 D1tag=cued_success_Response.D1tag(cued_success_Response.excluded==0); A2atag=cued_success_Response.A2atag(cued_success_Response.excluded==0); 
-save('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\for_data_matrix_D1vA2a.mat','D1tag','A2atag');
+% save('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\for_data_matrix_D1vA2a.mat','D1tag','A2atag');
 
 % takePointsBeforeZero=5; %15;
 % takePointsAfterZero=70;
