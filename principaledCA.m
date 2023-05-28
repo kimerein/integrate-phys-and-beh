@@ -17,10 +17,15 @@ switch doingHighOrLowRank
 %         tensie(tensie>10)=10;
 %         tensie=noNansOrInfs(tensie);
 %         whichFac=1;
-%         load(['C:\Users\sabatini\Documents\currtens train at least 20 trials\factor_0.mat']); facvec1=factor(:,whichFac);
+%         load(['C:\Users\sabatini\Documents\currtens train at least 20 trials\factor_0.mat']); facvec1=ones(size(factor(:,whichFac)));
 %         load(['C:\Users\sabatini\Documents\currtens train at least 20 trials\factor_1.mat']); facvec2=factor(:,whichFac);
 %         load(['C:\Users\sabatini\Documents\currtens train at least 20 trials\factor_2.mat']); facvec3=factor(:,whichFac);
-%         [T,neuron_loadings]=projectCurrentDataOntoExistingCP_justvecs(facvec1,facvec2,facvec3,tensie);
+%         [T,neuron_loadings_fac1]=projectCurrentDataOntoExistingCP_justvecs(facvec1,facvec2,facvec3,tensie);
+%         whichFac=2;
+%         load(['C:\Users\sabatini\Documents\currtens train at least 20 trials\factor_0.mat']); facvec1=ones(size(factor(:,whichFac)));
+%         load(['C:\Users\sabatini\Documents\currtens train at least 20 trials\factor_1.mat']); facvec2=factor(:,whichFac);
+%         load(['C:\Users\sabatini\Documents\currtens train at least 20 trials\factor_2.mat']); facvec3=factor(:,whichFac);
+%         [T,neuron_loadings_fac2]=projectCurrentDataOntoExistingCP_justvecs(facvec1,facvec2,facvec3,tensie);
 
         data=getTrialTypeDependentResidual(data);
         % Normalize each unit's PSTH, don't min-subtract here bcz assume 0 is 0
@@ -277,6 +282,9 @@ function [T,neuron_loadings]=projectCurrentDataOntoExistingCP_justvecs(fac1_vec1
 % temp=allconditions_cpmodel.U{3}; fac1_vec3=temp(:,whichFactor);
 fac1_ktens=ktensor({fac1_vec1,fac1_vec2,fac1_vec3});
 fac1=outerProduct(outerProduct(fac1_vec1,fac1_vec2),fac1_vec3);
+% B=fac1(1:end);
+% A=test_data_matrix(1:end);
+% projected=(nansum(A.*B)/nansum(B.*B)).*fac1;
 projected=(test_data_matrix.*fac1)./norm(fac1_ktens);
 ptens=tensor(projected);
 T=hosvd(ptens,sqrt(3e-1),'rank',[1 1 1]);
