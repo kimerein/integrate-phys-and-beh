@@ -11,6 +11,17 @@ end
 switch doingHighOrLowRank
     case 'high'
         backupdata=data;
+
+%         smoodata=backupdata;
+%         tensie=smoodata(:,:,2:5);
+%         tensie(tensie>10)=10;
+%         tensie=noNansOrInfs(tensie);
+%         whichFac=1;
+%         load(['C:\Users\sabatini\Documents\currtens train at least 20 trials\factor_0.mat']); facvec1=factor(:,whichFac);
+%         load(['C:\Users\sabatini\Documents\currtens train at least 20 trials\factor_1.mat']); facvec2=factor(:,whichFac);
+%         load(['C:\Users\sabatini\Documents\currtens train at least 20 trials\factor_2.mat']); facvec3=factor(:,whichFac);
+%         [T,neuron_loadings]=projectCurrentDataOntoExistingCP_justvecs(facvec1,facvec2,facvec3,tensie);
+
         data=getTrialTypeDependentResidual(data);
         % Normalize each unit's PSTH, don't min-subtract here bcz assume 0 is 0
         data=normalizeData(data,[2 3],'sd'); % last argument either 'sd', 'max' or 'mean'
@@ -254,6 +265,26 @@ figure(); scatter(mean(us(:,2:3),2),mean(us(:,4:5),2));
 % figure(); imagesc(S(:,1:10));
 % figure(); imagesc(V(1:4,:)');
 % figure(); imagesc(V(:,1:4));
+
+end
+
+function [T,neuron_loadings]=projectCurrentDataOntoExistingCP_justvecs(fac1_vec1,fac1_vec2,fac1_vec3,test_data_matrix)
+
+% load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\CP model\allconditions_cpmodel.mat');
+% load(loc);
+% temp=allconditions_cpmodel.U{1}; fac1_vec1=temp(:,whichFactor);
+% temp=allconditions_cpmodel.U{2}; fac1_vec2=temp(:,whichFactor);
+% temp=allconditions_cpmodel.U{3}; fac1_vec3=temp(:,whichFactor);
+fac1_ktens=ktensor({fac1_vec1,fac1_vec2,fac1_vec3});
+fac1=outerProduct(outerProduct(fac1_vec1,fac1_vec2),fac1_vec3);
+projected=(test_data_matrix.*fac1)./norm(fac1_ktens);
+ptens=tensor(projected);
+T=hosvd(ptens,sqrt(3e-1),'rank',[1 1 1]);
+neuron_loadings=T.U{1}./T.core(1,1,1);
+figure(); bar(T.U{1}./T.core(1,1,1),'r');
+figure(); subplot(1,3,1); plot(fac1_vec1,'Color','k'); hold on; plot(T.U{1}./T.core(1,1,1),'Color','r'); legend({'existing CP','new data'});
+subplot(1,3,2); plot(fac1_vec2,'Color','k'); hold on; plot(T.U{2},'Color','r');
+subplot(1,3,3); plot(fac1_vec3,'Color','k'); hold on; plot(T.U{3},'Color','r');
 
 end
 
