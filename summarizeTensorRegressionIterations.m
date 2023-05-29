@@ -17,14 +17,16 @@ for i=1:length(dd)
     loss(i)=a.results.loss_train_final;
     % factor sums
     for j=1:size(fac0.factor,2)
-        sumByFac(i,j)=sumByFac(i,j)+nansum(abs(fac0.factor(:,j)));
+        sumByFac(i,j)=sumByFac(i,j)+nansum(abs(fac0.factor(:,j)-nanmean(fac0.factor(:,j))));
     end
     for j=1:size(fac1.factor,2)
-        sumByFac(i,j)=sumByFac(i,j)+nansum(abs(fac1.factor(:,j)));
+        sumByFac(i,j)=sumByFac(i,j)+nansum(abs(fac1.factor(:,j)-nanmean(fac1.factor(:,j))));
     end
     for j=1:size(fac2.factor,2)
-        sumByFac(i,j)=sumByFac(i,j)+nansum(abs(fac2.factor(:,j)));
+        sumByFac(i,j)=sumByFac(i,j)+nansum(abs(fac2.factor(:,j)-nanmean(fac2.factor(:,j))));
     end
+    % order factors by sumByFac
+    sumByFac(i,:)=sort(sumByFac(i,:),'descend');
     % mixed loading
     mixedLoading(i)=getMixedLoading(fac0.factor);
 end
@@ -58,6 +60,7 @@ end
 function overall_mixedLoadingPenalty=getMixedLoading(neuron_fac)
 
 pairwiseDiffs=nan(size(neuron_fac,1),size(neuron_fac,2)*size(neuron_fac,2)-size(neuron_fac,2));
+totalFac=nansum(nansum(abs(neuron_fac)));
 for i=1:size(neuron_fac,1) % across neurons
     l=1;
     for j=1:size(neuron_fac,2)
@@ -72,6 +75,6 @@ for i=1:size(neuron_fac,1) % across neurons
     end
 end
 mixedLoadingPenalty=nanmin(abs(pairwiseDiffs),[],2);
-overall_mixedLoadingPenalty=nansum(mixedLoadingPenalty);
+overall_mixedLoadingPenalty=nansum(mixedLoadingPenalty)./totalFac;
 
 end
