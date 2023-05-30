@@ -52,7 +52,9 @@ end
 
 figure();
 scatter(whatRank*ones(size(mixedLoading)),mixedLoading,[],'k');
-hold on;
+% scatter(whatRank*ones(size(mixedLoading(sumByFac(:,end)>=1))),mixedLoading(sumByFac(:,end)>=1),[],'k');
+% hold on;
+% scatter(whatRank*ones(size(mixedLoading(sumByFac(:,end)<1))),mixedLoading(sumByFac(:,end)<1),'filled','k');
 line([whatRank-0.2 whatRank+0.2],[nanmean(mixedLoading) nanmean(mixedLoading)],'Color','k');
 
 end
@@ -60,7 +62,8 @@ end
 function overall_mixedLoadingPenalty=getMixedLoading(neuron_fac)
 
 pairwiseDiffs=nan(size(neuron_fac,1),size(neuron_fac,2)*size(neuron_fac,2)-size(neuron_fac,2));
-totalFac=nansum(nansum(abs(neuron_fac)));
+pairwiseSums=nan(size(neuron_fac,1),size(neuron_fac,2)*size(neuron_fac,2)-size(neuron_fac,2));
+totalFac=nansum(nansum(neuron_fac));
 for i=1:size(neuron_fac,1) % across neurons
     l=1;
     for j=1:size(neuron_fac,2)
@@ -69,12 +72,18 @@ for i=1:size(neuron_fac,1) % across neurons
             if j==k
                 continue
             end
-            pairwiseDiffs(i,l)=neuron_fac(i,j)-neuron_fac(i,k);
+            pairwiseDiffs(i,l)=abs(neuron_fac(i,j))-abs(neuron_fac(i,k));
+            pairwiseSums(i,l)=abs(neuron_fac(i,j))+abs(neuron_fac(i,k));
             l=l+1;
         end
     end
 end
-mixedLoadingPenalty=nanmin(abs(pairwiseDiffs),[],2);
-overall_mixedLoadingPenalty=nansum(mixedLoadingPenalty)./totalFac;
+mixedLoadingPenalty=nansum(abs(pairwiseDiffs),2);
+sumpairs=nansum(abs(pairwiseSums),2);
+mix=nansum(mixedLoadingPenalty);
+if mix<0.1
+    mix=0.1;
+end
+overall_mixedLoadingPenalty=nansum(sumpairs)/mix;
 
 end

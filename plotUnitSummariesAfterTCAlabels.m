@@ -86,6 +86,10 @@ switch doingCued
 %         temp=prctile(cuez(groupLabelsFromTCA==2),[0 6 12 50 88 94 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; temp=sort(unique(temp)); cuezbins{2}=temp; 
         temp=prctile(cuez(groupLabelsFromTCA==1),[0 50 100]); temp(2)=0; temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; temp=sort(unique(temp)); cuezbins{1}=temp;
         temp=prctile(cuez(groupLabelsFromTCA==2),[0 50 100]); temp(2)=0; temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; temp=sort(unique(temp)); cuezbins{2}=temp; 
+
+        cuezbins{1}=[-0.5 0.5 1.5];
+        cuezbins{2}=[-0.5 0.5 1.5];
+
 %         temp=prctile(cuez(groupLabelsFromTCA==2),[0 45 55 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; temp=sort(unique(temp)); cuezbins{2}=temp; 
 %         temp=prctile(cuez(groupLabelsFromTCA==1),[0 17 22 40 60 82 90 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 42th prctile is 0 cuez for grp 1
 %         temp=prctile(cuez(groupLabelsFromTCA==2),[0 17 22 40 60 82 90 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
@@ -167,7 +171,7 @@ switch justAvsOrTuning
         r.response1=outUncuedSucc.response1; r.response2=outUncuedFail.response1; plotOverlayedResponses(r,'g','r'); title('Uncued grp 1');
         r.response1=outUncuedSucc.response2; r.response2=outUncuedFail.response2; plotOverlayedResponses(r,'g','r'); title('Uncued grp 2');
         
-        makeDirectionQuiverPlot(outCuedSucc,outCuedFail,outUncuedSucc,outUncuedFail,'response1',[1 5]);
+        makeDirectionQuiverPlot(outCuedSucc,outCuedFail,outUncuedSucc,outUncuedFail,'response2',[1 5]);
 
     case 'tuning'
         % failure_off={'unit91onCh1_A2atagged','unit97onCh28_A2atagged','unit98onCh31_A2atagged','unit99onCh28_A2atagged','unit147onCh22_A2atagged','unit159onCh27_A2atagged','unit160onCh27_A2atagged','unit162onCh27_A2atagged','unit163onCh27_A2atagged','unit208onCh23_A2atagged','unit208onCh25_A2atagged','unit209onCh21_A2atagged','unit209onCh23_A2atagged','unit215onCh27_A2atagged','unit217onCh27_A2atagged','unit227onCh30_A2atagged','unit233onCh30_A2atagged'};
@@ -198,7 +202,13 @@ switch justAvsOrTuning
 %         [grp1_succ_uncuesig,grp2_succ_uncuesig]=plotByCuez(uncued_success_Response,nonsigcuez,groupLabelsFromTCA,'uncued success',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
 %         [grp1_fail_uncuesig,grp2_fail_uncuesig]=plotByCuez(uncued_failure_Response,nonsigcuez,groupLabelsFromTCA,'uncued failure',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
 
-        plotOutsOverlayed(grp1_succ,grp1_succ_uncue);
+        disp('doing grp1succ vs grp1_succ_uncue');
+        plotOutsOverlayed(grp1_succ,grp1_succ_uncue); pause;
+        disp('doing grp1fail vs grp1_fail_uncue');
+        plotOutsOverlayed(grp1_fail,grp1_fail_uncue); pause;
+        disp('doing grp2succ vs grp2_succ_uncue');
+        plotOutsOverlayed(grp2_succ,grp2_succ_uncue); pause;
+        disp('doing grp2fail vs grp2_fail_uncue');
         plotOutsOverlayed(grp2_fail,grp2_fail_uncue);
 end
 
@@ -207,7 +217,31 @@ end
 function makeDirectionQuiverPlot(outCuedSucc,outCuedFail,outUncuedSucc,outUncuedFail,whichResp,plotWindow)
 
 if ~strcmp(whichResp,'response1')
-    error('not yet implemented response2 plot');
+    [~,mi]=nanmin(abs(outCuedFail.response2.unittimes-plotWindow(1)));
+    plotInds(1)=mi;
+    [~,mi]=nanmin(abs(outCuedFail.response2.unittimes-plotWindow(2)));
+    plotInds(2)=mi;
+    dir1_av=nanmean(outCuedSucc.response2.me(plotInds(1):plotInds(2)));
+    dir1_ubyu=nanmean(outCuedSucc.response2.unitbyunit(:,plotInds(1):plotInds(2)),2);
+    dir2_av=nanmean(outUncuedSucc.response2.me(plotInds(1):plotInds(2)));
+    dir2_ubyu=nanmean(outUncuedSucc.response2.unitbyunit(:,plotInds(1):plotInds(2)),2);
+    dir3_av=nanmean(outCuedFail.response2.me(plotInds(1):plotInds(2)));
+    dir3_ubyu=nanmean(outCuedFail.response2.unitbyunit(:,plotInds(1):plotInds(2)),2);
+    dir4_av=nanmean(outUncuedFail.response2.me(plotInds(1):plotInds(2)));
+    dir4_ubyu=nanmean(outUncuedFail.response2.unitbyunit(:,plotInds(1):plotInds(2)),2);
+
+    figure();
+    quiver(0,0,0,dir1_av,'Color',[0.5 0.5 0.5]); hold on;
+    quiver(0,0,dir2_av,0,'Color',[0.5 0.5 0.5]);
+    quiver(0,0,-dir3_av,0,'Color',[0.5 0.5 0.5]);
+    quiver(0,0,0,-dir4_av,'Color',[0.5 0.5 0.5]);
+    quiver(0,0,[dir2_av-dir3_av],[dir1_av-dir4_av],'Color','k');
+    for i=1:size(dir1_ubyu)
+        scatter([dir2_ubyu(i,:)-dir3_ubyu(i,:)],[dir1_ubyu(i,:)-dir4_ubyu(i,:)],[],'k');
+    end
+    xlabel('Uncued success positive, cued failure negative');
+    ylabel('Cued success positive, uncued failure negative');
+    return
 end
 [~,mi]=nanmin(abs(outCuedFail.response1.unittimes-plotWindow(1)));
 plotInds(1)=mi;

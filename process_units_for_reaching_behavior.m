@@ -695,10 +695,10 @@ anyIsSig=any(isSig==1,2);
 %% Set up data matrix
 % Units X conditions (alignments to beh events) X time
 % a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\cue.mat'); cue_Response=a.Response; 
-a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\discard trials where opto during cue\cued_success_Response.mat'); cued_success_Response=a.cued_success_Response;  
-a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\discard trials where opto during cue\cued_failureNotDrop_Response.mat'); cued_failure_Response=a.cued_failureNotDrop_Response; 
-a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\discard trials where opto during cue\uncued_success_Response.mat'); uncued_success_Response=a.uncued_success_Response; 
-a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\discard trials where opto during cue\uncued_failureNotDrop_Response.mat'); uncued_failure_Response=a.uncued_failureNotDrop_Response;
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\excluded trials where opto during cue\cued_success_Response.mat'); cued_success_Response=a.cued_success_Response;  
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\excluded trials where opto during cue\cued_failureNotDrop_Response.mat'); cued_failure_Response=a.cued_failureNotDrop_Response; 
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\excluded trials where opto during cue\uncued_success_Response.mat'); uncued_success_Response=a.uncued_success_Response; 
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\excluded trials where opto during cue\uncued_failureNotDrop_Response.mat'); uncued_failure_Response=a.uncued_failureNotDrop_Response;
 % a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\cue_noReach.mat'); cue_noReach_Response=a.Response;
 %a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\uncued_reach.mat'); uncued_reach_Response=a.Response;
 
@@ -713,7 +713,7 @@ a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\discard trials w
 % uncued_failure_Response=removeUnitFromResponse(uncued_failure_Response,trmv);
 % uncued_success_Response=removeUnitFromResponse(uncued_success_Response,trmv);
 
-trial_n_cutoff=20;
+trial_n_cutoff=0;
 out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',excludeTooFewTrials(cued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false));
 % out=plotVariousSUResponsesAlignedToBeh('matchUnitsAcrossResponses',excludeTooFewTrials(cue_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(cued_failure_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_success_Response,trial_n_cutoff,false),excludeTooFewTrials(uncued_failure_Response,trial_n_cutoff,false));
 % cue_Response=out.Response1; 
@@ -810,9 +810,11 @@ boot=1; % num iterations for bootstrap
 
 clear r
 % load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\TCA\idx_groupLabelsFromTCA.mat'); temp=idx; idx(temp==2)=1; idx(temp==1)=2; % labels flipped for this TCA
-load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\tensor regression\rank 2\idx.mat'); 
+% load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\tensor regression\rank 2\idx.mat'); 
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\tensor regression\BEST SO FAR\currtens\idx.mat'); 
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\tensor regression\BEST SO FAR\currtens\isHighWeight_train.mat');
 
-usingGLMidx=true;
+usingGLMidx=false;
 if usingGLMidx==true
 
     % CONSIDER THROWING OUT CUED TRIALS WHERE REACH SEEMS
@@ -870,9 +872,9 @@ if usingGLMidx==true
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_failure_Response.mat'); cued_failure_Response.idx=idx; r{2}=cued_failure_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_failure_Response.mat'); uncued_failure_Response.idx=idx; r{3}=uncued_failure_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_success_Response.mat'); uncued_success_Response.idx=idx; r{4}=uncued_success_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_drop_Response.mat'); r{5}=cued_drop_Response;
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_drop_Response.mat'); r{5}=cued_drop_Response;
 %     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\cued_failureNotDrop_Response.mat'); r{6}=cued_failureNotDrop_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_drop_Response.mat'); r{6}=uncued_drop_Response;
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_drop_Response.mat'); r{6}=uncued_drop_Response;
 %     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\uncued_failureNotDrop_Response.mat'); r{8}=uncued_failureNotDrop_Response;
 %     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\cued_reach_Response.mat'); r{9}=cued_reach_Response;
 %     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\uncued_reach_Response.mat'); r{10}=uncued_reach_Response;
@@ -882,8 +884,12 @@ if usingGLMidx==true
 %     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\all_failure_Response.mat'); r{14}=all_failure_Response;
 else
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\unitbyunit_names_to_match_cued_success_Response.mat');
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\only trials where opto during cue\cued_success_Response.mat');
-    cued_success_Response.idx=idx;
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_success_Response.mat');
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\tensor regression\BEST SO FAR\currtens\excludedInCurrent_cued_success_Response.mat');
+    nownotexcl=find(cued_success_Response.excluded==0); wasnotexcl=find(excludedInCurrent_cued_success_Response==0);
+    cued_success_Response.isHighWeight=nan(size(cued_success_Response.ns));
+    cued_success_Response.idx=nan(size(cued_success_Response.ns)); cued_success_Response.idx(ismember(nownotexcl,wasnotexcl))=idx; cued_success_Response.isHighWeight(ismember(nownotexcl,wasnotexcl))=isHighWeight_train';
+    % cued_success_Response.idx=idx;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\py_all_glm_coef_butIndexedIntoMatCoefs.mat');
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\py_metrics_butIndexedIntoMatCoefs.mat');
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\unitnames_glm.mat');
@@ -900,12 +906,12 @@ else
     whichGLMinds=[1:71];
     cued_success_Response=addMetricsToResponse(cued_success_Response,py_metrics,py_all_glm_coef,indexGLMcellsIntoUnitNames,whichGLMinds);
     r{1}=cued_success_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\only trials where opto during cue\cued_failure_Response.mat'); cued_failure_Response.idx=idx; r{2}=cued_failure_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\only trials where opto during cue\uncued_failure_Response.mat'); uncued_failure_Response.idx=idx; r{3}=uncued_failure_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\only trials where opto during cue\uncued_success_Response.mat'); uncued_success_Response.idx=idx; r{4}=uncued_success_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\only trials where opto during cue\cued_drop_Response.mat'); r{5}=cued_drop_Response;
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_failure_Response.mat'); r{2}=cued_failure_Response;
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_failure_Response.mat'); r{3}=uncued_failure_Response;
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_success_Response.mat'); r{4}=uncued_success_Response;
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\only trials where opto during cue\cued_drop_Response.mat'); r{5}=cued_drop_Response;
 %     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\cued_failureNotDrop_Response.mat'); r{6}=cued_failureNotDrop_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\only trials where opto during cue\uncued_drop_Response.mat'); r{6}=uncued_drop_Response;
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\only trials where opto during cue\uncued_drop_Response.mat'); r{6}=uncued_drop_Response;
 %     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\uncued_failureNotDrop_Response.mat'); r{8}=uncued_failureNotDrop_Response;
 %     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\cued_reach_Response.mat'); r{9}=cued_reach_Response;
 %     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\uncued_reach_Response.mat'); r{10}=uncued_reach_Response;
@@ -932,9 +938,9 @@ cued_success_Response=r{1};
 cued_failure_Response=r{2};
 uncued_failure_Response=r{3};
 uncued_success_Response=r{4};
-cued_drop_Response=r{5};
+% cued_drop_Response=r{5};
 % cued_failureNotDrop_Response=r{6};
-uncued_drop_Response=r{6};
+% uncued_drop_Response=r{6};
 % uncued_failureNotDrop_Response=r{8};
 % cued_reach_Response=r{9};
 % uncued_reach_Response=r{10};
@@ -989,8 +995,8 @@ end
 
 % Average firing rates could try excluding all with trial_n_cutoff=5 or 8
 % or 9 or 12 or more (but only for succ-continuing)
-% plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'justAvs','justAvs');
-plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Response,cued_drop_Response,uncued_success_Response,uncued_drop_Response,[],'justAvs','justAvs');
+plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'justAvs','justAvs');
+% plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Response,cued_drop_Response,uncued_success_Response,uncued_drop_Response,[],'justAvs','justAvs');
 % plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Response,cued_failureNotDrop_Response,uncued_success_Response,uncued_failureNotDrop_Response,[],'justAvs','justAvs');
 % plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Response,cued_failure_noReach_Response,uncued_success_Response,uncued_failure_noReach_Response,[],'justAvs','justAvs');
 
@@ -1100,6 +1106,8 @@ plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cued_success_Response.
 plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,(cued_success_Response.glmcoef_index21+cued_success_Response.glmcoef_index22+cued_success_Response.glmcoef_index23+cued_success_Response.glmcoef_index24+cued_success_Response.glmcoef_index25+cued_success_Response.glmcoef_index26),cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning');
 plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,(cued_success_Response.glmcoef_index21+cued_success_Response.glmcoef_index22+cued_success_Response.glmcoef_index23+cued_success_Response.glmcoef_index24+cued_success_Response.glmcoef_index25+cued_success_Response.glmcoef_index26)-...
                                                           (cued_success_Response.glmcoef_index20+cued_success_Response.glmcoef_index19+cued_success_Response.glmcoef_index18+cued_success_Response.glmcoef_index17+cued_success_Response.glmcoef_index16+cued_success_Response.glmcoef_index16),cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning');
+
+plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cued_success_Response.isHighWeight,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning');
 
 % cuez=getCueTunedUnits(uncuedReach_Response,cuedReach_Response,'justcue_v_justuncue','mean',1,[4 12],[-2 0],[4 12],[-2 0]); 
 % plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued');
