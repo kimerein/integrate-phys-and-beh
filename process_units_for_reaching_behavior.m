@@ -909,6 +909,7 @@ else
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_failure_Response.mat'); r{2}=cued_failure_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_failure_Response.mat'); r{3}=uncued_failure_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_success_Response.mat'); r{4}=uncued_success_Response;
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cue_Response.mat'); r{5}=cue_Response;
 %     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\only trials where opto during cue\cued_drop_Response.mat'); r{5}=cued_drop_Response;
 %     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\cued_failureNotDrop_Response.mat'); r{6}=cued_failureNotDrop_Response;
 %     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\only trials where opto during cue\uncued_drop_Response.mat'); r{6}=uncued_drop_Response;
@@ -938,6 +939,7 @@ cued_success_Response=r{1};
 cued_failure_Response=r{2};
 uncued_failure_Response=r{3};
 uncued_success_Response=r{4};
+cue_Response=r{5};
 % cued_drop_Response=r{5};
 % cued_failureNotDrop_Response=r{6};
 % uncued_drop_Response=r{6};
@@ -1014,6 +1016,14 @@ plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Respon
 % figure(); plot(uncued_success_Response.unitbyunit_x(i,:),smoothdata(uncued_success_Response.unitbyunit_y(i,:),'gaussian',10),'Color','g');
 % hold on; plot(uncued_success_Response.aligncomp_x(i,:),uncued_success_Response.aligncomp_y(i,:),'Color','b');
 % disp(['Doing ' names_of_units{i} ' from session ' num2str(sessions_of_units(i))]);
+
+%%%%%%%%%%%% Plot cue response of subpopulation
+% f=find(cued_success_Response.excluded==0); 
+% trmv=cued_success_Response.excluded;
+% trmv(f(~(cued_success_Response.idx==1 & cued_success_Response.isHighWeight==1)))=1;
+% trmv=logical(trmv);
+% subCueResponse=removeUnitFromResponse(cue_Response,trmv);
+% plotVariousSUResponsesAlignedToBeh('meanAcrossUnits',subCueResponse,1);
 
 %% TUNING OF PERSISTENT ACTIVITY
 clear r
