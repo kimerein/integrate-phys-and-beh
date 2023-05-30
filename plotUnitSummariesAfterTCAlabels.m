@@ -304,10 +304,15 @@ time=nanmean(currR.unitbyunit_x,1);
 temp=nanmean(currR.aligncomp_x,1);
 [~,ma]=nanmax(nanmean(currR.aligncomp_y,1));
 timeOfMaxAlignComp=temp(ma);
+[~,mi]=nanmin(abs(time-timeOfMaxAlignComp));
 for i=1:size(currR.unitbyunit_y,1)
     lastNonNan=find(~isnan(currR.unitbyunit_y(i,:)),1,'last');
     lastNonNanTime=time(lastNonNan);
     if lastNonNanTime-timeOfMaxAlignComp<atLeastXBaseline
+        shouldExclude(i)=1;
+    end
+    % if isnan at timeOfMaxAlignComp
+    if isnan(currR.unitbyunit_y(i,mi))
         shouldExclude(i)=1;
     end
 end
@@ -317,10 +322,15 @@ time=nanmean(currR.unitbyunit_x,1);
 temp=nanmean(currR.aligncomp_x,1);
 [~,ma]=nanmax(nanmean(currR.aligncomp_y,1));
 timeOfMaxAlignComp=temp(ma);
+[~,mi]=nanmin(abs(time-timeOfMaxAlignComp));
 for i=1:size(currR.unitbyunit_y,1)
     lastNonNan=find(~isnan(currR.unitbyunit_y(i,:)),1,'last');
     lastNonNanTime=time(lastNonNan);
     if lastNonNanTime-timeOfMaxAlignComp<atLeastXBaseline
+        shouldExclude(i)=1;
+    end
+    % if isnan at timeOfMaxAlignComp
+    if isnan(currR.unitbyunit_y(i,mi))
         shouldExclude(i)=1;
     end
 end
@@ -330,10 +340,15 @@ time=nanmean(currR.unitbyunit_x,1);
 temp=nanmean(currR.aligncomp_x,1);
 [~,ma]=nanmax(nanmean(currR.aligncomp_y,1));
 timeOfMaxAlignComp=temp(ma);
+[~,mi]=nanmin(abs(time-timeOfMaxAlignComp));
 for i=1:size(currR.unitbyunit_y,1)
     lastNonNan=find(~isnan(currR.unitbyunit_y(i,:)),1,'last');
     lastNonNanTime=time(lastNonNan);
     if lastNonNanTime-timeOfMaxAlignComp<atLeastXBaseline
+        shouldExclude(i)=1;
+    end
+    % if isnan at timeOfMaxAlignComp
+    if isnan(currR.unitbyunit_y(i,mi))
         shouldExclude(i)=1;
     end
 end
@@ -422,8 +437,8 @@ function plotOutsOverlayed(out1,out2)
 
 baseSubDiffers=false;
 forvio_timewindow=[2 5];
-smoothbeforediff=true;
-smoothbeforebin=5;
+smoothbeforediff=false;
+smoothbeforebin=50;
 
 if smoothbeforediff==true
     for i=1:length(out1.allunits)
@@ -431,11 +446,17 @@ if smoothbeforediff==true
         data2=out2.allunits{i};
         disp('smoo data1');
         for j=1:size(data1,1)
-            data1(j,:)=smooth(data1(j,:),smoothbeforebin);
+            if mod(j,100)==0
+                disp(['j: ' num2str(j)]);
+            end
+            data1(j,:)=smooth(data1(j,:),smoothbeforebin,'moving');
         end
         disp('smoo data2');
         for j=1:size(data2,1)
-            data2(j,:)=smooth(data2(j,:),smoothbeforebin);
+            if mod(j,100)==0
+                disp(['j: ' num2str(j)]);
+            end
+            data2(j,:)=smooth(data2(j,:),smoothbeforebin,'moving');
         end
         out1.allunits{i}=data1;
         out2.allunits{i}=data2;
