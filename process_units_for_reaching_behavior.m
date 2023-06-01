@@ -813,6 +813,7 @@ clear r
 % load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\tensor regression\rank 2\idx.mat'); 
 load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\tensor regression\BEST SO FAR\currtens\idx.mat'); 
 load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\tensor regression\BEST SO FAR\currtens\isHighWeight_train.mat');
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\tensor regression\BEST SO FAR\currtens\isVeryHighWeight_train.mat');
 
 usingGLMidx=false;
 if usingGLMidx==true
@@ -888,7 +889,12 @@ else
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\tensor regression\BEST SO FAR\currtens\excludedInCurrent_cued_success_Response.mat');
     nownotexcl=find(cued_success_Response.excluded==0); wasnotexcl=find(excludedInCurrent_cued_success_Response==0);
     cued_success_Response.isHighWeight=nan(size(cued_success_Response.ns));
-    cued_success_Response.idx=nan(size(cued_success_Response.ns)); cued_success_Response.idx(ismember(nownotexcl,wasnotexcl))=idx; cued_success_Response.isHighWeight(ismember(nownotexcl,wasnotexcl))=isHighWeight_train';
+    ued_success_Response.isVeryHighWeight=nan(size(cued_success_Response.ns));
+    cued_success_Response.idx=nan(size(cued_success_Response.ns)); 
+    cued_success_Response.idx(ismember(nownotexcl,wasnotexcl))=idx; 
+    cued_success_Response.isHighWeight(ismember(nownotexcl,wasnotexcl))=isHighWeight_train';
+    cued_success_Response.isVeryHighWeight(ismember(nownotexcl,wasnotexcl))=isVeryHighWeight_train;
+    cued_success_Response.isVeryHighWeight=cued_success_Response.isVeryHighWeight';
     % cued_success_Response.idx=idx;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\py_all_glm_coef_butIndexedIntoMatCoefs.mat');
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\py_metrics_butIndexedIntoMatCoefs.mat');
@@ -909,7 +915,7 @@ else
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_failure_Response.mat'); r{2}=cued_failure_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_failure_Response.mat'); r{3}=uncued_failure_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_success_Response.mat'); r{4}=uncued_success_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cue_Response.mat'); r{5}=cue_Response;
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cue_noReach_Response.mat'); cue_Response=cue_noReach_Response; r{5}=cue_Response;
 %     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\only trials where opto during cue\cued_drop_Response.mat'); r{5}=cued_drop_Response;
 %     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\cued_failureNotDrop_Response.mat'); r{6}=cued_failureNotDrop_Response;
 %     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\only trials where opto during cue\uncued_drop_Response.mat'); r{6}=uncued_drop_Response;
@@ -983,9 +989,9 @@ if usingGLMidx==true
     cued_failure_Response=removeUnitFromResponse(cued_failure_Response,trmv);
     uncued_failure_Response=removeUnitFromResponse(uncued_failure_Response,trmv);
     uncued_success_Response=removeUnitFromResponse(uncued_success_Response,trmv);
-    cued_drop_Response=removeUnitFromResponse(cued_drop_Response,trmv);
+%     cued_drop_Response=removeUnitFromResponse(cued_drop_Response,trmv);
 %     cued_failureNotDrop_Response=removeUnitFromResponse(cued_failureNotDrop_Response,trmv);
-    uncued_drop_Response=removeUnitFromResponse(uncued_drop_Response,trmv);
+%     uncued_drop_Response=removeUnitFromResponse(uncued_drop_Response,trmv);
 %     uncued_failureNotDrop_Response=removeUnitFromResponse(uncued_failureNotDrop_Response,trmv);
 %     cued_reach_Response=removeUnitFromResponse(cued_reach_Response,trmv);
 %     uncued_reach_Response=removeUnitFromResponse(uncued_reach_Response,trmv);

@@ -30,7 +30,7 @@ switch justAvsOrTuning
         Zscore=false;
         minmaxnorm=false;
         smoo=1; %6; %smoo=3; %smoo=42;
-        chopOutliers=false;
+        chopOutliers=true;
         smoothBeforeResids=true;
         smooBef=200; %150; %10; %30;
         getResiduals=false; % but need this to get rid of mid-range
@@ -135,7 +135,7 @@ if smoothBeforeResids==true
 end
 
 if chopOutliers==true
-    aboveThisFR=10;
+    aboveThisFR=100;
     [cued_success_Response,~,uncued_success_Response,~]=chopOuts(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,aboveThisFR,groupLabelsFromTCA==1);
     [~,cued_failure_Response,~,uncued_failure_Response]=chopOuts(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,aboveThisFR,groupLabelsFromTCA==2);
 end
@@ -171,7 +171,7 @@ switch justAvsOrTuning
         r.response1=outUncuedSucc.response1; r.response2=outUncuedFail.response1; plotOverlayedResponses(r,'g','r'); title('Uncued grp 1');
         r.response1=outUncuedSucc.response2; r.response2=outUncuedFail.response2; plotOverlayedResponses(r,'g','r'); title('Uncued grp 2');
         
-        makeDirectionQuiverPlot(outCuedSucc,outCuedFail,outUncuedSucc,outUncuedFail,'response2',[1 5]);
+        makeDirectionQuiverPlot(outCuedSucc,outCuedFail,outUncuedSucc,outUncuedFail,'response1',[1 5]);
 
     case 'tuning'
         % failure_off={'unit91onCh1_A2atagged','unit97onCh28_A2atagged','unit98onCh31_A2atagged','unit99onCh28_A2atagged','unit147onCh22_A2atagged','unit159onCh27_A2atagged','unit160onCh27_A2atagged','unit162onCh27_A2atagged','unit163onCh27_A2atagged','unit208onCh23_A2atagged','unit208onCh25_A2atagged','unit209onCh21_A2atagged','unit209onCh23_A2atagged','unit215onCh27_A2atagged','unit217onCh27_A2atagged','unit227onCh30_A2atagged','unit233onCh30_A2atagged'};
@@ -436,7 +436,7 @@ end
 function plotOutsOverlayed(out1,out2)
 
 baseSubDiffers=false;
-forvio_timewindow=[2 5];
+forvio_timewindow=[2 4.5]; %[2 5];
 smoothbeforediff=false;
 smoothbeforebin=50;
 
@@ -495,6 +495,7 @@ for i=1:length(out1.allunits)
 end
 
 figure(); scatter(all_cuez,all_differs);
+disp(['THIS IS SIGNRANK: ' num2str(signrank(all_differs))]);
 
 % temp=differs{1};
 % base=nanmean(temp(:,differstimes{1}>-5 & differstimes{1}<-3),2);
@@ -539,10 +540,12 @@ end
 
 figure();
 violin(forvio(excludeForVio==0),'facecolor',cmap(excludeForVio==0,:),'medc',[],'facealpha',1); %,'bw',0.4);
-[p,tbl,stats]=anova1(alldatas,alldatas_labels);
-results=multcompare(stats);
-results_tbl = array2table(results,"VariableNames", ...
-    ["Group A","Group B","Lower Limit","A-B","Upper Limit","P-value"]);
+try
+    [p,tbl,stats]=anova1(alldatas,alldatas_labels);
+    results=multcompare(stats);
+    results_tbl = array2table(results,"VariableNames", ...
+        ["Group A","Group B","Lower Limit","A-B","Upper Limit","P-value"]);
+end
 
 end
 
@@ -679,28 +682,48 @@ if doGauss==true
 else
     temp=cued_success_Response.unitbyunit_y;
     for i=1:size(temp,1)
-        temp(i,:)=smooth(temp(i,:)',smoo,'moving')';
+        tempie=smooth(temp(i,:)',smoo,'moving')';
+        f=find(~isnan(tempie),1,'last');
+        tempie(f-smoo:end)=nan;
+        f=find(~isnan(tempie),1,'first');
+        tempie(1:f+smoo)=nan;
+        temp(i,:)=tempie;
     end
     cued_success_Response.unitbyunit_y=temp;
     disp('smooth 1 of 4 done');
 
     temp=cued_failure_Response.unitbyunit_y;
     for i=1:size(temp,1)
-        temp(i,:)=smooth(temp(i,:)',smoo,'moving')';
+        tempie=smooth(temp(i,:)',smoo,'moving')';
+        f=find(~isnan(tempie),1,'last');
+        tempie(f-smoo:end)=nan;
+        f=find(~isnan(tempie),1,'first');
+        tempie(1:f+smoo)=nan;
+        temp(i,:)=tempie;
     end
     cued_failure_Response.unitbyunit_y=temp;
     disp('smooth 2 of 4 done');
 
     temp=uncued_success_Response.unitbyunit_y;
     for i=1:size(temp,1)
-        temp(i,:)=smooth(temp(i,:)',smoo,'moving')';
+        tempie=smooth(temp(i,:)',smoo,'moving')';
+        f=find(~isnan(tempie),1,'last');
+        tempie(f-smoo:end)=nan;
+        f=find(~isnan(tempie),1,'first');
+        tempie(1:f+smoo)=nan;
+        temp(i,:)=tempie;
     end
     uncued_success_Response.unitbyunit_y=temp;
     disp('smooth 3 of 4 done');
 
     temp=uncued_failure_Response.unitbyunit_y;
     for i=1:size(temp,1)
-        temp(i,:)=smooth(temp(i,:)',smoo,'moving')';
+        tempie=smooth(temp(i,:)',smoo,'moving')';
+        f=find(~isnan(tempie),1,'last');
+        tempie(f-smoo:end)=nan;
+        f=find(~isnan(tempie),1,'first');
+        tempie(1:f+smoo)=nan;
+        temp(i,:)=tempie;
     end
     uncued_failure_Response.unitbyunit_y=temp;
     disp('smooth 4 of 4 done');
