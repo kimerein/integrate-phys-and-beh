@@ -87,8 +87,8 @@ switch doingCued
         temp=prctile(cuez(groupLabelsFromTCA==1),[0 50 100]); temp(2)=0; temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; temp=sort(unique(temp)); cuezbins{1}=temp;
         temp=prctile(cuez(groupLabelsFromTCA==2),[0 50 100]); temp(2)=0; temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; temp=sort(unique(temp)); cuezbins{2}=temp; 
 
-        cuezbins{1}=[-0.5 0.5 1.5];
-        cuezbins{2}=[-0.5 0.5 1.5];
+%         cuezbins{1}=[-0.5 0.5 1.5];
+%         cuezbins{2}=[-0.5 0.5 1.5];
 
 %         temp=prctile(cuez(groupLabelsFromTCA==2),[0 45 55 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; temp=sort(unique(temp)); cuezbins{2}=temp; 
 %         temp=prctile(cuez(groupLabelsFromTCA==1),[0 17 22 40 60 82 90 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 42th prctile is 0 cuez for grp 1
@@ -468,6 +468,7 @@ differs=cell(1,length(out1.allunits));
 differstimes=cell(1,length(out1.allunits));
 all_differs=[];
 all_cuez=[];
+whichgp=[];
 for i=1:length(out1.allunits)
 %     figure();
     data1=out1.allunits{i};
@@ -482,6 +483,7 @@ for i=1:length(out1.allunits)
     t1=out1.time{i}; 
     all_differs=[all_differs; nanmean(temp(:,t1(1:si)>=forvio_timewindow(1) & t1(1:si)<forvio_timewindow(2)),2)];
     all_cuez=[all_cuez; out1.cuez{i}];
+    whichgp=[whichgp; ones(size(out1.cuez{i})).*i];
     if baseSubDiffers==true
         temp=differs{i};
 %         base=nanmean(nanmean(temp(:,out1.time{i}>-5 & out1.time{i}<-3),2),1);
@@ -496,6 +498,11 @@ end
 
 figure(); scatter(all_cuez,all_differs);
 disp(['THIS IS SIGNRANK: ' num2str(signrank(all_differs))]);
+try
+    disp(['THIS IS SIGNRANK set 1: ' num2str(signrank(all_differs(whichgp==1)))]);
+    disp(['THIS IS SIGNRANK set 2: ' num2str(signrank(all_differs(whichgp==2)))]);
+catch
+end
 
 % temp=differs{1};
 % base=nanmean(temp(:,differstimes{1}>-5 & differstimes{1}<-3),2);

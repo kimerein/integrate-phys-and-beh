@@ -33,7 +33,7 @@ switch onlyLED
         end
         noReachesBeforeTime=0; % wrt cue, to be sure have enough frames around reach
         noReachesAfterTime=1; % wrt cue, to be sure have enough frames around reach
-    case'all'
+    case 'all'
         % do nothing
     otherwise 
         error('Do not recognize onlyLED parameter value');

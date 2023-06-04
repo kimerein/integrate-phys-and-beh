@@ -1,6 +1,13 @@
 function [X,Y,Z]=plotReachTrajectories(X,Y,Z,X_from_under,reachTrajTimes,smoobin,fps)
 
 % NEED TO FIGURE OUT SCALE_Y!
+% Explanation
+% X and Z are from the side mirror
+% Y is exclusively from the under mirror
+% X_from_under should match well with X but is from the under mirror
+% scaleY brings the scale of the under mirror distances into alignment with
+% the scale of the side mirror distances
+% Y is the side to side movement of paw
 
 Xdelta_thresh=0;
 Zdelta_thresh=0; %25;
@@ -8,10 +15,10 @@ Z_diff_thresh=0.5;
 nindsAboveForZ=10;
 realToInd=floor(2./(1/fps));
 atleastthismany_notnan_points=200;
-scaleY=0.25;
-startsinrange_X=[0 110]; %[90 110];
-startsinrange_Y=[0 680]; %[200 450];
-startsinrange_Z=[160 1000]; %[200 350];
+scaleY=1;
+startsinrange_X=[]; %[0 110]; %[90 110];
+startsinrange_Y=[]; %[0 680]; %[200 450];
+startsinrange_Z=[]; %[160 1000]; %[200 350];
 startTime=2; % in seconds
 
 % Good settings for Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20190605\March_C
@@ -48,6 +55,9 @@ X=X(~isnan(Z_deviates),:);
 Y=Y(~isnan(Z_deviates),:);
 Z=Z(~isnan(Z_deviates),:);
 X_from_under=X_from_under(~isnan(Z_deviates),:);
+
+figure(); plot(nanmean(X,1)-nanmean(nanmean(X,1)),'Color','k'); hold on; plot(nanmean(X_from_under,1)-nanmean(nanmean(X_from_under,1)),'Color','b');
+title('X is black, X from under is blue');
 
 % Take only reaches that start in zone defined by "startsinrange"
 if ~isempty(startsinrange_X)
