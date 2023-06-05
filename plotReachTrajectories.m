@@ -1,7 +1,6 @@
 function [X,Y,Z]=plotReachTrajectories(X,Y,Z,X_from_under,reachTrajTimes,smoobin,fps)
 
-% NEED TO FIGURE OUT SCALE_Y!
-% Explanation
+% Explanation of scaleY
 % X and Z are from the side mirror
 % Y is exclusively from the under mirror
 % X_from_under should match well with X but is from the under mirror
