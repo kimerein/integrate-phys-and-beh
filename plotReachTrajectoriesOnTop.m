@@ -7,13 +7,13 @@ ds=5;
 startAtSamePoint=true;
 
 if startAtSamePoint==true
-    noLEDx=noLEDx-repmat(nanmean(noLEDx(:,1),1),size(noLEDx,1),size(noLEDx,2));
-    noLEDy=noLEDy-repmat(nanmean(noLEDy(:,1),1),size(noLEDy,1),size(noLEDy,2));
-    noLEDz=noLEDz-repmat(nanmean(noLEDz(:,1),1),size(noLEDz,1),size(noLEDz,2));
+    noLEDx=noLEDx-repmat(nanmean(nanmean(noLEDx(:,1:500),2),1),size(noLEDx,1),size(noLEDx,2));
+    noLEDy=noLEDy-repmat(nanmean(nanmean(noLEDy(:,1:500),2),1),size(noLEDy,1),size(noLEDy,2));
+    noLEDz=noLEDz-repmat(nanmean(nanmean(noLEDz(:,1:500),2),1),size(noLEDz,1),size(noLEDz,2));
 
-    LEDx=LEDx-repmat(nanmean(LEDx(:,1),1),size(LEDx,1),size(LEDx,2));
-    LEDy=LEDy-repmat(nanmean(LEDy(:,1),1),size(LEDy,1),size(LEDy,2));
-    LEDz=LEDz-repmat(nanmean(LEDz(:,1),1),size(LEDz,1),size(LEDz,2));
+    LEDx=LEDx-repmat(nanmean(nanmean(LEDx(:,1:500),2),1),size(LEDx,1),size(LEDx,2));
+    LEDy=LEDy-repmat(nanmean(nanmean(LEDy(:,1:500),2),1),size(LEDy,1),size(LEDy,2));
+    LEDz=LEDz-repmat(nanmean(nanmean(LEDz(:,1:500),2),1),size(LEDz,1),size(LEDz,2));
 end
 
 if flipZ==true
