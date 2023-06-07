@@ -17,8 +17,9 @@ atleastthismany_notnan_points=200;
 scaleY=1;
 startsinrange_X=[]; %[0 110]; %[90 110];
 startsinrange_Y=[]; %[0 680]; %[200 450];
-startsinrange_Z=[]; %[160 1000]; %[200 350];
+startsinrange_Z=[]; %[160 300]; %1000]; %[200 350];
 startTime=2; % in seconds
+flipZ=true;
 
 % Good settings for Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20190605\March_C
 % Xdelta_thresh=0;
@@ -49,7 +50,12 @@ if ~isempty(smoobin)
     end
 end
 
+% [X,Y,Z,X_from_under,Z_deviates]=realignToReachStarts(X,Y,Z,X_from_under,Z_diff_thresh,nindsAboveForZ,realToInd);
+% USE X, i.e., FORWARD / BACKWARD, AS CRITERION INSTEAD OF UP / DOWN
+backupX=X; backupZ=Z; Z=-backupX; X=backupZ;
 [X,Y,Z,X_from_under,Z_deviates]=realignToReachStarts(X,Y,Z,X_from_under,Z_diff_thresh,nindsAboveForZ,realToInd);
+temp=X; X=-Z; Z=temp;
+
 X=X(~isnan(Z_deviates),:);
 Y=Y(~isnan(Z_deviates),:);
 Z=Z(~isnan(Z_deviates),:);
@@ -64,6 +70,7 @@ if ~isempty(startsinrange_X)
     startsatperch_X=any(X(:,1:startInds)>startsinrange_X(1),2) & any(X(:,1:startInds)<startsinrange_X(2),2);
     startsatperch_Y=any(Y(:,1:startInds)>startsinrange_Y(1),2) & any(Y(:,1:startInds)<startsinrange_Y(2),2);
     startsatperch_Z=any(Z(:,1:startInds)>startsinrange_Z(1),2) & any(Z(:,1:startInds)<startsinrange_Z(2),2);
+%     startsatperch_Z(any(Z>400,2))=0;
     startsatperch=startsatperch_X & startsatperch_Y & startsatperch_Z;
     X=X(startsatperch,:);
     Y=Y(startsatperch,:);
@@ -104,6 +111,11 @@ figure(); plot(reachTrajTimes,X'); title('X');
 figure(); plot(reachTrajTimes,Y'); title('Y');
 figure(); plot(reachTrajTimes,Z'); title('Z');
 
+if flipZ==true
+    backupZ=Z;
+    Z=-Z;
+end
+
 figure(); 
 colorsUpTo=size(X,2);
 cmap=colormap(cool(colorsUpTo));
@@ -115,6 +127,9 @@ for i=1:size(X,1)
     scatter3(X(i,:),Y(i,:).*scaleY,Z(i,:),30,cmap); hold on;
 end
 xlabel('X'); ylabel('Y'); zlabel('Z');
+% view(-116.4279,56.0009);
+view(-162.2125,9.8783);
+% view(-330.8644,17.7600);
 
 figure();
 scatter3(nanmean(X,1),nanmean(Y,1).*scaleY,nanmean(Z,1),30,cmap);
@@ -123,6 +138,13 @@ scatter3(nanmean(X,1),nanmean(Y,1).*scaleY,nanmean(Z,1),30,cmap);
 % plot3(nanmean(X(:,1:50),1),nanmean(Y(:,1:50),1),nanmean(Z(:,1:50),1),'Color','b');
 xlabel('X'); ylabel('Y'); zlabel('Z');
 title('Average');
+% view(-116.4279,56.0009);
+view(-162.2125,9.8783);
+% view(-330.8644,17.7600);
+
+if flipZ==true
+    Z=backupZ;
+end
 
 % load('Z:\MICROSCOPE\Kim\Final Figs\Fig1\reach trajectories\March_C\all_noOpto_reachTrajectories.mat')
 % [Xout,Yout,Zout]=plotReachTrajectories(all_X,all_Y,all_Z,all_X_from_under,reachTrajTimes,100,256);

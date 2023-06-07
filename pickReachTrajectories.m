@@ -102,6 +102,7 @@ for i=1:size(reaches,1)
         end
         % for each reach, each trial
         [vid,frame]=getVidAndFrame_fromTimeAfterCue(reachtimes(i,f(j))-avcuetime,highspeed_tbt,i);
+        %vid=vid+226;
         [X,Y,Z,X_from_under]=getPawTrajectory(DLCoutput_location,vidName,vid,frame,framesBefore,framesAfter);
         if ~isempty(X)
             allX(reachcounter,:)=X;

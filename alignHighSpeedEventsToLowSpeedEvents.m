@@ -166,9 +166,9 @@ highspeed_tbt=fleshOutDuration(highspeed_tbt,'cue',floor(cue_duration./ds_timest
 highspeed_tbt=fleshOutDuration(highspeed_tbt,'distractor',floor(distractor_duration./ds_timestep));
 
 %%%%%%%%%%% USER SETS THIS
-% lowspeed_tbt=moveRedForwardOrBack(lowspeed_tbt,[2:size(lowspeed_tbt.cue,1)],[],'drop');
-highspeed_tbt=moveRedForwardOrBack(highspeed_tbt,[3:size(highspeed_tbt.cue,1)],[],'drop');
-% highspeed_tbt=moveRedForwardOrBack(highspeed_tbt,[101:size(highspeed_tbt.cue,1)],[],'drop');
+lowspeed_tbt=moveRedForwardOrBack(lowspeed_tbt,[2:size(lowspeed_tbt.cue,1)],[],'drop');
+% highspeed_tbt=moveRedForwardOrBack(highspeed_tbt,[2:35 37:size(highspeed_tbt.cue,1)],[],'drop');
+% highspeed_tbt=moveRedForwardOrBack(highspeed_tbt,[98:size(highspeed_tbt.cue,1)],[],'drop');
 
 % Plot behavior from high speed vs low speed video
 plotBehFromLowSpeedMovie(lowspeed_tbt);

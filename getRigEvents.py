@@ -27,7 +27,7 @@ def getRigEvents(
     
     # codedir = r'C:\Users\sabatini\Documents\GitHub\integrate-phys-and-beh'
     codedir = os.getcwd()
-    videos = r'Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20190815\March_A\DLC vids'
+    videos = r'Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20191127\April_short\DLC vids'
     # videos: list
     #    A list of strings containing the full paths to videos for analysis or a path to the directory, where all the videos with same extension are stored.
     getDifferenceEventsBeforeSaving = True
@@ -112,14 +112,74 @@ def getRigEvents(
     #distractorThresh = 15
     #reachThresh = 3
     # March_A 20190815
-    wheelZone = [191, 300, 1, 251] # [x_start, x_end, y_start, y_end]
-    cueZone = [80, 109, 468, 543] # [x_start, x_end, y_start, y_end]
-    distractorZone = [1, 36, 342, 389] # [x_start, x_end, y_start, y_end]
-    reachZone = [104, 150, 111, 198] # [x_start, x_end, y_start, y_end]
-    cueThresh = 6
+    #wheelZone = [191, 300, 1, 251] # [x_start, x_end, y_start, y_end]
+    #cueZone = [80, 109, 468, 543] # [x_start, x_end, y_start, y_end]
+    #distractorZone = [1, 36, 342, 389] # [x_start, x_end, y_start, y_end]
+    #reachZone = [104, 150, 111, 198] # [x_start, x_end, y_start, y_end]
+    #cueThresh = 6
+    #wheelThresh = 1
+    #rawThresh = 1
+    #distractorThresh = 15
+    #reachThresh = 1.5
+    # March_D 20190628
+    #wheelZone = [207, 290, 1, 251] # [x_start, x_end, y_start, y_end]
+    #cueZone = [80, 134, 477, 559] # [x_start, x_end, y_start, y_end]
+    #distractorZone = [1, 28, 413, 453] # [x_start, x_end, y_start, y_end]
+    #reachZone = [104, 150, 156, 208] # [x_start, x_end, y_start, y_end]
+    #cueThresh = 6
+    #wheelThresh = 1
+    #rawThresh = 1
+    #distractorThresh = 3
+    #reachThresh = 1.5
+    # March_D 20190715
+    #wheelZone = [207, 290, 1, 251] # [x_start, x_end, y_start, y_end]
+    #cueZone = [71, 111, 451, 559] # [x_start, x_end, y_start, y_end]
+    #distractorZone = [19, 44, 528, 558] # [x_start, x_end, y_start, y_end]
+    #reachZone = [88, 150, 102, 171] # [x_start, x_end, y_start, y_end]
+    #cueThresh = 6
+    #wheelThresh = 1
+    #rawThresh = 1
+    #distractorThresh = 3
+    #reachThresh = 1.5
+    # March_D 20190715
+    #wheelZone = [207, 262, 1, 251] # [x_start, x_end, y_start, y_end]
+    #cueZone = [0, 110, 501, 559] # [x_start, x_end, y_start, y_end]
+    #distractorZone = [1, 60, 338, 403] # [x_start, x_end, y_start, y_end]
+    #reachZone = [110, 195, 115, 171] # [x_start, x_end, y_start, y_end]
+    #cueThresh = 1
+    #wheelThresh = 1
+    #rawThresh = 1
+    #distractorThresh = 3
+    #reachThresh = 1.5
+    # April_short 20190927
+    #wheelZone = [207, 262, 1, 251] # [x_start, x_end, y_start, y_end]
+    #cueZone = [63, 103, 477, 559] # [x_start, x_end, y_start, y_end]
+    #distractorZone = [1, 49, 348, 395] # [x_start, x_end, y_start, y_end]
+    #reachZone = [119, 195, 108, 155] # [x_start, x_end, y_start, y_end]
+    #cueThresh = 3
+    #wheelThresh = 1
+    #rawThresh = 1
+    #distractorThresh = 3
+    #reachThresh = 1.5
+    # April_short 20191011
+    #wheelZone = [207, 262, 1, 251] # [x_start, x_end, y_start, y_end]
+    #cueZone = [69, 140, 474, 559] # [x_start, x_end, y_start, y_end]
+    #distractorZone = [38, 59, 347, 394] # [x_start, x_end, y_start, y_end]
+    #reachZone = [107, 189, 108, 155] # [x_start, x_end, y_start, y_end]
+    #cueThresh = 10
+    #wheelThresh = 1
+    #rawThresh = 2
+    #distractorThresh = 2
+    #reachThresh = 1.5
+    # April_short 20191127
+    wheelZone = [150, 250, 1, 235] # [x_start, x_end, y_start, y_end]
+    cueZone = [59, 82, 446, 512] # [x_start, x_end, y_start, y_end]
+    distractorZone = [38, 59, 347, 394] # [x_start, x_end, y_start, y_end]
+    reachZone = [70, 142, 75, 120] # [x_start, x_end, y_start, y_end]
+    cueThresh = 5
     wheelThresh = 1
-    rawThresh = 1
-    distractorThresh = 15
+    rawThresh = 2
+    distractorThresh = 2
     reachThresh = 1.5
 
     ##################################################
