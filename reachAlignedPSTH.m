@@ -22,8 +22,9 @@ behavior_tbt.reach_onTrial(unitdets.dontUseTrials==1,:)=0; % zero out trials whe
 event='reach_onTrial';
 timeWindow=[0.1 0.4]; % in seconds from cue onset
 [~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
-[temp1,temp2]=getSameRange(dataout,alignComp,indsbefore,indsafter);
+[temp1,temp2,temp3]=getSameRange(dataout,alignComp,indsbefore,indsafter);
 data.optoduringcue=temp1; 
+data.optoduringcue_tbt=temp3;
 timepoints.optoduringcue=temp2;
 
 % opto before cue
@@ -33,8 +34,9 @@ behavior_tbt.reach_onTrial(unitdets.dontUseTrials==1,:)=0; % zero out trials whe
 event='reach_onTrial';
 timeWindow=[-0.4 -0.1]; % in seconds from cue onset
 [~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
-[temp1,temp2]=getSameRange(dataout,alignComp,indsbefore,indsafter);
-data.optobeforecue=temp1; 
+[temp1,temp2,temp3]=getSameRange(dataout,alignComp,indsbefore,indsafter);
+data.optobeforecue=temp1;
+data.optobeforecue_tbt=temp3;
 timepoints.optobeforecue=temp2;
 
 % opto after cue
@@ -44,12 +46,13 @@ behavior_tbt.reach_onTrial(unitdets.dontUseTrials==1,:)=0; % zero out trials whe
 event='reach_onTrial';
 timeWindow=[0.4 0.7]; % in seconds from cue onset
 [~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
-[temp1,temp2]=getSameRange(dataout,alignComp,indsbefore,indsafter);
-data.optoaftercue=temp1; 
+[temp1,temp2,temp3]=getSameRange(dataout,alignComp,indsbefore,indsafter);
+data.optoaftercue=temp1;
+data.optoaftercue_tbt=temp3;
 timepoints.optoaftercue=temp2;
 
 % all opto on together
-data.allopto=mean([data.optobeforecue; data.optoduringcue; data.optoaftercue],1,'omitnan');
+data.allopto=mean([data.optobeforecue_tbt; data.optoduringcue_tbt; data.optoaftercue_tbt],1,'omitnan');
 timepoints.allopto=mean([timepoints.optobeforecue; timepoints.optoduringcue; timepoints.optoaftercue],1,'omitnan');
 
 % no opto
@@ -59,22 +62,25 @@ behavior_tbt.reach_onTrial(unitdets.dontUseTrials==1,:)=0; % zero out trials whe
 event='reach_onTrial';
 timeWindow=[-0.4 -0.1]; % in seconds from cue onset
 [~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
-[temp1,temp2]=getSameRange(dataout,alignComp,indsbefore,indsafter);
+[temp1,temp2,temp3]=getSameRange(dataout,alignComp,indsbefore,indsafter);
 data.nooptobeforecue=temp1; 
+data.nooptobeforecue_tbt=temp3;
 timepoints.nooptobeforecue=temp2;
 timeWindow=[0.1 0.4]; % in seconds from cue onset
 [~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
-[temp1,temp2]=getSameRange(dataout,alignComp,indsbefore,indsafter);
+[temp1,temp2,temp3]=getSameRange(dataout,alignComp,indsbefore,indsafter);
 data.nooptoduringcue=temp1; 
+data.nooptoduringcue_tbt=temp3;
 timepoints.nooptoduringcue=temp2;
 timeWindow=[0.4 0.7]; % in seconds from cue onset
 [~,dataout,~,alignComp,~,~,~,phys_timepointsComp]=plotPhysiologyResult(phys_tbt,behavior_tbt,[],event,['unit' num2str(assign)],'cueZone_onVoff','first',timeWindow,[],suppressFigs); close all;
-[temp1,temp2]=getSameRange(dataout,alignComp,indsbefore,indsafter);
+[temp1,temp2,temp3]=getSameRange(dataout,alignComp,indsbefore,indsafter);
 data.nooptoaftercue=temp1; 
+data.nooptoaftercue_tbt=temp3;
 timepoints.nooptoaftercue=temp2;
 
 % all no opto together
-data.allNOopto=mean([data.nooptobeforecue; data.nooptoduringcue; data.nooptoaftercue],1,'omitnan');
+data.allNOopto=mean([data.nooptobeforecue_tbt; data.nooptoduringcue_tbt; data.nooptoaftercue_tbt],1,'omitnan');
 timepoints.allNOopto=mean([timepoints.nooptobeforecue; timepoints.nooptoduringcue; timepoints.nooptoaftercue],1,'omitnan');
 
 figure();
@@ -84,7 +90,7 @@ plot(downSampAv(timepoints.allopto,ds),downSampAv(data.allopto,ds),'Color','r');
 
 end
 
-function [subdata,subtimes]=getSameRange(dataout,alignComp,indsbefore,indsafter)
+function [subdata,subtimes,subdata_tbt]=getSameRange(dataout,alignComp,indsbefore,indsafter)
 
 if isempty(alignComp)
     subdata=[];
@@ -97,6 +103,7 @@ timesalign=alignComp.x;
 timeof=timesalign(indof);
 [~,mi]=nanmin(abs(nanmean(dataout.x,1)-timeof));
 subdata=nanmean(dataout.y(:,mi-indsbefore:mi+indsafter),1);
+subdata_tbt=dataout.y(:,mi-indsbefore:mi+indsafter);
 subtimes=nanmean(dataout.x(:,mi-indsbefore:mi+indsafter),1)-timeof;
 
 end
