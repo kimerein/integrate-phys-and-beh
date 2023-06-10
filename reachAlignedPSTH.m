@@ -95,6 +95,7 @@ function [subdata,subtimes,subdata_tbt]=getSameRange(dataout,alignComp,indsbefor
 if isempty(alignComp)
     subdata=[];
     subtimes=[];
+    subdata_tbt=[];
     return
 end
 
