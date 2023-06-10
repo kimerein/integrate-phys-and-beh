@@ -23,8 +23,8 @@ settings.useSameTrainingSetForAllNeurons=false;
 settings.discardDrops=false;
 settings.dropFolderName='uncued_drop';
 settings.dropFileName='uncuedDrop';
-settings.discardTrialsWhereOptoDuringCue=true;
-settings.onlyTrialsWhereOptoDuringCue=false;
+settings.discardTrialsWhereOptoDuringCue=false;
+settings.onlyTrialsWhereOptoDuringCue=true;
 settings.discardTrialsIfAnyOpto=false;
 settings.minTrialLength=9.5; % in seconds
 
