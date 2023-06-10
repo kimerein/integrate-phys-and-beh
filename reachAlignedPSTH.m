@@ -86,6 +86,12 @@ end
 
 function [subdata,subtimes]=getSameRange(dataout,alignComp,indsbefore,indsafter)
 
+if isempty(alignComp)
+    subdata=[];
+    subtimes=[];
+    return
+end
+
 timesalign=alignComp.x;
 [~,indof]=nanmax(nanmean(alignComp.y,1));
 timeof=timesalign(indof);
