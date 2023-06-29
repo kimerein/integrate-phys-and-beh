@@ -7,9 +7,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt11May2023170242\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023175615\'; % directory containing experimental data
 behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log - Slimmed down w old mice added.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt11May2023170242\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023175615\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -51,11 +51,14 @@ backup.metadata=metadata;
 % [alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,[4 5 19]);
 
 % Optional: discard preemptive
-% [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
+[alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
 
 % fix weird bug where reach batch sometimes get stuck at 1 (in less than 0.1% of trials), possibly an
 % interp problem somewhere?? not sure
 alltbt=fixReachesStuckAtOne(alltbt);
+
+% fix weird opto bug, where opto output from Arduino was flickering
+alltbt.optoOn(nansum(alltbt.optoOn,2)>100,:)=0;
 
 %% choose additional settings for reaction time analysis
 
@@ -122,21 +125,22 @@ alltbt.mouseid=metadata.mouseid;
 alltbt.sessid=metadata.sessid;
 trialTypes.sessid=metadata.sessid;
 % tbt_filter.sortField='mouseid';
-% tbt_filter.sortField='fractionThroughSess_adjusted';
-% tbt_filter.sortField='dprimes';
-% tbt_filter.sortField='distractor_immediate_after_cue';
 tbt_filter.sortField='fractionThroughSess_adjusted';
+% tbt_filter.sortField='dprimes';
+% tbt_filter.sortField='day1formice';
+% tbt_filter.sortField='distractor_immediate_after_cue';
+% tbt_filter.sortField='fractionThroughSess_adjusted';
 % tbt_filter.sortField='opto_enhanced_reach';
 % tbt_filter.sortField='mouseLearned';
 % tbt_filter.sortField='initiallyLowLEDsess';
 % tbt_filter.sortField='takeMouse';
 % tbt_filter.range_values=[1 6 7 8 10 14 18];
 % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
-% tbt_filter.range_values=[0.75 100];
+% tbt_filter.range_values=[-100 100]; %[0.75 100];
 % tbt_filter.range_values=[2.5 3.5];
-tbt_filter.range_values=[-0.5 0.1];
+tbt_filter.range_values=[0.5 1];
 % tbt_filter.range_values=[0.75 100]; % maybe 2,6,7,12
-% tbt_filter.range_values=[5.5 6.5]; % maybe 2,6,7,12
+% tbt_filter.range_values=[-100 100]; % maybe 2,6,7,12
 % tbt_filter.range_values=[2 3 4 5 6 7 8 9 10 11 12 14 15 17 18 19]; % which mice start at non-learning 
 % tbt_filter.range_values=[1 2 4 5 6 7 8 9 10 11 12 17 18 19];
 % tbt_filter.range_values=[1     2     3     6     7     8     9    10    11    12    14    15    17    18];
@@ -195,7 +199,7 @@ test.nInSequence=[2]; % defines trial pairs, e.g., 2 means will compare each tri
 trialTypes.isLongITI_1forward=[trialTypes.isLongITI(2:end); 0];
 trialTypes.optoGroup_1forward=[trialTypes.optoGroup(2:end); 0];
 % trial1='trialTypes.optoGroup~=1';
-% trial1='trialTypes.led~=1 & trialTypes.led_1back~=1';
+% trial1='trialTypes.led==0'; % | trialTypes.led_1back==0 | trialTypes.led_2back==0';
 % memory
 %this %trial1='trialTypes.led~=1'; 
 % trial1='trialTypes.isLongITI==1';
@@ -208,12 +212,12 @@ trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start
 % trial1='trialTypes.optoGroup~=1 & trialTypes.consumed_pellet_1back==1 & trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1';
 test.trial1=trial1;
 test.templateSequence2_cond=eval(trial1);
-trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
+% trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
 % memory
 % this %trial2='trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3 & trialTypes.led_1forward==0';
 % trial2='trialTypes.optoGroup~=1 & trialTypes.led==0 & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
 % trial2='trialTypes.optoGroup~=1 & trialTypes.led==0';
-% trial2='trialTypes.led==1';
+trial2='trialTypes.led==0';
 test.trial2=trial2;
 test.templateSequence2_end=eval(trial2);
 test.fillInBetweenWithAnything=false; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1

@@ -1,6 +1,6 @@
 function [trialTypes]=getTimingOfOpto(alltbt,useOptoField,trialTypes,multipleOptoTimes)
 
-thresh=0.05;
+thresh=0.5;
 
 % Get timing of opto starts
 opto=alltbt.(useOptoField);

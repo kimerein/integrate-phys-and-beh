@@ -553,6 +553,13 @@ end
 
 function [data1_mean,data2_mean,data1_se,data2_se,timeBins]=plotTimeseries(data1_mean,data1_se,color1,data2_mean,data2_se,color2,timeBins)
 
+doDownSamp=false;
+if doDownSamp==true
+    ds=5;
+else
+    ds=1;
+end
+
 suppPlots=whetherToSuppressPlots();
 
 plotAsCityscape=true;
@@ -563,6 +570,10 @@ if correctForBinSize==true
     data2_mean=data2_mean./mode(diff(timeBins));
     data1_se=data1_se./mode(diff(timeBins));
     data2_se=data2_se./mode(diff(timeBins));
+end
+if doDownSamp==true
+    data1_se=data1_se.*sqrt(ds/ds^2);
+    data2_se=data2_se.*sqrt(ds/ds^2);
 end
 
 data1_mean=nanmean(data1_mean,1);
@@ -580,18 +591,18 @@ end
 %hold on;
 if plotAsCityscape==true
     if suppPlots==false
-        [n,x]=cityscape_hist(data1_mean,timeBins);
+        [n,x]=cityscape_hist(downSampAv(data1_mean,ds),downSampAv(timeBins,ds));
         plot(x,n,'Color',color1); hold on;
-        [n,x]=cityscape_hist(data1_mean+data1_se,timeBins);
+        [n,x]=cityscape_hist(downSampAv(data1_mean+data1_se,ds),downSampAv(timeBins,ds));
         plot(x,n,'Color',color1);
-        [n,x]=cityscape_hist(data1_mean-data1_se,timeBins);
+        [n,x]=cityscape_hist(downSampAv(data1_mean-data1_se,ds),downSampAv(timeBins,ds));
         plot(x,n,'Color',color1);
     end
 else
     if suppPlots==false    
-        plot(timeBins,data1_mean,'Color',color1); hold on;
-        plot(timeBins,data1_mean+data1_se,'Color',color1);
-        plot(timeBins,data1_mean-data1_se,'Color',color1);
+        plot(downSampAv(timeBins,ds),downSampAv(data1_mean,ds),'Color',color1); hold on;
+        plot(downSampAv(timeBins,ds),downSampAv(data1_mean+data1_se,ds),'Color',color1);
+        plot(downSampAv(timeBins,ds),downSampAv(data1_mean-data1_se,ds),'Color',color1);
     end
 end
 
@@ -599,18 +610,18 @@ end
 %hold on;
 if plotAsCityscape==true
     if suppPlots==false   
-        [n,x]=cityscape_hist(data2_mean,timeBins);
+        [n,x]=cityscape_hist(downSampAv(data2_mean,ds),downSampAv(timeBins,ds));
         plot(x,n,'Color',color2); hold on;
-        [n,x]=cityscape_hist(data2_mean+data2_se,timeBins);
+        [n,x]=cityscape_hist(downSampAv(data2_mean+data2_se,ds),downSampAv(timeBins,ds));
         plot(x,n,'Color',color2);
-        [n,x]=cityscape_hist(data2_mean-data2_se,timeBins);
+        [n,x]=cityscape_hist(downSampAv(data2_mean-data2_se,ds),downSampAv(timeBins,ds));
         plot(x,n,'Color',color2);
     end
 else
     if suppPlots==false    
-        plot(timeBins,data2_mean,'Color',color2); hold on;
-        plot(timeBins,data2_mean+data2_se,'Color',color2);
-        plot(timeBins,data2_mean-data2_se,'Color',color2);
+        plot(downSampAv(timeBins,ds),downSampAv(data2_mean,ds),'Color',color2); hold on;
+        plot(downSampAv(timeBins,ds),downSampAv(data2_mean+data2_se,ds),'Color',color2);
+        plot(downSampAv(timeBins,ds),downSampAv(data2_mean-data2_se,ds),'Color',color2);
     end
 end
 
