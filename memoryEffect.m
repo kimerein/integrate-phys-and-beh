@@ -166,7 +166,7 @@ title('dprime GIVEN REACH');
 
 end
 
-function [dprime_given_reach,dprime_given_reachPLUSsd,dprime_given_reachMINUSsd]=dprimes_given_reach(alltbt,dataset,suppressPlots,fracthrubins,whichEvent)
+function [dprime_given_reach,dprime_given_reachPLUSsd,dprime_given_reachMINUSsd,p_reach_preceded_by_cue_tbt,sample_std_for_binomial_tbt,p_reach_followed_by_cue_tbt,sample_std_for_binomial_follow_tbt]=dprimes_given_reach(alltbt,dataset,suppressPlots,fracthrubins,whichEvent)
 
 if ~iscell(fracthrubins)
     fracthrubins_ends=[];
@@ -184,6 +184,15 @@ fracthru=fracthru_allevs(trial_number);
 % fracthrubins=0:0.1:1.0001;
 p_reach_preceded_by_cue=nan(length(fracthrubins)-1,1);
 sample_std_for_binomial=nan(length(fracthrubins)-1,1);
+% trial by trial
+tbtu=unique(trial_number);
+p_reach_preceded_by_cue_tbt=nan(length(tbtu),1);
+sample_std_for_binomial_tbt=nan(length(tbtu),1);
+for i=1:length(tbtu)
+    p_reach_preceded_by_cue_tbt(i)=nanmean(was_reach_preceded_by_cue(trial_number==tbtu(i)));
+    sample_std_for_binomial_tbt(i)=sqrt((p_reach_preceded_by_cue_tbt(i)*(1-p_reach_preceded_by_cue_tbt(i)))/nansum(trial_number==tbtu(i)));
+end
+% frac through sess
 for i=1:length(fracthrubins)-1
     if isempty(fracthrubins_ends)
         p_reach_preceded_by_cue(i)=nanmean(was_reach_preceded_by_cue(fracthru>=fracthrubins(i) & fracthru<fracthrubins(i+1)));
@@ -205,6 +214,15 @@ fracthru_allevs=alltbt.fractionThroughSess_adjusted(dataset.realDistributions.ev
 fracthru=fracthru_allevs(trial_number);
 p_reach_followed_by_cue=nan(length(fracthrubins)-1,1);
 sample_std_for_binomial_follow=nan(length(fracthrubins)-1,1);
+% trial by trial
+tbtu=unique(trial_number);
+p_reach_followed_by_cue_tbt=nan(length(tbtu),1);
+sample_std_for_binomial_follow_tbt=nan(length(tbtu),1);
+for i=1:length(tbtu)
+    p_reach_followed_by_cue_tbt(i)=nanmean(was_reach_followed_by_cue(trial_number==tbtu(i)));
+    sample_std_for_binomial_follow_tbt(i)=sqrt((p_reach_followed_by_cue_tbt(i)*(1-p_reach_followed_by_cue_tbt(i)))/nansum(trial_number==tbtu(i)));
+end
+% frac thru
 for i=1:length(fracthrubins)-1
     if isempty(fracthrubins_ends)
         p_reach_followed_by_cue(i)=nanmean(was_reach_followed_by_cue(fracthru>=fracthrubins(i) & fracthru<fracthrubins(i+1)));

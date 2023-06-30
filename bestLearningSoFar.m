@@ -52,6 +52,14 @@ for i=1:size(include_firsthalf,2)
     end
 end
 
+figure();
+for i=1:size(include_firsthalf,2)
+    if ismember(days(i),[1:39])
+        line([1 2],[0 nanmean(include_secondhalf(:,i),1)-nanmean(include_firsthalf(:,i),1)],'Color','k'); hold on;
+        scatter(2,nanmean(include_secondhalf(:,i),1)-nanmean(include_firsthalf(:,i),1));
+    end
+end
+
 disp(nanmean(nanmean(include_firsthalf(:,ismember(days,1:39)),1)));
 disp(nanmean(nanmean(include_secondhalf(:,ismember(days,1:39)),1)));
 disp(signrank(nanmean(include_firsthalf(:,ismember(days,1:39)),1),nanmean(include_secondhalf(:,ismember(days,1:39)),1)));
