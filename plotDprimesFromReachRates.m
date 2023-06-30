@@ -147,6 +147,8 @@ if isempty(reachrates)
     return
 end
 dprimes_over_sess=nan(size(reachrates.alltrials_uncued,1),ceil(size(reachrates.alltrials_uncued,2)/trialBinSize));
+hit_over_sess=nan(size(reachrates.alltrials_uncued,1),ceil(size(reachrates.alltrials_uncued,2)/trialBinSize));
+fa_over_sess=nan(size(reachrates.alltrials_uncued,1),ceil(size(reachrates.alltrials_uncued,2)/trialBinSize));
 fracs_over_sess=nan(size(reachrates.alltrials_uncued,1),ceil(size(reachrates.alltrials_uncued,2)/trialBinSize));
 currbincounter=0;
 currtrial=0;
@@ -175,11 +177,15 @@ for i=1:ceil(size(reachrates.alltrials_uncued,2)/trialBinSize)
         break
     end
     fracs_av=nanmean(curr_bin_fracs,2);
-    dprimes_lasttrial=calc_dprimes(currbinuncued,currbincued);
+    [dprimes_lasttrial,hit_lasttrial,fa_lasttrial]=calc_dprimes(currbinuncued,currbincued);
     dprimes_over_sess(:,currbincounter)=dprimes_lasttrial;
+    hit_over_sess(:,currbincounter)=hit_lasttrial;
+    fa_over_sess(:,currbincounter)=fa_lasttrial;
     fracs_over_sess(:,currbincounter)=fracs_av;
 end
 dprimes_over_sess=dprimes_over_sess(:,1:currbincounter);
+hit_over_sess=dprimes_over_sess(:,1:currbincounter);
+fa_over_sess=dprimes_over_sess(:,1:currbincounter);
 fracs_over_sess=fracs_over_sess(:,1:currbincounter);
 fi=find(all(isnan(dprimes_over_sess),1),2,'first');
 if ~isempty(fi)
@@ -189,7 +195,7 @@ end
 
 end
 
-function dprimes=calc_dprimes(uncued_events,cued_events)
+function [dprimes,hit_rates,fa_rates]=calc_dprimes(uncued_events,cued_events)
 
 useBayes=true; % Bayes estimator helps to ameliorate SOME of the shift in d-prime that results from simply having too few trials
 flipContingency=true; % if want to get probability that a reach preceded or followed by cue, rather than probability that cue preceded or followed by reach

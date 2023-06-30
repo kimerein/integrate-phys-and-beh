@@ -80,6 +80,10 @@ for i=1:length(u)
     j=j+nanmax(metadata.sessid(metadata.mouseid==u(i)));
 end
 
+% Optional: discard no pellet reaches within certain time after success
+% bcz represent chewing arm movements
+alltbt=ignoreReachesAfterSuccess(alltbt,metadata,6); % last arg is seconds after success, i.e., how long to chew pellet
+
 % Optional: Exclude trials with paw on wheel
 % [alltbt,metadata,trialTypes]=excludePawOnWheel(alltbt,metadata,trialTypes,'cueZone_onVoff');
 
