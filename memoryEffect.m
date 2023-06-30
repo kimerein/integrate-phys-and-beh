@@ -208,6 +208,10 @@ if suppressPlots~=true
         line([fracthrubins(i) fracthrubins(i)],[p_reach_preceded_by_cue(i)-sample_std_for_binomial(i) p_reach_preceded_by_cue(i)+sample_std_for_binomial(i)]);
     end
     xlabel('Fraction through session'); ylabel('P (m sd given binom) reach preceded by cue');
+
+    ds=10;
+    figure(); plot(downSampAv(p_reach_preceded_by_cue_tbt,ds)); hold on;
+    xlabel('Bin'); ylabel('P reach preceded by cue TRIALS BINNED');
 end
 [was_reach_followed_by_cue,trial_number,reach_time]=givenReach_probThatWasPrecededByCue(dataset.realDistributions, whichEvent, -1.5, timestep, cueAtInd); % if third arg is negative, will get prob cue AFTER reach
 fracthru_allevs=alltbt.fractionThroughSess_adjusted(dataset.realDistributions.event_isSeq{1}==1);
@@ -238,6 +242,10 @@ if suppressPlots~=true
         line([fracthrubins(i) fracthrubins(i)],[p_reach_followed_by_cue(i)-sample_std_for_binomial_follow(i) p_reach_followed_by_cue(i)+sample_std_for_binomial_follow(i)]);
     end
     xlabel('Fraction through session'); ylabel('P (m sd given binom) reach followed by cue');
+
+    ds=10;
+    figure(); plot(downSampAv(p_reach_followed_by_cue_tbt,ds));
+    xlabel('Bin'); ylabel('P reach followed by cue TRIALS BINNED');
 end
 dprime_given_reach=norminv(p_reach_preceded_by_cue)-norminv(p_reach_followed_by_cue);
 dprime_given_reachPLUSsd=norminv(p_reach_preceded_by_cue+sample_std_for_binomial)-norminv(p_reach_followed_by_cue-sample_std_for_binomial_follow);
