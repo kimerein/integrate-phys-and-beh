@@ -82,7 +82,7 @@ end
 
 % Optional: discard no pellet reaches within certain time after success
 % bcz represent chewing arm movements
-alltbt=ignoreReachesAfterSuccess(alltbt,metadata,6); % last arg is seconds after success, i.e., how long to chew pellet
+alltbt=ignoreReachesAfterSuccess(alltbt,metadata,9); % last arg is seconds after success, i.e., how long to chew pellet
 
 % Optional: Exclude trials with paw on wheel
 % [alltbt,metadata,trialTypes]=excludePawOnWheel(alltbt,metadata,trialTypes,'cueZone_onVoff');
@@ -142,7 +142,7 @@ tbt_filter.sortField='sessid';
 % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
 % tbt_filter.range_values=[-100 100]; %[0.75 100];
 % tbt_filter.range_values=[2.5 3.5];
-tbt_filter.range_values=[36.5 37.5];
+tbt_filter.range_values=[37.5 38.5];
 % tbt_filter.range_values=[0.75 100]; % maybe 2,6,7,12
 % tbt_filter.range_values=[-100 100]; % maybe 2,6,7,12
 % tbt_filter.range_values=[2 3 4 5 6 7 8 9 10 11 12 14 15 17 18 19]; % which mice start at non-learning 

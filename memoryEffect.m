@@ -55,11 +55,12 @@ reachratesettings=getReachRateSettings(withinCueTimeWindow);
 % THEN
 % NO LED FIRST
 test.nInSequence=[nInSequence]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
-trial1='trialTypes.led~=1';
-% trial1=flankingTrials;
+% trial1='trialTypes.led~=1';
+trial1=flankingTrials;
 test.trial1=trial1;
 linker=' & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup_1forward~=3'; 
-trial2=['trialTypes.led~=1' linker];
+% trial2=['trialTypes.led~=1' linker];
+trial2=['trialTypes.led~=1'];
 test.trial2=trial2;
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch');
@@ -81,9 +82,11 @@ title('No led sequence');
 test.nInSequence=[nInSequence]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
 linker=' & trialTypes.led_1back~=1'; 
 % trial1=['trialTypes.led~=1' linker]; 
-trial1=['trialTypes.led~=1']; 
+% trial1=['trialTypes.led~=1'];
+trial1=flankingTrials;
 test.trial1=trial1;
-trial2=['trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3'];
+% trial2=['trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3'];
+trial2=['trialTypes.led==1'];
 test.trial2=trial2;
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch');
@@ -118,7 +121,7 @@ binsForFracs=0:0.01:1;
 con=plotHistoOfFracs(binsForFracs,fracs_inThisPartOfSess_noLED,fracs_inThisPartOfSess_LED);
 % what's more important is to the sample the actual number of trials,
 % because it's binomial
-resampleToMatchNumberTrials=true; 
+resampleToMatchNumberTrials=false; %true; 
 if resampleToMatchNumberTrials
     % whichever has fewer trials
     nTrials_con=nansum(~isnan(noLED_all_uncued));
@@ -153,6 +156,7 @@ hold on;
 scatter(nanmean(fracs_inThisPartOfSess_dprimeLED(1:end)),mean_dprime_LED,[],'r','filled');
 line([nanmean(fracs_inThisPartOfSess_dprimeNoLED(1:end)) nanmean(fracs_inThisPartOfSess_dprimeNoLED(1:end))],[mean_dprime-se_dprime mean_dprime+se_dprime],'Color','k');
 line([nanmean(fracs_inThisPartOfSess_dprimeLED(1:end)) nanmean(fracs_inThisPartOfSess_dprimeLED(1:end))],[mean_dprime_LED-se_dprime_LED mean_dprime_LED+se_dprime_LED],'Color','r');
+title('dprime useFractionThroughSession');
 
 % plot output in dprime GIVEN REACH space
 figure();

@@ -184,8 +184,8 @@ for i=1:ceil(size(reachrates.alltrials_uncued,2)/trialBinSize)
     fracs_over_sess(:,currbincounter)=fracs_av;
 end
 dprimes_over_sess=dprimes_over_sess(:,1:currbincounter);
-hit_over_sess=dprimes_over_sess(:,1:currbincounter);
-fa_over_sess=dprimes_over_sess(:,1:currbincounter);
+hit_over_sess=hit_over_sess(:,1:currbincounter);
+fa_over_sess=fa_over_sess(:,1:currbincounter);
 fracs_over_sess=fracs_over_sess(:,1:currbincounter);
 fi=find(all(isnan(dprimes_over_sess),1),2,'first');
 if ~isempty(fi)
@@ -197,8 +197,8 @@ end
 
 function [dprimes,hit_rates,fa_rates]=calc_dprimes(uncued_events,cued_events)
 
-useBayes=true; % Bayes estimator helps to ameliorate SOME of the shift in d-prime that results from simply having too few trials
-flipContingency=true; % if want to get probability that a reach preceded or followed by cue, rather than probability that cue preceded or followed by reach
+useBayes=false; % Bayes estimator helps to ameliorate SOME of the shift in d-prime that results from simply having too few trials
+flipContingency=false; % if want to get probability that a reach preceded or followed by cue, rather than probability that cue preceded or followed by reach
 
 if flipContingency==true
     % https://www.researchgate.net/publication/251102295_Corrections_for_extreme_proportions_and_their_biasing_effects_on_estimated_values_of_d_'

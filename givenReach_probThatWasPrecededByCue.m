@@ -24,8 +24,14 @@ for i=1:size(reaches,1)
     f=find(temp>0.5);
     if ~isempty(f)
         if cueAfterReach==true
+            % of all the reaches on this trial, what fraction are within
+            % cueWithinXind of cue and precede cue?
+            % i.e., P(cue follows reach | reach)
             was_reach_preceded_by_cue=[was_reach_preceded_by_cue (cueAtInd-f<cueWithinXind & f-cueAtInd<0)];
         else
+            % of all the reaches on this trial, what fraction are within
+            % cueWithinXind of cue and follow cue?
+            % i.e., P(cue precedes reach | reach)
             was_reach_preceded_by_cue=[was_reach_preceded_by_cue (f-cueAtInd<cueWithinXind & f-cueAtInd>0)];
         end
         trial_number=[trial_number ones(1,length(f))*i];
