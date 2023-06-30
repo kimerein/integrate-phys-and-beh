@@ -456,13 +456,13 @@ reachratesettings.suppressPlots=true;
 if isempty(withinCueTimeWindow)
     reachratesettings.acrossSess_window1=[0.05 1.05]; % cued window [0.05 1]
 else
-    reachratesettings.acrossSess_window1=[0.05 0.05+withinCueTimeWindow]; 
+    reachratesettings.acrossSess_window1=[0 0+withinCueTimeWindow]; 
 end
 reachratesettings.acrossSess_window2=[7 reachratesettings.maxTrialLength]; % beware reach suppression after a success
 if isempty(withinCueTimeWindow)
     reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength -1]; 
 else
-    reachratesettings.acrossSess_window3=[-0.125-withinCueTimeWindow -0.125]; 
+    reachratesettings.acrossSess_window3=[0-withinCueTimeWindow 0]; 
 end
 reachratesettings.scatterPointSize=50; % size for points in scatter plot
 reachratesettings.addSatietyLines=false; % whether to add proportionality lines to figure

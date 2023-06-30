@@ -156,7 +156,7 @@ for i=1:ceil(size(reachrates.alltrials_uncued,2)/trialBinSize)
         break
     end
     currbincounter=currbincounter+1;
-    takeInds=i:i+trialBinSize-1;
+    takeInds=(i-1)*trialBinSize+1:(i-1)*trialBinSize+trialBinSize;
     if any(takeInds>size(reachrates.alltrials_uncued,2))
         takeInds=i:size(reachrates.alltrials_uncued,2);
     end
