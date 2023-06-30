@@ -192,10 +192,36 @@ end
 function dprimes=calc_dprimes(uncued_events,cued_events)
 
 useBayes=true; % Bayes estimator helps to ameliorate SOME of the shift in d-prime that results from simply having too few trials
+flipContingency=true; % if want to get probability that a reach preceded or followed by cue, rather than probability that cue preceded or followed by reach
 
-if useBayes==true
+if flipContingency==true
+    % https://www.researchgate.net/publication/251102295_Corrections_for_extreme_proportions_and_their_biasing_effects_on_estimated_values_of_d_'
+    % Stanislaw, Harold, and Natasha Todorov. 1999. "Calculation of Signal Detection Theory Measures." Behavior Research Methods, Instruments, & Computers 31 (1): 137–49. http://link.springer.com/article/10.3758/BF03207704.
+    % Could also get
+    % Probability that reach preceded by cue
+    hit_rates=nansum(cued_events>0,2)./nansum(nansum([(cued_events>0); (uncued_events>0)],1),2); % 3 reaches same as 1 reach
+%     hit_rates=nansum(cued_events,2)./nansum(nansum([cued_events; uncued_events],1),2);
+    % probability that reach followed by cue (this is from the uncued time bin,
+    % when precedes cue)
+    fa_rates=nansum(uncued_events>0,2)./nansum(nansum([(cued_events>0); (uncued_events>0)],1),2); % 3 reaches same as 1 reach
+%     fa_rates=nansum(uncued_events,2)./nansum(nansum([cued_events; uncued_events],1),2);
+    % Correct for extreme values, i.e., 0 or 1
+    n=nansum(nansum([cued_events; uncued_events],1),2);
+    if hit_rates==0
+        hit_rates=1/(2*n);
+    elseif hit_rates==1
+        hit_rates=1-(1/(2*n));
+    end
+    if fa_rates==0
+        fa_rates=1/(2*n);
+    elseif fa_rates==1
+        fa_rates=1-(1/(2*n));
+    end
+elseif useBayes==true
     disp('USING BAYES!');
+    % This is calculating probability that cue is followed by reach
     hit_rates=(nansum(cued_events>0,2)+1)./(nansum(~isnan(cued_events),2)+2);
+    % probability that uncue is followed by reach
     fa_rates=(nansum(uncued_events>0,2)+1)./(nansum(~isnan(uncued_events),2)+2);
 else
     hit_rates=nansum(cued_events>0,2)./nansum(~isnan(cued_events),2);

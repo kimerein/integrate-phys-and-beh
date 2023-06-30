@@ -334,9 +334,10 @@ plotHallmarksOfSatiety(reachrates,dataset,alltbt,metadata,trialTypes);
 % memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,[],plotCDFUpTo);
 nInSeq=2; 
 useFractionThroughSession=[0.4 1];
+withinCueTimeWindow=1.5; % in sec
 % useFractionThroughSession=[-100 100];
 plotCDFUpTo=3;
-memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,[],plotCDFUpTo);
+memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,[],plotCDFUpTo,withinCueTimeWindow);
 % ANOTHER WAY
 trialTypes.lowLEDsequence=findSeqsWithN_of_condition(trialTypes, 'led', 55, 150, false);
 [~,ui]=unique(trialTypes.sessid);

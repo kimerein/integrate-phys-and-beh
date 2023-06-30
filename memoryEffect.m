@@ -1,4 +1,4 @@
-function memoryEffect(alltbt,metadata,trialTypes,nInSequence,useFractionThroughSession,useReachType,plotCDFUpTo)
+function memoryEffect(alltbt,metadata,trialTypes,nInSequence,useFractionThroughSession,useReachType,plotCDFUpTo,withinCueTimeWindow)
 
 flankingTrials='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1'; % take every trial
 %flankingTrials='trialTypes.led~=1'; % take no LED trials only
@@ -14,7 +14,7 @@ saveDir=['/Volumes/Neurobio/MICROSCOPE/Kim/RT pairs data sets/' temp]; % where t
 alltbt.sessid=metadata.sessid;
 trialTypes.sessid=metadata.sessid;
 shuffleTrialOrder=false; % if want to randomly permute trial order to test for ordering effects
-reachratesettings=getReachRateSettings();
+reachratesettings=getReachRateSettings(withinCueTimeWindow);
 
 % FIRST PLOT CHANGE OVER ALL TRIALS WITHIN SESSION
 trial1=flankingTrials; 
@@ -26,12 +26,12 @@ dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,
 % playing with an alternate metric: given reach, probability that cue preceded reach
 % fracthrubins=0:0.1:1.0001;
 fracthrubins={[0:0.05:0.95],[0.1:0.05:1.001]};
-[dprime_given_reach,dprime_given_reachPLUSsd,dprime_given_reachMINUSsd]=dprimes_given_reach(alltbt,dataset,false,fracthrubins,'rawReaching_event_trialiInSeq'); % two formats for fracthrubins, see function
+[dprime_given_reach,dprime_given_reachPLUSsd,dprime_given_reachMINUSsd]=dprimes_given_reach(alltbt,dataset,false,fracthrubins,'rawReaching_event_trialiInSeq',withinCueTimeWindow); % two formats for fracthrubins, see function
 % continuing to plot change over all trials within session
 reachratesettings.suppressPlots=false;
 reachratesettings.binTrialsForAvAcrossSess=true;
 reachratesettings.binThisManyTrials=20; 
-reachratesettings.stopPlottingTrialsAfterN=120;
+reachratesettings.stopPlottingTrialsAfterN=200; %120;
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 title('All trial types over session');
 [dprimes,fracs_over_sess,initialDprimes]=plotDprimesFromReachRates(reachrates,false,plotVersusFrac);
@@ -51,7 +51,7 @@ for i=1:length(fracsThroughSessBins)-1
     [cmap,k,kstep]=plotMeAndSE_2D(i,fracsThroughSessBins,me_uncued,s_uncued,me_cued,s_cued,cmap,k,kstep);
 end
 
-reachratesettings=getReachRateSettings();
+reachratesettings=getReachRateSettings(withinCueTimeWindow);
 % THEN
 % NO LED FIRST
 test.nInSequence=[nInSequence]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
@@ -66,7 +66,7 @@ alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch');
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch back');
 fracthrubins=0:useFractionThroughSession(1):useFractionThroughSession(2)+0.001;
-[dprime_given_reach_noLED,dprime_given_reachPLUSsd_noLED,dprime_given_reachMINUSsd_noLED]=dprimes_given_reach(alltbt,dataset,false,fracthrubins,'rawReaching_event_trialiInSeq');
+[dprime_given_reach_noLED,dprime_given_reachPLUSsd_noLED,dprime_given_reachMINUSsd_noLED]=dprimes_given_reach(alltbt,dataset,false,fracthrubins,'rawReaching_event_trialiInSeq',withinCueTimeWindow);
 title('dprime NO LED given reach');
 plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching'); title('No LED');
 plotChangeInReachCDF(dataset.realDistributions,alltbt,plotCDFUpTo); title('No LED');
@@ -90,7 +90,7 @@ alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch');
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch back');
 fracthrubins=0:useFractionThroughSession(1):useFractionThroughSession(2)+0.001;
-[dprime_given_reach_LED,dprime_given_reachPLUSsd_LED,dprime_given_reachMINUSsd_LED]=dprimes_given_reach(alltbt,dataset,false,fracthrubins,'rawReaching_event_trialiInSeq');
+[dprime_given_reach_LED,dprime_given_reachPLUSsd_LED,dprime_given_reachMINUSsd_LED]=dprimes_given_reach(alltbt,dataset,false,fracthrubins,'rawReaching_event_trialiInSeq',withinCueTimeWindow);
 title('dprime LED given reach');
 plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching'); title('LED');
 plotChangeInReachCDF(dataset.realDistributions,alltbt,plotCDFUpTo); title('LED');
@@ -166,7 +166,7 @@ title('dprime GIVEN REACH');
 
 end
 
-function [dprime_given_reach,dprime_given_reachPLUSsd,dprime_given_reachMINUSsd,p_reach_preceded_by_cue_tbt,sample_std_for_binomial_tbt,p_reach_followed_by_cue_tbt,sample_std_for_binomial_follow_tbt]=dprimes_given_reach(alltbt,dataset,suppressPlots,fracthrubins,whichEvent)
+function [dprime_given_reach,dprime_given_reachPLUSsd,dprime_given_reachMINUSsd,p_reach_preceded_by_cue_tbt,sample_std_for_binomial_tbt,p_reach_followed_by_cue_tbt,sample_std_for_binomial_follow_tbt]=dprimes_given_reach(alltbt,dataset,suppressPlots,fracthrubins,whichEvent,withinCueTimeWindow)
 
 if ~iscell(fracthrubins)
     fracthrubins_ends=[];
@@ -178,7 +178,7 @@ end
 
 % playing with an alternate metric: given reach, probability that cue preceded reach
 temp=nanmean(alltbt.times,1); timestep=mode(diff(temp(~isnan(temp)))); [~,cueAtInd]=nanmax(nanmean(alltbt.cueZone_onVoff,1));
-[was_reach_preceded_by_cue,trial_number,reach_time]=givenReach_probThatWasPrecededByCue(dataset.realDistributions, whichEvent, 1.5, timestep, cueAtInd); % if third arg is negative, will get prob cue AFTER reach
+[was_reach_preceded_by_cue,trial_number,reach_time]=givenReach_probThatWasPrecededByCue(dataset.realDistributions, whichEvent, withinCueTimeWindow, timestep, cueAtInd); % if third arg is negative, will get prob cue AFTER reach
 fracthru_allevs=alltbt.fractionThroughSess_adjusted(dataset.realDistributions.event_isSeq{1}==1);
 fracthru=fracthru_allevs(trial_number);
 % fracthrubins=0:0.1:1.0001;
@@ -442,7 +442,7 @@ se_cued=nanstd(cued_inThisPartOfSess(1:end),[],2)./sqrt(nansum(~isnan(cued_inThi
 
 end
 
-function reachratesettings=getReachRateSettings()
+function reachratesettings=getReachRateSettings(withinCueTimeWindow)
 
 reachratesettings.epsilon_cue=0; % in seconds
 reachratesettings.epsilon_uncue=2; % in seconds
@@ -453,9 +453,17 @@ reachratesettings.maxTrialLength=9.5; % in sec, wrt cue
 reachratesettings.minTrialLength=-2; % wrt cue, in sec
 reachratesettings.suppressPlots=true;
 % reachratesettings.acrossSess_window1=[0.05 2]; % cued window [0.05 1]
-reachratesettings.acrossSess_window1=[0.05 1.05]; % cued window [0.05 1]
+if isempty(withinCueTimeWindow)
+    reachratesettings.acrossSess_window1=[0.05 1.05]; % cued window [0.05 1]
+else
+    reachratesettings.acrossSess_window1=[0.05 0.05+withinCueTimeWindow]; 
+end
 reachratesettings.acrossSess_window2=[7 reachratesettings.maxTrialLength]; % beware reach suppression after a success
-reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength -1]; 
+if isempty(withinCueTimeWindow)
+    reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength -1]; 
+else
+    reachratesettings.acrossSess_window3=[-0.125-withinCueTimeWindow -0.125]; 
+end
 reachratesettings.scatterPointSize=50; % size for points in scatter plot
 reachratesettings.addSatietyLines=false; % whether to add proportionality lines to figure
 reachratesettings.stopPlottingTrialsAfterN=286;
