@@ -78,6 +78,9 @@ elseif length(varargin)==4
     trialTypes=varargin{3};
     fromAllTbt=varargin{4};
 
+    metadata.higherThanBefore=zeros(size(metadata.dprimes));
+    alltbt.higherThanBefore=zeros(size(alltbt.dprimes));
+    trialTypes.higherThanBefore=zeros(size(trialTypes.dprimes));
     % for each mouse, for each sessid, get whether that session achieved a
     % higher dprime than any previous day
     umouse=unique(metadata.mouseid);
@@ -89,9 +92,6 @@ elseif length(varargin)==4
         avformouse=metadata.dprimes(ui);
         higherThanBefore=getDaysHigherThanBefore(avformouse,[],[],true,false);
         % put back into metadata, alltbt and trialTypes
-        metadata.higherThanBefore=zeros(size(metadata.dprimes));
-        alltbt.higherThanBefore=zeros(size(alltbt.dprimes));
-        trialTypes.higherThanBefore=zeros(size(trialTypes.dprimes));
         for j=1:length(usess)
             metadata.higherThanBefore(metadata.sess_wrt_day1==usess(j) & metadata.mouseid==umouse(i))=higherThanBefore(j);
             alltbt.higherThanBefore(metadata.sess_wrt_day1==usess(j) & metadata.mouseid==umouse(i))=higherThanBefore(j);
