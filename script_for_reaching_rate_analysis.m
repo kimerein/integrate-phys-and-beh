@@ -129,11 +129,11 @@ alltbt.mouseid=metadata.mouseid;
 alltbt.sessid=metadata.sessid;
 trialTypes.sessid=metadata.sessid;
 % tbt_filter.sortField='mouseid';
-tbt_filter.sortField='sessid';
+% tbt_filter.sortField='sessid';
 % tbt_filter.sortField='dprimes';
 % tbt_filter.sortField='day1formice';
 % tbt_filter.sortField='distractor_immediate_after_cue';
-% tbt_filter.sortField='fractionThroughSess_adjusted';
+tbt_filter.sortField='fractionThroughSess_adjusted';
 % tbt_filter.sortField='opto_enhanced_reach';
 % tbt_filter.sortField='mouseLearned';
 % tbt_filter.sortField='initiallyLowLEDsess';
@@ -141,10 +141,10 @@ tbt_filter.sortField='sessid';
 % tbt_filter.range_values=[1 6 7 8 10 14 18];
 % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
 % tbt_filter.range_values=[-100 100]; %[0.75 100];
-% tbt_filter.range_values=[2.5 3.5];
-tbt_filter.range_values=[37.5 38.5];
+tbt_filter.range_values=[0.4 1];
+% tbt_filter.range_values=[37.5 38.5];
 % tbt_filter.range_values=[0.75 100]; % maybe 2,6,7,12
-% tbt_filter.range_values=[-100 100]; % maybe 2,6,7,12
+% tbt_filter.range_values=[0.5 1.5]; % maybe 2,6,7,12
 % tbt_filter.range_values=[2 3 4 5 6 7 8 9 10 11 12 14 15 17 18 19]; % which mice start at non-learning 
 % tbt_filter.range_values=[1 2 4 5 6 7 8 9 10 11 12 17 18 19];
 % tbt_filter.range_values=[1     2     3     6     7     8     9    10    11    12    14    15    17    18];
@@ -331,7 +331,9 @@ plotVersusFrac=false;
 plotHallmarksOfSatiety(reachrates,dataset,alltbt,metadata,trialTypes);
 
 %% memory effect
-% consider filtering for no opto enhanced
+% filter fracThruSess to [0.4 1], then get bestLearningSoFar.m to find days when new higher dprime achieved
+% [alltbt,metadata,trialTypes]=bestLearningSoFar(alltbt,metadata,trialTypes,true);
+% consider filtering for no opto enhanced, mouse learned
 % nInSeq=5; % WHAT I USED FOR OPTO GRC TALK
 % useFractionThroughSession=[0.4 0.6];
 % plotCDFUpTo=3;
@@ -340,7 +342,7 @@ nInSeq=2;
 useFractionThroughSession=[0.4 1];
 withinCueTimeWindow=1.5; % in sec
 % useFractionThroughSession=[-100 100];
-plotCDFUpTo=3;
+plotCDFUpTo=9.5;
 memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,[],plotCDFUpTo,withinCueTimeWindow);
 % ANOTHER WAY
 trialTypes.lowLEDsequence=findSeqsWithN_of_condition(trialTypes, 'led', 55, 150, false);
