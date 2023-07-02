@@ -133,6 +133,7 @@ trialTypes.sessid=metadata.sessid;
 % tbt_filter.sortField='dprimes';
 % tbt_filter.sortField='day1formice';
 % tbt_filter.sortField='distractor_immediate_after_cue';
+% tbt_filter.sortField='higherThanBefore';
 tbt_filter.sortField='fractionThroughSess_adjusted';
 % tbt_filter.sortField='opto_enhanced_reach';
 % tbt_filter.sortField='mouseLearned';
@@ -332,7 +333,10 @@ plotHallmarksOfSatiety(reachrates,dataset,alltbt,metadata,trialTypes);
 
 %% memory effect
 % filter fracThruSess to [0.4 1], then get bestLearningSoFar.m to find days when new higher dprime achieved
-% [alltbt,metadata,trialTypes]=bestLearningSoFar(alltbt,metadata,trialTypes,true);
+% [alltbt,metadata,trialTypes,higherThanBefore_sessIDs]=bestLearningSoFar(alltbt,metadata,trialTypes,true);
+% metadata.higherThanBefore=zeros(size(metadata.sessid));
+% metadata.higherThanBefore(ismember(metadata.sessid,higherThanBefore_sessIDs))=1;
+% alltbt.higherThanBefore=metadata.higherThanBefore; trialTypes.higherThanBefore=metadata.higherThanBefore;
 % consider filtering for no opto enhanced, mouse learned
 % nInSeq=5; % WHAT I USED FOR OPTO GRC TALK
 % useFractionThroughSession=[0.4 0.6];

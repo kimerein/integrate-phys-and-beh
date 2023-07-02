@@ -1,4 +1,4 @@
-function [alltbt,metadata,trialTypes]=bestLearningSoFar(varargin)
+function [alltbt,metadata,trialTypes,higherSessIDs]=bestLearningSoFar(varargin)
 
 % TWO POSSIBLE FUNCTIONS OF THIS CODE! See different argument options
 
@@ -99,6 +99,8 @@ elseif length(varargin)==4
         end
     end
 end
+
+higherSessIDs=unique(metadata.sessid(metadata.higherThanBefore==1));
 
 end
 
