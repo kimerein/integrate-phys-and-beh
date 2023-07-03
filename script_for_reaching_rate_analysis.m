@@ -7,9 +7,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023183557\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023184639\'; % directory containing experimental data
 behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log - Slimmed down w old mice added.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023183557\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023184639\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -165,8 +165,8 @@ alltbt=checkForOptoEnhancedReach(alltbt,metadata,trialTypes,'all_reachBatch','tr
 trialTypes.opto_enhanced_reach=alltbt.opto_enhanced_reach;
 
 %% find sessions where mouse learned
-part1_fracThroughSess=[0 0.2];
-part2_fracThroughSess=[0.2 0.8];
+part1_fracThroughSess=[0 0.5]; %[0 0.2];
+part2_fracThroughSess=[0.5 1]; %[0.2 0.8];
 learningThresh=0.1;
 alltbt=findSessWhereMouseLearned(alltbt,metadata,trialTypes,part1_fracThroughSess,part2_fracThroughSess,learningThresh);
 trialTypes.mouseLearned=alltbt.mouseLearned;
@@ -336,9 +336,6 @@ plotHallmarksOfSatiety(reachrates,dataset,alltbt,metadata,trialTypes);
 % using whole session to calc dprime so as not to select for any particular 
 % shape of within-session change
 % [alltbt,metadata,trialTypes,higherThanBefore_sessIDs]=bestLearningSoFar(alltbt,metadata,trialTypes,true);
-% metadata.higherThanBefore=zeros(size(metadata.sessid));
-% metadata.higherThanBefore(ismember(metadata.sessid,higherThanBefore_sessIDs))=1;
-% alltbt.higherThanBefore=metadata.higherThanBefore; trialTypes.higherThanBefore=metadata.higherThanBefore;
 % also filter for mouse learned
 % nInSeq=5; % WHAT I USED FOR OPTO GRC TALK
 % useFractionThroughSession=[0.4 0.6];
