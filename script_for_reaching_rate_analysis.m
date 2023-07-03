@@ -128,7 +128,6 @@ saveDir=['/Volumes/Neurobio/MICROSCOPE/Kim/RT pairs data sets/' temp]; % where t
 alltbt.mouseid=metadata.mouseid;
 alltbt.sessid=metadata.sessid;
 trialTypes.sessid=metadata.sessid;
-tbt_filter.sortField='mouseid';
 % tbt_filter.sortField='sessid';
 % tbt_filter.sortField='dprimes';
 % tbt_filter.sortField='day1formice';
@@ -136,14 +135,14 @@ tbt_filter.sortField='mouseid';
 % tbt_filter.sortField='higherThanBefore';
 % tbt_filter.sortField='fractionThroughSess_adjusted';
 % tbt_filter.sortField='opto_enhanced_reach';
-% tbt_filter.sortField='mouseLearned';
+tbt_filter.sortField='mouseLearned';
 % tbt_filter.sortField='initiallyLowLEDsess';
-% tbt_filter.sortField='takeMouse';
+% tbt_filter.sortField='takemice';
 % tbt_filter.range_values=[1 6 7 8 10 14 18];
 % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
 % tbt_filter.range_values=[-100 100]; %[0.75 100];
 % tbt_filter.range_values=[2 3 6 7 8 9];
-% tbt_filter.range_values=[0.5 1.5];
+tbt_filter.range_values=[0.5 1.5];
 % tbt_filter.range_values=[0.75 100]; % maybe 2,6,7,12
 % tbt_filter.range_values=[0.5 1.5]; % maybe 2,6,7,12
 % tbt_filter.range_values=[2 3 4 5 6 7 8 9 10 11 12 14 15 17 18 19]; % which mice start at non-learning 
@@ -340,7 +339,7 @@ plotHallmarksOfSatiety(reachrates,dataset,alltbt,metadata,trialTypes);
 % metadata.higherThanBefore=zeros(size(metadata.sessid));
 % metadata.higherThanBefore(ismember(metadata.sessid,higherThanBefore_sessIDs))=1;
 % alltbt.higherThanBefore=metadata.higherThanBefore; trialTypes.higherThanBefore=metadata.higherThanBefore;
-% also filter for no opto enhanced, mouse learned
+% also filter for mouse learned
 % nInSeq=5; % WHAT I USED FOR OPTO GRC TALK
 % useFractionThroughSession=[0.4 0.6];
 % plotCDFUpTo=3;
