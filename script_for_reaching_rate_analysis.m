@@ -7,9 +7,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023184639\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023175615\'; % directory containing experimental data
 behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log - Slimmed down w old mice added.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023184639\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023175615\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -134,16 +134,16 @@ trialTypes.sessid=metadata.sessid;
 % tbt_filter.sortField='day1formice';
 % tbt_filter.sortField='distractor_immediate_after_cue';
 % tbt_filter.sortField='higherThanBefore';
-tbt_filter.sortField='fractionThroughSess_adjusted';
+% tbt_filter.sortField='fractionThroughSess_adjusted';
 % tbt_filter.sortField='opto_enhanced_reach';
-% tbt_filter.sortField='mouseLearned';
+tbt_filter.sortField='mouseLearned';
 % tbt_filter.sortField='initiallyLowLEDsess';
 % tbt_filter.sortField='takeMouse';
 % tbt_filter.range_values=[1 6 7 8 10 14 18];
 % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
 % tbt_filter.range_values=[-100 100]; %[0.75 100];
-tbt_filter.range_values=[0.4 1];
-% tbt_filter.range_values=[37.5 38.5];
+% tbt_filter.range_values=[2 3 6 7 8 9];
+tbt_filter.range_values=[0.5 1.5];
 % tbt_filter.range_values=[0.75 100]; % maybe 2,6,7,12
 % tbt_filter.range_values=[0.5 1.5]; % maybe 2,6,7,12
 % tbt_filter.range_values=[2 3 4 5 6 7 8 9 10 11 12 14 15 17 18 19]; % which mice start at non-learning 
@@ -332,12 +332,14 @@ plotVersusFrac=false;
 plotHallmarksOfSatiety(reachrates,dataset,alltbt,metadata,trialTypes);
 
 %% memory effect
-% filter fracThruSess to [0.4 1], then get bestLearningSoFar.m to find days when new higher dprime achieved
+% get bestLearningSoFar.m to find days when new higher dprime achieved,
+% using whole session to calc dprime so as not to select for any particular 
+% shape of within-session change
 % [alltbt,metadata,trialTypes,higherThanBefore_sessIDs]=bestLearningSoFar(alltbt,metadata,trialTypes,true);
 % metadata.higherThanBefore=zeros(size(metadata.sessid));
 % metadata.higherThanBefore(ismember(metadata.sessid,higherThanBefore_sessIDs))=1;
 % alltbt.higherThanBefore=metadata.higherThanBefore; trialTypes.higherThanBefore=metadata.higherThanBefore;
-% consider filtering for no opto enhanced, mouse learned
+% also filter for no opto enhanced, mouse learned
 % nInSeq=5; % WHAT I USED FOR OPTO GRC TALK
 % useFractionThroughSession=[0.4 0.6];
 % plotCDFUpTo=3;

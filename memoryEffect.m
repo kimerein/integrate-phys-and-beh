@@ -121,7 +121,7 @@ binsForFracs=0:0.01:1;
 con=plotHistoOfFracs(binsForFracs,fracs_inThisPartOfSess_noLED,fracs_inThisPartOfSess_LED);
 % what's more important is to the sample the actual number of trials,
 % because it's binomial
-resampleToMatchNumberTrials=false; %true; 
+resampleToMatchNumberTrials=true; %false; 
 if resampleToMatchNumberTrials
     % whichever has fewer trials
     nTrials_con=nansum(~isnan(noLED_all_uncued));
