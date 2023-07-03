@@ -7,9 +7,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023175615\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023183557\'; % directory containing experimental data
 behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log - Slimmed down w old mice added.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023175615\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023183557\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -142,7 +142,7 @@ tbt_filter.sortField='mouseLearned';
 % tbt_filter.range_values=[1 6 7 8 10 14 18];
 % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
 % tbt_filter.range_values=[-100 100]; %[0.75 100];
-% tbt_filter.range_values=[2 3 6 7 8 9];
+% tbt_filter.range_values=[1 3]; %[2 3 6 7 8 9];
 tbt_filter.range_values=[0.5 1.5];
 % tbt_filter.range_values=[0.75 100]; % maybe 2,6,7,12
 % tbt_filter.range_values=[0.5 1.5]; % maybe 2,6,7,12
@@ -161,7 +161,8 @@ tbt_filter.clock_progress=true;
 
 %% check for opto-enhanced reaching
 alltbt.sessid=metadata.sessid;
-alltbt=checkForOptoEnhancedReach(alltbt,metadata,trialTypes,'all_reachBatch','trialTypes.led==1','cueZone_onVoff',[-0.25 0.5],20);
+alltbt=checkForOptoEnhancedReach(alltbt,metadata,trialTypes,'all_reachBatch','trialTypes.optoGroup==2','cueZone_onVoff',[-0.25 0.5],20);
+% alltbt=checkForOptoEnhancedReach(alltbt,metadata,trialTypes,'all_reachBatch','trialTypes.led==1','cueZone_onVoff',[-0.25 0.5],20);
 trialTypes.opto_enhanced_reach=alltbt.opto_enhanced_reach;
 
 %% find sessions where mouse learned

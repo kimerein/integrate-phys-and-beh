@@ -69,7 +69,7 @@ alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch back')
 fracthrubins=0:useFractionThroughSession(1):useFractionThroughSession(2)+0.001;
 [dprime_given_reach_noLED,dprime_given_reachPLUSsd_noLED,dprime_given_reachMINUSsd_noLED]=dprimes_given_reach(alltbt,dataset,false,fracthrubins,'rawReaching_event_trialiInSeq',withinCueTimeWindow);
 title('dprime NO LED given reach');
-plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching'); title('No LED');
+returnThis=plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching'); title('No LED');
 plotChangeInReachCDF(dataset.realDistributions,alltbt,plotCDFUpTo); title('No LED');
 reachratesettings.suppressPlots=false;
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
@@ -86,7 +86,7 @@ linker=' & trialTypes.led_1back~=1';
 trial1=flankingTrials;
 test.trial1=trial1;
 % trial2=['trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3'];
-trial2=['trialTypes.led==1'];
+trial2=['trialTypes.optoGroup==2'];
 test.trial2=trial2;
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch');
@@ -95,7 +95,7 @@ alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch back')
 fracthrubins=0:useFractionThroughSession(1):useFractionThroughSession(2)+0.001;
 [dprime_given_reach_LED,dprime_given_reachPLUSsd_LED,dprime_given_reachMINUSsd_LED]=dprimes_given_reach(alltbt,dataset,false,fracthrubins,'rawReaching_event_trialiInSeq',withinCueTimeWindow);
 title('dprime LED given reach');
-plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching'); title('LED');
+returnThis=plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching'); title('LED');
 plotChangeInReachCDF(dataset.realDistributions,alltbt,plotCDFUpTo); title('LED');
 reachratesettings.suppressPlots=false;
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
@@ -188,6 +188,7 @@ fracthru=fracthru_allevs(trial_number);
 % fracthrubins=0:0.1:1.0001;
 p_reach_preceded_by_cue=nan(length(fracthrubins)-1,1);
 sample_std_for_binomial=nan(length(fracthrubins)-1,1);
+ns_reach_preceded_by_cue=nan(length(fracthrubins)-1,1);
 % trial by trial
 tbtu=unique(trial_number);
 p_reach_preceded_by_cue_tbt=nan(length(tbtu),1);
@@ -201,9 +202,11 @@ for i=1:length(fracthrubins)-1
     if isempty(fracthrubins_ends)
         p_reach_preceded_by_cue(i)=nanmean(was_reach_preceded_by_cue(fracthru>=fracthrubins(i) & fracthru<fracthrubins(i+1)));
         sample_std_for_binomial(i)=sqrt((p_reach_preceded_by_cue(i)*(1-p_reach_preceded_by_cue(i)))/nansum(fracthru>=fracthrubins(i) & fracthru<fracthrubins(i+1)));
+        ns_reach_preceded_by_cue(i)=nansum(fracthru>=fracthrubins(i) & fracthru<fracthrubins(i+1));
     else
         p_reach_preceded_by_cue(i)=nanmean(was_reach_preceded_by_cue(fracthru>=fracthrubins(i) & fracthru<fracthrubins_ends(i)));
         sample_std_for_binomial(i)=sqrt((p_reach_preceded_by_cue(i)*(1-p_reach_preceded_by_cue(i)))/nansum(fracthru>=fracthrubins(i) & fracthru<fracthrubins_ends(i)));
+        ns_reach_preceded_by_cue(i)=nansum(fracthru>=fracthrubins(i) & fracthru<fracthrubins_ends(i));
     end
 end
 if suppressPlots~=true
@@ -222,6 +225,7 @@ fracthru_allevs=alltbt.fractionThroughSess_adjusted(dataset.realDistributions.ev
 fracthru=fracthru_allevs(trial_number);
 p_reach_followed_by_cue=nan(length(fracthrubins)-1,1);
 sample_std_for_binomial_follow=nan(length(fracthrubins)-1,1);
+ns_reach_followed_by_cue=nan(length(fracthrubins)-1,1);
 % trial by trial
 tbtu=unique(trial_number);
 p_reach_followed_by_cue_tbt=nan(length(tbtu),1);
@@ -235,9 +239,11 @@ for i=1:length(fracthrubins)-1
     if isempty(fracthrubins_ends)
         p_reach_followed_by_cue(i)=nanmean(was_reach_followed_by_cue(fracthru>=fracthrubins(i) & fracthru<fracthrubins(i+1)));
         sample_std_for_binomial_follow(i)=sqrt((p_reach_followed_by_cue(i)*(1-p_reach_followed_by_cue(i)))/nansum(fracthru>=fracthrubins(i) & fracthru<fracthrubins(i+1)));
+        ns_reach_followed_by_cue(i)=nansum(fracthru>=fracthrubins(i) & fracthru<fracthrubins(i+1));
     else
         p_reach_followed_by_cue(i)=nanmean(was_reach_followed_by_cue(fracthru>=fracthrubins(i) & fracthru<fracthrubins_ends(i)));
         sample_std_for_binomial_follow(i)=sqrt((p_reach_followed_by_cue(i)*(1-p_reach_followed_by_cue(i)))/nansum(fracthru>=fracthrubins(i) & fracthru<fracthrubins_ends(i)));
+        ns_reach_followed_by_cue(i)=nansum(fracthru>=fracthrubins(i) & fracthru<fracthrubins_ends(i));
     end
 end
 if suppressPlots~=true
@@ -251,6 +257,10 @@ if suppressPlots~=true
     figure(); plot(downSampAv(p_reach_followed_by_cue_tbt,ds));
     xlabel('Bin'); ylabel('P reach followed by cue TRIALS BINNED');
 end
+p_reach_preceded_by_cue(p_reach_preceded_by_cue==0)=1./(2.*ns_reach_preceded_by_cue(p_reach_preceded_by_cue==0));
+p_reach_preceded_by_cue(p_reach_preceded_by_cue==1)=1-(1./(2.*ns_reach_preceded_by_cue(p_reach_preceded_by_cue==1)));
+p_reach_followed_by_cue(p_reach_followed_by_cue==0)=1./(2.*ns_reach_followed_by_cue(p_reach_followed_by_cue==0));
+p_reach_followed_by_cue(p_reach_followed_by_cue==1)=1-(1./(2.*ns_reach_followed_by_cue(p_reach_followed_by_cue==1)));
 dprime_given_reach=norminv(p_reach_preceded_by_cue)-norminv(p_reach_followed_by_cue);
 dprime_given_reachPLUSsd=norminv(p_reach_preceded_by_cue+sample_std_for_binomial)-norminv(p_reach_followed_by_cue-sample_std_for_binomial_follow);
 dprime_given_reachMINUSsd=norminv(p_reach_preceded_by_cue-sample_std_for_binomial)-norminv(p_reach_followed_by_cue+sample_std_for_binomial_follow);

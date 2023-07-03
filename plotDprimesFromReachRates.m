@@ -198,7 +198,7 @@ end
 function [dprimes,hit_rates,fa_rates]=calc_dprimes(uncued_events,cued_events)
 
 useBayes=false; % Bayes estimator helps to ameliorate SOME of the shift in d-prime that results from simply having too few trials
-flipContingency=true; % if want to get probability that a reach preceded or followed by cue, rather than probability that cue preceded or followed by reach
+flipContingency=false; % if want to get probability that a reach preceded or followed by cue, rather than probability that cue preceded or followed by reach
 
 if flipContingency==true
     disp('DOING FLIP CONTINGENCY!');
