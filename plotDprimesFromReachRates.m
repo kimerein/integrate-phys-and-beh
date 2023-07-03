@@ -216,12 +216,14 @@ if flipContingency==true
     n=nansum((cued_events>0) + (uncued_events>0),2);
     if any(hit_rates==0)
         hit_rates(hit_rates==0)=1./(2.*n(hit_rates==0));
-    elseif any(hit_rates==1)
+    end
+    if any(hit_rates==1)
         hit_rates(hit_rates==1)=1-(1./(2.*n(hit_rates==1)));
     end
     if any(fa_rates==0)
         fa_rates(fa_rates==0)=1./(2.*n(fa_rates==0));
-    elseif any(fa_rates==1)
+    end
+    if any(fa_rates==1)
         fa_rates(fa_rates==1)=1-(1./(2.*n(fa_rates==1)));
     end
 elseif useBayes==true
