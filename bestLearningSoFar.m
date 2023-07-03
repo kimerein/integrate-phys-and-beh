@@ -97,6 +97,9 @@ elseif length(varargin)==4
             alltbt.higherThanBefore(metadata.sess_wrt_day1==usess(j) & metadata.mouseid==umouse(i))=higherThanBefore(j);
             trialTypes.higherThanBefore(metadata.sess_wrt_day1==usess(j) & metadata.mouseid==umouse(i))=higherThanBefore(j);
         end
+        figure();
+        plot(usess,avformouse); hold on;
+        scatter(usess(higherThanBefore==1),ones(size(usess(higherThanBefore==1))),[],'r');
     end
 end
 
