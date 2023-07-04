@@ -50,6 +50,8 @@ xlabel('Time (sec)'); ylabel(['Reach rate (reaches per sec) ' num2str(plotReturn
 
 returnout.data1_mean{1}=mecombo;
 returnout.data1_se{1}=combo_se;
+returnout.data2_mean{1}=mecombo;
+returnout.data2_se{1}=combo_se;
 returnout.time_for_x=plotReturn1.time_for_x;
 returnout.n=plotReturn1.n+plotReturn2.n;
 
