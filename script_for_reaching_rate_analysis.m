@@ -7,9 +7,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023183557\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023184639\'; % directory containing experimental data
 behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log - Slimmed down w old mice added.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023183557\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023184639\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -129,11 +129,11 @@ alltbt.mouseid=metadata.mouseid;
 alltbt.sessid=metadata.sessid;
 trialTypes.sessid=metadata.sessid;
 % tbt_filter.sortField='sessid';
-% tbt_filter.sortField='dprimes';
+tbt_filter.sortField='dprimes';
 % tbt_filter.sortField='day1formice';
 % tbt_filter.sortField='distractor_immediate_after_cue';
 % tbt_filter.sortField='higherThanBefore';
-tbt_filter.sortField='fractionThroughSess_adjusted';
+% tbt_filter.sortField='fractionThroughSess_adjusted';
 % tbt_filter.sortField='opto_enhanced_reach';
 % tbt_filter.sortField='mouseLearned';
 % tbt_filter.sortField='initiallyLowLEDsess';
@@ -142,7 +142,8 @@ tbt_filter.sortField='fractionThroughSess_adjusted';
 % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
 % tbt_filter.range_values=[-100 100]; %[0.75 100];
 % tbt_filter.range_values=[2 3 6 7 8 9];
-tbt_filter.range_values=[0.5 1];
+% tbt_filter.range_values=[0.5 1.5];
+tbt_filter.range_values=[-100 0.75]; 
 % tbt_filter.range_values=[0.75 100]; % maybe 2,6,7,12
 % tbt_filter.range_values=[0.5 1.5]; % maybe 2,6,7,12
 % tbt_filter.range_values=[2 3 4 5 6 7 8 9 10 11 12 14 15 17 18 19]; % which mice start at non-learning 
@@ -165,10 +166,22 @@ alltbt=checkForOptoEnhancedReach(alltbt,metadata,trialTypes,'all_reachBatch','tr
 trialTypes.opto_enhanced_reach=alltbt.opto_enhanced_reach;
 
 %% find sessions where mouse learned
-part1_fracThroughSess=[0 0.5]; %[0 0.2];
-part2_fracThroughSess=[0.5 1]; %[0.2 0.8];
+part1_fracThroughSess=[0 0.25];
+part2_fracThroughSess=[0.25 1];
 learningThresh=0.1;
 alltbt=findSessWhereMouseLearned(alltbt,metadata,trialTypes,part1_fracThroughSess,part2_fracThroughSess,learningThresh);
+learned1=alltbt.mouseLearned;
+part1_fracThroughSess=[0 0.5];
+part2_fracThroughSess=[0.5 1];
+learningThresh=0.1;
+alltbt=findSessWhereMouseLearned(alltbt,metadata,trialTypes,part1_fracThroughSess,part2_fracThroughSess,learningThresh);
+learned2=alltbt.mouseLearned;
+part1_fracThroughSess=[0 0.75];
+part2_fracThroughSess=[0.75 1];
+learningThresh=0.1;
+alltbt=findSessWhereMouseLearned(alltbt,metadata,trialTypes,part1_fracThroughSess,part2_fracThroughSess,learningThresh);
+learned3=alltbt.mouseLearned;
+alltbt.mouseLearned=learned1 | learned2 | learned3;
 trialTypes.mouseLearned=alltbt.mouseLearned;
 
 %% learning curves
@@ -203,7 +216,7 @@ test.nInSequence=[2]; % defines trial pairs, e.g., 2 means will compare each tri
 % trial1='trialTypes.led==0';
 trialTypes.isLongITI_1forward=[trialTypes.isLongITI(2:end); 0];
 trialTypes.optoGroup_1forward=[trialTypes.optoGroup(2:end); 0];
-% trial1='trialTypes.optoGroup~=1';
+% trial1='trialTypes.led==0';
 % trial1='trialTypes.led==0'; % | trialTypes.led_1back==0 | trialTypes.led_2back==0';
 % memory
 %this %trial1='trialTypes.led~=1'; 
@@ -222,7 +235,7 @@ test.templateSequence2_cond=eval(trial1);
 % this %trial2='trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3 & trialTypes.led_1forward==0';
 % trial2='trialTypes.optoGroup~=1 & trialTypes.led==0 & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
 % trial2='trialTypes.optoGroup~=1 & trialTypes.led==0';
-trial2='trialTypes.optoGroup==2';
+trial2='trialTypes.led==1';
 test.trial2=trial2;
 test.templateSequence2_end=eval(trial2);
 test.fillInBetweenWithAnything=false; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1
@@ -343,10 +356,10 @@ plotHallmarksOfSatiety(reachrates,dataset,alltbt,metadata,trialTypes);
 % memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,[],plotCDFUpTo);
 nInSeq=2; 
 useFractionThroughSession=[0.5 1];
-withinCueTimeWindow=1.5; % in sec
-% useFractionThroughSession=[-100 100];
+withinCueTimeWindow=0.4; % in sec
+beginOfSess=0.25; % up to this fraction of session
 plotCDFUpTo=9.5;
-memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,[],plotCDFUpTo,withinCueTimeWindow);
+memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,[],plotCDFUpTo,withinCueTimeWindow,beginOfSess);
 % ANOTHER WAY
 trialTypes.lowLEDsequence=findSeqsWithN_of_condition(trialTypes, 'led', 55, 150, false);
 [~,ui]=unique(trialTypes.sessid);

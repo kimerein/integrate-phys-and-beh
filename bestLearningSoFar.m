@@ -112,6 +112,8 @@ function higherThanBefore=getDaysHigherThanBefore(avformouse,firsthalf,secondhal
 % useDayAv=false;
 % nanOutAfterExpert=true;
 
+epsilon=0.1; % error in dprime
+
 highestSoFar=-inf;
 if nanOutAfterExpert==true
     highestSoFar=3;
@@ -123,7 +125,7 @@ for i=1:length(avformouse)
             higherThanBefore(i)=1;
         end
     elseif useDayAv==true
-        if avformouse(i)>highestSoFar
+        if avformouse(i)>highestSoFar-epsilon
             highestSoFar=avformouse(i);
             higherThanBefore(i)=1;
         end

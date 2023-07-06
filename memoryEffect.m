@@ -1,4 +1,4 @@
-function memoryEffect(alltbt,metadata,trialTypes,nInSequence,useFractionThroughSession,useReachType,plotCDFUpTo,withinCueTimeWindow)
+function memoryEffect(alltbt,metadata,trialTypes,nInSequence,useFractionThroughSession,useReachType,plotCDFUpTo,withinCueTimeWindow,beginOfSessWindow)
 
 flankingTrials='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1'; % take every trial
 %flankingTrials='trialTypes.led~=1'; % take no LED trials only
@@ -56,11 +56,12 @@ reachratesettings=getReachRateSettings(withinCueTimeWindow);
 % NO LED FIRST
 test.nInSequence=[nInSequence]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
 % trial1='trialTypes.led~=1';
+% trial1='trialTypes.led==0'; 
 trial1=flankingTrials;
 test.trial1=trial1;
 linker=' & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup_1forward~=3'; 
 % trial2=['trialTypes.led~=1' linker];
-trial2=['trialTypes.led~=1'];
+trial2=['trialTypes.led==0'];
 test.trial2=trial2;
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch');
@@ -79,12 +80,14 @@ reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'c
 title('No led sequence');
 [mean_uncued,se_uncued,mean_cued,se_cued,uncued_inThisPartOfSess_noLED,cued_inThisPartOfSess_noLED,fracs_inThisPartOfSess_noLED]=getCuedUncuedMeanSE(reachrates,useFractionThroughSession);
 [mean_dprime,se_dprime,dprimes_inThisPartOfSess,fracs_inThisPartOfSess_dprimeNoLED]=getDprimeMeanSE(dprimes_noLED,fracs_over_sess_noLED,useFractionThroughSession);
+[mean_dprime_firstHalf,se_dprime_firstHalf,dprimes_inThisPartOfSess_firstHalf,fracs_inThisPartOfSess_dprimeNoLED_firstHalf]=getDprimeMeanSE(dprimes_noLED,fracs_over_sess_noLED,[0 beginOfSessWindow]);
 
 % LED SECOND
 test.nInSequence=[nInSequence]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
 linker=' & trialTypes.led_1back~=1'; 
 % trial1=['trialTypes.led~=1' linker]; 
 % trial1=['trialTypes.led~=1'];
+% trial1='trialTypes.led==0'; 
 trial1=flankingTrials;
 test.trial1=trial1;
 % trial2=['trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3'];
@@ -108,6 +111,7 @@ reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'c
 title('Led sequence');
 [mean_uncued_LED,se_uncued_LED,mean_cued_LED,se_cued_LED,uncued_inThisPartOfSess_LED,cued_inThisPartOfSess_LED,fracs_inThisPartOfSess_LED]=getCuedUncuedMeanSE(reachrates,useFractionThroughSession);
 [mean_dprime_LED,se_dprime_LED,dprimes_inThisPartOfSess,fracs_inThisPartOfSess_dprimeLED]=getDprimeMeanSE(dprimes_LED,fracs_over_sess_LED,useFractionThroughSession);
+[mean_dprime_LED_firstHalf,se_dprime_LED_firstHalf,dprimes_inThisPartOfSess_firstHalf,fracs_inThisPartOfSess_dprimeLED_firstHalf]=getDprimeMeanSE(dprimes_LED,fracs_over_sess_LED,[0 beginOfSessWindow]);
 
 noLED_all_uncued=uncued_inThisPartOfSess_noLED(1:end);
 noLED_all_cued=cued_inThisPartOfSess_noLED(1:end);
@@ -154,6 +158,15 @@ line([mean_uncued mean_uncued],[mean_cued-se_cued mean_cued+se_cued],'Color','k'
 line([mean_uncued_LED-se_uncued_LED mean_uncued_LED+se_uncued_LED],[mean_cued_LED mean_cued_LED],'Color','r');
 line([mean_uncued_LED mean_uncued_LED],[mean_cued_LED-se_cued_LED mean_cued_LED+se_cued_LED],'Color','r');
 
+% plot output in 1D dprime space FIRST HALF
+figure();
+scatter(nanmean(fracs_inThisPartOfSess_dprimeNoLED_firstHalf(1:end)),mean_dprime_firstHalf,[],'k','filled');
+hold on; 
+scatter(nanmean(fracs_inThisPartOfSess_dprimeLED_firstHalf(1:end)),mean_dprime_LED_firstHalf,[],'r','filled');
+line([nanmean(fracs_inThisPartOfSess_dprimeNoLED_firstHalf(1:end)) nanmean(fracs_inThisPartOfSess_dprimeNoLED_firstHalf(1:end))],[mean_dprime_firstHalf-se_dprime_firstHalf mean_dprime_firstHalf+se_dprime_firstHalf],'Color','k');
+line([nanmean(fracs_inThisPartOfSess_dprimeLED_firstHalf(1:end)) nanmean(fracs_inThisPartOfSess_dprimeLED_firstHalf(1:end))],[mean_dprime_LED_firstHalf-se_dprime_LED_firstHalf mean_dprime_LED_firstHalf+se_dprime_LED_firstHalf],'Color','r');
+title('dprime useFractionThroughSession FIRST HALF');
+
 % plot output in 1D dprime space
 figure();
 scatter(nanmean(fracs_inThisPartOfSess_dprimeNoLED(1:end)),mean_dprime,[],'k','filled');
@@ -171,7 +184,6 @@ scatter(nanmean(useFractionThroughSession),dprime_given_reach_LED(end),[],'r','f
 line([nanmean(useFractionThroughSession) nanmean(useFractionThroughSession)],[dprime_given_reachMINUSsd_noLED(end) dprime_given_reachPLUSsd_noLED(end)],'Color','k');
 line([nanmean(useFractionThroughSession) nanmean(useFractionThroughSession)],[dprime_given_reachMINUSsd_LED(end) dprime_given_reachPLUSsd_LED(end)],'Color','r');
 title('dprime GIVEN REACH');
-
 
 end
 
@@ -215,7 +227,7 @@ if suppressPlots~=true
     end
     xlabel('Fraction through session'); ylabel('P (m sd given binom) reach preceded by cue');
 end
-[was_reach_followed_by_cue,trial_number,reach_time]=givenReach_probThatWasPrecededByCue(dataset.realDistributions, whichEvent, -1.5, timestep, cueAtInd); % if third arg is negative, will get prob cue AFTER reach
+[was_reach_followed_by_cue,trial_number,reach_time]=givenReach_probThatWasPrecededByCue(dataset.realDistributions, whichEvent, withinCueTimeWindow, timestep, cueAtInd); % if third arg is negative, will get prob cue AFTER reach
 fracthru_allevs=alltbt.fractionThroughSess_adjusted(dataset.realDistributions.event_isSeq{1}==1);
 fracthru=fracthru_allevs(trial_number);
 p_reach_followed_by_cue=nan(length(fracthrubins)-1,1);

@@ -1,7 +1,8 @@
 function [alltbt,unique_sessid,changeInDprimes]=findSessWhereMouseLearned(alltbt,metadata,trialTypes,part1_fracThroughSess,part2_fracThroughSess,learningThresh)
 
 nInSequence=2;
-flankingTrials='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1'; % take every trial
+% flankingTrials='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1'; % take every trial
+flankingTrials='trialTypes.led==0'; % take no LED trials
 shuffleTrialOrder=false; % if want to randomly permute trial order to test for ordering effects
 alltbt.sessid=metadata.sessid;
 trialTypes.sessid=metadata.sessid;
@@ -13,12 +14,15 @@ reachratesettings.percentOfReachesFromSess_forInitRate=20; % use this fraction o
 reachratesettings.maxTrialLength=9.5; % in sec, wrt cue
 reachratesettings.minTrialLength=-2; % wrt cue, in sec
 reachratesettings.suppressPlots=true;
-reachratesettings.acrossSess_window1=[0.05 2]; % cued window [0.05 1]
+
+dpset=settingsForDprimes(alltbt,'cueZone_onVoff',false);
+
+reachratesettings.acrossSess_window1=[dpset.reachAfterCueWindow_start dpset.reachAfterCueWindow_end]; % cued window [0.05 1]
 % reachratesettings.acrossSess_window1=[0 9.5]; % cued window [0.05 1]
 % reachratesettings.acrossSess_window1=[4 7];
 % note that after mouse gets a pellet, reaching is suppressed
 reachratesettings.acrossSess_window2=[7 reachratesettings.maxTrialLength]; % beware reach suppression after a success
-reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength 0]; 
+reachratesettings.acrossSess_window3=[dpset.preCueWindow_start1 dpset.preCueWindow_end1]; %[reachratesettings.minTrialLength 0]; 
 reachratesettings.scatterPointSize=50; % size for points in scatter plot
 reachratesettings.addSatietyLines=true; % whether to add proportionality lines to figure
 reachratesettings.stopPlottingTrialsAfterN=500;

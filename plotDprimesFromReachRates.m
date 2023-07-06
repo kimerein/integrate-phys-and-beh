@@ -22,7 +22,7 @@ settings.stopPlottingBinsAfterN=200; %60; %55;
 settings.furtherBinBins=false; %true; %false; %true;
 settings.binThisManyBins=5;
 settings.plotVersusFrac=plotVersusFrac; % if is true, will plot dprime versus fraction through session instead of trial count
-settings.plotChangeInDprimes=true;
+settings.plotChangeInDprimes=false;
 
 [dprimes,fracs_over_sess]=getdprimes(reachrates,settings.binThisManyTrials,settings);
 firstBinDprimes=dprimes(:,1);
