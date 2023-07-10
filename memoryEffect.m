@@ -25,7 +25,8 @@ test.trial2=trial2;
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
 % playing with an alternate metric: given reach, probability that cue preceded reach
 % fracthrubins=0:0.1:1.0001;
-fracthrubins={[0:0.05:0.95],[0.1:0.05:1.001]};
+% fracthrubins={[0:0.05:0.95],[0.1:0.05:1.001]};
+fracthrubins={[0:0.15:1],[0.15:0.15:0.87 1]};
 [dprime_given_reach,dprime_given_reachPLUSsd,dprime_given_reachMINUSsd]=dprimes_given_reach(alltbt,dataset,false,fracthrubins,'rawReaching_event_trialiInSeq',withinCueTimeWindow); % two formats for fracthrubins, see function
 % continuing to plot change over all trials within session
 reachratesettings.suppressPlots=false;
@@ -67,9 +68,10 @@ test.trial2=trial2;
 alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch');
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch back');
-fracthrubins={[0:0.05:0.95],[0.1:0.05:1.001]};
+% fracthrubins={[0:0.05:0.95],[0.1:0.05:1.001]};
+fracthrubins={[0:0.15:1],[0.15:0.15:0.87 1]};
 dprimes_given_reach(alltbt,dataset,false,fracthrubins,'rawReaching_event_trialiInSeq',withinCueTimeWindow);
-fracthrubins=0:useFractionThroughSession(1):useFractionThroughSession(2)+0.001;
+fracthrubins=[0: useFractionThroughSession(1) useFractionThroughSession(2)+0.001];
 [dprime_given_reach_noLED,dprime_given_reachPLUSsd_noLED,dprime_given_reachMINUSsd_noLED]=dprimes_given_reach(alltbt,dataset,false,fracthrubins,'rawReaching_event_trialiInSeq',withinCueTimeWindow);
 title('dprime NO LED given reach');
 returnThis=plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching'); title('No LED');
@@ -98,9 +100,10 @@ test.trial2=trial2;
 alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch');
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch back');
-fracthrubins={[0:0.05:0.95],[0.1:0.05:1.001]};
+% fracthrubins={[0:0.05:0.95],[0.1:0.05:1.001]};
+fracthrubins={[0:0.15:1],[0.15:0.15:0.87 1]};
 dprimes_given_reach(alltbt,dataset,false,fracthrubins,'rawReaching_event_trialiInSeq',withinCueTimeWindow);
-fracthrubins=0:useFractionThroughSession(1):useFractionThroughSession(2)+0.001;
+fracthrubins=[0: useFractionThroughSession(1) useFractionThroughSession(2)+0.001];
 [dprime_given_reach_LED,dprime_given_reachPLUSsd_LED,dprime_given_reachMINUSsd_LED]=dprimes_given_reach(alltbt,dataset,false,fracthrubins,'rawReaching_event_trialiInSeq',withinCueTimeWindow);
 title('dprime LED given reach');
 returnThis=plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching'); title('LED');
@@ -130,7 +133,7 @@ binsForFracs=0:0.01:1;
 con=plotHistoOfFracs(binsForFracs,fracs_inThisPartOfSess_noLED,fracs_inThisPartOfSess_LED);
 % what's more important is to the sample the actual number of trials,
 % because it's binomial
-resampleToMatchNumberTrials=true; %false; 
+resampleToMatchNumberTrials=false; 
 if resampleToMatchNumberTrials
     % whichever has fewer trials
     nTrials_con=nansum(~isnan(noLED_all_uncued));
@@ -227,7 +230,7 @@ if suppressPlots~=true
     end
     xlabel('Fraction through session'); ylabel('P (m sd given binom) reach preceded by cue');
 end
-[was_reach_followed_by_cue,trial_number,reach_time]=givenReach_probThatWasPrecededByCue(dataset.realDistributions, whichEvent, withinCueTimeWindow, timestep, cueAtInd); % if third arg is negative, will get prob cue AFTER reach
+[was_reach_followed_by_cue,trial_number,reach_time]=givenReach_probThatWasPrecededByCue(dataset.realDistributions, whichEvent, -withinCueTimeWindow, timestep, cueAtInd); % if third arg is negative, will get prob cue AFTER reach
 fracthru_allevs=alltbt.fractionThroughSess_adjusted(dataset.realDistributions.event_isSeq{1}==1);
 fracthru=fracthru_allevs(trial_number);
 p_reach_followed_by_cue=nan(length(fracthrubins)-1,1);
