@@ -7,9 +7,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023184639\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023175615\'; % directory containing experimental data
 behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log - Slimmed down w old mice added.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023184639\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023175615\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -51,14 +51,14 @@ backup.metadata=metadata;
 % [alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,[4 5 19]);
 
 % Optional: discard preemptive
-% [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
+[alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
 
 % fix weird bug where reach batch sometimes get stuck at 1 (in less than 0.1% of trials), possibly an
 % interp problem somewhere?? not sure
 alltbt=fixReachesStuckAtOne(alltbt);
 
 % fix weird opto bug, where opto output from Arduino was flickering
-alltbt.optoOn(nansum(alltbt.optoOn,2)>100,:)=0;
+% alltbt.optoOn(nansum(alltbt.optoOn,2)>100,:)=0;
 
 %% choose additional settings for reaction time analysis
 
@@ -82,7 +82,7 @@ end
 
 % Optional: discard no pellet reaches within certain time after success
 % bcz represent chewing arm movements
-alltbt=ignoreReachesAfterSuccess(alltbt,metadata,9); % last arg is seconds after success, i.e., how long to chew pellet
+% alltbt=ignoreReachesAfterSuccess(alltbt,metadata,9); % last arg is seconds after success, i.e., how long to chew pellet
 
 % Optional: Exclude trials with paw on wheel
 % [alltbt,metadata,trialTypes]=excludePawOnWheel(alltbt,metadata,trialTypes,'cueZone_onVoff');
@@ -128,8 +128,8 @@ saveDir=['/Volumes/Neurobio/MICROSCOPE/Kim/RT pairs data sets/' temp]; % where t
 alltbt.mouseid=metadata.mouseid;
 alltbt.sessid=metadata.sessid;
 trialTypes.sessid=metadata.sessid;
-tbt_filter.sortField='sessid';
-% tbt_filter.sortField='dprimes';
+% tbt_filter.sortField='sessid';
+tbt_filter.sortField='dprimes';
 % tbt_filter.sortField='day1formice';
 % tbt_filter.sortField='distractor_immediate_after_cue';
 % tbt_filter.sortField='higherThanBefore';
@@ -142,7 +142,7 @@ tbt_filter.sortField='sessid';
 % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
 % tbt_filter.range_values=[-100 100]; %[0.75 100];
 % tbt_filter.range_values=[2 3 6 7 8 9];
-tbt_filter.range_values=[37.5 38.5] ;%0.471];
+tbt_filter.range_values=[-100 100] ;%0.471];
 % tbt_filter.range_values=[-100 0.75]; 
 % tbt_filter.range_values=[0.75 100]; % maybe 2,6,7,12
 % tbt_filter.range_values=[0.5 1.5]; % maybe 2,6,7,12
@@ -211,19 +211,20 @@ trialTypes.sess_wrt_day1=metadata.sess_wrt_day1; alltbt.sess_wrt_day1=metadata.s
 %% build relevant data sets
 
 % settings for paired RT data set
-test.nInSequence=[2]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
+test.nInSequence=[4]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
 % requirement for first trial in pair
 % trial1='trialTypes.led==0';
 trialTypes.isLongITI_1forward=[trialTypes.isLongITI(2:end); 0];
+trialTypes.isLongITI_1back=[1; trialTypes.isLongITI(1:end-1)];
 trialTypes.optoGroup_1forward=[trialTypes.optoGroup(2:end); 0];
 % trial1='trialTypes.led==0';
 % trial1='trialTypes.led==0'; % | trialTypes.led_1back==0 | trialTypes.led_2back==0';
 % memory
 %this %trial1='trialTypes.led~=1'; 
 % trial1='trialTypes.isLongITI==1';
-trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
+% trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
 % trial1='trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1'; % & trialTypes.isLongITI_1forward==1'];
-% trial1='trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup~=1  & trialTypes.isLongITI_1forward==1';
+trial1='trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup~=1';
 % trial1='trialTypes.cued_reach_1forward==1 & trialTypes.touched_pellet_1forward==1 & (trialTypes.led_1forward==0) & trialTypes.optoGroup~=1  & trialTypes.optoGroup_1forward~=1';
 % trial1='trialTypes.cued_reach_1forward==0  & trialTypes.touched_pellet_1forward==1 & (trialTypes.led_1forward==0) & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
 % trial1='trialTypes.cued_reach_1forward==1 & trialTypes.consumed_pellet_1forward==0 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
@@ -234,8 +235,9 @@ test.templateSequence2_cond=eval(trial1);
 % memory
 % this %trial2='trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3 & trialTypes.led_1forward==0';
 % trial2='trialTypes.optoGroup~=1 & trialTypes.led==0 & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
+trial2='trialTypes.optoGroup~=1 & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
 % trial2='trialTypes.optoGroup~=1 & trialTypes.led==0';
-trial2='trialTypes.led==0';
+% trial2='trialTypes.led==0';
 test.trial2=trial2;
 test.templateSequence2_end=eval(trial2);
 test.fillInBetweenWithAnything=false; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1
@@ -377,6 +379,9 @@ nInSeq=2;
 useFractionThroughSession=[0 1];
 plotCDFUpTo=3;
 memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,'reachBatch_miss_reachStarts',plotCDFUpTo);
+
+%% p(reach preceded by cue) and p(reach followed by cue) for a sequence
+% first run "build relevant data sets" to find sequences
 
 %% shift in reach rate between trial pair
 
