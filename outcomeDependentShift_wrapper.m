@@ -1,4 +1,4 @@
-function [f1,f2]=outcomeDependentShift_wrapper(alltbt,trialTypes,metadata,saveDir,f1,f2)
+function [f1,f2]=outcomeDependentShift_wrapper(alltbt,trialTypes,metadata,saveDir,f1,f2,reachratesettings,timeWindowOfEventReach)
 
 compareToFirstTrial=true;
 linkSuccesses=false;
@@ -25,8 +25,8 @@ trialTypes.reachedAfterCue_1forward=[trialTypes.reachedAfterCue(2:end); 0];
 flankingTrials='(trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1)';
 
 % which to plot
-whichToPlot='no reach'; % can be 'success','delayed success','drop','cued touch','cued touch and switch color','failed cued reach','false alarm','no reach','basic','wildcard','backward success'
-[plotset,trialTypes]=whichToPlotNow(whichToPlot,trialTypes,alltbt);
+whichToPlot='success'; % can be 'success','delayed success','drop','cued touch','cued touch and switch color','failed cued reach','false alarm','no reach','basic','wildcard','backward success'
+[plotset,trialTypes]=whichToPlotNow(whichToPlot,trialTypes,alltbt,timeWindowOfEventReach);
 
 shuffleTrialOrder=false; % if want to randomly permute trial order to test for ordering effects
 reachratesettings.epsilon_cue=0; % in seconds
@@ -37,18 +37,18 @@ reachratesettings.percentOfReachesFromSess_forInitRate=20; % use this fraction o
 reachratesettings.maxTrialLength=9.5; % in sec, wrt cue
 reachratesettings.minTrialLength=-2; % wrt cue, in sec
 reachratesettings.suppressPlots=true;
- % sec wrt cue onset
-reachratesettings.acrossSess_window1=[0.05 1]; % cued window [0.05 1]
-% reachratesettings.acrossSess_window1=[0 9.5]; % cued window [0.05 1]
-% reachratesettings.acrossSess_window1=[4 7];
-% note that after mouse gets a pellet, reaching is suppressed
-reachratesettings.acrossSess_window2=[7 reachratesettings.maxTrialLength]; % beware reach suppression after a success
-reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength -1]; 
+% sec wrt cue onset
+% reachratesettings.acrossSess_window1=[0.05 1]; % cued window [0.05 1]
+% % reachratesettings.acrossSess_window1=[0 9.5]; % cued window [0.05 1]
+% % reachratesettings.acrossSess_window1=[4 7];
+% % note that after mouse gets a pellet, reaching is suppressed
+% reachratesettings.acrossSess_window2=[7 reachratesettings.maxTrialLength]; % beware reach suppression after a success
+% reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength -1]; 
 reachratesettings.scatterPointSize=50; % size for points in scatter plot
 reachratesettings.addSatietyLines=true; % whether to add proportionality lines to figure
 reachratesettings.stopPlottingTrialsAfterN=500;
 reachratesettings.showFitLine=false;
-reachratesettings.useWindowsForUncued=[3]; % to use window2 or window3 or both for the uncued reach rate
+% reachratesettings.useWindowsForUncued=[3]; % to use window2 or window3 or both for the uncued reach rate
 reachratesettings.initWindows=[]; % empty if want to calculate from dataset
 reachratesettings.addSessionLines=false; % for no averaging across sessions plot, whether to connect trial bins within same session with lines
 reachratesettings.binThisManyTrials=25; % how many trials to bin within each session
@@ -58,6 +58,11 @@ reachratesettings.binTrialsForAvAcrossSess=false;
 % see script_for_reaching_rate_analysis.m for explanation of rate methods
 dprimes_noLED_lasttrial=[];
 dprimes_LED_lasttrial=[];
+
+% print settings
+disp(['Using as time window to classify reach as cued (wrt cue onset in sec): ' num2str(reachratesettings.acrossSess_window1(1)) ' to ' num2str(reachratesettings.acrossSess_window1(2))]);
+disp(['Using as time window to classify reach as UNCUED (wrt cue onset in sec): ' num2str(reachratesettings.acrossSess_window3(1)) ' to ' num2str(reachratesettings.acrossSess_window3(2))]);
+pause;
 
 if ~isempty(f1)
     set(0,'CurrentFigure',f1);
@@ -88,12 +93,14 @@ if ~isempty(a)
 end
 % success
 nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.success_in_cued_window_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==0']; % & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
+% trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.success_in_cued_window_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==0']; % & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
+trial1='trialTypes.optoGroup~=1 & trialTypes.did_cued_reach_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1';
 if linkSuccesses==false
     trial2=[flankingTrials];
 else
     trial2=[flankingTrials ' & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1'];
 end
+trial2='trialTypes.optoGroup~=1 & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
@@ -528,12 +535,14 @@ quiver(baseEffect_uncued_mean_out,baseEffect_cued_mean_out,uncued_mean_out-baseE
 
 end
 
-function [plotset,trialTypes]=whichToPlotNow(whichToPlot,trialTypes,alltbt)
+function [plotset,trialTypes]=whichToPlotNow(whichToPlot,trialTypes,alltbt,timeWindow)
 
 plotset.cuedtouchcolor=[171 104 87]./255;
 switch whichToPlot
     case 'success'
-        timeWindow=[0 0.5]; % WHISPER mice
+        if isnan(timeWindow)
+            timeWindow=[0 0.5]; % WHISPER mice
+        end
         % for opto grc, used time window 0.25 to 1.25
 %         timeWindow=[0.1 0.5]; %[0.1 1]; % change this to select only trials with a reach in this window
         plotset.wildcard=false;
@@ -546,9 +555,11 @@ switch whichToPlot
         plotset.noreach=false;
         plotset.backward_success=false;
     case 'delayed success'
+        if isnan(timeWindow)
 %         timeWindow=[5 9]; % from cue, in seconds
 %         timeWindow=[3 7.5]; % from cue, in seconds
-        timeWindow=[5 7.5]; % from cue, in seconds
+            timeWindow=[5 7.5]; % from cue, in seconds
+        end
         plotset.wildcard=false;
         plotset.success=false;
         plotset.delayed=true;
@@ -559,7 +570,9 @@ switch whichToPlot
         plotset.noreach=false;
         plotset.backward_success=false;
     case 'backward success'
-        timeWindow=[];
+        if isnan(timeWindow)
+            timeWindow=[];
+        end
         plotset.wildcard=false;
         plotset.success=false;
         plotset.delayed=false;
@@ -570,7 +583,9 @@ switch whichToPlot
         plotset.noreach=false;
         plotset.backward_success=true;
     case 'drop'
-        timeWindow=[];
+        if isnan(timeWindow)
+            timeWindow=[];
+        end
         plotset.wildcard=false;
         plotset.success=false;
         plotset.delayed=false;
@@ -581,7 +596,9 @@ switch whichToPlot
         plotset.noreach=false;
         plotset.backward_success=false;
     case 'cued touch'
-        timeWindow=[];
+        if isnan(timeWindow)
+            timeWindow=[];
+        end
         plotset.wildcard=false;
         plotset.success=false;
         plotset.delayed=false;
@@ -592,7 +609,9 @@ switch whichToPlot
         plotset.noreach=false;
         plotset.backward_success=false;
     case 'cued touch and switch color'
-        timeWindow=[];
+        if isnan(timeWindow)
+            timeWindow=[];
+        end
         plotset.wildcard=false;
         plotset.success=false;
         plotset.delayed=false;
@@ -604,7 +623,9 @@ switch whichToPlot
         plotset.cuedtouchcolor='g';
         plotset.backward_success=false;
     case 'failed cued reach'
-        timeWindow=[]; %1.5];
+        if isnan(timeWindow)
+            timeWindow=[]; %1.5];
+        end
         plotset.wildcard=false;
         plotset.success=false;
         plotset.delayed=false;
@@ -615,7 +636,9 @@ switch whichToPlot
         plotset.noreach=false;
         plotset.backward_success=false;
     case 'false alarm'
-        timeWindow=[];
+        if isnan(timeWindow)
+            timeWindow=[];
+        end
         plotset.wildcard=false;
         plotset.success=false;
         plotset.delayed=false;
@@ -626,7 +649,9 @@ switch whichToPlot
         plotset.noreach=false;
         plotset.backward_success=false;
     case 'no reach'
-        timeWindow=[];
+        if isnan(timeWindow)
+            timeWindow=[];
+        end
         plotset.wildcard=false;
         plotset.success=false;
         plotset.delayed=false;
@@ -637,7 +662,9 @@ switch whichToPlot
         plotset.noreach=true;
         plotset.backward_success=false;
     case 'wildcard'
-        timeWindow=[];
+        if isnan(timeWindow)
+            timeWindow=[];
+        end
         plotset.wildcard=true;
         plotset.success=false;
         plotset.delayed=false;
@@ -648,7 +675,9 @@ switch whichToPlot
         plotset.noreach=false;
         plotset.backward_success=false;
     case 'basic'
-        timeWindow=[];
+        if isnan(timeWindow)
+            timeWindow=[];
+        end
         plotset.wildcard=false;
         plotset.success=true;
         plotset.delayed=false;
@@ -677,7 +706,7 @@ end
 
 function dprimes=calc_dprime_per_sess(uncued_events,cued_events)
 
-useBayes=true; % Bayes estimator helps to ameliorate SOME of the shift in d-prime that results from simply having too few trials
+useBayes=false; % Bayes estimator helps to ameliorate SOME of the shift in d-prime that results from simply having too few trials
 
 if useBayes==true
     disp('USING BAYES!');

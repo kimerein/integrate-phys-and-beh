@@ -178,7 +178,7 @@ alltbt=findSessWhereMouseLearned(alltbt,metadata,trialTypes,part1_fracThroughSes
 learned2=alltbt.mouseLearned;
 part1_fracThroughSess=[0 0.75];
 part2_fracThroughSess=[0.75 1];
-learningThresh=0.1;
+learningThresh=0.1; % used 0.1 for most of Fig 3
 alltbt=findSessWhereMouseLearned(alltbt,metadata,trialTypes,part1_fracThroughSess,part2_fracThroughSess,learningThresh);
 learned3=alltbt.mouseLearned;
 alltbt.mouseLearned=learned1 | learned2 | learned3;
@@ -210,6 +210,12 @@ trialTypes.sess_wrt_day1=metadata.sess_wrt_day1; alltbt.sess_wrt_day1=metadata.s
 
 %% build relevant data sets
 
+% set up current definition of "use this event"
+cuedreachtimewindow=0.4; % in seconds
+cuedreachinds=94:94+floor(cuedreachtimewindow./0.035);
+trialTypes.did_cued_reach=any(alltbt.reachBatch_success_reachStarts(:,cuedreachinds)>0.5,2); % cued success
+trialTypes.did_cued_reach_1forward=[trialTypes.did_cued_reach(2:end); 0];
+
 % settings for paired RT data set
 test.nInSequence=[3]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
 % requirement for first trial in pair
@@ -217,12 +223,16 @@ test.nInSequence=[3]; % defines trial pairs, e.g., 2 means will compare each tri
 trialTypes.isLongITI_1forward=[trialTypes.isLongITI(2:end); 0];
 trialTypes.isLongITI_1back=[1; trialTypes.isLongITI(1:end-1)];
 trialTypes.optoGroup_1forward=[trialTypes.optoGroup(2:end); 0];
-trial1='trialTypes.led==1';
+trialTypes.led_11back=[ones(11,1); trialTypes.led(1:end-11)];
+trialTypes.led_7back=[ones(7,1); trialTypes.led(1:end-7)];
+trialTypes.led_6back=[ones(6,1); trialTypes.led(1:end-6)];
+% trial1='trialTypes.led==0';
 % trial1='trialTypes.led==0'; % | trialTypes.led_1back==0 | trialTypes.led_2back==0';
 % memory
 %this %trial1='trialTypes.led~=1'; 
 % trial1='trialTypes.isLongITI==1';
 % trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
+trial1='trialTypes.optoGroup~=1 & trialTypes.did_cued_reach_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1'; % & trialTypes.isLongITI_1forward==1'];
 % trial1='trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1'; % & trialTypes.isLongITI_1forward==1'];
 % trial1='trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup~=1';
 % trial1='trialTypes.cued_reach_1forward==1 & trialTypes.touched_pellet_1forward==1 & (trialTypes.led_1forward==0) & trialTypes.optoGroup~=1  & trialTypes.optoGroup_1forward~=1';
@@ -235,12 +245,13 @@ test.templateSequence2_cond=eval(trial1);
 % memory
 % this %trial2='trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3 & trialTypes.led_1forward==0';
 % trial2='trialTypes.optoGroup~=1 & trialTypes.led==0 & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
-% trial2='trialTypes.optoGroup~=1 & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
+trial2='trialTypes.optoGroup~=1 & (trialTypes.led_1forward==0 | trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_1back==0)';
 % trial2='trialTypes.optoGroup~=1 & trialTypes.led==0';
-trial2='trialTypes.led==1';
+% trial2='trialTypes.led==1 & trialTypes.led_1forward==0 & trialTypes.led_6back==0'; 
+% trial2='trialTypes.led==0 & trialTypes.led_1forward==1 & trialTypes.led_7back==1'; % & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
 test.trial2=trial2;
 test.templateSequence2_end=eval(trial2);
-test.fillInBetweenWithAnything=false; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1
+test.fillInBetweenWithAnything=true; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1
 test.event_name=['alltrials' tbt_filter.name 'inBetweenAnything' num2str(test.fillInBetweenWithAnything)];
 % test.onlyConsiderReachType='reachBatch_success_reachStarts';
 test.onlyConsiderReachType=[];
@@ -273,7 +284,7 @@ plotBehaviorSessEvents_wrapper(alltbt,metadata,trialTypes,[37.5 38.5]); % last a
 % last argument chooses type of plot
 % see function plotBehaviorEventFx.m for options
 [returnThis,returnThisRef]=plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching');
-% plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching_cdf'); 
+plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching_cdf'); 
 
 %% plot trial to trial change in reach CDF
 
@@ -382,8 +393,8 @@ memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,'reachB
 
 %% p(reach preceded by cue) and p(reach followed by cue) for a sequence
 % first run "build relevant data sets" to find sequences
-usePositions=-10:15;
-plotByPosition(dataset, alltbt, trialTypes, metadata, usePositions, 'all_reachBatch', 0.5);
+usePositions=-10:20;
+returnout=plotByPosition(dataset, alltbt, trialTypes, metadata, usePositions, 'all_reachBatch', 0.5);
 
 %% shift in reach rate between trial pair
 
@@ -419,7 +430,12 @@ plotPairedChangeMinusSatiety(reachrates);
 
 %% plot outcome-dependent shifts
 
-outcomeDependentShift_wrapper(alltbt,trialTypes,metadata,saveDir,[],[]); % change e.g. line 407 in outcomeDependentShift_wrapper.m for varied timing
+reachratesettings.acrossSess_window1=[0.05 1]; % time window wrt cue onset to classify reach as cued
+reachratesettings.acrossSess_window2=[7 reachratesettings.maxTrialLength]; % beware reach suppression after a success
+reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength -1]; % time window wrt cue onset to classify reach as uncued
+reachratesettings.useWindowsForUncued=[3]; % to use window2 or window3 or both for the uncued reach rate
+timeWindowToCountAsEventReach=[]; % set as nan if want to use default in outcomeDependentShift_wrapper.m
+outcomeDependentShift_wrapper(alltbt,trialTypes,metadata,saveDir,[],[],reachratesettings,[]); 
 
 %% plot outcome-dependent shifts AND separate by dprime
 

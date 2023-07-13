@@ -1,4 +1,4 @@
-function plotByPosition(dataset, alltbt, trialTypes, metadata, usePositions, whichReach, cueWithinXsec)
+function out=plotByPosition(dataset, alltbt, trialTypes, metadata, usePositions, whichReach, cueWithinXsec)
 
 % p_reach followed or preceded by cue for each position in a sequence
 
@@ -50,5 +50,29 @@ for i=1:length(usePositions)
     line([usePositions(i) usePositions(i)],[p_reach_followed_by_cue(i)-sample_std_for_binomial_follow(i) p_reach_followed_by_cue(i)+sample_std_for_binomial_follow(i)],'Color','r');
 end
 title('p reach followed by cue');
+
+p_reach_preceded_by_cue(p_reach_preceded_by_cue==0)=1./(2.*ns_reach_preceded_by_cue(p_reach_preceded_by_cue==0));
+p_reach_preceded_by_cue(p_reach_preceded_by_cue==1)=1-(1./(2.*ns_reach_preceded_by_cue(p_reach_preceded_by_cue==1)));
+p_reach_followed_by_cue(p_reach_followed_by_cue==0)=1./(2.*ns_reach_followed_by_cue(p_reach_followed_by_cue==0));
+p_reach_followed_by_cue(p_reach_followed_by_cue==1)=1-(1./(2.*ns_reach_followed_by_cue(p_reach_followed_by_cue==1)));
+dprime_given_reach=norminv(p_reach_preceded_by_cue)-norminv(p_reach_followed_by_cue);
+dprime_given_reachPLUSsd=norminv(p_reach_preceded_by_cue+sample_std_for_binomial_precede)-norminv(p_reach_followed_by_cue-sample_std_for_binomial_follow);
+dprime_given_reachMINUSsd=norminv(p_reach_preceded_by_cue-sample_std_for_binomial_precede)-norminv(p_reach_followed_by_cue+sample_std_for_binomial_follow);
+figure();
+plot(usePositions,dprime_given_reach,'Color','g'); hold on;
+plot(usePositions,dprime_given_reachPLUSsd,'Color','g');
+plot(usePositions,dprime_given_reachMINUSsd,'Color','g');
+line([0 0],[min(dprime_given_reachMINUSsd,[],'omitnan') max(dprime_given_reachPLUSsd,[],'omitnan')],'Color','b');
+
+out.usePositions=usePositions;
+out.dprime_given_reach=dprime_given_reach;
+out.dprime_given_reachPLUSsd=dprime_given_reachPLUSsd;
+out.dprime_given_reachMINUSsd=dprime_given_reachMINUSsd;
+out.p_reach_preceded_by_cue=p_reach_preceded_by_cue;
+out.sample_std_for_binomial_precede=sample_std_for_binomial_precede;
+out.ns_reach_preceded_by_cue=ns_reach_preceded_by_cue;
+out.p_reach_followed_by_cue=p_reach_followed_by_cue;
+out.sample_std_for_binomial_follow=sample_std_for_binomial_follow;
+out.ns_reach_followed_by_cue=ns_reach_followed_by_cue;
 
 end
