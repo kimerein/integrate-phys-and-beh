@@ -70,8 +70,8 @@ else
     f1=figure();
 end
 xlabel('Uncued reach rate (1/sec)');
-% ylabel('Probability that reached faster after cue on second trial');
-% title('Approach 2, window 2 vs window 1');
+ylabel('Depends on approach, if 3, then Cued reach rate (1/sec)');
+title(['Approach ' num2str(reachratesettings.useWindowsForUncued)]);
 % baseline all trials
 nInSequence=3;
 trial1=[flankingTrials ' & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
@@ -529,9 +529,11 @@ if compareToFirstTrial==true
         dprimes_firsttrial=calc_dprime_per_sess(reachrates.trial1_alltrials_uncued,reachrates.trial1_alltrials_cued);
     end
 end
-quiver(baseEffect_uncued_mean_out,baseEffect_cued_mean_out,uncued_mean_out-baseEffect_uncued_mean_out,cued_mean_out-baseEffect_cued_mean_out,'Color',color1,'LineWidth',2);
-quiver(baseEffect_uncued_mean_out,baseEffect_cued_mean_out,uncued_mean_out-baseEffect_uncued_mean_out,cued_mean_out-baseEffect_cued_mean_out,'Color',color2,'LineWidth',0.5);
+if thisplotset
+    quiver(baseEffect_uncued_mean_out,baseEffect_cued_mean_out,uncued_mean_out-baseEffect_uncued_mean_out,cued_mean_out-baseEffect_cued_mean_out,'Color',color1,'LineWidth',2);
+    quiver(baseEffect_uncued_mean_out,baseEffect_cued_mean_out,uncued_mean_out-baseEffect_uncued_mean_out,cued_mean_out-baseEffect_cued_mean_out,'Color',color2,'LineWidth',0.5);
 % line([0 baseEffect_uncued_mean_out],[0 baseEffect_cued_mean_out],'Color',[0.2 0.2 0.2]);
+end
 
 end
 

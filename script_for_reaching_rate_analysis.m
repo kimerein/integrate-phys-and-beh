@@ -430,12 +430,12 @@ plotPairedChangeMinusSatiety(reachrates);
 
 %% plot outcome-dependent shifts
 
-reachratesettings.acrossSess_window1=[0.05 1]; % time window wrt cue onset to classify reach as cued
-reachratesettings.acrossSess_window2=[7 reachratesettings.maxTrialLength]; % beware reach suppression after a success
-reachratesettings.acrossSess_window3=[reachratesettings.minTrialLength -1]; % time window wrt cue onset to classify reach as uncued
+reachratesettings.acrossSess_window1=[0 cuedreachtimewindow]; % time window wrt cue onset to classify reach as cued
+reachratesettings.acrossSess_window2=[7 9.5]; % beware reach suppression after a success
+reachratesettings.acrossSess_window3=[-2 -1]; % time window wrt cue onset to classify reach as uncued
 reachratesettings.useWindowsForUncued=[3]; % to use window2 or window3 or both for the uncued reach rate
-timeWindowToCountAsEventReach=[]; % set as nan if want to use default in outcomeDependentShift_wrapper.m
-outcomeDependentShift_wrapper(alltbt,trialTypes,metadata,saveDir,[],[],reachratesettings,[]); 
+timeWindowToCountAsEventReach=[0 cuedreachtimewindow]; % set as nan if want to use default in outcomeDependentShift_wrapper.m
+outcomeDependentShift_wrapper(alltbt,trialTypes,metadata,saveDir,[],[],reachratesettings,timeWindowToCountAsEventReach); 
 
 %% plot outcome-dependent shifts AND separate by dprime
 

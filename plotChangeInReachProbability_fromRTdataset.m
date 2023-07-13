@@ -588,7 +588,7 @@ if useRateMethod==1 || useRateMethod==3
             y_x_proportionality_lines=[];
         end
     end
-    if settings.showFitLine==true
+    if settings.suppressPlots==false && settings.showFitLine==true
         lastToUse=settings.stopPlottingTrialsAfterN;
         if lastToUse>length(approach_uncued)
             lastToUse=length(approach_uncued);
@@ -634,9 +634,11 @@ if useRateMethod==1 || useRateMethod==3
     else
         upTo=length(approach_cued);
     end
-    quiver(nanmean(approach_uncued(1:n_for_init_rate)),nanmean(approach_cued(1:n_for_init_rate)),...
-        nanmean(approach_uncued(upTo-n_for_init_rate:upTo))-nanmean(approach_uncued(1:n_for_init_rate)),...
-        nanmean(approach_cued(upTo-n_for_init_rate:upTo))-nanmean(approach_cued(1:n_for_init_rate)),'Color','k');
+    if settings.suppressPlots==false
+        quiver(nanmean(approach_uncued(1:n_for_init_rate)),nanmean(approach_cued(1:n_for_init_rate)),...
+            nanmean(approach_uncued(upTo-n_for_init_rate:upTo))-nanmean(approach_uncued(1:n_for_init_rate)),...
+            nanmean(approach_cued(upTo-n_for_init_rate:upTo))-nanmean(approach_cued(1:n_for_init_rate)),'Color','k');
+    end
     quiver_y=nanmean(approach_cued(upTo-n_for_init_rate:upTo))-nanmean(approach_cued(1:n_for_init_rate));
     quiver_x=nanmean(approach_uncued(upTo-n_for_init_rate:upTo))-nanmean(approach_uncued(1:n_for_init_rate));
     quiver_m=quiver_y/quiver_x;
@@ -776,22 +778,24 @@ if useRateMethod==2
         bootMeans(1,i)=nanmean(sub_prob_uncued);
         bootMeans(2,i)=nanmean(sub_prob_cued);
     end
-    s=scatter(bootMeans(1,:),bootMeans(2,:),20,'k','filled');
-    s.AlphaData = 0.5*ones(1,size(bootMeans,2));
-    s.MarkerFaceAlpha = 'flat';
-    scatter(nanmean(altogether_prob_uncued),nanmean(altogether_prob_cued),50,'k','filled');
-%     tmp=cat(3,reachprobin_window2,ratein_window3);
-%     C=nansum(tmp,3);
-%     tempuncued=nanmean(nanmean(C/2,1),2);
-%     tempuncued(isnan(tempuncued) | isinf(tempuncued))=0;
-%     tempcued=nanmean(nanmean(reachprobin_window1,1),2);
-%     tempcued(isnan(tempcued) | isinf(tempcued))=0;
-%     quiver(0,0,tempuncued,tempcued,'Color','k');
-    xlabel('Uncued reach rate (1/sec)');
-%     xlabel('Probability that he reached in uncued window (-2 to -1 sec before cue)');
-    % ylabel('Cued reach rate (1/sec)');
-    ylabel('Probability that reached faster after cue on second trial');
-    title('Approach 2, window 2 vs window 1');
+    if settings.suppressPlots==false
+        s=scatter(bootMeans(1,:),bootMeans(2,:),20,'k','filled');
+        s.AlphaData = 0.5*ones(1,size(bootMeans,2));
+        s.MarkerFaceAlpha = 'flat';
+        scatter(nanmean(altogether_prob_uncued),nanmean(altogether_prob_cued),50,'k','filled');
+        %     tmp=cat(3,reachprobin_window2,ratein_window3);
+        %     C=nansum(tmp,3);
+        %     tempuncued=nanmean(nanmean(C/2,1),2);
+        %     tempuncued(isnan(tempuncued) | isinf(tempuncued))=0;
+        %     tempcued=nanmean(nanmean(reachprobin_window1,1),2);
+        %     tempcued(isnan(tempcued) | isinf(tempcued))=0;
+        %     quiver(0,0,tempuncued,tempcued,'Color','k');
+        xlabel('Uncued reach rate (1/sec)');
+        %     xlabel('Probability that he reached in uncued window (-2 to -1 sec before cue)');
+        % ylabel('Cued reach rate (1/sec)');
+        ylabel('Probability that reached faster after cue on second trial');
+        title('Approach 2, window 2 vs window 1');
+    end
     out.cued=approach2_cued;
     out.uncued=approach2_uncued;
     out.alltrials_cued=approach2_alltrials_cued;
