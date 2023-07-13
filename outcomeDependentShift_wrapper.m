@@ -1,4 +1,4 @@
-function [f1,f2]=outcomeDependentShift_wrapper(alltbt,trialTypes,metadata,saveDir,f1,f2,reachratesettings,timeWindowOfEventReach)
+function [f1,f2]=outcomeDependentShift_wrapper(alltbt,trialTypes,metadata,saveDir,f1,f2,reachratesettings,timeWindowOfEventReach,testEventReach)
 
 compareToFirstTrial=true;
 linkSuccesses=false;
@@ -101,6 +101,13 @@ else
     trial2=[flankingTrials ' & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1'];
 end
 trial2='trialTypes.optoGroup~=1 & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
+if plotset.success==true & ~isnan(testEventReach.trial1)
+    disp('Using passed in test event conditions'); pause;
+    trial1=testEventReach.trial1; trial2=testEventReach.trial2;
+    if testEventReach.fillInBetweenWithAnything==false
+        error('Not yet implemented outcomeDependentShift_wrapper for fillInBetweenWithAnything is false');
+    end
+end
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
@@ -247,6 +254,15 @@ if linkSuccesses==false
 else
     trial2=[flankingTrials ' & trialTypes.led_1forward==0'];
 end
+if plotset.success==true & ~isnan(testEventReach.trial1)
+    if ~isfield(testEventReach,'trial1_LED')
+        error('When passing in testEventReach conditions, need to receive both no LED and LED conditions');
+    end
+    trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
+    if testEventReach.fillInBetweenWithAnything==false
+        error('Not yet implemented outcomeDependentShift_wrapper for fillInBetweenWithAnything is false');
+    end
+end
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
@@ -384,7 +400,7 @@ if ~strcmp(whichToPlot,'basic') && ~isempty(dprimes_noLED_lasttrial) && ~isempty
     figure();
     plot(noLED_x,noLED_n,'Color','k');
     hold on;
-    plot(LED_x,LED_n,'Color','r');
+    plot(LED_x,LED_n,'Color','r'); title('Session by session change in dprime');
     if ~any(~isnan(dprimes_noLED_lasttrial-dprimes_noLED_firsttrial+dprimes_LED_lasttrial-dprimes_LED_firsttrial))
         disp('all nans');
     else
@@ -393,13 +409,16 @@ if ~strcmp(whichToPlot,'basic') && ~isempty(dprimes_noLED_lasttrial) && ~isempty
         disp(pval);
     end
     figure();
-    [black_x,black_y]=plotMouseByMouseChangeTrialToTrial(noLED_rr,metadata,'k'); hold on;
-    [red_x,red_y]=plotMouseByMouseChangeTrialToTrial(LED_rr,metadata,'r');
+    [black_x,black_y]=plotMouseByMouseChangeTrialToTrial(noLED_rr,metadata,'k',true); hold on;
+    [red_x,red_y]=plotMouseByMouseChangeTrialToTrial(LED_rr,metadata,'r',true);
+    figure();
+    [black_x,black_y]=plotMouseByMouseChangeTrialToTrial(noLED_rr,metadata,'k',false); hold on;
+    [red_x,red_y]=plotMouseByMouseChangeTrialToTrial(LED_rr,metadata,'r',false);
 end
 
 end
 
-function [x_mousebymouse,y_mousebymouse]=plotMouseByMouseChangeTrialToTrial(reachrates,metadata,c)
+function [x_mousebymouse,y_mousebymouse]=plotMouseByMouseChangeTrialToTrial(reachrates,metadata,c,doSessBySess)
 
 atleastthismanytrials=3; %15;
 [~,ui]=unique(metadata.sessid);
@@ -476,13 +495,15 @@ sessbysess_trialnplus_cued=nanmean(temp,2);
 temp1=sessbysess_trialnplus_uncued-sessbysess_trialn_uncued;
 temp2=sessbysess_trialnplus_cued-sessbysess_trialn_cued;
 a=[temp1(~isnan(temp1) & ~isnan(temp2)) temp2(~isnan(temp1) & ~isnan(temp2))];
-for i=1:size(a,1)
-    quiver(0,0,a(i,1),a(i,2),'Color',c);
-    hold on;
+if doSessBySess==true
+    for i=1:size(a,1)
+        quiver(0,0,a(i,1),a(i,2),'Color',c);
+        hold on;
+    end
+    me=nanmean(a,1); s=nanstd(a,[],1)./sqrt(size(a,1));
+    line([me(1) me(1)],[me(2)-s(2) me(2)+s(2)]); line([me(1)-s(1) me(1)+s(1)],[me(2) me(2)]);
+    quiver(0,0,nanmean(a(:,1)),nanmean(a(:,2)),'Color',c,'LineWidth',4); title('session by session');
 end
-me=nanmean(a,1); s=nanstd(a,[],1)./sqrt(size(a,1)); 
-line([me(1) me(1)],[me(2)-s(2) me(2)+s(2)]); line([me(1)-s(1) me(1)+s(1)],[me(2) me(2)]);
-quiver(0,0,nanmean(a(:,1)),nanmean(a(:,2)),'Color',c,'LineWidth',4);
 
 % mousebymouse_trialn_uncued=nan(1,length(unique(mouseids)));
 % mousebymouse_trialn_cued=nan(1,length(unique(mouseids)));
@@ -498,11 +519,14 @@ quiver(0,0,nanmean(a(:,1)),nanmean(a(:,2)),'Color',c,'LineWidth',4);
 % end
 
 % MOUSE BY MOUSE
-% for i=1:length(u)
-%     quiver(0,0,mousebymouse_trialnplus_uncued(i)-mousebymouse_trialn_uncued(i),mousebymouse_trialnplus_cued(i)-mousebymouse_trialn_cued(i),'Color',c);
-%     hold on;
-% end
-% quiver(0,0,nanmean(mousebymouse_trialnplus_uncued-mousebymouse_trialn_uncued),nanmean(mousebymouse_trialnplus_cued-mousebymouse_trialn_cued),'Color',c,'LineWidth',4);
+if doSessBySess==false
+    for i=1:length(u)
+        quiver(0,0,mousebymouse_trialnplus_uncued(i)-mousebymouse_trialn_uncued(i),mousebymouse_trialnplus_cued(i)-mousebymouse_trialn_cued(i),'Color',c);
+        hold on;
+    end
+    quiver(0,0,nanmean(mousebymouse_trialnplus_uncued-mousebymouse_trialn_uncued),nanmean(mousebymouse_trialnplus_cued-mousebymouse_trialn_cued),'Color',c,'LineWidth',4);
+    title('mouse by mouse');
+end
 x_mousebymouse=mousebymouse_trialnplus_uncued-mousebymouse_trialn_uncued;
 y_mousebymouse=mousebymouse_trialnplus_cued-mousebymouse_trialn_cued;
 
@@ -778,7 +802,9 @@ stillsuppressbootstrap=false;
 altogether_prob_cued=approach2_alltrials_cued(1:end); % better to bootstrap across trials, not sessions, because in some sessions, mouse drops a lot
 altogether_prob_uncued=approach2_alltrials_uncued(1:end);
 takeTrials=~isnan(altogether_prob_cued) & ~isnan(altogether_prob_uncued);
-disp(['dropping this many trials because of nan ' num2str(nansum(~takeTrials))]);
+% nan trials are from cases where a session had fewer trials, just nanned
+% to fill in matrix
+% disp(['dropping this many trials because of nan ' num2str(nansum(~takeTrials))]);
 altogether_prob_cued=altogether_prob_cued(takeTrials==1);
 altogether_prob_uncued=altogether_prob_uncued(takeTrials==1);
 % Show bootstrapped 95% CI
