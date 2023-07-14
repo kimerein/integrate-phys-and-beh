@@ -125,6 +125,13 @@ else
     trial1=[flankingTrials ' & trialTypes.led_1back==1 & trialTypes.optoGroup_1back~=1'];
 end
 trial2=[flankingTrials ' & trialTypes.consumed_pellet_1forward==1' ' & trialTypes.reachedInTimeWindow_1back==1 & trialTypes.success_in_cued_window_1back==1 & trialTypes.consumed_pellet_1back==1 & trialTypes.led_1back==0 & trialTypes.optoGroup_1back~=1']; % & trialTypes.isLongITI_1forward==1'];
+if plotset.backward_success==true & ~isnan(testEventReach.trial1)
+    disp('Using passed in test event conditions'); pause;
+    trial1=testEventReach.trial1; trial2=testEventReach.trial2;
+    if testEventReach.fillInBetweenWithAnything==false
+        error('Not yet implemented outcomeDependentShift_wrapper for fillInBetweenWithAnything is false');
+    end
+end
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
@@ -141,6 +148,13 @@ if linkSuccesses==false
     trial2=[flankingTrials];
 else
     trial2=[flankingTrials ' & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1'];
+end
+if plotset.delayed==true & ~isnan(testEventReach.trial1)
+    disp('Using passed in test event conditions'); pause;
+    trial1=testEventReach.trial1; trial2=testEventReach.trial2;
+    if testEventReach.fillInBetweenWithAnything==false
+        error('Not yet implemented outcomeDependentShift_wrapper for fillInBetweenWithAnything is false');
+    end
 end
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
@@ -168,6 +182,13 @@ end
 nInSequence=3;
 trial1=[flankingTrials ' & trialTypes.touched_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
 trial2=[flankingTrials];
+if plotset.cuedtouch==true & ~isnan(testEventReach.trial1)
+    disp('Using passed in test event conditions'); pause;
+    trial1=testEventReach.trial1; trial2=testEventReach.trial2;
+    if testEventReach.fillInBetweenWithAnything==false
+        error('Not yet implemented outcomeDependentShift_wrapper for fillInBetweenWithAnything is false');
+    end
+end
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
@@ -185,6 +206,13 @@ if linkSuccesses==false
 else
     trial2=[flankingTrials ' & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1'];
 end
+if plotset.failedcued==true & ~isnan(testEventReach.trial1)
+    disp('Using passed in test event conditions'); pause;
+    trial1=testEventReach.trial1; trial2=testEventReach.trial2;
+    if testEventReach.fillInBetweenWithAnything==false
+        error('Not yet implemented outcomeDependentShift_wrapper for fillInBetweenWithAnything is false');
+    end
+end
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
@@ -198,6 +226,13 @@ end
 nInSequence=3;
 trial1=['trialTypes.reachedBeforeCue_1forward==1 & trialTypes.reachToPelletBeforeCue_1forward==0 & trialTypes.led_1forward==0 & trialTypes.optoGroup_2back~=1']; % & trialTypes.isLongITI_1forward==1'];
 trial2=[flankingTrials];
+if plotset.failedcued==true & ~isnan(testEventReach.trial1)
+    disp('Using passed in test event conditions'); pause;
+    trial1=testEventReach.trial1; trial2=testEventReach.trial2;
+    if testEventReach.fillInBetweenWithAnything==false
+        error('Not yet implemented outcomeDependentShift_wrapper for fillInBetweenWithAnything is false');
+    end
+end
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
@@ -255,8 +290,10 @@ else
     trial2=[flankingTrials ' & trialTypes.led_1forward==0'];
 end
 if plotset.success==true & ~isnan(testEventReach.trial1)
-    disp('Using passed in test event conditions'); pause;
-    trial1=testEventReach.trial1; trial2=testEventReach.trial2;
+    if ~isfield(testEventReach,'trial1_LED')
+        error('When passing in testEventReach conditions, need to receive both no LED and LED conditions');
+    end
+    trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
     if testEventReach.fillInBetweenWithAnything==false
         error('Not yet implemented outcomeDependentShift_wrapper for fillInBetweenWithAnything is false');
     end
@@ -398,7 +435,7 @@ if ~strcmp(whichToPlot,'basic') && ~isempty(dprimes_noLED_lasttrial) && ~isempty
     figure();
     plot(noLED_x,noLED_n,'Color','k');
     hold on;
-    plot(LED_x,LED_n,'Color','r');
+    plot(LED_x,LED_n,'Color','r'); title('Session by session change in dprime');
     if ~any(~isnan(dprimes_noLED_lasttrial-dprimes_noLED_firsttrial+dprimes_LED_lasttrial-dprimes_LED_firsttrial))
         disp('all nans');
     else
@@ -407,15 +444,33 @@ if ~strcmp(whichToPlot,'basic') && ~isempty(dprimes_noLED_lasttrial) && ~isempty
         disp(pval);
     end
     figure();
-    [black_x,black_y]=plotMouseByMouseChangeTrialToTrial(noLED_rr,metadata,'k'); hold on;
-    [red_x,red_y]=plotMouseByMouseChangeTrialToTrial(LED_rr,metadata,'r');
+    [black_x,black_y]=plotMouseByMouseChangeTrialToTrial(noLED_rr,metadata,'k',true); hold on;
+    [red_x,red_y]=plotMouseByMouseChangeTrialToTrial(LED_rr,metadata,'r',true);
+    figure();
+    [black_x,black_y,changeindprime_bymouse_black]=plotMouseByMouseChangeTrialToTrial(noLED_rr,metadata,'k',false); hold on;
+    [red_x,red_y,changeindprime_bymouse_red]=plotMouseByMouseChangeTrialToTrial(LED_rr,metadata,'r',false);
+    [n,x]=hist(changeindprime_bymouse_black,[fliplr(0-binstep/2:-binstep:mi) 0+binstep/2:binstep:ma]);
+    [noLED_n,noLED_x]=cityscape_hist(n,x);
+    [n,x]=hist(changeindprime_bymouse_red,[fliplr(0-binstep/2:-binstep:mi) 0+binstep/2:binstep:ma]);
+    [LED_n,LED_x]=cityscape_hist(n,x);
+    figure();
+    plot(noLED_x,noLED_n,'Color','k');
+    hold on;
+    plot(LED_x,LED_n,'Color','r'); title('Mouse by mouse change in dprime');
+    if ~any(~isnan(changeindprime_bymouse_black+changeindprime_bymouse_red))
+        disp('all nans');
+    else
+        pval=signrank(changeindprime_bymouse_black,changeindprime_bymouse_red);
+        disp('pval from signrank comparing change in dprime MOUSE BY MOUSE');
+        disp(pval);
+    end
 end
 
 end
 
-function [x_mousebymouse,y_mousebymouse]=plotMouseByMouseChangeTrialToTrial(reachrates,metadata,c)
+function [x_mousebymouse,y_mousebymouse,changeindprime_bymouse]=plotMouseByMouseChangeTrialToTrial(reachrates,metadata,c,doSessBySess)
 
-atleastthismanytrials=3; %15;
+atleastthismanytrials=3; 
 [~,ui]=unique(metadata.sessid);
 mouseids=metadata.mouseid(ui);
 
@@ -463,6 +518,28 @@ for i=1:length(ui)
     end
     mousebymouse_trialnplus_cued_all{u==currmouse}=temp;
 end
+maxlength=0;
+for i=1:length(mousebymouse_trialn_uncued_all)
+    if length(mousebymouse_trialn_uncued_all{i})>maxlength
+        maxlength=length(mousebymouse_trialn_uncued_all{i});
+    end
+end
+for i=1:length(mousebymouse_trialn_uncued_all)
+    if length(mousebymouse_trialn_uncued_all{i})<maxlength
+        mousebymouse_trialn_uncued_all_asmatrix(i,:)=[mousebymouse_trialn_uncued_all{i} nan(1,maxlength-length(mousebymouse_trialn_uncued_all{i}))];
+        mousebymouse_trialn_cued_all_asmatrix(i,:)=[mousebymouse_trialn_cued_all{i} nan(1,maxlength-length(mousebymouse_trialn_cued_all{i}))];
+        mousebymouse_trialnplus_uncued_all_asmatrix(i,:)=[mousebymouse_trialnplus_uncued_all{i} nan(1,maxlength-length(mousebymouse_trialnplus_uncued_all{i}))];
+        mousebymouse_trialnplus_cued_all_asmatrix(i,:)=[mousebymouse_trialnplus_cued_all{i} nan(1,maxlength-length(mousebymouse_trialnplus_cued_all{i}))];
+    else
+        mousebymouse_trialn_uncued_all_asmatrix(i,:)=mousebymouse_trialn_uncued_all{i};
+        mousebymouse_trialn_cued_all_asmatrix(i,:)=mousebymouse_trialn_cued_all{i};
+        mousebymouse_trialnplus_uncued_all_asmatrix(i,:)=mousebymouse_trialnplus_uncued_all{i};
+        mousebymouse_trialnplus_cued_all_asmatrix(i,:)=mousebymouse_trialnplus_cued_all{i};
+    end
+end
+dprimes_bymouse_firsttrial=calc_dprime_per_sess(mousebymouse_trialn_uncued_all_asmatrix,mousebymouse_trialn_cued_all_asmatrix);
+dprimes_bymouse_trialnplus=calc_dprime_per_sess(mousebymouse_trialnplus_uncued_all_asmatrix,mousebymouse_trialnplus_cued_all_asmatrix);
+changeindprime_bymouse=dprimes_bymouse_trialnplus-dprimes_bymouse_firsttrial;
 mousebymouse_trialn_uncued=nan(1,length(u));
 mousebymouse_trialn_cued=nan(1,length(u));
 mousebymouse_trialnplus_uncued=nan(1,length(u));
@@ -490,13 +567,15 @@ sessbysess_trialnplus_cued=nanmean(temp,2);
 temp1=sessbysess_trialnplus_uncued-sessbysess_trialn_uncued;
 temp2=sessbysess_trialnplus_cued-sessbysess_trialn_cued;
 a=[temp1(~isnan(temp1) & ~isnan(temp2)) temp2(~isnan(temp1) & ~isnan(temp2))];
-for i=1:size(a,1)
-    quiver(0,0,a(i,1),a(i,2),'Color',c);
-    hold on;
+if doSessBySess==true
+    for i=1:size(a,1)
+        quiver(0,0,a(i,1),a(i,2),'Color',c);
+        hold on;
+    end
+    me=nanmean(a,1); s=nanstd(a,[],1)./sqrt(size(a,1));
+    line([me(1) me(1)],[me(2)-s(2) me(2)+s(2)]); line([me(1)-s(1) me(1)+s(1)],[me(2) me(2)]);
+    quiver(0,0,nanmean(a(:,1)),nanmean(a(:,2)),'Color',c,'LineWidth',4); title('session by session');
 end
-me=nanmean(a,1); s=nanstd(a,[],1)./sqrt(size(a,1)); 
-line([me(1) me(1)],[me(2)-s(2) me(2)+s(2)]); line([me(1)-s(1) me(1)+s(1)],[me(2) me(2)]);
-quiver(0,0,nanmean(a(:,1)),nanmean(a(:,2)),'Color',c,'LineWidth',4);
 
 % mousebymouse_trialn_uncued=nan(1,length(unique(mouseids)));
 % mousebymouse_trialn_cued=nan(1,length(unique(mouseids)));
@@ -512,11 +591,17 @@ quiver(0,0,nanmean(a(:,1)),nanmean(a(:,2)),'Color',c,'LineWidth',4);
 % end
 
 % MOUSE BY MOUSE
-% for i=1:length(u)
-%     quiver(0,0,mousebymouse_trialnplus_uncued(i)-mousebymouse_trialn_uncued(i),mousebymouse_trialnplus_cued(i)-mousebymouse_trialn_cued(i),'Color',c);
-%     hold on;
-% end
-% quiver(0,0,nanmean(mousebymouse_trialnplus_uncued-mousebymouse_trialn_uncued),nanmean(mousebymouse_trialnplus_cued-mousebymouse_trialn_cued),'Color',c,'LineWidth',4);
+if doSessBySess==false
+    for i=1:length(u)
+        quiver(0,0,mousebymouse_trialnplus_uncued(i)-mousebymouse_trialn_uncued(i),mousebymouse_trialnplus_cued(i)-mousebymouse_trialn_cued(i),'Color',c);
+        hold on;
+    end
+    me=nanmean([mousebymouse_trialnplus_uncued-mousebymouse_trialn_uncued mousebymouse_trialnplus_cued-mousebymouse_trialn_cued],1); 
+    s=nanstd([mousebymouse_trialnplus_uncued-mousebymouse_trialn_uncued mousebymouse_trialnplus_cued-mousebymouse_trialn_cued],[],1)./sqrt(size([mousebymouse_trialnplus_uncued-mousebymouse_trialn_uncued mousebymouse_trialnplus_cued-mousebymouse_trialn_cued],1));
+    line([me(1) me(1)],[me(2)-s(2) me(2)+s(2)]); line([me(1)-s(1) me(1)+s(1)],[me(2) me(2)]);
+    quiver(0,0,nanmean(mousebymouse_trialnplus_uncued-mousebymouse_trialn_uncued),nanmean(mousebymouse_trialnplus_cued-mousebymouse_trialn_cued),'Color',c,'LineWidth',4);
+    title('mouse by mouse');
+end
 x_mousebymouse=mousebymouse_trialnplus_uncued-mousebymouse_trialn_uncued;
 y_mousebymouse=mousebymouse_trialnplus_cued-mousebymouse_trialn_cued;
 
