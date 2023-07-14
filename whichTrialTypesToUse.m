@@ -40,10 +40,12 @@ switch whichEventType
         trial2_LED='trialTypes.optoGroup~=1 & (trialTypes.led_1forward==0 | trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_1back==0)';
     case 'cued failure'
         % did not touch pellet despite reaching in cued window
-        trial1=['(trialTypes.optoGroup~=1 & trialTypes.touched_pellet_1back==0 & trialTypes.noReach_1back==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touched_pellet_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0) | ' ...
-                '(trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1                                 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touched_pellet_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0)']; 
+        trial1=['(trialTypes.optoGroup~=1 & trialTypes.touch_in_cued_window_1back==0 & trialTypes.noReach_1back==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0) | ' ...
+                '(trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1                                       & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0)']; 
         trial2='trialTypes.optoGroup~=1 & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
-        trial1_LED=['(trialTypes.optoGroup~=1 & trialTypes.touched_pellet_1back==0 & trialTypes.noReach_1back==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touched_pellet_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1) | ' ...
-                    '(trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1                                 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touched_pellet_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1)']; 
+        trial1_LED=['(trialTypes.optoGroup~=1 & trialTypes.touch_in_cued_window_1back==0 & trialTypes.noReach_1back==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1) | ' ...
+                    '(trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1                                       & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1)']; 
         trial2_LED='trialTypes.optoGroup~=1 & (trialTypes.led_1forward==0 | trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_1back==0)';
 end
+
+
