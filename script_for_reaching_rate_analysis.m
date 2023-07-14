@@ -250,7 +250,7 @@ trialTypes.led_6back=[ones(6,1); trialTypes.led(1:end-6)];
 % % trial2='trialTypes.led==1 & trialTypes.led_1forward==0 & trialTypes.led_6back==0'; 
 % % trial2='trialTypes.led==0 & trialTypes.led_1forward==1 & trialTypes.led_7back==1'; % & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
 
-[trial1,trial2,trial1_LED,trial2_LED]=whichTrialTypesToUse(alltbt,trialTypes,metadata,'success',[0 cuedreachtimewindow]);
+[trialTypes,trial1,trial2,trial1_LED,trial2_LED]=whichTrialTypesToUse(alltbt,trialTypes,metadata,'success',[0 cuedreachtimewindow],'reachBatch_success_reachStarts');
 test.trial1=trial1;
 test.trial2=trial2;
 % test.trial1=trial1_LED;
@@ -443,7 +443,7 @@ reachratesettings.acrossSess_window3=[-2 -1]; % time window wrt cue onset to cla
 reachratesettings.useWindowsForUncued=[3]; % to use window2 or window3 or both for the uncued reach rate
 timeWindowToCountAsEventReach=[0 cuedreachtimewindow]; % set as nan if want to use default in outcomeDependentShift_wrapper.m
 % test.trial1=nan; % set as nan if want to use default in outcomeDependentShift_wrapper.m, else will inherit from this function
-[trial1,trial2,trial1_LED,trial2_LED]=whichTrialTypesToUse(alltbt,trialTypes,metadata,'success',[0 cuedreachtimewindow]);
+[trialTypes,trial1,trial2,trial1_LED,trial2_LED]=whichTrialTypesToUse(alltbt,trialTypes,metadata,'success',[0 cuedreachtimewindow],'reachBatch_success_reachStarts');
 test.trial1=trial1; test.trial2=trial2; test.trial1_LED=trial1_LED; test.trial2_LED=trial2_LED;
 whichToPlot='success'; % whichToPlot can be 'success','delayed success','drop','cued touch','cued touch and switch color','failed cued reach','false alarm','no reach','basic','wildcard','backward success'
 [~,~,returnout]=outcomeDependentShift_wrapper(alltbt,trialTypes,metadata,saveDir,[],[],reachratesettings,timeWindowToCountAsEventReach,test,whichToPlot); 

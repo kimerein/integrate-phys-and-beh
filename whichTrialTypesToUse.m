@@ -1,4 +1,4 @@
-function [trial1,trial2,trial1_LED,trial2_LED]=whichTrialTypesToUse(alltbt,trialTypes,metadata,whichEventType,timeWindow)
+function [trialTypes,trial1,trial2,trial1_LED,trial2_LED]=whichTrialTypesToUse(alltbt,trialTypes,metadata,whichEventType,timeWindow,whichReachInTimeWindow)
 
 [~,cueindma]=nanmax(nanmean(alltbt.cueZone_onVoff,1));
 timestep=mode(diff(nanmean(alltbt.times,1)));
@@ -9,7 +9,8 @@ if isempty(timeWindow)
 else
     timeWindowInds(1)=floor(timeWindow(1)/timestep);
     timeWindowInds(2)=floor(timeWindow(2)/timestep);
-    trialTypes.reachedInTimeWindow=any(alltbt.all_reachBatch(:,cueindma+timeWindowInds(1)-1:cueindma+timeWindowInds(2))>0.05,2);
+    temp=alltbt.(whichReachInTimeWindow);
+    trialTypes.reachedInTimeWindow=any(temp(:,cueindma+timeWindowInds(1):cueindma+timeWindowInds(2))>0.05,2);
     trialTypes.reachedInTimeWindow_1forward=[trialTypes.reachedInTimeWindow(2:end); 0];
     trialTypes.reachedInTimeWindow_1back=[0; trialTypes.reachedInTimeWindow(1:end-1)];
 end
