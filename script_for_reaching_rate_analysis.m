@@ -82,7 +82,7 @@ end
 
 % Optional: discard no pellet reaches within certain time after success
 % bcz represent chewing arm movements
-% alltbt=ignoreReachesAfterSuccess(alltbt,metadata,9); % last arg is seconds after success, i.e., how long to chew pellet
+alltbt=ignoreReachesAfterSuccess(alltbt,metadata,6); % last arg is seconds after success, i.e., how long to chew pellet
 
 % Optional: Exclude trials with paw on wheel
 % [alltbt,metadata,trialTypes]=excludePawOnWheel(alltbt,metadata,trialTypes,'cueZone_onVoff');
@@ -210,12 +210,12 @@ trialTypes.sess_wrt_day1=metadata.sess_wrt_day1; alltbt.sess_wrt_day1=metadata.s
 
 %% build relevant data sets
 
-% set up current definition of "use this event"
 cuedreachtimewindow=0.4; % in seconds
-cuedreachinds=94:94+floor(cuedreachtimewindow./0.035);
-trialTypes.did_cued_reach=any(alltbt.reachBatch_success_reachStarts(:,cuedreachinds)>0.5,2); % cued success
-% trialTypes.did_cued_reach=any(alltbt.reachBatch_success_reachStarts(:,94+142:94+214)>0.5,2); % delayed success
-trialTypes.did_cued_reach_1forward=[trialTypes.did_cued_reach(2:end); 0];
+
+% cuedreachinds=94:94+floor(cuedreachtimewindow./0.035);
+% trialTypes.did_cued_reach=(any(alltbt.reachBatch_miss_reachStarts(:,cuedreachinds)>0.5,2) | any(alltbt.pelletmissingreach_reachStarts(:,cuedreachinds)>0.5,2)) & trialTypes.touched_pellet==0; % cued failure and no uncued success
+% % trialTypes.did_cued_reach=any(alltbt.reachBatch_miss_reachStarts(:,94+128:94+214)>0.5,2) | any(alltbt.pelletmissingreach_reachStarts(:,94+128:94+214)>0.5,2); % delayed failure, 4.5 sec to 7.5 sec
+% trialTypes.did_cued_reach_1forward=[trialTypes.did_cued_reach(2:end); 0];
 
 % settings for paired RT data set
 test.nInSequence=[3]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
@@ -227,30 +227,36 @@ trialTypes.optoGroup_1forward=[trialTypes.optoGroup(2:end); 0];
 trialTypes.led_11back=[ones(11,1); trialTypes.led(1:end-11)];
 trialTypes.led_7back=[ones(7,1); trialTypes.led(1:end-7)];
 trialTypes.led_6back=[ones(6,1); trialTypes.led(1:end-6)];
-% trial1='trialTypes.led==0';
-% trial1='trialTypes.led==0'; % | trialTypes.led_1back==0 | trialTypes.led_2back==0';
-% memory
-%this %trial1='trialTypes.led~=1'; 
-% trial1='trialTypes.isLongITI==1';
-% trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
-trial1='trialTypes.optoGroup~=1 & trialTypes.did_cued_reach_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.isLongITI_1forward==1';
-% trial1='trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1'; % & trialTypes.isLongITI_1forward==1'];
-% trial1='trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup~=1';
-% trial1='trialTypes.cued_reach_1forward==1 & trialTypes.touched_pellet_1forward==1 & (trialTypes.led_1forward==0) & trialTypes.optoGroup~=1  & trialTypes.optoGroup_1forward~=1';
-% trial1='trialTypes.cued_reach_1forward==0  & trialTypes.touched_pellet_1forward==1 & (trialTypes.led_1forward==0) & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
-% trial1='trialTypes.cued_reach_1forward==1 & trialTypes.consumed_pellet_1forward==0 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
-% trial1='trialTypes.optoGroup~=1 & trialTypes.consumed_pellet_1back==1 & trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1';
+
+% % trial1='trialTypes.led==0';
+% % trial1='trialTypes.led==0'; % | trialTypes.led_1back==0 | trialTypes.led_2back==0';
+% % memory
+% %this %trial1='trialTypes.led~=1'; 
+% % trial1='trialTypes.isLongITI==1';
+% % trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
+% trial1='trialTypes.optoGroup~=1 & trialTypes.did_cued_reach_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.isLongITI_1forward==1';
+% % trial1='trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1'; % & trialTypes.isLongITI_1forward==1'];
+% % trial1='trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup~=1';
+% % trial1='trialTypes.cued_reach_1forward==1 & trialTypes.touched_pellet_1forward==1 & (trialTypes.led_1forward==0) & trialTypes.optoGroup~=1  & trialTypes.optoGroup_1forward~=1';
+% % trial1='trialTypes.cued_reach_1forward==0  & trialTypes.touched_pellet_1forward==1 & (trialTypes.led_1forward==0) & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
+% % trial1='trialTypes.cued_reach_1forward==1 & trialTypes.consumed_pellet_1forward==0 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
+% % trial1='trialTypes.optoGroup~=1 & trialTypes.consumed_pellet_1back==1 & trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1';
+% % trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
+% % memory
+% % this %trial2='trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3 & trialTypes.led_1forward==0';
+% % trial2='trialTypes.optoGroup~=1 & trialTypes.led==0 & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
+% trial2='trialTypes.optoGroup~=1 & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
+% % trial2='trialTypes.optoGroup~=1 & trialTypes.led==0';
+% % trial2='trialTypes.led==1 & trialTypes.led_1forward==0 & trialTypes.led_6back==0'; 
+% % trial2='trialTypes.led==0 & trialTypes.led_1forward==1 & trialTypes.led_7back==1'; % & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
+
+[trial1,trial2,trial1_LED,trial2_LED]=whichTrialTypesToUse(alltbt,trialTypes,metadata,'success',[0 cuedreachtimewindow]);
 test.trial1=trial1;
-test.templateSequence2_cond=eval(trial1);
-% trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
-% memory
-% this %trial2='trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3 & trialTypes.led_1forward==0';
-% trial2='trialTypes.optoGroup~=1 & trialTypes.led==0 & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
-trial2='trialTypes.optoGroup~=1 & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
-% trial2='trialTypes.optoGroup~=1 & trialTypes.led==0';
-% trial2='trialTypes.led==1 & trialTypes.led_1forward==0 & trialTypes.led_6back==0'; 
-% trial2='trialTypes.led==0 & trialTypes.led_1forward==1 & trialTypes.led_7back==1'; % & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
 test.trial2=trial2;
+% test.trial1=trial1_LED;
+% test.trial2=trial2_LED;
+
+test.templateSequence2_cond=eval(trial1);
 test.templateSequence2_end=eval(trial2);
 test.fillInBetweenWithAnything=true; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1
 test.event_name=['alltrials' tbt_filter.name 'inBetweenAnything' num2str(test.fillInBetweenWithAnything)];
@@ -437,10 +443,9 @@ reachratesettings.acrossSess_window3=[-2 -1]; % time window wrt cue onset to cla
 reachratesettings.useWindowsForUncued=[3]; % to use window2 or window3 or both for the uncued reach rate
 timeWindowToCountAsEventReach=[0 cuedreachtimewindow]; % set as nan if want to use default in outcomeDependentShift_wrapper.m
 % test.trial1=nan; % set as nan if want to use default in outcomeDependentShift_wrapper.m, else will inherit from this function
-% fill in LED conditions, e.g.,
-% test.trial1_LED='trialTypes.optoGroup~=1 & trialTypes.did_cued_reach_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.isLongITI_1forward==1';
-% test.trial2_LED='trialTypes.optoGroup~=1 & (trialTypes.led_1forward==0 | trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_1back==0)';
-whichToPlot='drop'; % whichToPlot can be 'success','delayed success','drop','cued touch','cued touch and switch color','failed cued reach','false alarm','no reach','basic','wildcard','backward success'
+[trial1,trial2,trial1_LED,trial2_LED]=whichTrialTypesToUse(alltbt,trialTypes,metadata,'success',[0 cuedreachtimewindow]);
+test.trial1=trial1; test.trial2=trial2; test.trial1_LED=trial1_LED; test.trial2_LED=trial2_LED;
+whichToPlot='success'; % whichToPlot can be 'success','delayed success','drop','cued touch','cued touch and switch color','failed cued reach','false alarm','no reach','basic','wildcard','backward success'
 [~,~,returnout]=outcomeDependentShift_wrapper(alltbt,trialTypes,metadata,saveDir,[],[],reachratesettings,timeWindowToCountAsEventReach,test,whichToPlot); 
 
 %% plot outcome-dependent shifts AND separate by dprime

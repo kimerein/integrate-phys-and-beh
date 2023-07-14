@@ -98,14 +98,12 @@ if plotset.wildcard==true
 end
 % success
 nInSequence=3;
-% trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.success_in_cued_window_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==0']; % & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
-trial1='trialTypes.optoGroup~=1 & trialTypes.did_cued_reach_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1';
+trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.success_in_cued_window_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==0']; % & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
 if linkSuccesses==false
     trial2=[flankingTrials];
 else
     trial2=[flankingTrials ' & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1'];
 end
-trial2='trialTypes.optoGroup~=1 & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
 if plotset.success==true & ~isnan(testEventReach.trial1)
     disp('Using passed in test event conditions'); pause;
     trial1=testEventReach.trial1; trial2=testEventReach.trial2;
