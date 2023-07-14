@@ -250,11 +250,10 @@ trialTypes.led_6back=[ones(6,1); trialTypes.led(1:end-6)];
 % % trial2='trialTypes.led==1 & trialTypes.led_1forward==0 & trialTypes.led_6back==0'; 
 % % trial2='trialTypes.led==0 & trialTypes.led_1forward==1 & trialTypes.led_7back==1'; % & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
 
-[trialTypes,trial1,trial2,trial1_LED,trial2_LED]=whichTrialTypesToUse(alltbt,trialTypes,metadata,'success',[0 cuedreachtimewindow],'reachBatch_success_reachStarts');
-test.trial1=trial1;
-test.trial2=trial2;
-% test.trial1=trial1_LED;
-% test.trial2=trial2_LED;
+% No opto inh
+[trialTypes,trial1,trial2,~,~]=whichTrialTypesToUse(alltbt,trialTypes,metadata,'success',[0 cuedreachtimewindow],'reachBatch_success_reachStarts'); % no LED
+% Opto inh
+% [trialTypes,~,~,trial1,trial2]=whichTrialTypesToUse(alltbt,trialTypes,metadata,'success',[0 cuedreachtimewindow],'reachBatch_success_reachStarts'); % LED
 
 test.templateSequence2_cond=eval(trial1);
 test.templateSequence2_end=eval(trial2);
