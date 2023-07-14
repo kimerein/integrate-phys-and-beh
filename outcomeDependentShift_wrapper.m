@@ -1,4 +1,4 @@
-function [f1,f2]=outcomeDependentShift_wrapper(alltbt,trialTypes,metadata,saveDir,f1,f2,reachratesettings,timeWindowOfEventReach,testEventReach,whichToPlot)
+function [f1,f2,returnout]=outcomeDependentShift_wrapper(alltbt,trialTypes,metadata,saveDir,f1,f2,reachratesettings,timeWindowOfEventReach,testEventReach,whichToPlot)
 
 compareToFirstTrial=true;
 linkSuccesses=false;
@@ -91,6 +91,11 @@ if ~isempty(a)
     dprimes_noLED_lasttrial=a;
     dprimes_noLED_firsttrial=b;
 end
+if plotset.wildcard==true
+    returnout.reachrates_noLED=reachrates;
+    returnout.dprimes_noLED_firsttrial=dprimes_noLED_firsttrial;
+    returnout.dprimes_noLED_lasttrial=dprimes_noLED_lasttrial;
+end
 % success
 nInSequence=3;
 % trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.success_in_cued_window_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==0']; % & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
@@ -117,6 +122,11 @@ if ~isempty(a)
     dprimes_noLED_firsttrial=b;
     noLED_rr=reachrates;
 end
+if plotset.success==true
+    returnout.reachrates_noLED=reachrates;
+    returnout.dprimes_noLED_firsttrial=dprimes_noLED_firsttrial;
+    returnout.dprimes_noLED_lasttrial=dprimes_noLED_lasttrial;
+end
 % backwards success
 nInSequence=3;
 if linkSuccesses==false
@@ -140,6 +150,11 @@ if ~isempty(a)
     dprimes_noLED_lasttrial=a;
     dprimes_noLED_firsttrial=b;
     noLED_rr=reachrates;
+end
+if plotset.backward_success==true
+    returnout.reachrates_noLED=reachrates;
+    returnout.dprimes_noLED_firsttrial=dprimes_noLED_firsttrial;
+    returnout.dprimes_noLED_lasttrial=dprimes_noLED_lasttrial;
 end
 % delayed success
 nInSequence=3;
@@ -165,6 +180,11 @@ if ~isempty(a)
     dprimes_noLED_firsttrial=b;
     noLED_rr=reachrates;
 end
+if plotset.delayed==true
+    returnout.reachrates_noLED=reachrates;
+    returnout.dprimes_noLED_firsttrial=dprimes_noLED_firsttrial;
+    returnout.dprimes_noLED_lasttrial=dprimes_noLED_lasttrial;
+end
 % drop
 nInSequence=3;
 trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==0' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==1 & trialTypes.consumed_pellet_1forward==0 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
@@ -177,6 +197,11 @@ if ~isempty(a)
     dprimes_noLED_lasttrial=a;
     dprimes_noLED_firsttrial=b;
     noLED_rr=reachrates;
+end
+if plotset.drop==true
+    returnout.reachrates_noLED=reachrates;
+    returnout.dprimes_noLED_firsttrial=dprimes_noLED_firsttrial;
+    returnout.dprimes_noLED_lasttrial=dprimes_noLED_lasttrial;
 end
 % touched after cue, i.e., success or drop
 nInSequence=3;
@@ -197,6 +222,11 @@ if ~isempty(a)
     dprimes_noLED_lasttrial=a;
     dprimes_noLED_firsttrial=b;
     noLED_rr=reachrates;
+end
+if plotset.cuedtouch==true
+    returnout.reachrates_noLED=reachrates;
+    returnout.dprimes_noLED_firsttrial=dprimes_noLED_firsttrial;
+    returnout.dprimes_noLED_lasttrial=dprimes_noLED_lasttrial;
 end
 % did not touch after cue despite reaching
 nInSequence=3;
@@ -222,6 +252,11 @@ if ~isempty(a)
     dprimes_noLED_firsttrial=b;
     noLED_rr=reachrates;
 end
+if plotset.failedcued==true
+    returnout.reachrates_noLED=reachrates;
+    returnout.dprimes_noLED_firsttrial=dprimes_noLED_firsttrial;
+    returnout.dprimes_noLED_lasttrial=dprimes_noLED_lasttrial;
+end
 % miss before cue
 nInSequence=3;
 trial1=['trialTypes.reachedBeforeCue_1forward==1 & trialTypes.reachToPelletBeforeCue_1forward==0 & trialTypes.led_1forward==0 & trialTypes.optoGroup_2back~=1']; % & trialTypes.isLongITI_1forward==1'];
@@ -242,6 +277,11 @@ if ~isempty(a)
     dprimes_noLED_firsttrial=b;
     noLED_rr=reachrates;
 end
+if plotset.falsealarm==true
+    returnout.reachrates_noLED=reachrates;
+    returnout.dprimes_noLED_firsttrial=dprimes_noLED_firsttrial;
+    returnout.dprimes_noLED_lasttrial=dprimes_noLED_lasttrial;
+end
 % does not reach
 nInSequence=3;
 trial1=[flankingTrials ' & trialTypes.noReach_1forward==1 & trialTypes.touched_pellet_1forward==0 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
@@ -261,6 +301,11 @@ if ~isempty(a)
     dprimes_noLED_lasttrial=a;
     dprimes_noLED_firsttrial=b;
     noLED_rr=reachrates;
+end
+if plotset.noreach==true
+    returnout.reachrates_noLED=reachrates;
+    returnout.dprimes_noLED_firsttrial=dprimes_noLED_firsttrial;
+    returnout.dprimes_noLED_lasttrial=dprimes_noLED_lasttrial;
 end
 
 if ~strcmp(whichToPlot,'basic')
@@ -288,6 +333,11 @@ if ~isempty(a)
     dprimes_LED_firsttrial=b;
     LED_rr=reachrates;
 end
+if plotset.wildcard==true
+    returnout.reachrates_LED=reachrates;
+    returnout.dprimes_LED_firsttrial=dprimes_LED_firsttrial;
+    returnout.dprimes_LED_lasttrial=dprimes_LED_lasttrial;
+end
 % success
 nInSequence=3;
 trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.success_in_cued_window_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==1 & (trialTypes.optoGroup_1forward==3)']; % & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup_1forward==2']; % & trialTypes.isLongITI_1forward==1'];
@@ -313,6 +363,11 @@ if ~isempty(a)
     dprimes_LED_lasttrial=a;
     dprimes_LED_firsttrial=b;
     LED_rr=reachrates;
+end
+if plotset.success==true
+    returnout.reachrates_LED=reachrates;
+    returnout.dprimes_LED_firsttrial=dprimes_LED_firsttrial;
+    returnout.dprimes_LED_lasttrial=dprimes_LED_lasttrial;
 end
 % backwards success
 nInSequence=3;
@@ -340,6 +395,11 @@ if ~isempty(a)
     dprimes_noLED_firsttrial=b;
     LED_rr=reachrates;
 end
+if plotset.backward_success==true
+    returnout.reachrates_LED=reachrates;
+    returnout.dprimes_LED_firsttrial=dprimes_LED_firsttrial;
+    returnout.dprimes_LED_lasttrial=dprimes_LED_lasttrial;
+end
 % delayed success
 nInSequence=3;
 trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
@@ -366,6 +426,11 @@ if ~isempty(a)
     dprimes_LED_firsttrial=b;
     LED_rr=reachrates;
 end
+if plotset.delayed==true
+    returnout.reachrates_LED=reachrates;
+    returnout.dprimes_LED_firsttrial=dprimes_LED_firsttrial;
+    returnout.dprimes_LED_lasttrial=dprimes_LED_lasttrial;
+end
 % drop
 nInSequence=3;
 trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==0' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==1 & trialTypes.consumed_pellet_1forward==0 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
@@ -388,6 +453,11 @@ if ~isempty(a)
     dprimes_LED_firsttrial=b;
     LED_rr=reachrates;
 end
+if plotset.drop==true
+    returnout.reachrates_LED=reachrates;
+    returnout.dprimes_LED_firsttrial=dprimes_LED_firsttrial;
+    returnout.dprimes_LED_lasttrial=dprimes_LED_lasttrial;
+end
 % touched after cue, i.e., success or drop
 nInSequence=3;
 trial1=[flankingTrials ' & trialTypes.touched_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
@@ -409,6 +479,11 @@ if ~isempty(a)
     dprimes_LED_lasttrial=a;
     dprimes_LED_firsttrial=b;
     LED_rr=reachrates;
+end
+if plotset.cuedtouch==true
+    returnout.reachrates_LED=reachrates;
+    returnout.dprimes_LED_firsttrial=dprimes_LED_firsttrial;
+    returnout.dprimes_LED_lasttrial=dprimes_LED_lasttrial;
 end
 % did not touch after cue despite reaching
 nInSequence=3;
@@ -436,6 +511,11 @@ if ~isempty(a)
     dprimes_LED_firsttrial=b;
     LED_rr=reachrates;
 end
+if plotset.failedcued==true
+    returnout.reachrates_LED=reachrates;
+    returnout.dprimes_LED_firsttrial=dprimes_LED_firsttrial;
+    returnout.dprimes_LED_lasttrial=dprimes_LED_lasttrial;
+end
 % miss before cue
 nInSequence=3;
 trial1=['trialTypes.reachedBeforeCue_1forward==1 & trialTypes.reachToPelletBeforeCue_1forward==0 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
@@ -458,6 +538,11 @@ if ~isempty(a)
     dprimes_LED_firsttrial=b;
     LED_rr=reachrates;
 end
+if plotset.falsealarm==true
+    returnout.reachrates_LED=reachrates;
+    returnout.dprimes_LED_firsttrial=dprimes_LED_firsttrial;
+    returnout.dprimes_LED_lasttrial=dprimes_LED_lasttrial;
+end
 % does not reach
 nInSequence=3;
 trial1=[flankingTrials ' & trialTypes.noReach_1forward==1 & trialTypes.touched_pellet_1forward==0 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
@@ -479,6 +564,11 @@ if ~isempty(a)
     dprimes_LED_lasttrial=a;
     dprimes_LED_firsttrial=b;
     LED_rr=reachrates;
+end
+if plotset.noreach==true
+    returnout.reachrates_LED=reachrates;
+    returnout.dprimes_LED_firsttrial=dprimes_LED_firsttrial;
+    returnout.dprimes_LED_lasttrial=dprimes_LED_lasttrial;
 end
 
 if ~strcmp(whichToPlot,'basic') && ~isempty(dprimes_noLED_lasttrial) && ~isempty(dprimes_LED_lasttrial)
@@ -534,6 +624,8 @@ if ~strcmp(whichToPlot,'basic') && ~isempty(dprimes_noLED_lasttrial) && ~isempty
         disp('pval from signrank comparing change in dprime MOUSE BY MOUSE');
         disp(pval);
     end
+    returnout.changeindprime_bymouse_black=changeindprime_bymouse_black;
+    returnout.changeindprime_bymouse_red=changeindprime_bymouse_red;
 end
 
 end

@@ -214,6 +214,7 @@ trialTypes.sess_wrt_day1=metadata.sess_wrt_day1; alltbt.sess_wrt_day1=metadata.s
 cuedreachtimewindow=0.4; % in seconds
 cuedreachinds=94:94+floor(cuedreachtimewindow./0.035);
 trialTypes.did_cued_reach=any(alltbt.reachBatch_success_reachStarts(:,cuedreachinds)>0.5,2); % cued success
+% trialTypes.did_cued_reach=any(alltbt.reachBatch_success_reachStarts(:,94+142:94+214)>0.5,2); % delayed success
 trialTypes.did_cued_reach_1forward=[trialTypes.did_cued_reach(2:end); 0];
 
 % settings for paired RT data set
@@ -284,7 +285,7 @@ plotBehaviorSessEvents_wrapper(alltbt,metadata,trialTypes,[37.5 38.5]); % last a
 % last argument chooses type of plot
 % see function plotBehaviorEventFx.m for options
 [returnThis,returnThisRef]=plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching');
-plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching_cdf'); 
+returnThisCDF=plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching_cdf'); 
 
 %% plot trial to trial change in reach CDF
 
@@ -439,8 +440,8 @@ timeWindowToCountAsEventReach=[0 cuedreachtimewindow]; % set as nan if want to u
 % fill in LED conditions, e.g.,
 % test.trial1_LED='trialTypes.optoGroup~=1 & trialTypes.did_cued_reach_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.isLongITI_1forward==1';
 % test.trial2_LED='trialTypes.optoGroup~=1 & (trialTypes.led_1forward==0 | trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_1back==0)';
-whichToPlot='success'; % whichToPlot can be 'success','delayed success','drop','cued touch','cued touch and switch color','failed cued reach','false alarm','no reach','basic','wildcard','backward success'
-outcomeDependentShift_wrapper(alltbt,trialTypes,metadata,saveDir,[],[],reachratesettings,timeWindowToCountAsEventReach,test,whichToPlot); 
+whichToPlot='drop'; % whichToPlot can be 'success','delayed success','drop','cued touch','cued touch and switch color','failed cued reach','false alarm','no reach','basic','wildcard','backward success'
+[~,~,returnout]=outcomeDependentShift_wrapper(alltbt,trialTypes,metadata,saveDir,[],[],reachratesettings,timeWindowToCountAsEventReach,test,whichToPlot); 
 
 %% plot outcome-dependent shifts AND separate by dprime
 

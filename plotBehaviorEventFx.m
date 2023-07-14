@@ -189,6 +189,8 @@ if plot_rawReaching_cdf==true
     for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
         [d1,d2]=plotCDF_rawReaches(dataset.rawReaching_allTrialsSequence_trial1InSeq{i},dataset.rawReaching_allTrialsSequence_trialiInSeq{i},timeBinsForReaching,cueTime,['CDF Raw Reaches all trials reference: trial 1 (black) vs ' num2str(dataset.nInSequence(i)-1) ' later (red)'],subtractPreCue,preCueWindow);
     end
+    returnThis.ref_cdf_trial1=d1;
+    returnThis.ref_cdf_trial2=d2;
     if startAtCue==false
         line([timeBinsForReaching(f) timeBinsForReaching(f)],[0 1],'Color','b');
         c=polyfit(timeBinsForReaching(timeBinsForReaching>=preCueWindow(1) & timeBinsForReaching<=preCueWindow(2)),d1(timeBinsForReaching>=preCueWindow(1) & timeBinsForReaching<=preCueWindow(2)),1);
