@@ -111,7 +111,7 @@ if plotset.success==true & ~isnan(testEventReach.trial1)
     disp('Using passed in test event conditions'); pause;
     trial1=testEventReach.trial1; trial2=testEventReach.trial2;
     if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); pause;
         nInSequence=testEventReach.nInSequence;
     end
 end
@@ -141,7 +141,7 @@ if plotset.backward_success==true & ~isnan(testEventReach.trial1)
     disp('Using passed in test event conditions'); pause;
     trial1=testEventReach.trial1; trial2=testEventReach.trial2;
     if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); pause;
         nInSequence=testEventReach.nInSequence;
     end
 end
@@ -171,7 +171,7 @@ if plotset.delayed==true & ~isnan(testEventReach.trial1)
     disp('Using passed in test event conditions'); pause;
     trial1=testEventReach.trial1; trial2=testEventReach.trial2;
     if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); pause;
         nInSequence=testEventReach.nInSequence;
     end
 end
@@ -215,7 +215,7 @@ if plotset.cuedtouch==true & ~isnan(testEventReach.trial1)
     disp('Using passed in test event conditions'); pause;
     trial1=testEventReach.trial1; trial2=testEventReach.trial2;
     if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); pause;
         nInSequence=testEventReach.nInSequence;
     end
 end
@@ -245,7 +245,7 @@ if plotset.failedcued==true & ~isnan(testEventReach.trial1)
     disp('Using passed in test event conditions'); pause;
     trial1=testEventReach.trial1; trial2=testEventReach.trial2;
     if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); pause;
         nInSequence=testEventReach.nInSequence;
     end
 end
@@ -271,7 +271,7 @@ if plotset.falsealarm==true & ~isnan(testEventReach.trial1)
     disp('Using passed in test event conditions'); pause;
     trial1=testEventReach.trial1; trial2=testEventReach.trial2;
     if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); pause;
         nInSequence=testEventReach.nInSequence;
     end
 end
@@ -297,7 +297,7 @@ if plotset.noreach==true & ~isnan(testEventReach.trial1)
     disp('Using passed in test event conditions'); pause;
     trial1=testEventReach.trial1; trial2=testEventReach.trial2;
     if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); pause;
         nInSequence=testEventReach.nInSequence;
     end
 end
@@ -360,7 +360,7 @@ if plotset.success==true & ~isnan(testEventReach.trial1)
     end
     trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
     if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); pause;
         nInSequence=testEventReach.nInSequence;
     end
 end
@@ -392,7 +392,7 @@ if plotset.backward_success==true & ~isnan(testEventReach.trial1)
     end
     trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
     if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); pause;
         nInSequence=testEventReach.nInSequence;
     end
 end
@@ -424,7 +424,7 @@ if plotset.delayed==true & ~isnan(testEventReach.trial1)
     end
     trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
     if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); pause;
         nInSequence=testEventReach.nInSequence;
     end
 end
@@ -452,7 +452,7 @@ if plotset.drop==true & ~isnan(testEventReach.trial1)
     end
     trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
     if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); pause;
         nInSequence=testEventReach.nInSequence;
     end
 end
@@ -480,7 +480,7 @@ if plotset.cuedtouch==true & ~isnan(testEventReach.trial1)
     end
     trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
     if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); pause;
         nInSequence=testEventReach.nInSequence;
     end
 end
@@ -512,7 +512,7 @@ if plotset.failedcued==true & ~isnan(testEventReach.trial1)
     end
     trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
     if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); pause;
         nInSequence=testEventReach.nInSequence;
     end
 end
@@ -540,7 +540,7 @@ if plotset.falsealarm==true & ~isnan(testEventReach.trial1)
     end
     trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
     if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); pause;
         nInSequence=testEventReach.nInSequence;
     end
 end
@@ -568,7 +568,7 @@ if plotset.noreach==true & ~isnan(testEventReach.trial1)
     end
     trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
     if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); pause;
         nInSequence=testEventReach.nInSequence;
     end
 end
