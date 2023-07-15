@@ -4,6 +4,9 @@ compareToFirstTrial=true;
 linkSuccesses=false;
 [~,cueindma]=nanmax(nanmean(alltbt.cueZone_onVoff,1));
 timestep=mode(diff(nanmean(alltbt.times,1)));
+if isnan(testEventReach.trial1)
+    testEventReach.fillInBetweenWithAnything=true;
+end
 
 trialTypes.isLongITI_1forward=[trialTypes.isLongITI(2:end); 0];
 trialTypes.optoGroup_1forward=[trialTypes.optoGroup(2:end); 0];
@@ -76,7 +79,7 @@ title(['Approach ' num2str(reachratesettings.useWindowsForUncued)]);
 nInSequence=3;
 trial1=[flankingTrials ' & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
 trial2=[flankingTrials];
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
+[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,true);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 if isempty(reachrates)
@@ -108,10 +111,11 @@ if plotset.success==true & ~isnan(testEventReach.trial1)
     disp('Using passed in test event conditions'); pause;
     trial1=testEventReach.trial1; trial2=testEventReach.trial2;
     if testEventReach.fillInBetweenWithAnything==false
-        error('Not yet implemented outcomeDependentShift_wrapper for fillInBetweenWithAnything is false');
+        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        nInSequence=testEventReach.nInSequence;
     end
 end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
+[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 [a,b]=doPlottingAndBootstrap(reachrates,'g','g','k',plotset.success,compareToFirstTrial);
@@ -137,10 +141,11 @@ if plotset.backward_success==true & ~isnan(testEventReach.trial1)
     disp('Using passed in test event conditions'); pause;
     trial1=testEventReach.trial1; trial2=testEventReach.trial2;
     if testEventReach.fillInBetweenWithAnything==false
-        error('Not yet implemented outcomeDependentShift_wrapper for fillInBetweenWithAnything is false');
+        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        nInSequence=testEventReach.nInSequence;
     end
 end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
+[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
 [a,b]=doPlottingAndBootstrap(reachrates,'g','g','b',plotset.backward_success,compareToFirstTrial);
@@ -166,10 +171,11 @@ if plotset.delayed==true & ~isnan(testEventReach.trial1)
     disp('Using passed in test event conditions'); pause;
     trial1=testEventReach.trial1; trial2=testEventReach.trial2;
     if testEventReach.fillInBetweenWithAnything==false
-        error('Not yet implemented outcomeDependentShift_wrapper for fillInBetweenWithAnything is false');
+        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        nInSequence=testEventReach.nInSequence;
     end
 end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
+[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 [a,b]=doPlottingAndBootstrap(reachrates,[15 141 6]./255,[15 141 6]./255,'k',plotset.delayed,compareToFirstTrial);
@@ -187,7 +193,7 @@ end
 nInSequence=3;
 trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==0' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==1 & trialTypes.consumed_pellet_1forward==0 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
 trial2=[flankingTrials];
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
+[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 [a,b]=doPlottingAndBootstrap(reachrates,'r','r','k',plotset.drop,compareToFirstTrial);
@@ -209,10 +215,11 @@ if plotset.cuedtouch==true & ~isnan(testEventReach.trial1)
     disp('Using passed in test event conditions'); pause;
     trial1=testEventReach.trial1; trial2=testEventReach.trial2;
     if testEventReach.fillInBetweenWithAnything==false
-        error('Not yet implemented outcomeDependentShift_wrapper for fillInBetweenWithAnything is false');
+        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        nInSequence=testEventReach.nInSequence;
     end
 end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
+[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 [a,b]=doPlottingAndBootstrap(reachrates,plotset.cuedtouchcolor,plotset.cuedtouchcolor,'k',plotset.cuedtouch,compareToFirstTrial);
@@ -238,10 +245,11 @@ if plotset.failedcued==true & ~isnan(testEventReach.trial1)
     disp('Using passed in test event conditions'); pause;
     trial1=testEventReach.trial1; trial2=testEventReach.trial2;
     if testEventReach.fillInBetweenWithAnything==false
-        error('Not yet implemented outcomeDependentShift_wrapper for fillInBetweenWithAnything is false');
+        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        nInSequence=testEventReach.nInSequence;
     end
 end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
+[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 [a,b]=doPlottingAndBootstrap(reachrates,[8 41 175]./255,[8 41 175]./255,'k',plotset.failedcued,compareToFirstTrial);
@@ -263,10 +271,11 @@ if plotset.falsealarm==true & ~isnan(testEventReach.trial1)
     disp('Using passed in test event conditions'); pause;
     trial1=testEventReach.trial1; trial2=testEventReach.trial2;
     if testEventReach.fillInBetweenWithAnything==false
-        error('Not yet implemented outcomeDependentShift_wrapper for fillInBetweenWithAnything is false');
+        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        nInSequence=testEventReach.nInSequence;
     end
 end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
+[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 [a,b]=doPlottingAndBootstrap(reachrates,'c','c','k',plotset.falsealarm,compareToFirstTrial);
@@ -288,10 +297,11 @@ if plotset.noreach==true & ~isnan(testEventReach.trial1)
     disp('Using passed in test event conditions'); pause;
     trial1=testEventReach.trial1; trial2=testEventReach.trial2;
     if testEventReach.fillInBetweenWithAnything==false
-        error('Not yet implemented outcomeDependentShift_wrapper for fillInBetweenWithAnything is false');
+        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        nInSequence=testEventReach.nInSequence;
     end
 end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
+[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 [a,b]=doPlottingAndBootstrap(reachrates,[0.8 0.8 0.8],[0.8 0.8 0.8],'k',plotset.noreach,compareToFirstTrial);
@@ -319,7 +329,7 @@ end
 nInSequence=3;
 trial1=[flankingTrials ' & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
 trial2=[flankingTrials];
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
+[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,true);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 if compareToFirstTrial==false
@@ -350,10 +360,11 @@ if plotset.success==true & ~isnan(testEventReach.trial1)
     end
     trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
     if testEventReach.fillInBetweenWithAnything==false
-        error('Not yet implemented outcomeDependentShift_wrapper for fillInBetweenWithAnything is false');
+        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        nInSequence=testEventReach.nInSequence;
     end
 end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
+[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 [a,b]=doPlottingAndBootstrap(reachrates,'g','m','k',plotset.success,compareToFirstTrial);
@@ -381,10 +392,11 @@ if plotset.backward_success==true & ~isnan(testEventReach.trial1)
     end
     trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
     if testEventReach.fillInBetweenWithAnything==false
-        error('Not yet implemented outcomeDependentShift_wrapper for fillInBetweenWithAnything is false');
+        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        nInSequence=testEventReach.nInSequence;
     end
 end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
+[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
 [a,b]=doPlottingAndBootstrap(reachrates,'g','m','b',plotset.backward_success,compareToFirstTrial);
@@ -412,10 +424,11 @@ if plotset.delayed==true & ~isnan(testEventReach.trial1)
     end
     trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
     if testEventReach.fillInBetweenWithAnything==false
-        error('Not yet implemented outcomeDependentShift_wrapper for fillInBetweenWithAnything is false');
+        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        nInSequence=testEventReach.nInSequence;
     end
 end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
+[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 [a,b]=doPlottingAndBootstrap(reachrates,[15 141 6]./255,'m','k',plotset.delayed,compareToFirstTrial);
@@ -439,10 +452,11 @@ if plotset.drop==true & ~isnan(testEventReach.trial1)
     end
     trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
     if testEventReach.fillInBetweenWithAnything==false
-        error('Not yet implemented outcomeDependentShift_wrapper for fillInBetweenWithAnything is false');
+        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        nInSequence=testEventReach.nInSequence;
     end
 end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
+[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
 [a,b]=doPlottingAndBootstrap(reachrates,'r','m','k',plotset.drop,compareToFirstTrial);
@@ -466,10 +480,11 @@ if plotset.cuedtouch==true & ~isnan(testEventReach.trial1)
     end
     trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
     if testEventReach.fillInBetweenWithAnything==false
-        error('Not yet implemented outcomeDependentShift_wrapper for fillInBetweenWithAnything is false');
+        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        nInSequence=testEventReach.nInSequence;
     end
 end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
+[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 [a,b]=doPlottingAndBootstrap(reachrates,plotset.cuedtouchcolor,'m','k',plotset.cuedtouch,compareToFirstTrial);
@@ -497,10 +512,11 @@ if plotset.failedcued==true & ~isnan(testEventReach.trial1)
     end
     trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
     if testEventReach.fillInBetweenWithAnything==false
-        error('Not yet implemented outcomeDependentShift_wrapper for fillInBetweenWithAnything is false');
+        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        nInSequence=testEventReach.nInSequence;
     end
 end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
+[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 [a,b]=doPlottingAndBootstrap(reachrates,[8 41 175]./255,'m','k',plotset.failedcued,compareToFirstTrial);
@@ -524,10 +540,11 @@ if plotset.falsealarm==true & ~isnan(testEventReach.trial1)
     end
     trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
     if testEventReach.fillInBetweenWithAnything==false
-        error('Not yet implemented outcomeDependentShift_wrapper for fillInBetweenWithAnything is false');
+        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        nInSequence=testEventReach.nInSequence;
     end
 end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
+[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
 [a,b]=doPlottingAndBootstrap(reachrates,'c','m','k',plotset.falsealarm,compareToFirstTrial);
@@ -551,10 +568,11 @@ if plotset.noreach==true & ~isnan(testEventReach.trial1)
     end
     trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
     if testEventReach.fillInBetweenWithAnything==false
-        error('Not yet implemented outcomeDependentShift_wrapper for fillInBetweenWithAnything is false');
+        disp(['Doing nInSequence ' num2str(nInSequence)]); pause;
+        nInSequence=testEventReach.nInSequence;
     end
 end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
+[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
 [a,b]=doPlottingAndBootstrap(reachrates,[0.8 0.8 0.8],'m','k',plotset.noreach,compareToFirstTrial);
@@ -1010,7 +1028,7 @@ end
 
 end
 
-function [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir)
+function [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,fillInBetweenWithAnything)
 
 tbt_filter.name='throwaway';
 test.nInSequence=[nInSequence]; 
@@ -1018,7 +1036,7 @@ test.trial1=trial1;
 test.templateSequence2_cond=eval(trial1);
 test.trial2=trial2;
 test.templateSequence2_end=eval(trial2);
-test.fillInBetweenWithAnything=true; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1
+test.fillInBetweenWithAnything=fillInBetweenWithAnything; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1
 test.event_name=['alltrials' tbt_filter.name 'inBetweenAnything' num2str(test.fillInBetweenWithAnything)];
 saveDir2=[saveDir '\' test.event_name];
 mkdir(saveDir2);
