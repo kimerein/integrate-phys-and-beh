@@ -251,9 +251,9 @@ trialTypes.led_6back=[ones(6,1); trialTypes.led(1:end-6)];
 % % trial2='trialTypes.led==0 & trialTypes.led_1forward==1 & trialTypes.led_7back==1'; % & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
 
 % No opto inh
-[trialTypes,trial1,trial2,~,~]=whichTrialTypesToUse(alltbt,trialTypes,metadata,'delayed failure',[3.5 8],'all_reachBatch'); % no LED
+% [trialTypes,trial1,trial2,~,~]=whichTrialTypesToUse(alltbt,trialTypes,metadata,'delayed failure',[3.5 8],'all_reachBatch'); % no LED
 % Opto inh
-% [trialTypes,~,~,trial1,trial2]=whichTrialTypesToUse(alltbt,trialTypes,metadata,'delayed failure',[3.5 8],'all_reachBatch'); % LED
+[trialTypes,~,~,trial1,trial2]=whichTrialTypesToUse(alltbt,trialTypes,metadata,'delayed failure',[3.5 8],'all_reachBatch'); % LED
 
 test.templateSequence2_cond=eval(trial1);
 test.templateSequence2_end=eval(trial2);
@@ -442,9 +442,9 @@ reachratesettings.acrossSess_window3=[-2 -1]; % time window wrt cue onset to cla
 reachratesettings.useWindowsForUncued=[3]; % to use window2 or window3 or both for the uncued reach rate
 timeWindowToCountAsEventReach=[3.5 8]; % set as nan if want to use default in outcomeDependentShift_wrapper.m
 % test.trial1=nan; % set as nan if want to use default in outcomeDependentShift_wrapper.m, else will inherit from this function
-[trialTypes,trial1,trial2,trial1_LED,trial2_LED]=whichTrialTypesToUse(alltbt,trialTypes,metadata,'delayed success',timeWindowToCountAsEventReach,'reachBatch_success_reachStarts');
+[trialTypes,trial1,trial2,trial1_LED,trial2_LED]=whichTrialTypesToUse(alltbt,trialTypes,metadata,'uncued failure',timeWindowToCountAsEventReach,'all_reachBatch');
 test.trial1=trial1; test.trial2=trial2; test.trial1_LED=trial1_LED; test.trial2_LED=trial2_LED;
-whichToPlot='delayed success'; % whichToPlot can be 'success','delayed success','drop','cued touch','cued touch and switch color','failed cued reach','false alarm','no reach','basic','wildcard','backward success'
+whichToPlot='false alarm'; % whichToPlot can be 'success','delayed success','drop','cued touch','cued touch and switch color','failed cued reach','false alarm','no reach','basic','wildcard','backward success'
 [~,~,returnout]=outcomeDependentShift_wrapper(alltbt,trialTypes,metadata,saveDir,[],[],reachratesettings,timeWindowToCountAsEventReach,test,whichToPlot); 
 
 %% plot outcome-dependent shifts AND separate by dprime
