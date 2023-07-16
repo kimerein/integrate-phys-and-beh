@@ -171,12 +171,37 @@ end
 if plot_rawReaching_cdf==true
     startAtCue=false;
     subtractPreCue=false;
+    startAtPrecue=true;
     preCueWindow=[-2 -1];
     
     timeStep=mode(diff(nanmean(alltbt.times,1)));
     timeBinsForReaching=0:timeStep:(size(dataset.rawReaching_allTrialsSequence_trial1InSeq{1},2)-1)*timeStep;
     % find cue ind
     [~,f]=nanmax(nanmean(alltbt.cueZone_onVoff,1));
+    if startAtPrecue==true
+        cueTime=timeBinsForReaching(f);
+        precuecutoff=cueTime+preCueWindow(1);
+        for i=1:length(dataset.rawReaching_allTrialsSequence_trial1InSeq)
+            temp=dataset.rawReaching_allTrialsSequence_trial1InSeq{i};
+            temp(:,timeBinsForReaching<precuecutoff)=0;
+            dataset.rawReaching_allTrialsSequence_trial1InSeq{i}=temp;
+        end
+        for i=1:length(dataset.rawReaching_allTrialsSequence_trialiInSeq)
+            temp=dataset.rawReaching_allTrialsSequence_trialiInSeq{i};
+            temp(:,timeBinsForReaching<precuecutoff)=0;
+            dataset.rawReaching_allTrialsSequence_trialiInSeq{i}=temp;
+        end
+        for i=1:length(dataset.rawReaching_event_trial1InSeq)
+            temp=dataset.rawReaching_event_trial1InSeq{i};
+            temp(:,timeBinsForReaching<precuecutoff)=0;
+            dataset.rawReaching_event_trial1InSeq{i}=temp;
+        end
+        for i=1:length(dataset.rawReaching_event_trialiInSeq)
+            temp=dataset.rawReaching_event_trialiInSeq{i};
+            temp(:,timeBinsForReaching<precuecutoff)=0;
+            dataset.rawReaching_event_trialiInSeq{i}=temp;
+        end
+    end
     if startAtCue==true
         cueTime=timeBinsForReaching(f);
         preCueWindow=[cueTime+preCueWindow(1) cueTime+preCueWindow(2)];
