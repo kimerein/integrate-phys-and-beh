@@ -16,6 +16,7 @@ else
 end
 
 trialTypes.isLongITI_1forward=[trialTypes.isLongITI(2:end); 0];
+trialTypes.isLongITI_2forward=[trialTypes.led(1+2:end); zeros(2,1)];
 trialTypes.optoGroup_1forward=[trialTypes.optoGroup(2:end); 0];
 trialTypes.optoGroup_1back=[0; trialTypes.optoGroup(1:end-1)];
 trialTypes.isLongITI_1back=[0; trialTypes.isLongITI(1:end-1)];
@@ -55,10 +56,10 @@ switch whichEventType
         trial2_LED='trialTypes.optoGroup~=1 & (trialTypes.led_1forward==0 | trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_1back==0)';
     case 'cued success accumulate'
         % need to use reachedInTimeWindow=[0 opto_duration] and reachBatch_success_reachStarts
-        trial1=['(trialTypes.optoGroup~=1 & trialTypes.led_1forward==0) SPLIT trialTypes.reachedInTimeWindow==1'];
-        trial2=['trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow_1back==1 & ' linkerForNoLED_accumulate];
-        trial1_LED=['(trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1)'];
-        trial2_LED=['trialTypes.optoGroup~=1 & trialTypes.consumed_pellet_4back==1 & ' linkerForLED_accumulate];
+        trial1=['trialTypes.optoGroup~=1 & (trialTypes.consumed_pellet_1back==1 | trialTypes.isLongITI_2forward==1) SPLIT trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow==1 & trialTypes.led==0'];
+        trial2=['trialTypes.optoGroup~=1 & ' linkerForNoLED_accumulate];
+        trial1_LED=['trialTypes.optoGroup~=1 & (trialTypes.consumed_pellet_1back==1 | trialTypes.isLongITI_2forward==1) SPLIT trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow==1 & trialTypes.led==1'];
+        trial2_LED=['trialTypes.optoGroup~=1 & ' linkerForLED_accumulate];
     case 'backwards cued success accumulate'
         % need to use reachedInTimeWindow=[0 opto_duration] and reachBatch_success_reachStarts
         trial2=['(trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0)'];

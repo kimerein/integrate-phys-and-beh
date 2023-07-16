@@ -441,7 +441,7 @@ reachratesettings.acrossSess_window2=[7 9.5]; % beware reach suppression after a
 reachratesettings.acrossSess_window3=[-2 -1]; % time window wrt cue onset to classify reach as uncued
 reachratesettings.useWindowsForUncued=[3]; % to use window2 or window3 or both for the uncued reach rate
 optoDuration=1; % in sec, for these data
-timeWindowToCountAsEventReach=[0.1 0.5]; % set as nan if want to use default in outcomeDependentShift_wrapper.m
+timeWindowToCountAsEventReach=[0 0.5]; % set as nan if want to use default in outcomeDependentShift_wrapper.m
 % test.trial1=nan; % set as nan if want to use default in outcomeDependentShift_wrapper.m, else will inherit from this function
 [trialTypes,trial1,trial2,trial1_LED,trial2_LED]=whichTrialTypesToUse(alltbt,trialTypes,metadata,'cued success accumulate',timeWindowToCountAsEventReach,'reachBatch_success_reachStarts');
 test.trial1=trial1; test.trial2=trial2; test.trial1_LED=trial1_LED; test.trial2_LED=trial2_LED;
