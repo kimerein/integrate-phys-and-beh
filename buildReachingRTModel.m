@@ -247,8 +247,10 @@ for i=1:length(nInSequence)
             if ~isempty(regexp(templateSequence2_cond,'SPLIT'))
                 % split templateSequence2_cond at SPLIT
                 r=regexp(templateSequence2_cond,'SPLIT');
-                part1_templateSequence2_cond=templateSequence2_cond(1:r-1);
-                part2_templateSequence2_cond=templateSequence2_cond(r+4:end);
+                part1_templateSequence2_condchar=templateSequence2_cond(1:r-1);
+                part2_templateSequence2_condchar=templateSequence2_cond(r+5:end);
+                part1_templateSequence2_cond=eval(part1_templateSequence2_condchar);
+                part2_templateSequence2_cond=eval(part2_templateSequence2_condchar);
                 if j==1
                     templateSequence1{j}=templateSequence1_cond;
                     templateSequence2{j}=part1_templateSequence2_cond;

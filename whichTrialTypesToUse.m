@@ -56,7 +56,7 @@ switch whichEventType
     case 'cued success accumulate'
         % need to use reachedInTimeWindow=[0 opto_duration] and reachBatch_success_reachStarts
         trial1=['(trialTypes.optoGroup~=1 & trialTypes.led_1forward==0) SPLIT trialTypes.reachedInTimeWindow==1'];
-        trial2=['trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow_1back==1 & trialTypes.reachedInTimeWindow_2back==1 & ' linkerForNoLED_accumulate];
+        trial2=['trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow_1back==1 & ' linkerForNoLED_accumulate];
         trial1_LED=['(trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1)'];
         trial2_LED=['trialTypes.optoGroup~=1 & trialTypes.consumed_pellet_4back==1 & ' linkerForLED_accumulate];
     case 'backwards cued success accumulate'
