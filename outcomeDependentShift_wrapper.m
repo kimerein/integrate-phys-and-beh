@@ -1033,7 +1033,11 @@ function [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,tri
 tbt_filter.name='throwaway';
 test.nInSequence=[nInSequence]; 
 test.trial1=trial1;
-test.templateSequence2_cond=eval(trial1);
+if ~isempty(regexp(trial1,'SPLIT'))
+    test.templateSequence2_cond=trial1;
+else
+    test.templateSequence2_cond=eval(trial1);
+end
 test.trial2=trial2;
 test.templateSequence2_end=eval(trial2);
 test.fillInBetweenWithAnything=fillInBetweenWithAnything; % if true, will allow middle trials to be anything; otherwise, middle trials must match cond1

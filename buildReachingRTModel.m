@@ -243,7 +243,26 @@ for i=1:length(nInSequence)
     nSeq=nInSequence(i);
     disp(nSeq);
     for j=1:nSeq
-        if fillInBetweenWithAnything==false
+        if ischar(templateSequence2_cond) 
+            if ~isempty(regexp(templateSequence2_cond,'SPLIT'))
+                % split templateSequence2_cond at SPLIT
+                r=regexp(templateSequence2_cond,'SPLIT');
+                part1_templateSequence2_cond=templateSequence2_cond(1:r-1);
+                part2_templateSequence2_cond=templateSequence2_cond(r+4:end);
+                if j==1
+                    templateSequence1{j}=templateSequence1_cond;
+                    templateSequence2{j}=part1_templateSequence2_cond;
+                elseif j==nSeq
+                    templateSequence1{j}=templateSequence1_end;
+                    templateSequence2{j}=templateSequence2_end;
+                else
+                    templateSequence1{j}=templateSequence1_cond;
+                    templateSequence2{j}=part2_templateSequence2_cond;
+                end
+            else
+                error('If templateSequence2_cond is still char here, then should contain SPLIT, else templateSequence2_cond should already be evaluated.');
+            end
+        elseif fillInBetweenWithAnything==false
             if j==1
                 templateSequence1{j}=templateSequence1_cond;
                 templateSequence2{j}=templateSequence2_cond;

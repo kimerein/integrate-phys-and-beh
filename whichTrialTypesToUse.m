@@ -54,11 +54,17 @@ switch whichEventType
                     '(trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1)']; 
         trial2_LED='trialTypes.optoGroup~=1 & (trialTypes.led_1forward==0 | trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_1back==0)';
     case 'cued success accumulate'
-        % use reachedInTimeWindow=[0 3] and reachBatch_success_reachStarts
-        trial1=['(trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0)'];
-        trial2=['trialTypes.optoGroup~=1 & ' linkerForNoLED_accumulate];
+        % need to use reachedInTimeWindow=[0 opto_duration] and reachBatch_success_reachStarts
+        trial1=['(trialTypes.optoGroup~=1 & trialTypes.led_1forward==0) SPLIT trialTypes.reachedInTimeWindow==1'];
+        trial2=['trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow_1back==1 & trialTypes.reachedInTimeWindow_2back==1 & ' linkerForNoLED_accumulate];
         trial1_LED=['(trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1)'];
-        trial2_LED=['trialTypes.optoGroup~=1 & ' linkerForLED_accumulate];
+        trial2_LED=['trialTypes.optoGroup~=1 & trialTypes.consumed_pellet_4back==1 & ' linkerForLED_accumulate];
+    case 'backwards cued success accumulate'
+        % need to use reachedInTimeWindow=[0 opto_duration] and reachBatch_success_reachStarts
+        trial2=['(trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0)'];
+        trial1=['trialTypes.optoGroup~=1 & ' linkerForNoLED_accumulate];
+        trial2_LED=['(trialTypes.optoGroup~=1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1)'];
+        trial1_LED=['trialTypes.optoGroup~=1 & trialTypes.led_2back==1'];% & ' linkerForLED_accumulate];
     case 'cued failure'
         % did not touch pellet despite reaching in cued window
         trial1=['(trialTypes.optoGroup~=1 & trialTypes.cued_reach_1back==1 & trialTypes.isLongITI_1back==1 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0) | ' ...
