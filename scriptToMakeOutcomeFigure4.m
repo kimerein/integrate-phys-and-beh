@@ -14,6 +14,19 @@ function scriptToMakeOutcomeFigure4(alltbt,trialTypes,metadata,cuedreachtimewind
 % Cued failure accumulate
 
 % Uncued success accumulate
+X=2;
+trialTypes.isLongITI_Xforward=[trialTypes.led(1+X:end); zeros(X,1)]; % for 4 sequence, "2forward"
+plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[3],[3.5 8],'delayed success accumulate','reachBatch_success_reachStarts',true,4,'delayed success',sad,savePlotsDir,'window3_minus2to0',tbt_filter);
+plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[3.5 8],'delayed success accumulate','reachBatch_success_reachStarts',true,4,'delayed success',sad,savePlotsDir,'window2and3_minus2to0',tbt_filter);
+plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 -1],[3],[3.5 8],'delayed success accumulate','reachBatch_success_reachStarts',true,4,'delayed success',sad,savePlotsDir,'window3_minus2tominus1',tbt_filter);
+plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 -1],[2 3],[3.5 8],'delayed success accumulate','reachBatch_success_reachStarts',true,4,'delayed success',sad,savePlotsDir,'window2and3_minus2tominus1',tbt_filter);
+
+X=3;
+trialTypes.isLongITI_Xforward=[trialTypes.led(1+X:end); zeros(X,1)]; % for 5 sequence, "3forward"
+plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[3],[3.5 8],'delayed success accumulate','reachBatch_success_reachStarts',true,5,'delayed success',sad,savePlotsDir,'window3_minus2to0',tbt_filter);
+plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[3.5 8],'delayed success accumulate','reachBatch_success_reachStarts',true,5,'delayed success',sad,savePlotsDir,'window2and3_minus2to0',tbt_filter);
+plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 -1],[3],[3.5 8],'delayed success accumulate','reachBatch_success_reachStarts',true,5,'delayed success',sad,savePlotsDir,'window3_minus2tominus1',tbt_filter);
+plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 -1],[2 3],[3.5 8],'delayed success accumulate','reachBatch_success_reachStarts',true,5,'delayed success',sad,savePlotsDir,'window2and3_minus2tominus1',tbt_filter);
 
 % Uncued failure accumulate
 plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[3],[3.5 8],'uncued failure accumulate','all_reachBatch',true,4,'false alarm',sad,savePlotsDir,'window3_minus2to0',tbt_filter);
@@ -28,7 +41,7 @@ plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 -1],[2 3],[3
 
 end
 
-function plotReachPDFandCDF(alltbt,trialTypes,metadata,test,tbt_filter,saveDir,savePlotsDir)
+function plotReachPDFandCDF(alltbt,trialTypes,metadata,test,tbt_filter,saveDir,savePlotsDir,addOn)
 
 if ~isempty(regexp(test.trial1,'SPLIT'))
     test.templateSequence2_cond=test.trial1;
@@ -53,13 +66,13 @@ skipCorrected=true;
 returnThisCDF=plotBehaviorEventFx(dataset.realDistributions,alltbt,[],'plot_rawReaching_cdf'); 
 
 % save figures and results
-if ~exist(fullfile(savePlotsDir,'pdfcdf'),'dir')
-    mkdir(fullfile(savePlotsDir,'pdfcdf'));
+if ~exist(fullfile(savePlotsDir,['pdfcdf' addOn]),'dir')
+    mkdir(fullfile(savePlotsDir,['pdfcdf' addOn]));
 end
-save(fullfile(savePlotsDir,'pdfcdf','returnThis.mat'),'returnThis');
-save(fullfile(savePlotsDir,'pdfcdf','returnThisRef.mat'),'returnThisRef');
-save(fullfile(savePlotsDir,'pdfcdf','returnThisCDF.mat'),'returnThisCDF');
-saveAllOpenFigures(fullfile(savePlotsDir,'pdfcdf'));
+save(fullfile(savePlotsDir,['pdfcdf' addOn],'returnThis.mat'),'returnThis');
+save(fullfile(savePlotsDir,['pdfcdf' addOn],'returnThisRef.mat'),'returnThisRef');
+save(fullfile(savePlotsDir,['pdfcdf' addOn],'returnThisCDF.mat'),'returnThisCDF');
+saveAllOpenFigures(fullfile(savePlotsDir,['pdfcdf' addOn]));
 close all;
 
 end
@@ -83,8 +96,8 @@ else
 end
 whichToPlot=whichToPlotName; % whichToPlot can be 'success','delayed success','drop','cued touch','cued touch and switch color','failed cued reach','false alarm','no reach','basic','wildcard','backward success'
 close all;
-% reach pdf and cdf
-plotReachPDFandCDF(alltbt,trialTypes,metadata,test,tbt_filter,sad,fullfile(savePlotsDir,[whichReachName '_seqLength' num2str(nInSequence) '_' addOn]));
+% reach pdf and cdf -- CONTROL
+plotReachPDFandCDF(alltbt,trialTypes,metadata,test,tbt_filter,sad,fullfile(savePlotsDir,[whichReachName '_seqLength' num2str(nInSequence) '_' addOn]),'control');
 % scatter plots for outcome change
 close all;
 [~,~,returnout]=outcomeDependentShift_wrapper(alltbt,trialTypes,metadata,sad,[],[],reachratesettings,timeWindowToCountAsEventReach,test,whichToPlot); 
@@ -94,6 +107,11 @@ if ~exist(fullfile(savePlotsDir,[whichReachName '_seqLength' num2str(nInSequence
 end
 save(fullfile(savePlotsDir,[whichReachName '_seqLength' num2str(nInSequence) '_' addOn],'returnout.mat'),'returnout');
 saveAllOpenFigures(fullfile(savePlotsDir,[whichReachName '_seqLength' num2str(nInSequence) '_' addOn]));
+close all;
+% reach pdf and cdf -- LED
+test.trial1=test.trial1_LED;
+test.trial2=test.trial2_LED;
+plotReachPDFandCDF(alltbt,trialTypes,metadata,test,tbt_filter,sad,fullfile(savePlotsDir,[whichReachName '_seqLength' num2str(nInSequence) '_' addOn]),'pDMStinh');
 close all;
 
 end

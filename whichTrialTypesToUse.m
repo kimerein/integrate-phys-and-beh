@@ -96,9 +96,9 @@ switch whichEventType
         % could put chewing_at_trial_start==0 for trial2 and trial2_LED but
         % it does NOT make a difference and reduces trials
     case 'delayed success accumulate'
-        trial1=['trialTypes.optoGroup~=1 & (trialTypes.consumed_pellet_1back==1 | trialTypes.isLongITI_2forward==1) SPLIT trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow==1 & trialTypes.led==0'];
+        trial1=['trialTypes.optoGroup~=1 & (trialTypes.consumed_pellet_1back==1 | trialTypes.isLongITI_Xforward==1) SPLIT trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow==1 & trialTypes.led==0'];
         trial2=['trialTypes.optoGroup~=1 & ' linkerForNoLED_accumulate];
-        trial1_LED=['trialTypes.optoGroup~=1 & (trialTypes.consumed_pellet_1back==1 | trialTypes.isLongITI_2forward==1) SPLIT trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow==1 & trialTypes.led==1'];
+        trial1_LED=['trialTypes.optoGroup~=1 & (trialTypes.consumed_pellet_1back==1 | trialTypes.isLongITI_Xforward==1) SPLIT trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow==1 & trialTypes.led==1'];
         trial2_LED=['trialTypes.optoGroup~=1 & ' linkerForLED_accumulate];
     case 'uncued failure'
         % did not touch pellet despite reaching in delayed window after cue

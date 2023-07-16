@@ -173,6 +173,9 @@ if plot_rawReaching_cdf==true
     subtractPreCue=false;
     startAtPrecue=true;
     preCueWindow=[-2 -1];
+    cutCDFat=9; % cut cdf at this time
+
+    maxTrile=cutCDFat; % make this empty if want whole trial length
     
     timeStep=mode(diff(nanmean(alltbt.times,1)));
     timeBinsForReaching=0:timeStep:(size(dataset.rawReaching_allTrialsSequence_trial1InSeq{1},2)-1)*timeStep;
@@ -212,7 +215,7 @@ if plot_rawReaching_cdf==true
         cueTime=0;
     end
     for i=1:length(dataset.allTrialsSequence_RT_trial1InSeq)
-        [d1,d2]=plotCDF_rawReaches(dataset.rawReaching_allTrialsSequence_trial1InSeq{i},dataset.rawReaching_allTrialsSequence_trialiInSeq{i},timeBinsForReaching,cueTime,['CDF Raw Reaches all trials reference: trial 1 (black) vs ' num2str(dataset.nInSequence(i)-1) ' later (red)'],subtractPreCue,preCueWindow);
+        [d1,d2]=plotCDF_rawReaches(dataset.rawReaching_allTrialsSequence_trial1InSeq{i},dataset.rawReaching_allTrialsSequence_trialiInSeq{i},timeBinsForReaching,cueTime,['CDF Raw Reaches all trials reference: trial 1 (black) vs ' num2str(dataset.nInSequence(i)-1) ' later (red)'],subtractPreCue,preCueWindow,maxTrile);
     end
     returnThis.ref_cdf_trial1=d1;
     returnThis.ref_cdf_trial2=d2;
@@ -226,20 +229,83 @@ if plot_rawReaching_cdf==true
     temp=dataset.event_name;
     temp(regexp(temp,'_'))=' ';
     for i=1:length(dataset.event_RT_trial1InSeq)
-        [d1,d2]=plotCDF_rawReaches(dataset.rawReaching_event_trial1InSeq{i},dataset.rawReaching_event_trialiInSeq{i},timeBinsForReaching,cueTime,['CDF Raw Reaches fx of ' temp ': trial 1 (black) vs ' num2str(dataset.nInSequence(i)-1) ' later (red)'],subtractPreCue,preCueWindow);
+        [d1,d2]=plotCDF_rawReaches(dataset.rawReaching_event_trial1InSeq{i},dataset.rawReaching_event_trialiInSeq{i},timeBinsForReaching,cueTime,['CDF Raw Reaches fx of ' temp ': trial 1 (black) vs ' num2str(dataset.nInSequence(i)-1) ' later (red)'],subtractPreCue,preCueWindow,maxTrile);
     end
+
+    % Bootstrap CDFs
+    dat2=dataset.rawReaching_event_trial1InSeq{1};
+    returnThis.trial1_rawReachMatrix=dat2;
+    % dat2=dataset.rawReaching_event_trialiInSeq{1};
+    takeFracForBootstrap=0.66;
+    takeIndsForBootstrap=ceil(takeFracForBootstrap*size(dat2,1));
+    nRuns=100;
+    bootCDFs=nan(nRuns,length(timeBinsForReaching));
+    for i=1:nRuns
+        takeTheseForBoot=randi(size(dat2,1),1,takeIndsForBootstrap); % with replacement
+        sub_dat2=dat2(takeTheseForBoot,:);
+        sub_dat2=sum(sub_dat2,1,'omitnan');
+        if isempty(maxTrile)
+        else
+            sub_dat2(timeBinsForReaching>maxTrile)=0;
+        end
+        cond2_cdf=accumulateDistribution(sub_dat2);
+        cond2_cdf=cond2_cdf./nanmax(cond2_cdf);
+        bootCDFs(i,:)=cond2_cdf;
+    end
+    % Show bootstrapped 95% CI
+    sorted_bootCDFs=nan(size(bootCDFs));
+    fifthPerc=nan(1,size(bootCDFs,2));
+    ninetyfifthPerc=nan(1,size(bootCDFs,2));
+    for i=1:size(bootCDFs,2)
+        sorted_bootCDFs(:,i)=sort(bootCDFs(:,i));
+        fifthPerc(i)=prctile(sorted_bootCDFs(:,i),5);
+        ninetyfifthPerc(i)=prctile(sorted_bootCDFs(:,i),95);
+    end
+    plot(timeBinsForReaching,fifthPerc,'Color','k'); hold on;
+    plot(timeBinsForReaching,ninetyfifthPerc,'Color','k');
+    % dat1=dataset.rawReaching_event_trial1InSeq{1};
+    dat2=dataset.rawReaching_event_trialiInSeq{1};
+    returnThis.trial2_rawReachMatrix=dat2;
+    takeFracForBootstrap=0.66;
+    takeIndsForBootstrap=ceil(takeFracForBootstrap*size(dat2,1));
+    nRuns=100;
+    bootCDFs=nan(nRuns,length(timeBinsForReaching));
+    for i=1:nRuns
+        takeTheseForBoot=randi(size(dat2,1),1,takeIndsForBootstrap); % with replacement
+        sub_dat2=dat2(takeTheseForBoot,:);
+        sub_dat2=sum(sub_dat2,1,'omitnan');
+        if isempty(maxTrile)
+        else
+            sub_dat2(timeBinsForReaching>maxTrile)=0;
+        end
+        cond2_cdf=accumulateDistribution(sub_dat2);
+        cond2_cdf=cond2_cdf./nanmax(cond2_cdf);
+        bootCDFs(i,:)=cond2_cdf;
+    end
+    % Show bootstrapped 95% CI
+    sorted_bootCDFs=nan(size(bootCDFs));
+    fifthPerc=nan(1,size(bootCDFs,2));
+    ninetyfifthPerc=nan(1,size(bootCDFs,2));
+    for i=1:size(bootCDFs,2)
+        sorted_bootCDFs(:,i)=sort(bootCDFs(:,i));
+        fifthPerc(i)=prctile(sorted_bootCDFs(:,i),5);
+        ninetyfifthPerc(i)=prctile(sorted_bootCDFs(:,i),95);
+    end
+    plot(timeBinsForReaching,fifthPerc,'Color','r'); hold on;
+    plot(timeBinsForReaching,ninetyfifthPerc,'Color','r');
+
     if startAtCue==false
         line([timeBinsForReaching(f) timeBinsForReaching(f)],[0 1],'Color','b');
         c=polyfit(timeBinsForReaching(timeBinsForReaching>=preCueWindow(1) & timeBinsForReaching<=preCueWindow(2)),d2(timeBinsForReaching>=preCueWindow(1) & timeBinsForReaching<=preCueWindow(2)),1);
         yest=polyval(c,timeBinsForReaching);
         plot(timeBinsForReaching,yest,'Color','g'); 
         ylim([0 1]);
-        returnThis.uncued_fit=c;
-        returnThis.timeBins=timeBinsForReaching;
-        returnThis.cueTime=timeBinsForReaching(f);
-        returnThis.cdf_trial1=d1;
-        returnThis.cdf_trial2=d2;
+        returnThis.uncued_fit=c;   
     end
+    returnThis.timeBins=timeBinsForReaching;
+    returnThis.cueTime=timeBinsForReaching(f);
+    returnThis.cdf_trial1=d1;
+    returnThis.cdf_trial2=d2;
 end
 
 % Plot reaction times distribution
@@ -801,13 +867,13 @@ end
 
 end
 
-function [out1,out2]=plotCDF_rawReaches(data1,data2,timesteps,cueTime,tit,subtractPreCue,preCueWindow)
+function [out1,out2]=plotCDF_rawReaches(data1,data2,timesteps,cueTime,tit,subtractPreCue,preCueWindow,maxTrialLength)
 
 % make raw reaching data a timeseries (i.e., a pdf)
 % then simply accumulate distribution, selecting only time points after the
 % cue
 
-maxTrialLength=[]; %9.5; % in sec, or empty if want to include all reaches
+% maxTrialLength=[]; %9.5; % in sec, or empty if want to include all reaches
 
 data1=sum(data1,1,'omitnan');
 data2=sum(data2,1,'omitnan');
