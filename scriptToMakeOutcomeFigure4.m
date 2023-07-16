@@ -59,7 +59,7 @@ end
 function saveAllOpenFigures(FolderName)
 
 FigList = findobj(allchild(0), 'flat', 'Type', 'figure');
-for iFig = 1:length(FigList)
+for iFig = 1:length(FigList)-1
   FigHandle = FigList(iFig);
   FigName   = get(FigHandle, 'Name');
   savefig(FigHandle, fullfile(FolderName, FigName, '.fig'));
