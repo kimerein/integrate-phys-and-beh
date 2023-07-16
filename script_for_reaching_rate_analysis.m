@@ -441,13 +441,13 @@ reachratesettings.acrossSess_window2=[7 9.5]; % beware reach suppression after a
 reachratesettings.acrossSess_window3=[-2 -1]; % time window wrt cue onset to classify reach as uncued
 reachratesettings.useWindowsForUncued=[3]; % to use window2 or window3 or both for the uncued reach rate
 optoDuration=1; % in sec, for these data
-timeWindowToCountAsEventReach=[0 0.5]; % set as nan if want to use default in outcomeDependentShift_wrapper.m
+timeWindowToCountAsEventReach=[3.5 8]; % set as nan if want to use default in outcomeDependentShift_wrapper.m
 % test.trial1=nan; % set as nan if want to use default in outcomeDependentShift_wrapper.m, else will inherit from this function
-[trialTypes,trial1,trial2,trial1_LED,trial2_LED]=whichTrialTypesToUse(alltbt,trialTypes,metadata,'cued success accumulate',timeWindowToCountAsEventReach,'reachBatch_success_reachStarts');
+[trialTypes,trial1,trial2,trial1_LED,trial2_LED]=whichTrialTypesToUse(alltbt,trialTypes,metadata,'delayed success accumulate',timeWindowToCountAsEventReach,'reachBatch_success_reachStarts');
 test.trial1=trial1; test.trial2=trial2; test.trial1_LED=trial1_LED; test.trial2_LED=trial2_LED;
 % for accumulate
 test.nInSequence=4; test.fillInBetweenWithAnything=false;
-whichToPlot='success'; % whichToPlot can be 'success','delayed success','drop','cued touch','cued touch and switch color','failed cued reach','false alarm','no reach','basic','wildcard','backward success'
+whichToPlot='delayed success'; % whichToPlot can be 'success','delayed success','drop','cued touch','cued touch and switch color','failed cued reach','false alarm','no reach','basic','wildcard','backward success'
 [~,~,returnout]=outcomeDependentShift_wrapper(alltbt,trialTypes,metadata,saveDir,[],[],reachratesettings,timeWindowToCountAsEventReach,test,whichToPlot); 
 
 %% plot outcome-dependent shifts AND separate by dprime
