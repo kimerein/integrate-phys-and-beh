@@ -435,7 +435,7 @@ reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'c
 plotPairedChangeMinusSatiety(reachrates);
 
 %% plot outcome-dependent shifts
-
+% scriptToMakeOutcomeFigure4(alltbt,trialTypes,metadata,cuedreachtimewindow,optoDuration,sad,savePlotsDir);
 reachratesettings.acrossSess_window1=[0 cuedreachtimewindow]; % time window wrt cue onset to classify reach as cued
 reachratesettings.acrossSess_window2=[7 9.5]; % beware reach suppression after a success
 reachratesettings.acrossSess_window3=[-2 0]; % time window wrt cue onset to classify reach as uncued
