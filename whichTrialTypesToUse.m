@@ -114,6 +114,8 @@ switch whichEventType
 %         trial1_LED=['(trialTypes.optoGroup_2back~=1 & trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow_1back==1 & trialTypes.touched_pellet_1back==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touched_pellet_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.isLongITI_1forward==1 & trialTypes.led_1forward==1)'];
 %         trial2_LED='trialTypes.optoGroup~=1 & (trialTypes.led_1forward==0 | trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_1back==0)';
     case 'uncued failure accumulate'
+        % note that reachratesettings.acrossSess_window3=[-2 0] picks up
+        % more of the uncued decrease
         trial1=['trialTypes.optoGroup~=1 & trialTypes.consumed_pellet_1back==0 SPLIT trialTypes.optoGroup~=1 & (trialTypes.reachedInTimeWindow==1 | trialTypes.reachedBeforeCue==1) & trialTypes.touched_pellet==0 & trialTypes.led==0'];
         trial2=['trialTypes.optoGroup~=1 & ' linkerForNoLED_accumulate];
         trial1_LED=['trialTypes.optoGroup~=1 & trialTypes.consumed_pellet_1back==0 SPLIT trialTypes.optoGroup~=1 & (trialTypes.reachedInTimeWindow==1 | trialTypes.reachedBeforeCue==1) & trialTypes.touched_pellet==0 & trialTypes.led==1'];

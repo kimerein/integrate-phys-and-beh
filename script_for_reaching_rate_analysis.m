@@ -438,7 +438,7 @@ plotPairedChangeMinusSatiety(reachrates);
 
 reachratesettings.acrossSess_window1=[0 cuedreachtimewindow]; % time window wrt cue onset to classify reach as cued
 reachratesettings.acrossSess_window2=[7 9.5]; % beware reach suppression after a success
-reachratesettings.acrossSess_window3=[-2 -1]; % time window wrt cue onset to classify reach as uncued
+reachratesettings.acrossSess_window3=[-2 0]; % time window wrt cue onset to classify reach as uncued
 reachratesettings.useWindowsForUncued=[3]; % to use window2 or window3 or both for the uncued reach rate
 optoDuration=1; % in sec, for these data
 timeWindowToCountAsEventReach=[3.5 8]; % set as nan if want to use default in outcomeDependentShift_wrapper.m
