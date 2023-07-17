@@ -2,6 +2,10 @@
 function scriptToMakeOutcomeFigure4(alltbt,trialTypes,metadata,cuedreachtimewindow,optoDuration,sad,savePlotsDir,tbt_filter)
 
 % CONTROLS
+% Current trial CONTROL
+plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[],'no no opto','all_reachBatch',false,3,'success',sad,savePlotsDir,'win2and3_minus2to0',tbt_filter);
+return
+
 % Cued success CONTROL
 plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[0 cuedreachtimewindow],'backwards cued success','reachBatch_success_reachStarts',false,3,'success',sad,savePlotsDir,'win2and3_minus2to0BACKWARD',tbt_filter);
 plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[0 optoDuration],'backwards cued success','reachBatch_success_reachStarts',false,3,'success',sad,savePlotsDir,'win2and3_minus2to0_optoDurforcueBACKWARD',tbt_filter);

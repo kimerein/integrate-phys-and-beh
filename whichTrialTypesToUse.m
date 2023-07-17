@@ -139,12 +139,15 @@ switch whichEventType
         trial1_LED=['trialTypes.optoGroup~=1 & trialTypes.consumed_pellet_1back==0 SPLIT trialTypes.optoGroup~=1 & (trialTypes.reachedInTimeWindow==1 | trialTypes.reachedBeforeCue==1) & trialTypes.touched_pellet==0' linkerForVariedTimingSame];
         trial2_LED=['trialTypes.optoGroup~=1 & ' linkerForLED_accumulate];
     case 'backwards uncued failure'
-        trial1=['(trialTypes.optoGroup~=1 & trialTypes.consumed_pellet_1back==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touched_pellet_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0) |' ...
-                '(trialTypes.optoGroup~=1 & trialTypes.consumed_pellet_1back==0 & trialTypes.reachedBeforeCue_1forward==1 & trialTypes.touched_pellet_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0)' linkerForVariedTimingUncued];
-        trial2=['trialTypes.optoGroup~=1 & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)' linkerForVariedTimingUncued];
-        trial1_LED=['(trialTypes.optoGroup~=1 & trialTypes.consumed_pellet_1back==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touched_pellet_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1) |' ...
-                '(trialTypes.optoGroup~=1 & trialTypes.consumed_pellet_1back==0 & trialTypes.reachedBeforeCue_1forward==1 & trialTypes.touched_pellet_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1)' linkerForVariedTimingForward linkerForVariedTimingUncued];
-        trial2_LED=['trialTypes.optoGroup~=1 & (trialTypes.led_1forward==0 | trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_1back==0)' linkerForVariedTimingUncued];
+        trial2=['(trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touched_pellet_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0)' linkerForVariedTimingUncued];
+        trial1=['trialTypes.optoGroup~=1 & ' linkerForNoLED_accumulate linkerForVariedTimingUncued];
+        trial2_LED=['(trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touched_pellet_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1)' linkerForVariedTimingForward linkerForVariedTimingUncued];
+        trial1_LED=['trialTypes.optoGroup~=1 & ' linkerForLED_accumulate linkerForVariedTimingUncued];
+    case 'no no opto'
+        trial1='trialTypes.optoGroup~=1 & trialTypes.led==0';
+        trial2='trialTypes.optoGroup~=1 & trialTypes.led==0';
+        trial1_LED='trialTypes.optoGroup~=1 & trialTypes.led==0';
+        trial2_LED=['trialTypes.optoGroup~=1 & trialTypes.led==1' linkerForVariedTimingSame];
 end
 
 
