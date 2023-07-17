@@ -96,7 +96,7 @@ switch whichEventType
         trial2_LED=['trialTypes.optoGroup~=1 & ' linkerForLED_accumulate];
     case 'backwards cued failure' 
         trial2=['(trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0)']; 
-        trial1=['trialTypes.optoGroup~=1 ' linkerForNoLED_accumulate];
+        trial1=['trialTypes.optoGroup~=1 & ' linkerForNoLED_accumulate];
         trial2_LED=['(trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1' linkerForVariedTimingForward ')']; 
         trial1_LED=['trialTypes.optoGroup~=1 & ' linkerForLED_accumulate];
     case 'delayed success'
