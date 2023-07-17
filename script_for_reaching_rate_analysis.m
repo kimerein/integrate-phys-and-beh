@@ -259,8 +259,8 @@ trialTypes.led_6back=[ones(6,1); trialTypes.led(1:end-6)];
 %         '(trialTypes.optoGroup~=1 & trialTypes.led==0 & trialTypes.isLongITI_1forward==1 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0)']; 
 % trial2='trialTypes.optoGroup~=1 & trialTypes.led==0 & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
 % 
-% trial1='trialTypes.led==0 & trialTypes.reachedInTimeWindow_1forward==1';
-% trial2='trialTypes.led==0';
+trial1='trialTypes.optoGroup==3';
+trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
 
 test.templateSequence2_cond=eval(trial1);
 test.templateSequence2_end=eval(trial2);
