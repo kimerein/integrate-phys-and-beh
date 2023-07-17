@@ -240,6 +240,10 @@ if plot_rawReaching_cdf==true
     takeIndsForBootstrap=ceil(takeFracForBootstrap*size(dat2,1));
     nRuns=100;
     bootCDFs=nan(nRuns,length(timeBinsForReaching));
+    if size(dat2,1)==0
+        returnThis.trial2_rawReachMatrix=dataset.rawReaching_event_trialiInSeq{1};
+        return
+    end
     for i=1:nRuns
         takeTheseForBoot=randi(size(dat2,1),1,takeIndsForBootstrap); % with replacement
         sub_dat2=dat2(takeTheseForBoot,:);
