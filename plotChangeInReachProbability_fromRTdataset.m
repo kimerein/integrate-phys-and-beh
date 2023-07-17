@@ -625,7 +625,7 @@ if useRateMethod==1 || useRateMethod==3
     out.trial1_alltrials_uncued=approach_trial1_uncued;
     out.trial1_alltrials_cued=approach_trial1_cued;
     
-    nIndsForfirstRates=nanmean(n_for_init_rate);
+    nIndsForfirstRates=floor(nanmean(n_for_init_rate));
     if ~isempty(settings.stopPlottingTrialsAfterN)
         upTo=settings.stopPlottingTrialsAfterN;
         if upTo>length(approach_cued)
@@ -635,19 +635,19 @@ if useRateMethod==1 || useRateMethod==3
         upTo=length(approach_cued);
     end
     if settings.suppressPlots==false
-        quiver(nanmean(approach_uncued(1:n_for_init_rate)),nanmean(approach_cued(1:n_for_init_rate)),...
-            nanmean(approach_uncued(upTo-n_for_init_rate:upTo))-nanmean(approach_uncued(1:n_for_init_rate)),...
-            nanmean(approach_cued(upTo-n_for_init_rate:upTo))-nanmean(approach_cued(1:n_for_init_rate)),'Color','k');
+        quiver(nanmean(approach_uncued(1:nIndsForfirstRates)),nanmean(approach_cued(1:nIndsForfirstRates)),...
+            nanmean(approach_uncued(upTo-nIndsForfirstRates:upTo))-nanmean(approach_uncued(1:nIndsForfirstRates)),...
+            nanmean(approach_cued(upTo-nIndsForfirstRates:upTo))-nanmean(approach_cued(1:nIndsForfirstRates)),'Color','k');
     end
-    quiver_y=nanmean(approach_cued(upTo-n_for_init_rate:upTo))-nanmean(approach_cued(1:n_for_init_rate));
-    quiver_x=nanmean(approach_uncued(upTo-n_for_init_rate:upTo))-nanmean(approach_uncued(1:n_for_init_rate));
+    quiver_y=nanmean(approach_cued(upTo-nIndsForfirstRates:upTo))-nanmean(approach_cued(1:nIndsForfirstRates));
+    quiver_x=nanmean(approach_uncued(upTo-nIndsForfirstRates:upTo))-nanmean(approach_uncued(1:nIndsForfirstRates));
     quiver_m=quiver_y/quiver_x;
     ang=atand(quiver_m);
     if quiver_y<0 && quiver_x<0
         ang=180+abs(ang);
     end
     disp(['vector angle ' num2str(ang)]);
-    proportional_m=nanmean(approach_cued(1:n_for_init_rate))/nanmean(approach_uncued(1:n_for_init_rate));
+    proportional_m=nanmean(approach_cued(1:nIndsForfirstRates))/nanmean(approach_uncued(1:nIndsForfirstRates));
     ang2=atand(proportional_m);
     ang2=180+abs(ang2);
     disp(['proportional angle ' num2str(ang2)]);

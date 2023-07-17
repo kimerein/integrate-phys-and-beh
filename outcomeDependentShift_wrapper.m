@@ -8,6 +8,11 @@ if isnan(testEventReach.trial1)
     testEventReach.fillInBetweenWithAnything=true;
 end
 
+dprimes_noLED_lasttrial=[];
+dprimes_noLED_firsttrial=[];
+dprimes_LED_lasttrial=[];
+dprimes_LED_firsttrial=[];
+
 trialTypes.isLongITI_1forward=[trialTypes.isLongITI(2:end); 0];
 trialTypes.optoGroup_1forward=[trialTypes.optoGroup(2:end); 0];
 trialTypes.optoGroup_1back=[0; trialTypes.optoGroup(1:end-1)];
