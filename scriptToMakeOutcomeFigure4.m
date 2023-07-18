@@ -32,8 +32,11 @@ function scriptToMakeOutcomeFigure4(alltbt,trialTypes,metadata,cuedreachtimewind
 
 
 % Cued failure
-plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[0 cuedreachtimewindow],'cued failure','all_reachBatch',false,3,'failed cued reach',sad,savePlotsDir,'win2and3_minus2to0',tbt_filter);
-plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[0 optoDuration],'cued failure','all_reachBatch',false,3,'failed cued reach',sad,savePlotsDir,'win2and3_minus2to0_optoDurforcue',tbt_filter);
+plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[0 cuedreachtimewindow],'cued failure','missOrNoPellet',false,3,'failed cued reach',sad,savePlotsDir,'win2and3_minus2to0',tbt_filter);
+plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[0 optoDuration],'cued failure','missOrNoPellet',false,3,'failed cued reach',sad,savePlotsDir,'win2and3_minus2to0_optoDurforcue',tbt_filter);
+
+% plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[0 cuedreachtimewindow],'cued failure','all_reachBatch',false,3,'failed cued reach',sad,savePlotsDir,'win2and3_minus2to0',tbt_filter);
+% plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[0 optoDuration],'cued failure','all_reachBatch',false,3,'failed cued reach',sad,savePlotsDir,'win2and3_minus2to0_optoDurforcue',tbt_filter);
 return
 
 % Uncued success

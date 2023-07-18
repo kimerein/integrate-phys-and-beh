@@ -60,6 +60,10 @@ alltbt=fixReachesStuckAtOne(alltbt);
 % fix weird opto bug, where opto output from Arduino was flickering
 % alltbt.optoOn(nansum(alltbt.optoOn,2)>100,:)=0;
 
+% get miss or no pellet reach
+alltbt.missOrNoPellet=alltbt.pelletmissingreach_reachStarts+alltbt.reachBatch_miss_reachStarts;
+alltbt.missOrNoPellet=single(alltbt.missOrNoPellet>0.5);
+
 %% choose additional settings for reaction time analysis
 
 settings=RTanalysis_settings('display settings','clear');
