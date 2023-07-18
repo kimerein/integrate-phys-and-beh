@@ -1,8 +1,8 @@
 % script for preparing directory structure before combining data across videos and days
 
 % assign mouse and session numbers
-expt_dir='Z:\MICROSCOPE\Kim\Behavior Final Data Sets\Varied timing GtACR2';
-optoOnHere=1; % 1 if there was opto, else 0
+expt_dir='Z:\MICROSCOPE\Kim\Behavior Final Data Sets\Recovery after FAKE constant sil';
+optoOnHere=0; % 1 if there was opto, else 0
 onlySaveOptoIfDoesNotExist=true;
 startMouseNumberingAt=1; % if want to start mouse numbers at some offset
 % organization of data in this directory must be 
