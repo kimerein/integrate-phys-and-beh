@@ -23,7 +23,7 @@ plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[3.
 % Uncued failure CONTROL
 plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[3.5 8],'backwards uncued failure','all_reachBatch',false,3,'false alarm',sad,savePlotsDir,'win2and3_minus2to0BACKWARD',tbt_filter);
 
-return
+% return
 
 % EXPERIMENTS
 % Cued success
@@ -189,7 +189,7 @@ end
 function saveAllOpenFigures(FolderName)
 
 FigList = findobj(allchild(0), 'flat', 'Type', 'figure');
-for iFig = 1:length(FigList)-1
+for iFig = 1:length(FigList)
   FigHandle = FigList(iFig);
   FigName   = get(FigHandle, 'Name');
   savefig(FigHandle, fullfile(FolderName, [FigName 'fig' num2str(iFig) '.fig']));

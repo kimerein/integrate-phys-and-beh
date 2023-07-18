@@ -46,13 +46,13 @@ linkerForNoLED_accumulate=['((trialTypes.led_1forward==1 & trialTypes.led_2forwa
 linkerForLED_accumulate=['((trialTypes.led_1forward==0 & trialTypes.led_2forward==0) | (trialTypes.led_2forward==0 & trialTypes.led_3forward==0) | (trialTypes.led_3forward==0 & trialTypes.led_4forward==0) | (trialTypes.led_4forward==0 & trialTypes.led_5forward==0) | (trialTypes.led_5forward==0 & trialTypes.led_6forward==0)' ...
                        ' | (trialTypes.led_6forward==0 & trialTypes.led_7forward==0) | (trialTypes.led_7forward==0 & trialTypes.led_8forward==0) | (trialTypes.led_8forward==0 & trialTypes.led_9forward==0) | (trialTypes.led_9forward==0 & trialTypes.led_10forward==0) | (trialTypes.led_10forward==0 & trialTypes.led_11forward==0) | (trialTypes.led_11forward==0 & trialTypes.led_12forward==0))'];
 % FOR VARIED TIMING
-linkerForVariedTimingForward=' & trialTypes.optoGroup_1forward==2';
-linkerForVariedTimingSame=' & trialTypes.optoGroup==2';
-linkerForVariedTimingUncued='';
-% ELSE
-% linkerForVariedTimingForward='';
-% linkerForVariedTimingSame='';
+% linkerForVariedTimingForward=' & trialTypes.optoGroup_1forward==2';
+% linkerForVariedTimingSame=' & trialTypes.optoGroup==2';
 % linkerForVariedTimingUncued='';
+% ELSE
+linkerForVariedTimingForward='';
+linkerForVariedTimingSame='';
+linkerForVariedTimingUncued='';
 
 switch whichEventType
     case 'cued success'
