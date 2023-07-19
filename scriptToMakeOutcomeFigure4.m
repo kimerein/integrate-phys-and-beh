@@ -23,7 +23,6 @@ plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[3.
 % Uncued failure CONTROL
 plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[3.5 8],'backwards uncued failure','missOrNoPellet',false,3,'false alarm',sad,savePlotsDir,'win2and3_minus2to0BACKWARD',tbt_filter);
 
-% return
 
 % EXPERIMENTS
 % Cued success
@@ -57,47 +56,25 @@ plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[0 
 % Cued failure accumulate 
 X=2;
 trialTypes.isLongITI_Xforward=[trialTypes.led(1+X:end); zeros(X,1)]; % for 4 sequence, "2forward"
-% plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[3],[0 cuedreachtimewindow],'cued failure accumulate','all_reachBatch',true,4,'failed cued reach',sad,savePlotsDir,'window3_minus2to0',tbt_filter);
 plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[0 cuedreachtimewindow],'cued failure accumulate','missOrNoPellet',true,4,'failed cued reach',sad,savePlotsDir,'win2and3_minus2to0',tbt_filter);
-% plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 -1],[3],[0 cuedreachtimewindow],'cued failure accumulate','all_reachBatch',true,4,'failed cued reach',sad,savePlotsDir,'window3_minus2tominus1',tbt_filter);
-% plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 -1],[2 3],[0 cuedreachtimewindow],'cued failure accumulate','all_reachBatch',true,4,'failed cued reach',sad,savePlotsDir,'window2and3_minus2tominus1',tbt_filter);
-
 plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[0 optoDuration],'cued failure accumulate','missOrNoPellet',true,4,'failed cued reach',sad,savePlotsDir,'win2and3_minus2to0_optoDurforcue',tbt_filter);
-
 X=3;
 trialTypes.isLongITI_Xforward=[trialTypes.led(1+X:end); zeros(X,1)]; % for 5 sequence, "3forward"
-% plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[3],[0 optoDuration],'cued failure accumulate','all_reachBatch',true,5,'failed cued reach',sad,savePlotsDir,'window3_minus2to0',tbt_filter);
 plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[0 optoDuration],'cued failure accumulate','missOrNoPellet',true,5,'failed cued reach',sad,savePlotsDir,'win2and3_minus2to0_optoDurforcue',tbt_filter);
-% plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 -1],[3],[0 optoDuration],'cued failure accumulate','all_reachBatch',true,5,'failed cued reach',sad,savePlotsDir,'window3_minus2tominus1',tbt_filter);
-% plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 -1],[2 3],[0 optoDuration],'cued failure accumulate','all_reachBatch',true,5,'failed cued reach',sad,savePlotsDir,'window2and3_minus2tominus1',tbt_filter);
 
 
 % Uncued success accumulate 
 X=2;
 trialTypes.isLongITI_Xforward=[trialTypes.led(1+X:end); zeros(X,1)]; % for 4 sequence, "2forward"
-% plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[3],[3.5 8],'delayed success accumulate','reachBatch_success_reachStarts',true,4,'delayed success',sad,savePlotsDir,'window3_minus2to0',tbt_filter);
 plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[3.5 8],'delayed success accumulate','reachBatch_success_reachStarts',true,4,'delayed success',sad,savePlotsDir,'win2and3_minus2to0',tbt_filter);
-% plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 -1],[3],[3.5 8],'delayed success accumulate','reachBatch_success_reachStarts',true,4,'delayed success',sad,savePlotsDir,'window3_minus2tominus1',tbt_filter);
-% plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 -1],[2 3],[3.5 8],'delayed success accumulate','reachBatch_success_reachStarts',true,4,'delayed success',sad,savePlotsDir,'window2and3_minus2tominus1',tbt_filter);
-
 X=3;
 trialTypes.isLongITI_Xforward=[trialTypes.led(1+X:end); zeros(X,1)]; % for 5 sequence, "3forward"
-% plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[3],[3.5 8],'delayed success accumulate','reachBatch_success_reachStarts',true,5,'delayed success',sad,savePlotsDir,'window3_minus2to0',tbt_filter);
 plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[3.5 8],'delayed success accumulate','reachBatch_success_reachStarts',true,5,'delayed success',sad,savePlotsDir,'win2and3_minus2to0',tbt_filter);
-% plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 -1],[3],[3.5 8],'delayed success accumulate','reachBatch_success_reachStarts',true,5,'delayed success',sad,savePlotsDir,'window3_minus2tominus1',tbt_filter);
-% plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 -1],[2 3],[3.5 8],'delayed success accumulate','reachBatch_success_reachStarts',true,5,'delayed success',sad,savePlotsDir,'window2and3_minus2tominus1',tbt_filter);
 
 
 % Uncued failure accumulate
-% plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[3],[3.5 8],'uncued failure accumulate','all_reachBatch',true,4,'false alarm',sad,savePlotsDir,'window3_minus2to0',tbt_filter);
 plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[3.5 8],'uncued failure accumulate','missOrNoPellet',true,4,'false alarm',sad,savePlotsDir,'win2and3_minus2to0',tbt_filter);
-% plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 -1],[3],[3.5 8],'uncued failure accumulate','all_reachBatch',true,4,'false alarm',sad,savePlotsDir,'window3_minus2tominus1',tbt_filter);
-% plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 -1],[2 3],[3.5 8],'uncued failure accumulate','all_reachBatch',true,4,'false alarm',sad,savePlotsDir,'window2and3_minus2tominus1',tbt_filter);
-
-% plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[3],[3.5 8],'uncued failure accumulate','all_reachBatch',true,5,'false alarm',sad,savePlotsDir,'window3_minus2to0',tbt_filter);
 plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[3.5 8],'uncued failure accumulate','missOrNoPellet',true,5,'false alarm',sad,savePlotsDir,'win2and3_minus2to0',tbt_filter);
-% plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 -1],[3],[3.5 8],'uncued failure accumulate','all_reachBatch',true,5,'false alarm',sad,savePlotsDir,'window3_minus2tominus1',tbt_filter);
-% plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 -1],[2 3],[3.5 8],'uncued failure accumulate','all_reachBatch',true,5,'false alarm',sad,savePlotsDir,'window2and3_minus2tominus1',tbt_filter);
 
 
 % Uncued success TWO HALF SECS BEFORE OPTO
