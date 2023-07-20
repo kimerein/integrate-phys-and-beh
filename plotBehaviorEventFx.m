@@ -172,8 +172,9 @@ if plot_rawReaching_cdf==true
     startAtCue=false;
     subtractPreCue=false;
     startAtPrecue=true;
-    preCueWindow=[-2 -1];
-    cutCDFat=9; % cut cdf at this time
+    cueonsetadjust=-0.1;
+    preCueWindow=[-2+cueonsetadjust -1+cueonsetadjust];
+    cutCDFat=9+cueonsetadjust; % cut cdf at this time
 
     maxTrile=cutCDFat; % make this empty if want whole trial length
     

@@ -7,9 +7,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt19Jul2023153612\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023175615\'; % directory containing experimental data
 behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log - Slimmed down w old mice added.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt19Jul2023153612\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023175615\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -60,10 +60,6 @@ alltbt=fixReachesStuckAtOne(alltbt);
 % fix weird opto bug, where opto output from Arduino was flickering
 % alltbt.optoOn(nansum(alltbt.optoOn,2)>100,:)=0;
 
-% get miss or no pellet reach
-alltbt.missOrNoPellet=alltbt.pelletmissingreach_reachStarts+alltbt.reachBatch_miss_reachStarts;
-alltbt.missOrNoPellet=single(alltbt.missOrNoPellet>0.5);
-
 %% choose additional settings for reaction time analysis
 
 settings=RTanalysis_settings('display settings','clear');
@@ -86,7 +82,11 @@ end
 
 % Optional: discard no pellet reaches within certain time after success
 % bcz represent chewing arm movements
-alltbt=ignoreReachesAfterSuccess(alltbt,metadata,6); % last arg is seconds after success, i.e., how long to chew pellet
+alltbt=ignoreReachesAfterSuccess(alltbt,metadata,9); % last arg is seconds after success, i.e., how long to chew pellet
+
+% get miss or no pellet reach
+alltbt.missOrNoPellet=alltbt.pelletmissingreach_reachStarts+alltbt.reachBatch_miss_reachStarts;
+alltbt.missOrNoPellet=single(alltbt.missOrNoPellet>0.5);
 
 % Optional: Exclude trials with paw on wheel
 % [alltbt,metadata,trialTypes]=excludePawOnWheel(alltbt,metadata,trialTypes,'cueZone_onVoff');
@@ -144,9 +144,9 @@ tbt_filter.sortField='dprimes';
 % tbt_filter.sortField='takemice';
 % tbt_filter.range_values=[1 6 7 8 10 14 18];
 % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
-% tbt_filter.range_values=[-100 100]; %[0.75 100];
+tbt_filter.range_values=[-100 100]; %[0.75 100];
 % tbt_filter.range_values=[2 3 6 7 8 9];
-tbt_filter.range_values=[-100 100] ;%0.471];
+% tbt_filter.range_values=[-100 0.5] ;%0.471];
 % tbt_filter.range_values=[-100 0.75]; 
 % tbt_filter.range_values=[0.75 100]; % maybe 2,6,7,12
 % tbt_filter.range_values=[0.5 1.5]; % maybe 2,6,7,12
