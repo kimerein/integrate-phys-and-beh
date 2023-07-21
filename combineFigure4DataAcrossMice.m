@@ -188,10 +188,10 @@ sbys.reachrates_noLED.alltrials_uncued=mean(rout.reachrates_noLED.alltrials_uncu
 sbys.reachrates_noLED.alltrials_cued=mean(rout.reachrates_noLED.alltrials_cued,2,'omitnan');
 ns=sum(~isnan(rout.reachrates_noLED.trial1_alltrials_uncued),2,'omitnan');
 
-mbym.reachrates_noLED.trial1_alltrials_uncued=getmbym(sessIDandMouseID,rout.reachrates_noLED.trial1_alltrials_uncued);
-mbym.reachrates_noLED.trial1_alltrials_cued=getmbym(sessIDandMouseID,rout.reachrates_noLED.trial1_alltrials_cued);
-mbym.reachrates_noLED.alltrials_uncued=getmbym(sessIDandMouseID,rout.reachrates_noLED.alltrials_uncued);
-mbym.reachrates_noLED.alltrials_cued=getmbym(sessIDandMouseID,rout.reachrates_noLED.alltrials_cued);
+mbym.reachrates_noLED.trial1_alltrials_uncued=getmbym(sessIDandMouseID,rout.reachrates_noLED.trial1_alltrials_uncued,atleast_n_trials);
+mbym.reachrates_noLED.trial1_alltrials_cued=getmbym(sessIDandMouseID,rout.reachrates_noLED.trial1_alltrials_cued,atleast_n_trials);
+mbym.reachrates_noLED.alltrials_uncued=getmbym(sessIDandMouseID,rout.reachrates_noLED.alltrials_uncued,atleast_n_trials);
+mbym.reachrates_noLED.alltrials_cued=getmbym(sessIDandMouseID,rout.reachrates_noLED.alltrials_cued,atleast_n_trials);
 
 sbys.reachrates_noLED.trial1_alltrials_uncued(ns<atleast_n_trials)=nan;
 sbys.reachrates_noLED.trial1_alltrials_cued(ns<atleast_n_trials)=nan;
@@ -217,10 +217,10 @@ sbys.reachrates_LED.alltrials_uncued=mean(rout.reachrates_LED.alltrials_uncued,2
 sbys.reachrates_LED.alltrials_cued=mean(rout.reachrates_LED.alltrials_cued,2,'omitnan');
 ns=sum(~isnan(rout.reachrates_LED.trial1_alltrials_uncued),2,'omitnan');
 
-mbym.reachrates_LED.trial1_alltrials_uncued=getmbym(sessIDandMouseID,rout.reachrates_LED.trial1_alltrials_uncued);
-mbym.reachrates_LED.trial1_alltrials_cued=getmbym(sessIDandMouseID,rout.reachrates_LED.trial1_alltrials_cued);
-mbym.reachrates_LED.alltrials_uncued=getmbym(sessIDandMouseID,rout.reachrates_LED.alltrials_uncued);
-mbym.reachrates_LED.alltrials_cued=getmbym(sessIDandMouseID,rout.reachrates_LED.alltrials_cued);
+mbym.reachrates_LED.trial1_alltrials_uncued=getmbym(sessIDandMouseID,rout.reachrates_LED.trial1_alltrials_uncued,atleast_n_trials);
+mbym.reachrates_LED.trial1_alltrials_cued=getmbym(sessIDandMouseID,rout.reachrates_LED.trial1_alltrials_cued,atleast_n_trials);
+mbym.reachrates_LED.alltrials_uncued=getmbym(sessIDandMouseID,rout.reachrates_LED.alltrials_uncued,atleast_n_trials);
+mbym.reachrates_LED.alltrials_cued=getmbym(sessIDandMouseID,rout.reachrates_LED.alltrials_cued,atleast_n_trials);
 
 sbys.reachrates_LED.trial1_alltrials_uncued(ns<atleast_n_trials)=nan;
 sbys.reachrates_LED.trial1_alltrials_cued(ns<atleast_n_trials)=nan;
@@ -233,10 +233,10 @@ function plotByBy(trial1_uncued,trial1_cued,trialn_uncued,trialn_cued,col,calcCu
 
 if calcCued==true
     scatter(trialn_uncued-trial1_uncued,(trialn_cued-trial1_cued)-(trialn_uncued-trial1_uncued),[],col); hold on;
-    scatter(mean(trialn_uncued-trial1_uncued,'all','omitnan'),mean((trialn_cued-trial1_cued)-(trialn_uncued-trial1_uncued),'all','omitnan'),10,col,'filled'); 
+    scatter(mean(trialn_uncued-trial1_uncued,'all','omitnan'),mean((trialn_cued-trial1_cued)-(trialn_uncued-trial1_uncued),'all','omitnan'),80,col,'filled'); 
 else
     scatter(trialn_uncued-trial1_uncued,trialn_cued-trial1_cued,[],col); hold on;
-    scatter(mean(trialn_uncued-trial1_uncued,'all','omitnan'),mean(trialn_cued-trial1_cued,'all','omitnan'),[],col);
+    scatter(mean(trialn_uncued-trial1_uncued,'all','omitnan'),mean(trialn_cued-trial1_cued,'all','omitnan'),80,col,'filled');
 end
 if plotLines==true
     for i=1:length(trialn_uncued)
@@ -255,13 +255,18 @@ end
 
 end
 
-function rrout=getmbym(sessIDandMouseID,rr)
+function rrout=getmbym(sessIDandMouseID,rr,atleast_n_trials)
 
 u=unique(sessIDandMouseID(:,2));
 rrout=nan(1,length(u));
 for i=1:length(u)
     currmouse=u(i);
     temp=rr(sessIDandMouseID(:,2)==currmouse,:);
+    % if fewer than atleast_n_trials not nan trials, drop this mouse
+    nonan=nansum(~isnan(temp(1:end)));
+    if nonan<atleast_n_trials
+        continue
+    end
     rrout(i)=mean(temp,'all','omitnan');
 end
 
