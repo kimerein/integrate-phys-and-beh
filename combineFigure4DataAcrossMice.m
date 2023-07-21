@@ -1,4 +1,4 @@
-function combineFigure4DataAcrossMice(dd,useOptoForThisGp,whichtoplot,timeStep,cueind,doCDF,doLEDcdf)
+function combineFigure4DataAcrossMice(dd,useOptoForThisGp,whichtoplot,timeStep,cueind,doCDF,doLEDcdf,calcCued,atleast_n_trials)
 
 rr_noLED_tri1_uncued=[];
 rr_noLED_tri1_cued=[];
@@ -15,9 +15,33 @@ returnThis_LED=cell(length(dd));
 
 forcdf_rawreach_trial1=[];
 forcdf_rawreach_trial2=[];
+
+s_trial1_alltrials_uncued=[];
+s_trial1_alltrials_cued=[];
+s_alltrials_uncued=[];
+s_alltrials_cued=[];
+sLED_trial1_alltrials_uncued=[];
+sLED_trial1_alltrials_cued=[];
+sLED_alltrials_uncued=[];
+sLED_alltrials_cued=[];
+
+m_trial1_alltrials_uncued=[];
+m_trial1_alltrials_cued=[];
+m_alltrials_uncued=[];
+m_alltrials_cued=[];
+mLED_trial1_alltrials_uncued=[];
+mLED_trial1_alltrials_cued=[];
+mLED_alltrials_uncued=[];
+mLED_alltrials_cued=[];
 for i=1:length(dd)
     currdir=dd{i};
     if doCDF==false
+        % Get mouse by mouse
+        % and sess by sess
+        % rows are sessid, column 1 is sessid, column2 is mouseid
+        a=load(fullfile(currdir,'sessIDandMouseID.mat'));
+        sessIDandMouseID=a.sessIDandMouseID;
+        
         a=load(fullfile(currdir,whichtoplot,'pdfcdfcontrol','returnThis.mat'));
         returnThis_control{i}=a.returnThis;
         a=load(fullfile(currdir,whichtoplot,'pdfcdfcontrol','returnThis.mat'));
@@ -34,6 +58,8 @@ for i=1:length(dd)
             % nothing to add
             continue
         end
+        
+
         temp=rout.reachrates_noLED.trial1_alltrials_uncued; temp=temp(:).';
         rr_noLED_tri1_uncued=[rr_noLED_tri1_uncued temp(1:end)];
         temp=rout.reachrates_noLED.trial1_alltrials_cued; temp=temp(:).';
@@ -67,6 +93,25 @@ for i=1:length(dd)
         rr_LED_tri1_cued=rr_LED_tri1_cued(~ina);
         rr_LED_trinext_uncued=rr_LED_trinext_uncued(~ina);
         rr_LED_trinext_cued=rr_LED_trinext_cued(~ina);
+
+        [sbys,mbym]=getMbyM_SbyS(sessIDandMouseID,rout,atleast_n_trials);
+        s_trial1_alltrials_uncued=[s_trial1_alltrials_uncued sbys.reachrates_noLED.trial1_alltrials_uncued'];
+        s_trial1_alltrials_cued=[s_trial1_alltrials_cued sbys.reachrates_noLED.trial1_alltrials_cued'];
+        s_alltrials_uncued=[s_alltrials_uncued sbys.reachrates_noLED.alltrials_uncued'];
+        s_alltrials_cued=[s_alltrials_cued sbys.reachrates_noLED.alltrials_cued'];
+        sLED_trial1_alltrials_uncued=[sLED_trial1_alltrials_uncued sbys.reachrates_LED.trial1_alltrials_uncued'];
+        sLED_trial1_alltrials_cued=[sLED_trial1_alltrials_cued sbys.reachrates_LED.trial1_alltrials_cued'];
+        sLED_alltrials_uncued=[sLED_alltrials_uncued sbys.reachrates_LED.trial1_alltrials_uncued'];
+        sLED_alltrials_cued=[sLED_alltrials_cued sbys.reachrates_LED.trial1_alltrials_cued'];
+
+        m_trial1_alltrials_uncued=[m_trial1_alltrials_uncued mbym.reachrates_noLED.trial1_alltrials_uncued];
+        m_trial1_alltrials_cued=[m_trial1_alltrials_cued mbym.reachrates_noLED.trial1_alltrials_cued];
+        m_alltrials_uncued=[m_alltrials_uncued mbym.reachrates_noLED.alltrials_uncued];
+        m_alltrials_cued=[m_alltrials_cued mbym.reachrates_noLED.alltrials_cued];
+        mLED_trial1_alltrials_uncued=[mLED_trial1_alltrials_uncued mbym.reachrates_LED.trial1_alltrials_uncued];
+        mLED_trial1_alltrials_cued=[mLED_trial1_alltrials_cued mbym.reachrates_LED.trial1_alltrials_cued];
+        mLED_alltrials_uncued=[mLED_alltrials_uncued mbym.reachrates_LED.trial1_alltrials_uncued];
+        mLED_alltrials_cued=[mLED_alltrials_cued mbym.reachrates_LED.trial1_alltrials_cued];
     else
         % do CDF only
         if doLEDcdf==false
@@ -89,31 +134,125 @@ end
 
 % do bootstrapped scatter
 figure();
-[uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_noLED_tri1_uncued,rr_noLED_tri1_cued,'k','k',false);
-plotMeAndSe(rr_noLED_tri1_uncued,rr_noLED_tri1_cued,'k',2,false);
-[uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_noLED_trinext_uncued,rr_noLED_trinext_cued,[0.5 0.5 0.5],[0.5 0.5 0.5],false);
-plotMeAndSe(rr_noLED_trinext_uncued,rr_noLED_trinext_cued,[0.5 0.5 0.5],2,false);
+[uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_noLED_tri1_uncued,rr_noLED_tri1_cued,'k','k',false,calcCued);
+plotMeAndSe(rr_noLED_tri1_uncued,rr_noLED_tri1_cued,'k',2,false,calcCued);
+[uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_noLED_trinext_uncued,rr_noLED_trinext_cued,[0.5 0.5 0.5],[0.5 0.5 0.5],false,calcCued);
+plotMeAndSe(rr_noLED_trinext_uncued,rr_noLED_trinext_cued,[0.5 0.5 0.5],2,false,calcCued);
 
 figure();
-[uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k','r',false);
-plotMeAndSe(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k',2,false);
-[uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_LED_trinext_uncued,rr_LED_trinext_cued,'r','r',false);
-plotMeAndSe(rr_LED_trinext_uncued,rr_LED_trinext_cued,'r',2,false);
+[uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k','r',false,calcCued);
+plotMeAndSe(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k',2,false,calcCued);
+[uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_LED_trinext_uncued,rr_LED_trinext_cued,'r','r',false,calcCued);
+plotMeAndSe(rr_LED_trinext_uncued,rr_LED_trinext_cued,'r',2,false,calcCued);
 
 
 end
 
-function plotMeAndSe(data1,data2,c,linewidth,suppressOutput)
+function [sbys,mbym]=getMbyM_SbyS(sessIDandMouseID,rout,atleast_n_trials)
+
+sbys.reachrates_noLED.trial1_alltrials_uncued=mean(rout.reachrates_noLED.trial1_alltrials_uncued,2,'omitnan');
+sbys.reachrates_noLED.trial1_alltrials_cued=mean(rout.reachrates_noLED.trial1_alltrials_cued,2,'omitnan');
+sbys.reachrates_noLED.alltrials_uncued=mean(rout.reachrates_noLED.alltrials_uncued,2,'omitnan');
+sbys.reachrates_noLED.alltrials_cued=mean(rout.reachrates_noLED.alltrials_cued,2,'omitnan');
+ns=sum(~isnan(rout.reachrates_noLED.trial1_alltrials_uncued),2,'omitnan');
+
+mbym.reachrates_noLED.trial1_alltrials_uncued=getmbym(sessIDandMouseID,sbys.reachrates_noLED.trial1_alltrials_uncued);
+mbym.reachrates_noLED.trial1_alltrials_cued=getmbym(sessIDandMouseID,sbys.reachrates_noLED.trial1_alltrials_cued);
+mbym.reachrates_noLED.alltrials_uncued=getmbym(sessIDandMouseID,sbys.reachrates_noLED.alltrials_uncued);
+mbym.reachrates_noLED.alltrials_cued=getmbym(sessIDandMouseID,sbys.reachrates_noLED.alltrials_cued);
+
+sbys.reachrates_noLED.trial1_alltrials_uncued(ns<atleast_n_trials)=nan;
+sbys.reachrates_noLED.trial1_alltrials_cued(ns<atleast_n_trials)=nan;
+sbys.reachrates_noLED.alltrials_uncued(ns<atleast_n_trials)=nan;
+sbys.reachrates_noLED.alltrials_cued(ns<atleast_n_trials)=nan;
+
+sbys.reachrates_LED.trial1_alltrials_uncued=mean(rout.reachrates_LED.trial1_alltrials_uncued,2,'omitnan');
+sbys.reachrates_LED.trial1_alltrials_cued=mean(rout.reachrates_LED.trial1_alltrials_cued,2,'omitnan');
+sbys.reachrates_LED.alltrials_uncued=mean(rout.reachrates_LED.alltrials_uncued,2,'omitnan');
+sbys.reachrates_LED.alltrials_cued=mean(rout.reachrates_LED.alltrials_cued,2,'omitnan');
+ns=sum(~isnan(rout.reachrates_LED.trial1_alltrials_uncued),2,'omitnan');
+
+mbym.reachrates_LED.trial1_alltrials_uncued=getmbym(sessIDandMouseID,sbys.reachrates_LED.trial1_alltrials_uncued);
+mbym.reachrates_LED.trial1_alltrials_cued=getmbym(sessIDandMouseID,sbys.reachrates_LED.trial1_alltrials_cued);
+mbym.reachrates_LED.alltrials_uncued=getmbym(sessIDandMouseID,sbys.reachrates_LED.alltrials_uncued);
+mbym.reachrates_LED.alltrials_cued=getmbym(sessIDandMouseID,sbys.reachrates_LED.alltrials_cued);
+
+sbys.reachrates_LED.trial1_alltrials_uncued(ns<atleast_n_trials)=nan;
+sbys.reachrates_LED.trial1_alltrials_cued(ns<atleast_n_trials)=nan;
+sbys.reachrates_LED.alltrials_uncued(ns<atleast_n_trials)=nan;
+sbys.reachrates_LED.alltrials_cued(ns<atleast_n_trials)=nan;
+
+end
+
+function rrout=getmbym(sessIDandMouseID,rr)
+
+u=unique(sessIDandMouseID(:,2));
+for i=1:length(u)
+    currmouse=u(i);
+    temp=rr(sessIDandMouseID(:,2)==currmouse,:);
+    rrout(i)=mean(mean(temp,1,'omitnan'),1,'omitnan');
+end
+
+end
+
+function [x,y]=readInFigData(figname)
+
+% Open the .fig file
+fig = openfig(figname,'reuse'); 
+
+% Get the handles of all the child objects
+axes_handles = get(fig,'Children');
+
+li=get(axes_handles(1),'Children');
+[x,y]=getquivers(li);
+
+end
+
+function [xdata,ydata]=getquivers(li)
+
+% this format from kim's figs
+% first quiver is average
+xdata=[]; ydata=[];
+for i=1:length(li)
+    if ~isa(li(i), 'matlab.graphics.chart.primitive.Quiver')
+        continue
+    end
+    if li(i).LineWidth==4
+        % skip it, was av
+        continue
+    end
+    xdata=[xdata li(i).UData];
+    ydata=[ydata li(i).VData];
+end
+
+end
+
+function plotMeAndSe(data1,data2,c,linewidth,suppressOutput,calcCued)
 % make inputs vectors if they are not
 data1=data1(1:end);
 data2=data2(1:end);
-% average within each session
-% data1=nanmean(data1,2); data1=data1';
-% data2=nanmean(data2,2); data2=data2';
 if suppressOutput==false
-    line([nanmean(data1)-nanstd(data1,[],2)./sqrt(nansum(~isnan(data1))) nanmean(data1)+nanstd(data1,[],2)./sqrt(nansum(~isnan(data1)))],[nanmean(data2) nanmean(data2)],'Color',c,'LineWidth',linewidth);
-    hold on;
-    line([nanmean(data1) nanmean(data1)],[nanmean(data2)-nanstd(data2,[],2)./sqrt(nansum(~isnan(data2))) nanmean(data2)+nanstd(data2,[],2)./sqrt(nansum(~isnan(data2)))],'Color',c,'LineWidth',linewidth);
+    if calcCued==true
+        % cued window is binomial bcz window small
+        % use normal approximation
+        % variance=np(1-p)
+        return
+        p=nanmean(data2>0.01);
+        n=nansum(~isnan(data2));
+        cuedVar=p*(1-p); % var of av rather than sum
+        cuedSD=sqrt(cuedVar);
+        % scale factor to change back to rate
+        scalefac=mean(data2,'all','omitnan')/p;
+        cuedRateSD=cuedSD*scalefac;
+        cuedRateSE=cuedRateSD./sqrt(n);
+        line([nanmean(data1)-nanstd(data1,[],2)./sqrt(nansum(~isnan(data1))) nanmean(data1)+nanstd(data1,[],2)./sqrt(nansum(~isnan(data1)))],[nanmean(data2) nanmean(data2)],'Color',c,'LineWidth',linewidth);
+        hold on;
+        line([nanmean(data1) nanmean(data1)],[nanmean(data2)-cuedRateSE nanmean(data2)+cuedRateSE],'Color',c,'LineWidth',linewidth);
+    else
+        line([nanmean(data1)-nanstd(data1,[],2)./sqrt(nansum(~isnan(data1))) nanmean(data1)+nanstd(data1,[],2)./sqrt(nansum(~isnan(data1)))],[nanmean(data2) nanmean(data2)],'Color',c,'LineWidth',linewidth);
+        hold on;
+        line([nanmean(data1) nanmean(data1)],[nanmean(data2)-nanstd(data2,[],2)./sqrt(nansum(~isnan(data2))) nanmean(data2)+nanstd(data2,[],2)./sqrt(nansum(~isnan(data2)))],'Color',c,'LineWidth',linewidth);
+    end
 end
 
 end
@@ -217,9 +356,22 @@ plot(timeBinsForReaching,ninetyfifthPerc,'Color','r');
 end
 
 
-function [uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(approach2_alltrials_uncued,approach2_alltrials_cued,colorForBootstrapPoints,scatterPointsEdgeColor,suppressOutput)
+function [uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(approach2_alltrials_uncued,approach2_alltrials_cued,colorForBootstrapPoints,scatterPointsEdgeColor,suppressOutput,calcCued)
 
 stillsuppressbootstrap=false;
+
+if isempty(approach2_alltrials_uncued) || isempty(approach2_alltrials_cued)
+    uncued_mean_out=[];
+    cued_mean_out=[];
+    bootMeans=[];
+    return
+end
+
+% can't directly subtract uncued from cued on a trial by trial
+% basis bcz cued is basically a binomial, either 1 or 0
+% need to get average rate before doing subtraction
+% calculate true cued, because reaching in cued window is actually
+% the sum of uncued and cued
 
 % altogether_prob_cued=nanmean(approach2_alltrials_cued,2);
 % altogether_prob_uncued=nanmean(approach2_alltrials_uncued,2);
@@ -240,17 +392,32 @@ for i=1:nRuns
     takeTheseForBoot=randi(length(altogether_prob_cued),1,takeIndsForBootstrap); % with replacement
     sub_prob_cued=altogether_prob_cued(takeTheseForBoot);
     sub_prob_uncued=altogether_prob_uncued(takeTheseForBoot);
-    bootMeans(1,i)=nanmean(sub_prob_uncued);
-    bootMeans(2,i)=nanmean(sub_prob_cued);
+    % can do subtraction here after calculating rate
+    if calcCued==true
+        bootMeans(1,i)=nanmean(sub_prob_uncued);
+        bootMeans(2,i)=nanmean(sub_prob_cued)-nanmean(sub_prob_uncued);
+    else
+        bootMeans(1,i)=nanmean(sub_prob_uncued);
+        bootMeans(2,i)=nanmean(sub_prob_cued);
+    end
 end
 if suppressOutput==false && stillsuppressbootstrap==false
     s=scatter(bootMeans(1,:),bootMeans(2,:),20,'filled','MarkerEdgeColor',scatterPointsEdgeColor,'MarkerFaceColor',colorForBootstrapPoints); hold on;
     s.AlphaData = 0.5*ones(1,size(bootMeans,2));
     s.MarkerFaceAlpha = 'flat';
-    scatter(nanmean(altogether_prob_uncued),nanmean(altogether_prob_cued),50,'filled','MarkerEdgeColor',scatterPointsEdgeColor,'MarkerFaceColor',colorForBootstrapPoints);
+    if calcCued==true
+        scatter(nanmean(altogether_prob_uncued),nanmean(altogether_prob_cued)-nanmean(altogether_prob_uncued),50,'filled','MarkerEdgeColor',scatterPointsEdgeColor,'MarkerFaceColor',colorForBootstrapPoints);
+    else
+        scatter(nanmean(altogether_prob_uncued),nanmean(altogether_prob_cued),50,'filled','MarkerEdgeColor',scatterPointsEdgeColor,'MarkerFaceColor',colorForBootstrapPoints);
+    end
 end
-uncued_mean_out=nanmean(altogether_prob_uncued);
-cued_mean_out=nanmean(altogether_prob_cued);
+if calcCued==true
+    uncued_mean_out=nanmean(altogether_prob_uncued);
+    cued_mean_out=nanmean(altogether_prob_cued)-nanmean(altogether_prob_uncued);
+else
+    uncued_mean_out=nanmean(altogether_prob_uncued);
+    cued_mean_out=nanmean(altogether_prob_cued);
+end
 
 end
 
