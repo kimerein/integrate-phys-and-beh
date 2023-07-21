@@ -168,13 +168,13 @@ plotMeAndSe(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k',2,false,calcCued);
 plotMeAndSe(rr_LED_trinext_uncued,rr_LED_trinext_cued,'r',2,false,calcCued);
 
 figure();
-plotByBy(s_trial1_alltrials_uncued,s_trial1_alltrials_cued,s_alltrials_uncued,s_alltrials_cued,'k',calcCued);
-plotByBy(sLED_trial1_alltrials_uncued,sLED_trial1_alltrials_cued,sLED_alltrials_uncued,sLED_alltrials_cued,'r',calcCued);
+plotByBy(s_trial1_alltrials_uncued,s_trial1_alltrials_cued,s_alltrials_uncued,s_alltrials_cued,'k',calcCued,false);
+plotByBy(sLED_trial1_alltrials_uncued,sLED_trial1_alltrials_cued,sLED_alltrials_uncued,sLED_alltrials_cued,'r',calcCued,false);
 title('Sess by sess');
 
 figure();
-plotByBy(m_trial1_alltrials_uncued,m_trial1_alltrials_cued,m_alltrials_uncued,m_alltrials_cued,'k',calcCued);
-plotByBy(mLED_trial1_alltrials_uncued,mLED_trial1_alltrials_cued,mLED_alltrials_uncued,mLED_alltrials_cued,'r',calcCued);
+plotByBy(m_trial1_alltrials_uncued,m_trial1_alltrials_cued,m_alltrials_uncued,m_alltrials_cued,'k',calcCued,true);
+plotByBy(mLED_trial1_alltrials_uncued,mLED_trial1_alltrials_cued,mLED_alltrials_uncued,mLED_alltrials_cued,'r',calcCued,true);
 title('Mouse by mouse');
 
 
@@ -229,12 +229,21 @@ sbys.reachrates_LED.alltrials_cued(ns<atleast_n_trials)=nan;
 
 end
 
-function plotByBy(trial1_uncued,trial1_cued,trialn_uncued,trialn_cued,col,calcCued)
+function plotByBy(trial1_uncued,trial1_cued,trialn_uncued,trialn_cued,col,calcCued,plotLines)
 
 if calcCued==true
     scatter(trialn_uncued-trial1_uncued,(trialn_cued-trial1_cued)-(trialn_uncued-trial1_uncued),[],col); hold on;
 else
     scatter(trialn_uncued-trial1_uncued,trialn_cued-trial1_cued,[],col); hold on;
+end
+if plotLines==true
+    for i=1:length(trialn_uncued)
+        if calcCued==true
+            line([0 trialn_uncued(i)-trial1_uncued(i)],[0 (trialn_cued(i)-trial1_cued(i))-(trialn_uncued(i)-trial1_uncued(i))],'Color',col); hold on;
+        else
+            line([0 trialn_uncued(i)-trial1_uncued(i)],[0 trialn_cued(i)-trial1_cued(i)],'Color',col); hold on;
+        end
+    end
 end
 
 end
