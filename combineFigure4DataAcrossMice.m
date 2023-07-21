@@ -188,10 +188,10 @@ sbys.reachrates_noLED.alltrials_uncued=mean(rout.reachrates_noLED.alltrials_uncu
 sbys.reachrates_noLED.alltrials_cued=mean(rout.reachrates_noLED.alltrials_cued,2,'omitnan');
 ns=sum(~isnan(rout.reachrates_noLED.trial1_alltrials_uncued),2,'omitnan');
 
-mbym.reachrates_noLED.trial1_alltrials_uncued=getmbym(sessIDandMouseID,sbys.reachrates_noLED.trial1_alltrials_uncued);
-mbym.reachrates_noLED.trial1_alltrials_cued=getmbym(sessIDandMouseID,sbys.reachrates_noLED.trial1_alltrials_cued);
-mbym.reachrates_noLED.alltrials_uncued=getmbym(sessIDandMouseID,sbys.reachrates_noLED.alltrials_uncued);
-mbym.reachrates_noLED.alltrials_cued=getmbym(sessIDandMouseID,sbys.reachrates_noLED.alltrials_cued);
+mbym.reachrates_noLED.trial1_alltrials_uncued=getmbym(sessIDandMouseID,rout.reachrates_noLED.trial1_alltrials_uncued);
+mbym.reachrates_noLED.trial1_alltrials_cued=getmbym(sessIDandMouseID,rout.reachrates_noLED.trial1_alltrials_cued);
+mbym.reachrates_noLED.alltrials_uncued=getmbym(sessIDandMouseID,rout.reachrates_noLED.alltrials_uncued);
+mbym.reachrates_noLED.alltrials_cued=getmbym(sessIDandMouseID,rout.reachrates_noLED.alltrials_cued);
 
 sbys.reachrates_noLED.trial1_alltrials_uncued(ns<atleast_n_trials)=nan;
 sbys.reachrates_noLED.trial1_alltrials_cued(ns<atleast_n_trials)=nan;
@@ -217,10 +217,10 @@ sbys.reachrates_LED.alltrials_uncued=mean(rout.reachrates_LED.alltrials_uncued,2
 sbys.reachrates_LED.alltrials_cued=mean(rout.reachrates_LED.alltrials_cued,2,'omitnan');
 ns=sum(~isnan(rout.reachrates_LED.trial1_alltrials_uncued),2,'omitnan');
 
-mbym.reachrates_LED.trial1_alltrials_uncued=getmbym(sessIDandMouseID,sbys.reachrates_LED.trial1_alltrials_uncued);
-mbym.reachrates_LED.trial1_alltrials_cued=getmbym(sessIDandMouseID,sbys.reachrates_LED.trial1_alltrials_cued);
-mbym.reachrates_LED.alltrials_uncued=getmbym(sessIDandMouseID,sbys.reachrates_LED.alltrials_uncued);
-mbym.reachrates_LED.alltrials_cued=getmbym(sessIDandMouseID,sbys.reachrates_LED.alltrials_cued);
+mbym.reachrates_LED.trial1_alltrials_uncued=getmbym(sessIDandMouseID,rout.reachrates_LED.trial1_alltrials_uncued);
+mbym.reachrates_LED.trial1_alltrials_cued=getmbym(sessIDandMouseID,rout.reachrates_LED.trial1_alltrials_cued);
+mbym.reachrates_LED.alltrials_uncued=getmbym(sessIDandMouseID,rout.reachrates_LED.alltrials_uncued);
+mbym.reachrates_LED.alltrials_cued=getmbym(sessIDandMouseID,rout.reachrates_LED.alltrials_cued);
 
 sbys.reachrates_LED.trial1_alltrials_uncued(ns<atleast_n_trials)=nan;
 sbys.reachrates_LED.trial1_alltrials_cued(ns<atleast_n_trials)=nan;
@@ -233,8 +233,10 @@ function plotByBy(trial1_uncued,trial1_cued,trialn_uncued,trialn_cued,col,calcCu
 
 if calcCued==true
     scatter(trialn_uncued-trial1_uncued,(trialn_cued-trial1_cued)-(trialn_uncued-trial1_uncued),[],col); hold on;
+    scatter(mean(trialn_uncued-trial1_uncued,'all','omitnan'),mean((trialn_cued-trial1_cued)-(trialn_uncued-trial1_uncued),'all','omitnan'),10,col,'filled'); 
 else
     scatter(trialn_uncued-trial1_uncued,trialn_cued-trial1_cued,[],col); hold on;
+    scatter(mean(trialn_uncued-trial1_uncued,'all','omitnan'),mean(trialn_cued-trial1_cued,'all','omitnan'),[],col);
 end
 if plotLines==true
     for i=1:length(trialn_uncued)
@@ -244,6 +246,11 @@ if plotLines==true
             line([0 trialn_uncued(i)-trial1_uncued(i)],[0 trialn_cued(i)-trial1_cued(i)],'Color',col); hold on;
         end
     end
+    if calcCued==true
+        line([0 mean(trialn_uncued-trial1_uncued,'all','omitnan')],[0 mean((trialn_cued-trial1_cued)-(trialn_uncued-trial1_uncued),'all','omitnan')],'Color',col,'LineWidth',4); hold on;
+    else
+        line([0 mean(trialn_uncued-trial1_uncued,'all','omitnan')],[0 mean(trialn_cued-trial1_cued,'all','omitnan')],'Color',col,'LineWidth',4); hold on;
+    end
 end
 
 end
@@ -251,10 +258,11 @@ end
 function rrout=getmbym(sessIDandMouseID,rr)
 
 u=unique(sessIDandMouseID(:,2));
+rrout=nan(1,length(u));
 for i=1:length(u)
     currmouse=u(i);
     temp=rr(sessIDandMouseID(:,2)==currmouse,:);
-    rrout(i)=mean(mean(temp,1,'omitnan'),1,'omitnan');
+    rrout(i)=mean(temp,'all','omitnan');
 end
 
 end
