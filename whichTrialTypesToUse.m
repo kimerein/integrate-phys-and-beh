@@ -82,7 +82,17 @@ switch whichEventType
         trial2_LED=['trialTypes.optoGroup~=1 & trialTypes.chewing_at_trial_start==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1 & (trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_5forward==0)' linkerForVariedTimingForward];
         trial1_LED=['trialTypes.optoGroup~=1 & trialTypes.chewing_at_trial_start==0'];
 
+    case 'cued drop'
+        % note that failing sometimes makes the mouse more persistent in future, but
+        % early cued reach is reduced
+        trial1=['trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.chewing_at_trial_start_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0']; 
+        trial2=['trialTypes.optoGroup~=1' linkerForNoLED];
+        trial1_LED=['trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.chewing_at_trial_start_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1' linkerForVariedTimingForward]; 
+        trial2_LED='trialTypes.optoGroup~=1 & (trialTypes.led_1forward==0 | trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_1back==0)';
+
     case 'cued failure'
+        % note that failing sometimes makes the mouse more persistent in future, but
+        % early cued reach is reduced
         trial1=['trialTypes.optoGroup~=1 & trialTypes.touched_pellet_1back==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.chewing_at_trial_start_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.touch_in_cued_window_1forward==0 & trialTypes.touched_pellet_1forward==0 & trialTypes.led_1forward==0']; 
         trial2=['trialTypes.optoGroup~=1' linkerForNoLED];
         trial1_LED=['trialTypes.optoGroup~=1 & trialTypes.touched_pellet_1back==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.chewing_at_trial_start_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.touch_in_cued_window_1forward==0 & trialTypes.touched_pellet_1forward==0 & trialTypes.led_1forward==1' linkerForVariedTimingForward]; 

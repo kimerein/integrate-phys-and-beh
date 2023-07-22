@@ -26,14 +26,18 @@ function scriptToMakeOutcomeFigure4(alltbt,trialTypes,metadata,cuedreachtimewind
 
 % EXPERIMENTS
 % Cued success
-plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[0 cuedreachtimewindow],'cued success','reachBatch_success_reachStarts',false,3,'success',sad,savePlotsDir,['win2and3_minus2to0' addtoall],tbt_filter);
+% plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[0 cuedreachtimewindow],'cued success','reachBatch_success_reachStarts',false,3,'success',sad,savePlotsDir,['win2and3_minus2to0' addtoall],tbt_filter);
 % plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[0 optoDuration],'cued success','reachBatch_success_reachStarts',false,3,'success',sad,savePlotsDir,['win2and3_minus2to0_optoDurforcue' addtoall],tbt_filter);
-return
+
 
 % Cued failure
 % plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[0 cuedreachtimewindow],'cued failure','missOrNoPellet',false,3,'failed cued reach',sad,savePlotsDir,['win2and3_minus2to0' addtoall],tbt_filter);
-plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[0 optoDuration],'cued failure','missOrNoPellet',false,3,'failed cued reach',sad,savePlotsDir,['win2and3_minus2to0_optoDurforcue' addtoall],tbt_filter);
+% plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[0 optoDuration],'cued failure','missOrNoPellet',false,3,'failed cued reach',sad,savePlotsDir,['win2and3_minus2to0_optoDurforcue' addtoall],tbt_filter);
 
+
+% Cued drop
+plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[0 cuedreachtimewindow],'cued drop','reachBatch_drop_reachStarts',false,3,'failed cued reach',sad,savePlotsDir,['win2and3_minus2to0' addtoall],tbt_filter);
+return
 
 % Uncued success
 plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[3.5 8],'delayed success','reachBatch_success_reachStarts',false,3,'delayed success',sad,savePlotsDir,['win2and3_minus2to0' addtoall],tbt_filter);

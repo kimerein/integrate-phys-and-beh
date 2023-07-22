@@ -173,10 +173,40 @@ plotByBy(sLED_trial1_alltrials_uncued,sLED_trial1_alltrials_cued,sLED_alltrials_
 title('Sess by sess');
 
 figure();
+plotMeAndSe(s_alltrials_uncued-s_trial1_alltrials_uncued,s_alltrials_cued-s_trial1_alltrials_cued,'k',2,false,calcCued);
+hold on;
+plotMeAndSe(sLED_alltrials_uncued-sLED_trial1_alltrials_uncued,sLED_alltrials_cued-sLED_trial1_alltrials_cued,'r',2,false,calcCued);
+title('Sess by sess mean and se');
+
+
+figure();
 plotByBy(m_trial1_alltrials_uncued,m_trial1_alltrials_cued,m_alltrials_uncued,m_alltrials_cued,'k',calcCued,true);
 plotByBy(mLED_trial1_alltrials_uncued,mLED_trial1_alltrials_cued,mLED_alltrials_uncued,mLED_alltrials_cued,'r',calcCued,true);
 title('Mouse by mouse');
 
+stats_compareChangeInRate(m_alltrials_uncued-m_trial1_alltrials_uncued,m_alltrials_cued-m_trial1_alltrials_cued,mLED_alltrials_uncued-mLED_trial1_alltrials_uncued,mLED_alltrials_cued-mLED_trial1_alltrials_cued);
+disp('AND NOW SESS BY SESS');
+stats_compareChangeInRate(s_alltrials_uncued-s_trial1_alltrials_uncued,s_alltrials_cued-s_trial1_alltrials_cued,sLED_alltrials_uncued-sLED_trial1_alltrials_uncued,sLED_alltrials_cued-sLED_trial1_alltrials_cued);
+
+end
+
+function stats_compareChangeInRate(uncued_change,cued_change,uncued_changeLED,cued_changeLED)
+
+ina=isnan(uncued_change) | isnan(uncued_changeLED);
+uncued_change=uncued_change(~ina);
+uncued_changeLED=uncued_changeLED(~ina);
+ina=isnan(cued_change) | isnan(cued_changeLED);
+cued_change=cued_change(~ina);
+cued_changeLED=cued_changeLED(~ina);
+
+if isempty(cued_changeLED)
+    return
+end
+
+p=signrank(uncued_change,uncued_changeLED);
+disp(['p of signrank for uncued change with and without LED: ' num2str(p)]);
+p=signrank(cued_change,cued_changeLED);
+disp(['p of signrank for cued change with and without LED: ' num2str(p)]);
 
 end
 
@@ -313,7 +343,6 @@ if suppressOutput==false
         % cued window is binomial bcz window small
         % use normal approximation
         % variance=np(1-p)
-        return
         p=nanmean(data2>0.01);
         n=nansum(~isnan(data2));
         cuedVar=p*(1-p); % var of av rather than sum
