@@ -1,4 +1,4 @@
-function combineFigure4DataAcrossMice(dd,useOptoForThisGp,whichtoplot,timeStep,cueind,doCDF,doLEDcdf,calcCued,atleast_n_trials)
+function combineFigure4DataAcrossMice(dd,useOptoForThisGp,whichtoplot_eventCond,timeStep,cueind,doCDF,doLEDcdf,calcCued,atleast_n_trials)
 
 rr_noLED_tri1_uncued=[];
 rr_noLED_tri1_cued=[];
@@ -9,6 +9,24 @@ rr_LED_tri1_uncued=[];
 rr_LED_tri1_cued=[];
 rr_LED_trinext_uncued=[];
 rr_LED_trinext_cued=[];
+
+if iscell(whichtoplot_eventCond)
+    % more than one event condition to combine
+    thesetoplot=cell(1,length(dd)*length(whichtoplot_eventCond));
+    newdd=cell(1,length(dd)*length(whichtoplot_eventCond));
+    newUseOpto=nan(1,length(dd)*length(whichtoplot_eventCond));
+    k=1;
+    for i=1:length(dd)
+        for j=1:length(whichtoplot_eventCond)
+            thesetoplot{k}=whichtoplot_eventCond{j};
+            newdd{k}=dd{i};
+            newUseOpto(k)=useOptoForThisGp(i);
+            k=k+1;
+        end
+    end
+    dd=newdd;
+    useOptoForThisGp=newUseOpto;
+end
 
 returnThis_control=cell(length(dd));
 returnThis_LED=cell(length(dd));
@@ -33,6 +51,7 @@ mLED_trial1_alltrials_uncued=[];
 mLED_trial1_alltrials_cued=[];
 mLED_alltrials_uncued=[];
 mLED_alltrials_cued=[];
+k=1;
 for i=1:length(dd)
     currdir=dd{i};
     if doCDF==false
@@ -41,6 +60,18 @@ for i=1:length(dd)
         % rows are sessid, column 1 is sessid, column2 is mouseid
         a=load(fullfile(currdir,'sessIDandMouseID.mat'));
         sessIDandMouseID=a.sessIDandMouseID;
+
+        if iscell(whichtoplot_eventCond)
+            % more than one event condition to combine
+            whichtoplot=thesetoplot{k};
+            k=k+1;
+        else
+            whichtoplot=whichtoplot_eventCond;
+        end
+
+        if ~exist(fullfile(currdir,whichtoplot,'pdfcdfcontrol','returnThis.mat'),'file')
+            continue
+        end
         
         a=load(fullfile(currdir,whichtoplot,'pdfcdfcontrol','returnThis.mat'));
         returnThis_control{i}=a.returnThis;
