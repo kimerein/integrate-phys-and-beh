@@ -7,9 +7,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt27Jun2023130430\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023175615\'; % directory containing experimental data
 behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log - Slimmed down w old mice added.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt27Jun2023130430\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023175615\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -82,7 +82,7 @@ end
 
 % Optional: discard no pellet reaches within certain time after success
 % bcz represent chewing arm movements
-alltbt=ignoreReachesAfterSuccess(alltbt,metadata,9); % last arg is seconds after success, i.e., how long to chew pellet
+% alltbt=ignoreReachesAfterSuccess(alltbt,metadata,9); % last arg is seconds after success, i.e., how long to chew pellet
 
 % get miss or no pellet reach
 alltbt.missOrNoPellet=alltbt.pelletmissingreach_reachStarts+alltbt.reachBatch_miss_reachStarts;

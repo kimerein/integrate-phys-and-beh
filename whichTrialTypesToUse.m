@@ -44,17 +44,17 @@ trialTypes.reachToPelletBeforeCue=any(alltbt.reachStarts_pelletPresent(:,1:cuein
 trialTypes.reachToPelletBeforeCue_1forward=[trialTypes.reachToPelletBeforeCue(2:end); 0];
 
 % FOR SESSIONS WITH INTERLEAVED OPTO
-% linkerForNoLED_accumulate=[' & ((trialTypes.led_1forward==1 & trialTypes.led_2forward==1) | (trialTypes.led_2forward==1 & trialTypes.led_3forward==1) | (trialTypes.led_3forward==1 & trialTypes.led_4forward==1) | (trialTypes.led_4forward==1 & trialTypes.led_5forward==1) | (trialTypes.led_5forward==1 & trialTypes.led_6forward==1)' ...
-%                          ' | (trialTypes.led_6forward==1 & trialTypes.led_7forward==1) | (trialTypes.led_7forward==1 & trialTypes.led_8forward==1) | (trialTypes.led_8forward==1 & trialTypes.led_9forward==1) | (trialTypes.led_9forward==1 & trialTypes.led_10forward==1) | (trialTypes.led_10forward==1 & trialTypes.led_11forward==1) | (trialTypes.led_11forward==1 & trialTypes.led_12forward==1))'];
-% linkerForLED_accumulate=[' & ((trialTypes.led_1forward==0 & trialTypes.led_2forward==0) | (trialTypes.led_2forward==0 & trialTypes.led_3forward==0) | (trialTypes.led_3forward==0 & trialTypes.led_4forward==0) | (trialTypes.led_4forward==0 & trialTypes.led_5forward==0) | (trialTypes.led_5forward==0 & trialTypes.led_6forward==0)' ...
-%                        ' | (trialTypes.led_6forward==0 & trialTypes.led_7forward==0) | (trialTypes.led_7forward==0 & trialTypes.led_8forward==0) | (trialTypes.led_8forward==0 & trialTypes.led_9forward==0) | (trialTypes.led_9forward==0 & trialTypes.led_10forward==0) | (trialTypes.led_10forward==0 & trialTypes.led_11forward==0) | (trialTypes.led_11forward==0 & trialTypes.led_12forward==0))'];
-% linkerForNoLED=' & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
-% linkerForNoLEDBACKWARDS=' & (trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_5forward==1)';
+linkerForNoLED_accumulate=[' & ((trialTypes.led_1forward==1 & trialTypes.led_2forward==1) | (trialTypes.led_2forward==1 & trialTypes.led_3forward==1) | (trialTypes.led_3forward==1 & trialTypes.led_4forward==1) | (trialTypes.led_4forward==1 & trialTypes.led_5forward==1) | (trialTypes.led_5forward==1 & trialTypes.led_6forward==1)' ...
+                         ' | (trialTypes.led_6forward==1 & trialTypes.led_7forward==1) | (trialTypes.led_7forward==1 & trialTypes.led_8forward==1) | (trialTypes.led_8forward==1 & trialTypes.led_9forward==1) | (trialTypes.led_9forward==1 & trialTypes.led_10forward==1) | (trialTypes.led_10forward==1 & trialTypes.led_11forward==1) | (trialTypes.led_11forward==1 & trialTypes.led_12forward==1))'];
+linkerForLED_accumulate=[' & ((trialTypes.led_1forward==0 & trialTypes.led_2forward==0) | (trialTypes.led_2forward==0 & trialTypes.led_3forward==0) | (trialTypes.led_3forward==0 & trialTypes.led_4forward==0) | (trialTypes.led_4forward==0 & trialTypes.led_5forward==0) | (trialTypes.led_5forward==0 & trialTypes.led_6forward==0)' ...
+                       ' | (trialTypes.led_6forward==0 & trialTypes.led_7forward==0) | (trialTypes.led_7forward==0 & trialTypes.led_8forward==0) | (trialTypes.led_8forward==0 & trialTypes.led_9forward==0) | (trialTypes.led_9forward==0 & trialTypes.led_10forward==0) | (trialTypes.led_10forward==0 & trialTypes.led_11forward==0) | (trialTypes.led_11forward==0 & trialTypes.led_12forward==0))'];
+linkerForNoLED=' & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
+linkerForNoLEDBACKWARDS=' & (trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_5forward==1)';
 % FOR NO OPTO SESSIONS
-linkerForNoLED_accumulate='';
-linkerForLED_accumulate='';
-linkerForNoLED='';
-linkerForNoLEDBACKWARDS='';
+% linkerForNoLED_accumulate='';
+% linkerForLED_accumulate='';
+% linkerForNoLED='';
+% linkerForNoLEDBACKWARDS='';
 
 % FOR VARIED TIMING
 % linkerForVariedTimingForward=' & trialTypes.optoGroup_1forward==2';
@@ -82,16 +82,16 @@ switch whichEventType
         trial2_LED=['trialTypes.optoGroup~=1 & trialTypes.chewing_at_trial_start==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1 & (trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_5forward==0)' linkerForVariedTimingForward];
         trial1_LED=['trialTypes.optoGroup~=1 & trialTypes.chewing_at_trial_start==0'];
 
-%     case 'all cued failures'
-%         trial1=['trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.chewing_at_trial_start_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0']; 
-%         trial2=['trialTypes.optoGroup~=1' linkerForNoLED];
-%         trial1_LED=['trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.chewing_at_trial_start_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1' linkerForVariedTimingForward]; 
-%         trial2_LED='trialTypes.optoGroup~=1 & (trialTypes.led_1forward==0 | trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_1back==0)';
-%     case 'backwards all cued failures' 
-%         trial2=['trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.chewing_at_trial_start_1forward==0  & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0' linkerForNoLEDBACKWARDS]; 
-%         trial1=['trialTypes.optoGroup~=1'];
-%         trial2_LED=['trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.chewing_at_trial_start_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1 & (trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_5forward==0)' linkerForVariedTimingForward]; 
-%         trial1_LED=['trialTypes.optoGroup~=1'];
+    case 'all cued failures'
+        trial1=['trialTypes.optoGroup~=1 & trialTypes.consumed_pellet_1back==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.chewing_at_trial_start_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0']; 
+        trial2=['trialTypes.optoGroup~=1' linkerForNoLED];
+        trial1_LED=['trialTypes.optoGroup~=1 & trialTypes.consumed_pellet_1back==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.chewing_at_trial_start_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1' linkerForVariedTimingForward]; 
+        trial2_LED='trialTypes.optoGroup~=1 & (trialTypes.led_1forward==0 | trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_1back==0)';
+    case 'backwards all cued failures' 
+        trial2=['trialTypes.optoGroup~=1 & trialTypes.consumed_pellet_1back==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.chewing_at_trial_start_1forward==0  & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0' linkerForNoLEDBACKWARDS]; 
+        trial1=['trialTypes.optoGroup~=1 & trialTypes.consumed_pellet_1back==0'];
+        trial2_LED=['trialTypes.optoGroup~=1 & trialTypes.consumed_pellet_1back==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.chewing_at_trial_start_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1 & (trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_5forward==0)' linkerForVariedTimingForward]; 
+        trial1_LED=['trialTypes.optoGroup~=1 & trialTypes.consumed_pellet_1back==0'];
 
     case 'cued drop'
         trial1=['trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0']; 
