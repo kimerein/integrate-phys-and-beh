@@ -1,4 +1,4 @@
-function combineFigure4DataAcrossMice(dd,useOptoForThisGp,whichtoplot_eventCond,timeStep,cueind,doCDF,doLEDcdf,calcCued,atleast_n_trials)
+function combineFigure4DataAcrossMice(dd,useOptoForThisGp,whichtoplot_eventCond,timeStep,cueind,doCDF,doLEDcdf,calcCued,atleast_n_trials,ds)
 
 rr_noLED_tri1_uncued=[];
 rr_noLED_tri1_cued=[];
@@ -84,10 +84,14 @@ for i=1:length(dd)
         % combine PDFs
         if i==2
             [~,~,returnControlPDF]=combineReachPlotDatasets(returnThis_control{1},[1 2],returnThis_control{2},[1 2],'k'); close all;
-            [~,~,returnLEDPDF]=combineReachPlotDatasets(returnThis_LED{1},[1 2],returnThis_LED{2},[1 2],'k'); close all;
+            if ~all(isnan(returnThis_LED{i}.data1_mean{1}))
+                [~,~,returnLEDPDF]=combineReachPlotDatasets(returnThis_LED{1},[1 2],returnThis_LED{2},[1 2],'k'); close all;
+            end
         elseif i>2
             [~,~,returnControlPDF]=combineReachPlotDatasets(returnControlPDF,[1 2],returnThis_control{i},[1 2],'k'); close all;
-            [~,~,returnLEDPDF]=combineReachPlotDatasets(returnLEDPDF,[1 2],returnThis_LED{i},[1 2],'k'); close all;
+            if ~all(isnan(returnThis_LED{i}.data1_mean{1}))
+                [~,~,returnLEDPDF]=combineReachPlotDatasets(returnLEDPDF,[1 2],returnThis_LED{i},[1 2],'k'); close all;
+            end
         end
 
         a=load(fullfile(currdir,whichtoplot,'returnout.mat'));
@@ -182,7 +186,7 @@ for i=1:length(dd)
         end
 
         % do CDF only
-        if doLEDcdf==false
+        if doLEDcdf==true
             a=load(fullfile(currdir,whichtoplot,'pdfcdfpDMStinh','returnThisCDF.mat'));
             rthisCDF=a.returnThisCDF;
             forcdf_rawreach_trial1=[forcdf_rawreach_trial1; rthisCDF.trial1_rawReachMatrix];
@@ -203,7 +207,17 @@ if doCDF==true
 end
 
 % plot pdfs
-plotPDF(returnControlPDF.data1_mean,combo_se,time_for_x,ntrials,linecol);
+[returnControlPDF.data1_se{1},returnControlPDF.data2_se{1},returnControlPDF.data1_mean{1},returnControlPDF.data2_mean{1},returnControlPDF.time_for_x]=downsamplePDF(returnControlPDF.data1_se{1},returnControlPDF.data2_se{1},returnControlPDF.data1_mean{1},returnControlPDF.data2_mean{1},returnControlPDF.time_for_x,ds);
+figure();
+plotPDF(returnControlPDF.data1_mean{1},returnControlPDF.data1_se{1},returnControlPDF.time_for_x,returnControlPDF.n,'k'); hold on;
+plotPDF(returnControlPDF.data2_mean{1},returnControlPDF.data2_se{1},returnControlPDF.time_for_x,returnControlPDF.n,'b');
+title('Control trial sequence');
+[returnLEDPDF.data1_se{1},returnLEDPDF.data2_se{1},returnLEDPDF.data1_mean{1},returnLEDPDF.data2_mean{1},returnLEDPDF.time_for_x]=downsamplePDF(returnLEDPDF.data1_se{1},returnLEDPDF.data2_se{1},returnLEDPDF.data1_mean{1},returnLEDPDF.data2_mean{1},returnLEDPDF.time_for_x,ds);
+figure();
+plotPDF(returnLEDPDF.data1_mean{1},returnLEDPDF.data1_se{1},returnLEDPDF.time_for_x,returnLEDPDF.n,'r'); hold on;
+plotPDF(returnLEDPDF.data2_mean{1},returnLEDPDF.data2_se{1},returnLEDPDF.time_for_x,returnLEDPDF.n,'b');
+title('LED trial sequence');
+
 
 % do bootstrapped scatter
 figure();
@@ -241,9 +255,21 @@ stats_compareChangeInRate(s_alltrials_uncued-s_trial1_alltrials_uncued,s_alltria
 
 end
 
+function [data1_se,data2_se,data1_mean,data2_mean,timeBins]=downsamplePDF(data1_se,data2_se,data1_mean,data2_mean,timeBins,ds)
+
+data1_se=data1_se.*sqrt(ds/ds^2);
+data2_se=data2_se.*sqrt(ds/ds^2);
+data1_se=downSampAv(data1_se,ds);
+data2_se=downSampAv(data2_se,ds);
+
+data1_mean=downSampAv(data1_mean,ds);
+data2_mean=downSampAv(data2_mean,ds);
+timeBins=downSampAv(timeBins,ds);
+
+end
+
 function plotPDF(mecombo,combo_se,time_for_x,ntrials,linecol)
 
-figure();
 [n,x]=cityscape_hist(mecombo,time_for_x);
 plot(x,n,'Color',linecol);
 hold on;
