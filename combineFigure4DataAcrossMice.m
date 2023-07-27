@@ -51,6 +51,8 @@ mLED_trial1_alltrials_uncued=[];
 mLED_trial1_alltrials_cued=[];
 mLED_alltrials_uncued=[];
 mLED_alltrials_cued=[];
+returnControlPDF=[];
+returnLEDPDF=[];
 k=1;
 for i=1:length(dd)
     currdir=dd{i};
@@ -75,13 +77,18 @@ for i=1:length(dd)
         
         a=load(fullfile(currdir,whichtoplot,'pdfcdfcontrol','returnThis.mat'));
         returnThis_control{i}=a.returnThis;
-        a=load(fullfile(currdir,whichtoplot,'pdfcdfcontrol','returnThis.mat'));
-        returnThis_control{i}=a.returnThis;
 
         a=load(fullfile(currdir,whichtoplot,'pdfcdfpDMStinh','returnThis.mat'));
         returnThis_LED{i}=a.returnThis;
-        a=load(fullfile(currdir,whichtoplot,'pdfcdfpDMStinh','returnThis.mat'));
-        returnThis_LED{i}=a.returnThis;
+
+        % combine PDFs
+        if i==2
+            [~,~,returnControlPDF]=combineReachPlotDatasets(returnThis_control{1},[1 2],returnThis_control{2},[1 2],'k'); close all;
+            [~,~,returnLEDPDF]=combineReachPlotDatasets(returnThis_LED{1},[1 2],returnThis_LED{2},[1 2],'k'); close all;
+        elseif i>2
+            [~,~,returnControlPDF]=combineReachPlotDatasets(returnControlPDF,[1 2],returnThis_control{i},[1 2],'k'); close all;
+            [~,~,returnLEDPDF]=combineReachPlotDatasets(returnLEDPDF,[1 2],returnThis_LED{i},[1 2],'k'); close all;
+        end
 
         a=load(fullfile(currdir,whichtoplot,'returnout.mat'));
         rout=a.returnout;
@@ -166,6 +173,14 @@ for i=1:length(dd)
         mLED_alltrials_uncued=[mLED_alltrials_uncued mbym.reachrates_LED.alltrials_uncued];
         mLED_alltrials_cued=[mLED_alltrials_cued mbym.reachrates_LED.alltrials_cued];
     else
+        if iscell(whichtoplot_eventCond)
+            % more than one event condition to combine
+            whichtoplot=thesetoplot{k};
+            k=k+1;
+        else
+            whichtoplot=whichtoplot_eventCond;
+        end
+
         % do CDF only
         if doLEDcdf==false
             a=load(fullfile(currdir,whichtoplot,'pdfcdfpDMStinh','returnThisCDF.mat'));
@@ -178,12 +193,17 @@ for i=1:length(dd)
             forcdf_rawreach_trial1=[forcdf_rawreach_trial1; rthisCDF.trial1_rawReachMatrix];
             forcdf_rawreach_trial2=[forcdf_rawreach_trial2; rthisCDF.trial2_rawReachMatrix];
         end
-
-        returnThisCDF.trial1_rawReachMatrix=forcdf_rawreach_trial1;
-        returnThisCDF.trial2_rawReachMatrix=forcdf_rawreach_trial2;
-        getMeanAndBootstrapForCDF(timeStep,returnThisCDF,cueind);
     end
 end
+
+if doCDF==true
+    returnThisCDF.trial1_rawReachMatrix=forcdf_rawreach_trial1;
+    returnThisCDF.trial2_rawReachMatrix=forcdf_rawreach_trial2;
+    getMeanAndBootstrapForCDF(timeStep,returnThisCDF,cueind);
+end
+
+% plot pdfs
+plotPDF(returnControlPDF.data1_mean,combo_se,time_for_x,ntrials,linecol);
 
 % do bootstrapped scatter
 figure();
@@ -218,6 +238,20 @@ title('Mouse by mouse');
 stats_compareChangeInRate(m_alltrials_uncued-m_trial1_alltrials_uncued,m_alltrials_cued-m_trial1_alltrials_cued,mLED_alltrials_uncued-mLED_trial1_alltrials_uncued,mLED_alltrials_cued-mLED_trial1_alltrials_cued);
 disp('AND NOW SESS BY SESS');
 stats_compareChangeInRate(s_alltrials_uncued-s_trial1_alltrials_uncued,s_alltrials_cued-s_trial1_alltrials_cued,sLED_alltrials_uncued-sLED_trial1_alltrials_uncued,sLED_alltrials_cued-sLED_trial1_alltrials_cued);
+
+end
+
+function plotPDF(mecombo,combo_se,time_for_x,ntrials,linecol)
+
+figure();
+[n,x]=cityscape_hist(mecombo,time_for_x);
+plot(x,n,'Color',linecol);
+hold on;
+[n,x]=cityscape_hist(mecombo-combo_se,time_for_x);
+plot(x,n,'Color',linecol);
+[n,x]=cityscape_hist(mecombo+combo_se,time_for_x);
+plot(x,n,'Color',linecol);
+xlabel('Time (sec)'); ylabel(['Reach rate (reaches per sec) ' num2str(ntrials) ' trials']);
 
 end
 
@@ -293,8 +327,8 @@ end
 function plotByBy(trial1_uncued,trial1_cued,trialn_uncued,trialn_cued,col,calcCued,plotLines)
 
 if calcCued==true
-    scatter(trialn_uncued-trial1_uncued,(trialn_cued-trial1_cued)-(trialn_uncued-trial1_uncued),[],col); hold on;
-    scatter(mean(trialn_uncued-trial1_uncued,'all','omitnan'),mean((trialn_cued-trial1_cued)-(trialn_uncued-trial1_uncued),'all','omitnan'),80,col,'filled'); 
+    scatter(trialn_uncued-trial1_uncued,(trialn_cued-trialn_uncued)-(trial1_cued-trial1_uncued),[],col); hold on;
+    scatter(mean(trialn_uncued-trial1_uncued,'all','omitnan'),mean((trialn_cued-trialn_uncued)-(trial1_cued-trial1_uncued),'all','omitnan'),80,col,'filled'); 
 else
     scatter(trialn_uncued-trial1_uncued,trialn_cued-trial1_cued,[],col); hold on;
     scatter(mean(trialn_uncued-trial1_uncued,'all','omitnan'),mean(trialn_cued-trial1_cued,'all','omitnan'),80,col,'filled');
@@ -302,13 +336,13 @@ end
 if plotLines==true
     for i=1:length(trialn_uncued)
         if calcCued==true
-            line([0 trialn_uncued(i)-trial1_uncued(i)],[0 (trialn_cued(i)-trial1_cued(i))-(trialn_uncued(i)-trial1_uncued(i))],'Color',col); hold on;
+            line([0 trialn_uncued(i)-trial1_uncued(i)],[0 (trialn_cued(i)-trialn_uncued(i))-(trial1_cued(i)-trial1_uncued(i))],'Color',col); hold on;
         else
             line([0 trialn_uncued(i)-trial1_uncued(i)],[0 trialn_cued(i)-trial1_cued(i)],'Color',col); hold on;
         end
     end
     if calcCued==true
-        line([0 mean(trialn_uncued-trial1_uncued,'all','omitnan')],[0 mean((trialn_cued-trial1_cued)-(trialn_uncued-trial1_uncued),'all','omitnan')],'Color',col,'LineWidth',4); hold on;
+        line([0 mean(trialn_uncued-trial1_uncued,'all','omitnan')],[0 mean((trialn_cued-trialn_uncued)-(trial1_cued-trial1_uncued),'all','omitnan')],'Color',col,'LineWidth',4); hold on;
     else
         line([0 mean(trialn_uncued-trial1_uncued,'all','omitnan')],[0 mean(trialn_cued-trial1_cued,'all','omitnan')],'Color',col,'LineWidth',4); hold on;
     end
@@ -397,10 +431,11 @@ end
 function getMeanAndBootstrapForCDF(timeStep,returnThisCDF,f)
 
 startAtCue=false;
+cuelengthadjust=0.25; % duration of cue
 subtractPreCue=false;
 startAtPrecue=true;
-preCueWindow=[-2 -1];
-cutCDFat=9; % cut cdf at this time
+preCueWindow=[-2 -1]-cuelengthadjust;
+cutCDFat=9-cuelengthadjust; % cut cdf at this time
 
 maxTrile=cutCDFat; % make this empty if want whole trial length
 
@@ -580,7 +615,7 @@ if ~isempty(maxTrialLength)
     data2(timesteps>maxTrialLength)=0;
 end
 
-suppPlots=whetherToSuppressPlots();
+suppPlots=false;
 
 if suppPlots==false
     cond1_cdf=accumulateDistribution(data1(timesteps>cueTime));
