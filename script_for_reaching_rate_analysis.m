@@ -7,9 +7,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt19Jul2023153612\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023175615\'; % directory containing experimental data
 behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log - Slimmed down w old mice added.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt19Jul2023153612\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023175615\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -64,6 +64,7 @@ alltbt=fixReachesStuckAtOne(alltbt);
 
 settings=RTanalysis_settings('display settings','clear');
 
+
 % find trials with long ITIs
 trialTypes=getLongITIs(alltbt,trialTypes,settings);
 
@@ -94,6 +95,9 @@ alltbt.anyFail=single(alltbt.anyFail>0.5);
 
 % Optional: Exclude trials with paw on wheel
 % [alltbt,metadata,trialTypes]=excludePawOnWheel(alltbt,metadata,trialTypes,'cueZone_onVoff');
+
+% Optional: Exclude sessions where mouse was cheating
+[alltbt,metadata,trialTypes]=excludePreemptiveSess(alltbt,metadata,trialTypes,[3.255-2 3.255-1],[3.255-1 3.255-0],3);
 
 % Optional: dprimes for each mouse, each session
 settingsDp=settingsForDprimes(alltbt,'cueZone_onVoff',true); % Check settings in settingsForDprimes

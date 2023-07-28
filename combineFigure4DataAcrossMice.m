@@ -217,8 +217,21 @@ if doCDF==true
     temp=downSampMatrix(returnThisCDF.trial2_rawReachMatrix,ds); temp(temp>0)=1;
 %     returnThisCDF.trial2_rawReachMatrix=temp;
     returnThisCDF.trial2_rawReachMatrix=downSampMatrix(returnThisCDF.trial2_rawReachMatrix,ds);
-    [n,x]=cityscape_hist(mean(temp,1,'omitnan'),ds_times);
-    hold on; plot(x,n,'Color','r');
+    [n2,x2]=cityscape_hist(mean(temp,1,'omitnan'),ds_times);
+    hold on; plot(x2,n2,'Color','r');
+    ylabel('Probability that mouse reaches over trials');
+
+    stopPDFat=[]; %9.5;
+    if ~isempty(stopPDFat)
+        figure(); plot(x,n./nansum(n(x<stopPDFat)),'Color','k'); hold on;
+        plot(x2,n2./nansum(n2(x2<stopPDFat)),'Color','r');
+        xlim([min(x,[],'all','omitnan') stopPDFat]);
+        ylabel('Reach PDF');
+    else
+        figure(); plot(x,n./nansum(n),'Color','k'); hold on;
+        plot(x2,n2./nansum(n2),'Color','r');
+        ylabel('Reach PDF');
+    end
 
 
     getMeanAndBootstrapForCDF(timeStep*ds,returnThisCDF,floor(cueind/ds));
@@ -479,7 +492,7 @@ cuelengthadjust=0.25; % duration of cue
 subtractPreCue=false;
 startAtPrecue=true;
 preCueWindow=[-2 -1]-cuelengthadjust;
-cutCDFat=17-cuelengthadjust; % cut cdf at this time
+cutCDFat=9-cuelengthadjust; % cut cdf at this time
 
 maxTrile=cutCDFat; % make this empty if want whole trial length
 
