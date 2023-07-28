@@ -210,13 +210,15 @@ if doCDF==true
     % plot reach probability per bin
     temp=downSampMatrix(returnThisCDF.trial1_rawReachMatrix,ds); temp(temp>0)=1;
     ds_times=0:timeStep*ds:(size(temp,2)-1)*(timeStep*ds);
-    % returnThisCDF.trial1_rawReachMatrix=temp;
+%     returnThisCDF.trial1_rawReachMatrix=temp;
     returnThisCDF.trial1_rawReachMatrix=downSampMatrix(returnThisCDF.trial1_rawReachMatrix,ds);
-    figure(); plot(ds_times,nanmean(temp,1),'Color','k');
+    [n,x]=cityscape_hist(mean(temp,1,'omitnan'),ds_times);
+    figure(); plot(x,n,'Color','k');
     temp=downSampMatrix(returnThisCDF.trial2_rawReachMatrix,ds); temp(temp>0)=1;
-    % returnThisCDF.trial2_rawReachMatrix=temp;
+%     returnThisCDF.trial2_rawReachMatrix=temp;
     returnThisCDF.trial2_rawReachMatrix=downSampMatrix(returnThisCDF.trial2_rawReachMatrix,ds);
-    hold on; plot(ds_times,nanmean(temp,1),'Color','r');
+    [n,x]=cityscape_hist(mean(temp,1,'omitnan'),ds_times);
+    hold on; plot(x,n,'Color','r');
 
 
     getMeanAndBootstrapForCDF(timeStep*ds,returnThisCDF,floor(cueind/ds));
@@ -477,7 +479,7 @@ cuelengthadjust=0.25; % duration of cue
 subtractPreCue=false;
 startAtPrecue=true;
 preCueWindow=[-2 -1]-cuelengthadjust;
-cutCDFat=9-cuelengthadjust; % cut cdf at this time
+cutCDFat=17-cuelengthadjust; % cut cdf at this time
 
 maxTrile=cutCDFat; % make this empty if want whole trial length
 
