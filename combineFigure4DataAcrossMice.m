@@ -203,55 +203,71 @@ end
 if doCDF==true
     returnThisCDF.trial1_rawReachMatrix=forcdf_rawreach_trial1;
     returnThisCDF.trial2_rawReachMatrix=forcdf_rawreach_trial2;
-    getMeanAndBootstrapForCDF(timeStep,returnThisCDF,cueind);
+
+    if isempty(ds)
+        ds=1;
+    end
+    % plot reach probability per bin
+    temp=downSampMatrix(returnThisCDF.trial1_rawReachMatrix,ds); temp(temp>0)=1;
+    ds_times=0:timeStep*ds:(size(temp,2)-1)*(timeStep*ds);
+    % returnThisCDF.trial1_rawReachMatrix=temp;
+    returnThisCDF.trial1_rawReachMatrix=downSampMatrix(returnThisCDF.trial1_rawReachMatrix,ds);
+    figure(); plot(ds_times,nanmean(temp,1),'Color','k');
+    temp=downSampMatrix(returnThisCDF.trial2_rawReachMatrix,ds); temp(temp>0)=1;
+    % returnThisCDF.trial2_rawReachMatrix=temp;
+    returnThisCDF.trial2_rawReachMatrix=downSampMatrix(returnThisCDF.trial2_rawReachMatrix,ds);
+    hold on; plot(ds_times,nanmean(temp,1),'Color','r');
+
+
+    getMeanAndBootstrapForCDF(timeStep*ds,returnThisCDF,floor(cueind/ds));
+else
+    % plot pdfs
+    [returnControlPDF.data1_se{1},returnControlPDF.data2_se{1},returnControlPDF.data1_mean{1},returnControlPDF.data2_mean{1},returnControlPDF.time_for_x]=downsamplePDF(returnControlPDF.data1_se{1},returnControlPDF.data2_se{1},returnControlPDF.data1_mean{1},returnControlPDF.data2_mean{1},returnControlPDF.time_for_x,ds);
+    figure();
+    plotPDF(returnControlPDF.data1_mean{1},returnControlPDF.data1_se{1},returnControlPDF.time_for_x,returnControlPDF.n,'k'); hold on;
+    plotPDF(returnControlPDF.data2_mean{1},returnControlPDF.data2_se{1},returnControlPDF.time_for_x,returnControlPDF.n,'b');
+    title('Control trial sequence');
+    [returnLEDPDF.data1_se{1},returnLEDPDF.data2_se{1},returnLEDPDF.data1_mean{1},returnLEDPDF.data2_mean{1},returnLEDPDF.time_for_x]=downsamplePDF(returnLEDPDF.data1_se{1},returnLEDPDF.data2_se{1},returnLEDPDF.data1_mean{1},returnLEDPDF.data2_mean{1},returnLEDPDF.time_for_x,ds);
+    figure();
+    plotPDF(returnLEDPDF.data1_mean{1},returnLEDPDF.data1_se{1},returnLEDPDF.time_for_x,returnLEDPDF.n,'r'); hold on;
+    plotPDF(returnLEDPDF.data2_mean{1},returnLEDPDF.data2_se{1},returnLEDPDF.time_for_x,returnLEDPDF.n,'b');
+    title('LED trial sequence');
+
+
+    % do bootstrapped scatter
+    figure();
+    [uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_noLED_tri1_uncued,rr_noLED_tri1_cued,'k','k',false,calcCued);
+    plotMeAndSe(rr_noLED_tri1_uncued,rr_noLED_tri1_cued,'k',2,false,calcCued);
+    [uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_noLED_trinext_uncued,rr_noLED_trinext_cued,[0.5 0.5 0.5],[0.5 0.5 0.5],false,calcCued);
+    plotMeAndSe(rr_noLED_trinext_uncued,rr_noLED_trinext_cued,[0.5 0.5 0.5],2,false,calcCued);
+
+    figure();
+    [uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k','r',false,calcCued);
+    plotMeAndSe(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k',2,false,calcCued);
+    [uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_LED_trinext_uncued,rr_LED_trinext_cued,'r','r',false,calcCued);
+    plotMeAndSe(rr_LED_trinext_uncued,rr_LED_trinext_cued,'r',2,false,calcCued);
+
+    figure();
+    plotByBy(s_trial1_alltrials_uncued,s_trial1_alltrials_cued,s_alltrials_uncued,s_alltrials_cued,'k',calcCued,false);
+    plotByBy(sLED_trial1_alltrials_uncued,sLED_trial1_alltrials_cued,sLED_alltrials_uncued,sLED_alltrials_cued,'r',calcCued,false);
+    title('Sess by sess');
+
+    figure();
+    plotMeAndSe(s_alltrials_uncued-s_trial1_alltrials_uncued,s_alltrials_cued-s_trial1_alltrials_cued,'k',2,false,calcCued);
+    hold on;
+    plotMeAndSe(sLED_alltrials_uncued-sLED_trial1_alltrials_uncued,sLED_alltrials_cued-sLED_trial1_alltrials_cued,'r',2,false,calcCued);
+    title('Sess by sess mean and se');
+
+
+    figure();
+    plotByBy(m_trial1_alltrials_uncued,m_trial1_alltrials_cued,m_alltrials_uncued,m_alltrials_cued,'k',calcCued,true);
+    plotByBy(mLED_trial1_alltrials_uncued,mLED_trial1_alltrials_cued,mLED_alltrials_uncued,mLED_alltrials_cued,'r',calcCued,true);
+    title('Mouse by mouse');
+
+    stats_compareChangeInRate(m_alltrials_uncued-m_trial1_alltrials_uncued,m_alltrials_cued-m_trial1_alltrials_cued,mLED_alltrials_uncued-mLED_trial1_alltrials_uncued,mLED_alltrials_cued-mLED_trial1_alltrials_cued);
+    disp('AND NOW SESS BY SESS');
+    stats_compareChangeInRate(s_alltrials_uncued-s_trial1_alltrials_uncued,s_alltrials_cued-s_trial1_alltrials_cued,sLED_alltrials_uncued-sLED_trial1_alltrials_uncued,sLED_alltrials_cued-sLED_trial1_alltrials_cued);
 end
-
-% plot pdfs
-[returnControlPDF.data1_se{1},returnControlPDF.data2_se{1},returnControlPDF.data1_mean{1},returnControlPDF.data2_mean{1},returnControlPDF.time_for_x]=downsamplePDF(returnControlPDF.data1_se{1},returnControlPDF.data2_se{1},returnControlPDF.data1_mean{1},returnControlPDF.data2_mean{1},returnControlPDF.time_for_x,ds);
-figure();
-plotPDF(returnControlPDF.data1_mean{1},returnControlPDF.data1_se{1},returnControlPDF.time_for_x,returnControlPDF.n,'k'); hold on;
-plotPDF(returnControlPDF.data2_mean{1},returnControlPDF.data2_se{1},returnControlPDF.time_for_x,returnControlPDF.n,'b');
-title('Control trial sequence');
-[returnLEDPDF.data1_se{1},returnLEDPDF.data2_se{1},returnLEDPDF.data1_mean{1},returnLEDPDF.data2_mean{1},returnLEDPDF.time_for_x]=downsamplePDF(returnLEDPDF.data1_se{1},returnLEDPDF.data2_se{1},returnLEDPDF.data1_mean{1},returnLEDPDF.data2_mean{1},returnLEDPDF.time_for_x,ds);
-figure();
-plotPDF(returnLEDPDF.data1_mean{1},returnLEDPDF.data1_se{1},returnLEDPDF.time_for_x,returnLEDPDF.n,'r'); hold on;
-plotPDF(returnLEDPDF.data2_mean{1},returnLEDPDF.data2_se{1},returnLEDPDF.time_for_x,returnLEDPDF.n,'b');
-title('LED trial sequence');
-
-
-% do bootstrapped scatter
-figure();
-[uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_noLED_tri1_uncued,rr_noLED_tri1_cued,'k','k',false,calcCued);
-plotMeAndSe(rr_noLED_tri1_uncued,rr_noLED_tri1_cued,'k',2,false,calcCued);
-[uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_noLED_trinext_uncued,rr_noLED_trinext_cued,[0.5 0.5 0.5],[0.5 0.5 0.5],false,calcCued);
-plotMeAndSe(rr_noLED_trinext_uncued,rr_noLED_trinext_cued,[0.5 0.5 0.5],2,false,calcCued);
-
-figure();
-[uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k','r',false,calcCued);
-plotMeAndSe(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k',2,false,calcCued);
-[uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_LED_trinext_uncued,rr_LED_trinext_cued,'r','r',false,calcCued);
-plotMeAndSe(rr_LED_trinext_uncued,rr_LED_trinext_cued,'r',2,false,calcCued);
-
-figure();
-plotByBy(s_trial1_alltrials_uncued,s_trial1_alltrials_cued,s_alltrials_uncued,s_alltrials_cued,'k',calcCued,false);
-plotByBy(sLED_trial1_alltrials_uncued,sLED_trial1_alltrials_cued,sLED_alltrials_uncued,sLED_alltrials_cued,'r',calcCued,false);
-title('Sess by sess');
-
-figure();
-plotMeAndSe(s_alltrials_uncued-s_trial1_alltrials_uncued,s_alltrials_cued-s_trial1_alltrials_cued,'k',2,false,calcCued);
-hold on;
-plotMeAndSe(sLED_alltrials_uncued-sLED_trial1_alltrials_uncued,sLED_alltrials_cued-sLED_trial1_alltrials_cued,'r',2,false,calcCued);
-title('Sess by sess mean and se');
-
-
-figure();
-plotByBy(m_trial1_alltrials_uncued,m_trial1_alltrials_cued,m_alltrials_uncued,m_alltrials_cued,'k',calcCued,true);
-plotByBy(mLED_trial1_alltrials_uncued,mLED_trial1_alltrials_cued,mLED_alltrials_uncued,mLED_alltrials_cued,'r',calcCued,true);
-title('Mouse by mouse');
-
-stats_compareChangeInRate(m_alltrials_uncued-m_trial1_alltrials_uncued,m_alltrials_cued-m_trial1_alltrials_cued,mLED_alltrials_uncued-mLED_trial1_alltrials_uncued,mLED_alltrials_cued-mLED_trial1_alltrials_cued);
-disp('AND NOW SESS BY SESS');
-stats_compareChangeInRate(s_alltrials_uncued-s_trial1_alltrials_uncued,s_alltrials_cued-s_trial1_alltrials_cued,sLED_alltrials_uncued-sLED_trial1_alltrials_uncued,sLED_alltrials_cued-sLED_trial1_alltrials_cued);
 
 end
 
@@ -498,8 +514,10 @@ takeFracForBootstrap=0.66;
 takeIndsForBootstrap=ceil(takeFracForBootstrap*size(dat2,1));
 nRuns=100;
 bootCDFs=nan(nRuns,length(timeBinsForReaching));
+whichTrialsTaken=cell(1,nRuns);
 for i=1:nRuns
     takeTheseForBoot=randi(size(dat2,1),1,takeIndsForBootstrap); % with replacement
+    whichTrialsTaken{i}=takeTheseForBoot;
     sub_dat2=dat2(takeTheseForBoot,:);
     sub_dat2=sum(sub_dat2,1,'omitnan');
     if isempty(maxTrile)
@@ -526,9 +544,10 @@ dat2=returnThisCDF.trial2_rawReachMatrix;
 takeFracForBootstrap=0.66;
 takeIndsForBootstrap=ceil(takeFracForBootstrap*size(dat2,1));
 nRuns=100;
-bootCDFs=nan(nRuns,length(timeBinsForReaching));
+bootCDFs2nd=nan(nRuns,length(timeBinsForReaching));
 for i=1:nRuns
-    takeTheseForBoot=randi(size(dat2,1),1,takeIndsForBootstrap); % with replacement
+    % takeTheseForBoot=randi(size(dat2,1),1,takeIndsForBootstrap); % with replacement
+    takeTheseForBoot=whichTrialsTaken{i};
     sub_dat2=dat2(takeTheseForBoot,:);
     sub_dat2=sum(sub_dat2,1,'omitnan');
     if isempty(maxTrile)
@@ -537,17 +556,33 @@ for i=1:nRuns
     end
     cond2_cdf=accumulateDistribution(sub_dat2);
     cond2_cdf=cond2_cdf./nanmax(cond2_cdf);
-    bootCDFs(i,:)=cond2_cdf;
+    bootCDFs2nd(i,:)=cond2_cdf;
 end
 % Show bootstrapped 95% CI
-sorted_bootCDFs=nan(size(bootCDFs));
-fifthPerc=nan(1,size(bootCDFs,2));
-ninetyfifthPerc=nan(1,size(bootCDFs,2));
-for i=1:size(bootCDFs,2)
-    sorted_bootCDFs(:,i)=sort(bootCDFs(:,i));
+sorted_bootCDFs=nan(size(bootCDFs2nd));
+fifthPerc=nan(1,size(bootCDFs2nd,2));
+ninetyfifthPerc=nan(1,size(bootCDFs2nd,2));
+for i=1:size(bootCDFs2nd,2)
+    sorted_bootCDFs(:,i)=sort(bootCDFs2nd(:,i));
     fifthPerc(i)=prctile(sorted_bootCDFs(:,i),5);
     ninetyfifthPerc(i)=prctile(sorted_bootCDFs(:,i),95);
 end
+plot(timeBinsForReaching,fifthPerc,'Color','r'); hold on;
+plot(timeBinsForReaching,ninetyfifthPerc,'Color','r');
+
+% Now get bootstrapped earth mover's function
+earthmovers=bootCDFs2nd-bootCDFs;
+% Show bootstrapped 95% CI
+sorted_bootEM=nan(size(earthmovers));
+fifthPerc=nan(1,size(earthmovers,2));
+ninetyfifthPerc=nan(1,size(earthmovers,2));
+for i=1:size(earthmovers,2)
+    sorted_bootEM(:,i)=sort(earthmovers(:,i));
+    fifthPerc(i)=prctile(sorted_bootEM(:,i),5);
+    ninetyfifthPerc(i)=prctile(sorted_bootEM(:,i),95);
+end
+figure();
+plot(timeBinsForReaching,nanmean(earthmovers,1),'Color','r'); hold on;
 plot(timeBinsForReaching,fifthPerc,'Color','r'); hold on;
 plot(timeBinsForReaching,ninetyfifthPerc,'Color','r');
 
