@@ -207,6 +207,13 @@ if doCDF==true
     if isempty(ds)
         ds=1;
     end
+    % Reach rate over trials
+    [n,x]=cityscape_hist(mean(returnThisCDF.trial1_rawReachMatrix,1,'omitnan'),0:timeStep:(size(returnThisCDF.trial1_rawReachMatrix,2)-1)*(timeStep));
+    figure(); plot(x,n,'Color','k');
+    [n2,x2]=cityscape_hist(mean(returnThisCDF.trial2_rawReachMatrix,1,'omitnan'),0:timeStep:(size(returnThisCDF.trial2_rawReachMatrix,2)-1)*(timeStep));
+    hold on; plot(x2,n2,'Color','r');
+    title('Reach rate average over trials');
+
     % plot reach probability per bin
     temp=downSampMatrix(returnThisCDF.trial1_rawReachMatrix,ds); temp(temp>0)=1;
     ds_times=0:timeStep*ds:(size(temp,2)-1)*(timeStep*ds);
@@ -221,7 +228,7 @@ if doCDF==true
     hold on; plot(x2,n2,'Color','r');
     ylabel('Probability that mouse reaches over trials');
 
-    stopPDFat=[]; %9.5;
+    stopPDFat=9.5;
     if ~isempty(stopPDFat)
         figure(); plot(x,n./nansum(n(x<stopPDFat)),'Color','k'); hold on;
         plot(x2,n2./nansum(n2(x2<stopPDFat)),'Color','r');
