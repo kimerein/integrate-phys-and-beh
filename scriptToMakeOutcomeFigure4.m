@@ -153,12 +153,12 @@ end
 
 function plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,acrossSess_window3,useWindowsForUncued,timeWindowToCountAsEventReach,whichEventName,whichReachName,isAccum,nInSequence,whichToPlotName,sad,savePlotsDir,addOn,tbt_filter)
 
-cueonsetadjust=-0.25; % cue duration
+cueonsetadjust=0; %-0.25; % cue duration
 cuedreachtimewindow=cuedreachtimewindow+cueonsetadjust;
 acrossSess_window3=acrossSess_window3+cueonsetadjust;
 timeWindowToCountAsEventReach=timeWindowToCountAsEventReach+cueonsetadjust;
 
-reachratesettings.acrossSess_window1=[0+cueonsetadjust cuedreachtimewindow]; % time window wrt cue onset to classify reach as cued
+reachratesettings.acrossSess_window1=[0+cueonsetadjust-0.1 cuedreachtimewindow]; % time window wrt cue onset to classify reach as cued
 reachratesettings.acrossSess_window2=[7+cueonsetadjust 9.5+cueonsetadjust]; % beware reach suppression after a success
 reachratesettings.acrossSess_window3=acrossSess_window3; %[-2 0]; % time window wrt cue onset to classify reach as uncued
 reachratesettings.useWindowsForUncued=useWindowsForUncued; %[3]; % to use window2 or window3 or both for the uncued reach rate

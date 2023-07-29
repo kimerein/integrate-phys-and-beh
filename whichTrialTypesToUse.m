@@ -67,9 +67,9 @@ linkerForVariedTimingUncued='';
 
 switch whichEventType
     case 'cued success'
-        trial1=['(trialTypes.optoGroup~=1 & trialTypes.chewing_at_trial_start==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0)']; 
+        trial1=['(trialTypes.optoGroup~=1 & trialTypes.chewing_at_trial_start==0 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0)']; 
         trial2=['trialTypes.optoGroup~=1 & trialTypes.chewing_at_trial_start==0' linkerForNoLED];
-        trial1_LED=['(trialTypes.optoGroup~=1 & trialTypes.chewing_at_trial_start==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1' linkerForVariedTimingForward ')']; 
+        trial1_LED=['(trialTypes.optoGroup~=1 & trialTypes.chewing_at_trial_start==0 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1' linkerForVariedTimingForward ')']; 
         trial2_LED='trialTypes.optoGroup~=1 & trialTypes.chewing_at_trial_start==0 & (trialTypes.led_1forward==0 | trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_1back==0)';
     case 'cued success accumulate'
         trial1=['trialTypes.optoGroup~=1 & trialTypes.chewing_at_trial_start==0 SPLIT trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow==1 & trialTypes.led==0'];
@@ -77,9 +77,9 @@ switch whichEventType
         trial1_LED=['trialTypes.optoGroup~=1 & trialTypes.chewing_at_trial_start==0 SPLIT trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow==1 & trialTypes.led==1' linkerForVariedTimingSame];
         trial2_LED=['trialTypes.optoGroup~=1 & trialTypes.chewing_at_trial_start==0' linkerForLED_accumulate];
     case 'backwards cued success'
-        trial2=['(trialTypes.optoGroup~=1 & trialTypes.chewing_at_trial_start==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0)' linkerForNoLEDBACKWARDS];
+        trial2=['(trialTypes.optoGroup~=1 & trialTypes.chewing_at_trial_start==0 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0)' linkerForNoLEDBACKWARDS];
         trial1=['trialTypes.optoGroup~=1 & trialTypes.chewing_at_trial_start==0'];
-        trial2_LED=['trialTypes.optoGroup~=1 & trialTypes.chewing_at_trial_start==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1 & (trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_5forward==0)' linkerForVariedTimingForward];
+        trial2_LED=['trialTypes.optoGroup~=1 & trialTypes.chewing_at_trial_start==0 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1 & (trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_5forward==0)' linkerForVariedTimingForward];
         trial1_LED=['trialTypes.optoGroup~=1 & trialTypes.chewing_at_trial_start==0'];
 
     case 'all cued failures'

@@ -214,6 +214,16 @@ if doCDF==true
     hold on; plot(x2,n2,'Color','r');
     title('Reach rate average over trials');
 
+    % Reach PDF averaged over trials
+    temp=downSampMatrix(returnThisCDF.trial1_rawReachMatrix,ds); temp=temp./repmat(nansum(temp,2),1,size(temp,2)); % make each row its own pdf
+    ds_times=0:timeStep*ds:(size(temp,2)-1)*(timeStep*ds);
+    [n,x]=cityscape_hist(mean(temp,1,'omitnan'),ds_times);
+    figure(); plot(x,n,'Color','k');
+    temp=downSampMatrix(returnThisCDF.trial2_rawReachMatrix,ds); temp=temp./repmat(nansum(temp,2),1,size(temp,2)); % make each row its own pdf
+    [n2,x2]=cityscape_hist(mean(temp,1,'omitnan'),ds_times);
+    hold on; plot(x2,n2,'Color','r');
+    ylabel('Average of each trial as PDF');
+
     % plot reach probability per bin
     temp=downSampMatrix(returnThisCDF.trial1_rawReachMatrix,ds); temp(temp>0)=1;
     ds_times=0:timeStep*ds:(size(temp,2)-1)*(timeStep*ds);
@@ -536,6 +546,7 @@ takeFracForBootstrap=0.66;
 takeIndsForBootstrap=ceil(takeFracForBootstrap*size(dat2,1));
 nRuns=100;
 bootCDFs=nan(nRuns,length(timeBinsForReaching));
+bootPDFs=nan(nRuns,length(timeBinsForReaching));
 whichTrialsTaken=cell(1,nRuns);
 for i=1:nRuns
     takeTheseForBoot=randi(size(dat2,1),1,takeIndsForBootstrap); % with replacement
@@ -549,6 +560,7 @@ for i=1:nRuns
     cond2_cdf=accumulateDistribution(sub_dat2);
     cond2_cdf=cond2_cdf./nanmax(cond2_cdf);
     bootCDFs(i,:)=cond2_cdf;
+    bootPDFs(i,:)=mean(sub_dat2,1,'omitnan')./sum(mean(sub_dat2,1,'omitnan'),'all','omitnan');
 end
 % Show bootstrapped 95% CI
 sorted_bootCDFs=nan(size(bootCDFs));
@@ -567,6 +579,7 @@ takeFracForBootstrap=0.66;
 takeIndsForBootstrap=ceil(takeFracForBootstrap*size(dat2,1));
 nRuns=100;
 bootCDFs2nd=nan(nRuns,length(timeBinsForReaching));
+bootPDFs2nd=nan(nRuns,length(timeBinsForReaching));
 for i=1:nRuns
     % takeTheseForBoot=randi(size(dat2,1),1,takeIndsForBootstrap); % with replacement
     takeTheseForBoot=whichTrialsTaken{i};
@@ -579,6 +592,7 @@ for i=1:nRuns
     cond2_cdf=accumulateDistribution(sub_dat2);
     cond2_cdf=cond2_cdf./nanmax(cond2_cdf);
     bootCDFs2nd(i,:)=cond2_cdf;
+    bootPDFs2nd(i,:)=mean(sub_dat2,1,'omitnan')./sum(mean(sub_dat2,1,'omitnan'),'all','omitnan');
 end
 % Show bootstrapped 95% CI
 sorted_bootCDFs=nan(size(bootCDFs2nd));
@@ -607,6 +621,23 @@ figure();
 plot(timeBinsForReaching,nanmean(earthmovers,1),'Color','r'); hold on;
 plot(timeBinsForReaching,fifthPerc,'Color','r'); hold on;
 plot(timeBinsForReaching,ninetyfifthPerc,'Color','r');
+
+% Bootstrapped difference in PDFs
+pdfdiff=bootPDFs2nd-bootPDFs;
+% Show bootstrapped 95% CI
+sorted_bootPD=nan(size(pdfdiff));
+fifthPerc=nan(1,size(pdfdiff,2));
+ninetyfifthPerc=nan(1,size(pdfdiff,2));
+for i=1:size(pdfdiff,2)
+    sorted_bootPD(:,i)=sort(pdfdiff(:,i));
+    fifthPerc(i)=prctile(sorted_bootPD(:,i),5);
+    ninetyfifthPerc(i)=prctile(sorted_bootPD(:,i),95);
+end
+figure();
+plot(timeBinsForReaching,nanmean(pdfdiff,1),'Color','r'); hold on;
+plot(timeBinsForReaching,fifthPerc,'Color','r'); hold on;
+plot(timeBinsForReaching,ninetyfifthPerc,'Color','r');
+title('Diff between PDFs from bootstrap');
 
 end
 
@@ -721,7 +752,7 @@ function cdf=accumulateDistribution(data)
 
 cdf=nan(size(data));
 for i=1:length(data)
-    cdf(i)=nansum(data(1:i));
+    cdf(i)=sum(data(1:i),'all','omitnan');
 end
 
 end
