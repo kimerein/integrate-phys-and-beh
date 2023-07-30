@@ -1,6 +1,6 @@
 function combineFigure4DataAcrossMice(dd,useOptoForThisGp,whichtoplot_eventCond,timeStep,cueind,doCDF,doLEDcdf,calcCued,atleast_n_trials,ds)
 
-% combineFigure4DataAcrossMice(dd([1:9 11:16]),useOptoForThisGp([1:9 11:16]),'cued success_seqLength3_win2and3_minus2to0_optoDurforcuepoi4then1NOOPREwin3',0.035,94,false,false,false,200,1);
+% combineFigure4DataAcrossMice(dd([1:9 11:17]),useOptoForThisGp([1:9 11:17]),'cued success_seqLength3_win2and3_minus2to0_optoDurforcuepoi4then1NOOPREwin3',0.035,94,false,false,false,200,1);
 
 rr_noLED_tri1_uncued=[];
 rr_noLED_tri1_cued=[];
@@ -84,7 +84,10 @@ for i=1:length(dd)
         returnThis_LED{i}=a.returnThis;
 
         % combine PDFs
-        if i==2
+        if i==1
+            returnControlPDF=returnThis_control{1};
+            returnLEDPDF=returnThis_LED{1};
+        elseif i==2
             [~,~,returnControlPDF]=combineReachPlotDatasets(returnThis_control{1},[1 2],returnThis_control{2},[1 2],'k'); close all;
             if ~all(isnan(returnThis_LED{i}.data1_mean{1}))
                 [~,~,returnLEDPDF]=combineReachPlotDatasets(returnThis_LED{1},[1 2],returnThis_LED{2},[1 2],'k'); close all;
@@ -313,11 +316,12 @@ else
     [uncued_mean_out,cued_mean_out,bootMeans,whichTriForBoot]=bootstrap(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k','r',false,calcCued,[]);
     plotMeAndSe(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k',2,false,calcCued);
     title('first trial in sequence');
-    figure();
-    [uncued_mean_out,cued_mean_out,bootMeans]=bootstrapAndSubtractTrialn(rr_LED_trinext_uncued,rr_LED_trinext_cued,'r','r',false,calcCued,whichTriForBoot,bootMeans,uncued_mean_out,cued_mean_out);
-    plotMeAndSe(rr_LED_trinext_uncued-rr_LED_tri1_uncued,rr_LED_trinext_cued-rr_LED_tri1_cued,'r',2,false,calcCued);
-    title('Joint trial n and n+i bootstrap, subtract trial n, just plotting n+i');
-
+    if ~isempty(rr_LED_trinext_uncued)
+        figure();
+        [uncued_mean_out,cued_mean_out,bootMeans]=bootstrapAndSubtractTrialn(rr_LED_trinext_uncued,rr_LED_trinext_cued,'r','r',false,calcCued,whichTriForBoot,bootMeans,uncued_mean_out,cued_mean_out);
+        plotMeAndSe(rr_LED_trinext_uncued-rr_LED_tri1_uncued,rr_LED_trinext_cued-rr_LED_tri1_cued,'r',2,false,calcCued);
+        title('Joint trial n and n+i bootstrap, subtract trial n, just plotting n+i');
+    end
 
     % sess by sess, mouse by mouse
     figure();
