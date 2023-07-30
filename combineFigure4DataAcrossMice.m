@@ -272,17 +272,34 @@ else
 
     % do bootstrapped scatter
     figure();
-    [uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_noLED_tri1_uncued,rr_noLED_tri1_cued,'k','k',false,calcCued);
+    [uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_noLED_tri1_uncued,rr_noLED_tri1_cued,'k','k',false,calcCued,[]);
     plotMeAndSe(rr_noLED_tri1_uncued,rr_noLED_tri1_cued,'k',2,false,calcCued);
-    [uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_noLED_trinext_uncued,rr_noLED_trinext_cued,[0.5 0.5 0.5],[0.5 0.5 0.5],false,calcCued);
+    [uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_noLED_trinext_uncued,rr_noLED_trinext_cued,[0.5 0.5 0.5],[0.5 0.5 0.5],false,calcCued,[]);
     plotMeAndSe(rr_noLED_trinext_uncued,rr_noLED_trinext_cued,[0.5 0.5 0.5],2,false,calcCued);
 
     figure();
-    [uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k','r',false,calcCued);
+    [uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k','r',false,calcCued,[]);
     plotMeAndSe(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k',2,false,calcCued);
-    [uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_LED_trinext_uncued,rr_LED_trinext_cued,'r','r',false,calcCued);
+    [uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_LED_trinext_uncued,rr_LED_trinext_cued,'r','r',false,calcCued,[]);
     plotMeAndSe(rr_LED_trinext_uncued,rr_LED_trinext_cued,'r',2,false,calcCued);
 
+    % bootstrap the joint distribution, should boot trials n and n+i
+    % together
+    figure();
+    [uncued_mean_out,cued_mean_out,bootMeans,whichTriForBoot]=bootstrap(rr_noLED_tri1_uncued,rr_noLED_tri1_cued,'k','k',false,calcCued,[]);
+    plotMeAndSe(rr_noLED_tri1_uncued,rr_noLED_tri1_cued,'k',2,false,calcCued);
+    [uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_noLED_trinext_uncued,rr_noLED_trinext_cued,[0.5 0.5 0.5],[0.5 0.5 0.5],false,calcCued,whichTriForBoot);
+    plotMeAndSe(rr_noLED_trinext_uncued,rr_noLED_trinext_cued,[0.5 0.5 0.5],2,false,calcCued);
+    title('Joint trial n and n+i bootstrap');
+
+    figure();
+    [uncued_mean_out,cued_mean_out,bootMeans,whichTriForBoot]=bootstrap(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k','r',false,calcCued,[]);
+    plotMeAndSe(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k',2,false,calcCued);
+    [uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_LED_trinext_uncued,rr_LED_trinext_cued,'r','r',false,calcCued,whichTriForBoot);
+    plotMeAndSe(rr_LED_trinext_uncued,rr_LED_trinext_cued,'r',2,false,calcCued);
+    title('Joint trial n and n+i bootstrap');
+
+    % sess by sess, mouse by mouse
     figure();
     plotByBy(s_trial1_alltrials_uncued,s_trial1_alltrials_cued,s_alltrials_uncued,s_alltrials_cued,'k',calcCued,false);
     plotByBy(sLED_trial1_alltrials_uncued,sLED_trial1_alltrials_cued,sLED_alltrials_uncued,sLED_alltrials_cued,'r',calcCued,false);
@@ -646,7 +663,7 @@ title('Diff between PDFs from bootstrap');
 end
 
 
-function [uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(approach2_alltrials_uncued,approach2_alltrials_cued,colorForBootstrapPoints,scatterPointsEdgeColor,suppressOutput,calcCued)
+function [uncued_mean_out,cued_mean_out,bootMeans,whichTrialsForBoot]=bootstrap(approach2_alltrials_uncued,approach2_alltrials_cued,colorForBootstrapPoints,scatterPointsEdgeColor,suppressOutput,calcCued,whichTrialsForBoot)
 
 stillsuppressbootstrap=false;
 
@@ -678,8 +695,19 @@ takeFracForBootstrap=0.66;
 takeIndsForBootstrap=ceil(takeFracForBootstrap*length(altogether_prob_cued));
 nRuns=100;
 bootMeans=nan(2,nRuns);
+if isempty(whichTrialsForBoot)
+    newboottrials=true;
+    whichTrialsForBoot=nan(nRuns,takeIndsForBootstrap);
+else
+    newboottrials=false;
+end
 for i=1:nRuns
-    takeTheseForBoot=randi(length(altogether_prob_cued),1,takeIndsForBootstrap); % with replacement
+    if newboottrials==true
+        takeTheseForBoot=randi(length(altogether_prob_cued),1,takeIndsForBootstrap); % with replacement
+        whichTrialsForBoot(i,:)=takeTheseForBoot;
+    else
+        takeTheseForBoot=whichTrialsForBoot(i,:);
+    end
     sub_prob_cued=altogether_prob_cued(takeTheseForBoot);
     sub_prob_uncued=altogether_prob_uncued(takeTheseForBoot);
     % can do subtraction here after calculating rate
