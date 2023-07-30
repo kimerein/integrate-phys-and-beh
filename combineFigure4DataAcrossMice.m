@@ -299,6 +299,26 @@ else
     plotMeAndSe(rr_LED_trinext_uncued,rr_LED_trinext_cued,'r',2,false,calcCued);
     title('Joint trial n and n+i bootstrap');
 
+    % Joint boot and subtract trial n
+    figure();
+    [uncued_mean_out,cued_mean_out,bootMeans,whichTriForBoot]=bootstrap(rr_noLED_tri1_uncued,rr_noLED_tri1_cued,'k','k',false,calcCued,[]);
+    plotMeAndSe(rr_noLED_tri1_uncued,rr_noLED_tri1_cued,'k',2,false,calcCued);
+    title('first trial in sequence');
+    figure();
+    [uncued_mean_out,cued_mean_out,bootMeans]=bootstrapAndSubtractTrialn(rr_noLED_trinext_uncued,rr_noLED_trinext_cued,[0.5 0.5 0.5],[0.5 0.5 0.5],false,calcCued,whichTriForBoot,bootMeans,uncued_mean_out,cued_mean_out);
+    plotMeAndSe(rr_noLED_trinext_uncued-rr_noLED_tri1_uncued,rr_noLED_trinext_cued-rr_noLED_tri1_cued,[0.5 0.5 0.5],2,false,calcCued);
+    title('Joint trial n and n+i bootstrap, subtract trial n, just plotting n+i');
+    
+    figure();
+    [uncued_mean_out,cued_mean_out,bootMeans,whichTriForBoot]=bootstrap(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k','r',false,calcCued,[]);
+    plotMeAndSe(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k',2,false,calcCued);
+    title('first trial in sequence');
+    figure();
+    [uncued_mean_out,cued_mean_out,bootMeans]=bootstrapAndSubtractTrialn(rr_LED_trinext_uncued,rr_LED_trinext_cued,'r','r',false,calcCued,whichTriForBoot,bootMeans,uncued_mean_out,cued_mean_out);
+    plotMeAndSe(rr_LED_trinext_uncued-rr_LED_tri1_uncued,rr_LED_trinext_cued-rr_LED_tri1_cued,'r',2,false,calcCued);
+    title('Joint trial n and n+i bootstrap, subtract trial n, just plotting n+i');
+
+
     % sess by sess, mouse by mouse
     figure();
     plotByBy(s_trial1_alltrials_uncued,s_trial1_alltrials_cued,s_alltrials_uncued,s_alltrials_cued,'k',calcCued,false);
@@ -735,6 +755,87 @@ if calcCued==true
 else
     uncued_mean_out=nanmean(altogether_prob_uncued);
     cued_mean_out=nanmean(altogether_prob_cued);
+end
+
+end
+
+function [uncued_mean_out,cued_mean_out,bootMeans,whichTrialsForBoot]=bootstrapAndSubtractTrialn(approach2_alltrials_uncued,approach2_alltrials_cued,colorForBootstrapPoints,scatterPointsEdgeColor,suppressOutput,calcCued,whichTrialsForBoot,trialn_vals,trialn_uncued_mean,trialn_cued_mean)
+
+if isempty(whichTrialsForBoot)
+    error('bootstrapAndSubtractTrialn can only be used once whichTrialsForBoot are defined');
+end
+
+stillsuppressbootstrap=false;
+
+if isempty(approach2_alltrials_uncued) || isempty(approach2_alltrials_cued)
+    uncued_mean_out=[];
+    cued_mean_out=[];
+    bootMeans=[];
+    return
+end
+
+% can't directly subtract uncued from cued on a trial by trial
+% basis bcz cued is basically a binomial, either 1 or 0
+% need to get average rate before doing subtraction
+% calculate true cued, because reaching in cued window is actually
+% the sum of uncued and cued
+
+% altogether_prob_cued=nanmean(approach2_alltrials_cued,2);
+% altogether_prob_uncued=nanmean(approach2_alltrials_uncued,2);
+altogether_prob_cued=approach2_alltrials_cued(1:end); % better to bootstrap across trials, not sessions, because in some sessions, mouse drops a lot
+altogether_prob_uncued=approach2_alltrials_uncued(1:end);
+takeTrials=~isnan(altogether_prob_cued) & ~isnan(altogether_prob_uncued);
+% nan trials are from cases where a session had fewer trials, just nanned
+% to fill in matrix
+% disp(['dropping this many trials because of nan ' num2str(nansum(~takeTrials))]);
+altogether_prob_cued=altogether_prob_cued(takeTrials==1);
+altogether_prob_uncued=altogether_prob_uncued(takeTrials==1);
+% Show bootstrapped 95% CI
+takeFracForBootstrap=0.66;
+takeIndsForBootstrap=ceil(takeFracForBootstrap*length(altogether_prob_cued));
+nRuns=100;
+bootMeans=nan(2,nRuns);
+if isempty(whichTrialsForBoot)
+    newboottrials=true;
+else
+    newboottrials=false;
+end
+for i=1:nRuns
+    if newboottrials==true
+    else
+        takeTheseForBoot=whichTrialsForBoot(i,:);
+        toSubtract=trialn_vals(:,i);
+    end
+    sub_prob_cued=altogether_prob_cued(takeTheseForBoot);
+    sub_prob_uncued=altogether_prob_uncued(takeTheseForBoot);
+    % can do subtraction here after calculating rate
+    if calcCued==true
+        bootMeans(1,i)=nanmean(sub_prob_uncued);
+        bootMeans(2,i)=nanmean(sub_prob_cued)-nanmean(sub_prob_uncued);
+    else
+        bootMeans(1,i)=nanmean(sub_prob_uncued);
+        bootMeans(2,i)=nanmean(sub_prob_cued);
+    end
+    % SUBTRACT TRIAL N FROM THIS TRIAL N+I BOOTSTRAPPED MEAN
+    bootMeans(1,i)=bootMeans(1,i)-toSubtract(1);
+    bootMeans(2,i)=bootMeans(2,i)-toSubtract(2);
+end
+if suppressOutput==false && stillsuppressbootstrap==false
+    s=scatter(bootMeans(1,:),bootMeans(2,:),20,'filled','MarkerEdgeColor',scatterPointsEdgeColor,'MarkerFaceColor',colorForBootstrapPoints); hold on;
+    s.AlphaData = 0.5*ones(1,size(bootMeans,2));
+    s.MarkerFaceAlpha = 'flat';
+    if calcCued==true
+        scatter(nanmean(altogether_prob_uncued)-trialn_uncued_mean,nanmean(altogether_prob_cued)-nanmean(altogether_prob_uncued)-trialn_cued_mean,50,'filled','MarkerEdgeColor',scatterPointsEdgeColor,'MarkerFaceColor',colorForBootstrapPoints);
+    else
+        scatter(nanmean(altogether_prob_uncued)-trialn_uncued_mean,nanmean(altogether_prob_cued)-trialn_cued_mean,50,'filled','MarkerEdgeColor',scatterPointsEdgeColor,'MarkerFaceColor',colorForBootstrapPoints);
+    end
+end
+if calcCued==true
+    uncued_mean_out=nanmean(altogether_prob_uncued)-trialn_uncued_mean;
+    cued_mean_out=nanmean(altogether_prob_cued)-nanmean(altogether_prob_uncued)-trialn_cued_mean;
+else
+    uncued_mean_out=nanmean(altogether_prob_uncued)-trialn_uncued_mean;
+    cued_mean_out=nanmean(altogether_prob_cued)-trialn_cued_mean;
 end
 
 end
