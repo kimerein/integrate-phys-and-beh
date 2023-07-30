@@ -68,6 +68,7 @@ settings=RTanalysis_settings('display settings','clear');
 % find trials with long ITIs
 trialTypes=getLongITIs(alltbt,trialTypes,settings);
 
+
 trialTypes=getTimingOfOpto(alltbt,'optoOn',trialTypes,settings.multipleOptoTimes);
 if ~isfield(trialTypes,'optoGroup')
     trialTypes.optoGroup=zeros(size(trialTypes.led));
