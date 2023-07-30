@@ -1,5 +1,7 @@
 function combineFigure4DataAcrossMice(dd,useOptoForThisGp,whichtoplot_eventCond,timeStep,cueind,doCDF,doLEDcdf,calcCued,atleast_n_trials,ds)
 
+% combineFigure4DataAcrossMice(dd([1:9 11:16]),useOptoForThisGp([1:9 11:16]),'cued success_seqLength3_win2and3_minus2to0_optoDurforcuepoi4then1NOOPREwin3',0.035,94,false,false,false,200,1);
+
 rr_noLED_tri1_uncued=[];
 rr_noLED_tri1_cued=[];
 rr_noLED_trinext_uncued=[];
@@ -60,7 +62,7 @@ for i=1:length(dd)
         % Get mouse by mouse
         % and sess by sess
         % rows are sessid, column 1 is sessid, column2 is mouseid
-        a=load(fullfile(currdir,'sessIDandMouseID.mat'));
+        a=load(fullfile(currdir,'sessIDandMouseID_NOOPRE.mat'));
         sessIDandMouseID=a.sessIDandMouseID;
 
         if iscell(whichtoplot_eventCond)
@@ -259,11 +261,13 @@ else
     plotPDF(returnControlPDF.data1_mean{1},returnControlPDF.data1_se{1},returnControlPDF.time_for_x,returnControlPDF.n,'k'); hold on;
     plotPDF(returnControlPDF.data2_mean{1},returnControlPDF.data2_se{1},returnControlPDF.time_for_x,returnControlPDF.n,'b');
     title('Control trial sequence');
-    [returnLEDPDF.data1_se{1},returnLEDPDF.data2_se{1},returnLEDPDF.data1_mean{1},returnLEDPDF.data2_mean{1},returnLEDPDF.time_for_x]=downsamplePDF(returnLEDPDF.data1_se{1},returnLEDPDF.data2_se{1},returnLEDPDF.data1_mean{1},returnLEDPDF.data2_mean{1},returnLEDPDF.time_for_x,ds);
-    figure();
-    plotPDF(returnLEDPDF.data1_mean{1},returnLEDPDF.data1_se{1},returnLEDPDF.time_for_x,returnLEDPDF.n,'r'); hold on;
-    plotPDF(returnLEDPDF.data2_mean{1},returnLEDPDF.data2_se{1},returnLEDPDF.time_for_x,returnLEDPDF.n,'b');
-    title('LED trial sequence');
+    if ~isempty(returnLEDPDF)
+        [returnLEDPDF.data1_se{1},returnLEDPDF.data2_se{1},returnLEDPDF.data1_mean{1},returnLEDPDF.data2_mean{1},returnLEDPDF.time_for_x]=downsamplePDF(returnLEDPDF.data1_se{1},returnLEDPDF.data2_se{1},returnLEDPDF.data1_mean{1},returnLEDPDF.data2_mean{1},returnLEDPDF.time_for_x,ds);
+        figure();
+        plotPDF(returnLEDPDF.data1_mean{1},returnLEDPDF.data1_se{1},returnLEDPDF.time_for_x,returnLEDPDF.n,'r'); hold on;
+        plotPDF(returnLEDPDF.data2_mean{1},returnLEDPDF.data2_se{1},returnLEDPDF.time_for_x,returnLEDPDF.n,'b');
+        title('LED trial sequence');
+    end
 
 
     % do bootstrapped scatter

@@ -8,7 +8,7 @@ function scriptToMakeOutcomeFigure4(alltbt,trialTypes,metadata,cuedreachtimewind
 
 % Cued success CONTROL
 % plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[0 cuedreachtimewindow],'backwards cued success','reachBatch_success_reachStarts',false,3,'success',sad,savePlotsDir,['win2and3_minus2to0BACKWARD' addtoall],tbt_filter);
-plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[0 optoDuration],'backwards cued success','reachBatch_success_reachStarts',false,3,'success',sad,savePlotsDir,['win2and3_minus2to0_optoDurforcueBACKWARD' addtoall],tbt_filter);
+plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[3],[0 optoDuration],'backwards cued success','reachBatch_success_reachStarts',false,3,'success',sad,savePlotsDir,['win2and3_minus2to0_optoDurforcueBACKWARD' addtoall],tbt_filter);
 
 
 % Cued failure CONTROL
@@ -41,7 +41,7 @@ plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[0 
 % EXPERIMENTS
 % Cued success
 % plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[0 cuedreachtimewindow],'cued success','reachBatch_success_reachStarts',false,3,'success',sad,savePlotsDir,['win2and3_minus2to0' addtoall],tbt_filter);
-plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[0 optoDuration],'cued success','reachBatch_success_reachStarts',false,3,'success',sad,savePlotsDir,['win2and3_minus2to0_optoDurforcue' addtoall],tbt_filter);
+plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[3],[0 optoDuration],'cued success','reachBatch_success_reachStarts',false,3,'success',sad,savePlotsDir,['win2and3_minus2to0_optoDurforcue' addtoall],tbt_filter);
 return
 
 % Cued failure
