@@ -124,26 +124,29 @@ for i=1:length(dd)
 
         if isempty(rout.reachrates_LED) || useOptoForThisGp(i)==0
             % nothing to add
-            [sbys,mbym]=getMbyM_SbyS(sessIDandMouseID,rout,atleast_n_trials);
-            s_trial1_alltrials_uncued=[s_trial1_alltrials_uncued sbys.reachrates_noLED.trial1_alltrials_uncued'];
-            s_trial1_alltrials_cued=[s_trial1_alltrials_cued sbys.reachrates_noLED.trial1_alltrials_cued'];
-            s_alltrials_uncued=[s_alltrials_uncued sbys.reachrates_noLED.alltrials_uncued'];
-            s_alltrials_cued=[s_alltrials_cued sbys.reachrates_noLED.alltrials_cued'];
+            try
+                [sbys,mbym]=getMbyM_SbyS(sessIDandMouseID,rout,atleast_n_trials);
+                s_trial1_alltrials_uncued=[s_trial1_alltrials_uncued sbys.reachrates_noLED.trial1_alltrials_uncued'];
+                s_trial1_alltrials_cued=[s_trial1_alltrials_cued sbys.reachrates_noLED.trial1_alltrials_cued'];
+                s_alltrials_uncued=[s_alltrials_uncued sbys.reachrates_noLED.alltrials_uncued'];
+                s_alltrials_cued=[s_alltrials_cued sbys.reachrates_noLED.alltrials_cued'];
 
-            m_trial1_alltrials_uncued=[m_trial1_alltrials_uncued mbym.reachrates_noLED.trial1_alltrials_uncued];
-            m_trial1_alltrials_cued=[m_trial1_alltrials_cued mbym.reachrates_noLED.trial1_alltrials_cued];
-            m_alltrials_uncued=[m_alltrials_uncued mbym.reachrates_noLED.alltrials_uncued];
-            m_alltrials_cued=[m_alltrials_cued mbym.reachrates_noLED.alltrials_cued];
+                m_trial1_alltrials_uncued=[m_trial1_alltrials_uncued mbym.reachrates_noLED.trial1_alltrials_uncued];
+                m_trial1_alltrials_cued=[m_trial1_alltrials_cued mbym.reachrates_noLED.trial1_alltrials_cued];
+                m_alltrials_uncued=[m_alltrials_uncued mbym.reachrates_noLED.alltrials_uncued];
+                m_alltrials_cued=[m_alltrials_cued mbym.reachrates_noLED.alltrials_cued];
 
-            sLED_trial1_alltrials_uncued=[sLED_trial1_alltrials_uncued sbys.reachrates_LED.trial1_alltrials_uncued'];
-            sLED_trial1_alltrials_cued=[sLED_trial1_alltrials_cued sbys.reachrates_LED.trial1_alltrials_cued'];
-            sLED_alltrials_uncued=[sLED_alltrials_uncued sbys.reachrates_LED.trial1_alltrials_uncued'];
-            sLED_alltrials_cued=[sLED_alltrials_cued sbys.reachrates_LED.trial1_alltrials_cued'];
+                sLED_trial1_alltrials_uncued=[sLED_trial1_alltrials_uncued sbys.reachrates_LED.trial1_alltrials_uncued'];
+                sLED_trial1_alltrials_cued=[sLED_trial1_alltrials_cued sbys.reachrates_LED.trial1_alltrials_cued'];
+                sLED_alltrials_uncued=[sLED_alltrials_uncued sbys.reachrates_LED.trial1_alltrials_uncued'];
+                sLED_alltrials_cued=[sLED_alltrials_cued sbys.reachrates_LED.trial1_alltrials_cued'];
 
-            mLED_trial1_alltrials_uncued=[mLED_trial1_alltrials_uncued mbym.reachrates_LED.trial1_alltrials_uncued];
-            mLED_trial1_alltrials_cued=[mLED_trial1_alltrials_cued mbym.reachrates_LED.trial1_alltrials_cued];
-            mLED_alltrials_uncued=[mLED_alltrials_uncued mbym.reachrates_LED.trial1_alltrials_uncued];
-            mLED_alltrials_cued=[mLED_alltrials_cued mbym.reachrates_LED.trial1_alltrials_cued];
+                mLED_trial1_alltrials_uncued=[mLED_trial1_alltrials_uncued mbym.reachrates_LED.trial1_alltrials_uncued];
+                mLED_trial1_alltrials_cued=[mLED_trial1_alltrials_cued mbym.reachrates_LED.trial1_alltrials_cued];
+                mLED_alltrials_uncued=[mLED_alltrials_uncued mbym.reachrates_LED.trial1_alltrials_uncued];
+                mLED_alltrials_cued=[mLED_alltrials_cued mbym.reachrates_LED.trial1_alltrials_cued];
+            catch
+            end
             continue
         end
         temp=rout.reachrates_LED.trial1_alltrials_uncued; temp=temp(:).';
@@ -161,26 +164,29 @@ for i=1:length(dd)
         rr_LED_trinext_uncued=rr_LED_trinext_uncued(~ina);
         rr_LED_trinext_cued=rr_LED_trinext_cued(~ina);
 
-        [sbys,mbym]=getMbyM_SbyS(sessIDandMouseID,rout,atleast_n_trials);
-        s_trial1_alltrials_uncued=[s_trial1_alltrials_uncued sbys.reachrates_noLED.trial1_alltrials_uncued'];
-        s_trial1_alltrials_cued=[s_trial1_alltrials_cued sbys.reachrates_noLED.trial1_alltrials_cued'];
-        s_alltrials_uncued=[s_alltrials_uncued sbys.reachrates_noLED.alltrials_uncued'];
-        s_alltrials_cued=[s_alltrials_cued sbys.reachrates_noLED.alltrials_cued'];
+        try
+            [sbys,mbym]=getMbyM_SbyS(sessIDandMouseID,rout,atleast_n_trials);
+            s_trial1_alltrials_uncued=[s_trial1_alltrials_uncued sbys.reachrates_noLED.trial1_alltrials_uncued'];
+            s_trial1_alltrials_cued=[s_trial1_alltrials_cued sbys.reachrates_noLED.trial1_alltrials_cued'];
+            s_alltrials_uncued=[s_alltrials_uncued sbys.reachrates_noLED.alltrials_uncued'];
+            s_alltrials_cued=[s_alltrials_cued sbys.reachrates_noLED.alltrials_cued'];
 
-        m_trial1_alltrials_uncued=[m_trial1_alltrials_uncued mbym.reachrates_noLED.trial1_alltrials_uncued];
-        m_trial1_alltrials_cued=[m_trial1_alltrials_cued mbym.reachrates_noLED.trial1_alltrials_cued];
-        m_alltrials_uncued=[m_alltrials_uncued mbym.reachrates_noLED.alltrials_uncued];
-        m_alltrials_cued=[m_alltrials_cued mbym.reachrates_noLED.alltrials_cued];
+            m_trial1_alltrials_uncued=[m_trial1_alltrials_uncued mbym.reachrates_noLED.trial1_alltrials_uncued];
+            m_trial1_alltrials_cued=[m_trial1_alltrials_cued mbym.reachrates_noLED.trial1_alltrials_cued];
+            m_alltrials_uncued=[m_alltrials_uncued mbym.reachrates_noLED.alltrials_uncued];
+            m_alltrials_cued=[m_alltrials_cued mbym.reachrates_noLED.alltrials_cued];
 
-        sLED_trial1_alltrials_uncued=[sLED_trial1_alltrials_uncued sbys.reachrates_LED.trial1_alltrials_uncued'];
-        sLED_trial1_alltrials_cued=[sLED_trial1_alltrials_cued sbys.reachrates_LED.trial1_alltrials_cued'];
-        sLED_alltrials_uncued=[sLED_alltrials_uncued sbys.reachrates_LED.alltrials_uncued'];
-        sLED_alltrials_cued=[sLED_alltrials_cued sbys.reachrates_LED.alltrials_cued'];
+            sLED_trial1_alltrials_uncued=[sLED_trial1_alltrials_uncued sbys.reachrates_LED.trial1_alltrials_uncued'];
+            sLED_trial1_alltrials_cued=[sLED_trial1_alltrials_cued sbys.reachrates_LED.trial1_alltrials_cued'];
+            sLED_alltrials_uncued=[sLED_alltrials_uncued sbys.reachrates_LED.alltrials_uncued'];
+            sLED_alltrials_cued=[sLED_alltrials_cued sbys.reachrates_LED.alltrials_cued'];
 
-        mLED_trial1_alltrials_uncued=[mLED_trial1_alltrials_uncued mbym.reachrates_LED.trial1_alltrials_uncued];
-        mLED_trial1_alltrials_cued=[mLED_trial1_alltrials_cued mbym.reachrates_LED.trial1_alltrials_cued];
-        mLED_alltrials_uncued=[mLED_alltrials_uncued mbym.reachrates_LED.alltrials_uncued];
-        mLED_alltrials_cued=[mLED_alltrials_cued mbym.reachrates_LED.alltrials_cued];
+            mLED_trial1_alltrials_uncued=[mLED_trial1_alltrials_uncued mbym.reachrates_LED.trial1_alltrials_uncued];
+            mLED_trial1_alltrials_cued=[mLED_trial1_alltrials_cued mbym.reachrates_LED.trial1_alltrials_cued];
+            mLED_alltrials_uncued=[mLED_alltrials_uncued mbym.reachrates_LED.alltrials_uncued];
+            mLED_alltrials_cued=[mLED_alltrials_cued mbym.reachrates_LED.alltrials_cued];
+        catch
+        end
     else
         if iscell(whichtoplot_eventCond)
             % more than one event condition to combine
