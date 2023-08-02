@@ -18,7 +18,7 @@ plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[3],[0 op
 
 % All cued failures including drops CONTROL
 % plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[0 cuedreachtimewindow],'backwards all cued failures','anyFail',false,3,'failed cued reach',sad,savePlotsDir,['win2and3_minus2to0BACKWARD' addtoall],tbt_filter);
-plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[3],[0 optoDuration],'backwards all cued failures','anyFail',false,3,'failed cued reach',sad,savePlotsDir,['win3_minus2to0_optoDurforcueBACKWARD' addtoall],tbt_filter);
+plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[3],[0 optoDuration],'backwards all cued failures','missOrNoPellet',false,3,'failed cued reach',sad,savePlotsDir,['win3_minus2to0_optoDurforcueBACKWARD' addtoall],tbt_filter);
 
 
 % Cued drops CONTROL
@@ -51,7 +51,7 @@ plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[3],[0 op
 
 % All cued failures
 % plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[2 3],[0 cuedreachtimewindow],'all cued failures','anyFail',false,3,'failed cued reach',sad,savePlotsDir,['win2and3_minus2to0' addtoall],tbt_filter);
-plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[3],[0 optoDuration],'all cued failures','anyFail',false,3,'failed cued reach',sad,savePlotsDir,['win3_minus2to0_optoDurforcue' addtoall],tbt_filter);
+plotSaveOutShift(alltbt,trialTypes,metadata,cuedreachtimewindow,[-2 0],[3],[0 optoDuration],'all cued failures','missOrNoPellet',false,3,'failed cued reach',sad,savePlotsDir,['win3_minus2to0_optoDurforcue' addtoall],tbt_filter);
 return
 
 % Cued drop

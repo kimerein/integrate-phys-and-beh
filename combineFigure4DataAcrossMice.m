@@ -1,6 +1,10 @@
 function combineFigure4DataAcrossMice(dd,useOptoForThisGp,whichtoplot_eventCond,timeStep,cueind,doCDF,doLEDcdf,calcCued,atleast_n_trials,ds)
 
 % combineFigure4DataAcrossMice(dd([1:9 11:17]),useOptoForThisGp([1:9 11:17]),'cued success_seqLength3_win2and3_minus2to0_optoDurforcuepoi4then1NOOPREwin3',0.035,94,false,false,false,200,1);
+% combineFigure4DataAcrossMice(dd([1 2 3 4 9 11 12 13 14 15 16 17]),useOptoForThisGp([1 2 3 4 9 11 12 13 14 15 16 17]),'cued success_seqLength3_win3_minus2to0_optoDurforcuepoi4then1NOOPRElongITI',0.035,94,false,false,false,200,1);
+% combineFigure4DataAcrossMice(dd([1 2 3 4 9 17]),useOptoForThisGp([1 2 3 4 9 17]),'cued success_seqLength3_win3_minus2to0_optoDurforcuepoi4then1NOOPRElongITI',0.035,94,false,false,false,200,1);
+% combineFigure4DataAcrossMice(dd([1 2 3 4 9 17]),useOptoForThisGp([1 2 3 4 9 17]),'all cued failures_seqLength3_win3_minus2to0_optoDurforcuepoi4then1NOOPRElongITI',0.035,94,false,false,false,0,1);
+% combineFigure4DataAcrossMice(dd([1 3 7 8 9 12 13 14 17]),useOptoForThisGp([1 3 7 8 9 12 13 14 17]),'cued success_seqLength3_win3_minus2to0_optoDurforcuepoi4then1NOOPRElongITI',0.035,94,false,false,false,0,1);
 
 rr_noLED_tri1_uncued=[];
 rr_noLED_tri1_cued=[];

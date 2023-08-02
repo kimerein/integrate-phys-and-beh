@@ -101,25 +101,33 @@ end
 function placeForO2data=getPlaceOfO2data(mousename,aviName,datestr)
 
 switch mousename
+    case 'bi_black'
+        placeForO2data=['Z:\MICROSCOPE\Kim\JuliaG\Behavior Expts\' mousename '\' datestr '\O2 output\' aviName];
     case 'bi_agouti'
         placeForO2data=['Z:\MICROSCOPE\Kim\JuliaG\Behavior Expts\' mousename '\' datestr '\O2 output\' aviName];
     case 'bi_both'
         placeForO2data=['Z:\MICROSCOPE\Kim\JuliaG\Behavior Expts\' mousename '\' datestr '\O2 output\' aviName];
+    case 'mus_big'
+        placeForO2data=['Z:\MICROSCOPE\Kim\JuliaG\Behavior Expts\' mousename '\' datestr '\O2 output\' aviName];
     case 'mitch_right'
-        placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\' aviName];
 %         placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\' aviName];
+        placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\O2 output\' aviName];
     case 'mitch_mismatch'
-%         placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\O2 output\' aviName];
-        placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\analysis\' aviName];
+        placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\O2 output\' aviName];
+%         placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\analysis\' aviName];
+%         placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\' aviName];
     case 'mitch_thin'
-%         placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\O2 output\' aviName];
-        placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\' aviName];
+        placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\O2 output\' aviName];
+%         placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\' aviName];
     case 'mitch_wide'
         placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\O2 output\' aviName];
 %         placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\' aviName];
+    case 'con_white'
+        placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\O2 output\' aviName];
+%         placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\' aviName];
     case 'mitch_none'
-%         placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\O2 output\' aviName];
-        placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\' aviName];
+        placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\O2 output\' aviName];
+%         placeForO2data=['Z:\MICROSCOPE\Kim\Mitchell\Behavior\' mousename '\' datestr '\' aviName];
     case 'ssm12'
         placeForO2data=['Z:\MICROSCOPE\Senmiao\Behavior\' datestr '\' mousename '\O2 output\' aviName]; 
     case 'ssm13'

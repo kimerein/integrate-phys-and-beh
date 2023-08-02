@@ -1077,6 +1077,7 @@ bootMeans=nan(2,nRuns);
 for i=1:nRuns
     takeTheseForBoot=randi(length(altogether_prob_cued),1,takeIndsForBootstrap); % with replacement
     sub_prob_cued=altogether_prob_cued(takeTheseForBoot);
+%     sub_prob_cued=(altogether_prob_cued(takeTheseForBoot)>0).*mean(altogether_prob_cued(altogether_prob_cued>0));
     sub_prob_uncued=altogether_prob_uncued(takeTheseForBoot);
     bootMeans(1,i)=nanmean(sub_prob_uncued);
     bootMeans(2,i)=nanmean(sub_prob_cued);

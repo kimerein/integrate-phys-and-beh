@@ -86,15 +86,38 @@ trial2=[flankingTrials];
 [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir);
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
+
+matchesEventCond_trial_n=dataset.realDistributions.allTrialsSequence_isSeq{1}==1;
+nth_sessions=metadata.sessid(matchesEventCond_trial_n);
+
 [a,b]=getdprimes(reachrates);
 if ~isempty(a)
     dprimes_lasttrial_secondPart=a;
     dprimes_firsttrial_secondPart=b;
 end
 
-alltbt=backup_alltbt; metadata=backup_metadata; trialTypes=backup_trialTypes;
+alltbt=backup_alltbt; 
+metadata=backup_metadata; 
+trialTypes=backup_trialTypes;
 unique_sessid=unique(metadata.sessid);
 changeInDprimes=dprimes_lasttrial_secondPart-dprimes_lasttrial;
+
+if length(changeInDprimes)~=length(unique_sessid)
+    expand_changeInDprimes=nan(1,length(unique_sessid));
+    % not an event in every session
+    % need to fill missing sessions
+    unique_nth_sessions=unique(nth_sessions);
+    for i=1:length(unique_sessid)
+        if ~ismember(unique_sessid(i),nth_sessions)
+            % event did not happen in this session
+            % already padded with nan
+        else
+            expand_changeInDprimes(i)=changeInDprimes(unique_nth_sessions==unique_sessid(i));
+        end
+    end
+    changeInDprimes=expand_changeInDprimes;
+end
+
 alltbt.mouseLearned=nan(size(alltbt.sessid));
 alltbt.withinSess_changeInDprime=nan(size(alltbt.sessid));
 for i=1:length(unique_sessid)
