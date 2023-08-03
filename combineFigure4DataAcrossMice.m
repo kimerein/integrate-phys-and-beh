@@ -1,5 +1,9 @@
 function combineFigure4DataAcrossMice(dd,useOptoForThisGp,whichtoplot_eventCond,timeStep,cueind,doCDF,doLEDcdf,calcCued,atleast_n_trials,ds)
 
+% use 1 2 9 11 13
+% combineFigure4DataAcrossMice(dd([1 2 4 5 9 11 13 14]),useOptoForThisGp([1 2 4 5 9 11 13 14]),'all cued failures_seqLength3_win3_minus2to0_optoDurforcuepoi2then1NOOPRELearnedLongITI',0.035,94,false,false,false,30,1);
+% combineFigure4DataAcrossMice(dd([1 3 9]),useOptoForThisGp([1 3 9]),'cued success_seqLength3_win3_minus2to0_optoDurforcuepoi2then1NOOPRELearnedLongITI',0.035,94,false,false,false,7,1);
+
 % combineFigure4DataAcrossMice(dd([1:9 11:17]),useOptoForThisGp([1:9 11:17]),'cued success_seqLength3_win2and3_minus2to0_optoDurforcuepoi4then1NOOPREwin3',0.035,94,false,false,false,200,1);
 % combineFigure4DataAcrossMice(dd([1 2 3 4 9 11 12 13 14 15 16 17]),useOptoForThisGp([1 2 3 4 9 11 12 13 14 15 16 17]),'cued success_seqLength3_win3_minus2to0_optoDurforcuepoi4then1NOOPRElongITI',0.035,94,false,false,false,200,1);
 % combineFigure4DataAcrossMice(dd([1 2 3 4 9 17]),useOptoForThisGp([1 2 3 4 9 17]),'cued success_seqLength3_win3_minus2to0_optoDurforcuepoi4then1NOOPRElongITI',0.035,94,false,false,false,200,1);
@@ -66,7 +70,8 @@ for i=1:length(dd)
         % Get mouse by mouse
         % and sess by sess
         % rows are sessid, column 1 is sessid, column2 is mouseid
-        a=load(fullfile(currdir,'sessIDandMouseID_NOOPRE.mat'));
+        a=load(fullfile(currdir,'sessIDandMouseID_NOOPRELearned.mat'));
+%         a=load(fullfile(currdir,'sessIDandMouseID_NOOPRE.mat'));
         sessIDandMouseID=a.sessIDandMouseID;
 
         if iscell(whichtoplot_eventCond)
@@ -200,6 +205,13 @@ for i=1:length(dd)
             whichtoplot=whichtoplot_eventCond;
         end
 
+        % Get mouse by mouse
+        % and sess by sess
+        % rows are sessid, column 1 is sessid, column2 is mouseid
+        a=load(fullfile(currdir,'sessIDandMouseID_NOOPRELearned.mat'));
+%         a=load(fullfile(currdir,'sessIDandMouseID_NOOPRE.mat'));
+        sessIDandMouseID=a.sessIDandMouseID;
+        
         % do CDF only
         if doLEDcdf==true
             a=load(fullfile(currdir,whichtoplot,'pdfcdfpDMStinh','returnThisCDF.mat'));
@@ -597,7 +609,7 @@ end
 
 % Bootstrap CDFs
 dat2=returnThisCDF.trial1_rawReachMatrix;
-takeFracForBootstrap=0.66;
+takeFracForBootstrap=1; %0.75; %0.66;
 takeIndsForBootstrap=ceil(takeFracForBootstrap*size(dat2,1));
 nRuns=100;
 bootCDFs=nan(nRuns,length(timeBinsForReaching));
@@ -630,7 +642,7 @@ plot(timeBinsForReaching,fifthPerc,'Color','k'); hold on;
 plot(timeBinsForReaching,ninetyfifthPerc,'Color','k');
 
 dat2=returnThisCDF.trial2_rawReachMatrix;
-takeFracForBootstrap=0.66;
+takeFracForBootstrap=1; %0.75; %0.66;
 takeIndsForBootstrap=ceil(takeFracForBootstrap*size(dat2,1));
 nRuns=100;
 bootCDFs2nd=nan(nRuns,length(timeBinsForReaching));
@@ -725,7 +737,7 @@ takeTrials=~isnan(altogether_prob_cued) & ~isnan(altogether_prob_uncued);
 altogether_prob_cued=altogether_prob_cued(takeTrials==1);
 altogether_prob_uncued=altogether_prob_uncued(takeTrials==1);
 % Show bootstrapped 95% CI
-takeFracForBootstrap=0.66;
+takeFracForBootstrap=1; %0.75; %0.66;
 takeIndsForBootstrap=ceil(takeFracForBootstrap*length(altogether_prob_cued));
 nRuns=100;
 bootMeans=nan(2,nRuns);
@@ -805,7 +817,7 @@ takeTrials=~isnan(altogether_prob_cued) & ~isnan(altogether_prob_uncued);
 altogether_prob_cued=altogether_prob_cued(takeTrials==1);
 altogether_prob_uncued=altogether_prob_uncued(takeTrials==1);
 % Show bootstrapped 95% CI
-takeFracForBootstrap=0.66;
+takeFracForBootstrap=1; %0.75; %0.66;
 takeIndsForBootstrap=ceil(takeFracForBootstrap*length(altogether_prob_cued));
 nRuns=100;
 bootMeans=nan(2,nRuns);

@@ -81,23 +81,25 @@ xlabel('Uncued reach rate (1/sec)');
 ylabel('Depends on approach, if 3, then Cued reach rate (1/sec)');
 title(['Approach ' num2str(reachratesettings.useWindowsForUncued)]);
 % baseline all trials
-nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
-trial2=[flankingTrials];
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,true);
-dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
-reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
-if isempty(reachrates)
-    disp('No trials matching this criterion');
-    return
-end
-if compareToFirstTrial==false
-    [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,'k','k',true);
-end
-[a,b]=doPlottingAndBootstrap(reachrates,[0.5 0.5 0.5],[0.5 0.5 0.5],'k',plotset.wildcard,compareToFirstTrial);
-if ~isempty(a)
-    dprimes_noLED_lasttrial=a;
-    dprimes_noLED_firsttrial=b;
+if plotset.wildcard==true
+    nInSequence=3;
+    trial1=[flankingTrials ' & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
+    trial2=[flankingTrials];
+    [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,true);
+    dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
+    reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
+    if isempty(reachrates)
+        disp('No trials matching this criterion');
+        return
+    end
+    if compareToFirstTrial==false
+        [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,'k','k',true);
+    end
+    [a,b]=doPlottingAndBootstrap(reachrates,[0.5 0.5 0.5],[0.5 0.5 0.5],'k',plotset.wildcard,compareToFirstTrial);
+    if ~isempty(a)
+        dprimes_noLED_lasttrial=a;
+        dprimes_noLED_firsttrial=b;
+    end
 end
 if plotset.wildcard==true
     returnout.reachrates_noLED=reachrates;
@@ -105,29 +107,31 @@ if plotset.wildcard==true
     returnout.dprimes_noLED_lasttrial=dprimes_noLED_lasttrial;
 end
 % success
-nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.success_in_cued_window_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==0']; % & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
-if linkSuccesses==false
-    trial2=[flankingTrials];
-else
-    trial2=[flankingTrials ' & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1'];
-end
-if plotset.success==true & ~isnan(testEventReach.trial1)
-    disp('Using passed in test event conditions'); %pause;
-    trial1=testEventReach.trial1; trial2=testEventReach.trial2;
-    if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
-        nInSequence=testEventReach.nInSequence;
+if plotset.success==true
+    nInSequence=3;
+    trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.success_in_cued_window_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==0']; % & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
+    if linkSuccesses==false
+        trial2=[flankingTrials];
+    else
+        trial2=[flankingTrials ' & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1'];
     end
-end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
-dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
-reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
-[a,b]=doPlottingAndBootstrap(reachrates,'g','g','k',plotset.success,compareToFirstTrial);
-if ~isempty(a)
-    dprimes_noLED_lasttrial=a;
-    dprimes_noLED_firsttrial=b;
-    noLED_rr=reachrates;
+    if plotset.success==true & ~isnan(testEventReach.trial1)
+        disp('Using passed in test event conditions'); %pause;
+        trial1=testEventReach.trial1; trial2=testEventReach.trial2;
+        if testEventReach.fillInBetweenWithAnything==false
+            disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
+            nInSequence=testEventReach.nInSequence;
+        end
+    end
+    [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
+    dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
+    reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
+    [a,b]=doPlottingAndBootstrap(reachrates,'g','g','k',plotset.success,compareToFirstTrial);
+    if ~isempty(a)
+        dprimes_noLED_lasttrial=a;
+        dprimes_noLED_firsttrial=b;
+        noLED_rr=reachrates;
+    end
 end
 if plotset.success==true
     returnout.reachrates_noLED=reachrates;
@@ -135,29 +139,31 @@ if plotset.success==true
     returnout.dprimes_noLED_lasttrial=dprimes_noLED_lasttrial;
 end
 % backwards success
-nInSequence=3;
-if linkSuccesses==false
-    trial1=[flankingTrials];
-else
-    trial1=[flankingTrials ' & trialTypes.led_1back==1 & trialTypes.optoGroup_1back~=1'];
-end
-trial2=[flankingTrials ' & trialTypes.consumed_pellet_1forward==1' ' & trialTypes.reachedInTimeWindow_1back==1 & trialTypes.success_in_cued_window_1back==1 & trialTypes.consumed_pellet_1back==1 & trialTypes.led_1back==0 & trialTypes.optoGroup_1back~=1']; % & trialTypes.isLongITI_1forward==1'];
-if plotset.backward_success==true & ~isnan(testEventReach.trial1)
-    disp('Using passed in test event conditions'); %pause;
-    trial1=testEventReach.trial1; trial2=testEventReach.trial2;
-    if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
-        nInSequence=testEventReach.nInSequence;
+if plotset.backward_success==true
+    nInSequence=3;
+    if linkSuccesses==false
+        trial1=[flankingTrials];
+    else
+        trial1=[flankingTrials ' & trialTypes.led_1back==1 & trialTypes.optoGroup_1back~=1'];
     end
-end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
-dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
-reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
-[a,b]=doPlottingAndBootstrap(reachrates,'g','g','b',plotset.backward_success,compareToFirstTrial);
-if ~isempty(a)
-    dprimes_noLED_lasttrial=a;
-    dprimes_noLED_firsttrial=b;
-    noLED_rr=reachrates;
+    trial2=[flankingTrials ' & trialTypes.consumed_pellet_1forward==1' ' & trialTypes.reachedInTimeWindow_1back==1 & trialTypes.success_in_cued_window_1back==1 & trialTypes.consumed_pellet_1back==1 & trialTypes.led_1back==0 & trialTypes.optoGroup_1back~=1']; % & trialTypes.isLongITI_1forward==1'];
+    if plotset.backward_success==true & ~isnan(testEventReach.trial1)
+        disp('Using passed in test event conditions'); %pause;
+        trial1=testEventReach.trial1; trial2=testEventReach.trial2;
+        if testEventReach.fillInBetweenWithAnything==false
+            disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
+            nInSequence=testEventReach.nInSequence;
+        end
+    end
+    [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
+    dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
+    reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
+    [a,b]=doPlottingAndBootstrap(reachrates,'g','g','b',plotset.backward_success,compareToFirstTrial);
+    if ~isempty(a)
+        dprimes_noLED_lasttrial=a;
+        dprimes_noLED_firsttrial=b;
+        noLED_rr=reachrates;
+    end
 end
 if plotset.backward_success==true
     returnout.reachrates_noLED=reachrates;
@@ -165,29 +171,31 @@ if plotset.backward_success==true
     returnout.dprimes_noLED_lasttrial=dprimes_noLED_lasttrial;
 end
 % delayed success
-nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
-if linkSuccesses==false
-    trial2=[flankingTrials];
-else
-    trial2=[flankingTrials ' & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1'];
-end
-if plotset.delayed==true & ~isnan(testEventReach.trial1)
-    disp('Using passed in test event conditions'); %pause;
-    trial1=testEventReach.trial1; trial2=testEventReach.trial2;
-    if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
-        nInSequence=testEventReach.nInSequence;
+if plotset.delayed==true
+    nInSequence=3;
+    trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
+    if linkSuccesses==false
+        trial2=[flankingTrials];
+    else
+        trial2=[flankingTrials ' & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1'];
     end
-end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
-dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
-reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
-[a,b]=doPlottingAndBootstrap(reachrates,[15 141 6]./255,[15 141 6]./255,'k',plotset.delayed,compareToFirstTrial);
-if ~isempty(a)
-    dprimes_noLED_lasttrial=a;
-    dprimes_noLED_firsttrial=b;
-    noLED_rr=reachrates;
+    if plotset.delayed==true & ~isnan(testEventReach.trial1)
+        disp('Using passed in test event conditions'); %pause;
+        trial1=testEventReach.trial1; trial2=testEventReach.trial2;
+        if testEventReach.fillInBetweenWithAnything==false
+            disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
+            nInSequence=testEventReach.nInSequence;
+        end
+    end
+    [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
+    dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
+    reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
+    [a,b]=doPlottingAndBootstrap(reachrates,[15 141 6]./255,[15 141 6]./255,'k',plotset.delayed,compareToFirstTrial);
+    if ~isempty(a)
+        dprimes_noLED_lasttrial=a;
+        dprimes_noLED_firsttrial=b;
+        noLED_rr=reachrates;
+    end
 end
 if plotset.delayed==true
     returnout.reachrates_noLED=reachrates;
@@ -195,17 +203,19 @@ if plotset.delayed==true
     returnout.dprimes_noLED_lasttrial=dprimes_noLED_lasttrial;
 end
 % drop
-nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==0' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==1 & trialTypes.consumed_pellet_1forward==0 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
-trial2=[flankingTrials];
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
-dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
-reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
-[a,b]=doPlottingAndBootstrap(reachrates,'r','r','k',plotset.drop,compareToFirstTrial);
-if ~isempty(a)
-    dprimes_noLED_lasttrial=a;
-    dprimes_noLED_firsttrial=b;
-    noLED_rr=reachrates;
+if plotset.drop==true
+    nInSequence=3;
+    trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==0' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==1 & trialTypes.consumed_pellet_1forward==0 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
+    trial2=[flankingTrials];
+    [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
+    dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
+    reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
+    [a,b]=doPlottingAndBootstrap(reachrates,'r','r','k',plotset.drop,compareToFirstTrial);
+    if ~isempty(a)
+        dprimes_noLED_lasttrial=a;
+        dprimes_noLED_firsttrial=b;
+        noLED_rr=reachrates;
+    end
 end
 if plotset.drop==true
     returnout.reachrates_noLED=reachrates;
@@ -213,25 +223,27 @@ if plotset.drop==true
     returnout.dprimes_noLED_lasttrial=dprimes_noLED_lasttrial;
 end
 % touched after cue, i.e., success or drop
-nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.touched_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
-trial2=[flankingTrials];
-if plotset.cuedtouch==true & ~isnan(testEventReach.trial1)
-    disp('Using passed in test event conditions'); %pause;
-    trial1=testEventReach.trial1; trial2=testEventReach.trial2;
-    if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
-        nInSequence=testEventReach.nInSequence;
+if plotset.cuedtouch==true
+    nInSequence=3;
+    trial1=[flankingTrials ' & trialTypes.touched_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
+    trial2=[flankingTrials];
+    if plotset.cuedtouch==true & ~isnan(testEventReach.trial1)
+        disp('Using passed in test event conditions'); %pause;
+        trial1=testEventReach.trial1; trial2=testEventReach.trial2;
+        if testEventReach.fillInBetweenWithAnything==false
+            disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
+            nInSequence=testEventReach.nInSequence;
+        end
     end
-end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
-dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
-reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
-[a,b]=doPlottingAndBootstrap(reachrates,plotset.cuedtouchcolor,plotset.cuedtouchcolor,'k',plotset.cuedtouch,compareToFirstTrial);
-if ~isempty(a)
-    dprimes_noLED_lasttrial=a;
-    dprimes_noLED_firsttrial=b;
-    noLED_rr=reachrates;
+    [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
+    dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
+    reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
+    [a,b]=doPlottingAndBootstrap(reachrates,plotset.cuedtouchcolor,plotset.cuedtouchcolor,'k',plotset.cuedtouch,compareToFirstTrial);
+    if ~isempty(a)
+        dprimes_noLED_lasttrial=a;
+        dprimes_noLED_firsttrial=b;
+        noLED_rr=reachrates;
+    end
 end
 if plotset.cuedtouch==true
     returnout.reachrates_noLED=reachrates;
@@ -239,29 +251,31 @@ if plotset.cuedtouch==true
     returnout.dprimes_noLED_lasttrial=dprimes_noLED_lasttrial;
 end
 % did not touch after cue despite reaching
-nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.touched_pellet_1back==0 & trialTypes.noReach_1back==0' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==0 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
-if linkSuccesses==false
-    trial2=[flankingTrials];
-else
-    trial2=[flankingTrials ' & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1'];
-end
-if plotset.failedcued==true & ~isnan(testEventReach.trial1)
-    disp('Using passed in test event conditions'); %pause;
-    trial1=testEventReach.trial1; trial2=testEventReach.trial2;
-    if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
-        nInSequence=testEventReach.nInSequence;
+if plotset.failedcued==true
+    nInSequence=3;
+    trial1=[flankingTrials ' & trialTypes.touched_pellet_1back==0 & trialTypes.noReach_1back==0' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==0 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
+    if linkSuccesses==false
+        trial2=[flankingTrials];
+    else
+        trial2=[flankingTrials ' & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1'];
     end
-end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
-dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
-reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
-[a,b]=doPlottingAndBootstrap(reachrates,[8 41 175]./255,[8 41 175]./255,'k',plotset.failedcued,compareToFirstTrial);
-if ~isempty(a)
-    dprimes_noLED_lasttrial=a;
-    dprimes_noLED_firsttrial=b;
-    noLED_rr=reachrates;
+    if plotset.failedcued==true & ~isnan(testEventReach.trial1)
+        disp('Using passed in test event conditions'); %pause;
+        trial1=testEventReach.trial1; trial2=testEventReach.trial2;
+        if testEventReach.fillInBetweenWithAnything==false
+            disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
+            nInSequence=testEventReach.nInSequence;
+        end
+    end
+    [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
+    dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
+    reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
+    [a,b]=doPlottingAndBootstrap(reachrates,[8 41 175]./255,[8 41 175]./255,'k',plotset.failedcued,compareToFirstTrial);
+    if ~isempty(a)
+        dprimes_noLED_lasttrial=a;
+        dprimes_noLED_firsttrial=b;
+        noLED_rr=reachrates;
+    end
 end
 if plotset.failedcued==true
     returnout.reachrates_noLED=reachrates;
@@ -269,25 +283,27 @@ if plotset.failedcued==true
     returnout.dprimes_noLED_lasttrial=dprimes_noLED_lasttrial;
 end
 % miss before cue
-nInSequence=3;
-trial1=['trialTypes.reachedBeforeCue_1forward==1 & trialTypes.reachToPelletBeforeCue_1forward==0 & trialTypes.led_1forward==0 & trialTypes.optoGroup_2back~=1']; % & trialTypes.isLongITI_1forward==1'];
-trial2=[flankingTrials];
-if plotset.falsealarm==true & ~isnan(testEventReach.trial1)
-    disp('Using passed in test event conditions'); %pause;
-    trial1=testEventReach.trial1; trial2=testEventReach.trial2;
-    if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
-        nInSequence=testEventReach.nInSequence;
+if plotset.falsealarm==true
+    nInSequence=3;
+    trial1=['trialTypes.reachedBeforeCue_1forward==1 & trialTypes.reachToPelletBeforeCue_1forward==0 & trialTypes.led_1forward==0 & trialTypes.optoGroup_2back~=1']; % & trialTypes.isLongITI_1forward==1'];
+    trial2=[flankingTrials];
+    if plotset.falsealarm==true & ~isnan(testEventReach.trial1)
+        disp('Using passed in test event conditions'); %pause;
+        trial1=testEventReach.trial1; trial2=testEventReach.trial2;
+        if testEventReach.fillInBetweenWithAnything==false
+            disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
+            nInSequence=testEventReach.nInSequence;
+        end
     end
-end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
-dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
-reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
-[a,b]=doPlottingAndBootstrap(reachrates,'c','c','k',plotset.falsealarm,compareToFirstTrial);
-if ~isempty(a)
-    dprimes_noLED_lasttrial=a;
-    dprimes_noLED_firsttrial=b;
-    noLED_rr=reachrates;
+    [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
+    dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
+    reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
+    [a,b]=doPlottingAndBootstrap(reachrates,'c','c','k',plotset.falsealarm,compareToFirstTrial);
+    if ~isempty(a)
+        dprimes_noLED_lasttrial=a;
+        dprimes_noLED_firsttrial=b;
+        noLED_rr=reachrates;
+    end
 end
 if plotset.falsealarm==true
     returnout.reachrates_noLED=reachrates;
@@ -295,25 +311,27 @@ if plotset.falsealarm==true
     returnout.dprimes_noLED_lasttrial=dprimes_noLED_lasttrial;
 end
 % does not reach
-nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.noReach_1forward==1 & trialTypes.touched_pellet_1forward==0 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
-trial2=[flankingTrials];
-if plotset.noreach==true & ~isnan(testEventReach.trial1)
-    disp('Using passed in test event conditions'); %pause;
-    trial1=testEventReach.trial1; trial2=testEventReach.trial2;
-    if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
-        nInSequence=testEventReach.nInSequence;
+if plotset.noreach==true
+    nInSequence=3;
+    trial1=[flankingTrials ' & trialTypes.noReach_1forward==1 & trialTypes.touched_pellet_1forward==0 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
+    trial2=[flankingTrials];
+    if plotset.noreach==true & ~isnan(testEventReach.trial1)
+        disp('Using passed in test event conditions'); %pause;
+        trial1=testEventReach.trial1; trial2=testEventReach.trial2;
+        if testEventReach.fillInBetweenWithAnything==false
+            disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
+            nInSequence=testEventReach.nInSequence;
+        end
     end
-end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
-dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
-reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
-[a,b]=doPlottingAndBootstrap(reachrates,[0.8 0.8 0.8],[0.8 0.8 0.8],'k',plotset.noreach,compareToFirstTrial);
-if ~isempty(a)
-    dprimes_noLED_lasttrial=a;
-    dprimes_noLED_firsttrial=b;
-    noLED_rr=reachrates;
+    [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
+    dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
+    reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
+    [a,b]=doPlottingAndBootstrap(reachrates,[0.8 0.8 0.8],[0.8 0.8 0.8],'k',plotset.noreach,compareToFirstTrial);
+    if ~isempty(a)
+        dprimes_noLED_lasttrial=a;
+        dprimes_noLED_firsttrial=b;
+        noLED_rr=reachrates;
+    end
 end
 if plotset.noreach==true
     returnout.reachrates_noLED=reachrates;
@@ -331,20 +349,22 @@ end
 
 %%%% LEDs
 % baseline all trials
-nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
-trial2=[flankingTrials];
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,true);
-dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
-reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
-if compareToFirstTrial==false
-    [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,'k','m',true);
-end
-[a,b]=doPlottingAndBootstrap(reachrates,[0.5 0.5 0.5],'m','k',plotset.wildcard,compareToFirstTrial);
-if ~isempty(a)
-    dprimes_LED_lasttrial=a;
-    dprimes_LED_firsttrial=b;
-    LED_rr=reachrates;
+if plotset.wildcard==true
+    nInSequence=3;
+    trial1=[flankingTrials ' & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
+    trial2=[flankingTrials];
+    [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,true);
+    dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
+    reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
+    if compareToFirstTrial==false
+        [baseEffect_uncued_mean_out,baseEffect_cued_mean_out]=bootstrap(reachrates.alltrials_uncued,reachrates.alltrials_cued,'k','m',true);
+    end
+    [a,b]=doPlottingAndBootstrap(reachrates,[0.5 0.5 0.5],'m','k',plotset.wildcard,compareToFirstTrial);
+    if ~isempty(a)
+        dprimes_LED_lasttrial=a;
+        dprimes_LED_firsttrial=b;
+        LED_rr=reachrates;
+    end
 end
 if plotset.wildcard==true
     returnout.reachrates_LED=reachrates;
@@ -352,31 +372,33 @@ if plotset.wildcard==true
     returnout.dprimes_LED_lasttrial=dprimes_LED_lasttrial;
 end
 % success
-nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.success_in_cued_window_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==1 & (trialTypes.optoGroup_1forward==3)']; % & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup_1forward==2']; % & trialTypes.isLongITI_1forward==1'];
-if linkSuccesses==false
-    trial2=[flankingTrials];
-else
-    trial2=[flankingTrials ' & trialTypes.led_1forward==0'];
-end
-if plotset.success==true & ~isnan(testEventReach.trial1)
-    if ~isfield(testEventReach,'trial1_LED')
-        error('When passing in testEventReach conditions, need to receive both no LED and LED conditions');
+if plotset.success==true
+    nInSequence=3;
+    trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.success_in_cued_window_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==1 & (trialTypes.optoGroup_1forward==3)']; % & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup_1forward==2']; % & trialTypes.isLongITI_1forward==1'];
+    if linkSuccesses==false
+        trial2=[flankingTrials];
+    else
+        trial2=[flankingTrials ' & trialTypes.led_1forward==0'];
     end
-    trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
-    if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
-        nInSequence=testEventReach.nInSequence;
+    if plotset.success==true & ~isnan(testEventReach.trial1)
+        if ~isfield(testEventReach,'trial1_LED')
+            error('When passing in testEventReach conditions, need to receive both no LED and LED conditions');
+        end
+        trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
+        if testEventReach.fillInBetweenWithAnything==false
+            disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
+            nInSequence=testEventReach.nInSequence;
+        end
     end
-end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
-dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
-reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
-[a,b]=doPlottingAndBootstrap(reachrates,'g','m','k',plotset.success,compareToFirstTrial);
-if ~isempty(a)
-    dprimes_LED_lasttrial=a;
-    dprimes_LED_firsttrial=b;
-    LED_rr=reachrates;
+    [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
+    dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
+    reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
+    [a,b]=doPlottingAndBootstrap(reachrates,'g','m','k',plotset.success,compareToFirstTrial);
+    if ~isempty(a)
+        dprimes_LED_lasttrial=a;
+        dprimes_LED_firsttrial=b;
+        LED_rr=reachrates;
+    end
 end
 if plotset.success==true
     returnout.reachrates_LED=reachrates;
@@ -384,31 +406,33 @@ if plotset.success==true
     returnout.dprimes_LED_lasttrial=dprimes_LED_lasttrial;
 end
 % backwards success
-nInSequence=3;
-if linkSuccesses==false
-    trial1=[flankingTrials];
-else
-    trial1=[flankingTrials ' & trialTypes.led_1back==0'];
-end
-trial2=[flankingTrials ' & trialTypes.consumed_pellet_1forward==1' ' & trialTypes.reachedInTimeWindow_1back==1 & trialTypes.success_in_cued_window_1back==1 & trialTypes.consumed_pellet_1back==1 & trialTypes.led_1back==1 & trialTypes.optoGroup_1back~=1']; % & trialTypes.isLongITI_1forward==1'];];
-if plotset.backward_success==true & ~isnan(testEventReach.trial1)
-    if ~isfield(testEventReach,'trial1_LED')
-        error('When passing in testEventReach conditions, need to receive both no LED and LED conditions');
+if plotset.backward_success==true
+    nInSequence=3;
+    if linkSuccesses==false
+        trial1=[flankingTrials];
+    else
+        trial1=[flankingTrials ' & trialTypes.led_1back==0'];
     end
-    trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
-    if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
-        nInSequence=testEventReach.nInSequence;
+    trial2=[flankingTrials ' & trialTypes.consumed_pellet_1forward==1' ' & trialTypes.reachedInTimeWindow_1back==1 & trialTypes.success_in_cued_window_1back==1 & trialTypes.consumed_pellet_1back==1 & trialTypes.led_1back==1 & trialTypes.optoGroup_1back~=1']; % & trialTypes.isLongITI_1forward==1'];];
+    if plotset.backward_success==true & ~isnan(testEventReach.trial1)
+        if ~isfield(testEventReach,'trial1_LED')
+            error('When passing in testEventReach conditions, need to receive both no LED and LED conditions');
+        end
+        trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
+        if testEventReach.fillInBetweenWithAnything==false
+            disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
+            nInSequence=testEventReach.nInSequence;
+        end
     end
-end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
-dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
-reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
-[a,b]=doPlottingAndBootstrap(reachrates,'g','m','b',plotset.backward_success,compareToFirstTrial);
-if ~isempty(a)
-    dprimes_noLED_lasttrial=a;
-    dprimes_noLED_firsttrial=b;
-    LED_rr=reachrates;
+    [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
+    dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
+    reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
+    [a,b]=doPlottingAndBootstrap(reachrates,'g','m','b',plotset.backward_success,compareToFirstTrial);
+    if ~isempty(a)
+        dprimes_noLED_lasttrial=a;
+        dprimes_noLED_firsttrial=b;
+        LED_rr=reachrates;
+    end
 end
 if plotset.backward_success==true
     returnout.reachrates_LED=reachrates;
@@ -416,31 +440,33 @@ if plotset.backward_success==true
     returnout.dprimes_LED_lasttrial=dprimes_LED_lasttrial;
 end
 % delayed success
-nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
-if linkSuccesses==false
-    trial2=[flankingTrials];
-else
-    trial2=[flankingTrials ' & trialTypes.led_1forward==0'];
-end
-if plotset.delayed==true & ~isnan(testEventReach.trial1)
-    if ~isfield(testEventReach,'trial1_LED')
-        error('When passing in testEventReach conditions, need to receive both no LED and LED conditions');
+if plotset.delayed==true
+    nInSequence=3;
+    trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
+    if linkSuccesses==false
+        trial2=[flankingTrials];
+    else
+        trial2=[flankingTrials ' & trialTypes.led_1forward==0'];
     end
-    trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
-    if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
-        nInSequence=testEventReach.nInSequence;
+    if plotset.delayed==true & ~isnan(testEventReach.trial1)
+        if ~isfield(testEventReach,'trial1_LED')
+            error('When passing in testEventReach conditions, need to receive both no LED and LED conditions');
+        end
+        trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
+        if testEventReach.fillInBetweenWithAnything==false
+            disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
+            nInSequence=testEventReach.nInSequence;
+        end
     end
-end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
-dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
-reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
-[a,b]=doPlottingAndBootstrap(reachrates,[15 141 6]./255,'m','k',plotset.delayed,compareToFirstTrial);
-if ~isempty(a)
-    dprimes_LED_lasttrial=a;
-    dprimes_LED_firsttrial=b;
-    LED_rr=reachrates;
+    [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
+    dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
+    reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
+    [a,b]=doPlottingAndBootstrap(reachrates,[15 141 6]./255,'m','k',plotset.delayed,compareToFirstTrial);
+    if ~isempty(a)
+        dprimes_LED_lasttrial=a;
+        dprimes_LED_firsttrial=b;
+        LED_rr=reachrates;
+    end
 end
 if plotset.delayed==true
     returnout.reachrates_LED=reachrates;
@@ -448,27 +474,29 @@ if plotset.delayed==true
     returnout.dprimes_LED_lasttrial=dprimes_LED_lasttrial;
 end
 % drop
-nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==0' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==1 & trialTypes.consumed_pellet_1forward==0 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
-trial2=[flankingTrials];
-if plotset.drop==true & ~isnan(testEventReach.trial1)
-    if ~isfield(testEventReach,'trial1_LED')
-        error('When passing in testEventReach conditions, need to receive both no LED and LED conditions');
+if plotset.drop==true
+    nInSequence=3;
+    trial1=[flankingTrials ' & trialTypes.consumed_pellet_1back==0' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==1 & trialTypes.consumed_pellet_1forward==0 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
+    trial2=[flankingTrials];
+    if plotset.drop==true & ~isnan(testEventReach.trial1)
+        if ~isfield(testEventReach,'trial1_LED')
+            error('When passing in testEventReach conditions, need to receive both no LED and LED conditions');
+        end
+        trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
+        if testEventReach.fillInBetweenWithAnything==false
+            disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
+            nInSequence=testEventReach.nInSequence;
+        end
     end
-    trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
-    if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
-        nInSequence=testEventReach.nInSequence;
+    [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
+    dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
+    reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
+    [a,b]=doPlottingAndBootstrap(reachrates,'r','m','k',plotset.drop,compareToFirstTrial);
+    if ~isempty(a)
+        dprimes_LED_lasttrial=a;
+        dprimes_LED_firsttrial=b;
+        LED_rr=reachrates;
     end
-end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
-dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
-reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
-[a,b]=doPlottingAndBootstrap(reachrates,'r','m','k',plotset.drop,compareToFirstTrial);
-if ~isempty(a)
-    dprimes_LED_lasttrial=a;
-    dprimes_LED_firsttrial=b;
-    LED_rr=reachrates;
 end
 if plotset.drop==true
     returnout.reachrates_LED=reachrates;
@@ -476,27 +504,29 @@ if plotset.drop==true
     returnout.dprimes_LED_lasttrial=dprimes_LED_lasttrial;
 end
 % touched after cue, i.e., success or drop
-nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.touched_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
-trial2=[flankingTrials];
-if plotset.cuedtouch==true & ~isnan(testEventReach.trial1)
-    if ~isfield(testEventReach,'trial1_LED')
-        error('When passing in testEventReach conditions, need to receive both no LED and LED conditions');
+if plotset.cuedtouch==true
+    nInSequence=3;
+    trial1=[flankingTrials ' & trialTypes.touched_pellet_1back==1' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
+    trial2=[flankingTrials];
+    if plotset.cuedtouch==true & ~isnan(testEventReach.trial1)
+        if ~isfield(testEventReach,'trial1_LED')
+            error('When passing in testEventReach conditions, need to receive both no LED and LED conditions');
+        end
+        trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
+        if testEventReach.fillInBetweenWithAnything==false
+            disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
+            nInSequence=testEventReach.nInSequence;
+        end
     end
-    trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
-    if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
-        nInSequence=testEventReach.nInSequence;
+    [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
+    dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
+    reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
+    [a,b]=doPlottingAndBootstrap(reachrates,plotset.cuedtouchcolor,'m','k',plotset.cuedtouch,compareToFirstTrial);
+    if ~isempty(a)
+        dprimes_LED_lasttrial=a;
+        dprimes_LED_firsttrial=b;
+        LED_rr=reachrates;
     end
-end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
-dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
-reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
-[a,b]=doPlottingAndBootstrap(reachrates,plotset.cuedtouchcolor,'m','k',plotset.cuedtouch,compareToFirstTrial);
-if ~isempty(a)
-    dprimes_LED_lasttrial=a;
-    dprimes_LED_firsttrial=b;
-    LED_rr=reachrates;
 end
 if plotset.cuedtouch==true
     returnout.reachrates_LED=reachrates;
@@ -504,31 +534,33 @@ if plotset.cuedtouch==true
     returnout.dprimes_LED_lasttrial=dprimes_LED_lasttrial;
 end
 % did not touch after cue despite reaching
-nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.touched_pellet_1back==0 & trialTypes.noReach_1back==0' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==0 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
-if linkSuccesses==false
-    trial2=[flankingTrials];
-else
-    trial2=[flankingTrials ' & trialTypes.led_1forward==0'];
-end
-if plotset.failedcued==true & ~isnan(testEventReach.trial1)
-    if ~isfield(testEventReach,'trial1_LED')
-        error('When passing in testEventReach conditions, need to receive both no LED and LED conditions');
+if plotset.failedcued==true
+    nInSequence=3;
+    trial1=[flankingTrials ' & trialTypes.touched_pellet_1back==0 & trialTypes.noReach_1back==0' ' & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.touch_in_cued_window_1forward==0 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
+    if linkSuccesses==false
+        trial2=[flankingTrials];
+    else
+        trial2=[flankingTrials ' & trialTypes.led_1forward==0'];
     end
-    trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
-    if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
-        nInSequence=testEventReach.nInSequence;
+    if plotset.failedcued==true & ~isnan(testEventReach.trial1)
+        if ~isfield(testEventReach,'trial1_LED')
+            error('When passing in testEventReach conditions, need to receive both no LED and LED conditions');
+        end
+        trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
+        if testEventReach.fillInBetweenWithAnything==false
+            disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
+            nInSequence=testEventReach.nInSequence;
+        end
     end
-end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
-dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
-reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
-[a,b]=doPlottingAndBootstrap(reachrates,[8 41 175]./255,'m','k',plotset.failedcued,compareToFirstTrial);
-if ~isempty(a)
-    dprimes_LED_lasttrial=a;
-    dprimes_LED_firsttrial=b;
-    LED_rr=reachrates;
+    [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
+    dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
+    reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
+    [a,b]=doPlottingAndBootstrap(reachrates,[8 41 175]./255,'m','k',plotset.failedcued,compareToFirstTrial);
+    if ~isempty(a)
+        dprimes_LED_lasttrial=a;
+        dprimes_LED_firsttrial=b;
+        LED_rr=reachrates;
+    end
 end
 if plotset.failedcued==true
     returnout.reachrates_LED=reachrates;
@@ -536,27 +568,29 @@ if plotset.failedcued==true
     returnout.dprimes_LED_lasttrial=dprimes_LED_lasttrial;
 end
 % miss before cue
-nInSequence=3;
-trial1=['trialTypes.reachedBeforeCue_1forward==1 & trialTypes.reachToPelletBeforeCue_1forward==0 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
-trial2=[flankingTrials];
-if plotset.falsealarm==true & ~isnan(testEventReach.trial1)
-    if ~isfield(testEventReach,'trial1_LED')
-        error('When passing in testEventReach conditions, need to receive both no LED and LED conditions');
+if plotset.falsealarm==true
+    nInSequence=3;
+    trial1=['trialTypes.reachedBeforeCue_1forward==1 & trialTypes.reachToPelletBeforeCue_1forward==0 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
+    trial2=[flankingTrials];
+    if plotset.falsealarm==true & ~isnan(testEventReach.trial1)
+        if ~isfield(testEventReach,'trial1_LED')
+            error('When passing in testEventReach conditions, need to receive both no LED and LED conditions');
+        end
+        trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
+        if testEventReach.fillInBetweenWithAnything==false
+            disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
+            nInSequence=testEventReach.nInSequence;
+        end
     end
-    trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
-    if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
-        nInSequence=testEventReach.nInSequence;
+    [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
+    dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
+    reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
+    [a,b]=doPlottingAndBootstrap(reachrates,'c','m','k',plotset.falsealarm,compareToFirstTrial);
+    if ~isempty(a)
+        dprimes_LED_lasttrial=a;
+        dprimes_LED_firsttrial=b;
+        LED_rr=reachrates;
     end
-end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
-dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
-reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
-[a,b]=doPlottingAndBootstrap(reachrates,'c','m','k',plotset.falsealarm,compareToFirstTrial);
-if ~isempty(a)
-    dprimes_LED_lasttrial=a;
-    dprimes_LED_firsttrial=b;
-    LED_rr=reachrates;
 end
 if plotset.falsealarm==true
     returnout.reachrates_LED=reachrates;
@@ -564,27 +598,29 @@ if plotset.falsealarm==true
     returnout.dprimes_LED_lasttrial=dprimes_LED_lasttrial;
 end
 % does not reach
-nInSequence=3;
-trial1=[flankingTrials ' & trialTypes.noReach_1forward==1 & trialTypes.touched_pellet_1forward==0 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
-trial2=[flankingTrials];
-if plotset.noreach==true & ~isnan(testEventReach.trial1)
-    if ~isfield(testEventReach,'trial1_LED')
-        error('When passing in testEventReach conditions, need to receive both no LED and LED conditions');
+if plotset.noreach==true
+    nInSequence=3;
+    trial1=[flankingTrials ' & trialTypes.noReach_1forward==1 & trialTypes.touched_pellet_1forward==0 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1']; % & trialTypes.isLongITI_1forward==1'];
+    trial2=[flankingTrials];
+    if plotset.noreach==true & ~isnan(testEventReach.trial1)
+        if ~isfield(testEventReach,'trial1_LED')
+            error('When passing in testEventReach conditions, need to receive both no LED and LED conditions');
+        end
+        trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
+        if testEventReach.fillInBetweenWithAnything==false
+            disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
+            nInSequence=testEventReach.nInSequence;
+        end
     end
-    trial1=testEventReach.trial1_LED; trial2=testEventReach.trial2_LED;
-    if testEventReach.fillInBetweenWithAnything==false
-        disp(['Doing nInSequence ' num2str(testEventReach.nInSequence)]); %pause;
-        nInSequence=testEventReach.nInSequence;
+    [test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
+    dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected);
+    reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings);
+    [a,b]=doPlottingAndBootstrap(reachrates,[0.8 0.8 0.8],'m','k',plotset.noreach,compareToFirstTrial);
+    if ~isempty(a)
+        dprimes_LED_lasttrial=a;
+        dprimes_LED_firsttrial=b;
+        LED_rr=reachrates;
     end
-end
-[test,fakeCueInd,skipCorrected]=fillInRestOfTest(nInSequence,trial1,trial2,trialTypes,saveDir,testEventReach.fillInBetweenWithAnything);
-dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
-reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'cueZone_onVoff',shuffleTrialOrder,reachratesettings); 
-[a,b]=doPlottingAndBootstrap(reachrates,[0.8 0.8 0.8],'m','k',plotset.noreach,compareToFirstTrial);
-if ~isempty(a)
-    dprimes_LED_lasttrial=a;
-    dprimes_LED_firsttrial=b;
-    LED_rr=reachrates;
 end
 if plotset.noreach==true
     returnout.reachrates_LED=reachrates;
