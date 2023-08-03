@@ -1010,17 +1010,17 @@ switch whichToPlot
 end
 [~,cueindma]=nanmax(nanmean(alltbt.cueZone_onVoff,1));
 timestep=mode(diff(nanmean(alltbt.times,1)));
-if isempty(timeWindow)
-    trialTypes.reachedInTimeWindow=ones(size(trialTypes.led));
-    trialTypes.reachedInTimeWindow_1forward=[trialTypes.reachedInTimeWindow(2:end); 1];
-    trialTypes.reachedInTimeWindow_1back=[1; trialTypes.reachedInTimeWindow(1:end-1)];
-else
-    timeWindowInds(1)=floor(timeWindow(1)/timestep);
-    timeWindowInds(2)=floor(timeWindow(2)/timestep);
-    trialTypes.reachedInTimeWindow=any(alltbt.all_reachBatch(:,cueindma+timeWindowInds(1)-1:cueindma+timeWindowInds(2))>0.05,2);
-    trialTypes.reachedInTimeWindow_1forward=[trialTypes.reachedInTimeWindow(2:end); 0];
-    trialTypes.reachedInTimeWindow_1back=[0; trialTypes.reachedInTimeWindow(1:end-1)];
-end
+% if isempty(timeWindow)
+%     trialTypes.reachedInTimeWindow=ones(size(trialTypes.led));
+%     trialTypes.reachedInTimeWindow_1forward=[trialTypes.reachedInTimeWindow(2:end); 1];
+%     trialTypes.reachedInTimeWindow_1back=[1; trialTypes.reachedInTimeWindow(1:end-1)];
+% else
+%     timeWindowInds(1)=floor(timeWindow(1)/timestep);
+%     timeWindowInds(2)=floor(timeWindow(2)/timestep);
+%     trialTypes.reachedInTimeWindow=any(alltbt.all_reachBatch(:,cueindma+timeWindowInds(1)-1:cueindma+timeWindowInds(2))>0.05,2);
+%     trialTypes.reachedInTimeWindow_1forward=[trialTypes.reachedInTimeWindow(2:end); 0];
+%     trialTypes.reachedInTimeWindow_1back=[0; trialTypes.reachedInTimeWindow(1:end-1)];
+% end
 
 end
 
