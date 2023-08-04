@@ -1,4 +1,4 @@
-function [takesess_con,takemice_con,takesess_LED,takemice_LED]=combineFigure4DataAcrossMice(dd,useOptoForThisGp,whichtoplot_eventCond,timeStep,cueind,doCDF,doLEDcdf,calcCued,atleast_n_trials,ds)
+function [takesess_con,takemice_con,takesess_LED,takemice_LED]=combineFigure4DataAcrossMice(dd,useOptoForThisGp,whichtoplot_eventCond,timeStep,cueind,doCDF,doLEDcdf,calcCued,atleast_n_trials,ds,useMice_con,useMice_LED)
 
 % use 1 2 5 6 9 11 12 13
 % 20 cutoff for at least this many sequences
@@ -360,7 +360,16 @@ else
     plotMeAndSe(sLED_alltrials_uncued-sLED_trial1_alltrials_uncued,sLED_alltrials_cued-sLED_trial1_alltrials_cued,'r',2,false,calcCued);
     title('Sess by sess mean and se');
 
-
+    if isempty(useMice_con)
+        useMice_con=ones(size(m_trial1_alltrials_uncued));
+    elseif length(useMice_con)~=length(m_trial1_alltrials_uncued)
+        error('useMice_con must match number of mice read in');
+    end
+    if isempty(useMice_LED)
+        useMice_LED=ones(size(mLED_trial1_alltrials_uncued));
+    elseif length(useMice_LED)~=length(mLED_trial1_alltrials_uncued)
+        error('useMice_LED must match number of mice read in');
+    end
     figure();
     plotByBy(m_trial1_alltrials_uncued,m_trial1_alltrials_cued,m_alltrials_uncued,m_alltrials_cued,'k',calcCued,true);
     plotByBy(mLED_trial1_alltrials_uncued,mLED_trial1_alltrials_cued,mLED_alltrials_uncued,mLED_alltrials_cued,'r',calcCued,true);
