@@ -1,14 +1,9 @@
-function combineFigure4DataAcrossMice(dd,useOptoForThisGp,whichtoplot_eventCond,timeStep,cueind,doCDF,doLEDcdf,calcCued,atleast_n_trials,ds)
+function [tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=combineFigure4DataAcrossMice(dd,useOptoForThisGp,whichtoplot_eventCond,timeStep,cueind,doCDF,doLEDcdf,calcCued,atleast_n_trials,ds)
 
-% use 1 2 9 11 13
-% combineFigure4DataAcrossMice(dd([1 2 4 5 9 11 13 14]),useOptoForThisGp([1 2 4 5 9 11 13 14]),'all cued failures_seqLength3_win3_minus2to0_optoDurforcuepoi2then1NOOPRELearnedLongITI',0.035,94,false,false,false,30,1);
-% combineFigure4DataAcrossMice(dd([1 3 9]),useOptoForThisGp([1 3 9]),'cued success_seqLength3_win3_minus2to0_optoDurforcuepoi2then1NOOPRELearnedLongITI',0.035,94,false,false,false,7,1);
+% use 1 2 5 6 9 11 12 13
+% 20 cutoff for at least this many sequences
 
-% combineFigure4DataAcrossMice(dd([1:9 11:17]),useOptoForThisGp([1:9 11:17]),'cued success_seqLength3_win2and3_minus2to0_optoDurforcuepoi4then1NOOPREwin3',0.035,94,false,false,false,200,1);
-% combineFigure4DataAcrossMice(dd([1 2 3 4 9 11 12 13 14 15 16 17]),useOptoForThisGp([1 2 3 4 9 11 12 13 14 15 16 17]),'cued success_seqLength3_win3_minus2to0_optoDurforcuepoi4then1NOOPRElongITI',0.035,94,false,false,false,200,1);
-% combineFigure4DataAcrossMice(dd([1 2 3 4 9 17]),useOptoForThisGp([1 2 3 4 9 17]),'cued success_seqLength3_win3_minus2to0_optoDurforcuepoi4then1NOOPRElongITI',0.035,94,false,false,false,200,1);
-% combineFigure4DataAcrossMice(dd([1 2 3 4 9 17]),useOptoForThisGp([1 2 3 4 9 17]),'all cued failures_seqLength3_win3_minus2to0_optoDurforcuepoi4then1NOOPRElongITI',0.035,94,false,false,false,0,1);
-% combineFigure4DataAcrossMice(dd([1 3 7 8 9 12 13 14 17]),useOptoForThisGp([1 3 7 8 9 12 13 14 17]),'cued success_seqLength3_win3_minus2to0_optoDurforcuepoi4then1NOOPRElongITI',0.035,94,false,false,false,0,1);
+tooksess_con=[]; tookmice_con=[]; tooksess_LED=[]; tookmice_LED=[];
 
 rr_noLED_tri1_uncued=[];
 rr_noLED_tri1_cued=[];
@@ -134,7 +129,7 @@ for i=1:length(dd)
         if isempty(rout.reachrates_LED) || useOptoForThisGp(i)==0
             % nothing to add
             try
-                [sbys,mbym]=getMbyM_SbyS(sessIDandMouseID,rout,atleast_n_trials);
+                [sbys,mbym,tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=getMbyM_SbyS(sessIDandMouseID,rout,atleast_n_trials);
                 s_trial1_alltrials_uncued=[s_trial1_alltrials_uncued sbys.reachrates_noLED.trial1_alltrials_uncued'];
                 s_trial1_alltrials_cued=[s_trial1_alltrials_cued sbys.reachrates_noLED.trial1_alltrials_cued'];
                 s_alltrials_uncued=[s_alltrials_uncued sbys.reachrates_noLED.alltrials_uncued'];
@@ -174,7 +169,7 @@ for i=1:length(dd)
         rr_LED_trinext_cued=rr_LED_trinext_cued(~ina);
 
         try
-            [sbys,mbym]=getMbyM_SbyS(sessIDandMouseID,rout,atleast_n_trials);
+            [sbys,mbym,tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=getMbyM_SbyS(sessIDandMouseID,rout,atleast_n_trials);
             s_trial1_alltrials_uncued=[s_trial1_alltrials_uncued sbys.reachrates_noLED.trial1_alltrials_uncued'];
             s_trial1_alltrials_cued=[s_trial1_alltrials_cued sbys.reachrates_noLED.trial1_alltrials_cued'];
             s_alltrials_uncued=[s_alltrials_uncued sbys.reachrates_noLED.alltrials_uncued'];
@@ -416,7 +411,12 @@ disp(['p of signrank for cued change with and without LED: ' num2str(p)]);
 
 end
 
-function [sbys,mbym]=getMbyM_SbyS(sessIDandMouseID,rout,atleast_n_trials)
+function [sbys,mbym,tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=getMbyM_SbyS(sessIDandMouseID,rout,atleast_n_trials)
+
+tooksess_con=[];
+tookmice_con=[];
+tooksess_LED=[];
+tookmice_LED=[];
 
 sbys.reachrates_noLED.trial1_alltrials_uncued=mean(rout.reachrates_noLED.trial1_alltrials_uncued,2,'omitnan');
 sbys.reachrates_noLED.trial1_alltrials_cued=mean(rout.reachrates_noLED.trial1_alltrials_cued,2,'omitnan');
@@ -424,11 +424,12 @@ sbys.reachrates_noLED.alltrials_uncued=mean(rout.reachrates_noLED.alltrials_uncu
 sbys.reachrates_noLED.alltrials_cued=mean(rout.reachrates_noLED.alltrials_cued,2,'omitnan');
 ns=sum(~isnan(rout.reachrates_noLED.trial1_alltrials_uncued),2,'omitnan');
 
-mbym.reachrates_noLED.trial1_alltrials_uncued=getmbym(sessIDandMouseID,rout.reachrates_noLED.trial1_alltrials_uncued,atleast_n_trials);
+[mbym.reachrates_noLED.trial1_alltrials_uncued,tookmice_con]=getmbym(sessIDandMouseID,rout.reachrates_noLED.trial1_alltrials_uncued,atleast_n_trials);
 mbym.reachrates_noLED.trial1_alltrials_cued=getmbym(sessIDandMouseID,rout.reachrates_noLED.trial1_alltrials_cued,atleast_n_trials);
 mbym.reachrates_noLED.alltrials_uncued=getmbym(sessIDandMouseID,rout.reachrates_noLED.alltrials_uncued,atleast_n_trials);
 mbym.reachrates_noLED.alltrials_cued=getmbym(sessIDandMouseID,rout.reachrates_noLED.alltrials_cued,atleast_n_trials);
 
+tooksess_con=ns>=atleast_n_trials;
 sbys.reachrates_noLED.trial1_alltrials_uncued(ns<atleast_n_trials)=nan;
 sbys.reachrates_noLED.trial1_alltrials_cued(ns<atleast_n_trials)=nan;
 sbys.reachrates_noLED.alltrials_uncued(ns<atleast_n_trials)=nan;
@@ -453,11 +454,12 @@ sbys.reachrates_LED.alltrials_uncued=mean(rout.reachrates_LED.alltrials_uncued,2
 sbys.reachrates_LED.alltrials_cued=mean(rout.reachrates_LED.alltrials_cued,2,'omitnan');
 ns=sum(~isnan(rout.reachrates_LED.trial1_alltrials_uncued),2,'omitnan');
 
-mbym.reachrates_LED.trial1_alltrials_uncued=getmbym(sessIDandMouseID,rout.reachrates_LED.trial1_alltrials_uncued,atleast_n_trials);
+[mbym.reachrates_LED.trial1_alltrials_uncued,tookmice_LED]=getmbym(sessIDandMouseID,rout.reachrates_LED.trial1_alltrials_uncued,atleast_n_trials);
 mbym.reachrates_LED.trial1_alltrials_cued=getmbym(sessIDandMouseID,rout.reachrates_LED.trial1_alltrials_cued,atleast_n_trials);
 mbym.reachrates_LED.alltrials_uncued=getmbym(sessIDandMouseID,rout.reachrates_LED.alltrials_uncued,atleast_n_trials);
 mbym.reachrates_LED.alltrials_cued=getmbym(sessIDandMouseID,rout.reachrates_LED.alltrials_cued,atleast_n_trials);
 
+tooksess_LED=ns>=atleast_n_trials;
 sbys.reachrates_LED.trial1_alltrials_uncued(ns<atleast_n_trials)=nan;
 sbys.reachrates_LED.trial1_alltrials_cued(ns<atleast_n_trials)=nan;
 sbys.reachrates_LED.alltrials_uncued(ns<atleast_n_trials)=nan;
@@ -491,15 +493,17 @@ end
 
 end
 
-function rrout=getmbym(sessIDandMouseID,rr,atleast_n_trials)
+function [rrout,tookmice]=getmbym(sessIDandMouseID,rr,atleast_n_trials)
 
 u=unique(sessIDandMouseID(:,2));
 rrout=nan(1,length(u));
+tookmice=nan(1,length(u));
 for i=1:length(u)
     currmouse=u(i);
     temp=rr(sessIDandMouseID(:,2)==currmouse,:);
     % if fewer than atleast_n_trials not nan trials, drop this mouse
     nonan=nansum(~isnan(temp(1:end)));
+    tookmice(i)=nonan>=atleast_n_trials;
     if nonan<atleast_n_trials
         continue
     end

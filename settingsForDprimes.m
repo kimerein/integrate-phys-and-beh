@@ -8,6 +8,15 @@ tims=0:timestep:(size(alltbt.times,2)-1)*timestep;
 disp(['Cue turns on at ' num2str(tims(ma)) ' seconds']);
 cuetimeat=tims(ma);
 
+% used for short-term memory learning within sess
+% settings.preCueWindow_start1=0.25;
+% settings.preCueWindow_end1=1;
+% settings.preCueWindow_start2=cuetimeat-0.98;
+% settings.preCueWindow_end2=cuetimeat-0.98+1.25;
+% settings.reachAfterCueWindow_start=-0.05;
+% settings.reachAfterCueWindow_end=0.75;
+
+% used for fig 1 and anywhere else w 400 ms window
 settings.preCueWindow_start1=cuetimeat-0.4; %+0.25; %-0.45; %0; % define start of time window from trial onset, in seconds -- for first window, assuming that trial onset is 0 sec
 settings.preCueWindow_end1=cuetimeat; %1; % define end of time window from trial onset, in seconds -- for first window
 % preCueWindow_start2=3.81; % define start of time window from trial onset, in seconds -- for second window
