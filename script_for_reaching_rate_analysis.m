@@ -98,7 +98,7 @@ alltbt.anyFail=single(alltbt.anyFail>0.5);
 % [alltbt,metadata,trialTypes]=excludePawOnWheel(alltbt,metadata,trialTypes,'cueZone_onVoff');
 
 % Optional: Exclude sessions where mouse was cheating
-[alltbt,metadata,trialTypes]=excludePreemptiveSess(alltbt,metadata,trialTypes,[3.255-2 3.255-1],[3.255-1 3.255-0],2);
+% [alltbt,metadata,trialTypes]=excludePreemptiveSess(alltbt,metadata,trialTypes,[3.255-2 3.255-1],[3.255-1 3.255-0],2);
 
 % Optional: dprimes for each mouse, each session
 settingsDp=settingsForDprimes(alltbt,'cueZone_onVoff',true); % Check settings in settingsForDprimes
@@ -141,8 +141,8 @@ saveDir=['/Volumes/Neurobio/MICROSCOPE/Kim/RT pairs data sets/' temp]; % where t
 alltbt.mouseid=metadata.mouseid;
 alltbt.sessid=metadata.sessid;
 trialTypes.sessid=metadata.sessid;
-% tbt_filter.sortField='sessid';
-tbt_filter.sortField='dprimes';
+tbt_filter.sortField='sessid';
+% tbt_filter.sortField='dprimes';
 % tbt_filter.sortField='day1formice';
 % tbt_filter.sortField='distractor_immediate_after_cue';
 % tbt_filter.sortField='higherThanBefore';
@@ -153,9 +153,9 @@ tbt_filter.sortField='dprimes';
 % tbt_filter.sortField='takemice';
 % tbt_filter.range_values=[1 6 7 8 10 14 18];
 % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
-tbt_filter.range_values=[-100 0.75]; %[0.75 100];
+% tbt_filter.range_values=[-100 0.75]; %[0.75 100];
 % tbt_filter.range_values=[2 3 6 7 8 9];
-% tbt_filter.range_values=[-100 100] ;%0.471];
+tbt_filter.range_values=[37.5 38.5] ;%0.471];
 % tbt_filter.range_values=[0 100]; % beginner: d<0.25, intermediate: 0.25<=d<0.75, expert: d>=0.75
 % tbt_filter.range_values=[0.75 100]; % maybe 2,6,7,12
 % tbt_filter.range_values=[0.5 1.5]; % maybe 2,6,7,12
@@ -395,7 +395,7 @@ plotHallmarksOfSatiety(reachrates,dataset,alltbt,metadata,trialTypes);
 % memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,[],plotCDFUpTo);
 nInSeq=2; 
 useFractionThroughSession=[0.5 1];
-withinCueTimeWindow=0.4; % in sec
+withinCueTimeWindow=1.5; %0.4; % in sec
 beginOfSess=0.25; % up to this fraction of session
 plotCDFUpTo=9.5;
 memoryEffect(alltbt,metadata,trialTypes,nInSeq,useFractionThroughSession,[],plotCDFUpTo,withinCueTimeWindow,beginOfSess);

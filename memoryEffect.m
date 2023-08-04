@@ -26,7 +26,8 @@ dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,
 % playing with an alternate metric: given reach, probability that cue preceded reach
 % fracthrubins=0:0.1:1.0001;
 % fracthrubins={[0:0.05:0.95],[0.1:0.05:1.001]};
-fracthrubins={[0:0.17:1],[0.17:0.17:1 1]};
+% fracthrubins={[0:0.17:1],[0.17:0.17:1 1]};
+fracthrubins={[0:0.11:1],[0.11:0.11:1 1]};
 [dprime_given_reach,dprime_given_reachPLUSsd,dprime_given_reachMINUSsd]=dprimes_given_reach(alltbt,dataset,false,fracthrubins,'rawReaching_event_trialiInSeq',withinCueTimeWindow); % two formats for fracthrubins, see function
 % continuing to plot change over all trials within session
 reachratesettings.suppressPlots=false;
@@ -69,7 +70,8 @@ alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch');
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch back');
 % fracthrubins={[0:0.05:0.95],[0.1:0.05:1.001]};
-fracthrubins={[0:0.17:1],[0.17:0.17:1 1]};
+% fracthrubins={[0:0.17:1],[0.17:0.17:1 1]};
+fracthrubins={[0:0.11:1],[0.11:0.11:1 1]};
 dprimes_given_reach(alltbt,dataset,false,fracthrubins,'rawReaching_event_trialiInSeq',withinCueTimeWindow);
 fracthrubins=[0 useFractionThroughSession(1) useFractionThroughSession(2)+0.001];
 [dprime_given_reach_noLED,dprime_given_reachPLUSsd_noLED,dprime_given_reachMINUSsd_noLED]=dprimes_given_reach(alltbt,dataset,false,fracthrubins,'rawReaching_event_trialiInSeq',withinCueTimeWindow);
@@ -101,7 +103,8 @@ alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch');
 dataset=buildReachingRTModel(alltbt,trialTypes,metadata,fakeCueInd,saveDir,test,skipCorrected); 
 alltbt=useDifferentReachType(alltbt,useReachType,'all_reachBatch','switch back');
 % fracthrubins={[0:0.05:0.95],[0.1:0.05:1.001]};
-fracthrubins={[0:0.17:1],[0.17:0.17:1 1]};
+% fracthrubins={[0:0.17:1],[0.17:0.17:1 1]};
+fracthrubins={[0:0.11:1],[0.11:0.11:1 1]};
 dprimes_given_reach(alltbt,dataset,false,fracthrubins,'rawReaching_event_trialiInSeq',withinCueTimeWindow);
 fracthrubins=[0 useFractionThroughSession(1) useFractionThroughSession(2)+0.001];
 [dprime_given_reach_LED,dprime_given_reachPLUSsd_LED,dprime_given_reachMINUSsd_LED]=dprimes_given_reach(alltbt,dataset,false,fracthrubins,'rawReaching_event_trialiInSeq',withinCueTimeWindow);
