@@ -1,9 +1,9 @@
-function [tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=combineFigure4DataAcrossMice(dd,useOptoForThisGp,whichtoplot_eventCond,timeStep,cueind,doCDF,doLEDcdf,calcCued,atleast_n_trials,ds)
+function [takesess_con,takemice_con,takesess_LED,takemice_LED]=combineFigure4DataAcrossMice(dd,useOptoForThisGp,whichtoplot_eventCond,timeStep,cueind,doCDF,doLEDcdf,calcCued,atleast_n_trials,ds)
 
 % use 1 2 5 6 9 11 12 13
 % 20 cutoff for at least this many sequences
 
-tooksess_con=[]; tookmice_con=[]; tooksess_LED=[]; tookmice_LED=[];
+takesess_con=[]; takemice_con=[]; takesess_LED=[]; takemice_LED=[];
 
 rr_noLED_tri1_uncued=[];
 rr_noLED_tri1_cued=[];
@@ -130,6 +130,10 @@ for i=1:length(dd)
             % nothing to add
             try
                 [sbys,mbym,tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=getMbyM_SbyS(sessIDandMouseID,rout,atleast_n_trials);
+                takesess_con=[takesess_con tooksess_con'];
+                takemice_con=[takemice_con tookmice_con];
+                takesess_LED=[takesess_LED tooksess_LED'];
+                takemice_LED=[takemice_LED tookmice_LED];
                 s_trial1_alltrials_uncued=[s_trial1_alltrials_uncued sbys.reachrates_noLED.trial1_alltrials_uncued'];
                 s_trial1_alltrials_cued=[s_trial1_alltrials_cued sbys.reachrates_noLED.trial1_alltrials_cued'];
                 s_alltrials_uncued=[s_alltrials_uncued sbys.reachrates_noLED.alltrials_uncued'];
@@ -170,6 +174,10 @@ for i=1:length(dd)
 
         try
             [sbys,mbym,tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=getMbyM_SbyS(sessIDandMouseID,rout,atleast_n_trials);
+            takesess_con=[takesess_con tooksess_con'];
+            takemice_con=[takemice_con tookmice_con];
+            takesess_LED=[takesess_LED tooksess_LED'];
+            takemice_LED=[takemice_LED tookmice_LED];
             s_trial1_alltrials_uncued=[s_trial1_alltrials_uncued sbys.reachrates_noLED.trial1_alltrials_uncued'];
             s_trial1_alltrials_cued=[s_trial1_alltrials_cued sbys.reachrates_noLED.trial1_alltrials_cued'];
             s_alltrials_uncued=[s_alltrials_uncued sbys.reachrates_noLED.alltrials_uncued'];
