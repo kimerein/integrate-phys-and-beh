@@ -1,6 +1,8 @@
 function [takesess_con,takemice_con,takesess_LED,takemice_LED]=combineFigure4DataAcrossMice(dd,useOptoForThisGp,whichtoplot_eventCond,timeStep,cueind,doCDF,doLEDcdf,calcCued,atleast_n_trials,ds,useMice_con,useMice_LED)
 
-% use 1 2 5 6 9 11 12 13
+% use 1 2 5 6 9 12 13
+% or use 1 2 5 6 9 11 12 13
+% maybe use 10
 % 20 cutoff for at least this many sequences
 
 takesess_con=[]; takemice_con=[]; takesess_LED=[]; takemice_LED=[];
@@ -65,7 +67,7 @@ for i=1:length(dd)
         % Get mouse by mouse
         % and sess by sess
         % rows are sessid, column 1 is sessid, column2 is mouseid
-        a=load(fullfile(currdir,'sessIDandMouseID_NOOPRELearned.mat'));
+        a=load(fullfile(currdir,'sessIDandMouseID_sessLearn.mat'));
 %         a=load(fullfile(currdir,'sessIDandMouseID_NOOPRE.mat'));
         sessIDandMouseID=a.sessIDandMouseID;
 
@@ -211,7 +213,7 @@ for i=1:length(dd)
         % Get mouse by mouse
         % and sess by sess
         % rows are sessid, column 1 is sessid, column2 is mouseid
-        a=load(fullfile(currdir,'sessIDandMouseID_NOOPRELearned.mat'));
+        a=load(fullfile(currdir,'sessIDandMouseID_sessLearn.mat'));
 %         a=load(fullfile(currdir,'sessIDandMouseID_NOOPRE.mat'));
         sessIDandMouseID=a.sessIDandMouseID;
         
@@ -371,8 +373,8 @@ else
         error('useMice_LED must match number of mice read in');
     end
     figure();
-    plotByBy(m_trial1_alltrials_uncued,m_trial1_alltrials_cued,m_alltrials_uncued,m_alltrials_cued,'k',calcCued,true);
-    plotByBy(mLED_trial1_alltrials_uncued,mLED_trial1_alltrials_cued,mLED_alltrials_uncued,mLED_alltrials_cued,'r',calcCued,true);
+    plotByBy(m_trial1_alltrials_uncued(useMice_con==1),m_trial1_alltrials_cued(useMice_con==1),m_alltrials_uncued(useMice_con==1),m_alltrials_cued(useMice_con==1),'k',calcCued,true);
+    plotByBy(mLED_trial1_alltrials_uncued(useMice_LED==1),mLED_trial1_alltrials_cued(useMice_LED==1),mLED_alltrials_uncued(useMice_LED==1),mLED_alltrials_cued(useMice_LED==1),'r',calcCued,true);
     title('Mouse by mouse');
 
     stats_compareChangeInRate(m_alltrials_uncued-m_trial1_alltrials_uncued,m_alltrials_cued-m_trial1_alltrials_cued,mLED_alltrials_uncued-mLED_trial1_alltrials_uncued,mLED_alltrials_cued-mLED_trial1_alltrials_cued);

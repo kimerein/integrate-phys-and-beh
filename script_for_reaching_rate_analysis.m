@@ -7,9 +7,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt19Jul2023153612\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt02May2023162937\'; % directory containing experimental data
 behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log - Slimmed down w old mice added.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt19Jul2023153612\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt02May2023162937\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -51,7 +51,7 @@ backup.metadata=metadata;
 % [alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,[4 5 19]);
 
 % Optional: discard preemptive
-[alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
+% [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
 
 % fix weird bug where reach batch sometimes get stuck at 1 (in less than 0.1% of trials), possibly an
 % interp problem somewhere?? not sure
@@ -98,7 +98,7 @@ alltbt.anyFail=single(alltbt.anyFail>0.5);
 % [alltbt,metadata,trialTypes]=excludePawOnWheel(alltbt,metadata,trialTypes,'cueZone_onVoff');
 
 % Optional: Exclude sessions where mouse was cheating
-[alltbt,metadata,trialTypes]=excludePreemptiveSess(alltbt,metadata,trialTypes,[3.255-2 3.255-1],[3.255-1 3.255-0],2);
+% [alltbt,metadata,trialTypes]=excludePreemptiveSess(alltbt,metadata,trialTypes,[3.255-2 3.255-1],[3.255-1 3.255-0],2);
 
 % Optional: dprimes for each mouse, each session
 settingsDp=settingsForDprimes(alltbt,'cueZone_onVoff',true); % Check settings in settingsForDprimes
@@ -142,11 +142,11 @@ alltbt.mouseid=metadata.mouseid;
 alltbt.sessid=metadata.sessid;
 trialTypes.sessid=metadata.sessid;
 % tbt_filter.sortField='sessid';
-tbt_filter.sortField='dprimes';
+% tbt_filter.sortField='dprimes';
 % tbt_filter.sortField='day1formice';
 % tbt_filter.sortField='distractor_immediate_after_cue';
 % tbt_filter.sortField='higherThanBefore';
-% tbt_filter.sortField='fractionThroughSess_adjusted';
+tbt_filter.sortField='fractionThroughSess_adjusted';
 % tbt_filter.sortField='opto_enhanced_reach';
 % tbt_filter.sortField='mouseLearned';
 % tbt_filter.sortField='initiallyLowLEDsess';
@@ -156,8 +156,8 @@ tbt_filter.sortField='dprimes';
 % tbt_filter.range_values=[-100 0.75]; %[0.75 100];
 % tbt_filter.range_values=[2 3 6 7 8 9];
 % tbt_filter.range_values=[37.5 38.5] ;%0.471];
-tbt_filter.range_values=[-100 0.75]; % beginner: d<0.25, intermediate: 0.25<=d<0.75, expert: d>=0.75
-% tbt_filter.range_values=[0.75 100]; % maybe 2,6,7,12
+% tbt_filter.range_values=[-100 0.75]; % beginner: d<0.25, intermediate: 0.25<=d<0.75, expert: d>=0.75
+tbt_filter.range_values=[0.5 1]; % maybe 2,6,7,12
 % tbt_filter.range_values=[0.5 1.5]; % maybe 2,6,7,12
 % tbt_filter.range_values=[2 3 4 5 6 7 8 9 10 11 12 14 15 17 18 19]; % which mice start at non-learning 
 % tbt_filter.range_values=[1 2 4 5 6 7 8 9 10 11 12 17 18 19];
