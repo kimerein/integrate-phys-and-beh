@@ -198,6 +198,12 @@ alltbt.mouseLearned=learned1 | learned2 | learned3;
 trialTypes.mouseLearned=alltbt.mouseLearned;
 
 %% learning curves
+% Optional: discard preemptive
+[alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
+% Optional: dprimes for each mouse, each session
+settingsDp=settingsForDprimes(alltbt,'cueZone_onVoff',true); % Check settings in settingsForDprimes
+[alltbt,trialTypes,metadata]=get_dprime_per_mouse(alltbt,trialTypes,metadata,false,settingsDp); % last arg is whether to get rates instead
+alltbt.dprimes(isinf(alltbt.dprimes))=3; 
 % DURING INITIAL LEARNING CONTROL OR SILENCING
 [learningC,days,reachrate_cued,reachrate_uncued,dayNdprime,day1dprime,quiverTips,biases]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1],[15:20],false);
 % for i=1:size(reachrate_cued,1)
