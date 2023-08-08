@@ -198,6 +198,7 @@ alltbt.mouseLearned=learned1 | learned2 | learned3;
 trialTypes.mouseLearned=alltbt.mouseLearned;
 
 %% learning curves
+[alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,unique(metadata.mouseid));
 % Optional: discard preemptive
 [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
 % Optional: dprimes for each mouse, each session
