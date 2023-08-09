@@ -57,13 +57,13 @@ linkerForNoLEDBACKWARDS=' & (trialTypes.led_2forward==1 | trialTypes.led_3forwar
 % linkerForNoLEDBACKWARDS='';
 
 % FOR VARIED TIMING
-% linkerForVariedTimingForward=' & trialTypes.optoGroup_1forward==2';
-% linkerForVariedTimingSame=' & trialTypes.optoGroup==2';
-% linkerForVariedTimingUncued='';
-% ELSE
-linkerForVariedTimingForward='';
-linkerForVariedTimingSame='';
+linkerForVariedTimingForward=' & trialTypes.optoGroup_1forward==2';
+linkerForVariedTimingSame=' & trialTypes.optoGroup==2';
 linkerForVariedTimingUncued='';
+% ELSE
+% linkerForVariedTimingForward='';
+% linkerForVariedTimingSame='';
+% linkerForVariedTimingUncued='';
 
 switch whichEventType
 %     case 'cued success'

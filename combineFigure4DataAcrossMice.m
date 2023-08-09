@@ -1,11 +1,18 @@
-function [takesess_con,takemice_con,takesess_LED,takemice_LED]=combineFigure4DataAcrossMice(dd,useOptoForThisGp,whichtoplot_eventCond,timeStep,cueind,doCDF,doLEDcdf,calcCued,atleast_n_trials,ds,useMice_con,useMice_LED)
+function [takesess_con,takemice_con,takesess_LED,takemice_LED]=combineFigure4DataAcrossMice(dd,useOptoForThisGp,whichtoplot_eventCond,timeStep,cueind,doCDF,doLEDcdf,calcCued,atleast_n_trials,ds,useMice_con,useMice_LED,nameofsessandmouse)
 
 % use 1 2 5 6 9 12 13
 % or use 1 2 5 6 9 11 12 13
 % maybe use 10
 % 20 cutoff for at least this many sequences
+% [tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=combineFigure4DataAcrossMice(dd([1 9]),useOptoForThisGp([1 9]),'cued success_seqLength3_win3_minus2to0_optoDurforcuepoi25then1NOOPREdplearn',0.035,94,false,false,false,40,1,[],[]);
+% [tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=combineFigure4DataAcrossMice(dd([1 2 5 6 9 11 12 13]),useOptoForThisGp([1 2 5 6 9 11 12 13]),'cued success_seqLength3_win3_minus2to0_optoDurforcuepoi25then1NOOPREdplearn',0.035,94,false,false,false,20,1,[],[]);
+% [tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=combineFigure4DataAcrossMice(dd([1 2 5 6 9 11 12 13]),useOptoForThisGp([1 2 5 6 9 11 12 13]),'cued success_seqLength3_win3_minus2to0_optoDurforcuepoi25then1NOOPREdplearn',0.035,94,false,false,false,50,1,[],[]);
 
 takesess_con=[]; takemice_con=[]; takesess_LED=[]; takemice_LED=[];
+
+if ~isempty(useMice_con) && ~isempty(useMice_LED)
+    atleast_n_trials=0;
+end
 
 rr_noLED_tri1_uncued=[];
 rr_noLED_tri1_cued=[];
@@ -67,7 +74,9 @@ for i=1:length(dd)
         % Get mouse by mouse
         % and sess by sess
         % rows are sessid, column 1 is sessid, column2 is mouseid
-        a=load(fullfile(currdir,'sessIDandMouseID_sessLearn.mat'));
+%         a=load(fullfile(currdir,'sessIDandMouseID_sessLearn.mat'));
+%         a=load(fullfile(currdir,'sessIDandMouseID_dplearn.mat'));
+        a=load(fullfile(currdir,nameofsessandmouse));
 %         a=load(fullfile(currdir,'sessIDandMouseID_NOOPRE.mat'));
         sessIDandMouseID=a.sessIDandMouseID;
 
@@ -213,7 +222,8 @@ for i=1:length(dd)
         % Get mouse by mouse
         % and sess by sess
         % rows are sessid, column 1 is sessid, column2 is mouseid
-        a=load(fullfile(currdir,'sessIDandMouseID_sessLearn.mat'));
+%         a=load(fullfile(currdir,'sessIDandMouseID_sessLearn.mat'));
+        a=load(fullfile(currdir,nameofsessandmouse));
 %         a=load(fullfile(currdir,'sessIDandMouseID_NOOPRE.mat'));
         sessIDandMouseID=a.sessIDandMouseID;
         
@@ -377,7 +387,12 @@ else
     plotByBy(mLED_trial1_alltrials_uncued(useMice_LED==1),mLED_trial1_alltrials_cued(useMice_LED==1),mLED_alltrials_uncued(useMice_LED==1),mLED_alltrials_cued(useMice_LED==1),'r',calcCued,true);
     title('Mouse by mouse');
 
-    stats_compareChangeInRate(m_alltrials_uncued-m_trial1_alltrials_uncued,m_alltrials_cued-m_trial1_alltrials_cued,mLED_alltrials_uncued-mLED_trial1_alltrials_uncued,mLED_alltrials_cued-mLED_trial1_alltrials_cued);
+    if ~all(useMice_con==1) & ~isempty(useMice_con) & all(useMice_con==useMice_LED)
+        disp('FOR STATS, USING SAME MICE FOR LED AND CON');
+        stats_compareChangeInRate(m_alltrials_uncued(useMice_LED==1)-m_trial1_alltrials_uncued(useMice_LED==1),m_alltrials_cued(useMice_LED==1)-m_trial1_alltrials_cued(useMice_LED==1),mLED_alltrials_uncued(useMice_LED==1)-mLED_trial1_alltrials_uncued(useMice_LED==1),mLED_alltrials_cued(useMice_LED==1)-mLED_trial1_alltrials_cued(useMice_LED==1));
+    else
+        stats_compareChangeInRate(m_alltrials_uncued-m_trial1_alltrials_uncued,m_alltrials_cued-m_trial1_alltrials_cued,mLED_alltrials_uncued-mLED_trial1_alltrials_uncued,mLED_alltrials_cued-mLED_trial1_alltrials_cued);
+    end
     disp('AND NOW SESS BY SESS');
     stats_compareChangeInRate(s_alltrials_uncued-s_trial1_alltrials_uncued,s_alltrials_cued-s_trial1_alltrials_cued,sLED_alltrials_uncued-sLED_trial1_alltrials_uncued,sLED_alltrials_cued-sLED_trial1_alltrials_cued);
 end
@@ -514,6 +529,11 @@ end
 
 function [rrout,tookmice]=getmbym(sessIDandMouseID,rr,atleast_n_trials)
 
+if size(sessIDandMouseID,1)~=size(rr,1)
+    disp('wrong sessAndMouseID');
+    pause;
+    error('wrong sessAndMouseID');
+end
 u=unique(sessIDandMouseID(:,2));
 rrout=nan(1,length(u));
 tookmice=nan(1,length(u));
