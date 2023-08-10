@@ -1,8 +1,8 @@
 function [takesess_con,takemice_con,takesess_LED,takemice_LED]=combineFigure4DataAcrossMice(dd,useOptoForThisGp,whichtoplot_eventCond,timeStep,cueind,doCDF,doLEDcdf,calcCued,atleast_n_trials,ds,useMice_con,useMice_LED,nameofsessandmouse)
 
 % use 1 2 5 9 12 13
-% [tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=combineFigure4DataAcrossMice(dd([1 2 5 9 12 13]),zeros(size(useOptoForThisGp)),'all cued failures_seqLength3_win3_minus2to0_optoDurforcuepoi25then1NOOPREdplearn',0.035,94,false,false,false,40,1,[],[],'sessIDandMouseID_dplearn.mat');
-% [tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=combineFigure4DataAcrossMice(dd([1 2 5 9 12 13]),zeros(size(useOptoForThisGp)),'cued success_seqLength3_win3_minus2to0_optoDurforcuepoi25then1NOOPREdplearn',0.035,94,false,false,false,40,1,[],[],'sessIDandMouseID_dplearn.mat');
+% [tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=combineFigure4DataAcrossMice(dd([1 2 5 9 12 13]),zeros(size(useOptoForThisGp([1 2 5 9 12 13]))),'all cued failures_seqLength3_win3_minus2to0_optoDurforcuepoi25then1NOOPREdplearn',0.035,94,false,false,false,40,1,[],[],'sessIDandMouseID_dplearn.mat');
+% [tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=combineFigure4DataAcrossMice(dd([1 2 5 9 12 13]),zeros(size(useOptoForThisGp([1 2 5 9 12 13]))),'cued success_seqLength3_win3_minus2to0_optoDurforcuepoi25then1NOOPREdplearn',0.035,94,false,false,false,40,1,[],[],'sessIDandMouseID_dplearn.mat');
 % [tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=combineFigure4DataAcrossMice(dd([1 2 9]),ones(size(useOptoForThisGp([1 2 9]))),'cued success_seqLength3_win3_minus2to0_optoDurforcuepoi25then1NOOPREdplearn',0.035,94,false,false,false,0,1,consensus_successAndFail_tookmice,consensus_successAndFail_tookmice,'sessIDandMouseID_dplearn.mat');
 
 
