@@ -1,12 +1,10 @@
 function [takesess_con,takemice_con,takesess_LED,takemice_LED]=combineFigure4DataAcrossMice(dd,useOptoForThisGp,whichtoplot_eventCond,timeStep,cueind,doCDF,doLEDcdf,calcCued,atleast_n_trials,ds,useMice_con,useMice_LED,nameofsessandmouse)
 
-% use 1 2 5 6 9 12 13
-% or use 1 2 5 6 9 11 12 13
-% maybe use 10
-% 20 cutoff for at least this many sequences
-% [tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=combineFigure4DataAcrossMice(dd([1 9]),useOptoForThisGp([1 9]),'cued success_seqLength3_win3_minus2to0_optoDurforcuepoi25then1NOOPREdplearn',0.035,94,false,false,false,40,1,[],[]);
-% [tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=combineFigure4DataAcrossMice(dd([1 2 5 6 9 11 12 13]),useOptoForThisGp([1 2 5 6 9 11 12 13]),'cued success_seqLength3_win3_minus2to0_optoDurforcuepoi25then1NOOPREdplearn',0.035,94,false,false,false,20,1,[],[]);
-% [tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=combineFigure4DataAcrossMice(dd([1 2 5 6 9 11 12 13]),useOptoForThisGp([1 2 5 6 9 11 12 13]),'cued success_seqLength3_win3_minus2to0_optoDurforcuepoi25then1NOOPREdplearn',0.035,94,false,false,false,50,1,[],[]);
+% use 1 2 5 9 12 13
+% [tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=combineFigure4DataAcrossMice(dd([1 2 5 9 12 13]),zeros(size(useOptoForThisGp)),'all cued failures_seqLength3_win3_minus2to0_optoDurforcuepoi25then1NOOPREdplearn',0.035,94,false,false,false,40,1,[],[],'sessIDandMouseID_dplearn.mat');
+% [tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=combineFigure4DataAcrossMice(dd([1 2 5 9 12 13]),zeros(size(useOptoForThisGp)),'cued success_seqLength3_win3_minus2to0_optoDurforcuepoi25then1NOOPREdplearn',0.035,94,false,false,false,40,1,[],[],'sessIDandMouseID_dplearn.mat');
+% [tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=combineFigure4DataAcrossMice(dd([1 2 9]),ones(size(useOptoForThisGp([1 2 9]))),'cued success_seqLength3_win3_minus2to0_optoDurforcuepoi25then1NOOPREdplearn',0.035,94,false,false,false,0,1,consensus_successAndFail_tookmice,consensus_successAndFail_tookmice,'sessIDandMouseID_dplearn.mat');
+
 
 takesess_con=[]; takemice_con=[]; takesess_LED=[]; takemice_LED=[];
 
@@ -348,7 +346,17 @@ else
     [uncued_mean_out,cued_mean_out,bootMeans]=bootstrapAndSubtractTrialn(rr_noLED_trinext_uncued,rr_noLED_trinext_cued,[0.5 0.5 0.5],[0.5 0.5 0.5],false,calcCued,whichTriForBoot,bootMeans,uncued_mean_out,cued_mean_out);
     plotMeAndSe(rr_noLED_trinext_uncued-rr_noLED_tri1_uncued,rr_noLED_trinext_cued-rr_noLED_tri1_cued,[0.5 0.5 0.5],2,false,calcCued);
     title('Joint trial n and n+i bootstrap, subtract trial n, just plotting n+i');
-    
+    histbins=-0.5+0.01:0.02:0.5; 
+    [n_uncued,edges_uncued]=histcounts(bootMeans(1,:),histbins); % uncued
+    [n_cued,edges_cued]=histcounts(bootMeans(2,:),histbins); % uncued
+    bootMeans_noLED=bootMeans;
+    figure();
+    [n,x]=cityscape_hist(n_uncued,edges_uncued);
+    plot(x,n,'Color','k'); title('Uncued');
+    figure();
+    [n,x]=cityscape_hist(n_cued,edges_cued);
+    plot(x,n,'Color','k'); title('Cued');
+
     figure();
     [uncued_mean_out,cued_mean_out,bootMeans,whichTriForBoot]=bootstrap(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k','r',false,calcCued,[]);
     plotMeAndSe(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k',2,false,calcCued);
@@ -358,6 +366,23 @@ else
         [uncued_mean_out,cued_mean_out,bootMeans]=bootstrapAndSubtractTrialn(rr_LED_trinext_uncued,rr_LED_trinext_cued,'r','r',false,calcCued,whichTriForBoot,bootMeans,uncued_mean_out,cued_mean_out);
         plotMeAndSe(rr_LED_trinext_uncued-rr_LED_tri1_uncued,rr_LED_trinext_cued-rr_LED_tri1_cued,'r',2,false,calcCued);
         title('Joint trial n and n+i bootstrap, subtract trial n, just plotting n+i');
+        [n_uncued_LED,edges_uncued_LED]=histcounts(bootMeans(1,:),histbins); % uncued
+        [n_cued_LED,edges_cued_LED]=histcounts(bootMeans(2,:),histbins); % uncued
+        figure();
+        [n,x]=cityscape_hist(n_uncued,edges_uncued);
+        plot(x,n,'Color','k'); hold on;
+        [n,x]=cityscape_hist(n_uncued_LED,edges_uncued_LED);
+        plot(x,n,'Color','r');
+        p_value=compareBootstraps(bootMeans_noLED(1,:)',bootMeans(1,:)'); % uncued
+        title(['Uncued pval ' num2str(p_value)]);
+
+        figure();
+        [n,x]=cityscape_hist(n_cued,edges_cued);
+        plot(x,n,'Color','k'); hold on;
+        [n,x]=cityscape_hist(n_cued_LED,edges_cued_LED);
+        plot(x,n,'Color','r');
+        p_value=compareBootstraps(bootMeans_noLED(2,:)',bootMeans(2,:)'); % cued
+        title(['Cued pval ' num2str(p_value)]);
     end
 
     % sess by sess, mouse by mouse
@@ -396,6 +421,28 @@ else
     disp('AND NOW SESS BY SESS');
     stats_compareChangeInRate(s_alltrials_uncued-s_trial1_alltrials_uncued,s_alltrials_cued-s_trial1_alltrials_cued,sLED_alltrials_uncued-sLED_trial1_alltrials_uncued,sLED_alltrials_cued-sLED_trial1_alltrials_cued);
 end
+
+end
+
+function p_value=compareBootstraps(bootstrap1,bootstrap2)
+
+% Observed test statistic
+obs_statistic = mean(bootstrap1) - mean(bootstrap2);
+
+% Permutation test 
+n_permutations = 10000; % 0 means pval<1e-5
+perm_statistics = zeros(n_permutations, 1);
+combined = [bootstrap1; bootstrap2];
+for i = 1:n_permutations
+    permuted = combined(randperm(length(combined)));
+    perm_sample1 = permuted(1:length(bootstrap1));
+    perm_sample2 = permuted(length(bootstrap1)+1:end);
+    perm_statistics(i) = mean(perm_sample1) - mean(perm_sample2);
+end
+
+% P-value
+p_value = mean(abs(perm_statistics) >= abs(obs_statistic));
+disp(['p-value: ', num2str(p_value)]);
 
 end
 
