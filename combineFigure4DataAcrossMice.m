@@ -1,9 +1,9 @@
 function [takesess_con,takemice_con,takesess_LED,takemice_LED]=combineFigure4DataAcrossMice(dd,useOptoForThisGp,whichtoplot_eventCond,timeStep,cueind,doCDF,doLEDcdf,calcCued,atleast_n_trials,ds,useMice_con,useMice_LED,nameofsessandmouse)
 
 % use 1 2 5 9 12 13
-% [tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=combineFigure4DataAcrossMice(dd([1 2 5 9 12 13]),zeros(size(useOptoForThisGp([1 2 5 9 12 13]))),'all cued failures_seqLength3_win3_minus2to0_optoDurforcuepoi25then1NOOPREdplearn',0.035,94,false,false,false,40,1,[],[],'sessIDandMouseID_dplearn.mat');
-% [tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=combineFigure4DataAcrossMice(dd([1 2 5 9 12 13]),zeros(size(useOptoForThisGp([1 2 5 9 12 13]))),'cued success_seqLength3_win3_minus2to0_optoDurforcuepoi25then1NOOPREdplearn',0.035,94,false,false,false,40,1,[],[],'sessIDandMouseID_dplearn.mat');
-% [tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=combineFigure4DataAcrossMice(dd([1 2 9]),ones(size(useOptoForThisGp([1 2 9]))),'cued success_seqLength3_win3_minus2to0_optoDurforcuepoi25then1NOOPREdplearn',0.035,94,false,false,false,0,1,consensus_successAndFail_tookmice,consensus_successAndFail_tookmice,'sessIDandMouseID_dplearn.mat');
+% [tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=combineFigure4DataAcrossMice(dd([1 2 5 9 12 13]),zeros(size(useOptoForThisGp([1 2 5 9 12 13]))),'cued success_seqLength3_win3_minus3to025_optoDurforcuepoi25then1NOOPREdplearn',0.035,94,false,false,false,40,1,[],[],'sessIDandMouseID_dplearn.mat');
+% [tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=combineFigure4DataAcrossMice(dd([1 2 5 9 12 13]),zeros(size(useOptoForThisGp([1 2 5 9 12 13]))),'all cued failures_seqLength3_win3_minus3to025_optoDurforcuepoi25then1NOOPREdplearn',0.035,94,false,false,false,40,1,[],[],'sessIDandMouseID_dplearn.mat');
+% [tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=combineFigure4DataAcrossMice(dd([1 2 9]),ones(size(useOptoForThisGp([1 2 9]))),'delayed success_seqLength3_win3_minus3to025poi25then1NOOPREdplearn',0.035,94,false,false,false,0,1,consensus_successAndFail_tookmice,consensus_successAndFail_tookmice,'sessIDandMouseID_dplearn.mat');
 
 
 takesess_con=[]; takemice_con=[]; takesess_LED=[]; takemice_LED=[];
@@ -830,6 +830,7 @@ altogether_prob_uncued=altogether_prob_uncued(takeTrials==1);
 takeFracForBootstrap=1; %0.75; %0.66;
 takeIndsForBootstrap=ceil(takeFracForBootstrap*length(altogether_prob_cued));
 nRuns=100;
+% nRuns=1000;
 bootMeans=nan(2,nRuns);
 if isempty(whichTrialsForBoot)
     newboottrials=true;
@@ -856,8 +857,13 @@ for i=1:nRuns
     end
 end
 if suppressOutput==false && stillsuppressbootstrap==false
-    s=scatter(bootMeans(1,:),bootMeans(2,:),20,'filled','MarkerEdgeColor',scatterPointsEdgeColor,'MarkerFaceColor',colorForBootstrapPoints); hold on;
-    s.AlphaData = 0.5*ones(1,size(bootMeans,2));
+    if nRuns>100
+        s=scatter(bootMeans(1,:),bootMeans(2,:),5,'filled','MarkerEdgeColor',scatterPointsEdgeColor,'MarkerFaceColor',colorForBootstrapPoints); hold on;
+        s.AlphaData = 0.1*ones(1,size(bootMeans,2));
+    else
+        s=scatter(bootMeans(1,:),bootMeans(2,:),20,'filled','MarkerEdgeColor',scatterPointsEdgeColor,'MarkerFaceColor',colorForBootstrapPoints); hold on;
+        s.AlphaData = 0.5*ones(1,size(bootMeans,2));
+    end
     s.MarkerFaceAlpha = 'flat';
     if calcCued==true
         scatter(nanmean(altogether_prob_uncued),nanmean(altogether_prob_cued)-nanmean(altogether_prob_uncued),50,'filled','MarkerEdgeColor',scatterPointsEdgeColor,'MarkerFaceColor',colorForBootstrapPoints);
@@ -910,6 +916,7 @@ altogether_prob_uncued=altogether_prob_uncued(takeTrials==1);
 takeFracForBootstrap=1; %0.75; %0.66;
 takeIndsForBootstrap=ceil(takeFracForBootstrap*length(altogether_prob_cued));
 nRuns=100;
+% nRuns=1000;
 bootMeans=nan(2,nRuns);
 if isempty(whichTrialsForBoot)
     newboottrials=true;
@@ -937,8 +944,13 @@ for i=1:nRuns
     bootMeans(2,i)=bootMeans(2,i)-toSubtract(2);
 end
 if suppressOutput==false && stillsuppressbootstrap==false
-    s=scatter(bootMeans(1,:),bootMeans(2,:),20,'filled','MarkerEdgeColor',scatterPointsEdgeColor,'MarkerFaceColor',colorForBootstrapPoints); hold on;
-    s.AlphaData = 0.5*ones(1,size(bootMeans,2));
+    if nRuns>100
+        s=scatter(bootMeans(1,:),bootMeans(2,:),5,'filled','MarkerEdgeColor',scatterPointsEdgeColor,'MarkerFaceColor',colorForBootstrapPoints); hold on;
+        s.AlphaData = 0.1*ones(1,size(bootMeans,2));
+    else
+        s=scatter(bootMeans(1,:),bootMeans(2,:),20,'filled','MarkerEdgeColor',scatterPointsEdgeColor,'MarkerFaceColor',colorForBootstrapPoints); hold on;
+        s.AlphaData = 0.5*ones(1,size(bootMeans,2));
+    end
     s.MarkerFaceAlpha = 'flat';
     if calcCued==true
         scatter(nanmean(altogether_prob_uncued)-trialn_uncued_mean,nanmean(altogether_prob_cued)-nanmean(altogether_prob_uncued)-trialn_cued_mean,50,'filled','MarkerEdgeColor',scatterPointsEdgeColor,'MarkerFaceColor',colorForBootstrapPoints);

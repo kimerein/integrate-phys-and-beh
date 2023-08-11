@@ -76,6 +76,11 @@ switch whichEventType
         trial1=['trialTypes.optoGroup~=1'];
         trial2_LED=['trialTypes.optoGroup~=1 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1 & (trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_5forward==0)' linkerForVariedTimingForward];
         trial1_LED=['trialTypes.optoGroup~=1'];
+    case 'cued success nplus1led'
+        trial1=['(trialTypes.optoGroup~=1 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0)']; 
+        trial2=['trialTypes.optoGroup~=1 & trialTypes.led==0' linkerForNoLED];
+        trial1_LED=['(trialTypes.optoGroup~=1 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0)']; 
+        trial2_LED=['trialTypes.optoGroup~=1 & trialTypes.led==1' linkerForVariedTimingSame ' & (trialTypes.led_1forward==0 | trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_1back==0)'];
 
     case 'all cued failures'
         trial1=['trialTypes.optoGroup~=1 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.after_cue_success_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0']; 
@@ -87,6 +92,11 @@ switch whichEventType
         trial1=['trialTypes.optoGroup~=1'];
         trial2_LED=['trialTypes.optoGroup~=1 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.after_cue_success_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1 & (trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_5forward==0)' linkerForVariedTimingForward]; 
         trial1_LED=['trialTypes.optoGroup~=1'];
+    case 'all cued failures nplus1led'
+        trial1=['trialTypes.optoGroup~=1 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.after_cue_success_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0']; 
+        trial2=['trialTypes.optoGroup~=1 & trialTypes.led==0' linkerForNoLED];
+        trial1_LED=['trialTypes.optoGroup~=1 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.after_cue_success_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0']; 
+        trial2_LED=['trialTypes.optoGroup~=1 & trialTypes.led==1' linkerForVariedTimingSame ' & (trialTypes.led_1forward==0 | trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_1back==0)'];
 
     case 'cued failure'
         % note that failing sometimes makes the mouse more persistent in future, but
@@ -131,6 +141,11 @@ switch whichEventType
         trial2=['trialTypes.optoGroup~=1' linkerForNoLED_accumulate];
         trial1_LED=['trialTypes.optoGroup~=1 SPLIT trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow==1 & trialTypes.led==1' linkerForVariedTimingSame];
         trial2_LED=['trialTypes.optoGroup~=1' linkerForLED_accumulate];
+    case 'delayed success nplus1led'
+        trial1=['(trialTypes.optoGroup~=1 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.cued_reach_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0)' linkerForVariedTimingUncued]; 
+        trial2=['trialTypes.optoGroup~=1 & trialTypes.led==0' linkerForNoLED linkerForVariedTimingUncued];
+        trial1_LED=['(trialTypes.optoGroup~=1 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.cued_reach_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0)' linkerForVariedTimingUncued]; 
+        trial2_LED=['trialTypes.optoGroup~=1 & trialTypes.led==1 ' linkerForVariedTimingSame ' & (trialTypes.led_1forward==0 | trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_1back==0)' linkerForVariedTimingUncued];
 
     case 'uncued drop'
         trial1=['trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0']; 
@@ -143,29 +158,12 @@ switch whichEventType
         trial2_LED=['trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1 & (trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_5forward==0)' linkerForVariedTimingForward]; 
         trial1_LED='trialTypes.optoGroup~=1';
 
-%      case 'uncued failure'
-%         % did not touch pellet despite reaching in delayed window after cue
-%         % OR reached before cue and thus failed to get pellet
-%         trial1=['trialTypes.optoGroup~=1 & (trialTypes.reachedInTimeWindow_1forward==1 | trialTypes.reachedBeforeCue_1forward==1) & trialTypes.consumed_pellet_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0' linkerForVariedTimingUncued];
-%         trial2=['trialTypes.optoGroup~=1' linkerForNoLED linkerForVariedTimingUncued];
-%         trial1_LED=['trialTypes.optoGroup~=1 & (trialTypes.reachedInTimeWindow_1forward==1 | trialTypes.reachedBeforeCue_1forward==1) & trialTypes.consumed_pellet_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1' linkerForVariedTimingUncued];
-%         trial2_LED=['trialTypes.optoGroup~=1 & (trialTypes.led_1forward==0 | trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_1back==0)' linkerForVariedTimingUncued];
-%     case 'uncued failure accumulate'
-%         trial1=['trialTypes.optoGroup~=1 SPLIT trialTypes.optoGroup~=1 & ((trialTypes.reachedInTimeWindow==1 & trialTypes.touched_pellet==0) | (trialTypes.reachedBeforeCue==1 & trialTypes.reachToPelletBeforeCue==0)) & trialTypes.chewing_at_trial_start==0 & trialTypes.led==0'];
-%         trial2=['trialTypes.optoGroup~=1' linkerForNoLED_accumulate];
-%         trial1_LED=['trialTypes.optoGroup~=1 SPLIT trialTypes.optoGroup~=1 & ((trialTypes.reachedInTimeWindow==1 & trialTypes.touched_pellet==0) | (trialTypes.reachedBeforeCue==1 & trialTypes.reachToPelletBeforeCue==0)) & trialTypes.chewing_at_trial_start==0 & trialTypes.led==1' linkerForVariedTimingSame];
-%         trial2_LED=['trialTypes.optoGroup~=1' linkerForLED_accumulate];
-%     case 'backwards uncued failure'
-%         trial2=['trialTypes.optoGroup~=1 & (trialTypes.reachedInTimeWindow_1forward==1 | trialTypes.reachedBeforeCue_1forward==1) & trialTypes.consumed_pellet_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0' linkerForVariedTimingUncued linkerForNoLEDBACKWARDS];
-%         trial1=['trialTypes.optoGroup~=1' linkerForVariedTimingUncued];
-%         trial2_LED=['trialTypes.optoGroup~=1 & (trialTypes.reachedInTimeWindow_1forward==1 | trialTypes.reachedBeforeCue_1forward==1) & trialTypes.consumed_pellet_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1' linkerForVariedTimingForward linkerForVariedTimingUncued ' & (trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_5forward==0)'];
-%         trial1_LED=['trialTypes.optoGroup~=1' linkerForVariedTimingUncued];
     case 'uncued failure'
         % did not touch pellet despite reaching in delayed window after cue
         % OR reached before cue and thus failed to get pellet
         trial1=['(trialTypes.optoGroup~=1 & (trialTypes.reachedBeforeCue_1forward==1 | trialTypes.reachedInTimeWindow_1forward==1) & trialTypes.cued_reach_1forward==0 & trialTypes.consumed_pellet_1forward==0 & trialTypes.chewing_at_trial_start_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0)' linkerForVariedTimingUncued];
         trial2=['trialTypes.optoGroup~=1' linkerForNoLED linkerForVariedTimingUncued];
-        trial1_LED=['(trialTypes.optoGroup~=1 & (trialTypes.reachedBeforeCue_1forward==1 | trialTypes.reachedInTimeWindow_1forward==1) & trialTypes.cued_reach_1forward==0 & trialTypes.consumed_pellet_1forward==0 & trialTypes.chewing_at_trial_start_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1)' linkerForVariedTimingUncued];
+        trial1_LED=['(trialTypes.optoGroup~=1 & (trialTypes.reachedBeforeCue_1forward==1 | trialTypes.reachedInTimeWindow_1forward==1) & trialTypes.cued_reach_1forward==0 & trialTypes.consumed_pellet_1forward==0 & trialTypes.chewing_at_trial_start_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1)' linkerForVariedTimingForward linkerForVariedTimingUncued];
         trial2_LED=['trialTypes.optoGroup~=1 & (trialTypes.led_1forward==0 | trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_1back==0)' linkerForVariedTimingUncued];
     case 'uncued failure accumulate'
         trial1=['trialTypes.optoGroup~=1 SPLIT trialTypes.optoGroup~=1 & ((trialTypes.reachedInTimeWindow==1 & trialTypes.touched_pellet==0) | (trialTypes.reachedBeforeCue==1 & trialTypes.reachToPelletBeforeCue==0)) & trialTypes.chewing_at_trial_start==0 & trialTypes.led==0'];
@@ -177,27 +175,13 @@ switch whichEventType
         trial1=['trialTypes.optoGroup~=1' linkerForVariedTimingUncued];
         trial2_LED=['(trialTypes.optoGroup~=1 & (trialTypes.reachedBeforeCue_1forward==1 | trialTypes.reachedInTimeWindow_1forward==1) & trialTypes.cued_reach_1forward==0 & trialTypes.consumed_pellet_1forward==0 & trialTypes.chewing_at_trial_start_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1)' linkerForVariedTimingForward linkerForVariedTimingUncued ' & (trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_5forward==0)'];
         trial1_LED=['trialTypes.optoGroup~=1' linkerForVariedTimingUncued];
-%     case 'uncued failure'
-%         % did not touch pellet despite reaching in delayed window after cue
-%         % OR reached before cue and thus failed to get pellet
-%         trial1=['(trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.cued_reach_1forward==0 & trialTypes.chewing_at_trial_start_1forward==0 & trialTypes.consumed_pellet_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0) | ' ...
-%                 '(trialTypes.optoGroup~=1 & trialTypes.reachedBeforeCue_1forward==1 & trialTypes.consumed_pellet_1forward==0 & trialTypes.chewing_at_trial_start_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0)' linkerForVariedTimingUncued];
-%         trial2=['trialTypes.optoGroup~=1' linkerForNoLED linkerForVariedTimingUncued];
-%         trial1_LED=['(trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.cued_reach_1forward==0 & trialTypes.chewing_at_trial_start_1forward==0 & trialTypes.consumed_pellet_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1) | ' ...
-%                     '(trialTypes.optoGroup~=1 & trialTypes.reachedBeforeCue_1forward==1 & trialTypes.consumed_pellet_1forward==0 & trialTypes.chewing_at_trial_start_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1)' linkerForVariedTimingUncued];
-%         trial2_LED=['trialTypes.optoGroup~=1 & (trialTypes.led_1forward==0 | trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_1back==0)' linkerForVariedTimingUncued];
-%     case 'uncued failure accumulate'
-%         trial1=['trialTypes.optoGroup~=1 SPLIT trialTypes.optoGroup~=1 & ((trialTypes.reachedInTimeWindow==1 & trialTypes.touched_pellet==0) | (trialTypes.reachedBeforeCue==1 & trialTypes.reachToPelletBeforeCue==0)) & trialTypes.chewing_at_trial_start==0 & trialTypes.led==0'];
-%         trial2=['trialTypes.optoGroup~=1' linkerForNoLED_accumulate];
-%         trial1_LED=['trialTypes.optoGroup~=1 SPLIT trialTypes.optoGroup~=1 & ((trialTypes.reachedInTimeWindow==1 & trialTypes.touched_pellet==0) | (trialTypes.reachedBeforeCue==1 & trialTypes.reachToPelletBeforeCue==0)) & trialTypes.chewing_at_trial_start==0 & trialTypes.led==1' linkerForVariedTimingSame];
-%         trial2_LED=['trialTypes.optoGroup~=1' linkerForLED_accumulate];
-%     case 'backwards uncued failure'
-%         trial2=['(trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.cued_reach_1forward==0 & trialTypes.chewing_at_trial_start_1forward==0 & trialTypes.consumed_pellet_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0) | ' ...
-%                 '(trialTypes.optoGroup~=1 & trialTypes.reachedBeforeCue_1forward==1 & trialTypes.consumed_pellet_1forward==0 & trialTypes.chewing_at_trial_start_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0)' linkerForVariedTimingUncued linkerForNoLEDBACKWARDS];
-%         trial1=['trialTypes.optoGroup~=1' linkerForVariedTimingUncued];
-%         trial2_LED=['(trialTypes.optoGroup~=1 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.cued_reach_1forward==0 & trialTypes.chewing_at_trial_start_1forward==0 & trialTypes.consumed_pellet_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1) | ' ...
-%                     '(trialTypes.optoGroup~=1 & trialTypes.reachedBeforeCue_1forward==1 & trialTypes.consumed_pellet_1forward==0 & trialTypes.chewing_at_trial_start_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1)' linkerForVariedTimingForward linkerForVariedTimingUncued ' & (trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_5forward==0)'];
-%         trial1_LED=['trialTypes.optoGroup~=1' linkerForVariedTimingUncued];
+    case 'uncued failure nplus1led'
+        % did not touch pellet despite reaching in delayed window after cue
+        % OR reached before cue and thus failed to get pellet
+        trial1=['(trialTypes.optoGroup~=1 & (trialTypes.reachedBeforeCue_1forward==1 | trialTypes.reachedInTimeWindow_1forward==1) & trialTypes.cued_reach_1forward==0 & trialTypes.consumed_pellet_1forward==0 & trialTypes.chewing_at_trial_start_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0)' linkerForVariedTimingUncued];
+        trial2=['trialTypes.optoGroup~=1 & trialTypes.led==0' linkerForNoLED linkerForVariedTimingUncued];
+        trial1_LED=['(trialTypes.optoGroup~=1 & (trialTypes.reachedBeforeCue_1forward==1 | trialTypes.reachedInTimeWindow_1forward==1) & trialTypes.cued_reach_1forward==0 & trialTypes.consumed_pellet_1forward==0 & trialTypes.chewing_at_trial_start_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0)' linkerForVariedTimingUncued];
+        trial2_LED=['trialTypes.optoGroup~=1 & trialTypes.led==1 ' linkerForVariedTimingSame ' & (trialTypes.led_1forward==0 | trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_1back==0)' linkerForVariedTimingUncued];
 
     case 'no no opto'
         trial1='trialTypes.optoGroup~=1 & trialTypes.led==0';
