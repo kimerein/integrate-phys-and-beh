@@ -888,6 +888,7 @@ if isempty(whichTrialsForBoot)
 end
 
 stillsuppressbootstrap=false;
+make2Dpdf=false;
 
 if isempty(approach2_alltrials_uncued) || isempty(approach2_alltrials_cued)
     uncued_mean_out=[];
@@ -965,6 +966,45 @@ else
     uncued_mean_out=nanmean(altogether_prob_uncued)-trialn_uncued_mean;
     cued_mean_out=nanmean(altogether_prob_cued)-trialn_cued_mean;
 end
+
+if make2Dpdf==true
+    % number counts in each bin, then 2D smooth
+    TwoDhist(bootMeans',200, -0.08, 0.08, -0.2, 0.2); % for plot
+end
+
+end
+
+function TwoDhist(points, nb, minX, maxX, minY, maxY)
+
+% Define the number of bins for the histogram
+numBins = [nb, nb];
+
+% Specify the x and y ranges and number of bins
+xRange = [minX, maxX]; % replace with your desired range
+yRange = [minY, maxY]; % replace with your desired range
+
+% Define the bin edges
+xEdges = linspace(xRange(1), xRange(2), numBins(1) + 1);
+yEdges = linspace(yRange(1), yRange(2), numBins(2) + 1);
+
+% Calculate the 2D histogram
+[N, ~, ~] = histcounts2(points(:, 1), points(:, 2), xEdges, yEdges);
+
+% Apply Gaussian smoothing
+smoothedN = imgaussfilt(N, 12); % The second parameter controls the degree of smoothing
+
+% Normalize to create a PDF
+pdf = smoothedN / (sum(smoothedN(:)));
+
+% Plot the smoothed histogram
+figure;
+imagesc(xEdges(1:end-1), yEdges(1:end-1), pdf');
+axis xy; % Flip the y-axis so that it matches the standard Cartesian coordinate system
+colorbar; % Add a color bar to show the scale
+xlabel('X Coordinate');
+ylabel('Y Coordinate');
+title('2D PDF');
+colormap(flipud(colormap('gray')));
 
 end
 
