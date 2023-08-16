@@ -695,10 +695,10 @@ anyIsSig=any(isSig==1,2);
 %% Set up data matrix
 % Units X conditions (alignments to beh events) X time
 % a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\cue.mat'); cue_Response=a.Response; 
-a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\excluded trials where opto during cue\cued_success_Response.mat'); cued_success_Response=a.cued_success_Response;  
-a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\excluded trials where opto during cue\cued_failureNotDrop_Response.mat'); cued_failure_Response=a.cued_failureNotDrop_Response; 
-a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\excluded trials where opto during cue\uncued_success_Response.mat'); uncued_success_Response=a.uncued_success_Response; 
-a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\excluded trials where opto during cue\uncued_failureNotDrop_Response.mat'); uncued_failure_Response=a.uncued_failureNotDrop_Response;
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_success_Response.mat'); cued_success_Response=a.cued_success_Response;  
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_failureNotDrop_Response.mat'); cued_failure_Response=a.cued_failureNotDrop_Response; 
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_success_Response.mat'); uncued_success_Response=a.uncued_success_Response; 
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_failureNotDrop_Response.mat'); uncued_failure_Response=a.uncued_failureNotDrop_Response;
 % a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\cue_noReach.mat'); cue_noReach_Response=a.Response;
 %a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\uncued_reach.mat'); uncued_reach_Response=a.Response;
 
@@ -889,7 +889,7 @@ else
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\tensor regression\BEST SO FAR\currtens\excludedInCurrent_cued_success_Response.mat');
     nownotexcl=find(cued_success_Response.excluded==0); wasnotexcl=find(excludedInCurrent_cued_success_Response==0);
     cued_success_Response.isHighWeight=nan(size(cued_success_Response.ns));
-    ued_success_Response.isVeryHighWeight=nan(size(cued_success_Response.ns));
+    cued_success_Response.isVeryHighWeight=nan(size(cued_success_Response.ns));
     cued_success_Response.idx=nan(size(cued_success_Response.ns)); 
     cued_success_Response.idx(ismember(nownotexcl,wasnotexcl))=idx; 
     cued_success_Response.isHighWeight(ismember(nownotexcl,wasnotexcl))=isHighWeight_train';
@@ -898,8 +898,10 @@ else
     % cued_success_Response.idx=idx;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\py_all_glm_coef_butIndexedIntoMatCoefs.mat');
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\py_metrics_butIndexedIntoMatCoefs.mat');
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\allr2scores.mat');
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\unitnames_glm.mat');
     indexGLMcellsIntoUnitNames=getNamesIndexIntoNamesList(unitnames_glm,unitbyunit_names); 
+    py_metrics.allr2scores=allr2scores;
     py_metrics.activeMoreBeforeCuedReach=nansum(py_all_glm_coef(:,[1:16 427:427+20 498:498+20 569:569+20]),2);
     py_metrics.activeMoreBeforeAnyReach=nansum(py_all_glm_coef(:,[214:214+20 285:285+20 356:356+20]),2);
     py_metrics.cuecoef_over1sec=nansum(py_all_glm_coef(:,[20:30]),2);
