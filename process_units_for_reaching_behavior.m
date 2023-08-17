@@ -960,6 +960,13 @@ else
     cued_success_Response.consensus_idx(cued_success_Response.idx_from_glm==1 & cued_success_Response.idx==1)=1; % 1 is succ-continuing, 0 is fail-continuing
     figure(); scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),cued_success_Response.combofailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),[],'b');
     hold on; scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),cued_success_Response.combofailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),[],'r');
+    figure(); scatter(cued_success_Response.allsuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),cued_success_Response.allfailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),[],'b');
+    hold on; scatter(cued_success_Response.allsuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),cued_success_Response.allfailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),[],'r');
+    scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),cued_success_Response.cXfailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),[],'b');
+    hold on; scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),cued_success_Response.cXfailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),[],'r');
+    % THIS IS THE FUNCTION:
+    % xie=-1:0.01:1; yie=-0.75*exp(-1.1*(xie-0.6))+1.5;  hold all; plot(xie,yie);
+
     r{1}=cued_success_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_failureNotDrop_Response.mat'); r{2}=cued_failureNotDrop_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_failureNotDrop_Response.mat'); r{3}=uncued_failureNotDrop_Response;
