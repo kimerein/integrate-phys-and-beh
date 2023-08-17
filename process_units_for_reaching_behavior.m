@@ -695,10 +695,10 @@ anyIsSig=any(isSig==1,2);
 %% Set up data matrix
 % Units X conditions (alignments to beh events) X time
 % a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\cue.mat'); cue_Response=a.Response; 
-a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_success_Response.mat'); cued_success_Response=a.cued_success_Response;  
-a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_failureNotDrop_Response.mat'); cued_failure_Response=a.cued_failureNotDrop_Response; 
-a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_success_Response.mat'); uncued_success_Response=a.uncued_success_Response; 
-a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_failureNotDrop_Response.mat'); uncued_failure_Response=a.uncued_failureNotDrop_Response;
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\excluded trials where opto during cue\cued_success_Response.mat'); cued_success_Response=a.cued_success_Response;  
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\excluded trials where opto during cue\cued_failureNotDrop_Response.mat'); cued_failure_Response=a.cued_failureNotDrop_Response; 
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\excluded trials where opto during cue\uncued_success_Response.mat'); uncued_success_Response=a.uncued_success_Response; 
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\excluded trials where opto during cue\uncued_failureNotDrop_Response.mat'); uncued_failure_Response=a.uncued_failureNotDrop_Response;
 % a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\cue_noReach.mat'); cue_noReach_Response=a.Response;
 %a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\uncued_reach.mat'); uncued_reach_Response=a.Response;
 
@@ -911,6 +911,36 @@ else
     py_metrics.allSucc_over1sec=nansum(py_all_glm_coef(:,[214:214+19]),2);
     py_metrics.cXsucc_overpoint5sec=nansum(py_all_glm_coef(:,[427:427+10]),2);
     py_metrics.allSucc_overpoint5sec=nansum(py_all_glm_coef(:,[214:214+10]),2);
+
+    % [num2str((1:640)') feature_names]
+    % Tensor regression temporal factors started at time 0, wrt reach,
+    % continues for 4.5 secs
+    % GLM coefficients according to shifts are from -2 to 5 sec wrt event
+    % GLM inds for 0 to 2 sec: shift names 0 to 20, 20 to 40 index
+    % GLM inds for 2 to 4.5 sec: shift names 21 to 45, 41 to 65 index
+    % GLM inds for 2 to 5 sec: shift names 21 to 50, 41 to 70 index
+    % all success starts at 214
+    firsthalfie=nansum(py_all_glm_coef(:,[234:254]),2);
+    secondhalfie=nansum(py_all_glm_coef(:,[255:284]),2);
+    py_metrics.allsuccess_modulation_index=(secondhalfie-firsthalfie)./(secondhalfie+firsthalfie);
+    firsthalfie=nansum(py_all_glm_coef(:,[447:467]),2);
+    secondhalfie=nansum(py_all_glm_coef(:,[468:497]),2);
+    py_metrics.cXsuccess_modulation_index=(secondhalfie-firsthalfie)./(secondhalfie+firsthalfie);
+    firsthalfie=nansum(py_all_glm_coef(:,[305:325]),2);
+    secondhalfie=nansum(py_all_glm_coef(:,[326:355]),2);
+    py_metrics.alldrop_modulation_index=(secondhalfie-firsthalfie)./(secondhalfie+firsthalfie);
+    firsthalfie=nansum(py_all_glm_coef(:,[376:396]),2);
+    secondhalfie=nansum(py_all_glm_coef(:,[397:426]),2);
+    py_metrics.allmiss_modulation_index=(secondhalfie-firsthalfie)./(secondhalfie+firsthalfie);
+    py_metrics.allfailure_modulation_index=(py_metrics.alldrop_modulation_index+py_metrics.allmiss_modulation_index)/2;
+    firsthalfie=nansum(py_all_glm_coef(:,[518:538]),2);
+    secondhalfie=nansum(py_all_glm_coef(:,[539:568]),2);
+    py_metrics.cXdrop_modulation_index=(secondhalfie-firsthalfie)./(secondhalfie+firsthalfie);
+    firsthalfie=nansum(py_all_glm_coef(:,[589:609]),2);
+    secondhalfie=nansum(py_all_glm_coef(:,[610:639]),2);
+    py_metrics.cXmiss_modulation_index=(secondhalfie-firsthalfie)./(secondhalfie+firsthalfie);
+    py_metrics.cXfailure_modulation_index=(py_metrics.cXdrop_modulation_index+py_metrics.cXmiss_modulation_index)/2;
+
     whichGLMinds=[1:71];
     cued_success_Response=addMetricsToResponse(cued_success_Response,py_metrics,py_all_glm_coef,indexGLMcellsIntoUnitNames,whichGLMinds);
     r{1}=cued_success_Response;

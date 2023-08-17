@@ -75,5 +75,19 @@ switch augmentscheme
         tensorfortrain=cat(3,tensorfortrain,tensorwithdrops2);
 
         allLabels=[(0:3)'; (0:3)'; repmat(([1 3])',size(tensorwithdrops2,3)/2,1)];
+    case 4
+        % randomly drop 50% of the cells
+        nRuns=50;
+        tensorwithdrops2=nan(size(truetensor,1),size(truetensor,2),nRuns*4);
+        for i=1:nRuns
+            dropforthistens=randsample(size(truetensor,1),floor(0.5*size(truetensor,1)));
+            tensorwithdrops2(:,:,(i-1)*4+1:i*4)=truetensor;
+            tensorwithdrops2(dropforthistens,:,(i-1)*4+1:i*4)=0;
+        end
+
+        % put all together
+        tensorfortrain=cat(3,truetensor,tensorwithdrops2);
+
+        allLabels=repmat((0:3)',size(tensorfortrain,3)/4,1);
 end
 
