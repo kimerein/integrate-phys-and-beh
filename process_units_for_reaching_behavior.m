@@ -979,8 +979,13 @@ else
     ythresh=-0.75*exp(-1.1.*(cued_success_Response.allsuccess_modulation_index-0.6))+1.5; belowthresh2=cued_success_Response.allfailure_modulation_index<ythresh; abovethresh2=cued_success_Response.allfailure_modulation_index>=ythresh;
     ythresh=-0.75*exp(-1.1.*(cued_success_Response.cXsuccess_modulation_index-0.6))+1.5; belowthresh3=cued_success_Response.cXfailure_modulation_index<ythresh; abovethresh3=cued_success_Response.cXfailure_modulation_index>=ythresh;
     cued_success_Response.idx=nan(size(cued_success_Response.idx)); 
-    cued_success_Response.idx(belowthresh1==1 | belowthresh2==1 | belowthresh3==1 | (cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0))=2; % 2 is failure-continuing
-    cued_success_Response.idx((abovethresh1==1 & abovethresh2==1 & abovethresh3==1) | (cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1) | ((abovethresh1==1 | abovethresh2==1 | abovethresh3==1) & ~(belowthresh1==1 | belowthresh2==1 | belowthresh3==1)))=1; % 1 is success-continuing
+%     cued_success_Response.idx(belowthresh1==1 | belowthresh2==1 | belowthresh3==1 | (cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0))=2; % 2 is failure-continuing
+%     cued_success_Response.idx((abovethresh1==1 & abovethresh2==1 & abovethresh3==1) | (cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1) | ((abovethresh1==1 | abovethresh2==1 | abovethresh3==1) & ~(belowthresh1==1 | belowthresh2==1 | belowthresh3==1)))=1; % 1 is success-continuing
+%     cued_success_Response.idx(belowthresh1==1 | belowthresh2==1 | belowthresh3==1)=2; % 2 is failure-continuing
+%     cued_success_Response.idx((abovethresh1==1 & abovethresh2==1 & abovethresh3==1) | ((abovethresh1==1 | abovethresh2==1 | abovethresh3==1) & ~(belowthresh1==1 | belowthresh2==1 | belowthresh3==1)))=1; % 1 is success-continuing
+    cued_success_Response.idx((cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0))=2; % 2 is failure-continuing
+    cued_success_Response.idx((cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1))=1; % 1 is success-continuing
+    idx=cued_success_Response.idx;
 
     r{1}=cued_success_Response;
 %     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_failureNotDrop_Response.mat'); r{2}=cued_failureNotDrop_Response;
@@ -1047,11 +1052,11 @@ cue_Response=r{5};
 % cued_failure_noReach_Response=removeUnitFromResponse(cued_failure_noReach_Response,trmv);
 % uncued_failure_noReach_Response=removeUnitFromResponse(uncued_failure_noReach_Response,trmv);
 
-usingGLMidx=true;
+usingGLMidx=false;
 if usingGLMidx==true
     % Remove units with firing rates too low??
     toolow=zeros(size(nanmean(cued_success_Response.unitbyunit_y,2)));
-%     toolow=nanmean(cued_success_Response.unitbyunit_y,2)+nanmean(uncued_success_Response.unitbyunit_y,2)+nanmean(cued_drop_Response.unitbyunit_y,2)+nanmean(uncued_drop_Response.unitbyunit_y,2)<2; 
+%     toolow=nanmean(cued_success_Response.unitbyunit_y,2)+nanmean(uncued_success_Response.unitbyunit_y,2)+nanmean(cued_failure_Response.unitbyunit_y,2)+nanmean(uncued_failure_Response.unitbyunit_y,2)<2; 
     
     % remove all units with nan classification
     f=find(cued_success_Response.excluded==0); 
@@ -1107,9 +1112,9 @@ plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Respon
 
 %% TUNING OF PERSISTENT ACTIVITY
 clear r
-load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\TCA\idx_groupLabelsFromTCA.mat');
+% load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\TCA\idx_groupLabelsFromTCA.mat');
 load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_success_Response.mat'); cued_success_Response.idx=idx; r{1}=cued_success_Response;
-load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_failure_Response.mat'); cued_failure_Response.idx=idx; r{2}=cued_failure_Response;
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\cued_failure_Response.mat'); cued_failure_Response.idx=cued_success_Response.idx; r{2}=cued_failure_Response;
 load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\uncued_failure_Response.mat'); uncued_failure_Response.idx=idx; r{3}=uncued_failure_Response;
 load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\test set\uncued_success_Response.mat'); uncued_success_Response.idx=idx; r{4}=uncued_success_Response;
 load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\cued_reach_Response.mat'); r{5}=cued_reach_Response;

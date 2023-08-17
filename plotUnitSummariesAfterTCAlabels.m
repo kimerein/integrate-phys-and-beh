@@ -9,16 +9,16 @@ switch justAvsOrTuning
         plotAll=false;
         Zscore=false;
         minmaxnorm=false;
-        chopOutliers=false;
-        smoo=30; %30; %6; %smoo=3; %smoo=42;
+        chopOutliers=true;
+        smoo=30; % only used for tuning %30; %6; %smoo=3; %smoo=42;
         smoothBeforeResids=true; 
-        smooBef=15; %30; %83;
+        smooBef=200; %15; %30; %83;
         getResiduals=false; % but need this to get rid of mid-range
-        ds=1;
+        ds=1; %1;
         removeInsufficientBaseline=true; % will nan out units that don't have at least X seconds of baseline before aligncomp max
-        atLeastXBaseline=0.75; % in sec
+        atLeastXBaseline=2; %0.75; % in sec
         removeInsufficientPostBaseline=true;
-        atLeastXAfterBaseline=5;
+        atLeastXAfterBaseline=10;
     case 'tuning'
         % for cue tuned plots
         % doingCued='uncuedOverCued'; % 'cued' or 'uncued' or 'cuedOverUncued' or 'uncuedOverCued'
