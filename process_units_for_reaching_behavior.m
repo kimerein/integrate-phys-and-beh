@@ -971,6 +971,7 @@ else
     scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),cued_success_Response.cXfailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),[],'b');
     hold on; scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),cued_success_Response.cXfailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),[],'r');
     xie=-1:0.01:1; yie=-0.75*exp(-1.1*(xie-0.6))+1.5; hold all; plot(xie,yie);
+
     % THIS IS THE BOUNDARY FUNCTION:
     % xie=-1:0.01:1; yie=-0.75*exp(-1.1*(xie-0.6))+1.5; hold all; plot(xie,yie);
     % Use it to define cell types, based on glm coefs
@@ -978,12 +979,14 @@ else
     ythresh=-0.75*exp(-1.1.*(cued_success_Response.allsuccess_modulation_index-0.6))+1.5; belowthresh2=cued_success_Response.allfailure_modulation_index<ythresh; abovethresh2=cued_success_Response.allfailure_modulation_index>=ythresh;
     ythresh=-0.75*exp(-1.1.*(cued_success_Response.cXsuccess_modulation_index-0.6))+1.5; belowthresh3=cued_success_Response.cXfailure_modulation_index<ythresh; abovethresh3=cued_success_Response.cXfailure_modulation_index>=ythresh;
     cued_success_Response.idx=nan(size(cued_success_Response.idx)); 
-    cued_success_Response.idx(belowthresh1==1 | belowthresh2==1 | belowthresh3==1)=0; % 0 is failure-continuing
-    cued_success_Response.idx((abovethresh1==1 & abovethresh2==1 & abovethresh3==1) | ((abovethresh1==1 | abovethresh2==1 | abovethresh3==1) & ~(belowthresh1==1 | belowthresh2==1 | belowthresh3==1)))=1; % 1 is success-continuing
+    cued_success_Response.idx(belowthresh1==1 | belowthresh2==1 | belowthresh3==1 | (cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0))=2; % 2 is failure-continuing
+    cued_success_Response.idx((abovethresh1==1 & abovethresh2==1 & abovethresh3==1) | (cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1) | ((abovethresh1==1 | abovethresh2==1 | abovethresh3==1) & ~(belowthresh1==1 | belowthresh2==1 | belowthresh3==1)))=1; % 1 is success-continuing
 
     r{1}=cued_success_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_failureNotDrop_Response.mat'); r{2}=cued_failureNotDrop_Response;
-    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_failureNotDrop_Response.mat'); r{3}=uncued_failureNotDrop_Response;
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_failureNotDrop_Response.mat'); r{2}=cued_failureNotDrop_Response;
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_failureNotDrop_Response.mat'); r{3}=uncued_failureNotDrop_Response;
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_failure_Response.mat'); r{2}=cued_failure_Response;
+    load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_failure_Response.mat'); r{3}=uncued_failure_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_success_Response.mat'); r{4}=uncued_success_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cue_noReach_Response.mat'); cue_Response=cue_noReach_Response; r{5}=cue_Response;
 %     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\only trials where opto during cue\cued_drop_Response.mat'); r{5}=cued_drop_Response;
@@ -1044,6 +1047,7 @@ cue_Response=r{5};
 % cued_failure_noReach_Response=removeUnitFromResponse(cued_failure_noReach_Response,trmv);
 % uncued_failure_noReach_Response=removeUnitFromResponse(uncued_failure_noReach_Response,trmv);
 
+usingGLMidx=true;
 if usingGLMidx==true
     % Remove units with firing rates too low??
     toolow=zeros(size(nanmean(cued_success_Response.unitbyunit_y,2)));
