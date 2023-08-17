@@ -964,8 +964,22 @@ else
     hold on; scatter(cued_success_Response.allsuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),cued_success_Response.allfailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),[],'r');
     scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),cued_success_Response.cXfailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),[],'b');
     hold on; scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),cued_success_Response.cXfailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),[],'r');
-    % THIS IS THE FUNCTION:
-    % xie=-1:0.01:1; yie=-0.75*exp(-1.1*(xie-0.6))+1.5;  hold all; plot(xie,yie);
+    figure(); scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),cued_success_Response.combofailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),[],'b');
+    hold on; scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),cued_success_Response.combofailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),[],'r');
+    scatter(cued_success_Response.allsuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),cued_success_Response.allfailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),[],'b');
+    hold on; scatter(cued_success_Response.allsuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),cued_success_Response.allfailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),[],'r');
+    scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),cued_success_Response.cXfailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),[],'b');
+    hold on; scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),cued_success_Response.cXfailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),[],'r');
+    xie=-1:0.01:1; yie=-0.75*exp(-1.1*(xie-0.6))+1.5; hold all; plot(xie,yie);
+    % THIS IS THE BOUNDARY FUNCTION:
+    % xie=-1:0.01:1; yie=-0.75*exp(-1.1*(xie-0.6))+1.5; hold all; plot(xie,yie);
+    % Use it to define cell types, based on glm coefs
+    ythresh=-0.75*exp(-1.1.*(cued_success_Response.combosuccess_modulation_index-0.6))+1.5; belowthresh1=cued_success_Response.combofailure_modulation_index<ythresh; abovethresh1=cued_success_Response.combofailure_modulation_index>=ythresh;
+    ythresh=-0.75*exp(-1.1.*(cued_success_Response.allsuccess_modulation_index-0.6))+1.5; belowthresh2=cued_success_Response.allfailure_modulation_index<ythresh; abovethresh2=cued_success_Response.allfailure_modulation_index>=ythresh;
+    ythresh=-0.75*exp(-1.1.*(cued_success_Response.cXsuccess_modulation_index-0.6))+1.5; belowthresh3=cued_success_Response.cXfailure_modulation_index<ythresh; abovethresh3=cued_success_Response.cXfailure_modulation_index>=ythresh;
+    cued_success_Response.idx=nan(size(cued_success_Response.idx)); 
+    cued_success_Response.idx(belowthresh1==1 | belowthresh2==1 | belowthresh3==1)=0; % 0 is failure-continuing
+    cued_success_Response.idx((abovethresh1==1 & abovethresh2==1 & abovethresh3==1) | ((abovethresh1==1 | abovethresh2==1 | abovethresh3==1) & ~(belowthresh1==1 | belowthresh2==1 | belowthresh3==1)))=1; % 1 is success-continuing
 
     r{1}=cued_success_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_failureNotDrop_Response.mat'); r{2}=cued_failureNotDrop_Response;
