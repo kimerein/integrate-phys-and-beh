@@ -811,9 +811,15 @@ boot=1; % num iterations for bootstrap
 clear r
 % load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\training\TCA\idx_groupLabelsFromTCA.mat'); temp=idx; idx(temp==2)=1; idx(temp==1)=2; % labels flipped for this TCA
 % load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\tensor regression\rank 2\idx.mat'); 
-load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\tensor regression\BEST SO FAR\currtens\idx.mat'); 
-load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\tensor regression\BEST SO FAR\currtens\isHighWeight_train.mat');
-load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\tensor regression\BEST SO FAR\currtens\isVeryHighWeight_train.mat');
+% load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\tensor regression\BEST SO FAR\currtens\idx.mat'); 
+% load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\tensor regression\BEST SO FAR\currtens\isHighWeight_train.mat');
+% load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\tensor regression\BEST SO FAR\currtens\isVeryHighWeight_train.mat');
+
+% load('C:\Users\sabatini\Documents\currtens BEST SO FAR\factor_0.mat');
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\tensor regression\BEST SO FAR\currtens THIS IS GOOD\factor_0.mat');
+idx=factor(:,1)>=factor(:,2);
+isHighWeight_train=factor(:,1)>0.03 | factor(:,2)>0.03;
+load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\combine mat and python glms\consensus_idx_from_glm_when_normByGLMcoefIntegral.mat');
 
 usingGLMidx=false;
 if usingGLMidx==true
@@ -888,13 +894,14 @@ else
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_success_Response.mat');
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\tensor regression\BEST SO FAR\currtens\excludedInCurrent_cued_success_Response.mat');
     nownotexcl=find(cued_success_Response.excluded==0); wasnotexcl=find(excludedInCurrent_cued_success_Response==0);
+
     cued_success_Response.isHighWeight=nan(size(cued_success_Response.ns));
     cued_success_Response.isVeryHighWeight=nan(size(cued_success_Response.ns));
     cued_success_Response.idx=nan(size(cued_success_Response.ns)); 
     cued_success_Response.idx(ismember(nownotexcl,wasnotexcl))=idx; 
     cued_success_Response.isHighWeight(ismember(nownotexcl,wasnotexcl))=isHighWeight_train';
     cued_success_Response.isVeryHighWeight(ismember(nownotexcl,wasnotexcl))=isVeryHighWeight_train;
-    cued_success_Response.isVeryHighWeight=cued_success_Response.isVeryHighWeight';
+    
     % cued_success_Response.idx=idx;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\py_all_glm_coef_butIndexedIntoMatCoefs.mat');
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\python glm training set\py_metrics_butIndexedIntoMatCoefs.mat');
@@ -902,6 +909,7 @@ else
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\unitnames_glm.mat');
     indexGLMcellsIntoUnitNames=getNamesIndexIntoNamesList(unitnames_glm,unitbyunit_names); 
     py_metrics.allr2scores=allr2scores;
+    py_metrics.idx_from_glm=idx_from_glm;
     py_metrics.activeMoreBeforeCuedReach=nansum(py_all_glm_coef(:,[1:16 427:427+20 498:498+20 569:569+20]),2);
     py_metrics.activeMoreBeforeAnyReach=nansum(py_all_glm_coef(:,[214:214+20 285:285+20 356:356+20]),2);
     py_metrics.cuecoef_over1sec=nansum(py_all_glm_coef(:,[20:30]),2);
@@ -920,29 +928,38 @@ else
     % GLM inds for 2 to 4.5 sec: shift names 21 to 45, 41 to 65 index
     % GLM inds for 2 to 5 sec: shift names 21 to 50, 41 to 70 index
     % all success starts at 214
-    firsthalfie=nansum(py_all_glm_coef(:,[234:254]),2);
-    secondhalfie=nansum(py_all_glm_coef(:,[255:284]),2);
-    py_metrics.allsuccess_modulation_index=(secondhalfie-firsthalfie)./(secondhalfie+firsthalfie);
-    firsthalfie=nansum(py_all_glm_coef(:,[447:467]),2);
-    secondhalfie=nansum(py_all_glm_coef(:,[468:497]),2);
-    py_metrics.cXsuccess_modulation_index=(secondhalfie-firsthalfie)./(secondhalfie+firsthalfie);
-    firsthalfie=nansum(py_all_glm_coef(:,[305:325]),2);
-    secondhalfie=nansum(py_all_glm_coef(:,[326:355]),2);
-    py_metrics.alldrop_modulation_index=(secondhalfie-firsthalfie)./(secondhalfie+firsthalfie);
-    firsthalfie=nansum(py_all_glm_coef(:,[376:396]),2);
-    secondhalfie=nansum(py_all_glm_coef(:,[397:426]),2);
-    py_metrics.allmiss_modulation_index=(secondhalfie-firsthalfie)./(secondhalfie+firsthalfie);
+    firsthalfie=nanmean(py_all_glm_coef(:,[234:254]),2);
+    secondhalfie=nanmean(py_all_glm_coef(:,[255:284]),2);
+    py_metrics.allsuccess_modulation_index=(secondhalfie-firsthalfie)./(abs(secondhalfie)+abs(firsthalfie));
+    py_metrics.allsuccess_change=(secondhalfie-firsthalfie);
+    firsthalfie=nanmean(py_all_glm_coef(:,[447:467]),2);
+    secondhalfie=nanmean(py_all_glm_coef(:,[468:497]),2);
+    py_metrics.cXsuccess_modulation_index=(secondhalfie-firsthalfie)./(abs(secondhalfie)+abs(firsthalfie));
+    firsthalfie=nanmean(py_all_glm_coef(:,[305:325]),2);
+    secondhalfie=nanmean(py_all_glm_coef(:,[326:355]),2);
+    py_metrics.alldrop_modulation_index=(secondhalfie-firsthalfie)./(abs(secondhalfie)+abs(firsthalfie));
+    firsthalfie=nanmean(py_all_glm_coef(:,[376:396]),2);
+    secondhalfie=nanmean(py_all_glm_coef(:,[397:426]),2);
+    py_metrics.allmiss_modulation_index=(secondhalfie-firsthalfie)./(abs(secondhalfie)+abs(firsthalfie));
+    py_metrics.allmiss_change=(secondhalfie-firsthalfie);
     py_metrics.allfailure_modulation_index=(py_metrics.alldrop_modulation_index+py_metrics.allmiss_modulation_index)/2;
-    firsthalfie=nansum(py_all_glm_coef(:,[518:538]),2);
-    secondhalfie=nansum(py_all_glm_coef(:,[539:568]),2);
-    py_metrics.cXdrop_modulation_index=(secondhalfie-firsthalfie)./(secondhalfie+firsthalfie);
-    firsthalfie=nansum(py_all_glm_coef(:,[589:609]),2);
-    secondhalfie=nansum(py_all_glm_coef(:,[610:639]),2);
-    py_metrics.cXmiss_modulation_index=(secondhalfie-firsthalfie)./(secondhalfie+firsthalfie);
+    firsthalfie=nanmean(py_all_glm_coef(:,[518:538]),2);
+    secondhalfie=nanmean(py_all_glm_coef(:,[539:568]),2);
+    py_metrics.cXdrop_modulation_index=(secondhalfie-firsthalfie)./(abs(secondhalfie)+abs(firsthalfie));
+    firsthalfie=nanmean(py_all_glm_coef(:,[589:609]),2);
+    secondhalfie=nanmean(py_all_glm_coef(:,[610:639]),2);
+    py_metrics.cXmiss_modulation_index=(secondhalfie-firsthalfie)./(abs(secondhalfie)+abs(firsthalfie));
     py_metrics.cXfailure_modulation_index=(py_metrics.cXdrop_modulation_index+py_metrics.cXmiss_modulation_index)/2;
+    py_metrics.combosuccess_modulation_index=(py_metrics.allsuccess_modulation_index+py_metrics.cXsuccess_modulation_index)/2;
+    py_metrics.combofailure_modulation_index=(py_metrics.allfailure_modulation_index+py_metrics.cXfailure_modulation_index)/2;
 
-    whichGLMinds=[1:71];
+    %whichGLMinds=[1:71];
+    whichGLMinds=[];
     cued_success_Response=addMetricsToResponse(cued_success_Response,py_metrics,py_all_glm_coef,indexGLMcellsIntoUnitNames,whichGLMinds);
+    cued_success_Response.consensus_idx=zeros(size(cued_success_Response.idx));
+    cued_success_Response.consensus_idx(cued_success_Response.idx_from_glm==1 & cued_success_Response.idx==1)=1; % 1 is succ-continuing, 0 is fail-continuing
+    figure(); scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),cued_success_Response.combofailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),[],'b');
+    hold on; scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),cued_success_Response.combofailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),[],'r');
     r{1}=cued_success_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_failureNotDrop_Response.mat'); r{2}=cued_failureNotDrop_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_failureNotDrop_Response.mat'); r{3}=uncued_failureNotDrop_Response;
