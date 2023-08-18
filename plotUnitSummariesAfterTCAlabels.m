@@ -979,6 +979,11 @@ else
     end
 end
 title(['groupLabel is 1 ' addToTit]);
+txt=['grp1: '];
+for i=1:length(grp1.allunits)
+    txt=[txt num2str(size(grp1.allunits{i},1)) ' units, '];
+end
+text(1,1,txt);
 
 if iscell(backup_cuezbins)
     cuezbins=backup_cuezbins{2};
@@ -1073,5 +1078,11 @@ else
     end
 end
 title(['groupLabel is 2 ' addToTit]);
+
+txt=['grp2: '];
+for i=1:length(grp2.allunits)
+    txt=[txt num2str(size(grp2.allunits{i},1)) ' units, '];
+end
+text(1,1,txt);
 
 end

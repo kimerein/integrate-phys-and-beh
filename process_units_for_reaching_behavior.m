@@ -953,8 +953,8 @@ else
     py_metrics.combosuccess_modulation_index=(py_metrics.allsuccess_modulation_index+py_metrics.cXsuccess_modulation_index)/2;
     py_metrics.combofailure_modulation_index=(py_metrics.allfailure_modulation_index+py_metrics.cXfailure_modulation_index)/2;
 
-    %whichGLMinds=[1:71];
-    whichGLMinds=[];
+    whichGLMinds=[1:71];
+%     whichGLMinds=[];
     cued_success_Response=addMetricsToResponse(cued_success_Response,py_metrics,py_all_glm_coef,indexGLMcellsIntoUnitNames,whichGLMinds);
     cued_success_Response.consensus_idx=zeros(size(cued_success_Response.idx));
     cued_success_Response.consensus_idx(cued_success_Response.idx_from_glm==1 & cued_success_Response.idx==1)=1; % 1 is succ-continuing, 0 is fail-continuing
@@ -965,7 +965,11 @@ else
     scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),cued_success_Response.cXfailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),[],'b');
     hold on; scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),cued_success_Response.cXfailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),[],'r');
     figure(); scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),cued_success_Response.combofailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),[],'b');
-    hold on; scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),cued_success_Response.combofailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),[],'r');
+    hold on; scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),cued_success_Response.combofailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),[],'r','filled');
+    
+    scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.cXsuccess_modulation_index>cued_success_Response.allsuccess_modulation_index & cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),cued_success_Response.combofailure_modulation_index(cued_success_Response.cXsuccess_modulation_index>cued_success_Response.allsuccess_modulation_index & cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),[],'b','filled');
+    hold on; scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.cXfailure_modulation_index>cued_success_Response.allfailure_modulation_index & cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),cued_success_Response.combofailure_modulation_index(cued_success_Response.cXfailure_modulation_index>cued_success_Response.allfailure_modulation_index & cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),[],'r');
+    
     scatter(cued_success_Response.allsuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),cued_success_Response.allfailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),[],'b');
     hold on; scatter(cued_success_Response.allsuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),cued_success_Response.allfailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),[],'r');
     scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),cued_success_Response.cXfailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),[],'b');
@@ -981,11 +985,15 @@ else
     cued_success_Response.idx=nan(size(cued_success_Response.idx)); 
 %     cued_success_Response.idx(belowthresh1==1 | belowthresh2==1 | belowthresh3==1 | (cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0))=2; % 2 is failure-continuing
 %     cued_success_Response.idx((abovethresh1==1 & abovethresh2==1 & abovethresh3==1) | (cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1) | ((abovethresh1==1 | abovethresh2==1 | abovethresh3==1) & ~(belowthresh1==1 | belowthresh2==1 | belowthresh3==1)))=1; % 1 is success-continuing
-%     cued_success_Response.idx(belowthresh1==1 | belowthresh2==1 | belowthresh3==1)=2; % 2 is failure-continuing
-%     cued_success_Response.idx((abovethresh1==1 & abovethresh2==1 & abovethresh3==1) | ((abovethresh1==1 | abovethresh2==1 | abovethresh3==1) & ~(belowthresh1==1 | belowthresh2==1 | belowthresh3==1)))=1; % 1 is success-continuing
-    cued_success_Response.idx((cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0))=2; % 2 is failure-continuing
-    cued_success_Response.idx((cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1))=1; % 1 is success-continuing
+    cued_success_Response.idx((belowthresh1==1 | belowthresh2==1 | belowthresh3==1))=2; % 2 is failure-continuing
+    cued_success_Response.idx(((abovethresh1==1 & abovethresh2==1 & abovethresh3==1) | ((abovethresh1==1 | abovethresh2==1 | abovethresh3==1) & ~(belowthresh1==1 | belowthresh2==1 | belowthresh3==1))))=1; % 1 is success-continuing
+%     cued_success_Response.idx((cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0))=2; % 2 is failure-continuing
+%     cued_success_Response.idx((cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1))=1; % 1 is success-continuing
     idx=cued_success_Response.idx;
+
+    % Define cued units
+    cuedamount=defineCuedUnits(cued_success_Response);
+    cued_success_Response.cuedamount=cuedamount;
 
     r{1}=cued_success_Response;
 %     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_failureNotDrop_Response.mat'); r{2}=cued_failureNotDrop_Response;
