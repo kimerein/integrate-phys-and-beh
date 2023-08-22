@@ -962,8 +962,9 @@ else
     cued_success_Response.consensus_idx=zeros(size(cued_success_Response.idx));
     cued_success_Response.consensus_idx(cued_success_Response.idx_from_glm==1 & cued_success_Response.idx==1)=1; % 1 is succ-continuing, 0 is fail-continuing
 
-    figure(); scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.allr2scores>0 & cued_success_Response.idx_from_glm==1),cued_success_Response.combofailure_modulation_index(cued_success_Response.allr2scores>0 & cued_success_Response.idx_from_glm==1),[],'b');
-    hold on; scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.allr2scores>0 & cued_success_Response.idx_from_glm==2),cued_success_Response.combofailure_modulation_index(cued_success_Response.allr2scores>0 & cued_success_Response.idx_from_glm==2),[],'r');
+    clearcell=abs(cued_success_Response.allSucc_sustained-cued_success_Response.allFail_sustained)>0.0005;
+    figure(); scatter(cued_success_Response.combosuccess_modulation_index(clearcell & cued_success_Response.allr2scores>0 & cued_success_Response.idx_from_glm==1),cued_success_Response.combofailure_modulation_index(clearcell & cued_success_Response.allr2scores>0 & cued_success_Response.idx_from_glm==1),[],'b');
+    hold on; scatter(cued_success_Response.combosuccess_modulation_index(clearcell & cued_success_Response.allr2scores>0 & cued_success_Response.idx_from_glm==2),cued_success_Response.combofailure_modulation_index(clearcell & cued_success_Response.allr2scores>0 & cued_success_Response.idx_from_glm==2),[],'r');
     xie=-1:0.01:1; yie=-0.75*exp(-1.1*(xie-0.6))+1.5; hold all; plot(xie,yie);
     title('GLM classification');
 

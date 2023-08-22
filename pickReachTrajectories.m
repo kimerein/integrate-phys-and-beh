@@ -1,4 +1,4 @@
-function [allX,allY,allZ,allX_from_under,reachTrajTimes]=pickReachTrajectories(lowspeed_tbt,highspeed_tbt,whichReachField,fromWhichArg,DLCoutput_location,vidName,fps,onlyLED)
+function [allX,allY,allZ,allX_from_under,reachTrajTimes]=pickReachTrajectories(lowspeed_tbt,highspeed_tbt,whichReachField,fromWhichArg,DLCoutput_location,vidName,fps,onlyLED,vidoffset)
 
 % fps is frames per second of high speed movie
 
@@ -102,7 +102,8 @@ for i=1:size(reaches,1)
         end
         % for each reach, each trial
         [vid,frame]=getVidAndFrame_fromTimeAfterCue(reachtimes(i,f(j))-avcuetime,highspeed_tbt,i);
-        %vid=vid+226;
+%         vid=vid+226;
+        vid=vid+vidoffset;
         [X,Y,Z,X_from_under]=getPawTrajectory(DLCoutput_location,vidName,vid,frame,framesBefore,framesAfter);
         if ~isempty(X)
             allX(reachcounter,:)=X;
