@@ -14,12 +14,15 @@ Z_diff_thresh=0.5;
 nindsAboveForZ=10;
 realToInd=floor(2./(1/fps));
 atleastthismany_notnan_points=200;
-scaleY=1;
-startsinrange_X=[]; %[0 110]; %[90 110];
-startsinrange_Y=[]; %[0 680]; %[200 450];
-startsinrange_Z=[]; %[160 300]; %1000]; %[200 350];
+scaleY=0.25;
+% startsinrange_X=[]; 
+% startsinrange_Y=[]; 
+% startsinrange_Z=[]; 
+startsinrange_X=[0 120]; %[0 110]; %[90 110];
+startsinrange_Y=[100 700]; %[0 680]; %[200 450];
+startsinrange_Z=[160 1000]; %[160 300]; %1000]; %[200 350];
 startTime=2; % in seconds
-flipZ=true;
+flipZ=false;
 
 % Good settings for Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20190605\March_C
 % Xdelta_thresh=0;
@@ -128,8 +131,9 @@ for i=1:size(X,1)
 end
 xlabel('X'); ylabel('Y'); zlabel('Z');
 % view(-116.4279,56.0009);
-view(-162.2125,9.8783);
+%view(-162.2125,9.8783);
 % view(-330.8644,17.7600);
+view(33.6808,-22.8782);
 
 figure();
 scatter3(nanmean(X,1),nanmean(Y,1).*scaleY,nanmean(Z,1),30,cmap);
@@ -139,8 +143,9 @@ scatter3(nanmean(X,1),nanmean(Y,1).*scaleY,nanmean(Z,1),30,cmap);
 xlabel('X'); ylabel('Y'); zlabel('Z');
 title('Average');
 % view(-116.4279,56.0009);
-view(-162.2125,9.8783);
+% view(-162.2125,9.8783);
 % view(-330.8644,17.7600);
+view(33.6808,-22.8782);
 
 if flipZ==true
     Z=backupZ;
