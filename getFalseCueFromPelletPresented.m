@@ -1,4 +1,4 @@
-function alltbt=getFalseCueFromPelletPresented(alltbt,trialTypes,metadata)
+function [alltbt,trialTypes,metadata]=getFalseCueFromPelletPresented(alltbt,trialTypes,metadata)
 
 % false cue if
 % pellet is presented again after trial duration
@@ -25,6 +25,9 @@ function alltbt=getFalseCueFromPelletPresented(alltbt,trialTypes,metadata)
 
 falseCueHere=all(alltbt.pelletPresent(:,249)<0.1,2) & nansum(alltbt.pelletPresent(:,250:end),2)>29 & trialTypes.isLongITI==1;
 % this is a slightly stricter cutoff but ensures falsecueon
+alltbt.falseCueHere=falseCueHere;
+trialTypes.falseCueHere=falseCueHere;
+metadata.falseCueHere=falseCueHere;
 
 % cue would have been at index 275
 alltbt.falseCueOn=zeros(size(alltbt.cue));

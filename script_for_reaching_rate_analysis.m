@@ -7,9 +7,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt24Aug2023131917\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt24Aug2023160818\'; % directory containing experimental data
 behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log - Slimmed down w old mice added.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt24Aug2023131917\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt24Aug2023160818\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -153,7 +153,8 @@ trialTypes.sessid=metadata.sessid;
 % tbt_filter.sortField='opto_enhanced_reach';
 % tbt_filter.sortField='mouseLearned';
 % tbt_filter.sortField='initiallyLowLEDsess';
-tbt_filter.sortField='takemice';
+% tbt_filter.sortField='takemice';
+tbt_filter.sortField='falseCueHere';
 % tbt_filter.range_values=[1 6 7 8 10 14 18];
 % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
 % tbt_filter.range_values=[-100 0.75]; %[0.75 100];
@@ -232,7 +233,10 @@ trialTypes.sess_wrt_day1=metadata.sess_wrt_day1; alltbt.sess_wrt_day1=metadata.s
 % use filtTbt
 
 %% find trials where pelletPresented and pelletPresent but no cue, i.e., "false cue" in omit cue control
+[alltbt,trialTypes,metadata]=getFalseCueFromPelletPresented(alltbt,trialTypes,metadata);
 
+%% find cues where pellet was missing for omit pellet control
+[alltbt,trialTypes,metadata]=findPelletMissingCues(alltbt,trialTypes,metadata);
 
 %% build relevant data sets
 
