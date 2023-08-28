@@ -7,9 +7,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt24Aug2023160818\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt28Aug2023163009\'; % directory containing experimental data
 behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log - Slimmed down w old mice added.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt24Aug2023160818\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt28Aug2023163009\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -86,7 +86,7 @@ end
 % Optional: discard no pellet reaches within certain time after success
 % bcz may represent chewing arm movements
 % this does not really affect results, only needed w small subset of mice
-% alltbt=ignoreReachesAfterSuccess(alltbt,metadata,9); % last arg is seconds after success, i.e., how long to chew pellet
+alltbt=ignoreReachesAfterSuccess(alltbt,metadata,9); % last arg is seconds after success, i.e., how long to chew pellet
 
 % get miss or no pellet reach
 alltbt.missOrNoPellet=alltbt.pelletmissingreach_reachStarts+alltbt.reachBatch_miss_reachStarts;
@@ -145,7 +145,7 @@ trialTypes.sessid=metadata.sessid;
 % tbt_filter.sortField='sessid';
 % tbt_filter.sortField='led';
 % tbt_filter.sortField='sess_wrt_day1';
-% tbt_filter.sortField='dprimes';
+tbt_filter.sortField='dprimes';
 % tbt_filter.sortField='day1formice';
 % tbt_filter.sortField='distractor_immediate_after_cue';
 % tbt_filter.sortField='higherThanBefore';
@@ -154,7 +154,8 @@ trialTypes.sessid=metadata.sessid;
 % tbt_filter.sortField='mouseLearned';
 % tbt_filter.sortField='initiallyLowLEDsess';
 % tbt_filter.sortField='takemice';
-tbt_filter.sortField='falseCueHere';
+% tbt_filter.sortField='reachedBeforeCue';
+% tbt_filter.sortField='pelletMissingAtCue';
 % tbt_filter.range_values=[1 6 7 8 10 14 18];
 % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
 % tbt_filter.range_values=[-100 0.75]; %[0.75 100];
@@ -163,7 +164,7 @@ tbt_filter.sortField='falseCueHere';
 % tbt_filter.range_values=[-100 0.75]; % beginner: d<0.25, intermediate: 0.25<=d<0.75, expert: d>=0.75
 % tbt_filter.range_values=[163.5 170];
 % tbt_filter.range_values=[0.5 0.9];
-tbt_filter.range_values=[0.5 1.5]; % maybe 2,6,7,12
+tbt_filter.range_values=[-100 100]; % maybe 2,6,7,12
 % tbt_filter.range_values=[2 3 4 5 6 7 8 9 10 11 12 14 15 17 18 19]; % which mice start at non-learning 
 % tbt_filter.range_values=[1 2 4 5 6 7 8 9 10 11 12 17 18 19];
 % tbt_filter.range_values=[1     2     3     6     7     8     9    10    11    12    14    15    17    18];
@@ -176,6 +177,9 @@ tbt_filter.clock_progress=true;
 
 % filter alltbt
 [alltbt,trialTypes,metadata]=filtTbt(alltbt,trialTypes,tbt_filter.sortField,tbt_filter.range_values,metadata,tbt_filter.clock_progress);
+
+%% realign everything to distractor (randomly select 1 distractor from each trial)
+% [alltbt,trialTypes,metadata]=realignToDistractor(alltbt,trialTypes,metadata);
 
 %% check for opto-enhanced reaching
 alltbt.sessid=metadata.sessid;
@@ -237,6 +241,8 @@ trialTypes.sess_wrt_day1=metadata.sess_wrt_day1; alltbt.sess_wrt_day1=metadata.s
 
 %% find cues where pellet was missing for omit pellet control
 [alltbt,trialTypes,metadata]=findPelletMissingCues(alltbt,trialTypes,metadata);
+trialTypes.reachedBeforeCue=any(alltbt.all_reachBatch(:,1:93)>0.5,2);
+alltbt.reachedBeforeCue=trialTypes.reachedBeforeCue; metadata.reachedBeforeCue=trialTypes.reachedBeforeCue;
 
 %% build relevant data sets
 
