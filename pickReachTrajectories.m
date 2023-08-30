@@ -102,6 +102,9 @@ for i=1:size(reaches,1)
         end
         % for each reach, each trial
         [vid,frame]=getVidAndFrame_fromTimeAfterCue(reachtimes(i,f(j))-avcuetime,highspeed_tbt,i);
+        if isnan(vid) && isnan(frame)
+            continue
+        end
 %         vid=vid+226;
         vid=vid+vidoffset;
         [X,Y,Z,X_from_under]=getPawTrajectory(DLCoutput_location,vidName,vid,frame,framesBefore,framesAfter);
@@ -168,6 +171,12 @@ end
 end
 
 function [vid,frame]=getVidAndFrame_fromTimeAfterCue(timeAfterCue,highspeed_tbt,whichTrial)
+
+vid=nan;
+frame=nan;
+if whichTrial>size(highspeed_tbt.cue,1)
+    return
+end
 
 cuethistrial=highspeed_tbt.cue(whichTrial,:);
 vidthistrial=highspeed_tbt.whichVid(whichTrial,:);
