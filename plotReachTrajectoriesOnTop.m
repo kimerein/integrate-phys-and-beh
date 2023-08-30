@@ -1,6 +1,6 @@
 function plotReachTrajectoriesOnTop(noLEDx,noLEDy,noLEDz,LEDx,LEDy,LEDz,reachTrajTimes)
 
-plotSE=true;
+plotSE=false; %true;
 doOtherPoints=true;
 flipZ=false; %true;
 ds=1; %5;
