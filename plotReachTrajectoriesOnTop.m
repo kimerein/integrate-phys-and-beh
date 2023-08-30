@@ -2,9 +2,9 @@ function plotReachTrajectoriesOnTop(noLEDx,noLEDy,noLEDz,LEDx,LEDy,LEDz,reachTra
 
 plotSE=true;
 doOtherPoints=true;
-flipZ=true;
-ds=5;
-startAtSamePoint=true;
+flipZ=false; %true;
+ds=1; %5;
+startAtSamePoint=false; %true;
 
 if startAtSamePoint==true
     noLEDx=noLEDx-repmat(nanmean(nanmean(noLEDx(:,1:500),2),1),size(noLEDx,1),size(noLEDx,2));
@@ -21,6 +21,30 @@ if flipZ==true
     LEDz=-LEDz;
 end
 
+% first show all
+figure();
+togX=[noLEDx; LEDx];
+togY=[noLEDy; LEDy];
+togZ=[noLEDz; LEDz];
+togLabels=[zeros(size(noLEDx,1),1); ones(size(LEDx,1),1)];
+rearr=randperm(size(togX,1));
+togX=togX(rearr,:);
+togY=togY(rearr,:);
+togZ=togZ(rearr,:);
+togLabels=togLabels(rearr);
+for i=1:size(togLabels,1)
+    if togLabels(i)==0
+        scatter3(togX(i,:),togY(i,:),togZ(i,:),10,'k');
+    else
+        scatter3(togX(i,:),togY(i,:),togZ(i,:),10,'r');
+    end
+    hold on; 
+end
+xlabel('X'); ylabel('Y'); zlabel('Z');
+title('All');
+view(33.6808,-22.8782);
+
+% then show summary
 figure(); 
 colorsUpTo=size(noLEDx,2);
 cmap=colormap(cool(colorsUpTo));
@@ -94,14 +118,15 @@ end
 xlabel('X'); ylabel('Y'); zlabel('Z');
 title('Average');
 
+view(33.6808,-22.8782);
 [caz,cel]=view();
 disp('Current azimuth');
 disp(caz);
 disp('Current elevation');
 disp(cel);
 % view(-116.4279,56.0009);
-view(-162.2125,9.8783);
-view(-330.8644,17.7600);
+% view(-162.2125,9.8783);
+% view(-330.8644,17.7600);
 
 end
 

@@ -151,6 +151,8 @@ if flipZ==true
     Z=backupZ;
 end
 
+Y=Y.*scaleY;
+
 % load('Z:\MICROSCOPE\Kim\Final Figs\Fig1\reach trajectories\March_C\all_noOpto_reachTrajectories.mat')
 % [Xout,Yout,Zout]=plotReachTrajectories(all_X,all_Y,all_Z,all_X_from_under,reachTrajTimes,100,256);
 % Xnoopto=nanmean(Xout,1);
