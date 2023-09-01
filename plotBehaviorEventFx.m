@@ -321,8 +321,14 @@ if plot_rt_pdf==true
     temp=dataset.event_name;
     temp(regexp(temp,'_'))=' ';
     for i=1:length(dataset.event_RT_trial1InSeq)
-        histo_nbins=plotHist(dataset.event_RT_trial1InSeq{i},dataset.event_RT_trialiInSeq{i},histo_nbins,['Reaction Times fx of ' temp ': trial 1 (black) vs ' num2str(dataset.nInSequence(i)-1) ' later (magenta)'],'RT (sec)');
+        [histo_nbins,retu]=plotHist(dataset.event_RT_trial1InSeq{i},dataset.event_RT_trialiInSeq{i},histo_nbins,['Reaction Times fx of ' temp ': trial 1 (black) vs ' num2str(dataset.nInSequence(i)-1) ' later (magenta)'],'RT (sec)');
     end
+    returnThis.data1_mean=retu.data1.y;
+    returnThis.data2_mean=retu.data2.y;
+    returnThis.data1_se=[];
+    returnThis.data2_se=[];
+    returnThis.time_for_x=retu.data1.x;
+    returnThis.n=dataset.ns.cond2;
 end
 
 % Plot reaction times CDF
@@ -941,6 +947,8 @@ if suppPlots==false
     ylabel('Count');
     title(tit);
 end
+returnThis.data1.x=x;
+returnThis.data1.y=n./nansum(n);
 
 [n,x]=histcounts(data2,x_backup);
 [n,x]=cityscape_hist(n,x);
@@ -955,8 +963,8 @@ if suppPlots==false
     legend(leg);
 end
 
-returnThis.x=x;
-returnThis.y=n./nansum(n);
+returnThis.data2.x=x;
+returnThis.data2.y=n./nansum(n);
 
 end
 
