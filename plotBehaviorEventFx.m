@@ -110,7 +110,8 @@ else
 end
 
 % histo_nbins=200; % number of bins for reaction time histogram
-histo_nbins=[-4*12.4245:0.2510:4*12.4245];
+% histo_nbins=[-4*12.4245:0.2510:4*12.4245];
+histo_nbins=[-4*12.4245:0.035:4*12.4245];
 % histo_nbins=[-4*12.4245-2*0.2510:4*0.2510:4*12.4245];
 % histo_nbins=[-4*12.4245-0.75*0.2510:1.5*0.2510:4*12.4245];
 backup_histo_nbins=histo_nbins;
