@@ -1,6 +1,18 @@
-function [spikes,auxData]=convertSpikesToTrials_and_saveAuxChs(spikes,filename)
+function [spikes,auxData,answersout]=convertSpikesToTrials_and_saveAuxChs(varargin)
 
 % Note that spikes before first trial will be discarded!
+
+if length(varargin)==2
+    spikes=varargin{1};
+    filename=varargin{2};
+    answers=nan(1,6);
+elseif length(varargin)==3
+    spikes=varargin{1};
+    filename=varargin{2};
+    answers=varargin{3};
+else
+    error('Wrong number of arguments to convertSpikesToTrials_and_saveAuxChs.m');
+end
 
 % seconds before cue to begin trial
 cueRelativeToTrialStart=1; % in seconds
@@ -11,9 +23,13 @@ ledch='auxData193'; % WHISPER system distractor LED
 cuech='auxData195invert'; % WHISPER system inverted cue
 optoch='auxData196invert';
 
-[cuetimes,cueData]=getEventsFromAnalogCh(filename,cuech);
-[distractortimes,distractorData]=getEventsFromAnalogCh(filename,ledch);
-[optotimes,optoData]=getEventsFromAnalogCh(filename,optoch);
+answersout=nan(1,6);
+[cuetimes,cueData,~,answerout]=getEventsFromAnalogCh(filename,cuech,answers(1:2));
+answersout(1:2)=answerout;
+[distractortimes,distractorData,~,answerout]=getEventsFromAnalogCh(filename,ledch,answers(3:4));
+answersout(3:4)=answerout;
+[optotimes,optoData,~,answerout]=getEventsFromAnalogCh(filename,optoch,answers(5:6));
+answersout(5:6)=answerout;
 auxData.cueData=cueData;
 auxData.distractorData=distractorData;
 auxData.distractorData.Values=smooth(auxData.distractorData.Values,3);
