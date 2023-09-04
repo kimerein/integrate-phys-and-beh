@@ -1,4 +1,4 @@
-function loopThroughAndGetEachUnitCueResponse(dirLocation,saveDir)
+function loopThroughAndGetEachUnitCueResponse(dirLocation,saveDir,modulationTimeWindowBefore,modulationTimeWindowAfter)
 
 % This was the channel ordering for Shi's spike sorting: [16 14 15 11 13 9 12 7 10 3 5 1 8 6 4 2 31 29 27 25 32 17 30 18 28 19 26 20 23 22 24 21]
 
@@ -16,32 +16,32 @@ for i=1:length(files)
     % find good units
     unittypes=post_spikes.labels(:,2);
     unitassignstouse=post_spikes.labels(unittypes==2,1);
-    chnumber=channelMap(number,post_spikes); % 32 is most dorsal, 1 is most ventral
-
     for j=1:length(unitassignstouse)
+        chnumber=channelMap(number,post_spikes,unitassignstouse(j)); % 32 is most dorsal, 1 is most ventral
         saveName=fullfile(saveDir,['unit' num2str(unitassignstouse(j)) 'onCh' num2str(chnumber)]);
-        [spiketimes,bincenters,N,edges]=SUresponseToCue(post_spikes,unitassignstouse(j),auxData,'cueData',2,2,0.01);
-        saveUnitAlignmentData(spiketimes,bincenters,N,edges,saveName,'cueAligned');
-        [spiketimes,bincenters,N,edges]=SUresponseToCue(post_spikes,unitassignstouse(j),auxData,'distractorData',2,2,0.01);
-        saveUnitAlignmentData(spiketimes,bincenters,N,edges,saveName,'distractorAligned');
-        [spiketimes,bincenters,N,edges]=SUresponseToCue(post_spikes,unitassignstouse(j),auxData,'optoData',2,2,0.01);
-        saveUnitAlignmentData(spiketimes,bincenters,N,edges,saveName,'optoAligned');
-        [spiketimes,bincenters,N,edges]=SUresponseToCue(post_spikes,unitassignstouse(j),auxData,'cueWithoutOptoData',2,2,0.01);
-        saveUnitAlignmentData(spiketimes,bincenters,N,edges,saveName,'cueWithoutOptoData');
-        [spiketimes,bincenters,N,edges]=SUresponseToCue(post_spikes,unitassignstouse(j),auxData,'cuePlusOptoData',2,2,0.01);
-        saveUnitAlignmentData(spiketimes,bincenters,N,edges,saveName,'cuePlusOptoData');
+        [spiketimes,bincenters,N,edges,modout]=SUresponseToCue(post_spikes,unitassignstouse(j),auxData,'cueData',2,2,0.01,modulationTimeWindowBefore,modulationTimeWindowAfter);
+        saveUnitAlignmentData(spiketimes,bincenters,N,edges,saveName,'cueAligned',modout);
+        [spiketimes,bincenters,N,edges,modout]=SUresponseToCue(post_spikes,unitassignstouse(j),auxData,'distractorData',2,2,0.01,modulationTimeWindowBefore,modulationTimeWindowAfter);
+        saveUnitAlignmentData(spiketimes,bincenters,N,edges,saveName,'distractorAligned',modout);
+        [spiketimes,bincenters,N,edges,modout]=SUresponseToCue(post_spikes,unitassignstouse(j),auxData,'optoData',2,2,0.01,modulationTimeWindowBefore,modulationTimeWindowAfter);
+        saveUnitAlignmentData(spiketimes,bincenters,N,edges,saveName,'optoAligned',modout);
+        [spiketimes,bincenters,N,edges,modout]=SUresponseToCue(post_spikes,unitassignstouse(j),auxData,'cueWithoutOptoData',2,2,0.01,modulationTimeWindowBefore,modulationTimeWindowAfter);
+        saveUnitAlignmentData(spiketimes,bincenters,N,edges,saveName,'cueWithoutOptoData',modout);
+        [spiketimes,bincenters,N,edges,modout]=SUresponseToCue(post_spikes,unitassignstouse(j),auxData,'cuePlusOptoData',2,2,0.01,modulationTimeWindowBefore,modulationTimeWindowAfter);
+        saveUnitAlignmentData(spiketimes,bincenters,N,edges,saveName,'cuePlusOptoData',modout);
         close all;
     end
 end
 
 end
 
-function saveUnitAlignmentData(spiketimes,bincenters,N,edges,saveName,addName)
+function saveUnitAlignmentData(spiketimes,bincenters,N,edges,saveName,addName,modulation)
 
 alignData.spiketimes=spiketimes;
 alignData.bincenters=bincenters;
 alignData.N=N;
 alignData.edges=edges;
+alignData.modulation=modulation;
 save([saveName addName '.mat'],'alignData');
 
 end
@@ -53,7 +53,7 @@ files = dir(fullfile(directoryPath, '*_sorted.mat'));
 
 end
 
-function chnumber=channelMap(spikesnumber,spikes)
+function chnumber=channelMap(spikesnumber,spikes,currAssign)
 
 % second row is Matlab index, first row is depth on probe, where 32 is most
 % dorsall, 1 is most ventral
@@ -120,12 +120,12 @@ amp=nan(1,size(spikes.waveforms,3));
 for l=1:size(spikes.waveforms,3)
     amp(l)=abs(min(reshape(mean(spikes.waveforms(spikes.assigns==currAssign,:,l),1,'omitnan'),1,size(spikes.waveforms,2)),[],2,'omitnan'));
 end
-[~,si]=sort(amp);
+[~,si]=sort(amp,'ascend');
 % sort trode chs for units
 if any(si>length(trodeChsForSpikes))
     error(['problem indexing spike channel for unit']);
 end
-trodeChsForSpikes=trodeChsForSpikes(si);
+trodeChsForSpikes=trodeChsForSpikes(si(end));
 
 chnumber=find(chmap(:,2)==trodeChsForSpikes);
 

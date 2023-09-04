@@ -1,4 +1,4 @@
-function [spiketimes,bincenters,N,edges]=SUresponseToCue(post_spikes,whichAssign,auxData,auxDataFieldForAlignment,timeWindowBeforeCueOnset,timeWindowAfterCueOnset,histogramBin)
+function [spiketimes,bincenters,N,edges,modout]=SUresponseToCue(post_spikes,whichAssign,auxData,auxDataFieldForAlignment,timeWindowBeforeCueOnset,timeWindowAfterCueOnset,histogramBin,durationBefore,durationAfter)
 
 % all times passed in must be in seconds
 
@@ -50,5 +50,17 @@ bins=-timeWindowBeforeCueOnset:histogramBin:timeWindowAfterCueOnset;
 bincenters=mean([edges(1:end-1); edges(2:end)],1,'omitnan');
 figure(); 
 plot(bincenters,N);
+
+% get modulation by this event type
+modout=modulated(bincenters,N,durationBefore,durationAfter);
+
+end
+
+function modout=modulated(bincenters,N,durationBefore,durationAfter)
+
+modout.baserate=mean(N(bincenters<=0 & bincenters>=-durationBefore),'all','omitnan');
+modout.afterrate=mean(N(bincenters>0 & bincenters<=durationAfter),'all','omitnan');
+modout.rawmod=modout.afterrate-modout.baserate;
+modout.fracmod=modout.afterrate/modout.baserate;
 
 end
