@@ -1,5 +1,7 @@
 function loopThroughAndGetEachUnitCueResponse(dirLocation,saveDir,modulationTimeWindowBefore,modulationTimeWindowAfter)
 
+justSavingNs=true;
+
 % This was the channel ordering for Shi's spike sorting: [16 14 15 11 13 9 12 7 10 3 5 1 8 6 4 2 31 29 27 25 32 17 30 18 28 19 26 20 23 22 24 21]
 
 files=findFiles(dirLocation);
@@ -16,6 +18,19 @@ for i=1:length(files)
     % find good units
     unittypes=post_spikes.labels(:,2);
     unitassignstouse=post_spikes.labels(unittypes==2,1);
+    if justSavingNs==true
+        n=countNs(auxData,'cueData');
+        save(fullfile(saveDir,'cue_n.mat'),'n');
+        n=countNs(auxData,'distractorData');
+        save(fullfile(saveDir,'distractor_n.mat'),'n');
+        n=countNs(auxData,'optoData');
+        save(fullfile(saveDir,'opto_n.mat'),'n');
+        n=countNs(auxData,'cueWithoutOptoData');
+        save(fullfile(saveDir,'cueWithoutOptoData_n.mat'),'n');
+        n=countNs(auxData,'cuePlusOptoData');
+        save(fullfile(saveDir,'cuePlusOptoData_n.mat'),'n');
+        break
+    end
     for j=1:length(unitassignstouse)
         chnumber=channelMap(number,post_spikes,unitassignstouse(j)); % 32 is most dorsal, 1 is most ventral
         saveName=fullfile(saveDir,['unit' num2str(unitassignstouse(j)) 'onCh' num2str(chnumber)]);
@@ -32,6 +47,46 @@ for i=1:length(files)
         close all;
     end
 end
+
+end
+
+function n=countNs(auxData,auxDataFieldForAlignment)
+
+withOpto=nan;
+if strcmp(auxDataFieldForAlignment,'cueWithoutOptoData') 
+    auxDataFieldForAlignment='cueData';
+    withOpto=false;
+end
+if strcmp(auxDataFieldForAlignment,'cuePlusOptoData')
+    auxDataFieldForAlignment='cueData';
+    withOpto=true;
+end
+optos=auxData.optoData.Values;
+alignTo=auxData.(auxDataFieldForAlignment).Values;
+if size(alignTo,1)>1 & size(alignTo,2)==1
+    alignTo=alignTo';
+end
+alignToOnsets=[0 diff(alignTo)==1];
+alignOnsetsAt=find(alignToOnsets==1);
+takecurronset=[];
+for i=1:length(alignOnsetsAt)
+    curronset=alignOnsetsAt(i);
+    if isnan(withOpto)
+        % take with or without opto
+    elseif withOpto==false
+        % take only cues without opto
+        if optos(curronset)==1
+            continue
+        end
+    elseif withOpto==true
+        % take only cues with opto
+        if optos(curronset)==0
+            continue
+        end
+    end
+    takecurronset=[takecurronset curronset];
+end
+n=length(takecurronset);
 
 end
 

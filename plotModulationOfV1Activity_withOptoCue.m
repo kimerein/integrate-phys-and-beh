@@ -24,6 +24,14 @@ for i = 1:length(files)
     allchs(i)=str2double(regexp(files(i).name, '(?<=Ch)\d+', 'match', 'once'));
 end
 
+% Switch to firing rates
+timestep=mode(diff(allbincenters));
+allpsth_N=allpsth_N./timestep;
+allmod_baserate=allmod_baserate./timestep;
+allmod_afterrate=allmod_afterrate./timestep;
+allmod_rawmod=allmod_rawmod./timestep;
+allmod_fracmod=allmod_fracmod./timestep;
+
 % Plot average PSTH and se
 figure();
 plot(allbincenters,mean(allpsth_N,1,'omitnan'),'Color','k');
@@ -33,9 +41,19 @@ plot(allbincenters,mean(allpsth_N,1,'omitnan')+std(allpsth_N,[],1,'omitnan')./sq
 
 % Plot modulation as a function of unit depth
 figure();
-scatter(allmod_rawmod,allchs); xlabel('Modulation'); ylabel('Channel, 32 dorsal, 1 ventral'); title('Raw modulation');
+subplot(1,4,1);
+scatter(allmod_rawmod,allchs); xlabel('Raw modulation'); ylabel('Channel, 32 dorsal, 1 ventral'); 
 
-figure();
-scatter(allmod_fracmod,allchs); xlabel('Modulation'); ylabel('Channel, 32 dorsal, 1 ventral'); title('Frac modulation');
+subplot(1,4,2);
+scatter(allmod_fracmod,allchs); xlabel('Frac modulation'); ylabel('Channel, 32 dorsal, 1 ventral'); 
+
+subplot(1,4,3);
+scatter(allmod_baserate,allchs); xlabel('Baseline firing rate'); ylabel('Channel, 32 dorsal, 1 ventral'); 
+
+subplot(1,4,4);
+scatter(allmod_afterrate,allchs); xlabel('Evoked firing rate'); ylabel('Channel, 32 dorsal, 1 ventral'); 
+
+
+
 
 end
