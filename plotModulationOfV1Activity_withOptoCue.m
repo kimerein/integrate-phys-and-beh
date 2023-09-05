@@ -3,6 +3,30 @@ function plotModulationOfV1Activity_withOptoCue(directoryPath,whichToRead)
 % Get a list of all .mat files in the directory that contain whichToRead in their name
 files = dir(fullfile(directoryPath, ['*', whichToRead, '*.mat']));
 
+% Get n's
+a=load(fullfile(directoryPath,'cue_n.mat'));
+cue_n=a.n;
+a=load(fullfile(directoryPath,'cuePlusOptoData_n.mat'));
+cuePlusOptoData_n=a.n;
+a=load(fullfile(directoryPath,'cueWithoutOptoData_n.mat'));
+cueWithoutOptoData_n=a.n;
+a=load(fullfile(directoryPath,'distractor_n.mat'));
+distractor_n=a.n;
+a=load(fullfile(directoryPath,'opto_n.mat'));
+opto_n=a.n;
+switch whichToRead
+    case 'cueAligned'
+        n=cue_n;
+    case 'distractorAligned'
+        n=distractor_n;
+    case 'cuePlusOptoData'
+        n=cuePlusOptoData_n;
+    case 'cueWithoutOptoData'
+        n=cueWithoutOptoData_n;
+    case 'optoAligned'
+        n=opto_n;
+end
+
 % Load each file
 % Save modulation, save PSTH
 for i = 1:length(files)
@@ -26,11 +50,11 @@ end
 
 % Switch to firing rates
 timestep=mode(diff(allbincenters));
-allpsth_N=allpsth_N./timestep;
-allmod_baserate=allmod_baserate./timestep;
-allmod_afterrate=allmod_afterrate./timestep;
-allmod_rawmod=allmod_rawmod./timestep;
-allmod_fracmod=allmod_fracmod./timestep;
+allpsth_N=(allpsth_N./n)./timestep;
+allmod_baserate=(allmod_baserate./n)./timestep;
+allmod_afterrate=(allmod_afterrate./n)./timestep;
+allmod_rawmod=(allmod_rawmod./n)./timestep;
+allmod_fracmod=(allmod_fracmod./n)./timestep;
 
 % Plot average PSTH and se
 figure();

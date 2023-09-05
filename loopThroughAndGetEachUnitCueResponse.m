@@ -26,9 +26,9 @@ for i=1:length(files)
         n=countNs(auxData,'optoData');
         save(fullfile(saveDir,'opto_n.mat'),'n');
         n=countNs(auxData,'cueWithoutOptoData');
-        save(fullfile(saveDir,'cueWithoutOptoData_n.mat'),'n');
+        save(fullfile(saveDir,'cueWithoutOpto_n.mat'),'n');
         n=countNs(auxData,'cuePlusOptoData');
-        save(fullfile(saveDir,'cuePlusOptoData_n.mat'),'n');
+        save(fullfile(saveDir,'cuePlusOpto_n.mat'),'n');
         break
     end
     for j=1:length(unitassignstouse)
