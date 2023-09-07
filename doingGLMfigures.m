@@ -1,6 +1,6 @@
 function doingGLMfigures(all_glm_coef,metrics,mat_all_glm_coef,mat_metrics,fromWhichSess_glm,g_p)
 
-indsdelay=44;
+% indsdelay=44;
 endminusinds=5;
 
 % some basic plots
@@ -84,6 +84,7 @@ xlabel('failure sustained'); ylabel('success sustained'); % this works
 
 %% What I'm doing now with GLM that has reach explicitly separated from outcome
 smooby=8;
+indsdelay=21;
 coefs_after_outcome=[];
 coefs_after_outcome=[coefs_after_outcome smoothMatrix(all_glm_coef(:,[71*3+1+indsdelay:71*3+1+70-endminusinds]),smooby)];
 coefs_after_outcome=[coefs_after_outcome smoothMatrix(all_glm_coef(:,[71*4+1+indsdelay:71*4+1+70-endminusinds])+all_glm_coef(:,[71*5+1+indsdelay:71*5+1+70-endminusinds]),smooby)];
