@@ -46,6 +46,9 @@ for j=1:length(dd)
     disp(['reading in from ' datadir]);
     ls=dir(datadir);
     for i=3:length(ls)
+        if strcmp(ls(i).name,'r2scores')
+            continue
+        end
         switch isMatGLM
             case true
                 if ~contains(ls(i).name,'coef')
@@ -69,6 +72,7 @@ for j=1:length(dd)
                 end
                 a=load([ls(i).folder sep ls(i).name]);
                 glm_coef=a.glm_coef;
+                glm_pva=nan(size(glm_coef));
         end
         if isempty(all_glm_coef)
             all_glm_coef=nan(maxUnitsPerSess*length(dd),length(glm_coef));

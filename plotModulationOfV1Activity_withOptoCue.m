@@ -1,4 +1,4 @@
-function [allexpts_allmod_rawmod,allexpts_allchs]=plotModulationOfV1Activity_withOptoCue(directoryPaths,whichToRead)
+function [allexpts_allmod_rawmod,allexpts_allchs,allexpts_allpsth_N,allbincenters]=plotModulationOfV1Activity_withOptoCue(directoryPaths,whichToRead)
 
 if ~iscell(directoryPaths)
     temp=directoryPaths;

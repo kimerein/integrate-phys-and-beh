@@ -195,8 +195,8 @@ end
 
 function event_types=getFeatureNames(feature_names)
 
-potential_event_types = {'cue', 'opto', 'distract', 'reach', 'fidget', 'success', 'drop', 'miss', 'failure', 'chew', ...
-                          'cXsuc', 'cXdro', 'cXmis','uXsuc','uXdro','uXmis'};
+potential_event_types = {'cue', 'opto', 'distract', 'fidget', 'success', 'drop', 'miss', 'failure', 'chew', ...
+                          'cXsuc', 'cXdro', 'cXmis','uXsuc','uXdro','uXmis', 'reach'};
 evcount=1; 
 for i=1:length(potential_event_types)
     for j=1:length(feature_names)
