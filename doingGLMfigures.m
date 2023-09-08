@@ -229,7 +229,6 @@ backup_all_glm_coef=all_glm_coef;
 needtoreplace=nanmean(all_glm_coef(:,5:10),2)>2*nanmean(all_glm_coef(:,1:4),2);
 all_glm_coef(nanmean(all_glm_coef(:,1:4),2)<0.01 & needtoreplace,5:10)=0;
 all_glm_coef(needtoreplace,5:10)=(mat_all_glm_coef(needtoreplace,5:10)./repmat(nanmean(mat_all_glm_coef(needtoreplace,5:10),2),1,length(5:10))).*repmat(nanmean(all_glm_coef(needtoreplace,1:4),2),1,length(5:10));
-fthee=find(idx_from_glm==1); all_glm_coef(fthee(196:238),1:15)=all_glm_coef(fthee(196:238),1:15)+all_glm_coef(fthee(196:238),100:100+14)+all_glm_coef(fthee(196:238),200:200+14);
 nanma=nanmax(all_glm_coef(:,[71*0+1:71*0+71 71*2+1:71*2+71]),[],2); nanma(nanma<0.1)=0.1;
 nama_all_glm_coef_othercoefs=all_glm_coef./repmat(nanma,1,size(all_glm_coef,2)); 
 nama_all_glm_coef_othercoefs=nama_all_glm_coef_othercoefs(orderingSuccVFail,:);
