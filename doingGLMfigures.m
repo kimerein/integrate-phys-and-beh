@@ -103,8 +103,9 @@ idx_from_glm=kmeans(temp,2,'Replicates',50);
 cmap=[0, 0.75, 0.75; 0.4940, 0.1840, 0.5560];
 
 % Make tsne plot
-Y=tsne(temp); 
+% Y=tsne(temp); 
 % Y=tsne(temp,'Algorithm','exact','Distance','chebychev','Exaggeration',10,'NumDimensions',2,'Perplexity',900,'Standardize',false);
+Y=tsne(temp,'Algorithm','exact','Distance','euclidean','NumDimensions',2,'Perplexity',150,'Standardize',false);
 Ynanned=all(isnan(temp),2);
 
 % Plot output of clustering
@@ -156,7 +157,7 @@ cmapm=[]; for i=1:length(unique(umbym)) cmapm=[cmapm; rand(1,3)]; end %cmap=colo
 figure(); scatter(Y(:,1),Y(:,2),[],cmapm(umbym,:),'filled'); title('Control'); 
 figure(); scatter(1:length(unique(umbym)),ones(size(1:length(unique(umbym)))),[],cmapm,'filled');
 
-% Plot histogram of tsne y axis
+% Plot histogram of tsne y minus x axis
 [n,x]=histcounts(Y(idx_from_glm(~isnan(idx_from_glm))==1,2)-Y(idx_from_glm(~isnan(idx_from_glm))==1,1),-60-0.5:1:60+0.5); 
 [n,x]=cityscape_hist(n,x); figure(); plot(x,n,'Color',cmap(2,:));
 [n,x]=histcounts(Y(idx_from_glm(~isnan(idx_from_glm))==2,2)-Y(idx_from_glm(~isnan(idx_from_glm))==2,1),-60-0.5:1:60+0.5); 
@@ -228,6 +229,7 @@ backup_all_glm_coef=all_glm_coef;
 needtoreplace=nanmean(all_glm_coef(:,5:10),2)>2*nanmean(all_glm_coef(:,1:4),2);
 all_glm_coef(nanmean(all_glm_coef(:,1:4),2)<0.01 & needtoreplace,5:10)=0;
 all_glm_coef(needtoreplace,5:10)=(mat_all_glm_coef(needtoreplace,5:10)./repmat(nanmean(mat_all_glm_coef(needtoreplace,5:10),2),1,length(5:10))).*repmat(nanmean(all_glm_coef(needtoreplace,1:4),2),1,length(5:10));
+fthee=find(idx_from_glm==1); all_glm_coef(fthee(196:238),1:15)=all_glm_coef(fthee(196:238),1:15)+all_glm_coef(fthee(196:238),100:100+14)+all_glm_coef(fthee(196:238),200:200+14);
 nanma=nanmax(all_glm_coef(:,[71*0+1:71*0+71 71*2+1:71*2+71]),[],2); nanma(nanma<0.1)=0.1;
 nama_all_glm_coef_othercoefs=all_glm_coef./repmat(nanma,1,size(all_glm_coef,2)); 
 nama_all_glm_coef_othercoefs=nama_all_glm_coef_othercoefs(orderingSuccVFail,:);
