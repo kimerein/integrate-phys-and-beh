@@ -101,6 +101,7 @@ idx_from_glm=kmeans(temp,2,'Replicates',50);
 %% Continue with figures
 
 cmap=[0, 0.75, 0.75; 0.4940, 0.1840, 0.5560];
+% cmap=[0, 0.75, 0.75; 0.4940, 0.1840, 0.5560; 1, 1, 0];
 
 % Make tsne plot
 % Y=tsne(temp); 

@@ -695,10 +695,10 @@ anyIsSig=any(isSig==1,2);
 %% Set up data matrix
 % Units X conditions (alignments to beh events) X time
 % a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\cue.mat'); cue_Response=a.Response; 
-a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\excluded trials where opto during cue\cued_success_Response.mat'); cued_success_Response=a.cued_success_Response;  
-a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\excluded trials where opto during cue\cued_failureNotDrop_Response.mat'); cued_failure_Response=a.cued_failureNotDrop_Response; 
-a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\excluded trials where opto during cue\uncued_success_Response.mat'); uncued_success_Response=a.uncued_success_Response; 
-a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\excluded trials where opto during cue\uncued_failureNotDrop_Response.mat'); uncued_failure_Response=a.uncued_failureNotDrop_Response;
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_success_Response.mat'); cued_success_Response=a.cued_success_Response;  
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_failureNotDrop_Response.mat'); cued_failure_Response=a.cued_failureNotDrop_Response; 
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_success_Response.mat'); uncued_success_Response=a.uncued_success_Response; 
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_failureNotDrop_Response.mat'); uncued_failure_Response=a.uncued_failureNotDrop_Response;
 % a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\cue_noReach.mat'); cue_noReach_Response=a.Response;
 %a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\uncued_reach.mat'); uncued_reach_Response=a.Response;
 
@@ -818,7 +818,7 @@ clear r
 % load('C:\Users\sabatini\Documents\currtens BEST SO FAR\factor_0.mat');
 load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\tensor regression\BEST SO FAR\currtens THIS IS GOOD\factor_0.mat');
 idx=factor(:,1)>=factor(:,2);
-isHighWeight_train=factor(:,1)>0.03 | factor(:,2)>0.03;
+isHighWeight_train=factor(:,1)>0.0262 | factor(:,2)>0.0207; % top 100 neurons for each factor
 load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM\matlab glm training set\combine mat and python glms\consensus_idx_from_glm_when_normByGLMcoefIntegral.mat');
 
 usingGLMidx=false;
@@ -989,6 +989,34 @@ else
     scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),cued_success_Response.cXfailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1),[],'k',"diamond");
     hold on; scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),cued_success_Response.cXfailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0),[],'r',"diamond");
     xie=-1:0.01:1; yie=-0.75*exp(-1.1*(xie-0.6))+1.5; hold all; plot(xie,yie);
+
+    % What I used for Fig 5 supp
+    cmap=[0, 0.75, 0.75; 0.4940, 0.1840, 0.5560];
+    %figure(); scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.allr2scores>0 & cued_success_Response.idx_from_glm==1),cued_success_Response.combofailure_modulation_index(cued_success_Response.allr2scores>0 & cued_success_Response.idx_from_glm==1),[],'b');
+    %hold on; scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.allr2scores>0 & cued_success_Response.idx_from_glm==2),cued_success_Response.combofailure_modulation_index(cued_success_Response.allr2scores>0 & cued_success_Response.idx_from_glm==2),[],'r');
+    figure(); scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.allr2scores>0 & cued_success_Response.idx_from_glm==1),cued_success_Response.cXfailure_modulation_index(cued_success_Response.allr2scores>0 & cued_success_Response.idx_from_glm==1),[],'b');
+    hold on; scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.allr2scores>0 & cued_success_Response.idx_from_glm==2),cued_success_Response.cXfailure_modulation_index(cued_success_Response.allr2scores>0 & cued_success_Response.idx_from_glm==2),[],'r');
+    scatter(cued_success_Response.allsuccess_modulation_index(cued_success_Response.allr2scores>0 & cued_success_Response.idx_from_glm==1),cued_success_Response.allfailure_modulation_index(cued_success_Response.allr2scores>0 & cued_success_Response.idx_from_glm==1),[],'b');
+    hold on; scatter(cued_success_Response.allsuccess_modulation_index(cued_success_Response.allr2scores>0 & cued_success_Response.idx_from_glm==2),cued_success_Response.allfailure_modulation_index(cued_success_Response.allr2scores>0 & cued_success_Response.idx_from_glm==2),[],'r');
+    xie=-1:0.01:1; yie=-0.75*exp(-1.1*(xie-0.6))+1.5; hold all; plot(xie,yie);
+    title('GLM classification');
+    %figure(); scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.idx==0),cued_success_Response.combofailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.idx==0),[],'b');
+    %hold on; scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.idx==1),cued_success_Response.combofailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.idx==1),[],'r');
+    figure(); scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.idx==0),cued_success_Response.cXfailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.idx==0),[],'b');
+    hold on; scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.idx==1),cued_success_Response.cXfailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.idx==1),[],'r');
+    scatter(cued_success_Response.allsuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.idx==0),cued_success_Response.allfailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.idx==0),[],'b');
+    hold on; scatter(cued_success_Response.allsuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.idx==1),cued_success_Response.allfailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.idx==1),[],'r');
+    xie=-1:0.01:1; yie=-0.75*exp(-1.1*(xie-0.6))+1.5; hold all; plot(xie,yie);
+    title('Tensor reg classification');
+    cued_success_Response.consensus_idx=nan(size(cued_success_Response.idx));
+    cued_success_Response.consensus_idx(cued_success_Response.idx_from_glm==1 | cued_success_Response.idx==0 & ~(cued_success_Response.idx_from_glm==2 | cued_success_Response.idx==1))=1; % 1 is succ-continuing, 0 is fail-continuing
+    cued_success_Response.consensus_idx(cued_success_Response.idx_from_glm==2 | cued_success_Response.idx==1 & ~(cued_success_Response.idx_from_glm==1 | cued_success_Response.idx==0))=2;
+    %figure(); scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.consensus_idx==1),cued_success_Response.combofailure_modulation_index(cued_success_Response.consensus_idx==1),[],'b');
+    %hold on; scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.consensus_idx==2),cued_success_Response.combofailure_modulation_index(cued_success_Response.consensus_idx==2),[],'r');
+    figure(); scatter(cued_success_Response.allsuccess_modulation_index(cued_success_Response.consensus_idx==1),cued_success_Response.allfailure_modulation_index(cued_success_Response.consensus_idx==1),[],'b');
+    hold on; scatter(cued_success_Response.allsuccess_modulation_index(cued_success_Response.consensus_idx==2),cued_success_Response.allfailure_modulation_index(cued_success_Response.consensus_idx==2),[],'r');
+    scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.consensus_idx==1),cued_success_Response.cXfailure_modulation_index(cued_success_Response.consensus_idx==1),[],'b');
+    hold on; scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.consensus_idx==2),cued_success_Response.cXfailure_modulation_index(cued_success_Response.consensus_idx==2),[],'r');
 
     % THIS IS THE BOUNDARY FUNCTION:
     % xie=-1:0.01:1; yie=-0.75*exp(-1.1*(xie-0.6))+1.5; hold all; plot(xie,yie);
