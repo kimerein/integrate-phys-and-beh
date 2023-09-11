@@ -1011,12 +1011,17 @@ else
     cued_success_Response.consensus_idx=nan(size(cued_success_Response.idx));
     cued_success_Response.consensus_idx(cued_success_Response.idx_from_glm==1 | cued_success_Response.idx==0 & ~(cued_success_Response.idx_from_glm==2 | cued_success_Response.idx==1))=1; % 1 is succ-continuing, 0 is fail-continuing
     cued_success_Response.consensus_idx(cued_success_Response.idx_from_glm==2 | cued_success_Response.idx==1 & ~(cued_success_Response.idx_from_glm==1 | cued_success_Response.idx==0))=2;
+    temp=cued_success_Response.idx; cued_success_Response.idx(temp==0)=1; cued_success_Response.idx(temp==1)=2;
     %figure(); scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.consensus_idx==1),cued_success_Response.combofailure_modulation_index(cued_success_Response.consensus_idx==1),[],'b');
     %hold on; scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.consensus_idx==2),cued_success_Response.combofailure_modulation_index(cued_success_Response.consensus_idx==2),[],'r');
     figure(); scatter(cued_success_Response.allsuccess_modulation_index(cued_success_Response.consensus_idx==1),cued_success_Response.allfailure_modulation_index(cued_success_Response.consensus_idx==1),[],'b');
     hold on; scatter(cued_success_Response.allsuccess_modulation_index(cued_success_Response.consensus_idx==2),cued_success_Response.allfailure_modulation_index(cued_success_Response.consensus_idx==2),[],'r');
     scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.consensus_idx==1),cued_success_Response.cXfailure_modulation_index(cued_success_Response.consensus_idx==1),[],'b');
     hold on; scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.consensus_idx==2),cued_success_Response.cXfailure_modulation_index(cued_success_Response.consensus_idx==2),[],'r');
+    cued_success_Response.idx_from_boundary=nan(size(cued_success_Response.idx));
+    cued_success_Response.idx_from_boundary(cued_success_Response.combosuccess_modulation_index>0)=1;
+    cued_success_Response.idx_from_boundary(cued_success_Response.combosuccess_modulation_index<=0)=2;
+
 
     % THIS IS THE BOUNDARY FUNCTION:
     % xie=-1:0.01:1; yie=-0.75*exp(-1.1*(xie-0.6))+1.5; hold all; plot(xie,yie);

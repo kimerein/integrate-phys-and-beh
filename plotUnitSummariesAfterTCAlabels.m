@@ -16,7 +16,7 @@ switch justAvsOrTuning
         getResiduals=false; % but need this to get rid of mid-range
         ds=1; %1;
         removeInsufficientBaseline=true; % will nan out units that don't have at least X seconds of baseline before aligncomp max
-        atLeastXBaseline=2; %0.75; % in sec
+        atLeastXBaseline=3; %0.75; % in sec
         removeInsufficientPostBaseline=true;
         atLeastXAfterBaseline=10;
     case 'tuning'
@@ -171,7 +171,7 @@ switch justAvsOrTuning
         r.response1=outUncuedSucc.response1; r.response2=outUncuedFail.response1; plotOverlayedResponses(r,'g','r'); title('Uncued grp 1');
         r.response1=outUncuedSucc.response2; r.response2=outUncuedFail.response2; plotOverlayedResponses(r,'g','r'); title('Uncued grp 2');
         
-        makeDirectionQuiverPlot(outCuedSucc,outCuedFail,outUncuedSucc,outUncuedFail,'response1',[1 5]);
+        makeDirectionQuiverPlot(outCuedSucc,outCuedFail,outUncuedSucc,outUncuedFail,'response2',[1 5]);
 
     case 'tuning'
         % failure_off={'unit91onCh1_A2atagged','unit97onCh28_A2atagged','unit98onCh31_A2atagged','unit99onCh28_A2atagged','unit147onCh22_A2atagged','unit159onCh27_A2atagged','unit160onCh27_A2atagged','unit162onCh27_A2atagged','unit163onCh27_A2atagged','unit208onCh23_A2atagged','unit208onCh25_A2atagged','unit209onCh21_A2atagged','unit209onCh23_A2atagged','unit215onCh27_A2atagged','unit217onCh27_A2atagged','unit227onCh30_A2atagged','unit233onCh30_A2atagged'};
