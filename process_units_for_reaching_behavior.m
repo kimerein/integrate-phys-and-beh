@@ -931,6 +931,21 @@ else
     % GLM inds for 2 to 4.5 sec: shift names 21 to 45, 41 to 65 index
     % GLM inds for 2 to 5 sec: shift names 21 to 50, 41 to 70 index
     % all success starts at 214
+    firsthalfie=nanmean(py_all_glm_coef(:,[230:234]),2);
+    secondhalfie=nanmean(py_all_glm_coef(:,[234:284]),2);
+    py_metrics.beforeaftersuccess_modulation_index=(secondhalfie-firsthalfie)./(abs(secondhalfie)+abs(firsthalfie));
+    
+    firsthalfie=nanmean(py_all_glm_coef(:,[301:305]),2);
+    secondhalfie=nanmean(py_all_glm_coef(:,[305:355]),2);
+    py_metrics.beforeafterdrop_modulation_index=(secondhalfie-firsthalfie)./(abs(secondhalfie)+abs(firsthalfie));
+
+    firsthalfie=nanmean(py_all_glm_coef(:,[372:376]),2);
+    secondhalfie=nanmean(py_all_glm_coef(:,[376:426]),2);
+    py_metrics.beforeaftermiss_modulation_index=(secondhalfie-firsthalfie)./(abs(secondhalfie)+abs(firsthalfie));
+   
+    py_metrics.beforeafterfailure_modulation_index=(py_metrics.beforeafterdrop_modulation_index+py_metrics.beforeaftermiss_modulation_index)/2;
+    
+
     firsthalfie=nanmean(py_all_glm_coef(:,[234:254]),2);
     secondhalfie=nanmean(py_all_glm_coef(:,[255:284]),2);
     py_metrics.allsuccess_modulation_index=(secondhalfie-firsthalfie)./(abs(secondhalfie)+abs(firsthalfie));
@@ -1008,9 +1023,10 @@ else
     hold on; scatter(cued_success_Response.allsuccess_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.idx==1),cued_success_Response.allfailure_modulation_index(cued_success_Response.isHighWeight==1 & cued_success_Response.idx==1),[],'r');
     xie=-1:0.01:1; yie=-0.75*exp(-1.1*(xie-0.6))+1.5; hold all; plot(xie,yie);
     title('Tensor reg classification');
-    cued_success_Response.consensus_idx=nan(size(cued_success_Response.idx));
-    cued_success_Response.consensus_idx(cued_success_Response.idx_from_glm==1 | cued_success_Response.idx==0 & ~(cued_success_Response.idx_from_glm==2 | cued_success_Response.idx==1))=1; % 1 is succ-continuing, 0 is fail-continuing
-    cued_success_Response.consensus_idx(cued_success_Response.idx_from_glm==2 | cued_success_Response.idx==1 & ~(cued_success_Response.idx_from_glm==1 | cued_success_Response.idx==0))=2;
+%     cued_success_Response.consensus_idx=nan(size(cued_success_Response.idx));
+%     cued_success_Response.consensus_idx(cued_success_Response.idx_from_glm==1 | cued_success_Response.idx==0 & ~(cued_success_Response.idx_from_glm==2 | cued_success_Response.idx==1))=1; % 1 is succ-continuing, 0 is fail-continuing
+%     cued_success_Response.consensus_idx(cued_success_Response.idx_from_glm==2 | cued_success_Response.idx==1 & ~(cued_success_Response.idx_from_glm==1 | cued_success_Response.idx==0))=2;
+    % CHANGE LABELS FOR IDX TO MATCH OTHERS
     temp=cued_success_Response.idx; cued_success_Response.idx(temp==0)=1; cued_success_Response.idx(temp==1)=2;
     %figure(); scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.consensus_idx==1),cued_success_Response.combofailure_modulation_index(cued_success_Response.consensus_idx==1),[],'b');
     %hold on; scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.consensus_idx==2),cued_success_Response.combofailure_modulation_index(cued_success_Response.consensus_idx==2),[],'r');
@@ -1019,25 +1035,47 @@ else
     scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.consensus_idx==1),cued_success_Response.cXfailure_modulation_index(cued_success_Response.consensus_idx==1),[],'b');
     hold on; scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.consensus_idx==2),cued_success_Response.cXfailure_modulation_index(cued_success_Response.consensus_idx==2),[],'r');
     cued_success_Response.idx_from_boundary=nan(size(cued_success_Response.idx));
-    cued_success_Response.idx_from_boundary(cued_success_Response.combosuccess_modulation_index>0)=1;
-    cued_success_Response.idx_from_boundary(cued_success_Response.combosuccess_modulation_index<=0)=2;
+    cued_success_Response.idx_from_boundary(cued_success_Response.combosuccess_modulation_index>0.45)=1;
+    cued_success_Response.idx_from_boundary(cued_success_Response.combosuccess_modulation_index<-0.52)=2;
+    cued_success_Response.idx_from_vertboundary=nan(size(cued_success_Response.idx));
+    cued_success_Response.idx_from_vertboundary(:)=1;
+    cued_success_Response.idx_from_vertboundary(cued_success_Response.combosuccess_modulation_index<0.325)=2;
+%     cued_success_Response.idx_far_from_boundary=nan(size(cued_success_Response.idx));
+%     cued_success_Response.idx_far_from_boundary(cued_success_Response.combosuccess_modulation_index>0.2 & cued_success_Response.combosuccess_modulation_index~=1)=1;
+%     cued_success_Response.idx_far_from_boundary(cued_success_Response.combosuccess_modulation_index<=-0.2 & cued_success_Response.combosuccess_modulation_index~=-1)=2;
+    cued_success_Response.idx_diagonal_boundary=nan(size(cued_success_Response.idx));
+    cued_success_Response.idx_diagonal_boundary(:)=2;
+    cued_success_Response.idx_diagonal_boundary((cued_success_Response.combosuccess_modulation_index-cued_success_Response.combofailure_modulation_index)>0.2)=1;
+    cued_success_Response.combo_boundary=nan(size(cued_success_Response.idx));
+    cued_success_Response.combo_boundary(cued_success_Response.idx_from_boundary==1 & cued_success_Response.idx_from_vertboundary==1 & cued_success_Response.idx_diagonal_boundary==1)=1;
+    cued_success_Response.combo_boundary(cued_success_Response.idx_from_boundary==2 & cued_success_Response.idx_from_vertboundary==2 & cued_success_Response.idx_diagonal_boundary==2)=2;   
+    cued_success_Response.consensus_idx=nan(size(cued_success_Response.idx));
+    cued_success_Response.consensus_idx(cued_success_Response.combo_boundary==1 | (cued_success_Response.idx==1 & cued_success_Response.isHighWeight==1) & (cued_success_Response.combo_boundary~=2 & cued_success_Response.idx~=2))=1; 
+    cued_success_Response.consensus_idx(cued_success_Response.combo_boundary==2 | (cued_success_Response.idx==2 & cued_success_Response.isHighWeight==1) & (cued_success_Response.combo_boundary~=1 & cued_success_Response.idx~=1))=2;
 
+    % Working on final boundary functions
+%     figure(); scatter(cued_success_Response.allsuccess_modulation_index(cued_success_Response.consensus_idx==1),cued_success_Response.allfailure_modulation_index(cued_success_Response.consensus_idx==1),[],'b');
+%     hold on; scatter(cued_success_Response.allsuccess_modulation_index(cued_success_Response.consensus_idx==2),cued_success_Response.allfailure_modulation_index(cued_success_Response.consensus_idx==2),[],'r');
+%     hold on; x1=-pi+0.01:0.01:-0.01; plot(x1,-(0.2*csc(3.25*(x1+0.2))+0.7)); xlim([-1 1]); ylim([-1 1]);
+%     figure(); scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.consensus_idx==1),cued_success_Response.cXfailure_modulation_index(cued_success_Response.consensus_idx==1),[],'b');
+%     hold on; scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.consensus_idx==2),cued_success_Response.cXfailure_modulation_index(cued_success_Response.consensus_idx==2),[],'r');
+%     x2=0.01:0.01:pi-0.01; hold on; plot(x2,-(0.1*csc(3*x2)-1.1)); xlim([-1 1]); ylim([-1 1]);
 
-    % THIS IS THE BOUNDARY FUNCTION:
-    % xie=-1:0.01:1; yie=-0.75*exp(-1.1*(xie-0.6))+1.5; hold all; plot(xie,yie);
-    % Use it to define cell types, based on glm coefs
-    ythresh=-0.75*exp(-1.1.*(cued_success_Response.combosuccess_modulation_index-0.6))+1.5; belowthresh1=cued_success_Response.combofailure_modulation_index<ythresh; abovethresh1=cued_success_Response.combofailure_modulation_index>=ythresh;
-    ythresh=-0.75*exp(-1.1.*(cued_success_Response.allsuccess_modulation_index-0.6))+1.5; belowthresh2=cued_success_Response.allfailure_modulation_index<ythresh; abovethresh2=cued_success_Response.allfailure_modulation_index>=ythresh;
-    ythresh=-0.75*exp(-1.1.*(cued_success_Response.cXsuccess_modulation_index-0.6))+1.5; belowthresh3=cued_success_Response.cXfailure_modulation_index<ythresh; abovethresh3=cued_success_Response.cXfailure_modulation_index>=ythresh;
-    cued_success_Response.idx=nan(size(cued_success_Response.idx)); 
-%     cued_success_Response.idx(belowthresh1==1 | belowthresh2==1 | belowthresh3==1 | (cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0))=2; % 2 is failure-continuing
-%     cued_success_Response.idx((abovethresh1==1 & abovethresh2==1 & abovethresh3==1) | (cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1) | ((abovethresh1==1 | abovethresh2==1 | abovethresh3==1) & ~(belowthresh1==1 | belowthresh2==1 | belowthresh3==1)))=1; % 1 is success-continuing
-    cued_success_Response.idx((belowthresh1==1 | belowthresh2==1 | belowthresh3==1))=2; % 2 is failure-continuing
-    cued_success_Response.idx(((abovethresh1==1 & abovethresh2==1 & abovethresh3==1) | ((abovethresh1==1 | abovethresh2==1 | abovethresh3==1) & ~(belowthresh1==1 | belowthresh2==1 | belowthresh3==1))))=1; % 1 is success-continuing
-%     cued_success_Response.idx((cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0))=2; % 2 is failure-continuing
-%     cued_success_Response.idx((cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1))=1; % 1 is success-continuing
-    cued_success_Response.idx(cued_success_Response.combosuccess_modulation_index==-1 & cued_success_Response.allsuccess_modulation_index==-1 & cued_success_Response.cXsuccess_modulation_index==-1)=nan;
-    idx=cued_success_Response.idx;
+%     % THIS IS THE BOUNDARY FUNCTION:
+%     % xie=-1:0.01:1; yie=-0.75*exp(-1.1*(xie-0.6))+1.5; hold all; plot(xie,yie);
+%     % Use it to define cell types, based on glm coefs
+%     ythresh=-0.75*exp(-1.1.*(cued_success_Response.combosuccess_modulation_index-0.6))+1.5; belowthresh1=cued_success_Response.combofailure_modulation_index<ythresh; abovethresh1=cued_success_Response.combofailure_modulation_index>=ythresh;
+%     ythresh=-0.75*exp(-1.1.*(cued_success_Response.allsuccess_modulation_index-0.6))+1.5; belowthresh2=cued_success_Response.allfailure_modulation_index<ythresh; abovethresh2=cued_success_Response.allfailure_modulation_index>=ythresh;
+%     ythresh=-0.75*exp(-1.1.*(cued_success_Response.cXsuccess_modulation_index-0.6))+1.5; belowthresh3=cued_success_Response.cXfailure_modulation_index<ythresh; abovethresh3=cued_success_Response.cXfailure_modulation_index>=ythresh;
+%     cued_success_Response.idx=nan(size(cued_success_Response.idx)); 
+% %     cued_success_Response.idx(belowthresh1==1 | belowthresh2==1 | belowthresh3==1 | (cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0))=2; % 2 is failure-continuing
+% %     cued_success_Response.idx((abovethresh1==1 & abovethresh2==1 & abovethresh3==1) | (cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1) | ((abovethresh1==1 | abovethresh2==1 | abovethresh3==1) & ~(belowthresh1==1 | belowthresh2==1 | belowthresh3==1)))=1; % 1 is success-continuing
+%     cued_success_Response.idx((belowthresh1==1 | belowthresh2==1 | belowthresh3==1))=2; % 2 is failure-continuing
+%     cued_success_Response.idx(((abovethresh1==1 & abovethresh2==1 & abovethresh3==1) | ((abovethresh1==1 | abovethresh2==1 | abovethresh3==1) & ~(belowthresh1==1 | belowthresh2==1 | belowthresh3==1))))=1; % 1 is success-continuing
+% %     cued_success_Response.idx((cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==0))=2; % 2 is failure-continuing
+% %     cued_success_Response.idx((cued_success_Response.isHighWeight==1 & cued_success_Response.consensus_idx==1))=1; % 1 is success-continuing
+%     cued_success_Response.idx(cued_success_Response.combosuccess_modulation_index==-1 & cued_success_Response.allsuccess_modulation_index==-1 & cued_success_Response.cXsuccess_modulation_index==-1)=nan;
+%     idx=cued_success_Response.idx;
 
     % Define cued units
     cuedamount=defineCuedUnits(cued_success_Response);
