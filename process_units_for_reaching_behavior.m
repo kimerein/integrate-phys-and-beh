@@ -1007,6 +1007,16 @@ else
 
     % What I used for Fig 5 supp
     cmap=[0, 0.75, 0.75; 0.4940, 0.1840, 0.5560];
+    figure(); s=scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.idx_from_glm==2),cued_success_Response.combofailure_modulation_index(cued_success_Response.idx_from_glm==2),100,cmap(2,:),'filled');
+    s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4;
+    hold on;
+    s=scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.idx_from_glm==1),cued_success_Response.combofailure_modulation_index(cued_success_Response.idx_from_glm==1),100,cmap(1,:),'filled');
+    s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4;
+    s=scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.idx==2 & cued_success_Response.isHighWeight==1),cued_success_Response.combofailure_modulation_index(cued_success_Response.idx==2 & cued_success_Response.isHighWeight==1),100,cmap(2,:),'filled');
+    s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4;
+    hold on;
+    s=scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.idx==1 & cued_success_Response.isHighWeight==1),cued_success_Response.combofailure_modulation_index(cued_success_Response.idx==1 & cued_success_Response.isHighWeight==1),100,cmap(1,:),'filled');
+    s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4;
     %figure(); scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.allr2scores>0 & cued_success_Response.idx_from_glm==1),cued_success_Response.combofailure_modulation_index(cued_success_Response.allr2scores>0 & cued_success_Response.idx_from_glm==1),[],'b');
     %hold on; scatter(cued_success_Response.combosuccess_modulation_index(cued_success_Response.allr2scores>0 & cued_success_Response.idx_from_glm==2),cued_success_Response.combofailure_modulation_index(cued_success_Response.allr2scores>0 & cued_success_Response.idx_from_glm==2),[],'r');
     figure(); scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.allr2scores>0 & cued_success_Response.idx_from_glm==1),cued_success_Response.cXfailure_modulation_index(cued_success_Response.allr2scores>0 & cued_success_Response.idx_from_glm==1),[],'b');
@@ -1037,9 +1047,6 @@ else
     cued_success_Response.idx_from_boundary=nan(size(cued_success_Response.idx));
     cued_success_Response.idx_from_boundary(cued_success_Response.combosuccess_modulation_index>0.45)=1;
     cued_success_Response.idx_from_boundary(cued_success_Response.combosuccess_modulation_index<-0.52)=2;
-    cued_success_Response.idx_from_vertboundary=nan(size(cued_success_Response.idx));
-    cued_success_Response.idx_from_vertboundary(:)=1;
-    cued_success_Response.idx_from_vertboundary(cued_success_Response.combosuccess_modulation_index<0.325)=2;
 %     cued_success_Response.idx_far_from_boundary=nan(size(cued_success_Response.idx));
 %     cued_success_Response.idx_far_from_boundary(cued_success_Response.combosuccess_modulation_index>0.2 & cued_success_Response.combosuccess_modulation_index~=1)=1;
 %     cued_success_Response.idx_far_from_boundary(cued_success_Response.combosuccess_modulation_index<=-0.2 & cued_success_Response.combosuccess_modulation_index~=-1)=2;
@@ -1047,8 +1054,8 @@ else
     cued_success_Response.idx_diagonal_boundary(:)=2;
     cued_success_Response.idx_diagonal_boundary((cued_success_Response.combosuccess_modulation_index-cued_success_Response.combofailure_modulation_index)>0.2)=1;
     cued_success_Response.combo_boundary=nan(size(cued_success_Response.idx));
-    cued_success_Response.combo_boundary(cued_success_Response.idx_from_boundary==1 & cued_success_Response.idx_from_vertboundary==1 & cued_success_Response.idx_diagonal_boundary==1)=1;
-    cued_success_Response.combo_boundary(cued_success_Response.idx_from_boundary==2 & cued_success_Response.idx_from_vertboundary==2 & cued_success_Response.idx_diagonal_boundary==2)=2;   
+    cued_success_Response.combo_boundary(cued_success_Response.idx_from_boundary==1 & cued_success_Response.idx_diagonal_boundary==1)=1;
+    cued_success_Response.combo_boundary(cued_success_Response.idx_from_boundary==2 & cued_success_Response.idx_diagonal_boundary==2)=2;   
     cued_success_Response.consensus_idx=nan(size(cued_success_Response.idx));
     cued_success_Response.consensus_idx(cued_success_Response.combo_boundary==1 | (cued_success_Response.idx==1 & cued_success_Response.isHighWeight==1) & (cued_success_Response.combo_boundary~=2 & cued_success_Response.idx~=2))=1; 
     cued_success_Response.consensus_idx(cued_success_Response.combo_boundary==2 | (cued_success_Response.idx==2 & cued_success_Response.isHighWeight==1) & (cued_success_Response.combo_boundary~=1 & cued_success_Response.idx~=1))=2;
