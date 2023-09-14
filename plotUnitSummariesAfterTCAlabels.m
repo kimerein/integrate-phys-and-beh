@@ -1,4 +1,29 @@
-function plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,isSig,doingCued,justAvsOrTuning)
+function tuningOutput=plotUnitSummariesAfterTCAlabels(varargin)
+
+tuningOutput=[];
+if length(varargin)==9
+    groupLabelsFromTCA=varargin{1};
+    cuez=varargin{2};
+    cued_success_Response=varargin{3};
+    cued_failure_Response=varargin{4};
+    uncued_success_Response=varargin{5};
+    uncued_failure_Response=varargin{6};
+    isSig=varargin{7};
+    doingCued=varargin{8};
+    justAvsOrTuning=varargin{9};
+    useTheseCuezBins=[];
+elseif length(varargin)==10
+    groupLabelsFromTCA=varargin{1};
+    cuez=varargin{2};
+    cued_success_Response=varargin{3};
+    cued_failure_Response=varargin{4};
+    uncued_success_Response=varargin{5};
+    uncued_failure_Response=varargin{6};
+    isSig=varargin{7};
+    doingCued=varargin{8};
+    justAvsOrTuning=varargin{9};
+    useTheseCuezBins=varargin{10};
+end
 
 switch justAvsOrTuning
     case 'justAvs'
@@ -10,9 +35,9 @@ switch justAvsOrTuning
         Zscore=false;
         minmaxnorm=false;
         chopOutliers=true;
-        smoo=30; % only used for tuning %30; %6; %smoo=3; %smoo=42;
+        smoo=1; %30; % only used for tuning %30; %6; %smoo=3; %smoo=42;
         smoothBeforeResids=true; 
-        smooBef=200; %15; %30; %83;
+        smooBef=100; %15; %30; %83;
         getResiduals=false; % but need this to get rid of mid-range
         ds=1; %1;
         removeInsufficientBaseline=true; % will nan out units that don't have at least X seconds of baseline before aligncomp max
@@ -24,15 +49,16 @@ switch justAvsOrTuning
         % doingCued='uncuedOverCued'; % 'cued' or 'uncued' or 'cuedOverUncued' or 'uncuedOverCued'
         basesubtract=false;
         individBase=false;
-        basetimewindow=[-5 -4]; %[9 12.5]; %[4 9];
+        basetimewindow=[9 16]; %[-5 -4]; %[9 12.5]; %[4 9];
 
         plotAll=false;
         Zscore=false;
+        normToBase=false; % doesn't work well, too much noise
         minmaxnorm=false;
         smoo=1; %6; %smoo=3; %smoo=42;
         chopOutliers=true;
         smoothBeforeResids=true;
-        smooBef=200; %150; %10; %30;
+        smooBef=100; %150; %10; %30;
         getResiduals=false; % but need this to get rid of mid-range
         dsForCuez=1;
         removeInsufficientBaseline=true; % will nan out units that don't have at least X seconds of baseline before aligncomp max
@@ -79,14 +105,16 @@ switch doingCued
 %         temp=prctile(cuez(groupLabelsFromTCA==1),[0 15 30 45 55 65 80 94 98 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp; % 39th prctile is 0 cuez for grp 1
 %         temp=prctile(cuez(groupLabelsFromTCA==2),[0 15 30 45 55 65 80 94 98 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; % 28th prctile is 0 cuez for grp 2
     case 'uncuedOverCued'
-        basesubtract=false;
+%         basesubtract=false;
 %         temp=prctile(cuez(groupLabelsFromTCA==1),[0 10 20 50 60 70 95 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{1}=temp;
 %         temp=prctile(cuez(groupLabelsFromTCA==2),[0 10 20 50 60 70 95 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; cuezbins{2}=temp; 
 %         temp=prctile(cuez(groupLabelsFromTCA==1),[0 6 12 50 88 94 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; temp=sort(unique(temp)); cuezbins{1}=temp;
 %         temp=prctile(cuez(groupLabelsFromTCA==2),[0 6 12 50 88 94 100]); temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; temp=sort(unique(temp)); cuezbins{2}=temp; 
         temp=prctile(cuez(groupLabelsFromTCA==1),[0 50 100]); temp(2)=0; temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; temp=sort(unique(temp)); cuezbins{1}=temp;
         temp=prctile(cuez(groupLabelsFromTCA==2),[0 50 100]); temp(2)=0; temp(1)=temp(1)-0.0001; temp(end)=temp(end)+0.0001; temp=sort(unique(temp)); cuezbins{2}=temp; 
-
+        if ~isempty(useTheseCuezBins)
+            cuezbins=useTheseCuezBins;
+        end
 %         cuezbins{1}=[-0.5 0.5 1.5];
 %         cuezbins{2}=[-0.5 0.5 1.5];
 
@@ -150,6 +178,10 @@ elseif minmaxnorm==true
     [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=maxNorm(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response);
 end
 
+if normToBase==true
+    [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=normByBaseWindow(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,basetimewindow);
+end
+
 switch justAvsOrTuning
     case 'justAvs'
         % ds=6;
@@ -188,6 +220,14 @@ switch justAvsOrTuning
         [grp1_fail,grp2_fail]=plotByCuez(cued_failure_Response,cuez,groupLabelsFromTCA,'cued failure',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
         [grp1_succ_uncue,grp2_succ_uncue]=plotByCuez(uncued_success_Response,cuez,groupLabelsFromTCA,'uncued success',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
         [grp1_fail_uncue,grp2_fail_uncue]=plotByCuez(uncued_failure_Response,cuez,groupLabelsFromTCA,'uncued failure',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
+        tuningOutput.grp1_succ=grp1_succ;
+        tuningOutput.grp2_succ=grp2_succ;
+        tuningOutput.grp1_fail=grp1_fail;
+        tuningOutput.grp2_fail=grp2_fail;
+        tuningOutput.grp1_succ_uncue=grp1_succ_uncue;
+        tuningOutput.grp2_succ_uncue=grp2_succ_uncue;
+        tuningOutput.grp1_fail_uncue=grp1_fail_uncue;
+        tuningOutput.grp2_fail_uncue=grp2_fail_uncue;
         % plotDiffOfBycuez(grp1_succ,grp1_fail,[]);
         % plotDiffOfBycuez(grp1_succ,grp1_fail,[-1.5 0]);
         % plotDiffOfBycuez(grp1_succ,grp1_fail,[0 2.1]);
@@ -202,14 +242,14 @@ switch justAvsOrTuning
 %         [grp1_succ_uncuesig,grp2_succ_uncuesig]=plotByCuez(uncued_success_Response,nonsigcuez,groupLabelsFromTCA,'uncued success',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
 %         [grp1_fail_uncuesig,grp2_fail_uncuesig]=plotByCuez(uncued_failure_Response,nonsigcuez,groupLabelsFromTCA,'uncued failure',dsForCuez,smoo,'jet',cuezbins,basesubtract,basetimewindow,plotAll);
 
-        disp('doing grp1succ vs grp1_succ_uncue');
-        plotOutsOverlayed(grp1_succ,grp1_succ_uncue); pause;
-        disp('doing grp1fail vs grp1_fail_uncue');
-        plotOutsOverlayed(grp1_fail,grp1_fail_uncue); pause;
-        disp('doing grp2succ vs grp2_succ_uncue');
-        plotOutsOverlayed(grp2_succ,grp2_succ_uncue); pause;
-        disp('doing grp2fail vs grp2_fail_uncue');
-        plotOutsOverlayed(grp2_fail,grp2_fail_uncue);
+%         disp('doing grp1succ vs grp1_succ_uncue');
+%         plotOutsOverlayed(grp1_succ,grp1_succ_uncue); pause;
+%         disp('doing grp1fail vs grp1_fail_uncue');
+%         plotOutsOverlayed(grp1_fail,grp1_fail_uncue); pause;
+%         disp('doing grp2succ vs grp2_succ_uncue');
+%         plotOutsOverlayed(grp2_succ,grp2_succ_uncue); pause;
+%         disp('doing grp2fail vs grp2_fail_uncue');
+%         plotOutsOverlayed(grp2_fail,grp2_fail_uncue);
 end
 
 end
@@ -630,6 +670,19 @@ for i=1:length(data1.bycuez)
     end
 end
 
+end
+
+function [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=normByBaseWindow(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,baseWindow)
+
+[cuetime,t]=getCueTimeForThisResponse(cued_success_Response);
+cued_success_Response.unitbyunit_y=cued_success_Response.unitbyunit_y./repmat(mean(cued_success_Response.unitbyunit_y(:,t>baseWindow(1) & t<baseWindow(2)),2,'omitnan'),1,size(cued_success_Response.unitbyunit_y,2));
+[cuetime,t]=getCueTimeForThisResponse(cued_failure_Response);
+cued_failure_Response.unitbyunit_y=cued_failure_Response.unitbyunit_y./repmat(mean(cued_failure_Response.unitbyunit_y(:,t>baseWindow(1) & t<baseWindow(2)),2,'omitnan'),1,size(cued_failure_Response.unitbyunit_y,2));
+[cuetime,t]=getCueTimeForThisResponse(uncued_success_Response);
+uncued_success_Response.unitbyunit_y=uncued_success_Response.unitbyunit_y./repmat(mean(uncued_success_Response.unitbyunit_y(:,t>baseWindow(1) & t<baseWindow(2)),2,'omitnan'),1,size(uncued_success_Response.unitbyunit_y,2));
+[cuetime,t]=getCueTimeForThisResponse(uncued_failure_Response);
+uncued_failure_Response.unitbyunit_y=uncued_failure_Response.unitbyunit_y./repmat(mean(uncued_failure_Response.unitbyunit_y(:,t>baseWindow(1) & t<baseWindow(2)),2,'omitnan'),1,size(uncued_failure_Response.unitbyunit_y,2));
+      
 end
 
 function [cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response]=maxNorm(cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response)

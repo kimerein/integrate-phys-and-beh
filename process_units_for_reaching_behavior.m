@@ -858,7 +858,7 @@ if usingGLMidx==true
     py_metrics.cXsucc_over1sec=nansum(py_all_glm_coef(:,[427:427+19]),2);
     py_metrics.allSucc_over1sec=nansum(py_all_glm_coef(:,[214:214+19]),2);
     py_metrics.cXsucc_overpoint5sec=nansum(py_all_glm_coef(:,[427:427+10]),2);
-    py_metrics.allSucc_overpoint5sec=nansum(py_all_glm_coef(:,[214:214+10]),2);
+    py_metrics.allSucc_overpoint5sec=nansum(py_all_glm_coef(:,[214:214+10]),2);    
     idx=nan(size(cued_success_Response.unitbyunit_x,1),1);
     idx(indexGLMcellsIntoUnitNames(~isnan(indexGLMcellsIntoUnitNames)))=idx_from_glm(~isnan(indexGLMcellsIntoUnitNames)); cued_success_Response.idx=idx;
 %     whichGLMinds=[286:286+71 356:356+71 499:499+71 568:568+71];
@@ -922,6 +922,7 @@ else
     py_metrics.allSucc_over1sec=nansum(py_all_glm_coef(:,[214:214+19]),2);
     py_metrics.cXsucc_overpoint5sec=nansum(py_all_glm_coef(:,[427:427+10]),2);
     py_metrics.allSucc_overpoint5sec=nansum(py_all_glm_coef(:,[214:214+10]),2);
+    py_metrics.precuebaseline=nansum(py_all_glm_coef(:,[1:1+10]),2);
 
     % [num2str((1:640)') feature_names]
     % Tensor regression temporal factors started at time 0, wrt reach,
@@ -931,6 +932,12 @@ else
     % GLM inds for 2 to 4.5 sec: shift names 21 to 45, 41 to 65 index
     % GLM inds for 2 to 5 sec: shift names 21 to 50, 41 to 70 index
     % all success starts at 214
+    % sus1to5sec
+    py_metrics.allfail_sus1to5sec=(nanmean(py_all_glm_coef(:,[305+10:305+50]),2)+nanmean(py_all_glm_coef(:,[376+10:376+50]),2))/2;
+    py_metrics.cXfail_sus1to5sec=(nanmean(py_all_glm_coef(:,[518+10:518+50]),2)+nanmean(py_all_glm_coef(:,[589+10:589+50]),2))/2;
+    py_metrics.allsucc_sus1to5sec=nanmean(py_all_glm_coef(:,[234+10:234+50]),2);
+    py_metrics.cXsucc_sus1to5sec=nanmean(py_all_glm_coef(:,[447+10:447+50]),2);
+
     firsthalfie=nanmean(py_all_glm_coef(:,[230:234]),2);
     secondhalfie=nanmean(py_all_glm_coef(:,[234:284]),2);
     py_metrics.beforeaftersuccess_modulation_index=(secondhalfie-firsthalfie)./(abs(secondhalfie)+abs(firsthalfie));
@@ -944,7 +951,6 @@ else
     py_metrics.beforeaftermiss_modulation_index=(secondhalfie-firsthalfie)./(abs(secondhalfie)+abs(firsthalfie));
    
     py_metrics.beforeafterfailure_modulation_index=(py_metrics.beforeafterdrop_modulation_index+py_metrics.beforeaftermiss_modulation_index)/2;
-    
 
     firsthalfie=nanmean(py_all_glm_coef(:,[234:254]),2);
     secondhalfie=nanmean(py_all_glm_coef(:,[255:284]),2);
@@ -1306,6 +1312,17 @@ plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,(cued_success_Response
 plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cued_success_Response.isHighWeight,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning');
 
 plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cued_success_Response.cXfail_sustained,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning');
+
+% 20230914
+binsForTuning{1}=[-10 -0.0001 10]; binsForTuning{2}=[-10 -0.0001 10];
+tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXfail_sus1to5sec-cued_success_Response.allfail_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning);
+plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXfail_sus1to5sec-cued_success_Response.allfail_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,cue_Response,[],'uncuedOverCued','tuning',binsForTuning);
+plotTuningOutputScatter(tuningOutput,'grp1_fail','grp1_fail_uncue',2,[2 5]);
+binsForTuning{1}=[-10 -0.0001 10]; binsForTuning{2}=[-10 -0.0001 10];
+tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXsucc_sus1to5sec-cued_success_Response.allsucc_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning); % first n is light green (lower range), second n is dark red (higher range)
+plotTuningOutputScatter(tuningOutput,'grp2_succ','grp2_succ_uncue',1,[2 5]);
+binsForTuning{1}=[-10 0.0001 10]; binsForTuning{2}=[-10 0.0001 10];
+tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXsucc_sus1to5sec-cued_success_Response.allsucc_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning); % first n is light green (lower range), second n is dark red (higher range)
 
 % cuez=getCueTunedUnits(uncuedReach_Response,cuedReach_Response,'justcue_v_justuncue','mean',1,[4 12],[-2 0],[4 12],[-2 0]); 
 % plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued');
