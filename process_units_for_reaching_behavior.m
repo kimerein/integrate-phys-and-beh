@@ -1189,7 +1189,7 @@ end
 
 % Average firing rates could try excluding all with trial_n_cutoff=5 or 8
 % or 9 or 12 or more (but only for succ-continuing)
-plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'justAvs','justAvs');
+plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,[],cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'justAvs','justAvs');
 % plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Response,cued_drop_Response,uncued_success_Response,uncued_drop_Response,[],'justAvs','justAvs');
 % plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Response,cued_failureNotDrop_Response,uncued_success_Response,uncued_failureNotDrop_Response,[],'justAvs','justAvs');
 % plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,[],cued_success_Response,cued_failure_noReach_Response,uncued_success_Response,uncued_failure_noReach_Response,[],'justAvs','justAvs');
@@ -1320,9 +1320,11 @@ plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success
 plotTuningOutputScatter(tuningOutput,'grp1_fail','grp1_fail_uncue',2,[2 5]);
 binsForTuning{1}=[-10 -0.0001 10]; binsForTuning{2}=[-10 -0.0001 10];
 tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXsucc_sus1to5sec-cued_success_Response.allsucc_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning); % first n is light green (lower range), second n is dark red (higher range)
-plotTuningOutputScatter(tuningOutput,'grp2_succ','grp2_succ_uncue',1,[2 5]);
+plotTuningOutputScatter(tuningOutput,'grp2_succ','grp2_succ_uncue',1,[1 5]);
 binsForTuning{1}=[-10 0.0001 10]; binsForTuning{2}=[-10 0.0001 10];
 tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXsucc_sus1to5sec-cued_success_Response.allsucc_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning); % first n is light green (lower range), second n is dark red (higher range)
+% All neurons not mixed selectivity
+
 
 % cuez=getCueTunedUnits(uncuedReach_Response,cuedReach_Response,'justcue_v_justuncue','mean',1,[4 12],[-2 0],[4 12],[-2 0]); 
 % plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued');

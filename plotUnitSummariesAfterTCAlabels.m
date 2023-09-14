@@ -34,6 +34,7 @@ switch justAvsOrTuning
         plotAll=false;
         Zscore=false;
         minmaxnorm=false;
+        normToBase=false; 
         chopOutliers=true;
         smoo=1; %30; % only used for tuning %30; %6; %smoo=3; %smoo=42;
         smoothBeforeResids=true; 
@@ -44,6 +45,12 @@ switch justAvsOrTuning
         atLeastXBaseline=3; %0.75; % in sec
         removeInsufficientPostBaseline=true;
         atLeastXAfterBaseline=10;
+        addbeginnings=false;
+
+        dropTrialBeginnings=true;
+        moreThanXSecBeforeAlign=1;
+        addbeginnings=true;
+        atLeastXBaseline=2;
     case 'tuning'
         % for cue tuned plots
         % doingCued='uncuedOverCued'; % 'cued' or 'uncued' or 'cuedOverUncued' or 'uncuedOverCued'
@@ -62,9 +69,11 @@ switch justAvsOrTuning
         getResiduals=false; % but need this to get rid of mid-range
         dsForCuez=1;
         removeInsufficientBaseline=true; % will nan out units that don't have at least X seconds of baseline before aligncomp max
-        atLeastXBaseline=0.75; % in sec
+        atLeastXBaseline=3; % in sec
         removeInsufficientPostBaseline=true;
         atLeastXAfterBaseline=10;
+        addbeginnings=false;
+        dropTrialBeginnings=false;
 end
 
 % plot all SU
@@ -137,7 +146,13 @@ groupLabelsFromTCA(isSig~=1)=-10; % omit these in plotting
 % smoo=6;
 % getResiduals=true; % but need this to get rid of mid-range
 
-addbeginnings=false;
+if dropTrialBeginnings==true
+    cued_success_Response=dropTrialBeginningsFunc(cued_success_Response,moreThanXSecBeforeAlign);
+    cued_failure_Response=dropTrialBeginningsFunc(cued_failure_Response,moreThanXSecBeforeAlign);
+    uncued_success_Response=dropTrialBeginningsFunc(uncued_success_Response,moreThanXSecBeforeAlign);
+    uncued_failure_Response=dropTrialBeginningsFunc(uncued_failure_Response,moreThanXSecBeforeAlign);
+end
+
 if addbeginnings==true
     cued_success_Response=addLastTrialToNextBeginning(cued_success_Response);
     cued_failure_Response=addLastTrialToNextBeginning(cued_failure_Response);
@@ -625,15 +640,36 @@ results_tbl = array2table(results,"VariableNames", ...
 
 end
 
+function currR=dropTrialBeginningsFunc(currR,moreThanXSecBeforeAlign)
+
+time=nanmean(currR.unitbyunit_x,1);
+temp=nanmean(currR.aligncomp_x,1);
+[~,ma]=nanmax(nanmean(currR.aligncomp_y,1));
+timeOfMaxAlignComp=temp(ma);
+xsecbefore=timeOfMaxAlignComp-moreThanXSecBeforeAlign;
+f=find(time<xsecbefore,1,'last');
+faligncomp=find(nanmean(currR.aligncomp_x,1)<xsecbefore,1,'last');
+temp=currR.unitbyunit_y;
+currR.unitbyunit_y=temp(:,f+1:end);
+temp=currR.unitbyunit_x;
+currR.unitbyunit_x=temp(:,f+1:end);
+temp=currR.aligncomp_x;
+currR.aligncomp_x=temp(:,faligncomp+1:end);
+temp=currR.aligncomp_y;
+currR.aligncomp_y=temp(:,faligncomp+1:end);
+
+end
+
 function resp=addLastTrialToNextBeginning(resp)
 
-trialEnds=[12 18];
+trialEnds=[13.5 18];
 times=nanmean(resp.unitbyunit_x,1);
-batch1begins=resp.unitbyunit_y(:,times>trialEnds(1)-3 & times<trialEnds(1));
-batch2begins=resp.unitbyunit_y(:,times>trialEnds(2)-3 & times<trialEnds(2));
+batch1begins=resp.unitbyunit_y(:,times>trialEnds(1)-6.5 & times<trialEnds(1));
+batch2begins=resp.unitbyunit_y(:,times>trialEnds(2)-6.5 & times<trialEnds(2));
+% batch2begins=[];
 togbatch=cat(3,batch1begins,batch2begins);
 togbatch=reshape(nanmean(togbatch,3),size(batch1begins,1),size(batch1begins,2));
-timesbatch=times(times>trialEnds(1)-3 & times<trialEnds(1));
+timesbatch=times(times>trialEnds(1)-6.5 & times<trialEnds(1));
 timesbatch=timesbatch-nanmax(timesbatch);
 timesbatch=timesbatch+nanmin(times);
 resp.unitbyunit_x=[repmat(timesbatch,size(resp.unitbyunit_x,1),1) resp.unitbyunit_x];
