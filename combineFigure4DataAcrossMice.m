@@ -5,7 +5,12 @@ function [takesess_con,takemice_con,takesess_LED,takemice_LED]=combineFigure4Dat
 % [tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=combineFigure4DataAcrossMice(dd([1 2 5 9 12 13]),zeros(size(useOptoForThisGp([1 2 5 9 12 13]))),'all cued failures_seqLength3_win3_minus3to025_optoDurforcuepoi25then1NOOPREdplearn',0.035,94,false,false,false,40,1,[],[],'sessIDandMouseID_dplearn.mat');
 % [tooksess_con,tookmice_con,tooksess_LED,tookmice_LED]=combineFigure4DataAcrossMice(dd([1 2 9]),ones(size(useOptoForThisGp([1 2 9]))),'delayed success_seqLength3_win3_minus3to025poi25then1NOOPREdplearn',0.035,94,false,false,false,0,1,consensus_successAndFail_tookmice,consensus_successAndFail_tookmice,'sessIDandMouseID_dplearn.mat');
 
-
+plotBlueInstead=true;
+if plotBlueInstead==true
+    cforopto='b';
+else
+    cforopto='r';
+end
 takesess_con=[]; takemice_con=[]; takesess_LED=[]; takemice_LED=[];
 
 if ~isempty(useMice_con) && ~isempty(useMice_LED)
@@ -251,7 +256,7 @@ if doCDF==true
     [n,x]=cityscape_hist(mean(returnThisCDF.trial1_rawReachMatrix,1,'omitnan'),0:timeStep:(size(returnThisCDF.trial1_rawReachMatrix,2)-1)*(timeStep));
     figure(); plot(x,n,'Color','k');
     [n2,x2]=cityscape_hist(mean(returnThisCDF.trial2_rawReachMatrix,1,'omitnan'),0:timeStep:(size(returnThisCDF.trial2_rawReachMatrix,2)-1)*(timeStep));
-    hold on; plot(x2,n2,'Color','r');
+    hold on; plot(x2,n2,'Color',cforopto);
     title('Reach rate average over trials');
 
     % Reach PDF averaged over trials
@@ -261,7 +266,7 @@ if doCDF==true
     figure(); plot(x,n,'Color','k');
     temp=downSampMatrix(returnThisCDF.trial2_rawReachMatrix,ds); temp=temp./repmat(nansum(temp,2),1,size(temp,2)); % make each row its own pdf
     [n2,x2]=cityscape_hist(mean(temp,1,'omitnan'),ds_times);
-    hold on; plot(x2,n2,'Color','r');
+    hold on; plot(x2,n2,'Color',cforopto);
     ylabel('Average of each trial as PDF');
 
     % plot reach probability per bin
@@ -275,18 +280,18 @@ if doCDF==true
 %     returnThisCDF.trial2_rawReachMatrix=temp;
     returnThisCDF.trial2_rawReachMatrix=downSampMatrix(returnThisCDF.trial2_rawReachMatrix,ds);
     [n2,x2]=cityscape_hist(mean(temp,1,'omitnan'),ds_times);
-    hold on; plot(x2,n2,'Color','r');
+    hold on; plot(x2,n2,'Color',cforopto);
     ylabel('Probability that mouse reaches over trials');
 
     stopPDFat=9.5;
     if ~isempty(stopPDFat)
         figure(); plot(x,n./nansum(n(x<stopPDFat)),'Color','k'); hold on;
-        plot(x2,n2./nansum(n2(x2<stopPDFat)),'Color','r');
+        plot(x2,n2./nansum(n2(x2<stopPDFat)),'Color',cforopto);
         xlim([min(x,[],'all','omitnan') stopPDFat]);
         ylabel('Reach PDF');
     else
         figure(); plot(x,n./nansum(n),'Color','k'); hold on;
-        plot(x2,n2./nansum(n2),'Color','r');
+        plot(x2,n2./nansum(n2),'Color',cforopto);
         ylabel('Reach PDF');
     end
 
@@ -316,10 +321,10 @@ else
     plotMeAndSe(rr_noLED_trinext_uncued,rr_noLED_trinext_cued,[0.5 0.5 0.5],2,false,calcCued);
 
     figure();
-    [uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k','r',false,calcCued,[]);
+    [uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k',cforopto,false,calcCued,[]);
     plotMeAndSe(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k',2,false,calcCued);
-    [uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_LED_trinext_uncued,rr_LED_trinext_cued,'r','r',false,calcCued,[]);
-    plotMeAndSe(rr_LED_trinext_uncued,rr_LED_trinext_cued,'r',2,false,calcCued);
+    [uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_LED_trinext_uncued,rr_LED_trinext_cued,cforopto,cforopto,false,calcCued,[]);
+    plotMeAndSe(rr_LED_trinext_uncued,rr_LED_trinext_cued,cforopto,2,false,calcCued);
 
     % bootstrap the joint distribution, should boot trials n and n+i
     % together
@@ -331,10 +336,10 @@ else
     title('Joint trial n and n+i bootstrap');
 
     figure();
-    [uncued_mean_out,cued_mean_out,bootMeans,whichTriForBoot]=bootstrap(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k','r',false,calcCued,[]);
+    [uncued_mean_out,cued_mean_out,bootMeans,whichTriForBoot]=bootstrap(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k',cforopto,false,calcCued,[]);
     plotMeAndSe(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k',2,false,calcCued);
-    [uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_LED_trinext_uncued,rr_LED_trinext_cued,'r','r',false,calcCued,whichTriForBoot);
-    plotMeAndSe(rr_LED_trinext_uncued,rr_LED_trinext_cued,'r',2,false,calcCued);
+    [uncued_mean_out,cued_mean_out,bootMeans]=bootstrap(rr_LED_trinext_uncued,rr_LED_trinext_cued,cforopto,cforopto,false,calcCued,whichTriForBoot);
+    plotMeAndSe(rr_LED_trinext_uncued,rr_LED_trinext_cued,cforopto,2,false,calcCued);
     title('Joint trial n and n+i bootstrap');
 
     % Joint boot and subtract trial n
@@ -358,13 +363,13 @@ else
     plot(x,n,'Color','k'); title('Cued');
 
     figure();
-    [uncued_mean_out,cued_mean_out,bootMeans,whichTriForBoot]=bootstrap(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k','r',false,calcCued,[]);
+    [uncued_mean_out,cued_mean_out,bootMeans,whichTriForBoot]=bootstrap(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k',cforopto,false,calcCued,[]);
     plotMeAndSe(rr_LED_tri1_uncued,rr_LED_tri1_cued,'k',2,false,calcCued);
     title('first trial in sequence');
     if ~isempty(rr_LED_trinext_uncued)
         figure();
-        [uncued_mean_out,cued_mean_out,bootMeans]=bootstrapAndSubtractTrialn(rr_LED_trinext_uncued,rr_LED_trinext_cued,'r','r',false,calcCued,whichTriForBoot,bootMeans,uncued_mean_out,cued_mean_out);
-        plotMeAndSe(rr_LED_trinext_uncued-rr_LED_tri1_uncued,rr_LED_trinext_cued-rr_LED_tri1_cued,'r',2,false,calcCued);
+        [uncued_mean_out,cued_mean_out,bootMeans]=bootstrapAndSubtractTrialn(rr_LED_trinext_uncued,rr_LED_trinext_cued,cforopto,cforopto,false,calcCued,whichTriForBoot,bootMeans,uncued_mean_out,cued_mean_out);
+        plotMeAndSe(rr_LED_trinext_uncued-rr_LED_tri1_uncued,rr_LED_trinext_cued-rr_LED_tri1_cued,cforopto,2,false,calcCued);
         title('Joint trial n and n+i bootstrap, subtract trial n, just plotting n+i');
         [n_uncued_LED,edges_uncued_LED]=histcounts(bootMeans(1,:),histbins); % uncued
         [n_cued_LED,edges_cued_LED]=histcounts(bootMeans(2,:),histbins); % uncued
@@ -372,7 +377,7 @@ else
         [n,x]=cityscape_hist(n_uncued,edges_uncued);
         plot(x,n,'Color','k'); hold on;
         [n,x]=cityscape_hist(n_uncued_LED,edges_uncued_LED);
-        plot(x,n,'Color','r');
+        plot(x,n,'Color',cforopto);
         p_value=compareBootstraps(bootMeans_noLED(1,:)',bootMeans(1,:)'); % uncued
         title(['Uncued pval ' num2str(p_value)]);
 
@@ -380,7 +385,7 @@ else
         [n,x]=cityscape_hist(n_cued,edges_cued);
         plot(x,n,'Color','k'); hold on;
         [n,x]=cityscape_hist(n_cued_LED,edges_cued_LED);
-        plot(x,n,'Color','r');
+        plot(x,n,'Color',cforopto);
         p_value=compareBootstraps(bootMeans_noLED(2,:)',bootMeans(2,:)'); % cued
         title(['Cued pval ' num2str(p_value)]);
     end
@@ -388,13 +393,13 @@ else
     % sess by sess, mouse by mouse
     figure();
     plotByBy(s_trial1_alltrials_uncued,s_trial1_alltrials_cued,s_alltrials_uncued,s_alltrials_cued,'k',calcCued,false);
-    plotByBy(sLED_trial1_alltrials_uncued,sLED_trial1_alltrials_cued,sLED_alltrials_uncued,sLED_alltrials_cued,'r',calcCued,false);
+    plotByBy(sLED_trial1_alltrials_uncued,sLED_trial1_alltrials_cued,sLED_alltrials_uncued,sLED_alltrials_cued,cforopto,calcCued,false);
     title('Sess by sess');
 
     figure();
     plotMeAndSe(s_alltrials_uncued-s_trial1_alltrials_uncued,s_alltrials_cued-s_trial1_alltrials_cued,'k',2,false,calcCued);
     hold on;
-    plotMeAndSe(sLED_alltrials_uncued-sLED_trial1_alltrials_uncued,sLED_alltrials_cued-sLED_trial1_alltrials_cued,'r',2,false,calcCued);
+    plotMeAndSe(sLED_alltrials_uncued-sLED_trial1_alltrials_uncued,sLED_alltrials_cued-sLED_trial1_alltrials_cued,cforopto,2,false,calcCued);
     title('Sess by sess mean and se');
 
     if isempty(useMice_con)
@@ -409,7 +414,7 @@ else
     end
     figure();
     plotByBy(m_trial1_alltrials_uncued(useMice_con==1),m_trial1_alltrials_cued(useMice_con==1),m_alltrials_uncued(useMice_con==1),m_alltrials_cued(useMice_con==1),'k',calcCued,true);
-    plotByBy(mLED_trial1_alltrials_uncued(useMice_LED==1),mLED_trial1_alltrials_cued(useMice_LED==1),mLED_alltrials_uncued(useMice_LED==1),mLED_alltrials_cued(useMice_LED==1),'r',calcCued,true);
+    plotByBy(mLED_trial1_alltrials_uncued(useMice_LED==1),mLED_trial1_alltrials_cued(useMice_LED==1),mLED_alltrials_uncued(useMice_LED==1),mLED_alltrials_cued(useMice_LED==1),cforopto,calcCued,true);
     title('Mouse by mouse');
 
     if ~all(useMice_con==1) & ~isempty(useMice_con) & all(useMice_con==useMice_LED)
@@ -760,8 +765,8 @@ for i=1:size(bootCDFs2nd,2)
     fifthPerc(i)=prctile(sorted_bootCDFs(:,i),5);
     ninetyfifthPerc(i)=prctile(sorted_bootCDFs(:,i),95);
 end
-plot(timeBinsForReaching,fifthPerc,'Color','r'); hold on;
-plot(timeBinsForReaching,ninetyfifthPerc,'Color','r');
+plot(timeBinsForReaching,fifthPerc,'Color',cforopto); hold on;
+plot(timeBinsForReaching,ninetyfifthPerc,'Color',cforopto);
 
 % Now get bootstrapped earth mover's function
 earthmovers=bootCDFs2nd-bootCDFs;
@@ -775,9 +780,9 @@ for i=1:size(earthmovers,2)
     ninetyfifthPerc(i)=prctile(sorted_bootEM(:,i),95);
 end
 figure();
-plot(timeBinsForReaching,nanmean(earthmovers,1),'Color','r'); hold on;
-plot(timeBinsForReaching,fifthPerc,'Color','r'); hold on;
-plot(timeBinsForReaching,ninetyfifthPerc,'Color','r');
+plot(timeBinsForReaching,nanmean(earthmovers,1),'Color',cforopto); hold on;
+plot(timeBinsForReaching,fifthPerc,'Color',cforopto); hold on;
+plot(timeBinsForReaching,ninetyfifthPerc,'Color',cforopto);
 
 % Bootstrapped difference in PDFs
 pdfdiff=bootPDFs2nd-bootPDFs;
@@ -791,9 +796,9 @@ for i=1:size(pdfdiff,2)
     ninetyfifthPerc(i)=prctile(sorted_bootPD(:,i),95);
 end
 figure();
-plot(timeBinsForReaching,nanmean(pdfdiff,1),'Color','r'); hold on;
+plot(timeBinsForReaching,nanmean(pdfdiff,1),'Color',cforopto); hold on;
 plot(timeBinsForReaching,fifthPerc,'Color','r'); hold on;
-plot(timeBinsForReaching,ninetyfifthPerc,'Color','r');
+plot(timeBinsForReaching,ninetyfifthPerc,'Color',cforopto);
 title('Diff between PDFs from bootstrap');
 
 end
