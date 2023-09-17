@@ -937,6 +937,9 @@ else
     py_metrics.cXfail_sus1to5sec=(nanmean(py_all_glm_coef(:,[518+10:518+50]),2)+nanmean(py_all_glm_coef(:,[589+10:589+50]),2))/2;
     py_metrics.allsucc_sus1to5sec=nanmean(py_all_glm_coef(:,[234+10:234+50]),2);
     py_metrics.cXsucc_sus1to5sec=nanmean(py_all_glm_coef(:,[447+10:447+50]),2);
+    py_metrics.allsucc_sus0to5sec=nanmean(py_all_glm_coef(:,[234:234+50]),2);
+    py_metrics.cXsucc_sus0to5sec=nanmean(py_all_glm_coef(:,[447:447+50]),2);
+    py_metrics.reachCoefAv=nanmean(py_all_glm_coef(:,[640:710]),2);
 
     firsthalfie=nanmean(py_all_glm_coef(:,[230:234]),2);
     secondhalfie=nanmean(py_all_glm_coef(:,[234:284]),2);
@@ -1314,17 +1317,25 @@ plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cued_success_Response.
 plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cued_success_Response.cXfail_sustained,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning');
 
 % 20230914
-binsForTuning{1}=[-10 -0.0001 10]; binsForTuning{2}=[-10 -0.0001 10];
-tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXfail_sus1to5sec-cued_success_Response.allfail_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning);
-plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXfail_sus1to5sec-cued_success_Response.allfail_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,cue_Response,[],'uncuedOverCued','tuning',binsForTuning);
+% binsForTuning{1}=[-10 -0.0001 10]; binsForTuning{2}=[-10 -0.0001 10];
+% tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXfail_sus1to5sec-cued_success_Response.allfail_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning);
+% plotTuningOutputScatter(tuningOutput,'grp1_fail','grp1_fail_uncue',2,[2 5]);
+% plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXfail_sus1to5sec-cued_success_Response.allfail_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,cue_Response,[],'uncuedOverCued','tuning',binsForTuning);
+% or consider just showing stats for all units
+binsForTuning{1}=[-10 -9 10]; binsForTuning{2}=[-10 -9 10];
+% binsForTuning{1}=[-10 -0.00005 10]; binsForTuning{2}=[-10 -0.00005 10];
+tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXfail_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning);
 plotTuningOutputScatter(tuningOutput,'grp1_fail','grp1_fail_uncue',2,[2 5]);
-binsForTuning{1}=[-10 -0.0001 10]; binsForTuning{2}=[-10 -0.0001 10];
-tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXsucc_sus1to5sec-cued_success_Response.allsucc_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning); % first n is light green (lower range), second n is dark red (higher range)
-plotTuningOutputScatter(tuningOutput,'grp2_succ','grp2_succ_uncue',1,[1 5]);
-binsForTuning{1}=[-10 0.0001 10]; binsForTuning{2}=[-10 0.0001 10];
-tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXsucc_sus1to5sec-cued_success_Response.allsucc_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning); % first n is light green (lower range), second n is dark red (higher range)
-% All neurons not mixed selectivity
+plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXfail_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,cue_Response,[],'uncuedOverCued','tuning',binsForTuning);
 
+% binsForTuning{1}=[-10 0 10]; binsForTuning{2}=[-10 0 10];
+binsForTuning{1}=[-10 -9 10]; binsForTuning{2}=[-10 -9 10];
+tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXsucc_sus0to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning); % first n is light green (lower range), second n is dark red (higher range)
+plotTuningOutputScatter(tuningOutput,'grp2_succ','grp2_succ_uncue',2,[0 5]);
+
+% sort by cued
+binsForTuning{1}=[-10 1 10]; binsForTuning{2}=[-10 1 10];
+tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cuecoef_over1sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning);
 
 % cuez=getCueTunedUnits(uncuedReach_Response,cuedReach_Response,'justcue_v_justuncue','mean',1,[4 12],[-2 0],[4 12],[-2 0]); 
 % plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued');

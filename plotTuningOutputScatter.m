@@ -14,6 +14,12 @@ fr2=nanmean(unitsfr2(:,whichinds),2);
 figure(); 
 plot(time1,nanmean(unitsfr1),'Color','r'); hold on;
 plot(time2,nanmean(unitsfr2),'Color','b'); 
+legend({'input1','input2'});
+
+disp('fr1 av');
+disp(nanmean(fr1));
+disp('fr2 av');
+disp(nanmean(fr2));
 
 figure();
 scatter(ones(size(fr1)),fr1,[],'r');
@@ -35,6 +41,9 @@ for i=1:length(fr1)
     line([1 2],[fr1(i)/fr1(i) fr2(i)/fr1(i)],'Color','k');
 end
 title('normalized to fr1');
+
+disp('This is the n');
+disp(length(fr1));
 
 figure();
 [n,x]=histcounts(fr2./fr1,0-0.25:0.5:15);
