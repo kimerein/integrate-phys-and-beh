@@ -1,4 +1,4 @@
-function plotTuningOutputScatter(tuningOutput,whichField1,whichField2,whichCuezOfUnits,timeWindowToCompare)
+function [fr1,fr2]=plotTuningOutputScatter(tuningOutput,whichField1,whichField2,whichCuezOfUnits,timeWindowToCompare)
 
 time1=tuningOutput.(whichField1).time{whichCuezOfUnits};
 time2=tuningOutput.(whichField2).time{whichCuezOfUnits};

@@ -1325,20 +1325,75 @@ plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cued_success_Response.
 binsForTuning{1}=[-10 -9 10]; binsForTuning{2}=[-10 -9 10];
 % binsForTuning{1}=[-10 -0.00005 10]; binsForTuning{2}=[-10 -0.00005 10];
 tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXfail_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning);
-plotTuningOutputScatter(tuningOutput,'grp1_fail','grp1_fail_uncue',2,[2 5]);
+[allgp1_cuedfailFR,allgp1_uncuedfailFR]=plotTuningOutputScatter(tuningOutput,'grp1_fail','grp1_fail_uncue',2,[2 5]);
+[allgp2_cuedfailFR,allgp2_uncuedfailFR]=plotTuningOutputScatter(tuningOutput,'grp2_fail','grp2_fail_uncue',2,[2 5]);
 plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXfail_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,cue_Response,[],'uncuedOverCued','tuning',binsForTuning);
 
 % binsForTuning{1}=[-10 0 10]; binsForTuning{2}=[-10 0 10];
 binsForTuning{1}=[-10 -9 10]; binsForTuning{2}=[-10 -9 10];
 tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXsucc_sus0to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning); % first n is light green (lower range), second n is dark red (higher range)
-plotTuningOutputScatter(tuningOutput,'grp2_succ','grp2_succ_uncue',2,[0 5]);
+[allgp2_cuedsuccFR,allgp2_uncuedsuccFR]=plotTuningOutputScatter(tuningOutput,'grp2_succ','grp2_succ_uncue',2,[2 5]);
+[allgp1_cuedsuccFR,allgp1_uncuedsuccFR]=plotTuningOutputScatter(tuningOutput,'grp1_succ','grp1_succ_uncue',2,[2 5]);
 
 % sort by cued
 binsForTuning{1}=[-10 1 10]; binsForTuning{2}=[-10 1 10];
 tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cuecoef_over1sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning);
-
 % cuez=getCueTunedUnits(uncuedReach_Response,cuedReach_Response,'justcue_v_justuncue','mean',1,[4 12],[-2 0],[4 12],[-2 0]); 
 % plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued');
+
+% not randomly mixed selectivity
+figure(); 
+yaxis=abs(cued_success_Response.cXsucc_sus0to5sec-cued_success_Response.allsucc_sus0to5sec)-abs(cued_success_Response.cXfail_sus1to5sec-cued_success_Response.allfail_sus1to5sec);
+xaxis=(cued_success_Response.cXsucc_sus0to5sec+cued_success_Response.allsucc_sus0to5sec)-(cued_success_Response.cXfail_sus1to5sec+cued_success_Response.allfail_sus1to5sec);
+scatter(xaxis,yaxis,[],'k'); hold on; 
+scatter(xaxis(cued_success_Response.consensus_idx==1),yaxis(cued_success_Response.consensus_idx==1),[],'b');
+scatter(xaxis(cued_success_Response.consensus_idx==2),yaxis(cued_success_Response.consensus_idx==2),[],'r');
+% shuffle fail wrt succ coeffs
+yaxis_part1=abs(cued_success_Response.cXsucc_sus0to5sec-cued_success_Response.allsucc_sus0to5sec);
+yaxis_part2=abs(cued_success_Response.cXfail_sus1to5sec-cued_success_Response.allfail_sus1to5sec);
+xaxis_part1=(cued_success_Response.cXsucc_sus0to5sec+cued_success_Response.allsucc_sus0to5sec);
+xaxis_part2=(cued_success_Response.cXfail_sus1to5sec+cued_success_Response.allfail_sus1to5sec);
+yaxis_part2=yaxis_part2(randperm(length(yaxis_part2)));
+xaxis_part2=xaxis_part2(randperm(length(xaxis_part2)));
+yaxis_shuff=yaxis_part1-yaxis_part2;
+xaxis_shuff=xaxis_part1-xaxis_part2;
+% relative to cue
+figure(); 
+yaxis=abs(cued_success_Response.cXsucc_sus0to5sec-cued_success_Response.allsucc_sus0to5sec)-abs(cued_success_Response.cXfail_sus1to5sec-cued_success_Response.allfail_sus1to5sec);
+xaxis=cued_success_Response.cuecoef_over1sec;
+scatter(xaxis,yaxis,[],'k'); hold on; 
+scatter(xaxis(cued_success_Response.consensus_idx==1),yaxis(cued_success_Response.consensus_idx==1),[],'b');
+scatter(xaxis(cued_success_Response.consensus_idx==2),yaxis(cued_success_Response.consensus_idx==2),[],'r');
+
+%% decode trial type
+% axis x is activity of gp1 units (use window 2 to 5 sec)
+% axis y is activity of gp2 units (use window 2 to 5 sec)
+figure(); nBoot=100; nUnits=85;
+takeThese_gp1=nan(nBoot,nUnits); takeThese_gp2=nan(nBoot,nUnits);
+for i=1:nBoot
+    takeThese_gp1(i,:)=randsample(length(allgp1_cuedsuccFR),nUnits); takeThese_gp2(i,:)=randsample(length(allgp2_cuedsuccFR),nUnits);
+end
+temp1=nan(nBoot,nUnits); temp2=nan(nBoot,nUnits);
+for i=1:nBoot
+    temp1(i,:)=nanmean(allgp1_cuedsuccFR(takeThese_gp1(i,:))); temp2(i,:)=nanmean(allgp2_cuedsuccFR(takeThese_gp2(i,:)));
+end
+scatter(-temp1,temp2,[],'g'); hold on; scatter(-nanmean(temp1),nanmean(temp2),[],'g','filled'); cuedsuccmeanx=nanmean(temp1); cuedsuccmeany=nanmean(temp2);
+temp1=nan(nBoot,nUnits); temp2=nan(nBoot,nUnits);
+for i=1:nBoot
+    temp1(i,:)=nanmean(allgp1_cuedfailFR(takeThese_gp1(i,:))); temp2(i,:)=nanmean(allgp2_cuedfailFR(takeThese_gp2(i,:)));
+end
+scatter(-temp1,temp2,[],'r'); scatter(-nanmean(temp1),nanmean(temp2),[],'r','filled'); cuedfailmeanx=nanmean(temp1); cuedfailmeany=nanmean(temp2);
+temp1=nan(nBoot,nUnits); temp2=nan(nBoot,nUnits);
+for i=1:nBoot
+    temp1(i,:)=nanmean(allgp1_uncuedsuccFR(takeThese_gp1(i,:))); temp2(i,:)=nanmean(allgp2_uncuedsuccFR(takeThese_gp2(i,:)));
+end
+scatter(-temp1,temp2,[],'b'); scatter(-nanmean(temp1),nanmean(temp2),[],'b','filled'); uncuedsuccmeanx=nanmean(temp1); uncuedsuccmeany=nanmean(temp2);
+temp1=nan(nBoot,nUnits); temp2=nan(nBoot,nUnits);
+for i=1:nBoot
+    temp1(i,:)=nanmean(allgp1_uncuedfailFR(takeThese_gp1(i,:))); temp2(i,:)=nanmean(allgp2_uncuedfailFR(takeThese_gp2(i,:)));
+end
+scatter(-temp1,temp2,[],'y'); scatter(-nanmean(temp1),nanmean(temp2),[],'y','filled'); uncuedfailmeanx=nanmean(temp1); uncuedfailmeany=nanmean(temp2);
+scatter(-(cuedsuccmeanx+cuedfailmeanx+uncuedsuccmeanx+uncuedfailmeanx)/4,(cuedsuccmeany+cuedfailmeany+uncuedsuccmeany+uncuedfailmeany)/4,[],'k','filled');
 
 %% CUED TUNING FROM GLM COEFFS
 clear r
