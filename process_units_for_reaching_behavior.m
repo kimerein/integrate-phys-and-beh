@@ -939,6 +939,10 @@ else
     py_metrics.cXsucc_sus1to5sec=nanmean(py_all_glm_coef(:,[447+10:447+50]),2);
     py_metrics.allsucc_sus0to5sec=nanmean(py_all_glm_coef(:,[234:234+50]),2);
     py_metrics.cXsucc_sus0to5sec=nanmean(py_all_glm_coef(:,[447:447+50]),2);
+    py_metrics.allfail_minus2to0sec=(nanmean(py_all_glm_coef(:,[305-20:305]),2)+nanmean(py_all_glm_coef(:,[376-20:376]),2))/2;
+    py_metrics.cXfail_minus2to0sec=(nanmean(py_all_glm_coef(:,[518-20:518]),2)+nanmean(py_all_glm_coef(:,[589-20:589]),2))/2;
+    py_metrics.allsucc_minus2to0sec=nanmean(py_all_glm_coef(:,[234-20:234]),2);
+    py_metrics.cXsucc_minus2to0sec=nanmean(py_all_glm_coef(:,[447-20:447]),2);
     py_metrics.reachCoefAv=nanmean(py_all_glm_coef(:,[640:710]),2);
 
     firsthalfie=nanmean(py_all_glm_coef(:,[230:234]),2);
@@ -1348,6 +1352,13 @@ xaxis=(cued_success_Response.cXsucc_sus0to5sec+cued_success_Response.allsucc_sus
 scatter(xaxis,yaxis,[],'k'); hold on; 
 scatter(xaxis(cued_success_Response.consensus_idx==1),yaxis(cued_success_Response.consensus_idx==1),[],'b');
 scatter(xaxis(cued_success_Response.consensus_idx==2),yaxis(cued_success_Response.consensus_idx==2),[],'r');
+% before outcome
+% figure(); 
+% yaxis=abs(cued_success_Response.cXsucc_minus2to0sec-cued_success_Response.allsucc_minus2to0sec)-abs(cued_success_Response.cXfail_minus2to0sec-cued_success_Response.allfail_minus2to0sec);
+% xaxis=(cued_success_Response.cXsucc_minus2to0sec+cued_success_Response.allsucc_minus2to0sec)-(cued_success_Response.cXfail_minus2to0sec+cued_success_Response.allfail_minus2to0sec);
+% scatter(xaxis,yaxis,[],'k'); hold on; 
+% scatter(xaxis(cued_success_Response.consensus_idx==1),yaxis(cued_success_Response.consensus_idx==1),[],'b');
+% scatter(xaxis(cued_success_Response.consensus_idx==2),yaxis(cued_success_Response.consensus_idx==2),[],'r');
 % shuffle fail wrt succ coeffs
 yaxis_part1=abs(cued_success_Response.cXsucc_sus0to5sec-cued_success_Response.allsucc_sus0to5sec);
 yaxis_part2=abs(cued_success_Response.cXfail_sus1to5sec-cued_success_Response.allfail_sus1to5sec);
@@ -1507,7 +1518,13 @@ analyzeProbabilityOfOnAfterOutcome(dd,[],[],[],'cued_failure','uncued_failure','
 % analyzeProbabilityOfOnAfterOutcome(dd,[0 2],[],[]);
 
 %% Attempt trial by trial classification, using labels from training set
-attemptTrialByTrialClassification(dd,[],[],'cued_success','cued_failure',[0 5],[]);
+% attemptTrialByTrialClassification(dd,[],[],'cued_success','cued_failure',[0 5],[]);
+fortbytclass=attemptTrialByTrialClassification(dd,[],[],'cued_success','cued_failure',[2 5],[],[],[],[]);
+
+% plot results
+a=load('Z:\MICROSCOPE\Kim\Final Figs\Fig5\Main figure\attempt trial by trial classification\cuedsuccess_vs_cuedfailure.mat');
+b=load('Z:\MICROSCOPE\Kim\Final Figs\Fig5\Main figure\attempt trial by trial classification\uncuedsuccess_vs_uncuedfailure.mat');
+decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cued_success_Response.consensus_idx,100,200,85);
 
 %% Behavior controls
 % load some behavior data

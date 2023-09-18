@@ -1,6 +1,9 @@
-function attemptTrialByTrialClassification(dd,success_Response,failure_Response,response_to_plot1,response_to_plot2,timeWindow,squishToSess,useFirstMapping,chooseShuffle,loadIn)
+function out=attemptTrialByTrialClassification(dd,success_Response,failure_Response,response_to_plot1,response_to_plot2,timeWindow,squishToSess,useFirstMapping,chooseShuffle,loadIn)
 
 % timeWindow is in seconds wrt peak of aligncomp
+
+justReturnFRs=true;
+out=[];
 
 if isempty(loadIn)
     useTensorLabels=true;
@@ -114,6 +117,20 @@ if isempty(loadIn)
     for i=1:length(unique(sessids))
         fromWhichTrialID_success(fromWhichSess_success==sessids(i))=fromWhichTrial_success(fromWhichSess_success==sessids(i))+(i-1)*trialoffset;
         fromWhichTrialID_failure(fromWhichSess_failure==sessids(i))=fromWhichTrial_failure(fromWhichSess_failure==sessids(i))+(i-1)*trialoffset;
+    end
+
+    if justReturnFRs==true
+        out.unitfr_success=unitfr_success;
+        out.fromWhichUnit_success=fromWhichUnit_success;
+        out.fromWhichTrial_success=fromWhichTrial_success;
+        out.fromWhichSess_success=fromWhichSess_success;
+        out.unitfr_failure=unitfr_failure;
+        out.fromWhichUnit_failure=fromWhichUnit_failure;
+        out.fromWhichTrial_failure=fromWhichTrial_failure;
+        out.fromWhichSess_failure=fromWhichSess_failure;
+        out.fromWhichTrialID_success=fromWhichTrialID_success;
+        out.fromWhichTrialID_failure=fromWhichTrialID_failure;
+        return
     end
 
     units=unique(success_Response.fromWhichUnit);
