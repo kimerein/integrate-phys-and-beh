@@ -1524,7 +1524,7 @@ fortbytclass=attemptTrialByTrialClassification(dd,[],[],'cued_success','cued_fai
 % plot results
 a=load('Z:\MICROSCOPE\Kim\Final Figs\Fig5\Main figure\attempt trial by trial classification\cuedsuccess_vs_cuedfailure.mat');
 b=load('Z:\MICROSCOPE\Kim\Final Figs\Fig5\Main figure\attempt trial by trial classification\uncuedsuccess_vs_uncuedfailure.mat');
-decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cued_success_Response.consensus_idx,100,200,85);
+decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cued_success_Response.consensus_idx,100,200,85,false); % nBoots,nUnits,nTrials,withReplacement
 
 %% Behavior controls
 % load some behavior data

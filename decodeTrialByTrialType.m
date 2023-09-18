@@ -1,4 +1,4 @@
-function decodeTrialByTrialType(tbyt_cuedsuccess_vs_cuedfailure,tbyt_uncuedsuccess_vs_uncuedfailure,idx,nBoot,nUnits,nTrials)
+function decodeTrialByTrialType(tbyt_cuedsuccess_vs_cuedfailure,tbyt_uncuedsuccess_vs_uncuedfailure,idx,nBoot,nUnits,nTrials,withReplacement)
 
 % Take a random sampling of trials from n units of idx==1, take average
 % Idx 1 and idx 2 units not necessarily acquired simultaneously, so
@@ -15,22 +15,22 @@ gp1_unit_ids=unique_units_idx(idx==1);
 gp2_unit_ids=unique_units_idx(idx==2);
 
 % cued success sample
-[trialIDsPerSample_gp1_cuedsuccess,unitsPerSample_gp1_cuedsuccess]=sampleUnitsAndTrials(nBoot,nUnits,nTrials,gp1_unit_ids,tbyt_cuedsuccess_vs_cuedfailure.fromWhichTrialID_success,tbyt_cuedsuccess_vs_cuedfailure.fromWhichUnit_success);
+[trialIDsPerSample_gp1_cuedsuccess,unitsPerSample_gp1_cuedsuccess]=sampleUnitsAndTrials(nBoot,nUnits,nTrials,gp1_unit_ids,tbyt_cuedsuccess_vs_cuedfailure.fromWhichTrialID_success,tbyt_cuedsuccess_vs_cuedfailure.fromWhichUnit_success,withReplacement);
 % cued failure sample
-[trialIDsPerSample_gp1_cuedfailure,unitsPerSample_gp1_cuedfailure]=sampleUnitsAndTrials(nBoot,nUnits,nTrials,gp1_unit_ids,tbyt_cuedsuccess_vs_cuedfailure.fromWhichTrialID_failure,tbyt_cuedsuccess_vs_cuedfailure.fromWhichUnit_failure);
+[trialIDsPerSample_gp1_cuedfailure,unitsPerSample_gp1_cuedfailure]=sampleUnitsAndTrials(nBoot,nUnits,nTrials,gp1_unit_ids,tbyt_cuedsuccess_vs_cuedfailure.fromWhichTrialID_failure,tbyt_cuedsuccess_vs_cuedfailure.fromWhichUnit_failure,withReplacement);
 % uncued success sample
-[trialIDsPerSample_gp1_uncuedsuccess,unitsPerSample_gp1_uncuedsuccess]=sampleUnitsAndTrials(nBoot,nUnits,nTrials,gp1_unit_ids,tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichTrialID_success,tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichUnit_success);
+[trialIDsPerSample_gp1_uncuedsuccess,unitsPerSample_gp1_uncuedsuccess]=sampleUnitsAndTrials(nBoot,nUnits,nTrials,gp1_unit_ids,tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichTrialID_success,tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichUnit_success,withReplacement);
 % uncued failure sample
-[trialIDsPerSample_gp1_uncuedfailure,unitsPerSample_gp1_uncuedfailure]=sampleUnitsAndTrials(nBoot,nUnits,nTrials,gp1_unit_ids,tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichTrialID_failure,tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichUnit_failure);
+[trialIDsPerSample_gp1_uncuedfailure,unitsPerSample_gp1_uncuedfailure]=sampleUnitsAndTrials(nBoot,nUnits,nTrials,gp1_unit_ids,tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichTrialID_failure,tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichUnit_failure,withReplacement);
 
 % cued success sample
-[trialIDsPerSample_gp2_cuedsuccess,unitsPerSample_gp2_cuedsuccess]=sampleUnitsAndTrials(nBoot,nUnits,nTrials,gp2_unit_ids,tbyt_cuedsuccess_vs_cuedfailure.fromWhichTrialID_success,tbyt_cuedsuccess_vs_cuedfailure.fromWhichUnit_success);
+[trialIDsPerSample_gp2_cuedsuccess,unitsPerSample_gp2_cuedsuccess]=sampleUnitsAndTrials(nBoot,nUnits,nTrials,gp2_unit_ids,tbyt_cuedsuccess_vs_cuedfailure.fromWhichTrialID_success,tbyt_cuedsuccess_vs_cuedfailure.fromWhichUnit_success,withReplacement);
 % cued failure sample
-[trialIDsPerSample_gp2_cuedfailure,unitsPerSample_gp2_cuedfailure]=sampleUnitsAndTrials(nBoot,nUnits,nTrials,gp2_unit_ids,tbyt_cuedsuccess_vs_cuedfailure.fromWhichTrialID_failure,tbyt_cuedsuccess_vs_cuedfailure.fromWhichUnit_failure);
+[trialIDsPerSample_gp2_cuedfailure,unitsPerSample_gp2_cuedfailure]=sampleUnitsAndTrials(nBoot,nUnits,nTrials,gp2_unit_ids,tbyt_cuedsuccess_vs_cuedfailure.fromWhichTrialID_failure,tbyt_cuedsuccess_vs_cuedfailure.fromWhichUnit_failure,withReplacement);
 % uncued success sample
-[trialIDsPerSample_gp2_uncuedsuccess,unitsPerSample_gp2_uncuedsuccess]=sampleUnitsAndTrials(nBoot,nUnits,nTrials,gp2_unit_ids,tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichTrialID_success,tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichUnit_success);
+[trialIDsPerSample_gp2_uncuedsuccess,unitsPerSample_gp2_uncuedsuccess]=sampleUnitsAndTrials(nBoot,nUnits,nTrials,gp2_unit_ids,tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichTrialID_success,tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichUnit_success,withReplacement);
 % uncued failure sample
-[trialIDsPerSample_gp2_uncuedfailure,unitsPerSample_gp2_uncuedfailure]=sampleUnitsAndTrials(nBoot,nUnits,nTrials,gp2_unit_ids,tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichTrialID_failure,tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichUnit_failure);
+[trialIDsPerSample_gp2_uncuedfailure,unitsPerSample_gp2_uncuedfailure]=sampleUnitsAndTrials(nBoot,nUnits,nTrials,gp2_unit_ids,tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichTrialID_failure,tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichUnit_failure,withReplacement);
 
 
 
@@ -66,7 +66,7 @@ scatter(-(cuedsuccmeanx+cuedfailmeanx+uncuedsuccmeanx+uncuedfailmeanx)/4,(cuedsu
 
 end
 
-function [trialIDsPerSample_gp1_cuedsuccess,unitsPerSample_gp1_cuedsuccess]=sampleUnitsAndTrials(nBoot,nUnits,nTrials,gp1_unit_ids,currtbyt_trialIDs,currtbyt_units)
+function [trialIDsPerSample_gp1_cuedsuccess,unitsPerSample_gp1_cuedsuccess]=sampleUnitsAndTrials(nBoot,nUnits,nTrials,gp1_unit_ids,currtbyt_trialIDs,currtbyt_units,withReplacement)
 
 % currtbyt_trialIDs=tbyt_cuedsuccess_vs_cuedfailure.fromWhichTrialID_success
 % currtbyt_units=tbyt_cuedsuccess_vs_cuedfailure.fromWhichUnit_success
@@ -76,7 +76,7 @@ unitsPerSample_gp1_cuedsuccess=nan(nBoot,nUnits);
 trialIDsPerSample_gp1_cuedsuccess=nan(nBoot,nTrials);
 for i=1:nBoot
     % rand sample of units
-    unitsPerSample_gp1_cuedsuccess(i,:)=gp1_unit_ids(randsample(length(gp1_unit_ids),nUnits));
+    unitsPerSample_gp1_cuedsuccess(i,:)=gp1_unit_ids(randsample(length(gp1_unit_ids),nUnits,withReplacement));
     % for these units, take a random sample of trials
     currcondition_trialIDs_fortheseunits=currtbyt_trialIDs(ismember(currtbyt_units,unitsPerSample_gp1_cuedsuccess(i,:)));
     % ensure only 1 trial per unit
@@ -95,7 +95,7 @@ for i=1:nBoot
     keepnotnan=~isnan(currcondition_trialIDs_fortheseunits);
     currcondition_trialIDs_fortheseunits=currcondition_trialIDs_fortheseunits(keepnotnan);
     unitIDs_for_thesetrialIDs=unitIDs_for_thesetrialIDs(keepnotnan);
-    trialIDsPerSample_gp1_cuedsuccess(i,:)=currcondition_trialIDs_fortheseunits(randsample(length(currcondition_trialIDs_fortheseunits),nTrials));
+    trialIDsPerSample_gp1_cuedsuccess(i,:)=currcondition_trialIDs_fortheseunits(randsample(length(currcondition_trialIDs_fortheseunits),nTrials,withReplacement));
 end
 
 end
