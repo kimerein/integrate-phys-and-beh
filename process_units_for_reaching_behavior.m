@@ -1405,6 +1405,7 @@ for i=1:nBoot
 end
 scatter(-temp1,temp2,[],'y'); scatter(-nanmean(temp1),nanmean(temp2),[],'y','filled'); uncuedfailmeanx=nanmean(temp1); uncuedfailmeany=nanmean(temp2);
 scatter(-(cuedsuccmeanx+cuedfailmeanx+uncuedsuccmeanx+uncuedfailmeanx)/4,(cuedsuccmeany+cuedfailmeany+uncuedsuccmeany+uncuedfailmeany)/4,[],'k','filled');
+xlabel('Gp 1 average unit firing rate'); ylabel('Gp 2 average unit firing rate');
 
 %% CUED TUNING FROM GLM COEFFS
 clear r
@@ -1520,11 +1521,32 @@ analyzeProbabilityOfOnAfterOutcome(dd,[],[],[],'cued_failure','uncued_failure','
 %% Attempt trial by trial classification, using labels from training set
 % attemptTrialByTrialClassification(dd,[],[],'cued_success','cued_failure',[0 5],[]);
 fortbytclass=attemptTrialByTrialClassification(dd,[],[],'cued_success','cued_failure',[2 5],[],[],[],[]);
-
+% still need to divide fortbytclass firing rates by number of bins in time
+% range, e.g., [2 5], because attemptTrialByTrialClassification.m takes the
+% sum, not average
+nbins=(5-2)/0.01;
+% figure out how these trial by trial units map onto
+% cued_success_Response.consensus_idx
+% exactly 1063 unit from cued_success_Respone tbyt, so good, those map
+% 1065 units from cued_failure_Response tbyt. Based on excluded from load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\all trials\discard trials where opto during cue\cued_failure_Response.mat')
+% can find mapping. Units 1:1390 are same in cuedsuccess and cuedfailure. Then cuedfailure has an extra unit, then 1 unit same, then 1 extra unit
+% in failure. So need to drop units 1391 and 1393 (indices into excluded) to get cuedfailure to match cuedsuccess. In indices 1:1065, 1:1391 is 
+% unit indices 1:558. So drop unit 559 and 560 of cuedfailure to get it to match cuedsuccess. See adjustment below.
+% Ok, now figure this out for uncuedsuccess and uncuedfailure wrt cuedsuccess units.
 % plot results
-a=load('Z:\MICROSCOPE\Kim\Final Figs\Fig5\Main figure\attempt trial by trial classification\cuedsuccess_vs_cuedfailure.mat');
-b=load('Z:\MICROSCOPE\Kim\Final Figs\Fig5\Main figure\attempt trial by trial classification\uncuedsuccess_vs_uncuedfailure.mat');
-decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cued_success_Response.consensus_idx,100,200,85,false); % nBoots,nUnits,nTrials,withReplacement
+a=load('Z:\MICROSCOPE\Kim\Final Figs\Fig5\Main figure\attempt trial by trial classification\cuedsuccess_vs_cuedfailure.mat'); a.fortbytclass.unitfr_success=a.fortbytclass.unitfr_success./nbins; a.fortbytclass.unitfr_failure=a.fortbytclass.unitfr_failure./nbins;
+figure(); plot(unique(fortbytclass.fromWhichUnit_success)); title('cuedsuccess units');
+dropinds=ismember(fortbytclass.fromWhichUnit_failure,559:560); keepinds=~ismember(1:length(fortbytclass.fromWhichUnit_failure),dropinds);
+fortbytclass.unitfr_failure=fortbytclass.unitfr_failure(keepinds);
+fortbytclass.fromWhichUnit_failure=fortbytclass.fromWhichUnit_failure(keepinds);
+fortbytclass.fromWhichTrial_failure=fortbytclass.fromWhichTrial_failure(keepinds);
+fortbytclass.fromWhichSess_failure=fortbytclass.fromWhichSess_failure(keepinds);
+fortbytclass.fromWhichTrialID_failure=fortbytclass.fromWhichTrialID_failure(keepinds);
+figure(); plot(unique(fortbytclass.fromWhichUnit_failure)); title('cuedfailure units');
+b=load('Z:\MICROSCOPE\Kim\Final Figs\Fig5\Main figure\attempt trial by trial classification\uncuedsuccess_vs_uncuedfailure.mat'); b.fortbytclass.unitfr_success=b.fortbytclass.unitfr_success./nbins; b.fortbytclass.unitfr_failure=b.fortbytclass.unitfr_failure./nbins;
+decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cued_success_Response.consensus_idx,100,100,70,false,false); % nBoots,nUnits,nTrials,withReplacement,addThirdAxis,nanAllZeros
+% neuron type shuffle
+decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cued_success_Response.consensus_idx(randperm(length(cued_success_Response.consensus_idx))),100,100,70,false,false);
 
 %% Behavior controls
 % load some behavior data

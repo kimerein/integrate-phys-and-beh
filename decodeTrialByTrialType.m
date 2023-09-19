@@ -1,4 +1,4 @@
-function decodeTrialByTrialType(tbyt_cuedsuccess_vs_cuedfailure,tbyt_uncuedsuccess_vs_uncuedfailure,idx,nBoot,nUnits,nTrials,withReplacement)
+function decodeTrialByTrialType(tbyt_cuedsuccess_vs_cuedfailure,tbyt_uncuedsuccess_vs_uncuedfailure,idx,nBoot,nUnits,nTrials,withReplacement,addThirdAxis,nanallzeros)
 
 % Take a random sampling of trials from n units of idx==1, take average
 % Idx 1 and idx 2 units not necessarily acquired simultaneously, so
@@ -13,6 +13,22 @@ end
 unique_units_idx=1:1063;
 gp1_unit_ids=unique_units_idx(idx==1);
 gp2_unit_ids=unique_units_idx(idx==2);
+
+% average all trials, all units
+temp1=nanmean(tbyt_cuedsuccess_vs_cuedfailure.unitfr_success(ismember(tbyt_cuedsuccess_vs_cuedfailure.fromWhichUnit_success,gp1_unit_ids))); 
+temp2=nanmean(tbyt_cuedsuccess_vs_cuedfailure.unitfr_success(ismember(tbyt_cuedsuccess_vs_cuedfailure.fromWhichUnit_success,gp2_unit_ids)));
+figure();
+scatter(-temp1,temp2,[],'g'); hold on;
+temp1=nanmean(tbyt_cuedsuccess_vs_cuedfailure.unitfr_failure(ismember(tbyt_cuedsuccess_vs_cuedfailure.fromWhichUnit_failure,gp1_unit_ids))); 
+temp2=nanmean(tbyt_cuedsuccess_vs_cuedfailure.unitfr_failure(ismember(tbyt_cuedsuccess_vs_cuedfailure.fromWhichUnit_failure,gp2_unit_ids)));
+scatter(-temp1,temp2,[],'r'); 
+temp1=nanmean(tbyt_uncuedsuccess_vs_uncuedfailure.unitfr_success(ismember(tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichUnit_success,gp1_unit_ids))); 
+temp2=nanmean(tbyt_uncuedsuccess_vs_uncuedfailure.unitfr_success(ismember(tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichUnit_success,gp2_unit_ids)));
+scatter(-temp1,temp2,[],'b'); 
+temp1=nanmean(tbyt_uncuedsuccess_vs_uncuedfailure.unitfr_failure(ismember(tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichUnit_failure,gp1_unit_ids))); 
+temp2=nanmean(tbyt_uncuedsuccess_vs_uncuedfailure.unitfr_failure(ismember(tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichUnit_failure,gp2_unit_ids)));
+scatter(-temp1,temp2,[],'y'); 
+
 
 % cued success sample
 [trialIDsPerSample_gp1_cuedsuccess,unitsPerSample_gp1_cuedsuccess]=sampleUnitsAndTrials(nBoot,nUnits,nTrials,gp1_unit_ids,tbyt_cuedsuccess_vs_cuedfailure.fromWhichTrialID_success,tbyt_cuedsuccess_vs_cuedfailure.fromWhichUnit_success,withReplacement);
@@ -32,37 +48,70 @@ gp2_unit_ids=unique_units_idx(idx==2);
 % uncued failure sample
 [trialIDsPerSample_gp2_uncuedfailure,unitsPerSample_gp2_uncuedfailure]=sampleUnitsAndTrials(nBoot,nUnits,nTrials,gp2_unit_ids,tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichTrialID_failure,tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichUnit_failure,withReplacement);
 
+% nan all trials that lack any data
+if nanallzeros==true
+    tbyt_cuedsuccess_vs_cuedfailure.unitfr_success(all(tbyt_cuedsuccess_vs_cuedfailure.unitfr_success==0,2),:)=nan;
+    tbyt_cuedsuccess_vs_cuedfailure.unitfr_failure(all(tbyt_cuedsuccess_vs_cuedfailure.unitfr_failure==0,2),:)=nan;
+    tbyt_uncuedsuccess_vs_uncuedfailure.unitfr_success(all(tbyt_cuedsuccess_vs_cuedfailure.unitfr_success==0,2),:)=nan;
+    tbyt_uncuedsuccess_vs_uncuedfailure.unitfr_failure(all(tbyt_cuedsuccess_vs_cuedfailure.unitfr_failure==0,2),:)=nan;
+end
 
-
-temp1=nan(nBoot,nTrials); temp2=nan(nBoot,nTrials);
+temp1=nan(nBoot,1); temp2=nan(nBoot,1);
 for i=1:nBoot
-    temp1(i,:)=nanmean(tbyt_cuedsuccess_vs_cuedfailure.unitfr_success(ismember(tbyt_cuedsuccess_vs_cuedfailure.fromWhichTrialID_success,trialIDsPerSample_gp1_cuedsuccess(i,:)))); 
-    temp2(i,:)=nanmean(tbyt_cuedsuccess_vs_cuedfailure.unitfr_success(ismember(tbyt_cuedsuccess_vs_cuedfailure.fromWhichTrialID_success,trialIDsPerSample_gp2_cuedsuccess(i,:)))); 
+    temp1(i)=nanmean(tbyt_cuedsuccess_vs_cuedfailure.unitfr_success(ismember(tbyt_cuedsuccess_vs_cuedfailure.fromWhichTrialID_success,trialIDsPerSample_gp1_cuedsuccess(i,:)))); 
+    temp2(i)=nanmean(tbyt_cuedsuccess_vs_cuedfailure.unitfr_success(ismember(tbyt_cuedsuccess_vs_cuedfailure.fromWhichTrialID_success,trialIDsPerSample_gp2_cuedsuccess(i,:)))); 
 end
 figure();
-scatter(-temp1,temp2,[],'g'); hold on; scatter(-nanmean(temp1),nanmean(temp2),[],'g','filled'); cuedsuccmeanx=nanmean(temp1); cuedsuccmeany=nanmean(temp2);
-
-temp1=nan(nBoot,nTrials); temp2=nan(nBoot,nTrials);
-for i=1:nBoot
-    temp1(i,:)=nanmean(tbyt_cuedsuccess_vs_cuedfailure.unitfr_failure(ismember(tbyt_cuedsuccess_vs_cuedfailure.fromWhichTrialID_failure,trialIDsPerSample_gp1_cuedfailure(i,:)))); 
-    temp2(i,:)=nanmean(tbyt_cuedsuccess_vs_cuedfailure.unitfr_failure(ismember(tbyt_cuedsuccess_vs_cuedfailure.fromWhichTrialID_failure,trialIDsPerSample_gp2_cuedfailure(i,:)))); 
+if addThirdAxis==false
+    scatter(-temp1,temp2,[],'g'); hold on; scatter(-nanmean(temp1),nanmean(temp2),[],'g','filled'); cuedsuccmeanx=nanmean(temp1); cuedsuccmeany=nanmean(temp2);
+else
+    scatter3(-temp1,temp2,(temp1+temp2),[],'g'); hold on; scatter3(-nanmean(temp1),nanmean(temp2),nanmean(temp1+temp2),[],'g','filled');
 end
-scatter(-temp1,temp2,[],'r'); scatter(-nanmean(temp1),nanmean(temp2),[],'r','filled'); cuedfailmeanx=nanmean(temp1); cuedfailmeany=nanmean(temp2);
+disp('cued success is green');
 
-temp1=nan(nBoot,nTrials); temp2=nan(nBoot,nTrials);
+temp1=nan(nBoot,1); temp2=nan(nBoot,1);
 for i=1:nBoot
-    temp1(i,:)=nanmean(tbyt_uncuedsuccess_vs_uncuedfailure.unitfr_success(ismember(tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichTrialID_success,trialIDsPerSample_gp1_uncuedsuccess(i,:)))); 
-    temp2(i,:)=nanmean(tbyt_uncuedsuccess_vs_uncuedfailure.unitfr_success(ismember(tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichTrialID_success,trialIDsPerSample_gp2_uncuedsuccess(i,:)))); 
+    temp1(i)=nanmean(tbyt_cuedsuccess_vs_cuedfailure.unitfr_failure(ismember(tbyt_cuedsuccess_vs_cuedfailure.fromWhichTrialID_failure,trialIDsPerSample_gp1_cuedfailure(i,:)))); 
+    temp2(i)=nanmean(tbyt_cuedsuccess_vs_cuedfailure.unitfr_failure(ismember(tbyt_cuedsuccess_vs_cuedfailure.fromWhichTrialID_failure,trialIDsPerSample_gp2_cuedfailure(i,:)))); 
 end
-scatter(-temp1,temp2,[],'b'); scatter(-nanmean(temp1),nanmean(temp2),[],'b','filled'); uncuedsuccmeanx=nanmean(temp1); uncuedsuccmeany=nanmean(temp2);
+if addThirdAxis==false
+    scatter(-temp1,temp2,[],'r'); scatter(-nanmean(temp1),nanmean(temp2),[],'r','filled'); cuedfailmeanx=nanmean(temp1); cuedfailmeany=nanmean(temp2);
+else
+    scatter3(-temp1,temp2,(temp1+temp2),[],'r'); hold on; scatter3(-nanmean(temp1),nanmean(temp2),nanmean(temp1+temp2),[],'r','filled');
+end
+disp('cued failure is red');
 
-temp1=nan(nBoot,nTrials); temp2=nan(nBoot,nTrials);
+temp1=nan(nBoot,1); temp2=nan(nBoot,1);
 for i=1:nBoot
-    temp1(i,:)=nanmean(tbyt_uncuedsuccess_vs_uncuedfailure.unitfr_failure(ismember(tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichTrialID_failure,trialIDsPerSample_gp1_uncuedfailure(i,:)))); 
-    temp2(i,:)=nanmean(tbyt_uncuedsuccess_vs_uncuedfailure.unitfr_failure(ismember(tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichTrialID_failure,trialIDsPerSample_gp2_uncuedfailure(i,:)))); 
+    temp1(i)=nanmean(tbyt_uncuedsuccess_vs_uncuedfailure.unitfr_success(ismember(tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichTrialID_success,trialIDsPerSample_gp1_uncuedsuccess(i,:)))); 
+    temp2(i)=nanmean(tbyt_uncuedsuccess_vs_uncuedfailure.unitfr_success(ismember(tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichTrialID_success,trialIDsPerSample_gp2_uncuedsuccess(i,:)))); 
 end
-scatter(-temp1,temp2,[],'y'); scatter(-nanmean(temp1),nanmean(temp2),[],'y','filled'); uncuedfailmeanx=nanmean(temp1); uncuedfailmeany=nanmean(temp2);
-scatter(-(cuedsuccmeanx+cuedfailmeanx+uncuedsuccmeanx+uncuedfailmeanx)/4,(cuedsuccmeany+cuedfailmeany+uncuedsuccmeany+uncuedfailmeany)/4,[],'k','filled');
+if addThirdAxis==false
+    scatter(-temp1,temp2,[],'b'); scatter(-nanmean(temp1),nanmean(temp2),[],'b','filled'); uncuedsuccmeanx=nanmean(temp1); uncuedsuccmeany=nanmean(temp2);
+else
+    scatter3(-temp1,temp2,(temp1+temp2),[],'b'); hold on; scatter3(-nanmean(temp1),nanmean(temp2),nanmean(temp1+temp2),[],'b','filled');
+end
+disp('uncued success is blue');
+
+temp1=nan(nBoot,1); temp2=nan(nBoot,1);
+for i=1:nBoot
+    temp1(i)=nanmean(tbyt_uncuedsuccess_vs_uncuedfailure.unitfr_failure(ismember(tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichTrialID_failure,trialIDsPerSample_gp1_uncuedfailure(i,:)))); 
+    temp2(i)=nanmean(tbyt_uncuedsuccess_vs_uncuedfailure.unitfr_failure(ismember(tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichTrialID_failure,trialIDsPerSample_gp2_uncuedfailure(i,:)))); 
+end
+if addThirdAxis==false
+    scatter(-temp1,temp2,[],'y'); scatter(-nanmean(temp1),nanmean(temp2),[],'y','filled'); uncuedfailmeanx=nanmean(temp1); uncuedfailmeany=nanmean(temp2);
+else
+    scatter3(-temp1,temp2,(temp1+temp2),[],'y'); hold on; scatter3(-nanmean(temp1),nanmean(temp2),nanmean(temp1+temp2),[],'y','filled');
+end
+disp('uncued failure is yellow');
+if addThirdAxis==false
+    scatter(-(cuedsuccmeanx+cuedfailmeanx+uncuedsuccmeanx+uncuedfailmeanx)/4,(cuedsuccmeany+cuedfailmeany+uncuedsuccmeany+uncuedfailmeany)/4,[],'k','filled');
+end
+xlabel('Gp 1 average trial firing rate (flipped)');
+ylabel('Gp 2 average trial firing rate');
+if addThirdAxis==true
+    zlabel('Sum of gp1 and gp2 firing rate');
+end
 
 end
 
