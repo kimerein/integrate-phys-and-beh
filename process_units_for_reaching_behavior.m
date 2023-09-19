@@ -1532,17 +1532,26 @@ nbins=(5-2)/0.01;
 % can find mapping. Units 1:1390 are same in cuedsuccess and cuedfailure. Then cuedfailure has an extra unit, then 1 unit same, then 1 extra unit
 % in failure. So need to drop units 1391 and 1393 (indices into excluded) to get cuedfailure to match cuedsuccess. In indices 1:1065, 1:1391 is 
 % unit indices 1:558. So drop unit 559 and 560 of cuedfailure to get it to match cuedsuccess. See adjustment below.
-% Ok, now figure this out for uncuedsuccess and uncuedfailure wrt cuedsuccess units.
+% Ok, now figure this out for uncuedsuccess and uncuedfailure wrt cuedsuccess units. uncued_success_Response already has 1063 units, and
+% they are the same 1063 units as cued_success_Response.
+% Uncued_failure_Response indexes up to unit 1065, like
+% cued_failure_Response. So 
 % plot results
 a=load('Z:\MICROSCOPE\Kim\Final Figs\Fig5\Main figure\attempt trial by trial classification\cuedsuccess_vs_cuedfailure.mat'); a.fortbytclass.unitfr_success=a.fortbytclass.unitfr_success./nbins; a.fortbytclass.unitfr_failure=a.fortbytclass.unitfr_failure./nbins;
-figure(); plot(unique(fortbytclass.fromWhichUnit_success)); title('cuedsuccess units');
-dropinds=ismember(fortbytclass.fromWhichUnit_failure,559:560); keepinds=~ismember(1:length(fortbytclass.fromWhichUnit_failure),dropinds);
-fortbytclass.unitfr_failure=fortbytclass.unitfr_failure(keepinds);
-fortbytclass.fromWhichUnit_failure=fortbytclass.fromWhichUnit_failure(keepinds);
-fortbytclass.fromWhichTrial_failure=fortbytclass.fromWhichTrial_failure(keepinds);
-fortbytclass.fromWhichSess_failure=fortbytclass.fromWhichSess_failure(keepinds);
-fortbytclass.fromWhichTrialID_failure=fortbytclass.fromWhichTrialID_failure(keepinds);
-figure(); plot(unique(fortbytclass.fromWhichUnit_failure)); title('cuedfailure units');
+figure(); plot(unique(a.fortbytclass.fromWhichUnit_success)); title('cuedsuccess units'); disp('max of cuedsuccessunits'); disp(nanmax(a.fortbytclass.fromWhichUnit_success));
+dropinds=ismember(a.fortbytclass.fromWhichUnit_failure,559:560); keepinds=~ismember(1:length(a.fortbytclass.fromWhichUnit_failure),dropinds);
+a.fortbytclass.unitfr_failure=a.fortbytclass.unitfr_failure(keepinds);
+a.fortbytclass.fromWhichUnit_failure=a.fortbytclass.fromWhichUnit_failure(keepinds);
+a.fortbytclass.fromWhichTrial_failure=a.fortbytclass.fromWhichTrial_failure(keepinds);
+a.fortbytclass.fromWhichSess_failure=a.fortbytclass.fromWhichSess_failure(keepinds);
+a.fortbytclass.fromWhichTrialID_failure=a.fortbytclass.fromWhichTrialID_failure(keepinds);
+% reassign unit ids
+currunitids=[1:558 561:1065];
+newunitids=1:1063;
+for i=1:length(currunitids)
+    a.fortbytclass.fromWhichUnit_failure(ismember(a.fortbytclass.fromWhichUnit_failure,currunitids(i)))=newunitids(i);
+end
+figure(); plot(unique(a.fortbytclass.fromWhichUnit_failure)); title('cuedfailure units'); disp('max of cuedfailureunits'); disp(nanmax(a.fortbytclass.fromWhichUnit_failure));
 b=load('Z:\MICROSCOPE\Kim\Final Figs\Fig5\Main figure\attempt trial by trial classification\uncuedsuccess_vs_uncuedfailure.mat'); b.fortbytclass.unitfr_success=b.fortbytclass.unitfr_success./nbins; b.fortbytclass.unitfr_failure=b.fortbytclass.unitfr_failure./nbins;
 decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cued_success_Response.consensus_idx,100,100,70,false,false); % nBoots,nUnits,nTrials,withReplacement,addThirdAxis,nanAllZeros
 % neuron type shuffle
