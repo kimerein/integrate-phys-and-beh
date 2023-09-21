@@ -1442,32 +1442,35 @@ xlabel('Gp 1 average unit firing rate'); ylabel('Gp 2 average unit firing rate')
 
 %% Trying a different mapping
 figure(); nBoot=100; nUnits=40;
-takeThese_gp1=nan(nBoot,nUnits); takeThese_gp2=nan(nBoot,nUnits);
+takeThese_gp1_cuedir1=nan(nBoot,nUnits); takeThese_gp1_cuedir2=nan(nBoot,nUnits); takeThese_gp2_cuedir1=nan(nBoot,nUnits); takeThese_gp2_cuedir2=nan(nBoot,nUnits);
 for i=1:nBoot
-    takeThese_gp1_cuedir1_gp1(i,:)=randsample(length(allgp1_cuedsuccFR_cuedir2),nUnits); takeThese_gp2(i,:)=randsample(length(allgp2_cuedsuccFR),nUnits);
+    takeThese_gp1_cuedir1(i,:)=randsample(length(allgp1_cuedsuccFR_cuedir1),nUnits); 
+    takeThese_gp1_cuedir2(i,:)=randsample(length(allgp1_cuedsuccFR_cuedir2),nUnits); 
+    takeThese_gp2_cuedir1(i,:)=randsample(length(allgp2_cuedsuccFR_cuedir1),nUnits); 
+    takeThese_gp2_cuedir2(i,:)=randsample(length(allgp2_cuedsuccFR_cuedir2),nUnits); 
 end
 temp1=nan(nBoot,nUnits); temp2=nan(nBoot,nUnits);
-cuedirdiff=allgp1_cuedsuccFR_cuedir2-allgp1_cuedsuccFR_cuedir1;
 for i=1:nBoot
-    temp1(i,:)=nanmean(cuedirdiff(takeThese_gp1(i,:))); temp2(i,:)=nanmean(allgp2_cuedsuccFR(takeThese_gp2(i,:)));
+    temp1(i,:)=-nanmean(allgp1_cuedsuccFR_cuedir2(takeThese_gp1_cuedir2(i,:)))+nanmean(allgp1_cuedsuccFR_cuedir1(takeThese_gp1_cuedir1(i,:))); 
+    temp2(i,:)=nanmean(allgp2_cuedsuccFR_cuedir2(takeThese_gp2_cuedir2(i,:)))-nanmean(allgp2_cuedsuccFR_cuedir1(takeThese_gp2_cuedir1(i,:))); 
 end
 scatter(temp1,temp2,[],'g'); hold on; scatter(nanmean(temp1),nanmean(temp2),[],'g','filled'); cuedsuccmeanx=nanmean(temp1); cuedsuccmeany=nanmean(temp2);
 temp1=nan(nBoot,nUnits); temp2=nan(nBoot,nUnits);
-cuedirdiff=allgp1_cuedfailFR_cuedir2-allgp1_cuedfailFR_cuedir1;
 for i=1:nBoot
-    temp1(i,:)=nanmean(cuedirdiff(takeThese_gp1(i,:))); temp2(i,:)=nanmean(allgp2_cuedfailFR(takeThese_gp2(i,:)));
+    temp1(i,:)=-nanmean(allgp1_cuedfailFR_cuedir2(takeThese_gp1_cuedir2(i,:)))+nanmean(allgp1_cuedfailFR_cuedir1(takeThese_gp1_cuedir1(i,:))); 
+    temp2(i,:)=nanmean(allgp2_cuedfailFR_cuedir2(takeThese_gp2_cuedir2(i,:)))-nanmean(allgp2_cuedfailFR_cuedir1(takeThese_gp2_cuedir1(i,:))); 
 end
 scatter(temp1,temp2,[],'r'); scatter(nanmean(temp1),nanmean(temp2),[],'r','filled'); cuedfailmeanx=nanmean(temp1); cuedfailmeany=nanmean(temp2);
 temp1=nan(nBoot,nUnits); temp2=nan(nBoot,nUnits);
-cuedirdiff=allgp1_uncuedsuccFR_cuedir2-allgp1_uncuedsuccFR_cuedir1;
 for i=1:nBoot
-    temp1(i,:)=nanmean(cuedirdiff(takeThese_gp1(i,:))); temp2(i,:)=nanmean(allgp2_uncuedsuccFR(takeThese_gp2(i,:)));
+    temp1(i,:)=-nanmean(allgp1_uncuedsuccFR_cuedir2(takeThese_gp1_cuedir2(i,:)))+nanmean(allgp1_uncuedsuccFR_cuedir1(takeThese_gp1_cuedir1(i,:))); 
+    temp2(i,:)=nanmean(allgp2_uncuedsuccFR_cuedir2(takeThese_gp2_cuedir2(i,:)))-nanmean(allgp2_uncuedsuccFR_cuedir1(takeThese_gp2_cuedir1(i,:)));
 end
 scatter(temp1,temp2,[],'b'); scatter(nanmean(temp1),nanmean(temp2),[],'b','filled'); uncuedsuccmeanx=nanmean(temp1); uncuedsuccmeany=nanmean(temp2);
 temp1=nan(nBoot,nUnits); temp2=nan(nBoot,nUnits);
-cuedirdiff=allgp1_uncuedfailFR_cuedir2-allgp1_uncuedfailFR_cuedir1;
 for i=1:nBoot
-    temp1(i,:)=nanmean(cuedirdiff(takeThese_gp1(i,:))); temp2(i,:)=nanmean(allgp2_uncuedfailFR(takeThese_gp2(i,:)));
+    temp1(i,:)=-nanmean(allgp1_uncuedfailFR_cuedir2(takeThese_gp1_cuedir2(i,:)))+nanmean(allgp1_uncuedfailFR_cuedir1(takeThese_gp1_cuedir1(i,:))); 
+    temp2(i,:)=nanmean(allgp2_uncuedfailFR_cuedir2(takeThese_gp2_cuedir2(i,:)))-nanmean(allgp2_uncuedfailFR_cuedir1(takeThese_gp2_cuedir1(i,:)));
 end
 scatter(temp1,temp2,[],'y'); scatter(nanmean(temp1),nanmean(temp2),[],'y','filled'); uncuedfailmeanx=nanmean(temp1); uncuedfailmeany=nanmean(temp2);
 scatter((cuedsuccmeanx+cuedfailmeanx+uncuedsuccmeanx+uncuedfailmeanx)/4,(cuedsuccmeany+cuedfailmeany+uncuedsuccmeany+uncuedfailmeany)/4,[],'k','filled');
