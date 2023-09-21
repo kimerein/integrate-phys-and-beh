@@ -1,4 +1,4 @@
-function decodeTrialByTrialType(tbyt_cuedsuccess_vs_cuedfailure,tbyt_uncuedsuccess_vs_uncuedfailure,idx,nBoot,nUnits,nTrials,withReplacement,addThirdAxis,nanallzeros,justBootstrapTrials,collapseWithinUnit)
+function out=decodeTrialByTrialType(tbyt_cuedsuccess_vs_cuedfailure,tbyt_uncuedsuccess_vs_uncuedfailure,idx,nBoot,nUnits,nTrials,withReplacement,addThirdAxis,nanallzeros,justBootstrapTrials,collapseWithinUnit)
 
 % Take a random sampling of trials from n units of idx==1, take average
 % Idx 1 and idx 2 units not necessarily acquired simultaneously, so
@@ -17,16 +17,20 @@ gp2_unit_ids=unique_units_idx(idx==2);
 % average all trials, all units
 temp1=nanmean(tbyt_cuedsuccess_vs_cuedfailure.unitfr_success(ismember(tbyt_cuedsuccess_vs_cuedfailure.fromWhichUnit_success,gp1_unit_ids))); 
 temp2=nanmean(tbyt_cuedsuccess_vs_cuedfailure.unitfr_success(ismember(tbyt_cuedsuccess_vs_cuedfailure.fromWhichUnit_success,gp2_unit_ids)));
+out.alltrialav_cuedsucc_gp1=temp1; out.alltrialav_cuedsucc_gp2=temp2;
 figure();
 scatter(temp1,temp2,[],'g'); hold on;
 temp1=nanmean(tbyt_cuedsuccess_vs_cuedfailure.unitfr_failure(ismember(tbyt_cuedsuccess_vs_cuedfailure.fromWhichUnit_failure,gp1_unit_ids))); 
 temp2=nanmean(tbyt_cuedsuccess_vs_cuedfailure.unitfr_failure(ismember(tbyt_cuedsuccess_vs_cuedfailure.fromWhichUnit_failure,gp2_unit_ids)));
+out.alltrialav_cuedfail_gp1=temp1; out.alltrialav_cuedfail_gp2=temp2;
 scatter(temp1,temp2,[],'r'); 
 temp1=nanmean(tbyt_uncuedsuccess_vs_uncuedfailure.unitfr_success(ismember(tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichUnit_success,gp1_unit_ids))); 
 temp2=nanmean(tbyt_uncuedsuccess_vs_uncuedfailure.unitfr_success(ismember(tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichUnit_success,gp2_unit_ids)));
+out.alltrialav_uncuedsucc_gp1=temp1; out.alltrialav_uncuedsucc_gp2=temp2;
 scatter(temp1,temp2,[],'b'); 
 temp1=nanmean(tbyt_uncuedsuccess_vs_uncuedfailure.unitfr_failure(ismember(tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichUnit_failure,gp1_unit_ids))); 
 temp2=nanmean(tbyt_uncuedsuccess_vs_uncuedfailure.unitfr_failure(ismember(tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichUnit_failure,gp2_unit_ids)));
+out.alltrialav_uncuedfail_gp1=temp1; out.alltrialav_uncuedfail_gp2=temp2;
 scatter(temp1,temp2,[],'y'); 
 
 if collapseWithinUnit==true
@@ -90,6 +94,7 @@ for i=1:nBoot
           & ismember(tbyt_cuedsuccess_vs_cuedfailure.fromWhichUnit_success,unitsPerSample_gp1_cuedsuccess(i,:)))); 
     temp2(i)=nanmean(tbyt_cuedsuccess_vs_cuedfailure.unitfr_success(ismember(tbyt_cuedsuccess_vs_cuedfailure.fromWhichTrialID_success,trialIDsPerSample_gp2_cuedsuccess(i,:)) & ismember(tbyt_cuedsuccess_vs_cuedfailure.fromWhichUnit_success,unitsPerSample_gp2_cuedsuccess(i,:)))); 
 end
+out.cuedsucc_temp1=temp1; out.cuedsucc_temp2=temp2;
 figure();
 if addThirdAxis==false
     scatter(temp1,temp2,[],'g'); hold on; scatter(nanmean(temp1),nanmean(temp2),[],'g','filled'); cuedsuccmeanx=nanmean(temp1); cuedsuccmeany=nanmean(temp2);
@@ -103,6 +108,7 @@ for i=1:nBoot
     temp1(i)=nanmean(tbyt_cuedsuccess_vs_cuedfailure.unitfr_failure(ismember(tbyt_cuedsuccess_vs_cuedfailure.fromWhichTrialID_failure,trialIDsPerSample_gp1_cuedfailure(i,:)) & ismember(tbyt_cuedsuccess_vs_cuedfailure.fromWhichUnit_failure,unitsPerSample_gp1_cuedfailure(i,:)))); 
     temp2(i)=nanmean(tbyt_cuedsuccess_vs_cuedfailure.unitfr_failure(ismember(tbyt_cuedsuccess_vs_cuedfailure.fromWhichTrialID_failure,trialIDsPerSample_gp2_cuedfailure(i,:)) & ismember(tbyt_cuedsuccess_vs_cuedfailure.fromWhichUnit_failure,unitsPerSample_gp2_cuedfailure(i,:)))); 
 end
+out.cuedfail_temp1=temp1; out.cuedfail_temp2=temp2;
 if addThirdAxis==false
     scatter(temp1,temp2,[],'r'); scatter(nanmean(temp1),nanmean(temp2),[],'r','filled'); cuedfailmeanx=nanmean(temp1); cuedfailmeany=nanmean(temp2);
 else
@@ -115,6 +121,7 @@ for i=1:nBoot
     temp1(i)=nanmean(tbyt_uncuedsuccess_vs_uncuedfailure.unitfr_success(ismember(tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichTrialID_success,trialIDsPerSample_gp1_uncuedsuccess(i,:)) & ismember(tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichUnit_success,unitsPerSample_gp1_uncuedsuccess(i,:)))); 
     temp2(i)=nanmean(tbyt_uncuedsuccess_vs_uncuedfailure.unitfr_success(ismember(tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichTrialID_success,trialIDsPerSample_gp2_uncuedsuccess(i,:)) & ismember(tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichUnit_success,unitsPerSample_gp2_uncuedsuccess(i,:)))); 
 end
+out.uncuedsucc_temp1=temp1; out.uncuedsucc_temp2=temp2;
 if addThirdAxis==false
     scatter(temp1,temp2,[],'b'); scatter(nanmean(temp1),nanmean(temp2),[],'b','filled'); uncuedsuccmeanx=nanmean(temp1); uncuedsuccmeany=nanmean(temp2);
 else
@@ -127,6 +134,7 @@ for i=1:nBoot
     temp1(i)=nanmean(tbyt_uncuedsuccess_vs_uncuedfailure.unitfr_failure(ismember(tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichTrialID_failure,trialIDsPerSample_gp1_uncuedfailure(i,:)) & ismember(tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichUnit_failure,unitsPerSample_gp1_uncuedfailure(i,:)))); 
     temp2(i)=nanmean(tbyt_uncuedsuccess_vs_uncuedfailure.unitfr_failure(ismember(tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichTrialID_failure,trialIDsPerSample_gp2_uncuedfailure(i,:)) & ismember(tbyt_uncuedsuccess_vs_uncuedfailure.fromWhichUnit_failure,unitsPerSample_gp2_uncuedfailure(i,:)))); 
 end
+out.uncuedfail_temp1=temp1; out.uncuedfail_temp2=temp2;
 if addThirdAxis==false
     scatter(temp1,temp2,[],'y'); scatter(nanmean(temp1),nanmean(temp2),[],'y','filled'); uncuedfailmeanx=nanmean(temp1); uncuedfailmeany=nanmean(temp2);
 else

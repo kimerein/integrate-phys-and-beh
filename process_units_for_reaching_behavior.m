@@ -1654,7 +1654,22 @@ for i=1:length(currunitids)
 end
 disp('max of uncuedfailureunits'); disp(nanmax(b.fortbytclass.fromWhichUnit_failure));
 decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cued_success_Response.consensus_idx,100,100,80,false,false,false,false,false); % nBoots,nUnits,nTrials,withReplacement,addThirdAxis,nanAllZeros,justBoostrapTrials,collapseWithinUnit
-decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cued_success_Response.consensus_idx,100,100,100,false,false,false,true,false);
+
+% gp1 bins: binsForTuning{1}=[-10 -0.0001 10]; % greater than bottom of bin, less than or equal to top of bin
+% gp2 bins: binsForTuning{1}=[-10 0 10];
+load('Z:\MICROSCOPE\Kim\Final Figs\Fig5\Main figure\cued_success_Response_w_py_metrics.mat'); backup_consensus_idx=cued_success_Response.consensus_idx;
+cidx=backup_consensus_idx; cidx(cued_success_Response.cXfail_sus1to5sec-cued_success_Response.allfail_sus1to5sec<=-0.0001 & backup_consensus_idx==1)=nan; % throw out bin1 for gp1
+cidx(cued_success_Response.cXsucc_sus1to5sec<=0 & backup_consensus_idx==2)=nan; % throw out bin1 for gp2
+out_cuedir2=decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cidx,100,100,100,false,false,false,true,false); close all;
+cidx=backup_consensus_idx; cidx(cued_success_Response.cXfail_sus1to5sec-cued_success_Response.allfail_sus1to5sec>-0.0001 & backup_consensus_idx==1)=nan; % throw out bin2 for gp1
+cidx(cued_success_Response.cXsucc_sus1to5sec>0 & backup_consensus_idx==2)=nan; % throw out bin2 for gp2
+out_cuedir1=decodeTrialByTrialType(a.fortbytclass,b.fo+rtbytclass,cidx,100,100,100,false,false,false,true,false); close all;
+figure(); 
+scatter(-out_cuedir2.cuedsucc_temp1+out_cuedir1.cuedsucc_temp1,out_cuedir2.cuedsucc_temp2-out_cuedir1.cuedsucc_temp2,[],'g'); hold on;
+scatter(-out_cuedir2.cuedfail_temp1+out_cuedir1.cuedfail_temp1,out_cuedir2.cuedfail_temp2-out_cuedir1.cuedfail_temp2,[],'r');
+scatter(-out_cuedir2.uncuedsucc_temp1+out_cuedir1.uncuedsucc_temp1,out_cuedir2.uncuedsucc_temp2-out_cuedir1.uncuedsucc_temp2,[],'b');
+scatter(-out_cuedir2.uncuedfail_temp1+out_cuedir1.uncuedfail_temp1,out_cuedir2.uncuedfail_temp2-out_cuedir1.uncuedfail_temp2,[],'y');
+
 % neuron type shuffle
 % decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cued_success_Response.consensus_idx(randperm(length(cued_success_Response.consensus_idx))),100,100,70,false,false,false);
 
