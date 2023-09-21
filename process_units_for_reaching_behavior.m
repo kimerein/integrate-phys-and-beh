@@ -337,7 +337,7 @@ for i=1:size(data_loc_array,1)
     dd_photo{i}=data_loc_array{i,15};
 end
 % choose type of response to plot
-response_to_plot='uncued_pelletMissing'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+response_to_plot='uncued_success'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 dd_photo_more=cell(1,length(dd_photo)); 
 for i=1:length(dd_photo)
     dd_photo_more{i}=[dd_photo{i} sep response_to_plot];
@@ -1320,30 +1320,40 @@ plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cued_success_Response.
 
 plotUnitSummariesAfterTCAlabels(cued_success_Response.idx,cued_success_Response.cXfail_sustained,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning');
 
-% 20230914
-% binsForTuning{1}=[-10 -0.0001 10]; binsForTuning{2}=[-10 -0.0001 10];
-% tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXfail_sus1to5sec-cued_success_Response.allfail_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning);
-% plotTuningOutputScatter(tuningOutput,'grp1_fail','grp1_fail_uncue',2,[2 5]);
-% plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXfail_sus1to5sec-cued_success_Response.allfail_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,cue_Response,[],'uncuedOverCued','tuning',binsForTuning);
-% or consider just showing stats for all units
+% % 20230914
+% % binsForTuning{1}=[-10 -0.0001 10]; binsForTuning{2}=[-10 -0.0001 10];
+% % tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXfail_sus1to5sec-cued_success_Response.allfail_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning);
+% % plotTuningOutputScatter(tuningOutput,'grp1_fail','grp1_fail_uncue',2,[2 5]);
+% % plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXfail_sus1to5sec-cued_success_Response.allfail_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,cue_Response,[],'uncuedOverCued','tuning',binsForTuning);
+% % or consider just showing stats for all units
+% binsForTuning{1}=[-10 -9 10]; binsForTuning{2}=[-10 -9 10];
+% % binsForTuning{1}=[-10 -0.00005 10]; binsForTuning{2}=[-10 -0.00005 10];
+% tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXfail_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning);
+% [allgp1_cuedfailFR,allgp1_uncuedfailFR]=plotTuningOutputScatter(tuningOutput,'grp1_fail','grp1_fail_uncue',2,[2 5]);
+% [allgp2_cuedfailFR,allgp2_uncuedfailFR]=plotTuningOutputScatter(tuningOutput,'grp2_fail','grp2_fail_uncue',2,[2 5]);
+% plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXfail_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,cue_Response,[],'uncuedOverCued','tuning',binsForTuning);
+
+% all units
 binsForTuning{1}=[-10 -9 10]; binsForTuning{2}=[-10 -9 10];
-% binsForTuning{1}=[-10 -0.00005 10]; binsForTuning{2}=[-10 -0.00005 10];
 tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXfail_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning);
 [allgp1_cuedfailFR,allgp1_uncuedfailFR]=plotTuningOutputScatter(tuningOutput,'grp1_fail','grp1_fail_uncue',2,[2 5]);
 [allgp2_cuedfailFR,allgp2_uncuedfailFR]=plotTuningOutputScatter(tuningOutput,'grp2_fail','grp2_fail_uncue',2,[2 5]);
-plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXfail_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,cue_Response,[],'uncuedOverCued','tuning',binsForTuning);
-
-% binsForTuning{1}=[-10 0 10]; binsForTuning{2}=[-10 0 10];
-binsForTuning{1}=[-10 -9 10]; binsForTuning{2}=[-10 -9 10];
-tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXsucc_sus0to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning); % first n is light green (lower range), second n is dark red (higher range)
-[allgp2_cuedsuccFR,allgp2_uncuedsuccFR]=plotTuningOutputScatter(tuningOutput,'grp2_succ','grp2_succ_uncue',2,[2 5]);
+plotTuningOutputScatter(tuningOutput,'grp1_succ_uncue','grp1_fail_uncue',2,[2 5]);
 [allgp1_cuedsuccFR,allgp1_uncuedsuccFR]=plotTuningOutputScatter(tuningOutput,'grp1_succ','grp1_succ_uncue',2,[2 5]);
+[allgp2_cuedsuccFR,allgp2_uncuedsuccFR]=plotTuningOutputScatter(tuningOutput,'grp2_succ','grp2_succ_uncue',2,[2 5]);
+plotTuningOutputScatter(tuningOutput,'grp2_succ','grp2_fail',2,[2 5]);
 
-% sort by cued
-binsForTuning{1}=[-10 1 10]; binsForTuning{2}=[-10 1 10];
-tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cuecoef_over1sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning);
-% cuez=getCueTunedUnits(uncuedReach_Response,cuedReach_Response,'justcue_v_justuncue','mean',1,[4 12],[-2 0],[4 12],[-2 0]); 
-% plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued');
+% % binsForTuning{1}=[-10 0 10]; binsForTuning{2}=[-10 0 10];
+% binsForTuning{1}=[-10 -9 10]; binsForTuning{2}=[-10 -9 10];
+% tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXsucc_sus0to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning); % first n is light green (lower range), second n is dark red (higher range)
+% [allgp2_cuedsuccFR,allgp2_uncuedsuccFR]=plotTuningOutputScatter(tuningOutput,'grp2_succ','grp2_succ_uncue',2,[2 5]);
+% [allgp1_cuedsuccFR,allgp1_uncuedsuccFR]=plotTuningOutputScatter(tuningOutput,'grp1_succ','grp1_succ_uncue',2,[2 5]);
+% 
+% % sort by cued
+% binsForTuning{1}=[-10 1 10]; binsForTuning{2}=[-10 1 10];
+% tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cuecoef_over1sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning);
+% % cuez=getCueTunedUnits(uncuedReach_Response,cuedReach_Response,'justcue_v_justuncue','mean',1,[4 12],[-2 0],[4 12],[-2 0]); 
+% % plotUnitSummariesAfterTCAlabels(groupLabelsFromTCA,cuez,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued');
 
 % not randomly mixed selectivity
 figure(); 
@@ -1388,23 +1398,23 @@ temp1=nan(nBoot,nUnits); temp2=nan(nBoot,nUnits);
 for i=1:nBoot
     temp1(i,:)=nanmean(allgp1_cuedsuccFR(takeThese_gp1(i,:))); temp2(i,:)=nanmean(allgp2_cuedsuccFR(takeThese_gp2(i,:)));
 end
-scatter(-temp1,temp2,[],'g'); hold on; scatter(-nanmean(temp1),nanmean(temp2),[],'g','filled'); cuedsuccmeanx=nanmean(temp1); cuedsuccmeany=nanmean(temp2);
+scatter(temp1,temp2,[],'g'); hold on; scatter(nanmean(temp1),nanmean(temp2),[],'g','filled'); cuedsuccmeanx=nanmean(temp1); cuedsuccmeany=nanmean(temp2);
 temp1=nan(nBoot,nUnits); temp2=nan(nBoot,nUnits);
 for i=1:nBoot
     temp1(i,:)=nanmean(allgp1_cuedfailFR(takeThese_gp1(i,:))); temp2(i,:)=nanmean(allgp2_cuedfailFR(takeThese_gp2(i,:)));
 end
-scatter(-temp1,temp2,[],'r'); scatter(-nanmean(temp1),nanmean(temp2),[],'r','filled'); cuedfailmeanx=nanmean(temp1); cuedfailmeany=nanmean(temp2);
+scatter(temp1,temp2,[],'r'); scatter(nanmean(temp1),nanmean(temp2),[],'r','filled'); cuedfailmeanx=nanmean(temp1); cuedfailmeany=nanmean(temp2);
 temp1=nan(nBoot,nUnits); temp2=nan(nBoot,nUnits);
 for i=1:nBoot
     temp1(i,:)=nanmean(allgp1_uncuedsuccFR(takeThese_gp1(i,:))); temp2(i,:)=nanmean(allgp2_uncuedsuccFR(takeThese_gp2(i,:)));
 end
-scatter(-temp1,temp2,[],'b'); scatter(-nanmean(temp1),nanmean(temp2),[],'b','filled'); uncuedsuccmeanx=nanmean(temp1); uncuedsuccmeany=nanmean(temp2);
+scatter(temp1,temp2,[],'b'); scatter(nanmean(temp1),nanmean(temp2),[],'b','filled'); uncuedsuccmeanx=nanmean(temp1); uncuedsuccmeany=nanmean(temp2);
 temp1=nan(nBoot,nUnits); temp2=nan(nBoot,nUnits);
 for i=1:nBoot
     temp1(i,:)=nanmean(allgp1_uncuedfailFR(takeThese_gp1(i,:))); temp2(i,:)=nanmean(allgp2_uncuedfailFR(takeThese_gp2(i,:)));
 end
-scatter(-temp1,temp2,[],'y'); scatter(-nanmean(temp1),nanmean(temp2),[],'y','filled'); uncuedfailmeanx=nanmean(temp1); uncuedfailmeany=nanmean(temp2);
-scatter(-(cuedsuccmeanx+cuedfailmeanx+uncuedsuccmeanx+uncuedfailmeanx)/4,(cuedsuccmeany+cuedfailmeany+uncuedsuccmeany+uncuedfailmeany)/4,[],'k','filled');
+scatter(temp1,temp2,[],'y'); scatter(nanmean(temp1),nanmean(temp2),[],'y','filled'); uncuedfailmeanx=nanmean(temp1); uncuedfailmeany=nanmean(temp2);
+scatter((cuedsuccmeanx+cuedfailmeanx+uncuedsuccmeanx+uncuedfailmeanx)/4,(cuedsuccmeany+cuedfailmeany+uncuedsuccmeany+uncuedfailmeany)/4,[],'k','filled');
 xlabel('Gp 1 average unit firing rate'); ylabel('Gp 2 average unit firing rate');
 
 %% CUED TUNING FROM GLM COEFFS
@@ -1520,7 +1530,11 @@ analyzeProbabilityOfOnAfterOutcome(dd,[],[],[],'cued_failure','uncued_failure','
 
 %% Attempt trial by trial classification, using labels from training set
 % attemptTrialByTrialClassification(dd,[],[],'cued_success','cued_failure',[0 5],[]);
-fortbytclass=attemptTrialByTrialClassification(dd,[],[],'cued_success','cued_failure',[2 5],[],[],[],[]);
+% RAN THIS NEXT LINE TO GET 'Z:\MICROSCOPE\Kim\Final Figs\Fig5\Main
+% figure\attempt trial by trial
+% classification\cuedsuccess_vs_cuedfailure.mat' and
+% 'uncuedsuccess_vs_uncuedfailure.mat'
+% fortbytclass=attemptTrialByTrialClassification(dd,[],[],'cued_success','cued_failure',[2 5],[],[],[],[]);
 % still need to divide fortbytclass firing rates by number of bins in time
 % range, e.g., [2 5], because attemptTrialByTrialClassification.m takes the
 % sum, not average
@@ -1537,6 +1551,16 @@ nbins=(5-2)/0.01;
 % cued_failure_Response. Units 559 and 560 already missing from uncued_failure_Response, but need to reassign unitids, as I did for cued_failure_Response. 
 % plot results
 a=load('Z:\MICROSCOPE\Kim\Final Figs\Fig5\Main figure\attempt trial by trial classification\cuedsuccess_vs_cuedfailure.mat'); a.fortbytclass.unitfr_success=a.fortbytclass.unitfr_success./nbins; a.fortbytclass.unitfr_failure=a.fortbytclass.unitfr_failure./nbins;
+% a.fortbytclass.unitfr_success(a.fortbytclass.unitfr_success<0.01)=0; a.fortbytclass.unitfr_failure(a.fortbytclass.unitfr_failure<0.01)=0; 
+% a.fortbytclass.unitfr_success(a.fortbytclass.unitfr_success>0 & a.fortbytclass.unitfr_success<=1)=1; a.fortbytclass.unitfr_failure(a.fortbytclass.unitfr_failure>0 & a.fortbytclass.unitfr_failure<=1)=1;
+% a.fortbytclass.unitfr_success(a.fortbytclass.unitfr_success>1 & a.fortbytclass.unitfr_success<=2)=2; a.fortbytclass.unitfr_failure(a.fortbytclass.unitfr_failure>1 & a.fortbytclass.unitfr_failure<=2)=2;
+% a.fortbytclass.unitfr_success(a.fortbytclass.unitfr_success>2 & a.fortbytclass.unitfr_success<=3)=3; a.fortbytclass.unitfr_failure(a.fortbytclass.unitfr_failure>2 & a.fortbytclass.unitfr_failure<=3)=3;
+% a.fortbytclass.unitfr_success(a.fortbytclass.unitfr_success>3 & a.fortbytclass.unitfr_success<=4)=4; a.fortbytclass.unitfr_failure(a.fortbytclass.unitfr_failure>3 & a.fortbytclass.unitfr_failure<=4)=4;
+% a.fortbytclass.unitfr_success(a.fortbytclass.unitfr_success>4 & a.fortbytclass.unitfr_success<=5)=5; a.fortbytclass.unitfr_failure(a.fortbytclass.unitfr_failure>4 & a.fortbytclass.unitfr_failure<=5)=5;
+% a.fortbytclass.unitfr_success(a.fortbytclass.unitfr_success>5 & a.fortbytclass.unitfr_success<=6)=6; a.fortbytclass.unitfr_failure(a.fortbytclass.unitfr_failure>5 & a.fortbytclass.unitfr_failure<=6)=6;
+% a.fortbytclass.unitfr_success(a.fortbytclass.unitfr_success>6 & a.fortbytclass.unitfr_success<=7)=7; a.fortbytclass.unitfr_failure(a.fortbytclass.unitfr_failure>6 & a.fortbytclass.unitfr_failure<=7)=7;
+% a.fortbytclass.unitfr_success(a.fortbytclass.unitfr_success>7 & a.fortbytclass.unitfr_success<=8)=8; a.fortbytclass.unitfr_failure(a.fortbytclass.unitfr_failure>7 & a.fortbytclass.unitfr_failure<=8)=8;
+% a.fortbytclass.unitfr_success(a.fortbytclass.unitfr_success>3)=3; a.fortbytclass.unitfr_failure(a.fortbytclass.unitfr_failure>3)=3;
 figure(); plot(unique(a.fortbytclass.fromWhichUnit_success)); title('cuedsuccess units'); disp('max of cuedsuccessunits'); disp(nanmax(a.fortbytclass.fromWhichUnit_success));
 dropinds=ismember(a.fortbytclass.fromWhichUnit_failure,559:560); keepinds=~ismember(1:length(a.fortbytclass.fromWhichUnit_failure),dropinds);
 a.fortbytclass.unitfr_failure=a.fortbytclass.unitfr_failure(keepinds);
@@ -1552,6 +1576,16 @@ for i=1:length(currunitids)
 end
 figure(); plot(unique(a.fortbytclass.fromWhichUnit_failure)); title('cuedfailure units'); disp('max of cuedfailureunits'); disp(nanmax(a.fortbytclass.fromWhichUnit_failure));
 b=load('Z:\MICROSCOPE\Kim\Final Figs\Fig5\Main figure\attempt trial by trial classification\uncuedsuccess_vs_uncuedfailure.mat'); b.fortbytclass.unitfr_success=b.fortbytclass.unitfr_success./nbins; b.fortbytclass.unitfr_failure=b.fortbytclass.unitfr_failure./nbins;
+% b.fortbytclass.unitfr_success(b.fortbytclass.unitfr_success<0.01)=0; b.fortbytclass.unitfr_failure(b.fortbytclass.unitfr_failure<0.01)=0; 
+% b.fortbytclass.unitfr_success(b.fortbytclass.unitfr_success>0 & b.fortbytclass.unitfr_success<=1)=1; b.fortbytclass.unitfr_failure(b.fortbytclass.unitfr_failure>0 & b.fortbytclass.unitfr_failure<=1)=1;
+% b.fortbytclass.unitfr_success(b.fortbytclass.unitfr_success>1 & b.fortbytclass.unitfr_success<=2)=2; b.fortbytclass.unitfr_failure(b.fortbytclass.unitfr_failure>1 & b.fortbytclass.unitfr_failure<=2)=2;
+% b.fortbytclass.unitfr_success(b.fortbytclass.unitfr_success>2 & b.fortbytclass.unitfr_success<=3)=3; b.fortbytclass.unitfr_failure(b.fortbytclass.unitfr_failure>2 & b.fortbytclass.unitfr_failure<=3)=3;
+% b.fortbytclass.unitfr_success(b.fortbytclass.unitfr_success>3 & b.fortbytclass.unitfr_success<=4)=4; b.fortbytclass.unitfr_failure(b.fortbytclass.unitfr_failure>3 & b.fortbytclass.unitfr_failure<=4)=4;
+% b.fortbytclass.unitfr_success(b.fortbytclass.unitfr_success>4 & b.fortbytclass.unitfr_success<=5)=5; b.fortbytclass.unitfr_failure(b.fortbytclass.unitfr_failure>4 & b.fortbytclass.unitfr_failure<=5)=5;
+% b.fortbytclass.unitfr_success(b.fortbytclass.unitfr_success>5 & b.fortbytclass.unitfr_success<=6)=6; b.fortbytclass.unitfr_failure(b.fortbytclass.unitfr_failure>5 & b.fortbytclass.unitfr_failure<=6)=6;
+% b.fortbytclass.unitfr_success(b.fortbytclass.unitfr_success>6 & b.fortbytclass.unitfr_success<=7)=7; b.fortbytclass.unitfr_failure(b.fortbytclass.unitfr_failure>6 & b.fortbytclass.unitfr_failure<=7)=7;
+% b.fortbytclass.unitfr_success(b.fortbytclass.unitfr_success>7 & b.fortbytclass.unitfr_success<=8)=8; b.fortbytclass.unitfr_failure(b.fortbytclass.unitfr_failure>7 & b.fortbytclass.unitfr_failure<=8)=8;
+% b.fortbytclass.unitfr_success(b.fortbytclass.unitfr_success>3)=3; b.fortbytclass.unitfr_failure(b.fortbytclass.unitfr_failure>3)=3;
 disp('max of uncuedsuccessunits'); disp(nanmax(b.fortbytclass.fromWhichUnit_success));
 % reassign unit ids
 currunitids=[1:558 561:1065];
@@ -1560,9 +1594,9 @@ for i=1:length(currunitids)
     b.fortbytclass.fromWhichUnit_failure(ismember(b.fortbytclass.fromWhichUnit_failure,currunitids(i)))=newunitids(i);
 end
 disp('max of uncuedfailureunits'); disp(nanmax(b.fortbytclass.fromWhichUnit_failure));
-decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cued_success_Response.consensus_idx,100,100,70,false,false); % nBoots,nUnits,nTrials,withReplacement,addThirdAxis,nanAllZeros
+decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cued_success_Response.consensus_idx,100,100,80,false,false,false,false,false); % nBoots,nUnits,nTrials,withReplacement,addThirdAxis,nanAllZeros,justBoostrapTrials,collapseWithinUnit
 % neuron type shuffle
-decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cued_success_Response.consensus_idx(randperm(length(cued_success_Response.consensus_idx))),100,100,70,false,false);
+% decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cued_success_Response.consensus_idx(randperm(length(cued_success_Response.consensus_idx))),100,100,70,false,false,false);
 
 %% Behavior controls
 % load some behavior data

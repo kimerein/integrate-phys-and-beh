@@ -14,3 +14,13 @@ settings.unitbaseline=300; %150;
 settings.maxUnitsPerSess=30; % can't get more than this many units per session
 settings.keepAllSingleTrials=false;
 settings.isPhotometry=true;
+
+% generally only use the following for units, not photometry
+settings.discardTrialsWhereOptoDuringCue=false; % never did photometry and silencing of pDMSt at the same time
+settings.onlyTrialsWhereOptoDuringCue=false;
+settings.discardTrialsIfAnyOpto=false;
+settings.discardDrops=false;
+settings.useSameTrainingSetForAllNeurons=false;
+settings.useTestSet=false;
+settings.makeTrainingSet=false;
+settings.useTrainingSet=false;
