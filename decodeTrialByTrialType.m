@@ -177,22 +177,16 @@ for i=1:nBoot
         trialIDsPerSample_gp1_cuedsuccess(i,:)=currcondition_trialIDs_fortheseunits(randsample(length(currcondition_trialIDs_fortheseunits),nTrials,withReplacement));
     else
         % testing
-        unitsPerSample_gp1_cuedsuccess=repmat(currtbyt_units(ismember(currtbyt_units,gp1_unit_ids))',nBoot,1);
-        trialIDsPerSample_gp1_cuedsuccess=repmat(currtbyt_trialIDs(ismember(currtbyt_units,gp1_unit_ids))',nBoot,1);
+%         unitsPerSample_gp1_cuedsuccess=repmat(currtbyt_units(ismember(currtbyt_units,gp1_unit_ids))',nBoot,1);
+%         trialIDsPerSample_gp1_cuedsuccess=repmat(currtbyt_trialIDs(ismember(currtbyt_units,gp1_unit_ids))',nBoot,1);
         
 
         % all trials for units of this gp
-%         currTrials=currtbyt_trialIDs(ismember(currtbyt_units,gp1_unit_ids));
-%         tookwhich=randsample(length(currTrials),nTrials,withReplacement);
-%         trialIDsPerSample_gp1_cuedsuccess(i,:)=currTrials(tookwhich);
-%         f=nan(1,length(trialIDsPerSample_gp1_cuedsuccess(i,:)));
-%         for j=1:length(trialIDsPerSample_gp1_cuedsuccess(i,:))
-%             fallunits=find(currtbyt_trialIDs==trialIDsPerSample_gp1_cuedsuccess(i,j)); % trial ID repeated for different units
-%             allunits=currtbyt_units(fallunits);
-%             % randomly choose one of the units
-%             whichunit=randsample(length(fallunits),1,withReplacement);
-%             unitsPerSample_gp1_cuedsuccess(i,j)=allunits(whichunit);
-%         end
+        currTrials=currtbyt_trialIDs(ismember(currtbyt_units,gp1_unit_ids));
+        whichUnitsAreThese=currtbyt_units(ismember(currtbyt_units,gp1_unit_ids));
+        tookwhich=randsample(length(currTrials),nTrials,withReplacement);
+        trialIDsPerSample_gp1_cuedsuccess(i,:)=currTrials(tookwhich);
+        unitsPerSample_gp1_cuedsuccess(i,:)=whichUnitsAreThese(tookwhich);
     end
 end
 
