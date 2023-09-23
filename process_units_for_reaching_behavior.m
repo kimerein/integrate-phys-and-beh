@@ -934,7 +934,11 @@ else
     % all success starts at 214
     % sus1to5sec
     py_metrics.allfail_sus1to5sec=(nanmean(py_all_glm_coef(:,[305+10:305+50]),2)+nanmean(py_all_glm_coef(:,[376+10:376+50]),2))/2;
+    py_metrics.alldrop_sus1to5sec=nanmean(py_all_glm_coef(:,[305+10:305+50]),2);
+    py_metrics.allmiss_sus1to5sec=nanmean(py_all_glm_coef(:,[376+10:376+50]),2);
     py_metrics.cXfail_sus1to5sec=(nanmean(py_all_glm_coef(:,[518+10:518+50]),2)+nanmean(py_all_glm_coef(:,[589+10:589+50]),2))/2;
+    py_metrics.cXdrop_sus1to5sec=nanmean(py_all_glm_coef(:,[518+10:518+50]),2);
+    py_metrics.cXmiss_sus1to5sec=nanmean(py_all_glm_coef(:,[589+10:589+50]),2);
     py_metrics.allsucc_sus1to5sec=nanmean(py_all_glm_coef(:,[234+10:234+50]),2);
     py_metrics.cXsucc_sus1to5sec=nanmean(py_all_glm_coef(:,[447+10:447+50]),2);
     py_metrics.allsucc_sus0to5sec=nanmean(py_all_glm_coef(:,[234:234+50]),2);
@@ -1335,8 +1339,10 @@ binsForTuning{1}=[-0.0001 0.0001 10]; binsForTuning{2}=[-0.0001 0.0001 10];
 tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXfail_sus1to5sec-cued_success_Response.allfail_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning);
 plotTuningOutputScatter(tuningOutput,'grp1_fail','grp1_fail_uncue',2,[2 5]);
 
-binsForTuning{1}=[-10 -0.0001 10]; binsForTuning{2}=[-10 -0.0001 10];
-tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXfail_sus1to5sec-cued_success_Response.allfail_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning);
+% binsForTuning{1}=[-10 -0.0001 10]; binsForTuning{2}=[-10 -0.0001 10];
+% tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXfail_sus1to5sec-cued_success_Response.allfail_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning);
+binsForTuning{1}=[-10 0.5 10]; binsForTuning{2}=[-10 0.5 10];
+tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cuecoef_over1sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning);
 [allgp1_cuedfailFR_cuedir2,allgp1_uncuedfailFR_cuedir2]=plotTuningOutputScatter(tuningOutput,'grp1_fail','grp1_fail_uncue',2,[2 5]);
 [allgp1_cuedfailFR_cuedir1,allgp1_uncuedfailFR_cuedir1]=plotTuningOutputScatter(tuningOutput,'grp1_fail','grp1_fail_uncue',1,[2 5]);
 [allgp1_cuedsuccFR_cuedir2,allgp1_uncuedsuccFR_cuedir2]=plotTuningOutputScatter(tuningOutput,'grp1_succ','grp1_succ_uncue',2,[2 5]);
@@ -1669,7 +1675,7 @@ scatter(-out_cuedir2.cuedsucc_temp1+out_cuedir1.cuedsucc_temp1,out_cuedir2.cueds
 scatter(-out_cuedir2.cuedfail_temp1+out_cuedir1.cuedfail_temp1,out_cuedir2.cuedfail_temp2-out_cuedir1.cuedfail_temp2,[],'r');
 scatter(-out_cuedir2.uncuedsucc_temp1+out_cuedir1.uncuedsucc_temp1,out_cuedir2.uncuedsucc_temp2-out_cuedir1.uncuedsucc_temp2,[],'b');
 scatter(-out_cuedir2.uncuedfail_temp1+out_cuedir1.uncuedfail_temp1,out_cuedir2.uncuedfail_temp2-out_cuedir1.uncuedfail_temp2,[],'y');
-
+xlabel('cue vs uncue gp1'); ylabel('cue vs uncue gp2');
 % neuron type shuffle
 % decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cued_success_Response.consensus_idx(randperm(length(cued_success_Response.consensus_idx))),100,100,70,false,false,false);
 
