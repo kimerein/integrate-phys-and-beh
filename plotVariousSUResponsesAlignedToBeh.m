@@ -1090,6 +1090,7 @@ end
 function out=meanAcrossUnits(activityD1tagged,downSampFac,suppressPlots)
 
 % normalizeToBeforeZero=false;
+doSmooth=false; smoothBy=10;
 
 rmOutliers=false;
 if rmOutliers==true
@@ -1097,6 +1098,14 @@ if rmOutliers==true
     disp(['removed ' num2str(sum(Tfrm)) ' outliers']);
 end
 temp=activityD1tagged.unitbyunit_y;
+if doSmooth==true
+    for i=1:size(activityD1tagged.unitbyunit_y,1)
+        if mod(i,100)==0
+            disp(i)
+        end
+        activityD1tagged.unitbyunit_y(i,:)=smooth(activityD1tagged.unitbyunit_y(i,:),smoothBy);
+    end
+end
 out.unitbyunit=activityD1tagged.unitbyunit_y;
 for i=1:size(temp,1)
 %     temp(i,:)=smoothdata(temp(i,:),'gaussian',2);
@@ -1104,6 +1113,8 @@ for i=1:size(temp,1)
     temp(i,:)=smoothdata(temp(i,:),'gaussian',7);
 end
 activityD1tagged.unitbyunit_y=temp;
+% comment or uncomment for gaussian smoothing of average
+% out.unitbyunit=activityD1tagged.unitbyunit_y;
 
 if suppressPlots~=1
     if size(activityD1tagged.unitbyunit_y,1)>1000

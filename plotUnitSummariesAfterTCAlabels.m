@@ -38,7 +38,7 @@ switch justAvsOrTuning
         chopOutliers=true;
         smoo=1; %30; % only used for tuning %30; %6; %smoo=3; %smoo=42;
         smoothBeforeResids=true; 
-        smooBef=5; %100; %15; %30; %83;
+        smooBef=100; %15; %30; %83;
         getResiduals=false; % but need this to get rid of mid-range
         ds=1; %1;
         removeInsufficientBaseline=true; % will nan out units that don't have at least X seconds of baseline before aligncomp max
