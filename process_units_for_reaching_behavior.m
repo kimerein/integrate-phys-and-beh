@@ -1455,32 +1455,42 @@ for i=1:nBoot
     takeThese_gp2_cuedir1(i,:)=randsample(length(allgp2_cuedsuccFR_cuedir1),nUnits); 
     takeThese_gp2_cuedir2(i,:)=randsample(length(allgp2_cuedsuccFR_cuedir2),nUnits); 
 end
-temp1=nan(nBoot,nUnits); temp2=nan(nBoot,nUnits);
+temp1=nan(nBoot,1); temp2=nan(nBoot,1);
 for i=1:nBoot
-    temp1(i,:)=-nanmean(allgp1_cuedsuccFR_cuedir2(takeThese_gp1_cuedir2(i,:)))+nanmean(allgp1_cuedsuccFR_cuedir1(takeThese_gp1_cuedir1(i,:))); 
-    temp2(i,:)=nanmean(allgp2_cuedsuccFR_cuedir2(takeThese_gp2_cuedir2(i,:)))-nanmean(allgp2_cuedsuccFR_cuedir1(takeThese_gp2_cuedir1(i,:))); 
+    temp1(i)=-nanmean(allgp1_cuedsuccFR_cuedir2(takeThese_gp1_cuedir2(i,:)))+nanmean(allgp1_cuedsuccFR_cuedir1(takeThese_gp1_cuedir1(i,:))); 
+    temp2(i)=nanmean(allgp2_cuedsuccFR_cuedir2(takeThese_gp2_cuedir2(i,:)))-nanmean(allgp2_cuedsuccFR_cuedir1(takeThese_gp2_cuedir1(i,:))); 
 end
+Xmatrix=[temp1 temp2]; ylabels=[ones(size(temp1,1),1)];
 scatter(temp1,temp2,[],'g'); hold on; scatter(nanmean(temp1),nanmean(temp2),[],'g','filled'); cuedsuccmeanx=nanmean(temp1); cuedsuccmeany=nanmean(temp2);
-temp1=nan(nBoot,nUnits); temp2=nan(nBoot,nUnits);
+temp1=nan(nBoot,1); temp2=nan(nBoot,1);
 for i=1:nBoot
-    temp1(i,:)=-nanmean(allgp1_cuedfailFR_cuedir2(takeThese_gp1_cuedir2(i,:)))+nanmean(allgp1_cuedfailFR_cuedir1(takeThese_gp1_cuedir1(i,:))); 
-    temp2(i,:)=nanmean(allgp2_cuedfailFR_cuedir2(takeThese_gp2_cuedir2(i,:)))-nanmean(allgp2_cuedfailFR_cuedir1(takeThese_gp2_cuedir1(i,:))); 
+    temp1(i)=-nanmean(allgp1_cuedfailFR_cuedir2(takeThese_gp1_cuedir2(i,:)))+nanmean(allgp1_cuedfailFR_cuedir1(takeThese_gp1_cuedir1(i,:))); 
+    temp2(i)=nanmean(allgp2_cuedfailFR_cuedir2(takeThese_gp2_cuedir2(i,:)))-nanmean(allgp2_cuedfailFR_cuedir1(takeThese_gp2_cuedir1(i,:))); 
 end
+Xmatrix=[Xmatrix; [temp1 temp2]]; ylabels=[ylabels; 2*ones(size(temp1,1),1)];
 scatter(temp1,temp2,[],'r'); scatter(nanmean(temp1),nanmean(temp2),[],'r','filled'); cuedfailmeanx=nanmean(temp1); cuedfailmeany=nanmean(temp2);
-temp1=nan(nBoot,nUnits); temp2=nan(nBoot,nUnits);
+temp1=nan(nBoot,1); temp2=nan(nBoot,1);
 for i=1:nBoot
-    temp1(i,:)=-nanmean(allgp1_uncuedsuccFR_cuedir2(takeThese_gp1_cuedir2(i,:)))+nanmean(allgp1_uncuedsuccFR_cuedir1(takeThese_gp1_cuedir1(i,:))); 
-    temp2(i,:)=nanmean(allgp2_uncuedsuccFR_cuedir2(takeThese_gp2_cuedir2(i,:)))-nanmean(allgp2_uncuedsuccFR_cuedir1(takeThese_gp2_cuedir1(i,:)));
+    temp1(i)=-nanmean(allgp1_uncuedsuccFR_cuedir2(takeThese_gp1_cuedir2(i,:)))+nanmean(allgp1_uncuedsuccFR_cuedir1(takeThese_gp1_cuedir1(i,:))); 
+    temp2(i)=nanmean(allgp2_uncuedsuccFR_cuedir2(takeThese_gp2_cuedir2(i,:)))-nanmean(allgp2_uncuedsuccFR_cuedir1(takeThese_gp2_cuedir1(i,:)));
 end
+Xmatrix=[Xmatrix; [temp1 temp2]]; ylabels=[ylabels; 3*ones(size(temp1,1),1)];
 scatter(temp1,temp2,[],'b'); scatter(nanmean(temp1),nanmean(temp2),[],'b','filled'); uncuedsuccmeanx=nanmean(temp1); uncuedsuccmeany=nanmean(temp2);
-temp1=nan(nBoot,nUnits); temp2=nan(nBoot,nUnits);
+temp1=nan(nBoot,1); temp2=nan(nBoot,1);
 for i=1:nBoot
-    temp1(i,:)=-nanmean(allgp1_uncuedfailFR_cuedir2(takeThese_gp1_cuedir2(i,:)))+nanmean(allgp1_uncuedfailFR_cuedir1(takeThese_gp1_cuedir1(i,:))); 
-    temp2(i,:)=nanmean(allgp2_uncuedfailFR_cuedir2(takeThese_gp2_cuedir2(i,:)))-nanmean(allgp2_uncuedfailFR_cuedir1(takeThese_gp2_cuedir1(i,:)));
+    temp1(i)=-nanmean(allgp1_uncuedfailFR_cuedir2(takeThese_gp1_cuedir2(i,:)))+nanmean(allgp1_uncuedfailFR_cuedir1(takeThese_gp1_cuedir1(i,:))); 
+    temp2(i)=nanmean(allgp2_uncuedfailFR_cuedir2(takeThese_gp2_cuedir2(i,:)))-nanmean(allgp2_uncuedfailFR_cuedir1(takeThese_gp2_cuedir1(i,:)));
 end
+Xmatrix=[Xmatrix; [temp1 temp2]]; ylabels=[ylabels; 4*ones(size(temp1,1),1)];
 scatter(temp1,temp2,[],'y'); scatter(nanmean(temp1),nanmean(temp2),[],'y','filled'); uncuedfailmeanx=nanmean(temp1); uncuedfailmeany=nanmean(temp2);
 scatter((cuedsuccmeanx+cuedfailmeanx+uncuedsuccmeanx+uncuedfailmeanx)/4,(cuedsuccmeany+cuedfailmeany+uncuedsuccmeany+uncuedfailmeany)/4,[],'k','filled');
 xlabel('Gp 1 cue vs uncue'); ylabel('Gp 2 cue vs uncue');
+
+% LDA
+ldaModel=fitcdiscr(Xmatrix,ylabels);
+predictedY=predict(ldaModel,Xmatrix);
+accuracy=sum(predictedY==ylabels)/length(ylabels);
+disp(['Accuracy of LDA on training set: ', num2str(accuracy * 100), '%']);
 
 %% CUED TUNING FROM GLM COEFFS
 clear r
