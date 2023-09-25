@@ -1447,7 +1447,7 @@ scatter((cuedsuccmeanx+cuedfailmeanx+uncuedsuccmeanx+uncuedfailmeanx)/4,(cuedsuc
 xlabel('Gp 1 average unit firing rate'); ylabel('Gp 2 average unit firing rate');
 
 %% Trying a different mapping
-figure(); nBoot=100; nUnits=40;
+figure(); nBoot=100; nUnits=5;
 takeThese_gp1_cuedir1=nan(nBoot,nUnits); takeThese_gp1_cuedir2=nan(nBoot,nUnits); takeThese_gp2_cuedir1=nan(nBoot,nUnits); takeThese_gp2_cuedir2=nan(nBoot,nUnits);
 for i=1:nBoot
     takeThese_gp1_cuedir1(i,:)=randsample(length(allgp1_cuedsuccFR_cuedir1),nUnits); 
@@ -1674,10 +1674,10 @@ decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cued_success_Response.conse
 % gp1 bins: binsForTuning{1}=[-10 -0.0001 10]; % greater than bottom of bin, less than or equal to top of bin
 % gp2 bins: binsForTuning{1}=[-10 0 10];
 load('Z:\MICROSCOPE\Kim\Final Figs\Fig5\Main figure\cued_success_Response_w_py_metrics.mat'); backup_consensus_idx=cued_success_Response.consensus_idx;
-cidx=backup_consensus_idx; cidx(cued_success_Response.cXfail_sus1to5sec-cued_success_Response.allfail_sus1to5sec<=-0.0001 & backup_consensus_idx==1)=nan; % throw out bin1 for gp1
+cidx=backup_consensus_idx; cidx(cued_success_Response.cuecoef_over1sec<=0.5 & backup_consensus_idx==1)=nan; % throw out bin1 for gp1
 cidx(cued_success_Response.cXsucc_sus1to5sec<=0 & backup_consensus_idx==2)=nan; % throw out bin1 for gp2
 out_cuedir2=decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cidx,100,100,100,false,false,false,true,false); close all;
-cidx=backup_consensus_idx; cidx(cued_success_Response.cXfail_sus1to5sec-cued_success_Response.allfail_sus1to5sec>-0.0001 & backup_consensus_idx==1)=nan; % throw out bin2 for gp1
+cidx=backup_consensus_idx; cidx(cued_success_Response.cuecoef_over1sec>0.5 & backup_consensus_idx==1)=nan; % throw out bin2 for gp1
 cidx(cued_success_Response.cXsucc_sus1to5sec>0 & backup_consensus_idx==2)=nan; % throw out bin2 for gp2
 out_cuedir1=decodeTrialByTrialType(a.fortbytclass,b.fo+rtbytclass,cidx,100,100,100,false,false,false,true,false); close all;
 figure(); 
