@@ -144,7 +144,7 @@ disp('uncued failure is yellow');
 if addThirdAxis==false
     scatter((cuedsuccmeanx+cuedfailmeanx+uncuedsuccmeanx+uncuedfailmeanx)/4,(cuedsuccmeany+cuedfailmeany+uncuedsuccmeany+uncuedfailmeany)/4,[],'k','filled');
 end
-xlabel('Gp 1 average trial firing rate (flipped)');
+xlabel('Gp 1 average trial firing rate');
 ylabel('Gp 2 average trial firing rate');
 if addThirdAxis==true
     zlabel('Sum of gp1 and gp2 firing rate');

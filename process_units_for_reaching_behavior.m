@@ -1423,28 +1423,38 @@ takeThese_gp1=nan(nBoot,nUnits); takeThese_gp2=nan(nBoot,nUnits);
 for i=1:nBoot
     takeThese_gp1(i,:)=randsample(length(allgp1_cuedsuccFR),nUnits); takeThese_gp2(i,:)=randsample(length(allgp2_cuedsuccFR),nUnits);
 end
-temp1=nan(nBoot,nUnits); temp2=nan(nBoot,nUnits);
+temp1=nan(nBoot,1); temp2=nan(nBoot,1);
 for i=1:nBoot
-    temp1(i,:)=nanmean(allgp1_cuedsuccFR(takeThese_gp1(i,:))); temp2(i,:)=nanmean(allgp2_cuedsuccFR(takeThese_gp2(i,:)));
+    temp1(i)=nanmean(allgp1_cuedsuccFR(takeThese_gp1(i,:))); temp2(i)=nanmean(allgp2_cuedsuccFR(takeThese_gp2(i,:)));
 end
+Xmatrix=[temp1 temp2]; ylabels=[ones(size(temp1,1),1)];
 scatter(temp1,temp2,[],'g'); hold on; scatter(nanmean(temp1),nanmean(temp2),[],'g','filled'); cuedsuccmeanx=nanmean(temp1); cuedsuccmeany=nanmean(temp2);
-temp1=nan(nBoot,nUnits); temp2=nan(nBoot,nUnits);
+temp1=nan(nBoot,1); temp2=nan(nBoot,1);
 for i=1:nBoot
-    temp1(i,:)=nanmean(allgp1_cuedfailFR(takeThese_gp1(i,:))); temp2(i,:)=nanmean(allgp2_cuedfailFR(takeThese_gp2(i,:)));
+    temp1(i)=nanmean(allgp1_cuedfailFR(takeThese_gp1(i,:))); temp2(i)=nanmean(allgp2_cuedfailFR(takeThese_gp2(i,:)));
 end
+Xmatrix=[Xmatrix; [temp1 temp2]]; ylabels=[ylabels; 2*ones(size(temp1,1),1)];
 scatter(temp1,temp2,[],'r'); scatter(nanmean(temp1),nanmean(temp2),[],'r','filled'); cuedfailmeanx=nanmean(temp1); cuedfailmeany=nanmean(temp2);
-temp1=nan(nBoot,nUnits); temp2=nan(nBoot,nUnits);
+temp1=nan(nBoot,1); temp2=nan(nBoot,1);
 for i=1:nBoot
-    temp1(i,:)=nanmean(allgp1_uncuedsuccFR(takeThese_gp1(i,:))); temp2(i,:)=nanmean(allgp2_uncuedsuccFR(takeThese_gp2(i,:)));
+    temp1(i)=nanmean(allgp1_uncuedsuccFR(takeThese_gp1(i,:))); temp2(i)=nanmean(allgp2_uncuedsuccFR(takeThese_gp2(i,:)));
 end
+Xmatrix=[Xmatrix; [temp1 temp2]]; ylabels=[ylabels; 3*ones(size(temp1,1),1)];
 scatter(temp1,temp2,[],'b'); scatter(nanmean(temp1),nanmean(temp2),[],'b','filled'); uncuedsuccmeanx=nanmean(temp1); uncuedsuccmeany=nanmean(temp2);
-temp1=nan(nBoot,nUnits); temp2=nan(nBoot,nUnits);
+temp1=nan(nBoot,1); temp2=nan(nBoot,1);
 for i=1:nBoot
-    temp1(i,:)=nanmean(allgp1_uncuedfailFR(takeThese_gp1(i,:))); temp2(i,:)=nanmean(allgp2_uncuedfailFR(takeThese_gp2(i,:)));
+    temp1(i)=nanmean(allgp1_uncuedfailFR(takeThese_gp1(i,:))); temp2(i)=nanmean(allgp2_uncuedfailFR(takeThese_gp2(i,:)));
 end
+Xmatrix=[Xmatrix; [temp1 temp2]]; ylabels=[ylabels; 4*ones(size(temp1,1),1)];
 scatter(temp1,temp2,[],'y'); scatter(nanmean(temp1),nanmean(temp2),[],'y','filled'); uncuedfailmeanx=nanmean(temp1); uncuedfailmeany=nanmean(temp2);
 scatter((cuedsuccmeanx+cuedfailmeanx+uncuedsuccmeanx+uncuedfailmeanx)/4,(cuedsuccmeany+cuedfailmeany+uncuedsuccmeany+uncuedfailmeany)/4,[],'k','filled');
 xlabel('Gp 1 average unit firing rate'); ylabel('Gp 2 average unit firing rate');
+
+% LDA
+ldaModel=fitcdiscr(Xmatrix,ylabels);
+predictedY=predict(ldaModel,Xmatrix);
+accuracy=sum(predictedY==ylabels)/length(ylabels);
+disp(['Accuracy of LDA on training set: ', num2str(accuracy * 100), '%']);
 
 %% Trying a different mapping
 figure(); nBoot=100; nUnits=5;
@@ -1650,7 +1660,7 @@ for i=1:length(currunitids)
     a.fortbytclass.fromWhichUnit_failure(ismember(a.fortbytclass.fromWhichUnit_failure,currunitids(i)))=newunitids(i);
 end
 figure(); plot(unique(a.fortbytclass.fromWhichUnit_failure)); title('cuedfailure units'); disp('max of cuedfailureunits'); disp(nanmax(a.fortbytclass.fromWhichUnit_failure));
-b=load('Z:\MICROSCOPE\Kim\Final Figs\Fig5\Main figure\attempt trial by trial classification\uncuedsuccess_vs_uncuedfailure.mat'); b.fortbytclass.unitfr_success=b.fortbytclass.unitfr_success./nbins; b.fortbytclass.unitfr_failure=b.fortbytclass.unitfr_failure./nbins;
+b=load('Z:\MICROSCOPE\Kim\Final Figs\Fig5\Main figure\attempt trial by trial classification\uncuedsuccess_vs_uncuedfailure_1to5sec.mat'); b.fortbytclass.unitfr_success=b.fortbytclass.unitfr_success./nbins; b.fortbytclass.unitfr_failure=b.fortbytclass.unitfr_failure./nbins;
 % b.fortbytclass.unitfr_success(b.fortbytclass.unitfr_success<0.01)=0; b.fortbytclass.unitfr_failure(b.fortbytclass.unitfr_failure<0.01)=0; 
 % b.fortbytclass.unitfr_success(b.fortbytclass.unitfr_success>0 & b.fortbytclass.unitfr_success<=1)=1; b.fortbytclass.unitfr_failure(b.fortbytclass.unitfr_failure>0 & b.fortbytclass.unitfr_failure<=1)=1;
 % b.fortbytclass.unitfr_success(b.fortbytclass.unitfr_success>1 & b.fortbytclass.unitfr_success<=2)=2; b.fortbytclass.unitfr_failure(b.fortbytclass.unitfr_failure>1 & b.fortbytclass.unitfr_failure<=2)=2;
@@ -1671,23 +1681,34 @@ end
 disp('max of uncuedfailureunits'); disp(nanmax(b.fortbytclass.fromWhichUnit_failure));
 decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cued_success_Response.consensus_idx,100,100,80,false,false,false,false,false); % nBoots,nUnits,nTrials,withReplacement,addThirdAxis,nanAllZeros,justBoostrapTrials,collapseWithinUnit
 
-% gp1 bins: binsForTuning{1}=[-10 -0.0001 10]; % greater than bottom of bin, less than or equal to top of bin
-% gp2 bins: binsForTuning{1}=[-10 0 10];
 load('Z:\MICROSCOPE\Kim\Final Figs\Fig5\Main figure\cued_success_Response_w_py_metrics.mat'); backup_consensus_idx=cued_success_Response.consensus_idx;
+
+nTrialsForBoot=10; 
+nUnitsForBoot=nTrialsForBoot;
 cidx=backup_consensus_idx; cidx(cued_success_Response.cuecoef_over1sec<=0.5 & backup_consensus_idx==1)=nan; % throw out bin1 for gp1
 cidx(cued_success_Response.cXsucc_sus1to5sec<=0 & backup_consensus_idx==2)=nan; % throw out bin1 for gp2
-out_cuedir2=decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cidx,100,100,100,false,false,false,true,false); close all;
+out_cuedir2=decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cidx,100,nUnitsForBoot,nTrialsForBoot,false,false,false,true,false); close all;
 cidx=backup_consensus_idx; cidx(cued_success_Response.cuecoef_over1sec>0.5 & backup_consensus_idx==1)=nan; % throw out bin2 for gp1
 cidx(cued_success_Response.cXsucc_sus1to5sec>0 & backup_consensus_idx==2)=nan; % throw out bin2 for gp2
-out_cuedir1=decodeTrialByTrialType(a.fortbytclass,b.fo+rtbytclass,cidx,100,100,100,false,false,false,true,false); close all;
+out_cuedir1=decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cidx,100,nUnitsForBoot,nTrialsForBoot,false,false,false,true,false); close all;
 figure(); 
 scatter(-out_cuedir2.cuedsucc_temp1+out_cuedir1.cuedsucc_temp1,out_cuedir2.cuedsucc_temp2-out_cuedir1.cuedsucc_temp2,[],'g'); hold on;
+Xmatrix=[-out_cuedir2.cuedsucc_temp1+out_cuedir1.cuedsucc_temp1 out_cuedir2.cuedsucc_temp2-out_cuedir1.cuedsucc_temp2]; ylabels=[ones(size(out_cuedir2.cuedsucc_temp1,1),1)];
 scatter(-out_cuedir2.cuedfail_temp1+out_cuedir1.cuedfail_temp1,out_cuedir2.cuedfail_temp2-out_cuedir1.cuedfail_temp2,[],'r');
+Xmatrix=[Xmatrix; [-out_cuedir2.cuedfail_temp1+out_cuedir1.cuedfail_temp1 out_cuedir2.cuedfail_temp2-out_cuedir1.cuedfail_temp2]]; ylabels=[ylabels; 2*ones(size(out_cuedir2.cuedsucc_temp1,1),1)];
 scatter(-out_cuedir2.uncuedsucc_temp1+out_cuedir1.uncuedsucc_temp1,out_cuedir2.uncuedsucc_temp2-out_cuedir1.uncuedsucc_temp2,[],'b');
+Xmatrix=[Xmatrix; [-out_cuedir2.uncuedsucc_temp1+out_cuedir1.uncuedsucc_temp1 out_cuedir2.uncuedsucc_temp2-out_cuedir1.uncuedsucc_temp2]]; ylabels=[ylabels; 3*ones(size(out_cuedir2.cuedsucc_temp1,1),1)];
 scatter(-out_cuedir2.uncuedfail_temp1+out_cuedir1.uncuedfail_temp1,out_cuedir2.uncuedfail_temp2-out_cuedir1.uncuedfail_temp2,[],'y');
+Xmatrix=[Xmatrix; [-out_cuedir2.uncuedfail_temp1+out_cuedir1.uncuedfail_temp1 out_cuedir2.uncuedfail_temp2-out_cuedir1.uncuedfail_temp2]]; ylabels=[ylabels; 4*ones(size(out_cuedir2.cuedsucc_temp1,1),1)];
 xlabel('cue vs uncue gp1'); ylabel('cue vs uncue gp2');
 % neuron type shuffle
 % decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cued_success_Response.consensus_idx(randperm(length(cued_success_Response.consensus_idx))),100,100,70,false,false,false);
+
+% LDA
+ldaModel=fitcdiscr(Xmatrix,ylabels);
+predictedY=predict(ldaModel,Xmatrix);
+accuracy=sum(predictedY==ylabels)/length(ylabels);
+disp(['Accuracy of LDA on training set: ', num2str(accuracy * 100), '%']);
 
 %% Behavior controls
 % load some behavior data
