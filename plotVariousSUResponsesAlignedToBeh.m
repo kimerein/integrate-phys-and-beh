@@ -1090,7 +1090,7 @@ end
 function out=meanAcrossUnits(activityD1tagged,downSampFac,suppressPlots)
 
 % normalizeToBeforeZero=false;
-doSmooth=false; smoothBy=10;
+doSmooth=false; doMedFilt=false; smoothBy=100; 
 
 rmOutliers=false;
 if rmOutliers==true
@@ -1104,6 +1104,14 @@ if doSmooth==true
             disp(i)
         end
         activityD1tagged.unitbyunit_y(i,:)=smooth(activityD1tagged.unitbyunit_y(i,:),smoothBy);
+    end
+end
+if doMedFilt==true
+    for i=1:size(activityD1tagged.unitbyunit_y,1)
+        if mod(i,100)==0
+            disp(i)
+        end
+        activityD1tagged.unitbyunit_y(i,:)=medfilt1(activityD1tagged.unitbyunit_y(i,:),smoothBy);
     end
 end
 out.unitbyunit=activityD1tagged.unitbyunit_y;

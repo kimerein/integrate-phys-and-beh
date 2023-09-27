@@ -695,10 +695,10 @@ anyIsSig=any(isSig==1,2);
 %% Set up data matrix
 % Units X conditions (alignments to beh events) X time
 % a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\cue.mat'); cue_Response=a.Response; 
-a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_success_Response.mat'); cued_success_Response=a.cued_success_Response;  
-a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_failureNotDrop_Response.mat'); cued_failure_Response=a.cued_failureNotDrop_Response; 
-a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_success_Response.mat'); uncued_success_Response=a.uncued_success_Response; 
-a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_failureNotDrop_Response.mat'); uncued_failure_Response=a.uncued_failureNotDrop_Response;
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\excluded trials where opto during cue\cued_success_Response.mat'); cued_success_Response=a.cued_success_Response;  
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\excluded trials where opto during cue\cued_failureNotDrop_Response.mat'); cued_failure_Response=a.cued_failureNotDrop_Response; 
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\excluded trials where opto during cue\uncued_success_Response.mat'); uncued_success_Response=a.uncued_success_Response; 
+a=load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM training set\excluded trials where opto during cue\uncued_failureNotDrop_Response.mat'); uncued_failure_Response=a.uncued_failureNotDrop_Response;
 % a=load('Z:\MICROSCOPE\Kim\20230205 all SU alignments\all trials averaged not downsampled\cue_noReach.mat'); cue_noReach_Response=a.Response;
 %a=load('Z:\MICROSCOPE\Kim\20221129 lab meeting\responses unit by unit\uncued_reach.mat'); uncued_reach_Response=a.Response;
 
@@ -1073,6 +1073,32 @@ else
     cued_success_Response.combo_boundary=nan(size(cued_success_Response.idx));
     cued_success_Response.combo_boundary(cued_success_Response.idx_from_boundary==1 & cued_success_Response.idx_diagonal_boundary==1)=1;
     cued_success_Response.combo_boundary(cued_success_Response.idx_from_boundary==2 & cued_success_Response.idx_diagonal_boundary==2)=2;   
+    
+    figure(); scatter(cued_success_Response.allsucc_sus1to5sec(cued_success_Response.idx==1 & cued_success_Response.isHighWeight==1),cued_success_Response.allfail_sus1to5sec(cued_success_Response.idx==1 & cued_success_Response.isHighWeight==1),[],'b');
+    hold on; scatter(cued_success_Response.allsucc_sus1to5sec(cued_success_Response.idx==2 & cued_success_Response.isHighWeight==1),cued_success_Response.allfail_sus1to5sec(cued_success_Response.idx==2 & cued_success_Response.isHighWeight==1),[],'r');
+    figure(); scatter(cued_success_Response.allsucc_sus1to5sec(cued_success_Response.idx_from_glm==1),cued_success_Response.allfail_sus1to5sec(cued_success_Response.idx_from_glm==1),[],'b');
+    hold on; scatter(cued_success_Response.allsucc_sus1to5sec(cued_success_Response.idx_from_glm==2),cued_success_Response.allfail_sus1to5sec(cued_success_Response.idx_from_glm==2),[],'r');
+    
+    figure(); s=scatter(0.5*cued_success_Response.allsucc_sus1to5sec(cued_success_Response.idx_from_glm==2)+0.5*cued_success_Response.cXsucc_sus1to5sec(cued_success_Response.idx_from_glm==2),0.5*cued_success_Response.allfail_sus1to5sec(cued_success_Response.idx_from_glm==2)+0.5*cued_success_Response.cXfail_sus1to5sec(cued_success_Response.idx_from_glm==2),100,cmap(2,:),'filled'); % purple
+    s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4; hold on;
+    s=scatter(0.5*cued_success_Response.allsucc_sus1to5sec(cued_success_Response.idx_from_glm==1)+0.5*cued_success_Response.cXsucc_sus1to5sec(cued_success_Response.idx_from_glm==1),0.5*cued_success_Response.allfail_sus1to5sec(cued_success_Response.idx_from_glm==1)+0.5*cued_success_Response.cXfail_sus1to5sec(cued_success_Response.idx_from_glm==1),100,cmap(1,:),'filled'); % cyan
+    s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4;
+    xlabel('combosucc_sus1to5sec'); ylabel('combofail_sus1to5sec');
+    title('idx from glm');
+    x=-1:0.00001:1; y=(0.0145055/0.0250066).*x; line(x,y,'Color',cmap(1,:));
+    x=0.03.*ones(size(x)); y=-1:0.00001:1; line(x,y,'Color',cmap(2,:));
+    x=0.00242583.*ones(size(x)); y=-1:0.00001:1; line(x,y,'Color',cmap(2,:));
+    x=-0.015.*ones(size(x)); y=-1:0.00001:1; line(x,y,'Color',cmap(2,:));
+    x=-1:0.00001:1; y=(-0.0212442/0.00951011).*x; line(x,y,'Color',cmap(1,:)); 
+    x=0.5*cued_success_Response.allsucc_sus1to5sec+0.5*cued_success_Response.cXsucc_sus1to5sec;
+    y=0.5*cued_success_Response.allfail_sus1to5sec+0.5*cued_success_Response.cXfail_sus1to5sec;
+    cued_success_Response.glm_boundary_2=nan(size(cued_success_Response.idx_from_glm));
+    cued_success_Response.glm_boundary_2(y>(0.0145055/0.0250066).*x & x>0 & x<0.00242583)=1; % cyan
+    cued_success_Response.glm_boundary_2(y>(-0.0212442/0.00951011).*x & x<0)=1; % cyan
+    cued_success_Response.glm_boundary_2(y<=(0.0145055/0.0250066).*x & x>0.00242583 & x<0.03)=2; % purple
+    cued_success_Response.glm_boundary_2(y<=(-0.0212442/0.00951011).*x & x<0 & x>-0.015)=2; % purple
+    % 2 is A2a, 1 is D1; in figures, purple is A2a, cyan is D1
+
     cued_success_Response.consensus_idx=nan(size(cued_success_Response.idx));
     cued_success_Response.consensus_idx(cued_success_Response.combo_boundary==1 | (cued_success_Response.idx==1 & cued_success_Response.isHighWeight==1) & (cued_success_Response.combo_boundary~=2 & cued_success_Response.idx~=2))=1; 
     cued_success_Response.consensus_idx(cued_success_Response.combo_boundary==2 | (cued_success_Response.idx==2 & cued_success_Response.isHighWeight==1) & (cued_success_Response.combo_boundary~=1 & cued_success_Response.idx~=1))=2;
