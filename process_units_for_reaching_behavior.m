@@ -941,6 +941,16 @@ else
     py_metrics.cXmiss_sus1to5sec=nanmean(py_all_glm_coef(:,[589+10:589+50]),2);
     py_metrics.allsucc_sus1to5sec=nanmean(py_all_glm_coef(:,[234+10:234+50]),2);
     py_metrics.cXsucc_sus1to5sec=nanmean(py_all_glm_coef(:,[447+10:447+50]),2);
+    
+    py_metrics.allfail_sus3to5sec=(nanmean(py_all_glm_coef(:,[305+30:305+50]),2)+nanmean(py_all_glm_coef(:,[376+30:376+50]),2))/2;
+    py_metrics.alldrop_sus3to5sec=nanmean(py_all_glm_coef(:,[305+30:305+50]),2);
+    py_metrics.allmiss_sus3to5sec=nanmean(py_all_glm_coef(:,[376+30:376+50]),2);
+    py_metrics.cXfail_sus3to5sec=(nanmean(py_all_glm_coef(:,[518+30:518+50]),2)+nanmean(py_all_glm_coef(:,[589+30:589+50]),2))/2;
+    py_metrics.cXdrop_sus3to5sec=nanmean(py_all_glm_coef(:,[518+30:518+50]),2);
+    py_metrics.cXmiss_sus3to5sec=nanmean(py_all_glm_coef(:,[589+30:589+50]),2);
+    py_metrics.allsucc_sus3to5sec=nanmean(py_all_glm_coef(:,[234+30:234+50]),2);
+    py_metrics.cXsucc_sus3to5sec=nanmean(py_all_glm_coef(:,[447+30:447+50]),2);
+
     py_metrics.allsucc_sus0to5sec=nanmean(py_all_glm_coef(:,[234:234+50]),2);
     py_metrics.cXsucc_sus0to5sec=nanmean(py_all_glm_coef(:,[447:447+50]),2);
     py_metrics.allfail_minus2to0sec=(nanmean(py_all_glm_coef(:,[305-20:305]),2)+nanmean(py_all_glm_coef(:,[376-20:376]),2))/2;
@@ -1086,22 +1096,27 @@ else
     xlabel('combosucc_sus1to5sec'); ylabel('combofail_sus1to5sec');
     title('idx from glm');
     x=-1:0.00001:1; y=(0.0145055/0.0250066).*x; line(x,y,'Color',cmap(1,:));
-    x=0.03.*ones(size(x)); y=-1:0.00001:1; line(x,y,'Color',cmap(2,:));
+    x=0.036.*ones(size(x)); y=-1:0.00001:1; line(x,y,'Color',cmap(2,:));
     x=0.00242583.*ones(size(x)); y=-1:0.00001:1; line(x,y,'Color',cmap(2,:));
-    x=-0.015.*ones(size(x)); y=-1:0.00001:1; line(x,y,'Color',cmap(2,:));
+    x=-0.0243546.*ones(size(x)); y=-1:0.00001:1; line(x,y,'Color',cmap(2,:));
+    x=0.*ones(size(x)); y=-1:0.00001:1; line(x,y,'Color',cmap(1,:));
     x=-1:0.00001:1; y=(-0.0212442/0.00951011).*x; line(x,y,'Color',cmap(1,:)); 
     x=0.5*cued_success_Response.allsucc_sus1to5sec+0.5*cued_success_Response.cXsucc_sus1to5sec;
     y=0.5*cued_success_Response.allfail_sus1to5sec+0.5*cued_success_Response.cXfail_sus1to5sec;
     cued_success_Response.glm_boundary_2=nan(size(cued_success_Response.idx_from_glm));
-    cued_success_Response.glm_boundary_2(y>(0.0145055/0.0250066).*x & x>0 & x<0.00242583)=1; % cyan
-    cued_success_Response.glm_boundary_2(y>(-0.0212442/0.00951011).*x & x<0)=1; % cyan
+%     cued_success_Response.glm_boundary_2(y>(0.0145055/0.0250066).*x & x>0 & x<0.00242583)=1; % cyan
+    cued_success_Response.glm_boundary_2(y>(-0.0212442/0.00951011).*x & x<=0)=1; % cyan
     cued_success_Response.glm_boundary_2(y<=(0.0145055/0.0250066).*x & x>0.00242583 & x<0.03)=2; % purple
+%     cued_success_Response.glm_boundary_2(y<=(-0.0212442/0.00951011).*x & x<0 & x>-0.015 & y>(0.0145055/0.0250066).*x)=2; % purple
     cued_success_Response.glm_boundary_2(y<=(-0.0212442/0.00951011).*x & x<0 & x>-0.015)=2; % purple
     % 2 is A2a, 1 is D1; in figures, purple is A2a, cyan is D1
 
+%     cued_success_Response.consensus_idx=nan(size(cued_success_Response.idx));
+%     cued_success_Response.consensus_idx(cued_success_Response.combo_boundary==1 | (cued_success_Response.idx==1 & cued_success_Response.isHighWeight==1) & (cued_success_Response.combo_boundary~=2 & cued_success_Response.idx~=2))=1; 
+%     cued_success_Response.consensus_idx(cued_success_Response.combo_boundary==2 | (cued_success_Response.idx==2 & cued_success_Response.isHighWeight==1) & (cued_success_Response.combo_boundary~=1 & cued_success_Response.idx~=1))=2;
     cued_success_Response.consensus_idx=nan(size(cued_success_Response.idx));
-    cued_success_Response.consensus_idx(cued_success_Response.combo_boundary==1 | (cued_success_Response.idx==1 & cued_success_Response.isHighWeight==1) & (cued_success_Response.combo_boundary~=2 & cued_success_Response.idx~=2))=1; 
-    cued_success_Response.consensus_idx(cued_success_Response.combo_boundary==2 | (cued_success_Response.idx==2 & cued_success_Response.isHighWeight==1) & (cued_success_Response.combo_boundary~=1 & cued_success_Response.idx~=1))=2;
+    cued_success_Response.consensus_idx(cued_success_Response.combo_boundary==1 | cued_success_Response.glm_boundary_2==1 | (cued_success_Response.idx==1 & cued_success_Response.isHighWeight==1) & (cued_success_Response.combo_boundary~=2 & cued_success_Response.idx~=2 & cued_success_Response.glm_boundary_2~=2))=1; 
+    cued_success_Response.consensus_idx(cued_success_Response.combo_boundary==2 | cued_success_Response.glm_boundary_2==2 | (cued_success_Response.idx==2 & cued_success_Response.isHighWeight==1) & (cued_success_Response.combo_boundary~=1 & cued_success_Response.idx~=1 & cued_success_Response.glm_boundary_2~=1))=2;
 
     % Working on final boundary functions
 %     figure(); scatter(cued_success_Response.allsuccess_modulation_index(cued_success_Response.consensus_idx==1),cued_success_Response.allfailure_modulation_index(cued_success_Response.consensus_idx==1),[],'b');
@@ -1134,6 +1149,8 @@ else
     r{1}=cued_success_Response;
 %     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_failureNotDrop_Response.mat'); r{2}=cued_failureNotDrop_Response;
 %     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_failureNotDrop_Response.mat'); r{3}=uncued_failureNotDrop_Response;
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_drop_Response.mat'); r{2}=cued_drop_Response;
+%     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_drop_Response.mat'); r{3}=uncued_drop_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\cued_failure_Response.mat'); r{2}=cued_failure_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_failure_Response.mat'); r{3}=uncued_failure_Response;
     load('Z:\MICROSCOPE\Kim\Physiology Final Data Sets\GLM test set\excluded trials where opto during cue\uncued_success_Response.mat'); r{4}=uncued_success_Response;
@@ -1367,7 +1384,7 @@ plotTuningOutputScatter(tuningOutput,'grp1_fail','grp1_fail_uncue',2,[2 5]);
 
 % binsForTuning{1}=[-10 -0.0001 10]; binsForTuning{2}=[-10 -0.0001 10];
 % tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXfail_sus1to5sec-cued_success_Response.allfail_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning);
-binsForTuning{1}=[-10 0.5 10]; binsForTuning{2}=[-10 0.5 10];
+binsForTuning{1}=[-10 0 10]; binsForTuning{2}=[-10 0 10];
 tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cuecoef_over1sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning);
 [allgp1_cuedfailFR_cuedir2,allgp1_uncuedfailFR_cuedir2]=plotTuningOutputScatter(tuningOutput,'grp1_fail','grp1_fail_uncue',2,[2 5]);
 [allgp1_cuedfailFR_cuedir1,allgp1_uncuedfailFR_cuedir1]=plotTuningOutputScatter(tuningOutput,'grp1_fail','grp1_fail_uncue',1,[2 5]);
@@ -1444,7 +1461,7 @@ scatter(xaxis(cued_success_Response.consensus_idx==2),yaxis(cued_success_Respons
 %% decode trial type
 % axis x is activity of gp1 units (use window 2 to 5 sec)
 % axis y is activity of gp2 units (use window 2 to 5 sec)
-figure(); nBoot=100; nUnits=85;
+figure(); nBoot=100; nUnits=50;
 takeThese_gp1=nan(nBoot,nUnits); takeThese_gp2=nan(nBoot,nUnits);
 for i=1:nBoot
     takeThese_gp1(i,:)=randsample(length(allgp1_cuedsuccFR),nUnits); takeThese_gp2(i,:)=randsample(length(allgp2_cuedsuccFR),nUnits);
@@ -1661,7 +1678,7 @@ nbins=(5-2)/0.01;
 % they are the same 1063 units as cued_success_Response. Uncued_failure_Response indexes up to unit 1065, like
 % cued_failure_Response. Units 559 and 560 already missing from uncued_failure_Response, but need to reassign unitids, as I did for cued_failure_Response. 
 % plot results
-a=load('Z:\MICROSCOPE\Kim\Final Figs\Fig5\Main figure\attempt trial by trial classification\cuedsuccess_vs_cuedfailure.mat'); a.fortbytclass.unitfr_success=a.fortbytclass.unitfr_success./nbins; a.fortbytclass.unitfr_failure=a.fortbytclass.unitfr_failure./nbins;
+a=load('Z:\MICROSCOPE\Kim\Final Figs\Fig5\Main figure\attempt trial by trial classification\cuedsuccess_vs_cuedfailure_1to5sec.mat'); a.fortbytclass.unitfr_success=a.fortbytclass.unitfr_success./nbins; a.fortbytclass.unitfr_failure=a.fortbytclass.unitfr_failure./nbins;
 % a.fortbytclass.unitfr_success(a.fortbytclass.unitfr_success<0.01)=0; a.fortbytclass.unitfr_failure(a.fortbytclass.unitfr_failure<0.01)=0; 
 % a.fortbytclass.unitfr_success(a.fortbytclass.unitfr_success>0 & a.fortbytclass.unitfr_success<=1)=1; a.fortbytclass.unitfr_failure(a.fortbytclass.unitfr_failure>0 & a.fortbytclass.unitfr_failure<=1)=1;
 % a.fortbytclass.unitfr_success(a.fortbytclass.unitfr_success>1 & a.fortbytclass.unitfr_success<=2)=2; a.fortbytclass.unitfr_failure(a.fortbytclass.unitfr_failure>1 & a.fortbytclass.unitfr_failure<=2)=2;
@@ -1711,11 +1728,13 @@ load('Z:\MICROSCOPE\Kim\Final Figs\Fig5\Main figure\cued_success_Response_w_py_m
 
 nTrialsForBoot=10; 
 nUnitsForBoot=nTrialsForBoot;
-cidx=backup_consensus_idx; cidx(cued_success_Response.cuecoef_over1sec<=0.5 & backup_consensus_idx==1)=nan; % throw out bin1 for gp1
-cidx(cued_success_Response.cXsucc_sus1to5sec<=0 & backup_consensus_idx==2)=nan; % throw out bin1 for gp2
+cidx=backup_consensus_idx; %cidx(cued_success_Response.cuecoef_over1sec<=0.5 & backup_consensus_idx==1)=nan; % throw out bin1 for gp1
+cidx(cued_success_Response.cuecoef_over1sec<=0.43 & backup_consensus_idx==1)=nan; % throw out bin1 for gp1
+cidx(cued_success_Response.cXsucc_sus1to5sec<=0.0001 & backup_consensus_idx==2)=nan; % throw out bin1 for gp2
 out_cuedir2=decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cidx,100,nUnitsForBoot,nTrialsForBoot,false,false,false,true,false); close all;
-cidx=backup_consensus_idx; cidx(cued_success_Response.cuecoef_over1sec>0.5 & backup_consensus_idx==1)=nan; % throw out bin2 for gp1
-cidx(cued_success_Response.cXsucc_sus1to5sec>0 & backup_consensus_idx==2)=nan; % throw out bin2 for gp2
+cidx=backup_consensus_idx; %cidx(cued_success_Response.cuecoef_over1sec>0.5 & backup_consensus_idx==1)=nan; % throw out bin2 for gp1
+cidx(cued_success_Response.cuecoef_over1sec>0.43 & backup_consensus_idx==1)=nan; % throw out bin2 for gp1
+cidx(cued_success_Response.cXsucc_sus1to5sec>0.0001 & backup_consensus_idx==2)=nan; % throw out bin2 for gp2
 out_cuedir1=decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cidx,100,nUnitsForBoot,nTrialsForBoot,false,false,false,true,false); close all;
 figure(); 
 scatter(-out_cuedir2.cuedsucc_temp1+out_cuedir1.cuedsucc_temp1,out_cuedir2.cuedsucc_temp2-out_cuedir1.cuedsucc_temp2,[],'g'); hold on;
