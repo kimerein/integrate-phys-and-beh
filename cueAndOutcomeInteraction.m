@@ -4,10 +4,10 @@ function cueAndOutcomeInteraction(tensor,consensus_idx,ds,bins,consensus_currgro
 % ds is for 2D smoothing
 % bins=-5-0.05:0.1:5;
 
-cuedsuccess_minus_uncuedsuccess=medfilt1(tensor(:,:,1)-tensor(:,:,3),300,[],2);
+cuedsuccess_minus_uncuedsuccess=medfilt1(tensor(:,:,1)-tensor(:,:,3),100,[],2);
 successdiff=nanmean(cuedsuccess_minus_uncuedsuccess(:,300:700),2);
 
-cuedfailure_minus_uncuedfailure=medfilt1(tensor(:,:,2)-tensor(:,:,4),300,[],2);
+cuedfailure_minus_uncuedfailure=medfilt1(tensor(:,:,2)-tensor(:,:,4),100,[],2);
 failurediff=nanmean(cuedfailure_minus_uncuedfailure(:,300:700),2);
 
 cuedsuccess_minus_cuedfailure=medfilt1(tensor(:,:,1)-tensor(:,:,2),100,[],2);
@@ -22,10 +22,14 @@ uncueddiff=nanmean(uncuedsuccess_minus_uncuedfailure(:,300:700),2);
 [n,x]=histcounts(successdiff(consensus_idx==consensus_currgroup),-5-0.05:0.1:5);
 [n_yaxis,x_yaxis]=cityscape_hist(n,x);
 % real joint distribution
+temp1=cueddiff(consensus_idx==consensus_currgroup); temp2=successdiff(consensus_idx==consensus_currgroup); eithernan=isnan(temp1) | isnan(temp2);
+[R,p]=corrcoef(temp1(~eithernan),temp2(~eithernan));
 [joint,zeroat]=jointDistribution(cueddiff(consensus_idx==consensus_currgroup),successdiff(consensus_idx==consensus_currgroup),bins,bins);
 temp=successdiff(consensus_idx==consensus_currgroup);
 [fakejoint,fakezeroat]=jointDistribution(repmat(cueddiff(consensus_idx==consensus_currgroup),5,1),[temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)))],bins,bins);
-figure();
+temp1=repmat(cueddiff(consensus_idx==consensus_currgroup),5,1); temp2=[temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)))]; eithernan=isnan(temp1) | isnan(temp2);
+[Rfake,pfake]=corrcoef(temp1(~eithernan),temp2(~eithernan));
+figure(); 
 subplot(4,1,1); plot(x_xaxis,n_xaxis); xlabel('cued succ vs fail');
 subplot(4,1,2); plot(x_yaxis,n_yaxis); xlabel('succ cued vs uncued');
 % subplot(4,1,3); imagesc(conv2(joint,ones(ds,ds),'same')); xlabel('true joint');
@@ -33,11 +37,11 @@ subplot(4,1,2); plot(x_yaxis,n_yaxis); xlabel('succ cued vs uncued');
 temp=medfilt2(joint,[ds ds]); 
 % temp=conv2(temp,ones(ds,ds),'same'); 
 temp(zeroat(1),zeroat(2))=nan;
-subplot(4,1,3); imagesc(temp); xlabel('true joint');
+subplot(4,1,3); imagesc(temp); xlabel('true joint'); ylabel(['R ' num2str(R(1,2)) ' p ' num2str(p(1,2))]);
 temp=medfilt2(fakejoint,[ds ds]); 
 % temp=conv2(temp,ones(ds,ds),'same'); 
 temp(fakezeroat(1),fakezeroat(2))=nan;
-subplot(4,1,4); imagesc(temp); xlabel('fake joint');
+subplot(4,1,4); imagesc(temp); xlabel('fake joint'); ylabel(['Rfake ' num2str(Rfake(1,2)) ' pfake ' num2str(pfake(1,2))]);
 
 % cued and fail
 [n,x]=histcounts(cueddiff(consensus_idx==consensus_currgroup),-5-0.05:0.1:5);
@@ -45,10 +49,14 @@ subplot(4,1,4); imagesc(temp); xlabel('fake joint');
 [n,x]=histcounts(failurediff(consensus_idx==consensus_currgroup),-5-0.05:0.1:5);
 [n_yaxis,x_yaxis]=cityscape_hist(n,x);
 % real joint distribution
+temp1=cueddiff(consensus_idx==consensus_currgroup); temp2=failurediff(consensus_idx==consensus_currgroup); eithernan=isnan(temp1) | isnan(temp2);
+[R,p]=corrcoef(temp1(~eithernan),temp2(~eithernan));
 [joint,zeroat]=jointDistribution(cueddiff(consensus_idx==consensus_currgroup),failurediff(consensus_idx==consensus_currgroup),bins,bins);
 temp=failurediff(consensus_idx==consensus_currgroup);
 [fakejoint,fakezeroat]=jointDistribution(repmat(cueddiff(consensus_idx==consensus_currgroup),5,1),[temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)))],bins,bins);
-figure();
+temp1=repmat(cueddiff(consensus_idx==consensus_currgroup),5,1); temp2=[temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)))]; eithernan=isnan(temp1) | isnan(temp2);
+[Rfake,pfake]=corrcoef(temp1(~eithernan),temp2(~eithernan));
+figure(); 
 subplot(4,1,1); plot(x_xaxis,n_xaxis); xlabel('cued succ vs fail');
 subplot(4,1,2); plot(x_yaxis,n_yaxis); xlabel('fail cued vs uncued');
 % subplot(4,1,3); imagesc(conv2(joint,ones(ds,ds),'same')); xlabel('true joint');
@@ -56,11 +64,11 @@ subplot(4,1,2); plot(x_yaxis,n_yaxis); xlabel('fail cued vs uncued');
 temp=medfilt2(joint,[ds ds]); 
 % temp=conv2(temp,ones(ds,ds),'same'); 
 temp(zeroat(1),zeroat(2))=nan;
-subplot(4,1,3); imagesc(temp); xlabel('true joint');
+subplot(4,1,3); imagesc(temp); xlabel('true joint'); ylabel(['R ' num2str(R(1,2)) ' p ' num2str(p(1,2))]);
 temp=medfilt2(fakejoint,[ds ds]); 
 % temp=conv2(temp,ones(ds,ds),'same'); 
 temp(fakezeroat(1),fakezeroat(2))=nan;
-subplot(4,1,4); imagesc(temp); xlabel('fake joint');
+subplot(4,1,4); imagesc(temp); xlabel('fake joint'); ylabel(['Rfake ' num2str(Rfake(1,2)) ' pfake ' num2str(pfake(1,2))]);
 
 % uncued and fail
 [n,x]=histcounts(uncueddiff(consensus_idx==consensus_currgroup),-5-0.05:0.1:5);
@@ -68,9 +76,13 @@ subplot(4,1,4); imagesc(temp); xlabel('fake joint');
 [n,x]=histcounts(failurediff(consensus_idx==consensus_currgroup),-5-0.05:0.1:5);
 [n_yaxis,x_yaxis]=cityscape_hist(n,x);
 % real joint distribution
+temp1=uncueddiff(consensus_idx==consensus_currgroup); temp2=failurediff(consensus_idx==consensus_currgroup); eithernan=isnan(temp1) | isnan(temp2);
+[R,p]=corrcoef(temp1(~eithernan),temp2(~eithernan));
 [joint,zeroat]=jointDistribution(uncueddiff(consensus_idx==consensus_currgroup),failurediff(consensus_idx==consensus_currgroup),bins,bins);
 temp=failurediff(consensus_idx==consensus_currgroup);
 [fakejoint,fakezeroat]=jointDistribution(repmat(uncueddiff(consensus_idx==consensus_currgroup),5,1),[temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)))],bins,bins);
+temp1=repmat(uncueddiff(consensus_idx==consensus_currgroup),5,1); temp2=[temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)))]; eithernan=isnan(temp1) | isnan(temp2);
+[Rfake,pfake]=corrcoef(temp1(~eithernan),temp2(~eithernan));
 figure();
 subplot(4,1,1); plot(x_xaxis,n_xaxis); xlabel('uncued succ vs fail');
 subplot(4,1,2); plot(x_yaxis,n_yaxis); xlabel('fail cued vs uncued');
@@ -79,11 +91,11 @@ subplot(4,1,2); plot(x_yaxis,n_yaxis); xlabel('fail cued vs uncued');
 temp=medfilt2(joint,[ds ds]); 
 % temp=conv2(temp,ones(ds,ds),'same'); 
 temp(zeroat(1),zeroat(2))=nan;
-subplot(4,1,3); imagesc(temp); xlabel('true joint');
+subplot(4,1,3); imagesc(temp); xlabel('true joint'); ylabel(['R ' num2str(R(1,2)) ' p ' num2str(p(1,2))]);
 temp=medfilt2(fakejoint,[ds ds]); 
 % temp=conv2(temp,ones(ds,ds),'same'); 
 temp(fakezeroat(1),fakezeroat(2))=nan;
-subplot(4,1,4); imagesc(temp); xlabel('fake joint');
+subplot(4,1,4); imagesc(temp); xlabel('fake joint'); ylabel(['Rfake ' num2str(Rfake(1,2)) ' pfake ' num2str(pfake(1,2))]);
 
 % uncued and succ
 [n,x]=histcounts(uncueddiff(consensus_idx==consensus_currgroup),-5-0.05:0.1:5);
@@ -91,10 +103,14 @@ subplot(4,1,4); imagesc(temp); xlabel('fake joint');
 [n,x]=histcounts(successdiff(consensus_idx==consensus_currgroup),-5-0.05:0.1:5);
 [n_yaxis,x_yaxis]=cityscape_hist(n,x);
 % real joint distribution
+temp1=uncueddiff(consensus_idx==consensus_currgroup); temp2=successdiff(consensus_idx==consensus_currgroup); eithernan=isnan(temp1) | isnan(temp2);
+[R,p]=corrcoef(temp1(~eithernan),temp2(~eithernan));
 [joint,zeroat]=jointDistribution(uncueddiff(consensus_idx==consensus_currgroup),successdiff(consensus_idx==consensus_currgroup),bins,bins);
 temp=successdiff(consensus_idx==consensus_currgroup);
 [fakejoint,fakezeroat]=jointDistribution(repmat(uncueddiff(consensus_idx==consensus_currgroup),5,1),[temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)))],bins,bins);
-figure();
+temp1=repmat(uncueddiff(consensus_idx==consensus_currgroup),5,1); temp2=[temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)))]; eithernan=isnan(temp1) | isnan(temp2);
+[Rfake,pfake]=corrcoef(temp1(~eithernan),temp2(~eithernan));
+figure(); 
 subplot(4,1,1); plot(x_xaxis,n_xaxis); xlabel('uncued succ vs fail');
 subplot(4,1,2); plot(x_yaxis,n_yaxis); xlabel('succ cued vs uncued');
 % subplot(4,1,3); imagesc(conv2(joint,ones(ds,ds),'same')); xlabel('true joint');
@@ -102,11 +118,11 @@ subplot(4,1,2); plot(x_yaxis,n_yaxis); xlabel('succ cued vs uncued');
 temp=medfilt2(joint,[ds ds]); 
 % temp=conv2(temp,ones(ds,ds),'same'); 
 temp(zeroat(1),zeroat(2))=nan;
-subplot(4,1,3); imagesc(temp); xlabel('true joint');
+subplot(4,1,3); imagesc(temp); xlabel('true joint'); ylabel(['R ' num2str(R(1,2)) ' p ' num2str(p(1,2))]);
 temp=medfilt2(fakejoint,[ds ds]); 
 % temp=conv2(temp,ones(ds,ds),'same'); 
 temp(fakezeroat(1),fakezeroat(2))=nan;
-subplot(4,1,4); imagesc(temp); xlabel('fake joint');
+subplot(4,1,4); imagesc(temp); xlabel('fake joint'); ylabel(['Rfake ' num2str(Rfake(1,2)) ' pfake ' num2str(pfake(1,2))]);
 
 end
 
