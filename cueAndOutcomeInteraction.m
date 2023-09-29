@@ -37,11 +37,11 @@ subplot(4,1,2); plot(x_yaxis,n_yaxis); xlabel('succ cued vs uncued');
 temp=medfilt2(joint,[ds ds]); 
 % temp=conv2(temp,ones(ds,ds),'same'); 
 temp(zeroat(1),zeroat(2))=nan;
-subplot(4,1,3); imagesc(temp); xlabel('true joint'); ylabel(['R ' num2str(R(1,2)) ' p ' num2str(p(1,2))]);
+subplot(4,1,3); imagesc(temp); xlabel('true joint'); ylabel(['R ' num2str(R(1,2)) ' p ' num2str(p(1,2))]); colormap(flipud(colormap('gray')));
 temp=medfilt2(fakejoint,[ds ds]); 
 % temp=conv2(temp,ones(ds,ds),'same'); 
 temp(fakezeroat(1),fakezeroat(2))=nan;
-subplot(4,1,4); imagesc(temp); xlabel('fake joint'); ylabel(['Rfake ' num2str(Rfake(1,2)) ' pfake ' num2str(pfake(1,2))]);
+subplot(4,1,4); imagesc(temp); xlabel('fake joint'); ylabel(['Rfake ' num2str(Rfake(1,2)) ' pfake ' num2str(pfake(1,2))]); colormap(flipud(colormap('gray')));
 
 % cued and fail
 [n,x]=histcounts(cueddiff(consensus_idx==consensus_currgroup),-5-0.05:0.1:5);
@@ -64,11 +64,11 @@ subplot(4,1,2); plot(x_yaxis,n_yaxis); xlabel('fail cued vs uncued');
 temp=medfilt2(joint,[ds ds]); 
 % temp=conv2(temp,ones(ds,ds),'same'); 
 temp(zeroat(1),zeroat(2))=nan;
-subplot(4,1,3); imagesc(temp); xlabel('true joint'); ylabel(['R ' num2str(R(1,2)) ' p ' num2str(p(1,2))]);
+subplot(4,1,3); imagesc(temp); xlabel('true joint'); ylabel(['R ' num2str(R(1,2)) ' p ' num2str(p(1,2))]); colormap(flipud(colormap('gray')));
 temp=medfilt2(fakejoint,[ds ds]); 
 % temp=conv2(temp,ones(ds,ds),'same'); 
 temp(fakezeroat(1),fakezeroat(2))=nan;
-subplot(4,1,4); imagesc(temp); xlabel('fake joint'); ylabel(['Rfake ' num2str(Rfake(1,2)) ' pfake ' num2str(pfake(1,2))]);
+subplot(4,1,4); imagesc(temp); xlabel('fake joint'); ylabel(['Rfake ' num2str(Rfake(1,2)) ' pfake ' num2str(pfake(1,2))]); colormap(flipud(colormap('gray')));
 
 % uncued and fail
 [n,x]=histcounts(uncueddiff(consensus_idx==consensus_currgroup),-5-0.05:0.1:5);
@@ -91,11 +91,11 @@ subplot(4,1,2); plot(x_yaxis,n_yaxis); xlabel('fail cued vs uncued');
 temp=medfilt2(joint,[ds ds]); 
 % temp=conv2(temp,ones(ds,ds),'same'); 
 temp(zeroat(1),zeroat(2))=nan;
-subplot(4,1,3); imagesc(temp); xlabel('true joint'); ylabel(['R ' num2str(R(1,2)) ' p ' num2str(p(1,2))]);
+subplot(4,1,3); imagesc(temp); xlabel('true joint'); ylabel(['R ' num2str(R(1,2)) ' p ' num2str(p(1,2))]); colormap(flipud(colormap('gray')));
 temp=medfilt2(fakejoint,[ds ds]); 
 % temp=conv2(temp,ones(ds,ds),'same'); 
 temp(fakezeroat(1),fakezeroat(2))=nan;
-subplot(4,1,4); imagesc(temp); xlabel('fake joint'); ylabel(['Rfake ' num2str(Rfake(1,2)) ' pfake ' num2str(pfake(1,2))]);
+subplot(4,1,4); imagesc(temp); xlabel('fake joint'); ylabel(['Rfake ' num2str(Rfake(1,2)) ' pfake ' num2str(pfake(1,2))]); colormap(flipud(colormap('gray')));
 
 % uncued and succ
 [n,x]=histcounts(uncueddiff(consensus_idx==consensus_currgroup),-5-0.05:0.1:5);
@@ -118,11 +118,11 @@ subplot(4,1,2); plot(x_yaxis,n_yaxis); xlabel('succ cued vs uncued');
 temp=medfilt2(joint,[ds ds]); 
 % temp=conv2(temp,ones(ds,ds),'same'); 
 temp(zeroat(1),zeroat(2))=nan;
-subplot(4,1,3); imagesc(temp); xlabel('true joint'); ylabel(['R ' num2str(R(1,2)) ' p ' num2str(p(1,2))]);
+subplot(4,1,3); imagesc(temp); xlabel('true joint'); ylabel(['R ' num2str(R(1,2)) ' p ' num2str(p(1,2))]); colormap(flipud(colormap('gray')));
 temp=medfilt2(fakejoint,[ds ds]); 
 % temp=conv2(temp,ones(ds,ds),'same'); 
 temp(fakezeroat(1),fakezeroat(2))=nan;
-subplot(4,1,4); imagesc(temp); xlabel('fake joint'); ylabel(['Rfake ' num2str(Rfake(1,2)) ' pfake ' num2str(pfake(1,2))]);
+subplot(4,1,4); imagesc(temp); xlabel('fake joint'); ylabel(['Rfake ' num2str(Rfake(1,2)) ' pfake ' num2str(pfake(1,2))]); colormap(flipud(colormap('gray')));
 
 end
 
