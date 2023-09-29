@@ -1,5 +1,6 @@
-function cueAndOutcomeInteraction(tensor,consensus_idx,ds,bins)
+function cueAndOutcomeInteraction(tensor,consensus_idx,ds,bins,consensus_currgroup)
 
+% cueAndOutcomeInteraction(tensor_tomatchcuedsuccess,cued_success_Response.consensus_idx,2,-5-(0.15/2):0.15:5,2);
 % ds is for 2D smoothing
 % bins=-5-0.05:0.1:5;
 
@@ -15,17 +16,86 @@ cueddiff=nanmean(cuedsuccess_minus_cuedfailure(:,300:700),2);
 uncuedsuccess_minus_uncuedfailure=medfilt1(tensor(:,:,3)-tensor(:,:,4),100,[],2);
 uncueddiff=nanmean(uncuedsuccess_minus_uncuedfailure(:,300:700),2);
 
-% gp 2
-[n,x]=histcounts(cueddiff(consensus_idx==2),-5-0.05:0.1:5);
+% cued and succ
+[n,x]=histcounts(cueddiff(consensus_idx==consensus_currgroup),-5-0.05:0.1:5);
 [n_xaxis,x_xaxis]=cityscape_hist(n,x);
-[n,x]=histcounts(successdiff(consensus_idx==2),-5-0.05:0.1:5);
+[n,x]=histcounts(successdiff(consensus_idx==consensus_currgroup),-5-0.05:0.1:5);
 [n_yaxis,x_yaxis]=cityscape_hist(n,x);
 % real joint distribution
-[joint,zeroat]=jointDistribution(cueddiff(consensus_idx==2),successdiff(consensus_idx==2),bins,bins);
-temp=successdiff(consensus_idx==2);
-[fakejoint,fakezeroat]=jointDistribution(repmat(cueddiff(consensus_idx==2),5,1),[temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)))],bins,bins);
+[joint,zeroat]=jointDistribution(cueddiff(consensus_idx==consensus_currgroup),successdiff(consensus_idx==consensus_currgroup),bins,bins);
+temp=successdiff(consensus_idx==consensus_currgroup);
+[fakejoint,fakezeroat]=jointDistribution(repmat(cueddiff(consensus_idx==consensus_currgroup),5,1),[temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)))],bins,bins);
 figure();
 subplot(4,1,1); plot(x_xaxis,n_xaxis); xlabel('cued succ vs fail');
+subplot(4,1,2); plot(x_yaxis,n_yaxis); xlabel('succ cued vs uncued');
+% subplot(4,1,3); imagesc(conv2(joint,ones(ds,ds),'same')); xlabel('true joint');
+% subplot(4,1,4); imagesc(conv2(fakejoint,ones(ds,ds),'same')); xlabel('fake joint');
+temp=medfilt2(joint,[ds ds]); 
+% temp=conv2(temp,ones(ds,ds),'same'); 
+temp(zeroat(1),zeroat(2))=nan;
+subplot(4,1,3); imagesc(temp); xlabel('true joint');
+temp=medfilt2(fakejoint,[ds ds]); 
+% temp=conv2(temp,ones(ds,ds),'same'); 
+temp(fakezeroat(1),fakezeroat(2))=nan;
+subplot(4,1,4); imagesc(temp); xlabel('fake joint');
+
+% cued and fail
+[n,x]=histcounts(cueddiff(consensus_idx==consensus_currgroup),-5-0.05:0.1:5);
+[n_xaxis,x_xaxis]=cityscape_hist(n,x);
+[n,x]=histcounts(failurediff(consensus_idx==consensus_currgroup),-5-0.05:0.1:5);
+[n_yaxis,x_yaxis]=cityscape_hist(n,x);
+% real joint distribution
+[joint,zeroat]=jointDistribution(cueddiff(consensus_idx==consensus_currgroup),failurediff(consensus_idx==consensus_currgroup),bins,bins);
+temp=failurediff(consensus_idx==consensus_currgroup);
+[fakejoint,fakezeroat]=jointDistribution(repmat(cueddiff(consensus_idx==consensus_currgroup),5,1),[temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)))],bins,bins);
+figure();
+subplot(4,1,1); plot(x_xaxis,n_xaxis); xlabel('cued succ vs fail');
+subplot(4,1,2); plot(x_yaxis,n_yaxis); xlabel('fail cued vs uncued');
+% subplot(4,1,3); imagesc(conv2(joint,ones(ds,ds),'same')); xlabel('true joint');
+% subplot(4,1,4); imagesc(conv2(fakejoint,ones(ds,ds),'same')); xlabel('fake joint');
+temp=medfilt2(joint,[ds ds]); 
+% temp=conv2(temp,ones(ds,ds),'same'); 
+temp(zeroat(1),zeroat(2))=nan;
+subplot(4,1,3); imagesc(temp); xlabel('true joint');
+temp=medfilt2(fakejoint,[ds ds]); 
+% temp=conv2(temp,ones(ds,ds),'same'); 
+temp(fakezeroat(1),fakezeroat(2))=nan;
+subplot(4,1,4); imagesc(temp); xlabel('fake joint');
+
+% uncued and fail
+[n,x]=histcounts(uncueddiff(consensus_idx==consensus_currgroup),-5-0.05:0.1:5);
+[n_xaxis,x_xaxis]=cityscape_hist(n,x);
+[n,x]=histcounts(failurediff(consensus_idx==consensus_currgroup),-5-0.05:0.1:5);
+[n_yaxis,x_yaxis]=cityscape_hist(n,x);
+% real joint distribution
+[joint,zeroat]=jointDistribution(uncueddiff(consensus_idx==consensus_currgroup),failurediff(consensus_idx==consensus_currgroup),bins,bins);
+temp=failurediff(consensus_idx==consensus_currgroup);
+[fakejoint,fakezeroat]=jointDistribution(repmat(uncueddiff(consensus_idx==consensus_currgroup),5,1),[temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)))],bins,bins);
+figure();
+subplot(4,1,1); plot(x_xaxis,n_xaxis); xlabel('uncued succ vs fail');
+subplot(4,1,2); plot(x_yaxis,n_yaxis); xlabel('fail cued vs uncued');
+% subplot(4,1,3); imagesc(conv2(joint,ones(ds,ds),'same')); xlabel('true joint');
+% subplot(4,1,4); imagesc(conv2(fakejoint,ones(ds,ds),'same')); xlabel('fake joint');
+temp=medfilt2(joint,[ds ds]); 
+% temp=conv2(temp,ones(ds,ds),'same'); 
+temp(zeroat(1),zeroat(2))=nan;
+subplot(4,1,3); imagesc(temp); xlabel('true joint');
+temp=medfilt2(fakejoint,[ds ds]); 
+% temp=conv2(temp,ones(ds,ds),'same'); 
+temp(fakezeroat(1),fakezeroat(2))=nan;
+subplot(4,1,4); imagesc(temp); xlabel('fake joint');
+
+% uncued and succ
+[n,x]=histcounts(uncueddiff(consensus_idx==consensus_currgroup),-5-0.05:0.1:5);
+[n_xaxis,x_xaxis]=cityscape_hist(n,x);
+[n,x]=histcounts(successdiff(consensus_idx==consensus_currgroup),-5-0.05:0.1:5);
+[n_yaxis,x_yaxis]=cityscape_hist(n,x);
+% real joint distribution
+[joint,zeroat]=jointDistribution(uncueddiff(consensus_idx==consensus_currgroup),successdiff(consensus_idx==consensus_currgroup),bins,bins);
+temp=successdiff(consensus_idx==consensus_currgroup);
+[fakejoint,fakezeroat]=jointDistribution(repmat(uncueddiff(consensus_idx==consensus_currgroup),5,1),[temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)));temp(randperm(length(temp)))],bins,bins);
+figure();
+subplot(4,1,1); plot(x_xaxis,n_xaxis); xlabel('uncued succ vs fail');
 subplot(4,1,2); plot(x_yaxis,n_yaxis); xlabel('succ cued vs uncued');
 % subplot(4,1,3); imagesc(conv2(joint,ones(ds,ds),'same')); xlabel('true joint');
 % subplot(4,1,4); imagesc(conv2(fakejoint,ones(ds,ds),'same')); xlabel('fake joint');
