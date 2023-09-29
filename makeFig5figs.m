@@ -1,20 +1,23 @@
 function makeFig5figs(tensor_tomatchcuedsuccess,cued_success_Response)
 
+excludeneuronsforallplot=921:983; % alignment weird for cued
+includeneurons=~ismember(1:size(tensor_tomatchcuedsuccess,1),excludeneuronsforallplot);
+
 % all neurons, unsorted
 figure();
-imagesc(tensor_tomatchcuedsuccess(:,:,1));
+imagesc(tensor_tomatchcuedsuccess(includeneurons,:,1));
 colormap(flipud(colormap('gray')));
 title('cued success all neurons unsorted');
 figure();
-imagesc(tensor_tomatchcuedsuccess(:,:,2));
+imagesc(tensor_tomatchcuedsuccess(includeneurons,:,2));
 colormap(flipud(colormap('gray')));
 title('cued failure all neurons unsorted');
 figure();
-imagesc(tensor_tomatchcuedsuccess(:,:,3));
+imagesc(tensor_tomatchcuedsuccess(includeneurons,:,3));
 colormap(flipud(colormap('gray')));
 title('uncued success all neurons unsorted');
 figure();
-imagesc(tensor_tomatchcuedsuccess(:,:,4));
+imagesc(tensor_tomatchcuedsuccess(includeneurons,:,4));
 colormap(flipud(colormap('gray')));
 title('uncued failure all neurons unsorted');
 
@@ -136,5 +139,9 @@ temp=cuedfailure_minus_uncuedfailure(f(si),:);
 figure(); imagesc(temp); colormap('spring');
 title('gp1 failure cued minus uncued');
 
+% cue and outcome interaction
+% cueAndOutcomeInteraction(tensor_tomatchcuedsuccess,cued_success_Response.consensus_idx,2,-5-(0.15/2):0.15:5,2);
+cueAndOutcomeInteraction(tensor_tomatchcuedsuccess,cued_success_Response.consensus_idx,3,-5-0.025:0.05:5,2);
+cueAndOutcomeInteraction(tensor_tomatchcuedsuccess,cued_success_Response.consensus_idx,2,-5-0.15:0.3:5,2);
 
 end
