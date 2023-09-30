@@ -143,5 +143,6 @@ title('gp1 failure cued minus uncued');
 % cueAndOutcomeInteraction(tensor_tomatchcuedsuccess,cued_success_Response.consensus_idx,2,-5-(0.15/2):0.15:5,2);
 cueAndOutcomeInteraction(tensor_tomatchcuedsuccess,cued_success_Response.consensus_idx,3,-5-0.025:0.05:5,2);
 cueAndOutcomeInteraction(tensor_tomatchcuedsuccess,cued_success_Response.consensus_idx,2,-5-0.15:0.3:5,2);
+cueAndOutcomeInteraction(tensor_tomatchcuedsuccess,ones(size(cued_success_Response.consensus_idx)),2,-5-0.05:0.1:5,1);
 
 end
