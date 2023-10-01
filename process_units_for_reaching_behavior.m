@@ -1723,7 +1723,19 @@ for i=1:length(currunitids)
     b.fortbytclass.fromWhichUnit_failure(ismember(b.fortbytclass.fromWhichUnit_failure,currunitids(i)))=newunitids(i);
 end
 disp('max of uncuedfailureunits'); disp(nanmax(b.fortbytclass.fromWhichUnit_failure));
-decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cued_success_Response.consensus_idx,100,100,80,false,false,false,false,false); % nBoots,nUnits,nTrials,withReplacement,addThirdAxis,nanAllZeros,justBoostrapTrials,collapseWithinUnit
+out_decode=decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cued_success_Response.consensus_idx,100,100,80,false,false,false,false,false); % nBoots,nUnits,nTrials,withReplacement,addThirdAxis,nanAllZeros,justBoostrapTrials,collapseWithinUnit
+
+% one mapping
+figure(); 
+scatter(out_decode.cuedsucc_temp2-out_decode.cuedsucc_temp1,out_decode.cuedsucc_temp2+out_decode.cuedsucc_temp1,[],'g'); hold on;
+Xmatrix=[out_decode.cuedsucc_temp2-out_decode.cuedsucc_temp1 out_decode.cuedsucc_temp2+out_decode.cuedsucc_temp1]; ylabels=[ones(size(out_cuedir2.cuedsucc_temp1,1),1)];
+scatter(out_decode.cuedfail_temp2-out_decode.cuedfail_temp1,out_decode.cuedfail_temp2+out_decode.cuedfail_temp1,[],'r');
+Xmatrix=[Xmatrix; [out_decode.cuedfail_temp2-out_decode.cuedfail_temp1 out_decode.cuedfail_temp2+out_decode.cuedfail_temp1]]; ylabels=[ylabels; 2*ones(size(out_cuedir2.cuedsucc_temp1,1),1)];
+scatter(out_decode.uncuedsucc_temp2-out_decode.uncuedsucc_temp1,out_decode.uncuedsucc_temp2+out_decode.uncuedsucc_temp1,[],'b');
+Xmatrix=[Xmatrix; [out_decode.uncuedsucc_temp2-out_decode.uncuedsucc_temp1 out_decode.uncuedsucc_temp2+out_decode.uncuedsucc_temp1]]; ylabels=[ylabels; 3*ones(size(out_cuedir2.cuedsucc_temp1,1),1)];
+scatter(out_decode.uncuedfail_temp2-out_decode.uncuedfail_temp1,out_decode.uncuedfail_temp2+out_decode.uncuedfail_temp1,[],'y');
+Xmatrix=[Xmatrix; [out_decode.uncuedfail_temp2-out_decode.uncuedfail_temp1 out_decode.uncuedfail_temp2+out_decode.uncuedfail_temp1]]; ylabels=[ylabels; 4*ones(size(out_cuedir2.cuedsucc_temp1,1),1)];
+xlabel('gp2 minus gp2'); ylabel('gp2 plus gp1');
 
 load('Z:\MICROSCOPE\Kim\Final Figs\Fig5\Main figure\cued_success_Response_w_py_metrics.mat'); backup_consensus_idx=cued_success_Response.consensus_idx;
 
@@ -1737,6 +1749,7 @@ cidx=backup_consensus_idx; %cidx(cued_success_Response.cuecoef_over1sec>0.5 & ba
 cidx(cued_success_Response.cuecoef_over1sec>0.43 & backup_consensus_idx==1)=nan; % throw out bin2 for gp1
 cidx(cued_success_Response.cXsucc_sus1to5sec>0.0001 & backup_consensus_idx==2)=nan; % throw out bin2 for gp2
 out_cuedir1=decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cidx,100,nUnitsForBoot,nTrialsForBoot,false,false,false,true,false); close all;
+% a mapping
 figure(); 
 scatter(-out_cuedir2.cuedsucc_temp1+out_cuedir1.cuedsucc_temp1,out_cuedir2.cuedsucc_temp2-out_cuedir1.cuedsucc_temp2,[],'g'); hold on;
 Xmatrix=[-out_cuedir2.cuedsucc_temp1+out_cuedir1.cuedsucc_temp1 out_cuedir2.cuedsucc_temp2-out_cuedir1.cuedsucc_temp2]; ylabels=[ones(size(out_cuedir2.cuedsucc_temp1,1),1)];

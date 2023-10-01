@@ -25,26 +25,26 @@ title('uncued failure all neurons unsorted');
 cuedsuccess_minus_uncuedsuccess=medfilt1(tensor_tomatchcuedsuccess(:,:,1)-tensor_tomatchcuedsuccess(:,:,3),100,[],2);
 successdiff=nanmean(cuedsuccess_minus_uncuedsuccess(:,300:700),2);
 cuedsuccess_minus_uncuedsuccess(isnan(cuedsuccess_minus_uncuedsuccess))=0; % for plotting
-cuedsuccess_minus_uncuedsuccess(cuedsuccess_minus_uncuedsuccess>3)=3; 
-cuedsuccess_minus_uncuedsuccess(cuedsuccess_minus_uncuedsuccess<-3)=-3;
+cuedsuccess_minus_uncuedsuccess(cuedsuccess_minus_uncuedsuccess>2)=2; 
+cuedsuccess_minus_uncuedsuccess(cuedsuccess_minus_uncuedsuccess<-2)=-2;
 successdiff_forplot=nanmean(cuedsuccess_minus_uncuedsuccess(:,300:700),2);
 cuedfailure_minus_uncuedfailure=medfilt1(tensor_tomatchcuedsuccess(:,:,2)-tensor_tomatchcuedsuccess(:,:,4),100,[],2);
 failurediff=nanmean(cuedfailure_minus_uncuedfailure(:,300:700),2);
 cuedfailure_minus_uncuedfailure(isnan(cuedfailure_minus_uncuedfailure))=0; % for plotting
-cuedfailure_minus_uncuedfailure(cuedfailure_minus_uncuedfailure>3)=3; 
-cuedfailure_minus_uncuedfailure(cuedfailure_minus_uncuedfailure<-3)=-3;
+cuedfailure_minus_uncuedfailure(cuedfailure_minus_uncuedfailure>2)=2; 
+cuedfailure_minus_uncuedfailure(cuedfailure_minus_uncuedfailure<-2)=-2;
 failurediff_forplot=nanmean(cuedfailure_minus_uncuedfailure(:,300:700),2);
 cuedsuccess_minus_cuedfailure=medfilt1(tensor_tomatchcuedsuccess(:,:,1)-tensor_tomatchcuedsuccess(:,:,2),100,[],2);
 cueddiff=nanmean(cuedsuccess_minus_cuedfailure(:,300:700),2);
 cuedsuccess_minus_cuedfailure(isnan(cuedsuccess_minus_cuedfailure))=0; % for plotting
-cuedsuccess_minus_cuedfailure(cuedsuccess_minus_cuedfailure>3)=3; 
-cuedsuccess_minus_cuedfailure(cuedsuccess_minus_cuedfailure<-3)=-3;
+cuedsuccess_minus_cuedfailure(cuedsuccess_minus_cuedfailure>2)=2; 
+cuedsuccess_minus_cuedfailure(cuedsuccess_minus_cuedfailure<-2)=-2;
 cueddiff_forplot=nanmean(cuedsuccess_minus_cuedfailure(:,300:700),2);
 uncuedsuccess_minus_uncuedfailure=medfilt1(tensor_tomatchcuedsuccess(:,:,3)-tensor_tomatchcuedsuccess(:,:,4),100,[],2);
 uncueddiff=nanmean(uncuedsuccess_minus_uncuedfailure(:,300:700),2);
 uncuedsuccess_minus_uncuedfailure(isnan(uncuedsuccess_minus_uncuedfailure))=0; % for plotting
-uncuedsuccess_minus_uncuedfailure(uncuedsuccess_minus_uncuedfailure>3)=3; 
-uncuedsuccess_minus_uncuedfailure(uncuedsuccess_minus_uncuedfailure<-3)=-3;
+uncuedsuccess_minus_uncuedfailure(uncuedsuccess_minus_uncuedfailure>2)=2; 
+uncuedsuccess_minus_uncuedfailure(uncuedsuccess_minus_uncuedfailure<-2)=-2;
 uncueddiff_forplot=nanmean(uncuedsuccess_minus_uncuedfailure(:,300:700),2);
 
 % sorted by cued succ minus cued fail
@@ -93,26 +93,26 @@ currentcombo=cueddiff_forplot(cued_success_Response.consensus_idx==2);
 f=find(cued_success_Response.consensus_idx==2);
 [~,si]=sort(currentcombo,'descend');
 temp=cuedsuccess_minus_cuedfailure(f(si),:);
-figure(); imagesc(temp); colormap('winter');
+figure(); imagesc(temp); colormap('jet'); %colormap('winter');
 title('gp2 cued success minus failure');
 currentcombo=cueddiff_forplot(cued_success_Response.consensus_idx==1);
 f=find(cued_success_Response.consensus_idx==1);
 [~,si]=sort(currentcombo,'descend');
 temp=cuedsuccess_minus_cuedfailure(f(si),:);
-figure(); imagesc(temp); colormap('winter');
+figure(); imagesc(temp); colormap('jet'); %colormap('winter');
 title('gp1 cued success minus failure');
 % uncued
 currentcombo=uncueddiff_forplot(cued_success_Response.consensus_idx==2);
 f=find(cued_success_Response.consensus_idx==2);
 [~,si]=sort(currentcombo,'descend');
 temp=uncuedsuccess_minus_uncuedfailure(f(si),:);
-figure(); imagesc(temp); colormap('winter');
+figure(); imagesc(temp); colormap('jet'); %colormap('winter');
 title('gp2 uncued success minus failure');
 currentcombo=uncueddiff_forplot(cued_success_Response.consensus_idx==1);
 f=find(cued_success_Response.consensus_idx==1);
 [~,si]=sort(currentcombo,'descend');
 temp=uncuedsuccess_minus_uncuedfailure(f(si),:);
-figure(); imagesc(temp); colormap('winter');
+figure(); imagesc(temp); colormap('jet'); %colormap('winter');
 title('gp1 uncued success minus failure');
 
 % cued minus uncued
@@ -121,26 +121,26 @@ currentcombo=successdiff_forplot(cued_success_Response.consensus_idx==2);
 f=find(cued_success_Response.consensus_idx==2);
 [~,si]=sort(currentcombo,'descend');
 temp=cuedsuccess_minus_uncuedsuccess(f(si),:);
-figure(); imagesc(temp); colormap('spring');
+figure(); imagesc(temp); colormap('jet'); %colormap('spring');
 title('gp2 success cued minus uncued');
 currentcombo=successdiff_forplot(cued_success_Response.consensus_idx==1);
 f=find(cued_success_Response.consensus_idx==1);
 [~,si]=sort(currentcombo,'descend');
 temp=cuedsuccess_minus_uncuedsuccess(f(si),:);
-figure(); imagesc(temp); colormap('spring');
+figure(); imagesc(temp); colormap('jet'); %colormap('spring');
 title('gp1 success cued minus uncued');
 % failure
 currentcombo=failurediff_forplot(cued_success_Response.consensus_idx==2);
 f=find(cued_success_Response.consensus_idx==2);
 [~,si]=sort(currentcombo,'descend');
 temp=cuedfailure_minus_uncuedfailure(f(si),:);
-figure(); imagesc(temp); colormap('spring');
+figure(); imagesc(temp); colormap('jet'); %colormap('spring');
 title('gp2 failure cued minus uncued');
 currentcombo=failurediff_forplot(cued_success_Response.consensus_idx==1);
 f=find(cued_success_Response.consensus_idx==1);
 [~,si]=sort(currentcombo,'descend');
 temp=cuedfailure_minus_uncuedfailure(f(si),:);
-figure(); imagesc(temp); colormap('spring');
+figure(); imagesc(temp); colormap('jet'); %colormap('spring');
 title('gp1 failure cued minus uncued');
 
 return
