@@ -1735,7 +1735,7 @@ scatter(out_decode.uncuedsucc_temp2-out_decode.uncuedsucc_temp1,out_decode.uncue
 Xmatrix=[Xmatrix; [out_decode.uncuedsucc_temp2-out_decode.uncuedsucc_temp1 out_decode.uncuedsucc_temp2+out_decode.uncuedsucc_temp1]]; ylabels=[ylabels; 3*ones(size(out_cuedir2.cuedsucc_temp1,1),1)];
 scatter(out_decode.uncuedfail_temp2-out_decode.uncuedfail_temp1,out_decode.uncuedfail_temp2+out_decode.uncuedfail_temp1,[],'y');
 Xmatrix=[Xmatrix; [out_decode.uncuedfail_temp2-out_decode.uncuedfail_temp1 out_decode.uncuedfail_temp2+out_decode.uncuedfail_temp1]]; ylabels=[ylabels; 4*ones(size(out_cuedir2.cuedsucc_temp1,1),1)];
-xlabel('gp2 minus gp2'); ylabel('gp2 plus gp1');
+xlabel('gp2 minus gp1'); ylabel('gp2 plus gp1');
 
 load('Z:\MICROSCOPE\Kim\Final Figs\Fig5\Main figure\cued_success_Response_w_py_metrics.mat'); backup_consensus_idx=cued_success_Response.consensus_idx;
 
