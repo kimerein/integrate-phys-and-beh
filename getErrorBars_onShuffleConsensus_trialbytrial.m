@@ -11,7 +11,7 @@ for countRuns=1:nRuns
     r=randperm(length(f));
     shuffle_consensus(f)=shuffle_consensus(f(r));
 
-    out_decode=decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,shuffle_consensus,100,150,countunits(unitsCounter),false,false,false,false,false); % nBoots,nUnits,nTrials,withReplacement,addThirdAxis,nanAllZeros,justBoostrapTrials,collapseWithinUnit
+    out_decode=decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,shuffle_consensus,100,205,countunits(unitsCounter),false,false,false,false,false); % nBoots,nUnits,nTrials,withReplacement,addThirdAxis,nanAllZeros,justBoostrapTrials,collapseWithinUnit
     % one mapping
     figure();
     scatter(out_decode.cuedsucc_temp2-out_decode.cuedsucc_temp1,out_decode.cuedsucc_temp2+out_decode.cuedsucc_temp1,[],'g'); hold on;
