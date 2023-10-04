@@ -1409,12 +1409,12 @@ tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx
 % all units
 binsForTuning{1}=[-10 -9 10]; binsForTuning{2}=[-10 -9 10];
 tuningOutput=plotUnitSummariesAfterTCAlabels(cued_success_Response.consensus_idx,cued_success_Response.cXfail_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning);
-[allgp1_cuedfailFR,allgp1_uncuedfailFR]=plotTuningOutputScatter(tuningOutput,'grp1_fail','grp1_fail_uncue',2,[2 5]);
-[allgp2_cuedfailFR,allgp2_uncuedfailFR]=plotTuningOutputScatter(tuningOutput,'grp2_fail','grp2_fail_uncue',2,[2 5]);
-plotTuningOutputScatter(tuningOutput,'grp1_succ_uncue','grp1_fail_uncue',2,[2 5]);
-[allgp1_cuedsuccFR,allgp1_uncuedsuccFR]=plotTuningOutputScatter(tuningOutput,'grp1_succ','grp1_succ_uncue',2,[2 5]);
-[allgp2_cuedsuccFR,allgp2_uncuedsuccFR]=plotTuningOutputScatter(tuningOutput,'grp2_succ','grp2_succ_uncue',2,[2 5]);
-plotTuningOutputScatter(tuningOutput,'grp2_succ','grp2_fail',2,[2 5]);
+[allgp1_cuedfailFR,allgp1_uncuedfailFR]=plotTuningOutputScatter(tuningOutput,'grp1_fail','grp1_fail_uncue',2,[1 5]);
+[allgp2_cuedfailFR,allgp2_uncuedfailFR]=plotTuningOutputScatter(tuningOutput,'grp2_fail','grp2_fail_uncue',2,[1 5]);
+plotTuningOutputScatter(tuningOutput,'grp1_succ_uncue','grp1_fail_uncue',2,[1 5]);
+[allgp1_cuedsuccFR,allgp1_uncuedsuccFR]=plotTuningOutputScatter(tuningOutput,'grp1_succ','grp1_succ_uncue',2,[1 5]);
+[allgp2_cuedsuccFR,allgp2_uncuedsuccFR]=plotTuningOutputScatter(tuningOutput,'grp2_succ','grp2_succ_uncue',2,[1 5]);
+plotTuningOutputScatter(tuningOutput,'grp2_succ','grp2_fail',2,[1 5]);
 
 % % binsForTuning{1}=[-10 0 10]; binsForTuning{2}=[-10 0 10];
 % binsForTuning{1}=[-10 -9 10]; binsForTuning{2}=[-10 -9 10];
@@ -1493,6 +1493,45 @@ Xmatrix=[Xmatrix; [temp1 temp2]]; ylabels=[ylabels; 4*ones(size(temp1,1),1)];
 scatter(temp1,temp2,[],'y'); scatter(nanmean(temp1),nanmean(temp2),[],'y','filled'); uncuedfailmeanx=nanmean(temp1); uncuedfailmeany=nanmean(temp2);
 scatter((cuedsuccmeanx+cuedfailmeanx+uncuedsuccmeanx+uncuedfailmeanx)/4,(cuedsuccmeany+cuedfailmeany+uncuedsuccmeany+uncuedfailmeany)/4,[],'k','filled');
 xlabel('Gp 1 average unit firing rate'); ylabel('Gp 2 average unit firing rate');
+
+% LDA
+ldaModel=fitcdiscr(Xmatrix,ylabels);
+predictedY=predict(ldaModel,Xmatrix);
+accuracy=sum(predictedY==ylabels)/length(ylabels);
+disp(['Accuracy of LDA on training set: ', num2str(accuracy * 100), '%']);
+
+%% Mapping gp2-gp1 vs. gp2+gp1
+figure(); nBoot=100; nUnits=200;
+takeThese_gp1=nan(nBoot,nUnits); takeThese_gp2=nan(nBoot,nUnits);
+for i=1:nBoot
+    takeThese_gp1(i,:)=randsample(length(allgp1_cuedsuccFR),nUnits); takeThese_gp2(i,:)=randsample(length(allgp2_cuedsuccFR),nUnits);
+end
+temp1=nan(nBoot,1); temp2=nan(nBoot,1);
+for i=1:nBoot
+    temp1(i)=nanmean(allgp1_cuedsuccFR(takeThese_gp1(i,:))); temp2(i)=nanmean(allgp2_cuedsuccFR(takeThese_gp2(i,:)));
+end
+Xmatrix=[temp2-temp1 temp2+temp1]; ylabels=[ones(size(temp1,1),1)];
+scatter(temp2-temp1,temp2+temp1,[],'g'); hold on; scatter(nanmean(temp2-temp1),nanmean(temp2+temp1),[],'g','filled'); cuedsuccmeanx=nanmean(temp2-temp1); cuedsuccmeany=nanmean(temp2+temp1);
+temp1=nan(nBoot,1); temp2=nan(nBoot,1);
+for i=1:nBoot
+    temp1(i)=nanmean(allgp1_cuedfailFR(takeThese_gp1(i,:))); temp2(i)=nanmean(allgp2_cuedfailFR(takeThese_gp2(i,:)));
+end
+Xmatrix=[Xmatrix; [temp2-temp1 temp2+temp1]]; ylabels=[ylabels; 2*ones(size(temp1,1),1)];
+scatter(temp2-temp1,temp2+temp1,[],'r'); scatter(nanmean(temp2-temp1),nanmean(temp2+temp1),[],'r','filled'); cuedfailmeanx=nanmean(temp2-temp1); cuedfailmeany=nanmean(temp2+temp1);
+temp1=nan(nBoot,1); temp2=nan(nBoot,1);
+for i=1:nBoot
+    temp1(i)=nanmean(allgp1_uncuedsuccFR(takeThese_gp1(i,:))); temp2(i)=nanmean(allgp2_uncuedsuccFR(takeThese_gp2(i,:)));
+end
+Xmatrix=[Xmatrix; [temp2-temp1 temp2+temp1]]; ylabels=[ylabels; 3*ones(size(temp1,1),1)];
+scatter(temp2-temp1,temp2+temp1,[],'b'); scatter(nanmean(temp2-temp1),nanmean(temp2+temp1),[],'b','filled'); uncuedsuccmeanx=nanmean(temp2-temp1); uncuedsuccmeany=nanmean(temp2+temp1);
+temp1=nan(nBoot,1); temp2=nan(nBoot,1);
+for i=1:nBoot
+    temp1(i)=nanmean(allgp1_uncuedfailFR(takeThese_gp1(i,:))); temp2(i)=nanmean(allgp2_uncuedfailFR(takeThese_gp2(i,:)));
+end
+Xmatrix=[Xmatrix; [temp2-temp1 temp2+temp1]]; ylabels=[ylabels; 4*ones(size(temp1,1),1)];
+scatter(temp2-temp1,temp2+temp1,[],'y'); scatter(nanmean(temp2-temp1),nanmean(temp2+temp1),[],'y','filled'); uncuedfailmeanx=nanmean(temp2-temp1); uncuedfailmeany=nanmean(temp2+temp1);
+scatter((cuedsuccmeanx+cuedfailmeanx+uncuedsuccmeanx+uncuedfailmeanx)/4,(cuedsuccmeany+cuedfailmeany+uncuedsuccmeany+uncuedfailmeany)/4,[],'k','filled');
+xlabel('Gp 2 minus gp 1 average unit firing rate'); ylabel('Gp 2 plus gp 1 average unit firing rate');
 
 % LDA
 ldaModel=fitcdiscr(Xmatrix,ylabels);
@@ -1728,13 +1767,13 @@ out_decode=decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cued_success_Res
 % one mapping
 figure(); 
 scatter(out_decode.cuedsucc_temp2-out_decode.cuedsucc_temp1,out_decode.cuedsucc_temp2+out_decode.cuedsucc_temp1,[],'g'); hold on;
-Xmatrix=[out_decode.cuedsucc_temp2-out_decode.cuedsucc_temp1 out_decode.cuedsucc_temp2+out_decode.cuedsucc_temp1]; ylabels=[ones(size(out_cuedir2.cuedsucc_temp1,1),1)];
+Xmatrix=[out_decode.cuedsucc_temp2-out_decode.cuedsucc_temp1 out_decode.cuedsucc_temp2+out_decode.cuedsucc_temp1]; ylabels=[ones(size(out_decode.cuedsucc_temp1,1),1)];
 scatter(out_decode.cuedfail_temp2-out_decode.cuedfail_temp1,out_decode.cuedfail_temp2+out_decode.cuedfail_temp1,[],'r');
-Xmatrix=[Xmatrix; [out_decode.cuedfail_temp2-out_decode.cuedfail_temp1 out_decode.cuedfail_temp2+out_decode.cuedfail_temp1]]; ylabels=[ylabels; 2*ones(size(out_cuedir2.cuedsucc_temp1,1),1)];
+Xmatrix=[Xmatrix; [out_decode.cuedfail_temp2-out_decode.cuedfail_temp1 out_decode.cuedfail_temp2+out_decode.cuedfail_temp1]]; ylabels=[ylabels; 2*ones(size(out_decode.cuedsucc_temp1,1),1)];
 scatter(out_decode.uncuedsucc_temp2-out_decode.uncuedsucc_temp1,out_decode.uncuedsucc_temp2+out_decode.uncuedsucc_temp1,[],'b');
-Xmatrix=[Xmatrix; [out_decode.uncuedsucc_temp2-out_decode.uncuedsucc_temp1 out_decode.uncuedsucc_temp2+out_decode.uncuedsucc_temp1]]; ylabels=[ylabels; 3*ones(size(out_cuedir2.cuedsucc_temp1,1),1)];
+Xmatrix=[Xmatrix; [out_decode.uncuedsucc_temp2-out_decode.uncuedsucc_temp1 out_decode.uncuedsucc_temp2+out_decode.uncuedsucc_temp1]]; ylabels=[ylabels; 3*ones(size(out_decode.cuedsucc_temp1,1),1)];
 scatter(out_decode.uncuedfail_temp2-out_decode.uncuedfail_temp1,out_decode.uncuedfail_temp2+out_decode.uncuedfail_temp1,[],'y');
-Xmatrix=[Xmatrix; [out_decode.uncuedfail_temp2-out_decode.uncuedfail_temp1 out_decode.uncuedfail_temp2+out_decode.uncuedfail_temp1]]; ylabels=[ylabels; 4*ones(size(out_cuedir2.cuedsucc_temp1,1),1)];
+Xmatrix=[Xmatrix; [out_decode.uncuedfail_temp2-out_decode.uncuedfail_temp1 out_decode.uncuedfail_temp2+out_decode.uncuedfail_temp1]]; ylabels=[ylabels; 4*ones(size(out_decode.cuedsucc_temp1,1),1)];
 xlabel('gp2 minus gp1'); ylabel('gp2 plus gp1');
 
 load('Z:\MICROSCOPE\Kim\Final Figs\Fig5\Main figure\cued_success_Response_w_py_metrics.mat'); backup_consensus_idx=cued_success_Response.consensus_idx;

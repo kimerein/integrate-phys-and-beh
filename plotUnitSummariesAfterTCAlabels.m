@@ -48,10 +48,10 @@ switch justAvsOrTuning
         addbeginnings=false;
         dropTrialBeginnings=false;
 
-%         dropTrialBeginnings=true;
-%         moreThanXSecBeforeAlign=1;
-%         addbeginnings=true;
-%         atLeastXBaseline=0;
+        dropTrialBeginnings=true;
+        moreThanXSecBeforeAlign=1;
+        addbeginnings=true;
+        atLeastXBaseline=0;
     case 'tuning'
         % for cue tuned plots
         % doingCued='uncuedOverCued'; % 'cued' or 'uncued' or 'cuedOverUncued' or 'uncuedOverCued'
