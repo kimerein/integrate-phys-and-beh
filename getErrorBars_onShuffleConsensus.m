@@ -24,7 +24,7 @@ for countRuns=1:nRuns
     figure(); nBoot=100; nUnits=countunits(unitsCounter);
     takeThese_gp1=nan(nBoot,nUnits); takeThese_gp2=nan(nBoot,nUnits);
     for i=1:nBoot
-        takeThese_gp1(i,:)=randsample(length(allgp1_cuedsuccFR),nUnits); takeThese_gp2(i,:)=randsample(length(allgp2_cuedsuccFR),nUnits);
+        takeThese_gp1(i,:)=randsample(length(allgp1_cuedsuccFR),nUnits,true); takeThese_gp2(i,:)=randsample(length(allgp2_cuedsuccFR),nUnits,true);
     end
     temp1=nan(nBoot,1); temp2=nan(nBoot,1);
     for i=1:nBoot
