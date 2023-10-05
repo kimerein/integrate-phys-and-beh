@@ -1111,6 +1111,19 @@ else
     cued_success_Response.glm_boundary_2(y<=(-0.0212442/0.00951011).*x & x<0 & x>-0.015)=2; % purple
     % 2 is A2a, 1 is D1; in figures, purple is A2a, cyan is D1
 
+    figure(); s=scatter(nanmean(matchedtocued_all_glm_coef(cued_success_Response.idx_from_glm==2,21:71),2),nanmean(matchedtocued_all_glm_coef(cued_success_Response.idx_from_glm==2,640+20:640+40),2),100,cmap(2,:),'filled'); % purple
+    s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4; hold on;
+    s=scatter(nanmean(matchedtocued_all_glm_coef(cued_success_Response.idx_from_glm==1,21:71),2),nanmean(matchedtocued_all_glm_coef(cued_success_Response.idx_from_glm==1,640+20:640+40),2),100,cmap(1,:),'filled'); % cyan
+    s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4;
+    xlabel('postcue coef'); ylabel('postreach 2 secs');
+    title('idx from glm');
+%     figure(); s=scatter(nanmean(matchedtocued_all_glm_coef(cued_success_Response.idx_from_glm==2,21:71),2)-nanmean(matchedtocued_all_glm_coef(cued_success_Response.idx_from_glm==2,1:20),2),nanmean(matchedtocued_all_glm_coef(cued_success_Response.idx_from_glm==2,640+20:640+40),2)-nanmean(matchedtocued_all_glm_coef(cued_success_Response.idx_from_glm==2,640:640+19),2),100,cmap(2,:),'filled'); % purple
+%     s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4; hold on;
+%     s=scatter(nanmean(matchedtocued_all_glm_coef(cued_success_Response.idx_from_glm==1,21:71),2)-nanmean(matchedtocued_all_glm_coef(cued_success_Response.idx_from_glm==1,1:20),2),nanmean(matchedtocued_all_glm_coef(cued_success_Response.idx_from_glm==1,640+20:640+40),2)-nanmean(matchedtocued_all_glm_coef(cued_success_Response.idx_from_glm==1,640:640+19),2),100,cmap(1,:),'filled'); % cyan
+%     s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4;
+%     xlabel('postcue coef'); ylabel('postreach 2 secs');
+%     title('idx from glm');
+
 %     cued_success_Response.consensus_idx=nan(size(cued_success_Response.idx));
 %     cued_success_Response.consensus_idx(cued_success_Response.combo_boundary==1 | (cued_success_Response.idx==1 & cued_success_Response.isHighWeight==1) & (cued_success_Response.combo_boundary~=2 & cued_success_Response.idx~=2))=1; 
 %     cued_success_Response.consensus_idx(cued_success_Response.combo_boundary==2 | (cued_success_Response.idx==2 & cued_success_Response.isHighWeight==1) & (cued_success_Response.combo_boundary~=1 & cued_success_Response.idx~=1))=2;
