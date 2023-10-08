@@ -3,13 +3,17 @@ function all_accs=getErrorBars_onShuffleConsensus_trialbytrial(a,b,cued_success_
 countunits=10:10:170;
 all_accs=nan(length(countunits),nRuns);
 
+temper_backup=[a.fortbytclass.unitfr_success; a.fortbytclass.unitfr_failure; b.fortbytclass.unitfr_success; b.fortbytclass.unitfr_failure];
+
 for unitsCounter=1:length(countunits)
 for countRuns=1:nRuns
 
+%     shuffle_consensus=cued_success_Response.consensus_idx;
+%     f=find(~isnan(shuffle_consensus));
+%     r=randperm(length(f));
+%     shuffle_consensus(f)=shuffle_consensus(f(r));
+
     shuffle_consensus=cued_success_Response.consensus_idx;
-    f=find(~isnan(shuffle_consensus));
-    r=randperm(length(f));
-    shuffle_consensus(f)=shuffle_consensus(f(r));
     
     if countunits(unitsCounter)<75
         nUnitsNow=100;
@@ -18,7 +22,28 @@ for countRuns=1:nRuns
     else
         nUnitsNow=200;
     end
+
+    % shuffle before
+    temper=[temper_backup];
+    temper_ids=[ones(size(a.fortbytclass.unitfr_success)); 2*ones(size(a.fortbytclass.unitfr_failure)); 3*ones(size(b.fortbytclass.unitfr_success)); 4*ones(size(b.fortbytclass.unitfr_failure))];
+    temper=temper(randperm(length(temper)));
+    a.fortbytclass.unitfr_success=temper(temper_ids==1);
+    a.fortbytclass.unitfr_failure=temper(temper_ids==2);
+    b.fortbytclass.unitfr_success=temper(temper_ids==3);
+    b.fortbytclass.unitfr_failure=temper(temper_ids==4);
+
     out_decode=decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,shuffle_consensus,100,nUnitsNow,countunits(unitsCounter),true,false,false,false,false); % nBoots,nUnits,nTrials,withReplacement,addThirdAxis,nanAllZeros,justBoostrapTrials,collapseWithinUnit
+    
+    % shuffle trial labels
+%     all1=[out_decode.cuedsucc_temp1; out_decode.cuedfail_temp1; out_decode.uncuedsucc_temp1; out_decode.uncuedfail_temp1];
+%     all2=[out_decode.cuedsucc_temp2; out_decode.cuedfail_temp2; out_decode.uncuedsucc_temp2; out_decode.uncuedfail_temp2];
+%     rall1=randperm(length(all1)); rall2=randperm(length(all2));
+%     all1=all1(rall1); all2=all2(rall2);
+%     inds1=[ones(size(out_decode.cuedsucc_temp1)); 2*ones(size(out_decode.cuedfail_temp1)); 3*ones(size(out_decode.uncuedsucc_temp1)); 4*ones(size(out_decode.uncuedfail_temp1))];
+%     inds2=[ones(size(out_decode.cuedsucc_temp2)); 2*ones(size(out_decode.cuedfail_temp2)); 3*ones(size(out_decode.uncuedsucc_temp2)); 4*ones(size(out_decode.uncuedfail_temp2))];
+%     out_decode.cuedsucc_temp1=all1(inds1==1); out_decode.cuedfail_temp1=all1(inds1==2); out_decode.uncuedsucc_temp1=all1(inds1==3); out_decode.uncuedfail_temp1=all1(inds1==4);
+%     out_decode.cuedsucc_temp2=all2(inds2==1); out_decode.cuedfail_temp2=all2(inds2==2); out_decode.uncuedsucc_temp2=all2(inds2==3); out_decode.uncuedfail_temp2=all2(inds2==4);
+    
     % one mapping
     figure();
     scatter(out_decode.cuedsucc_temp2-out_decode.cuedsucc_temp1,out_decode.cuedsucc_temp2+out_decode.cuedsucc_temp1,[],'g'); hold on;

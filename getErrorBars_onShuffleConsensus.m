@@ -6,10 +6,13 @@ all_accs=nan(length(countunits),nRuns);
 for unitsCounter=1:length(countunits)
 for countRuns=1:nRuns
 
+%     % just shuffle gp1 vs gp2
+%     shuffle_consensus=cued_success_Response.consensus_idx;
+%     f=find(~isnan(shuffle_consensus));
+%     r=randperm(length(f));
+%     shuffle_consensus(f)=shuffle_consensus(f(r));
+
     shuffle_consensus=cued_success_Response.consensus_idx;
-    f=find(~isnan(shuffle_consensus));
-    r=randperm(length(f));
-    shuffle_consensus(f)=shuffle_consensus(f(r));
 
     binsForTuning{1}=[-10 -9 10]; binsForTuning{2}=[-10 -9 10];
     tuningOutput=plotUnitSummariesAfterTCAlabels(shuffle_consensus,cued_success_Response.cXfail_sus1to5sec,cued_success_Response,cued_failure_Response,uncued_success_Response,uncued_failure_Response,[],'uncuedOverCued','tuning',binsForTuning);
@@ -20,6 +23,16 @@ for countRuns=1:nRuns
     [allgp2_cuedsuccFR,allgp2_uncuedsuccFR]=plotTuningOutputScatter(tuningOutput,'grp2_succ','grp2_succ_uncue',2,[1 5]);
     plotTuningOutputScatter(tuningOutput,'grp2_succ','grp2_fail',2,[1 5]);
     close all;
+
+    % shuffle trial labels
+    all1=[allgp1_cuedfailFR; allgp1_uncuedfailFR; allgp1_cuedsuccFR; allgp1_uncuedsuccFR];
+    all2=[allgp2_cuedfailFR; allgp2_uncuedfailFR; allgp2_cuedsuccFR; allgp2_uncuedsuccFR];
+    rall1=randperm(length(all1)); rall2=randperm(length(all2));
+    all1=all1(rall1); all2=all2(rall2);
+    inds1=[ones(size(allgp1_cuedfailFR)); 2*ones(size(allgp1_uncuedfailFR)); 3*ones(size(allgp1_cuedsuccFR)); 4*ones(size(allgp1_uncuedsuccFR))];
+    inds2=[ones(size(allgp2_cuedfailFR)); 2*ones(size(allgp2_uncuedfailFR)); 3*ones(size(allgp2_cuedsuccFR)); 4*ones(size(allgp2_uncuedsuccFR))];
+    allgp1_cuedfailFR=all1(inds1==1); allgp1_uncuedfailFR=all1(inds1==2); allgp1_cuedsuccFR=all1(inds1==3); allgp1_uncuedsuccFR=all1(inds1==4);
+    allgp2_cuedfailFR=all2(inds2==1); allgp2_uncuedfailFR=all2(inds2==2); allgp2_cuedsuccFR=all2(inds2==3); allgp2_uncuedsuccFR=all2(inds2==4);
 
     figure(); nBoot=100; nUnits=countunits(unitsCounter);
     takeThese_gp1=nan(nBoot,nUnits); takeThese_gp2=nan(nBoot,nUnits);

@@ -1513,6 +1513,16 @@ predictedY=predict(ldaModel,Xmatrix);
 accuracy=sum(predictedY==ylabels)/length(ylabels);
 disp(['Accuracy of LDA on training set: ', num2str(accuracy * 100), '%']);
 
+%% Trial type shuffle
+all1=[allgp1_cuedsuccFR; allgp1_cuedfailFR; allgp1_uncuedsuccFR; allgp1_uncuedfailFR];
+all2=[allgp2_cuedsuccFR; allgp2_cuedfailFR; allgp2_uncuedsuccFR; allgp2_uncuedfailFR];
+rall1=randperm(length(all1)); rall2=randperm(length(all2));
+all1=all1(rall1); all2=all2(rall2);
+inds1=[ones(size(allgp1_cuedsuccFR)); 2*ones(size(allgp1_cuedfailFR)); 3*ones(size(allgp1_uncuedsuccFR)); 4*ones(size(allgp1_uncuedfailFR))];
+inds2=[ones(size(allgp2_cuedsuccFR)); 2*ones(size(allgp2_cuedfailFR)); 3*ones(size(allgp2_uncuedsuccFR)); 4*ones(size(allgp2_uncuedfailFR))];
+allgp1_cuedsuccFR=all1(inds1==1); allgp1_cuedfailFR=all1(inds1==2); allgp1_uncuedsuccFR=all1(inds1==3); allgp1_uncuedfailFR=all1(inds1==4);
+allgp2_cuedsuccFR=all2(inds2==1); allgp2_cuedfailFR=all2(inds2==2); allgp2_uncuedsuccFR=all2(inds2==3); allgp2_uncuedfailFR=all2(inds2==4);
+
 %% Mapping gp2-gp1 vs. gp2+gp1
 figure(); nBoot=100; nUnits=200;
 takeThese_gp1=nan(nBoot,nUnits); takeThese_gp2=nan(nBoot,nUnits);
@@ -1547,6 +1557,13 @@ scatter((cuedsuccmeanx+cuedfailmeanx+uncuedsuccmeanx+uncuedfailmeanx)/4,(cuedsuc
 xlabel('Gp 2 minus gp 1 average unit firing rate'); ylabel('Gp 2 plus gp 1 average unit firing rate');
 
 % LDA
+% ldaModel=fitcdiscr(Xmatrix,ylabels);
+% predictedY=predict(ldaModel,Xmatrix);
+% accuracy=sum(predictedY==ylabels)/length(ylabels);
+% disp(['Accuracy of LDA on training set: ', num2str(accuracy * 100), '%']);
+
+% 3-way classification
+ylabels(ylabels==4)=2;
 ldaModel=fitcdiscr(Xmatrix,ylabels);
 predictedY=predict(ldaModel,Xmatrix);
 accuracy=sum(predictedY==ylabels)/length(ylabels);
