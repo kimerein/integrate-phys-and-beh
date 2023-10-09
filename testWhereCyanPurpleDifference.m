@@ -6,8 +6,10 @@ yrange(1)=nanmin(y);
 yrange(2)=nanmax(y);
 % xbins=xrange(1):0.015:xrange(2)+0.0001;
 % ybins=-1.05:0.15:1.05; %yrange(1):0.15:yrange(2);
-xbins=xrange(1):0.015:xrange(2)+0.0001;
-ybins=-1.05:0.3:1.05; %yrange(1):0.15:yrange(2);
+xbins=-0.025:0.04:xrange(2); %xrange(1):0.015:xrange(2)+0.0001;
+xbins(end)=xbins(end)+0.0001;
+ybins=-1:0.5:1; %yrange(1):0.15:yrange(2);
+ybins(end)=ybins(end)+0.0001;
 
 label1_for_bin=nan(length(xbins)-1,length(ybins)-1);
 label2_for_bin=nan(length(xbins)-1,length(ybins)-1);
@@ -20,7 +22,10 @@ for i=1:length(xbins)-1
     end
 end
 
+label1_for_bin(label1_for_bin==0)=0.01;
+label2_for_bin(label2_for_bin==0)=0.01;
 ratio_1to2=label1_for_bin./label2_for_bin;
+ratio_1to2(label1_for_bin+label2_for_bin<1.02)=nan; 
 
 figure(); 
 s=scatter(x(label==1),y(label==1),100,cmap(1,:),'filled'); 
