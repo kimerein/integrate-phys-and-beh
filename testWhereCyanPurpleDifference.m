@@ -37,9 +37,9 @@ figure();
 for i=1:length(xbins)-1
     for j=1:length(ybins)-1
         if ratio_1to2(i,j)<ratiocutoffs(1) % 2 preferred
-            patch([xbins(i) xbins(i) xbins(i+1) xbins(i+1)],[ybins(j) ybins(j+1) ybins(j+1) ybins(j)],cmap(2,:),'FaceAlpha',0.4,'EdgeColor','none'); hold on;
+            patch([xbins(i) xbins(i) xbins(i+1) xbins(i+1)],[ybins(j) ybins(j+1) ybins(j+1) ybins(j)],cmap(2,:),'FaceAlpha',0.4); hold on;
         elseif ratio_1to2(i,j)>ratiocutoffs(2) % 1 preferred
-            patch([xbins(i) xbins(i) xbins(i+1) xbins(i+1)],[ybins(j) ybins(j+1) ybins(j+1) ybins(j)],cmap(1,:),'FaceAlpha',0.4,'EdgeColor','none'); hold on;
+            patch([xbins(i) xbins(i) xbins(i+1) xbins(i+1)],[ybins(j) ybins(j+1) ybins(j+1) ybins(j)],cmap(1,:),'FaceAlpha',0.4); hold on;
         end
     end
 end
