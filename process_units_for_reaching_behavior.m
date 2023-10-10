@@ -976,24 +976,30 @@ else
     firsthalfie=nanmean(py_all_glm_coef(:,[234:254]),2);
     secondhalfie=nanmean(py_all_glm_coef(:,[255:284]),2);
     py_metrics.allsuccess_modulation_index=(secondhalfie-firsthalfie)./(abs(secondhalfie)+abs(firsthalfie));
+    py_metrics.allsuccess_modulation_index(abs(secondhalfie)+abs(firsthalfie)==0)=0;
     py_metrics.allsuccess_change=(secondhalfie-firsthalfie);
     firsthalfie=nanmean(py_all_glm_coef(:,[447:467]),2);
     secondhalfie=nanmean(py_all_glm_coef(:,[468:497]),2);
     py_metrics.cXsuccess_modulation_index=(secondhalfie-firsthalfie)./(abs(secondhalfie)+abs(firsthalfie));
+    py_metrics.cXsuccess_modulation_index(abs(secondhalfie)+abs(firsthalfie)==0)=0;
     firsthalfie=nanmean(py_all_glm_coef(:,[305:325]),2);
     secondhalfie=nanmean(py_all_glm_coef(:,[326:355]),2);
     py_metrics.alldrop_modulation_index=(secondhalfie-firsthalfie)./(abs(secondhalfie)+abs(firsthalfie));
+    py_metrics.alldrop_modulation_index(abs(secondhalfie)+abs(firsthalfie)==0)=0;
     firsthalfie=nanmean(py_all_glm_coef(:,[376:396]),2);
     secondhalfie=nanmean(py_all_glm_coef(:,[397:426]),2);
     py_metrics.allmiss_modulation_index=(secondhalfie-firsthalfie)./(abs(secondhalfie)+abs(firsthalfie));
+    py_metrics.allmiss_modulation_index(abs(secondhalfie)+abs(firsthalfie)==0)=0;
     py_metrics.allmiss_change=(secondhalfie-firsthalfie);
     py_metrics.allfailure_modulation_index=(py_metrics.alldrop_modulation_index+py_metrics.allmiss_modulation_index)/2;
     firsthalfie=nanmean(py_all_glm_coef(:,[518:538]),2);
     secondhalfie=nanmean(py_all_glm_coef(:,[539:568]),2);
     py_metrics.cXdrop_modulation_index=(secondhalfie-firsthalfie)./(abs(secondhalfie)+abs(firsthalfie));
+    py_metrics.cXdrop_modulation_index(abs(secondhalfie)+abs(firsthalfie)==0)=0;
     firsthalfie=nanmean(py_all_glm_coef(:,[589:609]),2);
     secondhalfie=nanmean(py_all_glm_coef(:,[610:639]),2);
     py_metrics.cXmiss_modulation_index=(secondhalfie-firsthalfie)./(abs(secondhalfie)+abs(firsthalfie));
+    py_metrics.cXmiss_modulation_index(abs(secondhalfie)+abs(firsthalfie)==0)=0;
     py_metrics.cXfailure_modulation_index=(py_metrics.cXdrop_modulation_index+py_metrics.cXmiss_modulation_index)/2;
     py_metrics.combosuccess_modulation_index=(py_metrics.allsuccess_modulation_index+py_metrics.cXsuccess_modulation_index)/2;
     py_metrics.combofailure_modulation_index=(py_metrics.allfailure_modulation_index+py_metrics.cXfailure_modulation_index)/2;
@@ -1072,14 +1078,17 @@ else
     scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.consensus_idx==1),cued_success_Response.cXfailure_modulation_index(cued_success_Response.consensus_idx==1),[],'b');
     hold on; scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.consensus_idx==2),cued_success_Response.cXfailure_modulation_index(cued_success_Response.consensus_idx==2),[],'r');
     cued_success_Response.idx_from_boundary=nan(size(cued_success_Response.idx));
-    cued_success_Response.idx_from_boundary(cued_success_Response.combosuccess_modulation_index>0.45)=1;
-    cued_success_Response.idx_from_boundary(cued_success_Response.combosuccess_modulation_index<-0.52)=2;
+%     cued_success_Response.idx_from_boundary(cued_success_Response.combosuccess_modulation_index>0.45 & confidence>0.45)=1;
+%     cued_success_Response.idx_from_boundary(cued_success_Response.combosuccess_modulation_index<-0.52 & confidence>0.45)=2;
+    cued_success_Response.idx_from_boundary(cued_success_Response.combosuccess_modulation_index>0.2 & confidence>0.45)=1;
+    cued_success_Response.idx_from_boundary(cued_success_Response.combosuccess_modulation_index<-0.2 & confidence>0.45)=2;
 %     cued_success_Response.idx_far_from_boundary=nan(size(cued_success_Response.idx));
 %     cued_success_Response.idx_far_from_boundary(cued_success_Response.combosuccess_modulation_index>0.2 & cued_success_Response.combosuccess_modulation_index~=1)=1;
 %     cued_success_Response.idx_far_from_boundary(cued_success_Response.combosuccess_modulation_index<=-0.2 & cued_success_Response.combosuccess_modulation_index~=-1)=2;
     cued_success_Response.idx_diagonal_boundary=nan(size(cued_success_Response.idx));
     cued_success_Response.idx_diagonal_boundary(:)=2;
-    cued_success_Response.idx_diagonal_boundary((cued_success_Response.combosuccess_modulation_index-cued_success_Response.combofailure_modulation_index)>0.2)=1;
+%     cued_success_Response.idx_diagonal_boundary((cued_success_Response.combosuccess_modulation_index-cued_success_Response.combofailure_modulation_index)>0.2)=1;
+    cued_success_Response.idx_diagonal_boundary((cued_success_Response.combosuccess_modulation_index-cued_success_Response.combofailure_modulation_index)>-0.05)=1;
     cued_success_Response.combo_boundary=nan(size(cued_success_Response.idx));
     cued_success_Response.combo_boundary(cued_success_Response.idx_from_boundary==1 & cued_success_Response.idx_diagonal_boundary==1)=1;
     cued_success_Response.combo_boundary(cued_success_Response.idx_from_boundary==2 & cued_success_Response.idx_diagonal_boundary==2)=2;   
@@ -1116,7 +1125,7 @@ else
     s=scatter(abs((0.5*cued_success_Response.allsucc_sus1to5sec(cued_success_Response.idx_from_glm==1 & confidence>0.5)+0.5*cued_success_Response.cXsucc_sus1to5sec(cued_success_Response.idx_from_glm==1 & confidence>0.5))-(0.5*cued_success_Response.allfail_sus1to5sec(cued_success_Response.idx_from_glm==1 & confidence>0.5)+0.5*cued_success_Response.cXfail_sus1to5sec(cued_success_Response.idx_from_glm==1 & confidence>0.5))),cued_success_Response.combosuccess_modulation_index(cued_success_Response.idx_from_glm==1 & confidence>0.5),100,cmap(1,:),'filled'); % cyan
     s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4;
     templabel=nan(size(cued_success_Response.idx_from_glm)); templabel(cued_success_Response.idx_from_glm==2 & confidence>0.5)=2; templabel(cued_success_Response.idx_from_glm==1 & confidence>0.5)=1; 
-    testWhereCyanPurpleDifference(abs((0.5*cued_success_Response.allsucc_sus1to5sec+0.5*cued_success_Response.cXsucc_sus1to5sec)-(0.5*cued_success_Response.allfail_sus1to5sec+0.5*cued_success_Response.cXfail_sus1to5sec)),cued_success_Response.combosuccess_modulation_index,templabel,cmap,[0.6666 1.5]);
+    [is1preferred,is2preferred,xbins_purppref,ybins_purppref]=testWhereCyanPurpleDifference(abs((0.5*cued_success_Response.allsucc_sus1to5sec+0.5*cued_success_Response.cXsucc_sus1to5sec)-(0.5*cued_success_Response.allfail_sus1to5sec+0.5*cued_success_Response.cXfail_sus1to5sec)),cued_success_Response.combosuccess_modulation_index,templabel,cmap,[0.6666 1.5]);
     hold on; s=scatter(abs((0.5*cued_success_Response.allsucc_sus1to5sec(cued_success_Response.idx_from_glm==2 & confidence>0.65)+0.5*cued_success_Response.cXsucc_sus1to5sec(cued_success_Response.idx_from_glm==2 & confidence>0.65))-(0.5*cued_success_Response.allfail_sus1to5sec(cued_success_Response.idx_from_glm==2 & confidence>0.65)+0.5*cued_success_Response.cXfail_sus1to5sec(cued_success_Response.idx_from_glm==2 & confidence>0.65))),cued_success_Response.combosuccess_modulation_index(cued_success_Response.idx_from_glm==2 & confidence>0.65),100,cmap(2,:),'filled'); % purple
     s.MarkerFaceAlpha=0.8; s.MarkerEdgeAlpha=0.8; hold on;
     s=scatter(abs((0.5*cued_success_Response.allsucc_sus1to5sec(cued_success_Response.idx_from_glm==1 & confidence>0.65)+0.5*cued_success_Response.cXsucc_sus1to5sec(cued_success_Response.idx_from_glm==1 & confidence>0.65))-(0.5*cued_success_Response.allfail_sus1to5sec(cued_success_Response.idx_from_glm==1 & confidence>0.65)+0.5*cued_success_Response.cXfail_sus1to5sec(cued_success_Response.idx_from_glm==1 & confidence>0.65))),cued_success_Response.combosuccess_modulation_index(cued_success_Response.idx_from_glm==1 & confidence>0.65),100,cmap(1,:),'filled'); % cyan
@@ -1131,12 +1140,50 @@ else
     s=scatter(abs((0.5*cued_success_Response.allsucc_sus1to5sec(cued_success_Response.idx==1 & cued_success_Response.isHighWeight==1)+0.5*cued_success_Response.cXsucc_sus1to5sec(cued_success_Response.idx==1 & cued_success_Response.isHighWeight==1))-(0.5*cued_success_Response.allfail_sus1to5sec(cued_success_Response.idx==1 & cued_success_Response.isHighWeight==1)+0.5*cued_success_Response.cXfail_sus1to5sec(cued_success_Response.idx==1 & cued_success_Response.isHighWeight==1))),cued_success_Response.combosuccess_modulation_index(cued_success_Response.idx==1 & cued_success_Response.isHighWeight==1),100,cmap(1,:),'filled'); % cyan
     s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4;
     templabel=nan(size(cued_success_Response.idx_from_glm)); templabel(cued_success_Response.idx==2 & cued_success_Response.isHighWeight==1)=2; templabel(cued_success_Response.idx==1 & cued_success_Response.isHighWeight==1)=1; 
-    testWhereCyanPurpleDifference(abs((0.5*cued_success_Response.allsucc_sus1to5sec+0.5*cued_success_Response.cXsucc_sus1to5sec)-(0.5*cued_success_Response.allfail_sus1to5sec+0.5*cued_success_Response.cXfail_sus1to5sec)),cued_success_Response.combosuccess_modulation_index,templabel,cmap,[0.6666 1.5]);
+    [is1preferred_idx,is2preferred_idx,xbins_purppref,ybins_purppref]=testWhereCyanPurpleDifference(abs((0.5*cued_success_Response.allsucc_sus1to5sec+0.5*cued_success_Response.cXsucc_sus1to5sec)-(0.5*cued_success_Response.allfail_sus1to5sec+0.5*cued_success_Response.cXfail_sus1to5sec)),cued_success_Response.combosuccess_modulation_index,templabel,cmap,[0.6666 1.5]);
+    
+    figure(); s=scatter3((0.5*cued_success_Response.allsucc_sus1to5sec(consense==2)+0.5*cued_success_Response.cXsucc_sus1to5sec(consense==2)),(0.5*cued_success_Response.allfail_sus1to5sec(consense==2)+0.5*cued_success_Response.cXfail_sus1to5sec(consense==2)),cued_success_Response.combosuccess_modulation_index(consense==2),100,cmap(2,:),'filled'); % purple
+    s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4; hold on;
+    s=scatter3((0.5*cued_success_Response.allsucc_sus1to5sec(consense==1)+0.5*cued_success_Response.cXsucc_sus1to5sec(consense==1)),(0.5*cued_success_Response.allfail_sus1to5sec(consense==1)+0.5*cued_success_Response.cXfail_sus1to5sec(consense==1)),cued_success_Response.combosuccess_modulation_index(consense==1),100,cmap(1,:),'filled'); % cyan
+    s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4; hold on;
+    xlabel('succ sustained'); ylabel('fail sustained'); zlabel('success mod');
+
+    % THIS VIEW USEFUL
+    figure(); s=scatter3(abs((0.5*cued_success_Response.allfail_sus1to5sec(cued_success_Response.idx_from_glm==2 & confidence>0.5)+0.5*cued_success_Response.cXfail_sus1to5sec(cued_success_Response.idx_from_glm==2 & confidence>0.5))),cued_success_Response.combosuccess_modulation_index(cued_success_Response.idx_from_glm==2 & confidence>0.5),cued_success_Response.combofailure_modulation_index(cued_success_Response.idx_from_glm==2 & confidence>0.5),100,cmap(2,:),'filled'); % purple
+    s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4; hold on;
+    s=scatter3(abs((0.5*cued_success_Response.allfail_sus1to5sec(cued_success_Response.idx_from_glm==1 & confidence>0.5)+0.5*cued_success_Response.cXfail_sus1to5sec(cued_success_Response.idx_from_glm==1 & confidence>0.5))),cued_success_Response.combosuccess_modulation_index(cued_success_Response.idx_from_glm==1 & confidence>0.5),cued_success_Response.combofailure_modulation_index(cued_success_Response.idx_from_glm==1 & confidence>0.5),100,cmap(1,:),'filled'); % cyan
+    s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4; hold on;
+    xlabel('abs fail sustained'); ylabel('success mod'); zlabel('fail mod');
+    templabel=cued_success_Response.idx_from_glm; templabel(confidence<0.5)=nan;
+    [is1preferred_idx,is2preferred_idx,xbins_purppref,ybins_purppref,zbins]=testWhereCyanPurpleDifference(abs(0.5*cued_success_Response.allfail_sus1to5sec+0.5*cued_success_Response.cXfail_sus1to5sec),cued_success_Response.combosuccess_modulation_index,templabel,cmap,[0.6666 1.5],cued_success_Response.combofailure_modulation_index);
+    figure(); s=scatter(abs((0.5*cued_success_Response.allfail_sus1to5sec(cued_success_Response.A2atag(cued_success_Response.excluded==0)==1)+0.5*cued_success_Response.cXfail_sus1to5sec(cued_success_Response.A2atag(cued_success_Response.excluded==0)==1))),cued_success_Response.combosuccess_modulation_index(cued_success_Response.A2atag(cued_success_Response.excluded==0)==1),100,cmap(2,:),'filled'); % purple
+    s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4; hold on;
+    s=scatter(abs((0.5*cued_success_Response.allfail_sus1to5sec(cued_success_Response.D1tag(cued_success_Response.excluded==0)==1)+0.5*cued_success_Response.cXfail_sus1to5sec(cued_success_Response.D1tag(cued_success_Response.excluded==0)==1))),cued_success_Response.combosuccess_modulation_index(cued_success_Response.D1tag(cued_success_Response.excluded==0)==1),100,cmap(1,:),'filled'); % cyan
+    s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4; hold on;
+    xlabel('fail sustained'); ylabel('success mod');
 
     figure(); s=scatter(abs((0.5*cued_success_Response.allsucc_sus1to5sec(cued_success_Response.A2atag(cued_success_Response.excluded==0)==1)+0.5*cued_success_Response.cXsucc_sus1to5sec(cued_success_Response.A2atag(cued_success_Response.excluded==0)==1))-(0.5*cued_success_Response.allfail_sus1to5sec(cued_success_Response.A2atag(cued_success_Response.excluded==0)==1)+0.5*cued_success_Response.cXfail_sus1to5sec(cued_success_Response.A2atag(cued_success_Response.excluded==0)==1))),cued_success_Response.combosuccess_modulation_index(cued_success_Response.A2atag(cued_success_Response.excluded==0)==1),100,cmap(2,:),'filled'); % purple
     s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4; hold on;
     s=scatter(abs((0.5*cued_success_Response.allsucc_sus1to5sec(cued_success_Response.D1tag(cued_success_Response.excluded==0)==1)+0.5*cued_success_Response.cXsucc_sus1to5sec(cued_success_Response.D1tag(cued_success_Response.excluded==0)==1))-(0.5*cued_success_Response.allfail_sus1to5sec(cued_success_Response.D1tag(cued_success_Response.excluded==0)==1)+0.5*cued_success_Response.cXfail_sus1to5sec(cued_success_Response.D1tag(cued_success_Response.excluded==0)==1))),cued_success_Response.combosuccess_modulation_index(cued_success_Response.D1tag(cued_success_Response.excluded==0)==1),100,cmap(1,:),'filled'); % cyan
     s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4;
+
+    cued_success_Response.consensus_idx=nan(size(cued_success_Response.idx_from_glm));
+    xforcons=abs((0.5*cued_success_Response.allsucc_sus1to5sec+0.5*cued_success_Response.cXsucc_sus1to5sec)-(0.5*cued_success_Response.allfail_sus1to5sec+0.5*cued_success_Response.cXfail_sus1to5sec));
+    yforcons=cued_success_Response.combosuccess_modulation_index;
+    for i=1:size(is1preferred_idx,1)
+        for j=1:size(is1preferred_idx,2)
+            if is1preferred_idx(i,j)==1 || is1preferred(i,j)==1
+                cued_success_Response.consensus_idx(xforcons>=xbins_purppref(i) & xforcons<xbins_purppref(i+1) & yforcons>=ybins_purppref(j) & yforcons<ybins_purppref(j+1))=1;
+            end
+            if is2preferred_idx(i,j)==1 || is2preferred(i,j)==1
+                cued_success_Response.consensus_idx(xforcons>=xbins_purppref(i) & xforcons<xbins_purppref(i+1) & yforcons>=ybins_purppref(j) & yforcons<ybins_purppref(j+1))=2;
+            end
+        end
+    end
+    figure(); s=scatter(xforcons(cued_success_Response.consensus_idx==2),yforcons(cued_success_Response.consensus_idx==2),100,cmap(2,:),'filled'); % purple
+    s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4; hold on; 
+    s=scatter(xforcons(cued_success_Response.consensus_idx==1),yforcons(cued_success_Response.consensus_idx==1),100,cmap(1,:),'filled'); % cyan
+    s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4; 
 
     figure(); s=scatter(nanmean(matchedtocued_all_glm_coef(cued_success_Response.idx_from_glm==2,21:71),2),nanmean(matchedtocued_all_glm_coef(cued_success_Response.idx_from_glm==2,640+20:640+40),2),100,cmap(2,:),'filled'); % purple
     s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4; hold on;
