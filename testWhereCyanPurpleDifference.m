@@ -80,6 +80,7 @@ elseif length(varargin)==6
     % xbins=xrange(1):0.015:xrange(2)+0.0001;
     % ybins=-1.05:0.15:1.05; %yrange(1):0.15:yrange(2);
     % xbins=-0.066:0.09:xrange(2); %xrange(1):0.015:xrange(2)+0.0001;
+    
     xbins=xrange(1):0.01:xrange(2);
     xbins(end)=xbins(end)+0.0001;
     ybins=-1:0.2:1; %yrange(1):0.15:yrange(2);

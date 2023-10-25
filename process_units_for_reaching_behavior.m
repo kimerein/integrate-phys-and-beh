@@ -372,7 +372,7 @@ for i=1:length(dd)
     dd_more{i}=[dd{i} sep response_to_plot];
 end
 whichUnitsToGrab='_'; % '_' for all units, or can be something like 'D1tagged'
-Response=getAndSaveResponse(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
+Response=e(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
 % for opto-tagging comparing tagged v untagged
 % [tagged_Response,D1orD2taggingExpt,putAlignPeakAt]=getAndSaveResponse(dd_more,'D1tagged',settingsForStriatumUnitPlots,[]);
 % [untagged_Response]=getAndSaveResponse(dd_more,'__',settingsForStriatumUnitPlots,putAlignPeakAt);
@@ -1078,17 +1078,17 @@ else
     scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.consensus_idx==1),cued_success_Response.cXfailure_modulation_index(cued_success_Response.consensus_idx==1),[],'b');
     hold on; scatter(cued_success_Response.cXsuccess_modulation_index(cued_success_Response.consensus_idx==2),cued_success_Response.cXfailure_modulation_index(cued_success_Response.consensus_idx==2),[],'r');
     cued_success_Response.idx_from_boundary=nan(size(cued_success_Response.idx));
-%     cued_success_Response.idx_from_boundary(cued_success_Response.combosuccess_modulation_index>0.45 & confidence>0.45)=1;
-%     cued_success_Response.idx_from_boundary(cued_success_Response.combosuccess_modulation_index<-0.52 & confidence>0.45)=2;
-    cued_success_Response.idx_from_boundary(cued_success_Response.combosuccess_modulation_index>0.2 & confidence>0.45)=1;
-    cued_success_Response.idx_from_boundary(cued_success_Response.combosuccess_modulation_index<-0.2 & confidence>0.45)=2;
+    cued_success_Response.idx_from_boundary(cued_success_Response.combosuccess_modulation_index>0.45 & confidence>0.45)=1;
+    cued_success_Response.idx_from_boundary(cued_success_Response.combosuccess_modulation_index<-0.52 & confidence>0.45)=2;
+%     cued_success_Response.idx_from_boundary(cued_success_Response.combosuccess_modulation_index>0.2 & confidence>0.45)=1;
+%     cued_success_Response.idx_from_boundary(cued_success_Response.combosuccess_modulation_index<-0.2 & confidence>0.45)=2;
 %     cued_success_Response.idx_far_from_boundary=nan(size(cued_success_Response.idx));
 %     cued_success_Response.idx_far_from_boundary(cued_success_Response.combosuccess_modulation_index>0.2 & cued_success_Response.combosuccess_modulation_index~=1)=1;
 %     cued_success_Response.idx_far_from_boundary(cued_success_Response.combosuccess_modulation_index<=-0.2 & cued_success_Response.combosuccess_modulation_index~=-1)=2;
     cued_success_Response.idx_diagonal_boundary=nan(size(cued_success_Response.idx));
     cued_success_Response.idx_diagonal_boundary(:)=2;
-%     cued_success_Response.idx_diagonal_boundary((cued_success_Response.combosuccess_modulation_index-cued_success_Response.combofailure_modulation_index)>0.2)=1;
-    cued_success_Response.idx_diagonal_boundary((cued_success_Response.combosuccess_modulation_index-cued_success_Response.combofailure_modulation_index)>-0.05)=1;
+    cued_success_Response.idx_diagonal_boundary((cued_success_Response.combosuccess_modulation_index-cued_success_Response.combofailure_modulation_index)>0.2)=1;
+%     cued_success_Response.idx_diagonal_boundary((cued_success_Response.combosuccess_modulation_index-cued_success_Response.combofailure_modulation_index)>-0.05)=1;
     cued_success_Response.combo_boundary=nan(size(cued_success_Response.idx));
     cued_success_Response.combo_boundary(cued_success_Response.idx_from_boundary==1 & cued_success_Response.idx_diagonal_boundary==1)=1;
     cued_success_Response.combo_boundary(cued_success_Response.idx_from_boundary==2 & cued_success_Response.idx_diagonal_boundary==2)=2;   
@@ -1149,13 +1149,53 @@ else
     xlabel('succ sustained'); ylabel('fail sustained'); zlabel('success mod');
 
     % THIS VIEW USEFUL
+    load('Z:\MICROSCOPE\Kim\Final Figs\Fig5\clusters for supplement\cued_success_Response_consensusFrom2views.mat')
     figure(); s=scatter3(abs((0.5*cued_success_Response.allfail_sus1to5sec(cued_success_Response.idx_from_glm==2 & confidence>0.5)+0.5*cued_success_Response.cXfail_sus1to5sec(cued_success_Response.idx_from_glm==2 & confidence>0.5))),cued_success_Response.combosuccess_modulation_index(cued_success_Response.idx_from_glm==2 & confidence>0.5),cued_success_Response.combofailure_modulation_index(cued_success_Response.idx_from_glm==2 & confidence>0.5),100,cmap(2,:),'filled'); % purple
     s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4; hold on;
     s=scatter3(abs((0.5*cued_success_Response.allfail_sus1to5sec(cued_success_Response.idx_from_glm==1 & confidence>0.5)+0.5*cued_success_Response.cXfail_sus1to5sec(cued_success_Response.idx_from_glm==1 & confidence>0.5))),cued_success_Response.combosuccess_modulation_index(cued_success_Response.idx_from_glm==1 & confidence>0.5),cued_success_Response.combofailure_modulation_index(cued_success_Response.idx_from_glm==1 & confidence>0.5),100,cmap(1,:),'filled'); % cyan
     s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4; hold on;
     xlabel('abs fail sustained'); ylabel('success mod'); zlabel('fail mod');
-    templabel=cued_success_Response.idx_from_glm; templabel(confidence<0.5)=nan;
-    [is1preferred_idx,is2preferred_idx,xbins_purppref,ybins_purppref,zbins]=testWhereCyanPurpleDifference(abs(0.5*cued_success_Response.allfail_sus1to5sec+0.5*cued_success_Response.cXfail_sus1to5sec),cued_success_Response.combosuccess_modulation_index,templabel,cmap,[0.6666 1.5],cued_success_Response.combofailure_modulation_index);
+    xforcons=abs(0.5*cued_success_Response.allfail_sus1to5sec+0.5*cued_success_Response.cXfail_sus1to5sec);
+    yforcons=cued_success_Response.combosuccess_modulation_index;
+    zforcons=cued_success_Response.combofailure_modulation_index;
+%     cued_success_Response.combo_boundary=nan(size(cued_success_Response.idx_from_glm));
+%     cued_success_Response.combo_boundary(yforcons>=zforcons & xforcons>=(-0.05/2).*yforcons+0.025 & ~(yforcons<zforcons & xforcons<(-0.05/2).*yforcons+0.025))=1; % cyan
+%     cued_success_Response.combo_boundary(yforcons<zforcons & xforcons<(-0.05/2).*yforcons+0.025 & ~(yforcons>=zforcons & xforcons>=(-0.05/2).*yforcons+0.025))=2; % purple
+    cued_success_Response.combo_boundary=nan(size(cued_success_Response.idx_from_glm));
+    cued_success_Response.combo_boundary(xforcons>(-0.04/2).*yforcons+0.02)=1; % cyan
+    cued_success_Response.combo_boundary(xforcons<=(-0.04/2).*yforcons+0.02)=2; % purple
+    % for cells that don't have any coef in success but have coef in
+    % failure, they are cyan
+    cued_success_Response.combo_boundary(nansum(matchedtocued_all_glm_coef(:,[234:284]),2)==0 & xforcons>0)=1; % cyan
+    % then combine with tensor regression classifications with high weights
+    cued_success_Response.consensus_idx=nan(size(cued_success_Response.idx));
+    cued_success_Response.consensus_idx(cued_success_Response.combo_boundary==1 | (cued_success_Response.idx==1 & cued_success_Response.isHighWeight==1) & (cued_success_Response.combo_boundary~=2 & cued_success_Response.idx~=2))=1; 
+    cued_success_Response.consensus_idx(cued_success_Response.combo_boundary==2 | (cued_success_Response.idx==2 & cued_success_Response.isHighWeight==1) & (cued_success_Response.combo_boundary~=1 & cued_success_Response.idx~=1))=2;
+
+%     templabel=cued_success_Response.idx_from_glm; templabel(confidence<0.5)=nan;
+%     [is1preferred_idx,is2preferred_idx,xbins_purppref,ybins_purppref,~,zbins_purppref]=testWhereCyanPurpleDifference(abs(0.5*cued_success_Response.allfail_sus1to5sec+0.5*cued_success_Response.cXfail_sus1to5sec),cued_success_Response.combosuccess_modulation_index,templabel,cmap,[1 1],cued_success_Response.combofailure_modulation_index);
+%     % and assign to combo_boundary
+%     cued_success_Response.combo_boundary=nan(size(cued_success_Response.idx_from_glm));
+%     xforcons=abs(0.5*cued_success_Response.allfail_sus1to5sec+0.5*cued_success_Response.cXfail_sus1to5sec);
+%     yforcons=cued_success_Response.combosuccess_modulation_index;
+%     zforcons=cued_success_Response.combofailure_modulation_index;
+%     for i=1:size(is1preferred_idx,1)
+%         for j=1:size(is1preferred_idx,2)
+%             for k=1:size(is1preferred_idx,3)
+%                 if is1preferred_idx(i,j,k)==1
+%                     cued_success_Response.combo_boundary(xforcons>=xbins_purppref(i) & xforcons<xbins_purppref(i+1) & yforcons>=ybins_purppref(j) & yforcons<ybins_purppref(j+1) & zforcons>=zbins_purppref(k) & zforcons<zbins_purppref(k+1))=1;
+%                 end
+%                 if is2preferred_idx(i,j,k)==1
+%                     cued_success_Response.combo_boundary(xforcons>=xbins_purppref(i) & xforcons<xbins_purppref(i+1) & yforcons>=ybins_purppref(j) & yforcons<ybins_purppref(j+1) & zforcons>=zbins_purppref(k) & zforcons<zbins_purppref(k+1))=2;
+%                 end
+%             end
+%         end
+%     end
+    % then combine with tensor regression classifications with high weights
+    cued_success_Response.consensus_idx=nan(size(cued_success_Response.idx));
+    cued_success_Response.consensus_idx(cued_success_Response.combo_boundary==1 | (cued_success_Response.idx==1 & cued_success_Response.isHighWeight==1) & (cued_success_Response.combo_boundary~=2 & cued_success_Response.idx~=2))=1; 
+    cued_success_Response.consensus_idx(cued_success_Response.combo_boundary==2 | (cued_success_Response.idx==2 & cued_success_Response.isHighWeight==1) & (cued_success_Response.combo_boundary~=1 & cued_success_Response.idx~=1))=2;
+    
     figure(); s=scatter(abs((0.5*cued_success_Response.allfail_sus1to5sec(cued_success_Response.A2atag(cued_success_Response.excluded==0)==1)+0.5*cued_success_Response.cXfail_sus1to5sec(cued_success_Response.A2atag(cued_success_Response.excluded==0)==1))),cued_success_Response.combosuccess_modulation_index(cued_success_Response.A2atag(cued_success_Response.excluded==0)==1),100,cmap(2,:),'filled'); % purple
     s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4; hold on;
     s=scatter(abs((0.5*cued_success_Response.allfail_sus1to5sec(cued_success_Response.D1tag(cued_success_Response.excluded==0)==1)+0.5*cued_success_Response.cXfail_sus1to5sec(cued_success_Response.D1tag(cued_success_Response.excluded==0)==1))),cued_success_Response.combosuccess_modulation_index(cued_success_Response.D1tag(cued_success_Response.excluded==0)==1),100,cmap(1,:),'filled'); % cyan
@@ -1167,23 +1207,23 @@ else
     s=scatter(abs((0.5*cued_success_Response.allsucc_sus1to5sec(cued_success_Response.D1tag(cued_success_Response.excluded==0)==1)+0.5*cued_success_Response.cXsucc_sus1to5sec(cued_success_Response.D1tag(cued_success_Response.excluded==0)==1))-(0.5*cued_success_Response.allfail_sus1to5sec(cued_success_Response.D1tag(cued_success_Response.excluded==0)==1)+0.5*cued_success_Response.cXfail_sus1to5sec(cued_success_Response.D1tag(cued_success_Response.excluded==0)==1))),cued_success_Response.combosuccess_modulation_index(cued_success_Response.D1tag(cued_success_Response.excluded==0)==1),100,cmap(1,:),'filled'); % cyan
     s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4;
 
-    cued_success_Response.consensus_idx=nan(size(cued_success_Response.idx_from_glm));
-    xforcons=abs((0.5*cued_success_Response.allsucc_sus1to5sec+0.5*cued_success_Response.cXsucc_sus1to5sec)-(0.5*cued_success_Response.allfail_sus1to5sec+0.5*cued_success_Response.cXfail_sus1to5sec));
-    yforcons=cued_success_Response.combosuccess_modulation_index;
-    for i=1:size(is1preferred_idx,1)
-        for j=1:size(is1preferred_idx,2)
-            if is1preferred_idx(i,j)==1 || is1preferred(i,j)==1
-                cued_success_Response.consensus_idx(xforcons>=xbins_purppref(i) & xforcons<xbins_purppref(i+1) & yforcons>=ybins_purppref(j) & yforcons<ybins_purppref(j+1))=1;
-            end
-            if is2preferred_idx(i,j)==1 || is2preferred(i,j)==1
-                cued_success_Response.consensus_idx(xforcons>=xbins_purppref(i) & xforcons<xbins_purppref(i+1) & yforcons>=ybins_purppref(j) & yforcons<ybins_purppref(j+1))=2;
-            end
-        end
-    end
-    figure(); s=scatter(xforcons(cued_success_Response.consensus_idx==2),yforcons(cued_success_Response.consensus_idx==2),100,cmap(2,:),'filled'); % purple
-    s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4; hold on; 
-    s=scatter(xforcons(cued_success_Response.consensus_idx==1),yforcons(cued_success_Response.consensus_idx==1),100,cmap(1,:),'filled'); % cyan
-    s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4; 
+%     cued_success_Response.consensus_idx=nan(size(cued_success_Response.idx_from_glm));
+%     xforcons=abs((0.5*cued_success_Response.allsucc_sus1to5sec+0.5*cued_success_Response.cXsucc_sus1to5sec)-(0.5*cued_success_Response.allfail_sus1to5sec+0.5*cued_success_Response.cXfail_sus1to5sec));
+%     yforcons=cued_success_Response.combosuccess_modulation_index;
+%     for i=1:size(is1preferred_idx,1)
+%         for j=1:size(is1preferred_idx,2)
+%             if is1preferred_idx(i,j)==1 || is1preferred(i,j)==1
+%                 cued_success_Response.consensus_idx(xforcons>=xbins_purppref(i) & xforcons<xbins_purppref(i+1) & yforcons>=ybins_purppref(j) & yforcons<ybins_purppref(j+1))=1;
+%             end
+%             if is2preferred_idx(i,j)==1 || is2preferred(i,j)==1
+%                 cued_success_Response.consensus_idx(xforcons>=xbins_purppref(i) & xforcons<xbins_purppref(i+1) & yforcons>=ybins_purppref(j) & yforcons<ybins_purppref(j+1))=2;
+%             end
+%         end
+%     end
+%     figure(); s=scatter(xforcons(cued_success_Response.consensus_idx==2),yforcons(cued_success_Response.consensus_idx==2),100,cmap(2,:),'filled'); % purple
+%     s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4; hold on; 
+%     s=scatter(xforcons(cued_success_Response.consensus_idx==1),yforcons(cued_success_Response.consensus_idx==1),100,cmap(1,:),'filled'); % cyan
+%     s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4; 
 
     figure(); s=scatter(nanmean(matchedtocued_all_glm_coef(cued_success_Response.idx_from_glm==2,21:71),2),nanmean(matchedtocued_all_glm_coef(cued_success_Response.idx_from_glm==2,640+20:640+40),2),100,cmap(2,:),'filled'); % purple
     s.MarkerFaceAlpha=0.4; s.MarkerEdgeAlpha=0.4; hold on;
@@ -1549,10 +1589,10 @@ scatter(xaxis(cued_success_Response.consensus_idx==2),yaxis(cued_success_Respons
 %% decode trial type
 % axis x is activity of gp1 units (use window 2 to 5 sec)
 % axis y is activity of gp2 units (use window 2 to 5 sec)
-figure(); nBoot=100; nUnits=50;
+figure(); nBoot=100; nUnits=200;
 takeThese_gp1=nan(nBoot,nUnits); takeThese_gp2=nan(nBoot,nUnits);
 for i=1:nBoot
-    takeThese_gp1(i,:)=randsample(length(allgp1_cuedsuccFR),nUnits); takeThese_gp2(i,:)=randsample(length(allgp2_cuedsuccFR),nUnits);
+    takeThese_gp1(i,:)=randsample(length(allgp1_cuedsuccFR),nUnits,true); takeThese_gp2(i,:)=randsample(length(allgp2_cuedsuccFR),nUnits,true);
 end
 temp1=nan(nBoot,1); temp2=nan(nBoot,1);
 for i=1:nBoot
@@ -1585,7 +1625,14 @@ xlabel('Gp 1 average unit firing rate'); ylabel('Gp 2 average unit firing rate')
 ldaModel=fitcdiscr(Xmatrix,ylabels);
 predictedY=predict(ldaModel,Xmatrix);
 accuracy=sum(predictedY==ylabels)/length(ylabels);
-disp(['Accuracy of LDA on training set: ', num2str(accuracy * 100), '%']);
+disp(['Accuracy of LDA on training set 4-way: ', num2str(accuracy * 100), '%']);
+
+% 3-way classification
+ylabels(ylabels==4)=2;
+ldaModel=fitcdiscr(Xmatrix,ylabels);
+predictedY=predict(ldaModel,Xmatrix);
+accuracy=sum(predictedY==ylabels)/length(ylabels);
+disp(['Accuracy of LDA on training set 3-way: ', num2str(accuracy * 100), '%']);
 
 %% Trial type shuffle
 all1=[allgp1_cuedsuccFR; allgp1_cuedfailFR; allgp1_uncuedsuccFR; allgp1_uncuedfailFR];
@@ -1868,6 +1915,18 @@ end
 disp('max of uncuedfailureunits'); disp(nanmax(b.fortbytclass.fromWhichUnit_failure));
 out_decode=decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cued_success_Response.consensus_idx,100,100,80,true,false,false,false,false); % nBoots,nUnits,nTrials,withReplacement,addThirdAxis,nanAllZeros,justBoostrapTrials,collapseWithinUnit
 
+% gp1 v gp2 mapping
+figure();
+scatter(out_decode.cuedsucc_temp1,out_decode.cuedsucc_temp2,[],'g'); hold on;
+Xmatrix=[out_decode.cuedsucc_temp1 out_decode.cuedsucc_temp2]; ylabels=[ones(size(out_decode.cuedsucc_temp1,1),1)];
+scatter(out_decode.cuedfail_temp1,out_decode.cuedfail_temp2,[],'r');
+Xmatrix=[Xmatrix; [out_decode.cuedfail_temp1 out_decode.cuedfail_temp2]]; ylabels=[ylabels; 2*ones(size(out_decode.cuedsucc_temp1,1),1)];
+scatter(out_decode.uncuedsucc_temp1,out_decode.uncuedsucc_temp2,[],'b');
+Xmatrix=[Xmatrix; [out_decode.uncuedsucc_temp1 out_decode.uncuedsucc_temp2]]; ylabels=[ylabels; 3*ones(size(out_decode.cuedsucc_temp1,1),1)];
+scatter(out_decode.uncuedfail_temp1,out_decode.uncuedfail_temp2,[],'y');
+Xmatrix=[Xmatrix; [out_decode.uncuedfail_temp1 out_decode.uncuedfail_temp2]]; ylabels=[ylabels; 4*ones(size(out_decode.cuedsucc_temp1,1),1)];
+xlabel('gp1'); ylabel('gp2');
+
 % one mapping
 figure(); 
 scatter(out_decode.cuedsucc_temp2-out_decode.cuedsucc_temp1,out_decode.cuedsucc_temp2+out_decode.cuedsucc_temp1,[],'g'); hold on;
@@ -1910,7 +1969,14 @@ xlabel('cue vs uncue gp1'); ylabel('cue vs uncue gp2');
 ldaModel=fitcdiscr(Xmatrix,ylabels);
 predictedY=predict(ldaModel,Xmatrix);
 accuracy=sum(predictedY==ylabels)/length(ylabels);
-disp(['Accuracy of LDA on training set: ', num2str(accuracy * 100), '%']);
+disp(['Accuracy of LDA on training set 4-way: ', num2str(accuracy * 100), '%']);
+
+% 3-way classification
+ylabels(ylabels==4)=2;
+ldaModel=fitcdiscr(Xmatrix,ylabels);
+predictedY=predict(ldaModel,Xmatrix);
+accuracy=sum(predictedY==ylabels)/length(ylabels);
+disp(['Accuracy of LDA on training set 3-way: ', num2str(accuracy * 100), '%']);
 
 %% Behavior controls
 % load some behavior data

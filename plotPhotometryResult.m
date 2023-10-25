@@ -127,7 +127,7 @@ else
             error('Do not recognize this photometry_tbt field name.');
         end
     end
-    phototimes=photometry_tbt.(getCorrectTime);
+    phototimes=nanmean(photometry_tbt.(getCorrectTime),1);
 end
 
 if ismember(plotPhotoField,theseBehFieldsUseTimeField3)

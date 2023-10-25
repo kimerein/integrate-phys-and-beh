@@ -37,14 +37,14 @@ failurediff_forplot=nanmean(cuedfailure_minus_uncuedfailure(:,300:700),2);
 cuedsuccess_minus_cuedfailure=medfilt1(tensor_tomatchcuedsuccess(:,:,1)-tensor_tomatchcuedsuccess(:,:,2),100,[],2);
 cueddiff=nanmean(cuedsuccess_minus_cuedfailure(:,300:700),2);
 cuedsuccess_minus_cuedfailure(isnan(cuedsuccess_minus_cuedfailure))=0; % for plotting
-cuedsuccess_minus_cuedfailure(cuedsuccess_minus_cuedfailure>2)=2; 
-cuedsuccess_minus_cuedfailure(cuedsuccess_minus_cuedfailure<-2)=-2;
+cuedsuccess_minus_cuedfailure(cuedsuccess_minus_cuedfailure>1.5)=1.5; 
+cuedsuccess_minus_cuedfailure(cuedsuccess_minus_cuedfailure<-1.5)=-1.5;
 cueddiff_forplot=nanmean(cuedsuccess_minus_cuedfailure(:,300:700),2);
 uncuedsuccess_minus_uncuedfailure=medfilt1(tensor_tomatchcuedsuccess(:,:,3)-tensor_tomatchcuedsuccess(:,:,4),100,[],2);
 uncueddiff=nanmean(uncuedsuccess_minus_uncuedfailure(:,300:700),2);
 uncuedsuccess_minus_uncuedfailure(isnan(uncuedsuccess_minus_uncuedfailure))=0; % for plotting
-uncuedsuccess_minus_uncuedfailure(uncuedsuccess_minus_uncuedfailure>2)=2; 
-uncuedsuccess_minus_uncuedfailure(uncuedsuccess_minus_uncuedfailure<-2)=-2;
+uncuedsuccess_minus_uncuedfailure(uncuedsuccess_minus_uncuedfailure>1.5)=1.5; 
+uncuedsuccess_minus_uncuedfailure(uncuedsuccess_minus_uncuedfailure<-1.5)=-1.5;
 uncueddiff_forplot=nanmean(uncuedsuccess_minus_uncuedfailure(:,300:700),2);
 
 % sorted by cued succ minus cued fail

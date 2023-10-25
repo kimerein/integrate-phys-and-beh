@@ -1,7 +1,8 @@
-function all_accs=getErrorBars_onShuffleConsensus_trialbytrial(a,b,cued_success_Response,nRuns)
+function [all_accs,all_accs_3way]=getErrorBars_onShuffleConsensus_trialbytrial(a,b,cued_success_Response,nRuns)
 
-countunits=10:10:170;
+countunits=180:10:200; %10:10:200;
 all_accs=nan(length(countunits),nRuns);
+all_accs_3way=nan(length(countunits),nRuns);
 
 temper_backup=[a.fortbytclass.unitfr_success; a.fortbytclass.unitfr_failure; b.fortbytclass.unitfr_success; b.fortbytclass.unitfr_failure];
 
@@ -19,8 +20,10 @@ for countRuns=1:nRuns
         nUnitsNow=100;
     elseif countunits(unitsCounter)>75 && countunits(unitsCounter)<125
         nUnitsNow=150;
-    else
+    elseif countunits(unitsCounter)>125 && countunits(unitsCounter)<175
         nUnitsNow=200;
+    else
+        nUnitsNow=250;
     end
 
     % shuffle before
@@ -44,22 +47,45 @@ for countRuns=1:nRuns
 %     out_decode.cuedsucc_temp1=all1(inds1==1); out_decode.cuedfail_temp1=all1(inds1==2); out_decode.uncuedsucc_temp1=all1(inds1==3); out_decode.uncuedfail_temp1=all1(inds1==4);
 %     out_decode.cuedsucc_temp2=all2(inds2==1); out_decode.cuedfail_temp2=all2(inds2==2); out_decode.uncuedsucc_temp2=all2(inds2==3); out_decode.uncuedfail_temp2=all2(inds2==4);
     
-    % one mapping
+%     % one mapping
+%     figure();
+%     scatter(out_decode.cuedsucc_temp2-out_decode.cuedsucc_temp1,out_decode.cuedsucc_temp2+out_decode.cuedsucc_temp1,[],'g'); hold on;
+%     Xmatrix=[out_decode.cuedsucc_temp2-out_decode.cuedsucc_temp1 out_decode.cuedsucc_temp2+out_decode.cuedsucc_temp1]; ylabels=[ones(size(out_decode.cuedsucc_temp1,1),1)];
+%     scatter(out_decode.cuedfail_temp2-out_decode.cuedfail_temp1,out_decode.cuedfail_temp2+out_decode.cuedfail_temp1,[],'r');
+%     Xmatrix=[Xmatrix; [out_decode.cuedfail_temp2-out_decode.cuedfail_temp1 out_decode.cuedfail_temp2+out_decode.cuedfail_temp1]]; ylabels=[ylabels; 2*ones(size(out_decode.cuedsucc_temp1,1),1)];
+%     scatter(out_decode.uncuedsucc_temp2-out_decode.uncuedsucc_temp1,out_decode.uncuedsucc_temp2+out_decode.uncuedsucc_temp1,[],'b');
+%     Xmatrix=[Xmatrix; [out_decode.uncuedsucc_temp2-out_decode.uncuedsucc_temp1 out_decode.uncuedsucc_temp2+out_decode.uncuedsucc_temp1]]; ylabels=[ylabels; 3*ones(size(out_decode.cuedsucc_temp1,1),1)];
+%     scatter(out_decode.uncuedfail_temp2-out_decode.uncuedfail_temp1,out_decode.uncuedfail_temp2+out_decode.uncuedfail_temp1,[],'y');
+%     Xmatrix=[Xmatrix; [out_decode.uncuedfail_temp2-out_decode.uncuedfail_temp1 out_decode.uncuedfail_temp2+out_decode.uncuedfail_temp1]]; ylabels=[ylabels; 4*ones(size(out_decode.cuedsucc_temp1,1),1)];
+%     xlabel('gp2 minus gp1'); ylabel('gp2 plus gp1');
+
+    % gp1 v gp2 mapping
     figure();
-    scatter(out_decode.cuedsucc_temp2-out_decode.cuedsucc_temp1,out_decode.cuedsucc_temp2+out_decode.cuedsucc_temp1,[],'g'); hold on;
-    Xmatrix=[out_decode.cuedsucc_temp2-out_decode.cuedsucc_temp1 out_decode.cuedsucc_temp2+out_decode.cuedsucc_temp1]; ylabels=[ones(size(out_decode.cuedsucc_temp1,1),1)];
-    scatter(out_decode.cuedfail_temp2-out_decode.cuedfail_temp1,out_decode.cuedfail_temp2+out_decode.cuedfail_temp1,[],'r');
-    Xmatrix=[Xmatrix; [out_decode.cuedfail_temp2-out_decode.cuedfail_temp1 out_decode.cuedfail_temp2+out_decode.cuedfail_temp1]]; ylabels=[ylabels; 2*ones(size(out_decode.cuedsucc_temp1,1),1)];
-    scatter(out_decode.uncuedsucc_temp2-out_decode.uncuedsucc_temp1,out_decode.uncuedsucc_temp2+out_decode.uncuedsucc_temp1,[],'b');
-    Xmatrix=[Xmatrix; [out_decode.uncuedsucc_temp2-out_decode.uncuedsucc_temp1 out_decode.uncuedsucc_temp2+out_decode.uncuedsucc_temp1]]; ylabels=[ylabels; 3*ones(size(out_decode.cuedsucc_temp1,1),1)];
-    scatter(out_decode.uncuedfail_temp2-out_decode.uncuedfail_temp1,out_decode.uncuedfail_temp2+out_decode.uncuedfail_temp1,[],'y');
-    Xmatrix=[Xmatrix; [out_decode.uncuedfail_temp2-out_decode.uncuedfail_temp1 out_decode.uncuedfail_temp2+out_decode.uncuedfail_temp1]]; ylabels=[ylabels; 4*ones(size(out_decode.cuedsucc_temp1,1),1)];
-    xlabel('gp2 minus gp1'); ylabel('gp2 plus gp1');
+    scatter(out_decode.cuedsucc_temp1,out_decode.cuedsucc_temp2,[],'g'); hold on;
+    Xmatrix=[out_decode.cuedsucc_temp1 out_decode.cuedsucc_temp2]; ylabels=[ones(size(out_decode.cuedsucc_temp1,1),1)];
+    scatter(out_decode.cuedfail_temp1,out_decode.cuedfail_temp2,[],'r');
+    Xmatrix=[Xmatrix; [out_decode.cuedfail_temp1 out_decode.cuedfail_temp2]]; ylabels=[ylabels; 2*ones(size(out_decode.cuedsucc_temp1,1),1)];
+    scatter(out_decode.uncuedsucc_temp1,out_decode.uncuedsucc_temp2,[],'b');
+    Xmatrix=[Xmatrix; [out_decode.uncuedsucc_temp1 out_decode.uncuedsucc_temp2]]; ylabels=[ylabels; 3*ones(size(out_decode.cuedsucc_temp1,1),1)];
+    scatter(out_decode.uncuedfail_temp1,out_decode.uncuedfail_temp2,[],'y');
+    Xmatrix=[Xmatrix; [out_decode.uncuedfail_temp1 out_decode.uncuedfail_temp2]]; ylabels=[ylabels; 4*ones(size(out_decode.cuedsucc_temp1,1),1)];
+    xlabel('gp1'); ylabel('gp2');
+
+
     ldaModel=fitcdiscr(Xmatrix,ylabels);
     predictedY=predict(ldaModel,Xmatrix);
     accuracy=sum(predictedY==ylabels)/length(ylabels);
     disp(['Accuracy of LDA on training set: ', num2str(accuracy * 100), '%']);
     all_accs(unitsCounter,countRuns)=accuracy * 100;
+    close all;
+
+    % 3-way classification
+    ylabels(ylabels==4)=2;
+    ldaModel=fitcdiscr(Xmatrix,ylabels);
+    predictedY=predict(ldaModel,Xmatrix);
+    accuracy=sum(predictedY==ylabels)/length(ylabels);
+    disp(['Accuracy of LDA on training set: ', num2str(accuracy * 100), '%']);
+    all_accs_3way(unitsCounter,countRuns)=accuracy * 100;
     close all;
 
 end

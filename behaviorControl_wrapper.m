@@ -167,6 +167,7 @@ end
 
 function chewendtimes=getChewEnd(beh2_tbt,reachType,reachWindow,behWindow)
 
+%beh2_tbt.times_wrt_trial_start=repmat([0:0.035:(size(beh2_tbt.cue,2)-1)*0.035],size(beh2_tbt.cue,1),1);
 [fout,dataout,n_events_in_av,alignmentCompanion,f_heatmap,plotBehFieldOut,phys_timepointsCompanion]=plotPhotometryResult(beh2_tbt,beh2_tbt,[],reachType,'chewingEnds','cueZone_onVoff','first',reachWindow,[]);
 close all;
 if isempty(dataout)

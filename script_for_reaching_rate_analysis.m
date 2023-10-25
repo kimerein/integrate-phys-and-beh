@@ -145,7 +145,7 @@ trialTypes.sessid=metadata.sessid;
 % tbt_filter.sortField='sessid';
 % tbt_filter.sortField='led';
 % tbt_filter.sortField='sess_wrt_day1';
-tbt_filter.sortField='dprimes';
+tbt_filter.sortField='mouseid';
 % tbt_filter.sortField='day1formice';
 % tbt_filter.sortField='distractor_immediate_after_cue';
 % tbt_filter.sortField='higherThanBefore';
@@ -163,8 +163,9 @@ tbt_filter.sortField='dprimes';
 % tbt_filter.range_values=[37.5 38.5] ;%0.471];
 % tbt_filter.range_values=[-100 0.75]; % beginner: d<0.25, intermediate: 0.25<=d<0.75, expert: d>=0.75
 % tbt_filter.range_values=[163.5 170];
+tbt_filter.range_values=[0.5 1.5];
 % tbt_filter.range_values=[0.5 0.9];
-tbt_filter.range_values=[-100 100]; % maybe 2,6,7,12
+% tbt_filter.range_values=[-100 100]; % maybe 2,6,7,12
 % tbt_filter.range_values=[2 3 4 5 6 7 8 9 10 11 12 14 15 17 18 19]; % which mice start at non-learning 
 % tbt_filter.range_values=[1 2 4 5 6 7 8 9 10 11 12 17 18 19];
 % tbt_filter.range_values=[1     2     3     6     7     8     9    10    11    12    14    15    17    18];
@@ -264,12 +265,12 @@ trialTypes.led_11back=[ones(11,1); trialTypes.led(1:end-11)];
 trialTypes.led_7back=[ones(7,1); trialTypes.led(1:end-7)];
 trialTypes.led_6back=[ones(6,1); trialTypes.led(1:end-6)];
 
-% trial1='trialTypes.led==0';
+trial1='trialTypes.led==0';
 % % trial1='trialTypes.led==0'; % | trialTypes.led_1back==0 | trialTypes.led_2back==0';
 % % memory
 % %this %trial1='trialTypes.led~=1'; 
 % % trial1='trialTypes.isLongITI==1';
-trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
+% trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
 % trial1='trialTypes.optoGroup~=1 & trialTypes.did_cued_reach_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.isLongITI_1forward==1';
 % % trial1='trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1'; % & trialTypes.isLongITI_1forward==1'];
 % % trial1='trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup~=1';
@@ -479,6 +480,8 @@ reachrates=plotChangeInReachProbability_fromRTdataset(dataset,metadata,alltbt,'c
 plotPairedChangeMinusSatiety(reachrates);
 
 %% plot outcome-dependent shifts
+% NEXT LINE IS WHAT I USED FOR FIGURE 4, e.g.,
+% scriptToMakeOutcomeFigure4(alltbt,trialTypes,metadata,0.25,1,saveDir,'Z:\MICROSCOPE\Kim\Final Figs\Fig4\Part 1 batch opto NkxCre x ReaChR\exclude preempt use this',tbt_filter,'poi25then1NOOPREdplearnNoEnhance');
 % scriptToMakeOutcomeFigure4(alltbt,trialTypes,metadata,cuedreachtimewindow,optoDuration,sad,savePlotsDir,tbt_filter);
 reachratesettings.acrossSess_window1=[0 cuedreachtimewindow]; % time window wrt cue onset to classify reach as cued
 reachratesettings.acrossSess_window2=[7 9.5]; % beware reach suppression after a success
