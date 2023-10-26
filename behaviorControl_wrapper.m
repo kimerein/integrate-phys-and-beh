@@ -118,7 +118,7 @@ plotSingleHist(alltog.cueFail_postoutcome_reaches,[0:1:15],'r',true);
 plotSingleHist(alltog.uncueSucc_postoutcome_reaches,[0:1:15],'k',true);
 plotSingleHist(alltog.uncueFail_postoutcome_reaches,[0:1:15],'b',true);
 title('Number of confirmatory reaches');
-r=ranksum(alltog.cueFail_postoutcome_reaches(alltog.cueFail_postoutcome_reaches<5), alltog.uncueFail_postoutcome_reaches(alltog.uncueFail_postoutcome_reaches<5));
+r=ranksum(alltog.cueFail_postoutcome_reaches(alltog.cueFail_postoutcome_reaches<10), alltog.uncueFail_postoutcome_reaches(alltog.uncueFail_postoutcome_reaches<10));
 disp(r);
 us=unique(alltog.cueFail_fromwhichsess_reaches);
 usuncue=unique(alltog.uncueFail_fromwhichsess_reaches);
