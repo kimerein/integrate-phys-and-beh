@@ -27,7 +27,7 @@ alltog.cueFail_fromwhichsess_chews=cueFail_fromwhichsess_chews;
 event='success_fromPerchOrWheel';
 % timeWindow=[3 7]; % in seconds from cue onset
 % timeWindow=[3 16]; % in seconds from cue onset THIS TIME MATCHES TIME WINDOW IN saveBehaviorAlignmentsSingleNeuron.m
-timeWindow=[3 4.5];
+timeWindow=[3 5];
 [uncueSucc_chewendings,uncueSucc_postoutcome_reaches,uncueSucc_fromwhichsess_reaches,uncueSucc_fromwhichsess_chews]=getChewsAndReachFromAllSess(data_loc_array,maxTrialsPerSess,event,cueOffset,timeWindow,behReadoutTimeWindow);
 alltog.uncueSucc_chewendings=uncueSucc_chewendings;
 alltog.uncueSucc_postoutcome_reaches=uncueSucc_postoutcome_reaches;
@@ -39,7 +39,7 @@ event='failure_noSuccessBeforeAndNoReachingAfter';
 % event='misses_and_pelletMissing_and_drop';
 % timeWindow=[3 7]; % in seconds from cue onset
 % timeWindow=[3 16]; 
-timeWindow=[3 4.5];
+timeWindow=[3 5];
 [uncueFail_chewendings,uncueFail_postoutcome_reaches,uncueFail_fromwhichsess_reaches,uncueFail_fromwhichsess_chews]=getChewsAndReachFromAllSess(data_loc_array,maxTrialsPerSess,event,cueOffset,timeWindow,behReadoutTimeWindow);
 alltog.uncueFail_chewendings=uncueFail_chewendings;
 alltog.uncueFail_postoutcome_reaches=uncueFail_postoutcome_reaches;
@@ -134,6 +134,10 @@ for i=1:length(u)
     sessbysess_uncue(i)=nanmean(temp_uncueFail_postoutcome_reaches(alltog.uncueFail_fromwhichsess_reaches==u(i)));
 end
 disp(signrank(sessbysess_cue,sessbysess_uncue));
+figure();
+for i=1:length(u)
+    line([1 2],[sessbysess_cue(i) sessbysess_uncue(i)]); hold on;
+end
 
 % mouse cannot produce real reaches at a rate of >2 per sec
 
