@@ -1,6 +1,8 @@
 function [alltog,postOutcome_reaches,chewDurations]=behaviorControl_wrapper(data_loc_array)
 
 cueOffset=-0.16; % match what used for physiology
+% NOTE THAT I USE 5 SEC HERE, BECAUSE THIS IS THE MAX POST-OUTCOME WINDOW 
+% And anything after this is beyond the post-outcome period
 behReadoutTimeWindow=[0 5]; % in sec from alignCompanion
 maxTrialsPerSess=250; % cannot be more than this many trials of any type
 
