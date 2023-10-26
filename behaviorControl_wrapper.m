@@ -15,6 +15,7 @@ alltog.cueSucc_fromwhichsess_chews=cueSucc_fromwhichsess_chews;
 
 % Cued failure and no reaching afterward
 event='failure_noSuccessBeforeAndNoReachingAfter';
+% event='misses_and_pelletMissing_and_drop';
 timeWindow=[0+cueOffset 3]; % in seconds from cue onset
 [cueFail_chewendings,cueFail_postoutcome_reaches,cueFail_fromwhichsess_reaches,cueFail_fromwhichsess_chews]=getChewsAndReachFromAllSess(data_loc_array,maxTrialsPerSess,event,cueOffset,timeWindow,behReadoutTimeWindow);
 alltog.cueFail_chewendings=cueFail_chewendings;
@@ -24,7 +25,9 @@ alltog.cueFail_fromwhichsess_chews=cueFail_fromwhichsess_chews;
 
 % Uncued success
 event='success_fromPerchOrWheel';
-timeWindow=[3 7]; % in seconds from cue onset
+% timeWindow=[3 7]; % in seconds from cue onset
+% timeWindow=[3 16]; % in seconds from cue onset THIS TIME MATCHES TIME WINDOW IN saveBehaviorAlignmentsSingleNeuron.m
+timeWindow=[3 4.5];
 [uncueSucc_chewendings,uncueSucc_postoutcome_reaches,uncueSucc_fromwhichsess_reaches,uncueSucc_fromwhichsess_chews]=getChewsAndReachFromAllSess(data_loc_array,maxTrialsPerSess,event,cueOffset,timeWindow,behReadoutTimeWindow);
 alltog.uncueSucc_chewendings=uncueSucc_chewendings;
 alltog.uncueSucc_postoutcome_reaches=uncueSucc_postoutcome_reaches;
@@ -33,7 +36,10 @@ alltog.uncueSucc_fromwhichsess_chews=uncueSucc_fromwhichsess_chews;
 
 % Uncued failure and no reaching afterward
 event='failure_noSuccessBeforeAndNoReachingAfter';
-timeWindow=[3 7]; % in seconds from cue onset
+% event='misses_and_pelletMissing_and_drop';
+% timeWindow=[3 7]; % in seconds from cue onset
+% timeWindow=[3 16]; 
+timeWindow=[3 4.5];
 [uncueFail_chewendings,uncueFail_postoutcome_reaches,uncueFail_fromwhichsess_reaches,uncueFail_fromwhichsess_chews]=getChewsAndReachFromAllSess(data_loc_array,maxTrialsPerSess,event,cueOffset,timeWindow,behReadoutTimeWindow);
 alltog.uncueFail_chewendings=uncueFail_chewendings;
 alltog.uncueFail_postoutcome_reaches=uncueFail_postoutcome_reaches;
@@ -81,6 +87,24 @@ plotSingleHist(alltog.cueFail_chewendings,[0:0.1:5],'r');
 plotSingleHist(alltog.uncueSucc_chewendings,[0:0.1:5],'k');
 plotSingleHist(alltog.uncueFail_chewendings,[0:0.1:5],'b');
 title('Chew durations (sec)');
+figure();
+plotSingleHist(alltog.cueSucc_chewendings,[0:0.5:5],'g',true); hold on;
+plotSingleHist(alltog.cueFail_chewendings,[0:0.5:5],'r',true);
+plotSingleHist(alltog.uncueSucc_chewendings,[0:0.5:5],'k',true);
+plotSingleHist(alltog.uncueFail_chewendings,[0:0.5:5],'b',true);
+title('Chew durations (sec), integral-norm');
+disp(ranksum(alltog.cueSucc_chewendings,alltog.uncueSucc_chewendings));
+
+us=unique(alltog.cueSucc_fromwhichsess_chews);
+usuncue=unique(alltog.uncueSucc_fromwhichsess_chews);
+u=us(ismember(us,usuncue));
+sessbysess_uncue=nan(length(u),1);
+sessbysess_cue=nan(length(u),1);
+for i=1:length(u)
+    sessbysess_cue(i)=nanmean(alltog.cueSucc_chewendings(alltog.cueSucc_fromwhichsess_chews==u(i)));
+    sessbysess_uncue(i)=nanmean(alltog.uncueSucc_chewendings(alltog.uncueSucc_fromwhichsess_chews==u(i)));
+end
+disp(signrank(sessbysess_cue,sessbysess_uncue));
 
 figure();
 plotSingleHist(alltog.cueSucc_postoutcome_reaches,[0:1:15],'g'); hold on;
@@ -88,6 +112,30 @@ plotSingleHist(alltog.cueFail_postoutcome_reaches,[0:1:15],'r');
 plotSingleHist(alltog.uncueSucc_postoutcome_reaches,[0:1:15],'k');
 plotSingleHist(alltog.uncueFail_postoutcome_reaches,[0:1:15],'b');
 title('Number of confirmatory reaches');
+figure();
+plotSingleHist(alltog.cueSucc_postoutcome_reaches,[0:1:15],'g',true); hold on;
+plotSingleHist(alltog.cueFail_postoutcome_reaches,[0:1:15],'r',true);
+plotSingleHist(alltog.uncueSucc_postoutcome_reaches,[0:1:15],'k',true);
+plotSingleHist(alltog.uncueFail_postoutcome_reaches,[0:1:15],'b',true);
+title('Number of confirmatory reaches');
+r=ranksum(alltog.cueFail_postoutcome_reaches(alltog.cueFail_postoutcome_reaches<5), alltog.uncueFail_postoutcome_reaches(alltog.uncueFail_postoutcome_reaches<5));
+disp(r);
+us=unique(alltog.cueFail_fromwhichsess_reaches);
+usuncue=unique(alltog.uncueFail_fromwhichsess_reaches);
+u=us(ismember(us,usuncue));
+sessbysess_uncue=nan(length(u),1);
+sessbysess_cue=nan(length(u),1);
+temp_cueFail_postoutcome_reaches=alltog.cueFail_postoutcome_reaches;
+temp_cueFail_postoutcome_reaches(temp_cueFail_postoutcome_reaches>5)=nan;
+temp_uncueFail_postoutcome_reaches=alltog.uncueFail_postoutcome_reaches;
+temp_uncueFail_postoutcome_reaches(temp_uncueFail_postoutcome_reaches>5)=nan;
+for i=1:length(u)
+    sessbysess_cue(i)=nanmean(temp_cueFail_postoutcome_reaches(alltog.cueFail_fromwhichsess_reaches==u(i)));
+    sessbysess_uncue(i)=nanmean(temp_uncueFail_postoutcome_reaches(alltog.uncueFail_fromwhichsess_reaches==u(i)));
+end
+disp(signrank(sessbysess_cue,sessbysess_uncue));
+
+% mouse cannot produce real reaches at a rate of >2 per sec
 
 figure(); plotSingleHist(postOutcome_reaches.dp_per_sess_cuedSucc_v_cuedFail,[-1-0.005:0.01:3+0.005],'k'); title('Confirmatory reaches Dprimes cuedSucc v cuedFail');
 figure(); plotSingleHist(postOutcome_reaches.dp_per_sess_uncuedSucc_v_uncuedFail,[-3-0.005:0.01:3+0.005],'k'); title('Confirmatory reaches Dprimes uncuedSucc v uncuedFail');
@@ -101,11 +149,27 @@ figure(); plotSingleHist(chewDurations.dp_per_sess_cuedFail_v_uncuedFail,[-3-0.0
 
 end
 
-function plotSingleHist(data,bins,col)
+function plotSingleHist(varargin)
+
+if length(varargin)==3
+    data=varargin{1};
+    bins=varargin{2};
+    col=varargin{3};
+    intnorm=false;
+elseif length(varargin)==4
+    data=varargin{1};
+    bins=varargin{2};
+    col=varargin{3};
+    intnorm=varargin{4};
+end
 
 [n,x]=histcounts(data,bins);
 [n,x]=cityscape_hist(n,x); 
-plot(x,n,'Color',col);
+if intnorm==false
+    plot(x,n,'Color',col);
+else
+    plot(x,n./nansum(n),'Color',col);
+end
 
 end
 
@@ -205,6 +269,8 @@ end
 temp=nanmean(alignmentCompanion.y,1);
 [~,ma]=nanmax(temp);
 eventTime=alignmentCompanion.x(ma);
-reaches=nansum(dataout.y(any(~isnan(alignmentCompanion.y),2),find(dataout.x>=eventTime+behWindow(1),1,'first'):find(dataout.x<=eventTime+behWindow(2),1,'last')));
+fwin=find(dataout.x>=eventTime+behWindow(1),1,'first'):find(dataout.x<=eventTime+behWindow(2),1,'last');
+re=nansum(dataout.y(:,fwin),2);
+reaches=re(any(~isnan(alignmentCompanion.y),2));
 
 end
