@@ -1,6 +1,6 @@
 function [all_accs,all_accs_3way]=getErrorBars_onShuffleConsensus_trialbytrial(a,b,cued_success_Response,nRuns)
 
-countunits=180:10:200; %10:10:200;
+countunits=10:10:200; %10:10:200;
 all_accs=nan(length(countunits),nRuns);
 all_accs_3way=nan(length(countunits),nRuns);
 
@@ -9,12 +9,12 @@ temper_backup=[a.fortbytclass.unitfr_success; a.fortbytclass.unitfr_failure; b.f
 for unitsCounter=1:length(countunits)
 for countRuns=1:nRuns
 
-%     shuffle_consensus=cued_success_Response.consensus_idx;
-%     f=find(~isnan(shuffle_consensus));
-%     r=randperm(length(f));
-%     shuffle_consensus(f)=shuffle_consensus(f(r));
-
     shuffle_consensus=cued_success_Response.consensus_idx;
+    f=find(~isnan(shuffle_consensus));
+    r=randperm(length(f));
+    shuffle_consensus(f)=shuffle_consensus(f(r));
+
+%     shuffle_consensus=cued_success_Response.consensus_idx;
     
     if countunits(unitsCounter)<75
         nUnitsNow=100;
@@ -27,13 +27,13 @@ for countRuns=1:nRuns
     end
 
     % shuffle before
-    temper=[temper_backup];
-    temper_ids=[ones(size(a.fortbytclass.unitfr_success)); 2*ones(size(a.fortbytclass.unitfr_failure)); 3*ones(size(b.fortbytclass.unitfr_success)); 4*ones(size(b.fortbytclass.unitfr_failure))];
-    temper=temper(randperm(length(temper)));
-    a.fortbytclass.unitfr_success=temper(temper_ids==1);
-    a.fortbytclass.unitfr_failure=temper(temper_ids==2);
-    b.fortbytclass.unitfr_success=temper(temper_ids==3);
-    b.fortbytclass.unitfr_failure=temper(temper_ids==4);
+%     temper=[temper_backup];
+%     temper_ids=[ones(size(a.fortbytclass.unitfr_success)); 2*ones(size(a.fortbytclass.unitfr_failure)); 3*ones(size(b.fortbytclass.unitfr_success)); 4*ones(size(b.fortbytclass.unitfr_failure))];
+%     temper=temper(randperm(length(temper)));
+%     a.fortbytclass.unitfr_success=temper(temper_ids==1);
+%     a.fortbytclass.unitfr_failure=temper(temper_ids==2);
+%     b.fortbytclass.unitfr_success=temper(temper_ids==3);
+%     b.fortbytclass.unitfr_failure=temper(temper_ids==4);
 
     out_decode=decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,shuffle_consensus,100,nUnitsNow,countunits(unitsCounter),true,false,false,false,false); % nBoots,nUnits,nTrials,withReplacement,addThirdAxis,nanAllZeros,justBoostrapTrials,collapseWithinUnit
     
@@ -72,12 +72,12 @@ for countRuns=1:nRuns
     xlabel('gp1'); ylabel('gp2');
 
 
-    ldaModel=fitcdiscr(Xmatrix,ylabels);
-    predictedY=predict(ldaModel,Xmatrix);
-    accuracy=sum(predictedY==ylabels)/length(ylabels);
-    disp(['Accuracy of LDA on training set: ', num2str(accuracy * 100), '%']);
-    all_accs(unitsCounter,countRuns)=accuracy * 100;
-    close all;
+%     ldaModel=fitcdiscr(Xmatrix,ylabels);
+%     predictedY=predict(ldaModel,Xmatrix);
+%     accuracy=sum(predictedY==ylabels)/length(ylabels);
+%     disp(['Accuracy of LDA on training set: ', num2str(accuracy * 100), '%']);
+%     all_accs(unitsCounter,countRuns)=accuracy * 100;
+%     close all;
 
     % 3-way classification
     ylabels(ylabels==4)=2;

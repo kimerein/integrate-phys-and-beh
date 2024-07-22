@@ -1,7 +1,7 @@
 % script for preparing directory structure before combining data across videos and days
 
 % assign mouse and session numbers
-expt_dir='Z:\MICROSCOPE\Kim\Behavior Final Data Sets\Red light is cue';
+expt_dir='\\research.files.med.harvard.edu\neurobio\MICROSCOPE\Kim\Behavior Final Data Sets\Varied timing Nkx x ReaChR with VT mice';
 optoOnHere=1; % 1 if there was opto, else 0
 onlySaveOptoIfDoesNotExist=true;
 startMouseNumberingAt=1; % if want to start mouse numbers at some offset

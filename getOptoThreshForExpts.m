@@ -1,6 +1,6 @@
 function getOptoThreshForExpts(expt_dir,optoFromArduino,arduinoOptoForWhichMice)
 
-overwriteExistingThresh=false;
+overwriteExistingThresh=true;
 check_for_human=1;
 
 currOptoFromArduino=optoFromArduino;

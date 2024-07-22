@@ -25,14 +25,15 @@ title('uncued failure all neurons unsorted');
 cuedsuccess_minus_uncuedsuccess=medfilt1(tensor_tomatchcuedsuccess(:,:,1)-tensor_tomatchcuedsuccess(:,:,3),100,[],2);
 successdiff=nanmean(cuedsuccess_minus_uncuedsuccess(:,300:700),2);
 cuedsuccess_minus_uncuedsuccess(isnan(cuedsuccess_minus_uncuedsuccess))=0; % for plotting
-cuedsuccess_minus_uncuedsuccess(cuedsuccess_minus_uncuedsuccess>2)=2; 
-cuedsuccess_minus_uncuedsuccess(cuedsuccess_minus_uncuedsuccess<-2)=-2;
+ends_high=0.75; ends_low=-0.75;
+cuedsuccess_minus_uncuedsuccess(cuedsuccess_minus_uncuedsuccess>ends_high)=ends_high; %2; 
+cuedsuccess_minus_uncuedsuccess(cuedsuccess_minus_uncuedsuccess<ends_low)=ends_low; %-2;
 successdiff_forplot=nanmean(cuedsuccess_minus_uncuedsuccess(:,300:700),2);
 cuedfailure_minus_uncuedfailure=medfilt1(tensor_tomatchcuedsuccess(:,:,2)-tensor_tomatchcuedsuccess(:,:,4),100,[],2);
 failurediff=nanmean(cuedfailure_minus_uncuedfailure(:,300:700),2);
 cuedfailure_minus_uncuedfailure(isnan(cuedfailure_minus_uncuedfailure))=0; % for plotting
-cuedfailure_minus_uncuedfailure(cuedfailure_minus_uncuedfailure>2)=2; 
-cuedfailure_minus_uncuedfailure(cuedfailure_minus_uncuedfailure<-2)=-2;
+cuedfailure_minus_uncuedfailure(cuedfailure_minus_uncuedfailure>ends_high)=ends_high; %2; 
+cuedfailure_minus_uncuedfailure(cuedfailure_minus_uncuedfailure<ends_low)=ends_low; %-2;
 failurediff_forplot=nanmean(cuedfailure_minus_uncuedfailure(:,300:700),2);
 cuedsuccess_minus_cuedfailure=medfilt1(tensor_tomatchcuedsuccess(:,:,1)-tensor_tomatchcuedsuccess(:,:,2),100,[],2);
 cueddiff=nanmean(cuedsuccess_minus_cuedfailure(:,300:700),2);

@@ -29,7 +29,7 @@ if isempty(settings)
     settings.discardPreemptive=1; % 1 if want to discard data sets with preemptive reaching
     settings.doRealign=1; % in tbt, cue can be any time point when cue is on; 1 if want to realign data based on cue starts (i.e., align all cue onsets)
     settings.useOptoZone=0; % 1 if want to use manually defined optoZone in video instead of Arduino-based optoOn
-    settings.maxDelayUntilOpto=9.5; % in seconds, max time from trial onset until opto turns on
+    settings.maxDelayUntilOpto=13.25; % in seconds, max time from trial onset until opto turns on
     settings.isOrchestra=1; % will suppress figures if running on server
     settings.putCueAtInd=94; % if, when doing cue realignment, want to put the cue onset (i.e., cueZone_onVoff max) at a specific index; only used if doRealign==1
     % if putCueAtInd is empty, will just use first trial's cue position as

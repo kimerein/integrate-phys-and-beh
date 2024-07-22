@@ -57,8 +57,9 @@ linkerForNoLEDBACKWARDS=' & (trialTypes.led_2forward==1 | trialTypes.led_3forwar
 % linkerForNoLEDBACKWARDS='';
 
 % FOR VARIED TIMING
-% linkerForVariedTimingForward=' & trialTypes.optoGroup_1forward==2';
-% linkerForVariedTimingSame=' & trialTypes.optoGroup==2';
+% USE variedTimingOfOptoWrtReach.m, not this function!!!!!!!!!!!!!!!!
+% linkerForVariedTimingForward=' & trialTypes.optoGroup_1forward==1';
+% linkerForVariedTimingSame=' & trialTypes.optoGroup==1';
 % linkerForVariedTimingUncued='';
 % ELSE
 linkerForVariedTimingForward='';
@@ -71,6 +72,11 @@ switch whichEventType
         trial2=['trialTypes.optoGroup~=1' linkerForNoLED];
         trial1_LED=['(trialTypes.optoGroup~=1 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1' linkerForVariedTimingForward ')']; 
         trial2_LED='trialTypes.optoGroup~=1 & (trialTypes.led_1forward==0 | trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_1back==0)';
+        % FOR VARIED TIMING EXPERIMENT
+%         trial1=['(trialTypes.optoGroup~=1 & trialTypes.optoGroup~=2 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.led_1forward==0)']; 
+%         trial2=['trialTypes.optoGroup~=1 & trialTypes.optoGroup~=2' linkerForNoLED];
+%         trial1_LED=['(trialTypes.optoGroup~=1 & trialTypes.optoGroup~=2 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.led_1forward==1' linkerForVariedTimingForward ')']; 
+%         trial2_LED='trialTypes.optoGroup~=1 & trialTypes.optoGroup~=2 & (trialTypes.led_1forward==0 | trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_1back==0)';
     case 'backwards cued success'
         trial2=['(trialTypes.optoGroup~=1 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0)' linkerForNoLEDBACKWARDS];
         trial1=['trialTypes.optoGroup~=1'];
@@ -131,6 +137,11 @@ switch whichEventType
         trial2=['trialTypes.optoGroup~=1' linkerForNoLED linkerForVariedTimingUncued];
         trial1_LED=['(trialTypes.optoGroup~=1 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.cued_reach_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1)' linkerForVariedTimingForward linkerForVariedTimingUncued]; 
         trial2_LED=['trialTypes.optoGroup~=1 & (trialTypes.led_1forward==0 | trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_1back==0)' linkerForVariedTimingUncued];
+        % FOR VARIED TIMING EXPERIMENT
+%         trial1=['(trialTypes.led==0 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.cued_reach_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0)' linkerForVariedTimingUncued]; 
+%         trial2=['trialTypes.led==0' linkerForNoLED linkerForVariedTimingUncued];
+%         trial1_LED=['(trialTypes.led==0 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.cued_reach_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1)' linkerForVariedTimingForward linkerForVariedTimingUncued]; 
+%         trial2_LED=['trialTypes.led==0 & (trialTypes.led_1forward==0 | trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_1back==0)' linkerForVariedTimingUncued];
     case 'backwards delayed success'
         trial2=['(trialTypes.optoGroup~=1 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.cued_reach_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0)' linkerForNoLEDBACKWARDS linkerForVariedTimingUncued]; 
         trial1=['trialTypes.optoGroup~=1' linkerForVariedTimingUncued];
