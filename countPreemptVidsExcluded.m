@@ -78,4 +78,6 @@ fprintf('Number of days with preemptCue true: %d\n', daysWithPreemptCueTrue);
 fprintf('Total number of unique VIDEOS: %d\n', length(preemptCueValues));
 fprintf('Number of VIDEOS with preemptCue true: %d\n', sum(preemptCueValues,'all','omitnan'));
 
+disp([length(preemptCueValues) sum(preemptCueValues,'all','omitnan') numUniqueDateFileNames daysWithPreemptCueTrue]);
+
 end
