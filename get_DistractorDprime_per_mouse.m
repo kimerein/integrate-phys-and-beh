@@ -131,8 +131,11 @@ for i=1:length(f)
     for j=1:size(temp,1)
         if ~isnan(shiftBy(j))
             if shiftBy(j)>0
-                temp(j,:)=circshift(temp(j,:),[0 shiftBy(j)]);
+                tempie=temp(j,:);
+                temp(j,:)=[tempie(shiftBy(j)+2:end) tempie(1:shiftBy(j)+2)];
             end
+        else
+            %temp(j,:)=nan; 
         end
     end
     alltbt.(f{i})=temp;

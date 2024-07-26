@@ -19,6 +19,12 @@ temp=alltbt.(distractName);
 temp(temp>=0.5)=1; temp(temp<0.5)=0;
 alltbt.(distractName)=temp;
 figure(); plot(nanmean(alltbt.(distractName),1),'Color','k');
+if randomDistractor==true
+    wasDistract=any(alltbt.(distractName)>0.5,2);
+else
+    wasDistract=any(temp(:,ma:end)>0.5,2);
+end
+hold on; plot(nanmean(temp(wasDistract==1,:),1),'Color','r');
 shiftBy=nan(size(temp,1),1);
 if randomDistractor==true
     for i=1:size(temp,1)
@@ -49,22 +55,31 @@ else
     end
 end
 % shift all relevant fields
-f={'all_reachBatch','cue','isChewing','isHold','movie_distractor','optoOn','optoZone','pawOnWheel','pelletPresent','pelletmissingreach_reachStarts',...
+f={'movie_distractor','all_reachBatch','cue','isChewing','isHold','optoOn','optoZone','pawOnWheel','pelletPresent','pelletmissingreach_reachStarts',...
    'reachBatch_all_pawOnWheel','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','reachBatch_success_reachStarts','reachStarts',...
    'reachStarts_pelletPresent'};
 for i=1:length(f)
+    if ~isfield(alltbt,f{i})
+        warning([f{i} ' is not a field of alltbt']);
+        continue
+    end
     temp=alltbt.(f{i});
     for j=1:size(temp,1)
         if ~isnan(shiftBy(j))
             if shiftBy(j)>0
-                temp(j,:)=circshift(temp(j,:),[0 shiftBy(j)]);
+                tempie=temp(j,:);
+                temp(j,:)=[tempie(shiftBy(j)+2:end) tempie(1:shiftBy(j)+1)]; % KR fixed 7/26/2024
             end
+        else
+            temp(j,:)=nan; % KR added 7/26/2024
         end
     end
     alltbt.(f{i})=temp;
 end
 
 hold on; plot(nanmean(alltbt.(distractName),1),'Color','b');
-title('black before, blue after shift');
+temp=alltbt.(distractName);
+hold on; plot(nanmean(temp(wasDistract==1,:),1),'Color','c');
+title('black before, red only distract present trials before, blue after shift');
 
 end
