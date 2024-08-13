@@ -58,7 +58,7 @@ function unique_units = getOptoSuppressionWHISPER_wrapper(opto_aligned_dir)
             aunit=load(fullfile(filesun(1).folder,filesun(1).name));
             unitdetails=[unitdetails [aunit.unitdets.isFS; aunit.unitdets.isTAN; aunit.unitdets.isSPN; aunit.unitdets.isLowFRThin]];
         end
-        disp([frchange; unitdetails]);
+        displayArrayWithSpaces([frchange; unitdetails]);
         pause
     end
 end
@@ -94,3 +94,24 @@ function sortedStr = sort_nat(cellStr)
     end
 
 end
+
+function displayArrayWithSpaces(array)
+    % Check if the input is a matrix or vector
+    if ~ismatrix(array)
+        error('Input must be a matrix or vector.');
+    end
+
+    % Get the size of the array
+    [rows, cols] = size(array);
+
+    % Loop through each row of the array
+    for i = 1:rows
+        % Create a string of the row's elements separated by spaces
+        rowStr = sprintf('%g ', array(i, :));
+        % Remove the trailing space
+        rowStr = strtrim(rowStr);
+        % Display the row string
+        disp(rowStr);
+    end
+end
+
