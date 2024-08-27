@@ -1,9 +1,22 @@
-function [confr,optfr,supp,unitName,con,opt,tim,optoOn]=getOptoSuppressionWHISPER(optoAligned_phys_tbt,unitName,ds)
+function [confr,optfr,supp,unitName,con,opt,tim,optoOn]=getOptoSuppressionWHISPER(optoAligned_phys_tbt,unitName,ds,takeOnlyOptoStartsInRange,physiology_tbt)
+
+f=nan(size(physiology_tbt.opto,1),1);
+for i=1:size(physiology_tbt.opto,1)
+    isf=find(physiology_tbt.opto(i,:)>0.1,1,'first');
+    if ~isempty(isf)
+        f(i)=isf;
+    end
+end
 
 tim=nanmean(optoAligned_phys_tbt.unitTimes_wrt_trial_start,1);
 fr=optoAligned_phys_tbt.(unitName);
-con=nanmean(fr(optoAligned_phys_tbt.hasOpto==0,:),1);
-opt=nanmean(fr(optoAligned_phys_tbt.hasOpto==1,:),1);
+if ~isempty(takeOnlyOptoStartsInRange)
+    con=nanmean(fr(optoAligned_phys_tbt.hasOpto==0,:),1);
+    opt=nanmean(fr(optoAligned_phys_tbt.hasOpto'==1 & f>takeOnlyOptoStartsInRange(1) & f<takeOnlyOptoStartsInRange(2),:),1);
+else
+    con=nanmean(fr(optoAligned_phys_tbt.hasOpto==0,:),1);
+    opt=nanmean(fr(optoAligned_phys_tbt.hasOpto==1,:),1);
+end
 
 figure(); 
 plot(nanmean(optoAligned_phys_tbt.cue_times,1),nanmean(optoAligned_phys_tbt.cue,1),'Color','b');

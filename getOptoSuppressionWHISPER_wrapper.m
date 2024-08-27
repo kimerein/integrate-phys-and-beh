@@ -1,4 +1,4 @@
-function [unique_units,allcon,allopt,tims] = getOptoSuppressionWHISPER_wrapper(opto_aligned_dir,pointsBeforeOptoStart,pointsAfterOptoStart)
+function [unique_units,allcon,allopt,tims] = getOptoSuppressionWHISPER_wrapper(opto_aligned_dir,pointsBeforeOptoStart,pointsAfterOptoStart,optoStartsRange,physiology_tbt)
 
     % Get a list of all .mat files in the directory that begin with "phys_tbt_for_spikes"
     mat_files = dir(fullfile(opto_aligned_dir, 'phys_tbt_for_spikes*.mat'));
@@ -50,7 +50,7 @@ function [unique_units,allcon,allopt,tims] = getOptoSuppressionWHISPER_wrapper(o
         rdet=regexp(mat_file_path,'opto_aligned');
         % For each unit, get effects of opto
         for uni=1:length(unique_units)
-            [confr,optfr,supp,unitName,con,opt,tim,optoOn]=getOptoSuppressionWHISPER(data,['unit' num2str(unique_units(uni))],1);
+            [confr,optfr,supp,unitName,con,opt,tim,optoOn]=getOptoSuppressionWHISPER(data,['unit' num2str(unique_units(uni))],1,optoStartsRange,physiology_tbt);
             f=find(optoOn>0.5,1,'first');
             allcon=[allcon; con(f-pointsBeforeOptoStart:f+pointsAfterOptoStart)];
             allopt=[allopt; opt(f-pointsBeforeOptoStart:f+pointsAfterOptoStart)];
