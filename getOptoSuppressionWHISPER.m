@@ -1,4 +1,4 @@
-function [confr,optfr,supp,unitName]=getOptoSuppressionWHISPER(optoAligned_phys_tbt,unitName,ds)
+function [confr,optfr,supp,unitName,con,opt,tim,optoOn]=getOptoSuppressionWHISPER(optoAligned_phys_tbt,unitName,ds)
 
 tim=nanmean(optoAligned_phys_tbt.unitTimes_wrt_trial_start,1);
 fr=optoAligned_phys_tbt.(unitName);
@@ -14,6 +14,7 @@ title('Cue and opto');
 % find suppression when opto on
 confr=nanmean(con(optoAligned_phys_tbt.optoOnInUnitTimes==1));
 optfr=nanmean(opt(optoAligned_phys_tbt.optoOnInUnitTimes==1));
+optoOn=optoAligned_phys_tbt.optoOnInUnitTimes;
 supp=optfr/confr;
 
 figure();
