@@ -50,7 +50,7 @@ function [unique_units,allcon,allopt,tims] = getOptoSuppressionWHISPER_wrapper(o
         rdet=regexp(mat_file_path,'opto_aligned');
         % For each unit, get effects of opto
         for uni=1:length(unique_units)
-            [confr,optfr,supp,unitName,con,opt,tim,optoOn]=getOptoSuppressionWHISPER(data,['unit' num2str(unique_units(uni))],10);
+            [confr,optfr,supp,unitName,con,opt,tim,optoOn]=getOptoSuppressionWHISPER(data,['unit' num2str(unique_units(uni))],1);
             f=find(optoOn>0.5,1,'first');
             allcon=[allcon; con(f-pointsBeforeOptoStart:f+pointsAfterOptoStart)];
             allopt=[allopt; opt(f-pointsBeforeOptoStart:f+pointsAfterOptoStart)];

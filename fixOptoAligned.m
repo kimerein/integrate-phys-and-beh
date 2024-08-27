@@ -84,13 +84,12 @@ for k = 1:length(sortedStr)
         % opto starts at optotime
         %figure(); plot(nanmean(physiology_tbt.cuetimes_wrt_trial_start,1),nanmean(physiology_tbt.cue,1));
         f=find(dataout.x>optotime,1,'first');
-        optoDur_inds=floor(optoDur/mode(diff(nanmean(physiology_tbt.cuetimes_wrt_trial_start,1))));
+        optoDur_inds=floor(optoDur/mode(diff(nanmean(dataout.x,1))));
         optoAligned_phys_tbt.optoOnInUnitTimes=zeros(1,size(dataout.y,2));
         optoAligned_phys_tbt.optoOnInUnitTimes(f:f+optoDur_inds)=1;
         optoAligned_phys_tbt.(['unit' num2str(unique_units(uni)) '_avAlignedToOpto'])=nanmean(dataout.y(optoAligned_phys_tbt.hasOpto==1,:),1);
         save(mat_file_path,'optoAligned_phys_tbt');
     end
-    pause
 end
 
 end
