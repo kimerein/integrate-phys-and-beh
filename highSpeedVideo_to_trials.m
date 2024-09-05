@@ -15,6 +15,8 @@ function tbt=highSpeedVideo_to_trials(filename,cueVarName,distractorVarName,rawV
 %      wheelSecBeforeCue: 0.9600
 
 % have user set these
+useRawDiffsAsWheelTurn=true; % if true, will take the raw pixel change as indication of the wheel turning, else will use the wheel zone and wheel thresh
+fillInWheelStarts=true;
 cueThresh=100;
 maxFramesToPlot=30000;
 rawThresh=1; % for where video skips, this is after the wheel has been turning for a little bit, about 0.96 s in Kim's rig
@@ -43,6 +45,8 @@ else
     rawDiffEvs_minus=double(a.([rawVarName '_minus']));
     distractorDiffEvs_plus=double(a.([distractorVarName '_plus']));
     distractorDiffEvs_minus=double(a.([distractorVarName '_minus']));
+    wheelDiffEvs_plus=double(a.([wheelVarName '_plus']));
+    wheelDiffEvs_minus=double(a.([wheelVarName '_minus']));
     howmanyframes=double(a.('howmanyframes'));
 end    
     
@@ -50,6 +54,7 @@ cueInds=floor(settings.cueDuration * settings.fps);
 distractorInds=floor(settings.distractorDuration * settings.fps);
 wheelBeforeCueInds=floor(settings.wheelSecBeforeCue * settings.fps);
 indsSlop=floor(0.05 * settings.fps);
+% indsSlop=floor(0.1 * settings.fps);
 
 % get possible cues first
 % then look for wheel turns at a fixed time before cue onset
@@ -76,6 +81,7 @@ xlabel('Frames');
 if foundDiffEvs==false
     [cueStarts,cueEnds]=findEventsOfSpecificDuration(cueDiffs,cueThresh,cueInds,indsSlop);
 else
+    pause;
     [cueStarts,cueEnds]=findDiffsOfSpecificDuration(cueDiffEvs_plus,cueDiffEvs_minus,cueInds,indsSlop);
 end
 % plot
@@ -89,14 +95,22 @@ if foundDiffEvs==false
     comboDiffs=zeros(size(cueDiffs));
     comboDiffs(cueStarts)=-1;
 else
-    wheelOnsets=rawDiffEvs_plus;
+    if useRawDiffsAsWheelTurn==true
+        wheelOnsets=rawDiffEvs_plus;
+    else
+        wheelOnsets=[wheelDiffEvs_plus wheelDiffEvs_minus];
+    end
 end
 % only keep wheelOnsets closest to cue onset, because cue is clearer
 % signal
 wheelStarts=zeros(size(cueStarts));
+wheelOnsets=[0 wheelOnsets];
 for i=1:length(cueStarts)
-    % find closest wheel onset preceding cue
-    wheelStarts(i)=wheelOnsets(find(wheelOnsets<cueStarts(i),1,'last'));
+    wheelStarts(i)=wheelOnsets(find(wheelOnsets<cueStarts(i)-10,1,'last'));
+end
+if fillInWheelStarts==true
+    wheelStarts=cueStarts-wheelBeforeCueInds;
+    wheelStarts(wheelStarts<0)=0;
 end
 if foundDiffEvs==false
     comboDiffs(wheelStarts)=1;
@@ -107,7 +121,8 @@ else
     for i=1:length(rawDiffEvs_plus)
         scatter(rawDiffEvs_plus(i),cueThresh*0.75,[],'g'); hold on;
     end
-    [wheelStarts,wheelEnds]=findDiffsOfSpecificDuration(wheelStarts,cueDiffEvs_plus,wheelBeforeCueInds,indsSlop);
+%     [wheelStarts,wheelEnds]=findDiffsOfSpecificDuration(wheelStarts,cueDiffEvs_plus,wheelBeforeCueInds,indsSlop);
+    [wheelStarts,wheelEnds]=findDiffsOfSpecificDuration(wheelStarts,cueStarts,wheelBeforeCueInds,indsSlop);
 end
 for i=1:length(wheelStarts)
     line([wheelStarts(i) wheelEnds(i)],[cueThresh-cueThresh*0.3 cueThresh-cueThresh*0.3],'Color',[0 0.75 0],'LineWidth',2);
@@ -165,10 +180,10 @@ for i=1:length(wheelStarts)
     else
         takeInds=wheelStarts(i):wheelStarts(i+1)-1;
     end
-    tbt.highspeed_frameinds(i,:)=downSampAv(frameinds(takeInds),ds);
-    tbt.cueZone_onVoff(i,:)=downSampAv(cueOn(takeInds),ds);
-    tbt.movie_distractor(i,:)=downSampAv(distractorOn(takeInds),ds);
-    tbt.wheelTurning(i,:)=downSampAv(wheelOn(takeInds),ds);
+    tbt.highspeed_frameinds(i,1:length(downSampAv(frameinds(takeInds),ds)))=downSampAv(frameinds(takeInds),ds);
+    tbt.cueZone_onVoff(i,1:length(downSampAv(cueOn(takeInds),ds)))=downSampAv(cueOn(takeInds),ds);
+    tbt.movie_distractor(i,1:length(downSampAv(distractorOn(takeInds),ds)))=downSampAv(distractorOn(takeInds),ds);
+    tbt.wheelTurning(i,1:length(downSampAv(wheelOn(takeInds),ds)))=downSampAv(wheelOn(takeInds),ds);
 end
 
 end

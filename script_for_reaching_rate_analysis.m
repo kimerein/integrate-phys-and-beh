@@ -11,9 +11,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt10Jul2024165656\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023175615\'; % directory containing experimental data
 behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log - Slimmed down w old mice added.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt10Jul2024165656\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023175615\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -56,7 +56,7 @@ backup.metadata=metadata;
 % [alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,[4 5 19]);
 
 % Optional: discard preemptive
-% [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
+[alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
 
 % fix weird bug where reach batch sometimes get stuck at 1 (in less than 0.1% of trials), possibly an
 % interp problem somewhere?? not sure
@@ -154,7 +154,7 @@ trialTypes.sessid=metadata.sessid;
 % tbt_filter.sortField='sessid';
 % tbt_filter.sortField='led';
 % tbt_filter.sortField='sess_wrt_day1';
-% tbt_filter.sortField='dprimes';
+tbt_filter.sortField='dprimes';
 % tbt_filter.sortField='day1formice';
 % tbt_filter.sortField='distractor_immediate_after_cue';
 % tbt_filter.sortField='higherThanBefore';
@@ -162,15 +162,15 @@ trialTypes.sessid=metadata.sessid;
 % tbt_filter.sortField='opto_enhanced_reach';
 % tbt_filter.sortField='mouseLearned';
 % tbt_filter.sortField='initiallyLowLEDsess';
-tbt_filter.sortField='takemice';
+% tbt_filter.sortField='takemice';
 % tbt_filter.sortField='reachedBeforeCue';
 % tbt_filter.sortField='pelletMissingAtCue';
 % tbt_filter.range_values=[1 6 7 8 10 14 18];
 % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
 % tbt_filter.range_values=[0.75 100]; %[0.75 100];
-tbt_filter.range_values=[0.5 1.5];
+% tbt_filter.range_values=[0.5 1.5];
 % tbt_filter.range_values=[37.5 38.5] ;%0.471];
-% tbt_filter.range_values=[-100 0.75]; % beginner: d<0.25, intermediate: 0.25<=d<0.75, expert: d>=0.75
+tbt_filter.range_values=[-100 100]; % beginner: d<0.25, intermediate: 0.25<=d<0.75, expert: d>=0.75
 % tbt_filter.range_values=[163.5 170];
 % tbt_filter.range_values=[77.5 78.5];
 % tbt_filter.range_values=[0.5 0.9];
@@ -264,22 +264,26 @@ cuedreachtimewindow=0.4; % in seconds
 % trialTypes.did_cued_reach_1forward=[trialTypes.did_cued_reach(2:end); 0];
 
 % settings for paired RT data set
-test.nInSequence=[2]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
+test.nInSequence=[7]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
 % requirement for first trial in pair
 % trial1='trialTypes.led==0';
 trialTypes.isLongITI_1forward=[trialTypes.isLongITI(2:end); 0];
 trialTypes.isLongITI_1back=[1; trialTypes.isLongITI(1:end-1)];
 trialTypes.optoGroup_1forward=[trialTypes.optoGroup(2:end); 0];
+trialTypes.led_5forward=[trialTypes.led(6:end); zeros(5,1)];
+trialTypes.led_6forward=[trialTypes.led(7:end); zeros(6,1)];
+trialTypes.led_7forward=[trialTypes.led(8:end); zeros(7,1)];
+trialTypes.led_8forward=[trialTypes.led(9:end); zeros(8,1)];
 trialTypes.led_11back=[ones(11,1); trialTypes.led(1:end-11)];
 trialTypes.led_7back=[ones(7,1); trialTypes.led(1:end-7)];
 trialTypes.led_6back=[ones(6,1); trialTypes.led(1:end-6)];
 
-% trial1='trialTypes.led==0';
+trial1='trialTypes.led_1back==1 & trialTypes.led==1 & trialTypes.led_1forward==1 & trialTypes.led_2forward==1 & trialTypes.led_3forward==1 & trialTypes.led_4forward==1 & trialTypes.led_5forward==1';
 % % trial1='trialTypes.led==0'; % | trialTypes.led_1back==0 | trialTypes.led_2back==0';
 % % memory
 % %this %trial1='trialTypes.led~=1'; 
 % % trial1='trialTypes.isLongITI==1';
-trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
+% trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
 % trial1='trialTypes.optoGroup~=1 & trialTypes.did_cued_reach_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.isLongITI_1forward==1';
 % % trial1='trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1'; % & trialTypes.isLongITI_1forward==1'];
 % % trial1='trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup~=1';
@@ -289,8 +293,8 @@ trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start
 % % trial1='trialTypes.optoGroup~=1 & trialTypes.consumed_pellet_1back==1 & trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1';
 % trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
 % % memory
-% trial2='trialTypes.led==0';
-trial2='(trialTypes.optoGroup~=1 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward==1)';
+trial2='trialTypes.led==0';
+% trial2='(trialTypes.optoGroup~=1 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward==1)';
 % % this %trial2='trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3 & trialTypes.led_1forward==0';
 % % trial2='trialTypes.optoGroup~=1 & trialTypes.led==0 & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
 % trial2='trialTypes.optoGroup~=1 & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';

@@ -27,7 +27,8 @@ def getRigEvents(
     
     # codedir = r'C:\Users\sabatini\Documents\GitHub\integrate-phys-and-beh'
     codedir = os.getcwd()
-    videos = r'Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20191127\April_short\DLC vids'
+    #videos = r'Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20191127\April_short\DLC vids'
+    videos = r'Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20190510\3F_white\DLC output\test'
     # videos: list
     #    A list of strings containing the full paths to videos for analysis or a path to the directory, where all the videos with same extension are stored.
     getDifferenceEventsBeforeSaving = True
@@ -172,15 +173,27 @@ def getRigEvents(
     #distractorThresh = 2
     #reachThresh = 1.5
     # April_short 20191127
-    wheelZone = [150, 250, 1, 235] # [x_start, x_end, y_start, y_end]
-    cueZone = [59, 82, 446, 512] # [x_start, x_end, y_start, y_end]
-    distractorZone = [38, 59, 347, 394] # [x_start, x_end, y_start, y_end]
-    reachZone = [70, 142, 75, 120] # [x_start, x_end, y_start, y_end]
+    #wheelZone = [150, 250, 1, 235] # [x_start, x_end, y_start, y_end]
+    #cueZone = [59, 82, 446, 512] # [x_start, x_end, y_start, y_end]
+    #distractorZone = [38, 59, 347, 394] # [x_start, x_end, y_start, y_end]
+    #reachZone = [70, 142, 75, 120] # [x_start, x_end, y_start, y_end]
+    #cueThresh = 5
+    #wheelThresh = 1
+    #rawThresh = 2
+    #distractorThresh = 2
+    #reachThresh = 1.5
+    # Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20190510\3F_white\DLC output\test
+    wheelZone = [195, 254, 139, 190] # [x_start, x_end, y_start, y_end]
+    cueZone = [1, 28, 432, 502] # [x_start, x_end, y_start, y_end]
+    distractorZone = [1, 15, 341, 358] # [x_start, x_end, y_start, y_end]
+    reachZone = [74, 124, 109, 171] # [x_start, x_end, y_start, y_end]
+    optoZone = [113, 143, 412, 463] # [x_start, x_end, y_start, y_end]
     cueThresh = 5
-    wheelThresh = 1
-    rawThresh = 2
-    distractorThresh = 2
-    reachThresh = 1.5
+    wheelThresh = 1.5
+    rawThresh = 1
+    distractorThresh = 30
+    reachThresh = 7
+    optoThresh = 20
 
     ##################################################
     # Looping over videos
@@ -201,6 +214,7 @@ def getRigEvents(
         vidStarts = []
         vidEnds = []
         reachDiffs = []
+        optoDiffs = []
         # Go to location of videos
         os.chdir(videos)
         for video in Videos:
@@ -209,7 +223,7 @@ def getRigEvents(
             ##################################################
             # If this is the first video
             if len(rawDiffs) == 0:
-                plotZonesOnExampleFrame(video, wheelZone, cueZone, distractorZone, reachZone)
+                plotZonesOnExampleFrame(video, wheelZone, cueZone, distractorZone, reachZone, optoZone)
 
             ##################################################
             # Loading the video
@@ -278,6 +292,7 @@ def getRigEvents(
                         distractorDiffs.append(np.mean(frame[distractorZone[0]:distractorZone[1], distractorZone[2]:distractorZone[3]]  - prevFrame[distractorZone[0]:distractorZone[1], distractorZone[2]:distractorZone[3]]))
                         wheelDiffs.append(np.mean(frame[wheelZone[0]:wheelZone[1], wheelZone[2]:wheelZone[3]]  - prevFrame[wheelZone[0]:wheelZone[1], wheelZone[2]:wheelZone[3]]))
                         reachDiffs.append(np.mean(frame[reachZone[0]:reachZone[1], reachZone[2]:reachZone[3]]  - prevFrame[reachZone[0]:reachZone[1], reachZone[2]:reachZone[3]]))
+                        optoDiffs.append(np.mean(frame[optoZone[0]:optoZone[1], optoZone[2]:optoZone[3]]  - prevFrame[optoZone[0]:optoZone[1], optoZone[2]:optoZone[3]]))
                         prevFrame = frame
                 elif counter >= nframes:
                     vidEnds.append(len(rawDiffs))
@@ -324,6 +339,14 @@ def getRigEvents(
     plt.plot([0, len(reachDiffs)], [-reachThresh, -reachThresh], 'r-')
     plt.title('reachThresh')
     plt.show()
+    # Plot optoDiffs
+    plt.figure()
+    plt.plot(optoDiffs)
+    # Plot optoThresh as line
+    plt.plot([0, len(optoDiffs)], [optoThresh, optoThresh], 'r-')
+    plt.plot([0, len(optoDiffs)], [-optoThresh, -optoThresh], 'r-')
+    plt.title('optoDiffs')
+    plt.show()
     # once have tested a video so know the right thresholds, can set getDifferenceEventsBeforeSaving to True
     # in order to save smaller files for Matlab
     if getDifferenceEventsBeforeSaving:
@@ -334,15 +357,17 @@ def getRigEvents(
         cueDiffEvs_plus = [idx for idx, element in enumerate(cueDiffs) if condition(element, cueThresh)]
         distractorDiffEvs_plus = [idx for idx, element in enumerate(distractorDiffs) if condition(element, distractorThresh)]
         reachDiffEvs_plus = [idx for idx, element in enumerate(reachDiffs) if condition(element, reachThresh)]
+        optoDiffEvs_plus = [idx for idx, element in enumerate(optoDiffs) if condition(element, optoThresh)]
         rawDiffEvs_minus = [idx for idx, element in enumerate(rawDiffs) if condminus(element, rawThresh)]
         wheelDiffEvs_minus = [idx for idx, element in enumerate(wheelDiffs) if condminus(element, wheelThresh)]
         cueDiffEvs_minus = [idx for idx, element in enumerate(cueDiffs) if condminus(element, cueThresh)]
         distractorDiffEvs_minus = [idx for idx, element in enumerate(distractorDiffs) if condminus(element, distractorThresh)]
         reachDiffEvs_minus = [idx for idx, element in enumerate(reachDiffs) if condminus(element, reachThresh)]
+        optoDiffEvs_minus = [idx for idx, element in enumerate(optoDiffs) if condminus(element, optoThresh)]
         howmanyframes = len(cueDiffs)
         # save event indices
-        outp = {"rawDiffEvs_plus": rawDiffEvs_plus, "cueDiffEvs_plus": cueDiffEvs_plus, "distractorDiffEvs_plus": distractorDiffEvs_plus, "wheelDiffEvs_plus": wheelDiffEvs_plus, "reachDiffEvs_plus": reachDiffEvs_plus,
-                "rawDiffEvs_minus": rawDiffEvs_minus, "cueDiffEvs_minus": cueDiffEvs_minus, "distractorDiffEvs_minus": distractorDiffEvs_minus, "wheelDiffEvs_minus": wheelDiffEvs_minus, "reachDiffEvs_minus": reachDiffEvs_minus,"howmanyframes": howmanyframes,
+        outp = {"rawDiffEvs_plus": rawDiffEvs_plus, "cueDiffEvs_plus": cueDiffEvs_plus, "distractorDiffEvs_plus": distractorDiffEvs_plus, "wheelDiffEvs_plus": wheelDiffEvs_plus, "reachDiffEvs_plus": reachDiffEvs_plus, "optoDiffEvs_plus": optoDiffEvs_plus,
+                "rawDiffEvs_minus": rawDiffEvs_minus, "cueDiffEvs_minus": cueDiffEvs_minus, "distractorDiffEvs_minus": distractorDiffEvs_minus, "wheelDiffEvs_minus": wheelDiffEvs_minus, "reachDiffEvs_minus": reachDiffEvs_minus, "optoDiffEvs_minus": optoDiffEvs_minus, "howmanyframes": howmanyframes,
                 "vidStarts": vidStarts, "vidEnds": vidEnds}
     else:
         # save results
@@ -354,7 +379,7 @@ def getRigEvents(
     return nframes, rawDiffs, cueDiffs, distractorDiffs, wheelDiffs
             
 
-def plotZonesOnExampleFrame(video, wheelZone, cueZone, distractorZone, reachZone):
+def plotZonesOnExampleFrame(video, wheelZone, cueZone, distractorZone, reachZone, optoZone):
     # Load example frame
     cap = cv2.VideoCapture(video)
     ret, frame = cap.read()
@@ -393,6 +418,15 @@ def plotZonesOnExampleFrame(video, wheelZone, cueZone, distractorZone, reachZone
     plt.plot([reachZone[2], reachZone[3]], [reachZone[0], reachZone[0]], 'r-')
     plt.plot([reachZone[2], reachZone[3]], [reachZone[1], reachZone[1]], 'r-')
     plt.title('reachZone')
+    plt.show()
+    # Plot opto zone
+    plt.figure()
+    plt.imshow(frame)
+    plt.plot([optoZone[2], optoZone[2]], [optoZone[0], optoZone[1]], 'r-')
+    plt.plot([optoZone[3], optoZone[3]], [optoZone[0], optoZone[1]], 'r-')
+    plt.plot([optoZone[2], optoZone[3]], [optoZone[0], optoZone[0]], 'r-')
+    plt.plot([optoZone[2], optoZone[3]], [optoZone[1], optoZone[1]], 'r-')
+    plt.title('optoZone')
     plt.show()
     # Close video
     cap.release()

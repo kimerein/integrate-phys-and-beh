@@ -1,10 +1,12 @@
 function [confr,optfr,supp,unitName,con,opt,tim,optoOn]=getOptoSuppressionWHISPER(optoAligned_phys_tbt,unitName,ds,takeOnlyOptoStartsInRange,physiology_tbt)
 
-f=nan(size(physiology_tbt.opto,1),1);
-for i=1:size(physiology_tbt.opto,1)
-    isf=find(physiology_tbt.opto(i,:)>0.1,1,'first');
-    if ~isempty(isf)
-        f(i)=isf;
+if ~isempty(physiology_tbt)
+    f=nan(size(physiology_tbt.opto,1),1);
+    for i=1:size(physiology_tbt.opto,1)
+        isf=find(physiology_tbt.opto(i,:)>0.1,1,'first');
+        if ~isempty(isf)
+            f(i)=isf;
+        end
     end
 end
 

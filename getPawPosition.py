@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt 
 import cv2
 import statsmodels.api as sm
+from itertools import combinations
 
 def getPawPosition(
 ):
@@ -13,7 +14,8 @@ def getPawPosition(
     """
 
     #bodyparts = ['currentPellet','middle_knuckle','middle_tip','palm','pinky_knuckle','pinky_tip','pointer_knuckle','pointer_tip','ring_knuckle','ring_tip','thumb_knuckle','thumb_tip','wrist']
-    bodyparts = ['palm','thumb_tip','wrist']
+    #bodyparts = ['palm','thumb_tip','wrist'] # this is what I used for paw position only
+    bodyparts =['palm','wrist','middle_knuckle','middle_tip','pinky_knuckle','pinky_tip','pointer_knuckle','pointer_tip','ring_knuckle','ring_tip','thumb_knuckle','thumb_tip']
     # bodyparts = ['palm']
     # Add Bottom to all bodyparts
     # bodyparts_under = [b+'Bottom' for b in bodyparts]
@@ -22,9 +24,11 @@ def getPawPosition(
     # bodyparts_side = [b+'Side' for b in bodyparts]
     bodyparts_side = bodyparts
     p_cutoff=0.1 #0.04
+    p_cutoff_fingers=0.01
 
     # For each .h5 file, get horizontal and vertical position of each bodypart
-    directory=r'Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20191127\April_short\DLC vids'
+    #directory=r'Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20191127\April_short\DLC vids'
+    directory=r'Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20190510\3F_white\DLC output'
     for filename in sorted(os.listdir(directory)):
         if filename.endswith(".h5"):
             # If filename contains side, then use bodyparts_side
@@ -53,6 +57,22 @@ def getPawPosition(
                 X, Y, Z, X_from_under = twoDtothreeD(pawPos_x,pawPos_y,pawPos_x_under,pawPos_y_under)
                 #X, Y, Z, X_from_under = filt3D(X,Y,Z,X_from_under)
                 savemat(os.path.join(directory, filename[:-4]+'3D'+'.mat'),{'X':X,'Y':Y,'Z':Z,'X_from_under':X_from_under})
+                # Get 3D positions of other bodyparts
+                positions_side = getBodyPartPositions(directory, filename, bodyparts_side, p_cutoff_fingers, 'Side')
+                positions_under = getBodyPartPositions(directory, filename, bodyparts_under, p_cutoff_fingers, 'Bottom')
+                positions3D = get3DBodyPartDataFromTwoViews(positions_side, positions_under)
+                # Calculate summed pointwise distance of all pairs of the finger body parts
+                knuckle_distances = calculateSummedPointwiseDistance(positions3D, ['middle_knuckle','pinky_knuckle','pointer_knuckle','ring_knuckle','thumb_knuckle'])
+                tip_distances = calculateSummedPointwiseDistance(positions3D, ['middle_tip','pinky_tip','pointer_tip','ring_tip','thumb_tip'])
+                all_distances = calculateSummedPointwiseDistance(positions3D, ['middle_knuckle','pinky_knuckle','pointer_knuckle','ring_knuckle','thumb_knuckle','middle_tip','pinky_tip','pointer_tip','ring_tip','thumb_tip'])
+                # Calculate distance between knuckles and finger tips
+                distance_knuckletotip = calculateSummedDistanceKnuckleTip(positions3D, ['middle','pinky','pointer','ring','thumb'])
+                # Save these to a .mat file
+                savemat(os.path.join(directory, filename[:-4]+'knuckle_distances'+'.mat'),{'knuckle_distances':knuckle_distances})
+                savemat(os.path.join(directory, filename[:-4]+'tip_distances'+'.mat'),{'tip_distances':tip_distances})
+                savemat(os.path.join(directory, filename[:-4]+'all_distances'+'.mat'),{'all_distances':all_distances})
+                savemat(os.path.join(directory, filename[:-4]+'distance_knuckletotip'+'.mat'),{'distance_knuckletotip':distance_knuckletotip})
+                
         elif filename.endswith(".avi"):
             # If there is no corresponding .h5 file with the same name, then create a .mat file with nan
             if os.path.exists(os.path.join(directory, filename[:-4]+'DLC_resnet50_Testing2DJan4shuffle1_500000.h5')):
@@ -85,6 +105,167 @@ def arimafilt(X):
     results = model.fit()
     filtered_data = results.fittedvalues
     return filtered_data
+
+
+def calculateSummedDistanceKnuckleTip(bodypart_positions_3D, include_these_bodyparts):
+    """
+    Calculate the summed distance between body parts labeled '_knuckle' and '_tip' at each time point
+    for all pairs of body parts passed in that have matching names followed by '_knuckle' or '_tip'.
+    
+    Parameters:
+    - bodypart_positions_3D: A dictionary containing the 3D positions of each body part, stored as separate X, Y, Z vectors.
+    - include_these_bodyparts: A list of body parts to include in the distance calculation (should have matching '_knuckle' and '_tip' parts).
+    
+    Returns:
+    - A vector (array) representing the summed distance between '_knuckle' and '_tip' labeled body parts for each time point.
+    """
+    
+    # Initialize a vector to accumulate the summed distance for each time point
+    n_timepoints = len(next(iter(bodypart_positions_3D.values()))['X'])  # Assuming all body parts have the same number of time points
+    total_distance = np.zeros(n_timepoints)
+
+    # Variable to count the number of valid knuckle-tip pairs
+    count_pairs = np.zeros(n_timepoints)
+    
+    # Loop through the provided list to find matching pairs of '_knuckle' and '_tip'
+    for bodypart in include_these_bodyparts:
+        knuckle_label = bodypart + '_knuckle'
+        tip_label = bodypart + '_tip'
+        
+        # Check if both '_knuckle' and '_tip' labels are present in the dictionary
+        if knuckle_label in bodypart_positions_3D and tip_label in bodypart_positions_3D:
+            # Extract the X, Y, Z coordinates for both '_knuckle' and '_tip'
+            knuckle_positions = np.column_stack((
+                bodypart_positions_3D[knuckle_label]['X'],
+                bodypart_positions_3D[knuckle_label]['Y'],
+                bodypart_positions_3D[knuckle_label]['Z']
+            ))
+            
+            tip_positions = np.column_stack((
+                bodypart_positions_3D[tip_label]['X'],
+                bodypart_positions_3D[tip_label]['Y'],
+                bodypart_positions_3D[tip_label]['Z']
+            ))
+            
+            # Calculate the pointwise distance between '_knuckle' and '_tip'
+            distances = np.linalg.norm(knuckle_positions - tip_positions, axis=1)
+            
+            # Ignore NaN values by using np.nan_to_num (convert NaN to zero)
+            distances = np.nan_to_num(distances, nan=0.0)
+            
+            # Add distances to the total distance vector
+            total_distance += distances
+
+            # Increment count only where distances are valid (not NaN)
+            count_pairs += ~np.isnan(distances)
+        else:
+            print(f"Warning: Missing pair for body part '{bodypart}' with '_knuckle' or '_tip' label.")
+    
+    # Calculate the average distance
+    # Avoid division by zero by using np.where to only divide where count_pairs > 0
+    average_distance = np.where(count_pairs > 0, total_distance / count_pairs, np.nan)
+    
+    return average_distance
+
+
+def calculateSummedPointwiseDistance(bodypart_positions_3D, include_these_bodyparts):
+    """
+    Calculate the summed pointwise distance of all pairs of specified body parts based on their 3D positions.
+    
+    Parameters:
+    - bodypart_positions_3D: A dictionary containing the 3D positions of each body part.
+    - include_these_bodyparts: A list of body parts to include in the distance calculation.
+    
+    Returns:
+    - A scalar value representing the summed pointwise distance of all specified pairs of body parts.
+    """
+    
+    # Filter the body part positions to include only the specified body parts
+    filtered_positions = {part: pos for part, pos in bodypart_positions_3D.items() if part in include_these_bodyparts}
+    
+    # Get the list of filtered body parts
+    filtered_bodyparts = list(filtered_positions.keys())
+    
+    # Initialize a vector to accumulate the summed distance for each time point
+    n_timepoints = len(next(iter(filtered_positions.values()))['X'])  # Assuming all body parts have the same number of time points
+    total_distance = np.zeros(n_timepoints)
+    
+    # Generate all unique pairs of filtered body parts using combinations
+    for part1, part2 in combinations(filtered_bodyparts, 2):
+        # Extract the X, Y, Z coordinates for each pair and combine them into a 3D array
+        positions1 = np.column_stack((
+            filtered_positions[part1]['X'],
+            filtered_positions[part1]['Y'],
+            filtered_positions[part1]['Z']
+        ))
+        
+        positions2 = np.column_stack((
+            filtered_positions[part2]['X'],
+            filtered_positions[part2]['Y'],
+            filtered_positions[part2]['Z']
+        ))
+        
+        # Calculate the pointwise distance between the two body parts
+        # Assuming positions are stored as arrays with shape (n_timepoints, 3)
+        distances = np.linalg.norm(positions1 - positions2, axis=1)
+        
+        # Ignore NaN values by using np.nan_to_num (convert NaN to zero)
+        distances = np.nan_to_num(distances, nan=0.0)
+        
+        # Add distances to the total distance vector
+        total_distance += distances
+    
+    return total_distance
+
+
+def get3DBodyPartDataFromTwoViews(bodypart_positions_side, bodypart_positions_under):
+    """
+    Process the position data for each body part from two different views (side and under).
+    
+    Parameters:
+    - bodypart_positions_side: A dictionary containing position and change data for each body part from the side view.
+    - bodypart_positions_under: A dictionary containing position and change data for each body part from the under view.
+    
+    The function performs operations on corresponding data for each body part in both views.
+    """
+    
+    # Get the set of body parts from both dictionaries
+    bodyparts_side = set(bodypart_positions_side.keys())
+    bodyparts_under = set(bodypart_positions_under.keys())
+    
+    # Find common body parts in both views
+    common_bodyparts = bodyparts_side.intersection(bodyparts_under)
+
+    # Define dictionary bodypart_positions_3D
+    bodypart_positions_3D = {}
+    
+    # Iterate through each common body part in the dictionaries
+    for bodypart in common_bodyparts:
+        print(f"Processing data for body part: {bodypart}")
+        
+        # Access x and y positions for the side view
+        x_positions_side = bodypart_positions_side[bodypart]['x']
+        y_positions_side = bodypart_positions_side[bodypart]['y']
+        
+        # Access x and y positions for the under view
+        x_positions_under = bodypart_positions_under[bodypart]['x']
+        y_positions_under = bodypart_positions_under[bodypart]['y']
+        
+        # Access changes in x and y positions for both views
+        #x_changes_side = bodypart_positions_side[bodypart]['x_change']
+        #y_changes_side = bodypart_positions_side[bodypart]['y_change']
+        #x_changes_under = bodypart_positions_under[bodypart]['x_change']
+        #y_changes_under = bodypart_positions_under[bodypart]['y_change']
+
+        # Convert 2D positions to 3D positions
+        X, Y, Z, X_from_under = twoDtothreeD(x_positions_side,y_positions_side,x_positions_under,y_positions_under)
+        
+        # Return the 3D positions as a dictionary of all the common_bodyparts
+        bodypart_positions_3D[bodypart] = {    'X': X, 'Y': Y, 'Z': Z, 'X_from_under': X_from_under    }
+        
+        print("\n")  # Add a newline for better readability between body parts
+
+    return bodypart_positions_3D
 
 
 def twoDtothreeD(side_pawPos_x,side_pawPos_y,under_pawPos_x,under_pawPos_y):
@@ -123,6 +304,66 @@ def fillinwithnearest(data):
         if np.isnan(data[i]):
             data[i] = data[i-1]
     return data
+
+
+def getBodyPartPositions(directory, filename, bodyparts, p_cutoff, substring_to_remove):
+    """
+    Get position data for multiple body parts from an HDF5 file.
+    
+    Parameters:
+    - directory: The directory containing the HDF5 file.
+    - filename: The name of the HDF5 file.
+    - bodyparts: A list of body parts to find positions for.
+    - p_cutoff: A likelihood cutoff below which positions are considered invalid.
+    - substring_to_remove: The substring to be removed from the body part names.
+    
+    Returns:
+    - A dictionary containing the x and y positions, and changes in these positions for each body part.
+    """
+    
+    print('Now processing:')
+    print(os.path.join(directory, filename))
+    
+    df = pd.read_hdf(os.path.join(directory, filename))
+    print(df.head())
+    
+    # Initialize dictionaries to store the results
+    bodypart_positions = {}
+    
+    # For each bodypart
+    for b in bodyparts:
+        # Find the column in level 1 of df that matches bodypart
+        for c in df.columns.get_level_values(1):
+            if c == b:
+                # Remove the specified substring from the body part name
+                bodypart_name_cleaned = c.replace(substring_to_remove, "")
+
+                # Process x-coordinates
+                temp_x = df.loc[:, (slice(None), c, [d == 'x' for d in df.columns.get_level_values(2)])].xs('x', axis=1, level=2)
+                cf = df.loc[:, (slice(None), c, [d == 'likelihood' for d in df.columns.get_level_values(2)])].xs('likelihood', axis=1, level=2)
+                temp_x = temp_x.to_numpy()
+                temp_x[cf < p_cutoff] = np.nan
+                temp_x = fillinwithnearest(temp_x)
+                
+                # Process y-coordinates
+                temp_y = df.loc[:, (slice(None), c, [d == 'y' for d in df.columns.get_level_values(2)])].xs('y', axis=1, level=2)
+                temp_y = temp_y.to_numpy()
+                temp_y[cf < p_cutoff] = np.nan
+                temp_y = fillinwithnearest(temp_y)
+                
+                # Calculate changes in positions
+                temp_x_change = np.diff(temp_x, 1, 0)
+                temp_y_change = np.diff(temp_y, 1, 0)
+                
+                # Store the results in the dictionary
+                bodypart_positions[bodypart_name_cleaned] = {
+                    'x': temp_x,
+                    'y': temp_y,
+                    'x_change': temp_x_change,
+                    'y_change': temp_y_change
+                }
+    
+    return bodypart_positions
 
 
 def getPawPosData(directory,filename,bodyparts,p_cutoff):

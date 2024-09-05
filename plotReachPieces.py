@@ -1,0 +1,255 @@
+import os
+import numpy as np
+import cv2
+import matplotlib.pyplot as plt
+from tqdm import tqdm
+import scipy.io 
+#from deeplabcut.utils import auxiliaryfunctions
+from pathlib import Path
+import glob
+
+def plotReachPieces(
+):
+    """
+    Analyze epochs of reach during opto or no opto.
+    Output: Plots the average of X, Y, and Z values around positive deflections in X separately when optoOn is True or False.
+    """
+
+    #videos = r'Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20191127\April_short\DLC vids'
+    videos = r'Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20190510\3F_white\DLC output\test'
+    videotype = ".avi"
+    # User set these values
+    # Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20190510\3F_white\DLC output
+    optoZone = [113, 143, 412, 463] # [x_start, x_end, y_start, y_end]
+    optoThresh = 180
+    window_size = 200  # Window around the peak (e.g., 40 frames before and after)
+    Rise = 20  # Minimum rise in X to be considered a deflection
+    RiseTimeInFrames = 80  # Maximum time in frames for the rise to occur
+
+    ##################################################
+    # Looping over videos
+    ##################################################
+    print("Finding videos")
+    Videos = []
+    for filename in os.listdir(videos):
+        if filename.endswith(videotype):
+            Videos.append(filename)
+    Videos = sorted(Videos)
+    print("Found ", len(Videos), " videos")
+
+    # Find positive-going deflections in X when optoOn is True and False
+    optoOn_true_deflections = []
+    optoOn_false_deflections = []
+    # Initialize arrays to store the average X, Y, and Z values for optoOn True and False with NaN
+    avg_X_true = np.full(2 * window_size, np.nan)
+    avg_Y_true = np.full(2 * window_size, np.nan)
+    avg_Z_true = np.full(2 * window_size, np.nan)
+    avg_X_false = np.full(2 * window_size, np.nan)
+    avg_Y_false = np.full(2 * window_size, np.nan)
+    avg_Z_false = np.full(2 * window_size, np.nan)
+    num_deflections_true = 0
+    num_deflections_false = 0
+    
+    if len(Videos) > 0:
+        optoOn = []
+        optoVals = []
+        # Go to location of videos
+        os.chdir(videos)
+        for idx, video in enumerate(Videos):
+            ##################################################
+            # Show zones on example frame
+            ##################################################
+            # If this is the first video
+            if len(optoOn) == 0:
+                plotZonesOnExampleFrame(video, optoZone)
+
+            ##################################################
+            # Loading the video
+            ##################################################
+            print("Starting to analyze ", video)
+            print("Loading ", video)
+            cap = cv2.VideoCapture(video)
+            if not cap.isOpened():
+                raise IOError(
+                    "Video could not be opened. Please check the file integrity."
+                )
+            fps = cap.get(
+                5
+            )  # https://docs.opencv.org/2.4/modules/highgui/doc/reading_and_writing_images_and_video.html#videocapture-get
+            nframes = int(cap.get(7))
+            duration = nframes * 1.0 / fps
+            size = (int(cap.get(4)), int(cap.get(3)))
+    
+            ny, nx = size
+            print(
+                "Duration of video [s]: ",
+                round(duration, 2),
+                ", recorded with ",
+                round(fps, 2),
+                "fps!",
+            )
+            print(
+                "Overall # of frames: ",
+                nframes,
+                " found with (before cropping) frame dimensions: ",
+                nx,
+                ny,
+            )
+            
+            pbar = tqdm(total=nframes)
+            counter = 0
+            step = max(10, int(nframes / 100))
+            while cap.isOpened():
+                if counter % step == 0:
+                    pbar.update(step)
+
+                ret, frame = cap.read()
+                if ret:
+                    ny, nx, nc = np.shape(frame)
+                    frame = rgb2gray(frame)
+                    ny, nx = np.shape(frame)
+
+                    # Append to optoOn whether the value in optoZone is above threshold optoThresh
+                    optoOn.append(np.mean(frame[optoZone[0]:optoZone[1], optoZone[2]:optoZone[3]]) > optoThresh)
+                    optoVals.append(np.mean(frame[optoZone[0]:optoZone[1], optoZone[2]:optoZone[3]]))
+                elif counter >= nframes:
+                    break
+                counter += 1
+            pbar.close()
+            
+            # Plot optoVals and threshold of example video if this is first video
+            # if video is one of the first 10 videos
+            if idx < 10:
+                plt.figure()
+                plt.plot(optoVals, label='optoVals')
+                plt.axhline(optoThresh, color='r', linestyle='--', label='Threshold')
+                plt.title("optoVals")
+                plt.show()
+
+             # Use glob to find a .mat file that matches the wildcard pattern
+            mat_pattern = video.split(".")[0] + "*" + "3D.mat"
+            mat_files = glob.glob(mat_pattern)
+            print(f"Found {len(mat_files)} .mat files matching the pattern {mat_pattern}")
+            print(mat_files)
+
+            if len(mat_files) > 0:
+                # Load the first .mat file that matches the pattern
+                mat_filename = mat_files[0]
+                print(f"Loading .mat file: {mat_filename}")
+                mat_data = scipy.io.loadmat(mat_filename)
+
+                # Assuming 'X' is the key in the .mat file containing the vector of values for each frame
+                X = mat_data['X'].flatten()  # Ensure X is a 1D vector
+                Y = mat_data['Y'].flatten()  # Ensure Y is a 1D vector
+                Z = mat_data['Z'].flatten()  # Ensure Z is a 1D vector
+                optoOn_array = np.array(optoOn)  # Convert optoOn to numpy array for easier indexing
+
+                # Plot optoOn_array 
+                plt.figure()
+                plt.plot(optoOn_array, label='optoOn')
+                plt.title("optoOn")
+                plt.show()
+
+                # Plot X
+                #plt.figure()
+                #plt.plot(X, label='X')
+                #plt.title("X")
+                #plt.show()
+
+                copyX = X.copy()
+                for i in range(len(X) - RiseTimeInFrames):
+                    # Check for a positive change greater than Rise in less than RiseTimeInFrames frames
+                    if copyX[i + RiseTimeInFrames] - copyX[i] > Rise:
+                        #print("Found deflection at frame", i + np.argmax(X[i:i + RiseTimeInFrames]))
+                        peak_idx = i + np.argmax(copyX[i:i + RiseTimeInFrames])  # Find peak in the deflection window
+                        #print("optoOn: ", optoOn_array[i + RiseTimeInFrames])
+                        if optoOn_array[i]:
+                            optoOn_true_deflections.append(peak_idx)
+                        else:
+                            optoOn_false_deflections.append(peak_idx)
+                        # Set all these timepoints in X to NaN to avoid double counting
+                        copyX[i:i + RiseTimeInFrames] = np.nan
+                        # Plot the deflection
+                        plt.figure()
+                        plt.plot(X[peak_idx - window_size:peak_idx + window_size], label='X')
+                        plt.axvline(window_size, color='r', linestyle='--', label='Peak')
+                        plt.title("Deflection")
+                        plt.show()
+
+                def update_average(peak_idx, X, Y, Z, avg_X, avg_Y, avg_Z):
+                    if peak_idx - window_size >= 0 and peak_idx + window_size < len(X):
+                        x_segment = X[peak_idx - window_size:peak_idx + window_size]
+                        y_segment = Y[peak_idx - window_size:peak_idx + window_size]
+                        z_segment = Z[peak_idx - window_size:peak_idx + window_size]
+                        
+                        # Average ignoring NaNs
+                        avg_X = np.nanmean([avg_X, x_segment], axis=0)
+                        avg_Y = np.nanmean([avg_Y, y_segment], axis=0)
+                        avg_Z = np.nanmean([avg_Z, z_segment], axis=0)
+
+                    return avg_X, avg_Y, avg_Z
+
+                # Loop through the detected deflections for optoOn == True
+                for peak_idx in optoOn_true_deflections:
+                    avg_X_true, avg_Y_true, avg_Z_true = update_average(peak_idx, X, Y, Z, avg_X_true, avg_Y_true, avg_Z_true)
+                    num_deflections_true += 1
+
+                # Loop through the detected deflections for optoOn == False
+                for peak_idx in optoOn_false_deflections:
+                    avg_X_false, avg_Y_false, avg_Z_false = update_average(peak_idx, X, Y, Z, avg_X_false, avg_Y_false, avg_Z_false)
+                    num_deflections_false += 1
+
+    print("num_deflections_true: ", num_deflections_true)
+    print("num_deflections_false: ", num_deflections_false)
+
+    # Plot the averaged X, Y, and Z for optoOn == True
+    plt.figure(figsize=(10, 6))
+    plt.plot(avg_X_true, label='X (optoOn=True)')
+    plt.plot(avg_Y_true, label='Y (optoOn=True)')
+    plt.plot(avg_Z_true, label='Z (optoOn=True)')
+    plt.axvline(window_size, color='r', linestyle='--', label='Peak (optoOn=True)')
+    plt.legend()
+    plt.title(f"Averaged X, Y, Z around positive deflections (optoOn=True, N={num_deflections_true})")
+    plt.xlabel("Frames (relative to peak)")
+    plt.ylabel("Position")
+    plt.show()
+
+    # Plot the averaged X, Y, and Z for optoOn == False
+    plt.figure(figsize=(10, 6))
+    plt.plot(avg_X_false, label='X (optoOn=False)')
+    plt.plot(avg_Y_false, label='Y (optoOn=False)')
+    plt.plot(avg_Z_false, label='Z (optoOn=False)')
+    plt.axvline(window_size, color='r', linestyle='--', label='Peak (optoOn=False)')
+    plt.legend()
+    plt.title(f"Averaged X, Y, Z around positive deflections (optoOn=False, N={num_deflections_false})")
+    plt.xlabel("Frames (relative to peak)")
+    plt.ylabel("Position")
+    plt.show()
+
+    
+
+def plotZonesOnExampleFrame(video, optoZone):
+    # Load example frame
+    cap = cv2.VideoCapture(video)
+    ret, frame = cap.read()
+    # Plot opto zone
+    plt.figure()
+    plt.imshow(frame)
+    plt.plot([optoZone[2], optoZone[2]], [optoZone[0], optoZone[1]], 'r-')
+    plt.plot([optoZone[3], optoZone[3]], [optoZone[0], optoZone[1]], 'r-')
+    plt.plot([optoZone[2], optoZone[3]], [optoZone[0], optoZone[0]], 'r-')
+    plt.plot([optoZone[2], optoZone[3]], [optoZone[1], optoZone[1]], 'r-')
+    plt.title('optoZone')
+    plt.show()
+    # Close video
+    cap.release()
+
+
+
+def rgb2gray(rgb):
+    r, g, b = rgb[:,:,0], rgb[:,:,1], rgb[:,:,2]
+    gray = 0.2989 * r + 0.5870 * g + 0.1140 * b
+    return gray
+    
+    
+plotReachPieces()
