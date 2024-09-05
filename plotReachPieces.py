@@ -25,6 +25,7 @@ def plotReachPieces(
     window_size = 200  # Window around the peak (e.g., 40 frames before and after)
     Rise = 20  # Minimum rise in X to be considered a deflection
     RiseTimeInFrames = 80  # Maximum time in frames for the rise to occur
+    showThisManyFiles=3 # Show the first this many files for debugging
 
     ##################################################
     # Looping over videos
@@ -44,9 +45,11 @@ def plotReachPieces(
     avg_X_true = np.full(2 * window_size, np.nan)
     avg_Y_true = np.full(2 * window_size, np.nan)
     avg_Z_true = np.full(2 * window_size, np.nan)
+    avg_tip_true = np.full(2 * window_size, np.nan)
     avg_X_false = np.full(2 * window_size, np.nan)
     avg_Y_false = np.full(2 * window_size, np.nan)
     avg_Z_false = np.full(2 * window_size, np.nan)
+    avg_tip_false = np.full(2 * window_size, np.nan)
     num_deflections_true = 0
     num_deflections_false = 0
     
@@ -119,7 +122,7 @@ def plotReachPieces(
             
             # Plot optoVals and threshold of example video if this is first video
             # if video is one of the first 10 videos
-            if idx < 10:
+            if idx < showThisManyFiles:
                 plt.figure()
                 plt.plot(optoVals, label='optoVals')
                 plt.axhline(optoThresh, color='r', linestyle='--', label='Threshold')
@@ -129,6 +132,8 @@ def plotReachPieces(
              # Use glob to find a .mat file that matches the wildcard pattern
             mat_pattern = video.split(".")[0] + "*" + "3D.mat"
             mat_files = glob.glob(mat_pattern)
+            tip_pattern = video.split(".")[0] + "*" + "tip_distances.mat"
+            tip_files = glob.glob(tip_pattern)
             print(f"Found {len(mat_files)} .mat files matching the pattern {mat_pattern}")
             print(mat_files)
 
@@ -137,18 +142,21 @@ def plotReachPieces(
                 mat_filename = mat_files[0]
                 print(f"Loading .mat file: {mat_filename}")
                 mat_data = scipy.io.loadmat(mat_filename)
+                tip_distances = scipy.io.loadmat(tip_files[0])['tip_distances']
 
                 # Assuming 'X' is the key in the .mat file containing the vector of values for each frame
                 X = mat_data['X'].flatten()  # Ensure X is a 1D vector
                 Y = mat_data['Y'].flatten()  # Ensure Y is a 1D vector
                 Z = mat_data['Z'].flatten()  # Ensure Z is a 1D vector
+                tips = tip_distances.flatten()  # Ensure tips is a 1D vector
                 optoOn_array = np.array(optoOn)  # Convert optoOn to numpy array for easier indexing
 
                 # Plot optoOn_array 
-                plt.figure()
-                plt.plot(optoOn_array, label='optoOn')
-                plt.title("optoOn")
-                plt.show()
+                if idx < showThisManyFiles:
+                    plt.figure()
+                    plt.plot(optoOn_array, label='optoOn')
+                    plt.title("optoOn")
+                    plt.show()
 
                 # Plot X
                 #plt.figure()
@@ -163,50 +171,73 @@ def plotReachPieces(
                         #print("Found deflection at frame", i + np.argmax(X[i:i + RiseTimeInFrames]))
                         peak_idx = i + np.argmax(copyX[i:i + RiseTimeInFrames])  # Find peak in the deflection window
                         #print("optoOn: ", optoOn_array[i + RiseTimeInFrames])
-                        if optoOn_array[i]:
+                        # If optoOn_array was true for any time in the deflection window, add this deflection to the list
+                        if np.any(optoOn_array[i:i + RiseTimeInFrames]):
                             optoOn_true_deflections.append(peak_idx)
                         else:
                             optoOn_false_deflections.append(peak_idx)
                         # Set all these timepoints in X to NaN to avoid double counting
                         copyX[i:i + RiseTimeInFrames] = np.nan
-                        # Plot the deflection
-                        plt.figure()
-                        plt.plot(X[peak_idx - window_size:peak_idx + window_size], label='X')
-                        plt.axvline(window_size, color='r', linestyle='--', label='Peak')
-                        plt.title("Deflection")
-                        plt.show()
+                        if idx < showThisManyFiles:
+                            plt.figure()
+                            plt.plot(X[peak_idx - window_size:peak_idx + window_size], label='X')
+                            plt.axvline(window_size, color='r', linestyle='--', label='Peak')
+                            plt.title("Deflection")
+                            plt.show()
 
-                def update_average(peak_idx, X, Y, Z, avg_X, avg_Y, avg_Z):
+                def update_sum(peak_idx, X, Y, Z, tip, avg_X, avg_Y, avg_Z, avg_tip):
                     if peak_idx - window_size >= 0 and peak_idx + window_size < len(X):
                         x_segment = X[peak_idx - window_size:peak_idx + window_size]
                         y_segment = Y[peak_idx - window_size:peak_idx + window_size]
                         z_segment = Z[peak_idx - window_size:peak_idx + window_size]
+                        tip_segment = tip[peak_idx - window_size:peak_idx + window_size]
                         
                         # Average ignoring NaNs
-                        avg_X = np.nanmean([avg_X, x_segment], axis=0)
-                        avg_Y = np.nanmean([avg_Y, y_segment], axis=0)
-                        avg_Z = np.nanmean([avg_Z, z_segment], axis=0)
+                        avg_X = np.nansum([avg_X, x_segment], axis=0)
+                        avg_Y = np.nansum([avg_Y, y_segment], axis=0)
+                        avg_Z = np.nansum([avg_Z, z_segment], axis=0)
+                        avg_tip = np.nansum([avg_tip, tip_segment], axis=0)
 
-                    return avg_X, avg_Y, avg_Z
+                    return avg_X, avg_Y, avg_Z, avg_tip
 
                 # Loop through the detected deflections for optoOn == True
                 for peak_idx in optoOn_true_deflections:
-                    avg_X_true, avg_Y_true, avg_Z_true = update_average(peak_idx, X, Y, Z, avg_X_true, avg_Y_true, avg_Z_true)
+                    avg_X_true, avg_Y_true, avg_Z_true, avg_tip_true = update_sum(peak_idx, X, Y, Z, tips, avg_X_true, avg_Y_true, avg_Z_true, avg_tip_true)
                     num_deflections_true += 1
 
                 # Loop through the detected deflections for optoOn == False
                 for peak_idx in optoOn_false_deflections:
-                    avg_X_false, avg_Y_false, avg_Z_false = update_average(peak_idx, X, Y, Z, avg_X_false, avg_Y_false, avg_Z_false)
+                    avg_X_false, avg_Y_false, avg_Z_false, avg_tip_false = update_sum(peak_idx, X, Y, Z, tips, avg_X_false, avg_Y_false, avg_Z_false, avg_tip_false)
+                    # Plot current avg_X_false
+                    #plt.figure()
+                    #plt.plot(avg_X_false, label='X (optoOn=False)')
+                    #plt.axvline(window_size, color='r', linestyle='--', label='Peak (optoOn=False)')
+                    #plt.legend()
+                    #plt.title(f"Averaged X around positive deflections (optoOn=False, N={num_deflections_false})")
+                    #plt.xlabel("Frames (relative to peak)")
+                    #plt.ylabel("Position")
+                    #plt.show()
                     num_deflections_false += 1
 
     print("num_deflections_true: ", num_deflections_true)
     print("num_deflections_false: ", num_deflections_false)
 
+    # Divide through by num_deflections to get the average
+    avg_X_true /= num_deflections_true
+    avg_Y_true /= num_deflections_true
+    avg_Z_true /= num_deflections_true
+    avg_tip_true /= num_deflections_true
+    avg_X_false /= num_deflections_false
+    avg_Y_false /= num_deflections_false
+    avg_Z_false /= num_deflections_false
+    avg_tip_false /= num_deflections_false
+    
     # Plot the averaged X, Y, and Z for optoOn == True
     plt.figure(figsize=(10, 6))
     plt.plot(avg_X_true, label='X (optoOn=True)')
     plt.plot(avg_Y_true, label='Y (optoOn=True)')
     plt.plot(avg_Z_true, label='Z (optoOn=True)')
+    plt.plot(avg_tip_true, label='tip (optoOn=True)')
     plt.axvline(window_size, color='r', linestyle='--', label='Peak (optoOn=True)')
     plt.legend()
     plt.title(f"Averaged X, Y, Z around positive deflections (optoOn=True, N={num_deflections_true})")
@@ -219,6 +250,7 @@ def plotReachPieces(
     plt.plot(avg_X_false, label='X (optoOn=False)')
     plt.plot(avg_Y_false, label='Y (optoOn=False)')
     plt.plot(avg_Z_false, label='Z (optoOn=False)')
+    plt.plot(avg_tip_false, label='tip (optoOn=False)')
     plt.axvline(window_size, color='r', linestyle='--', label='Peak (optoOn=False)')
     plt.legend()
     plt.title(f"Averaged X, Y, Z around positive deflections (optoOn=False, N={num_deflections_false})")
