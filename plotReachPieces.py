@@ -16,7 +16,7 @@ def plotReachPieces(
     """
 
     #videos = r'Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20191127\April_short\DLC vids'
-    videos = r'Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20190510\3F_white\DLC output\test'
+    videos = r'Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20190510\3F_white\DLC output\new test'
     videotype = ".avi"
     # User set these values
     # Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20190510\3F_white\DLC output
@@ -226,6 +226,18 @@ def plotReachPieces(
     plotAverageAroundDeflections(avg_Y_false, False, window_size, num_deflections_false, "Y")
     plotAverageAroundDeflections(avg_Z_false, False, window_size, num_deflections_false, "Z")
     plotAverageAroundDeflections(avg_tip_false, False, window_size, num_deflections_false, "tip")
+
+    # Save to .mat files
+    print("Saving to .mat files")
+    scipy.io.savemat("avg_X_true.mat", {"avg_X_true": avg_X_true})
+    scipy.io.savemat("avg_Y_true.mat", {"avg_Y_true": avg_Y_true})
+    scipy.io.savemat("avg_Z_true.mat", {"avg_Z_true": avg_Z_true})
+    scipy.io.savemat("avg_tip_true.mat", {"avg_tip_true": avg_tip_true})
+    scipy.io.savemat("avg_X_false.mat", {"avg_X_false": avg_X_false})
+    scipy.io.savemat("avg_Y_false.mat", {"avg_Y_false": avg_Y_false})
+    scipy.io.savemat("avg_Z_false.mat", {"avg_Z_false": avg_Z_false})
+    scipy.io.savemat("avg_tip_false.mat", {"avg_tip_false": avg_tip_false})
+    print("Done!")
 
 
 
