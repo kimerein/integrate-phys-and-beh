@@ -38,9 +38,6 @@ def plotReachPieces(
     Videos = sorted(Videos)
     print("Found ", len(Videos), " videos")
 
-    # Find positive-going deflections in X when optoOn is True and False
-    optoOn_true_deflections = []
-    optoOn_false_deflections = []
     # Initialize arrays to store the average X, Y, and Z values for optoOn True and False with NaN
     avg_X_true = np.full(2 * window_size, np.nan)
     avg_Y_true = np.full(2 * window_size, np.nan)
@@ -54,8 +51,6 @@ def plotReachPieces(
     num_deflections_false = 0
     
     if len(Videos) > 0:
-        optoOn = []
-        optoVals = []
         # Go to location of videos
         os.chdir(videos)
         for idx, video in enumerate(Videos):
@@ -63,7 +58,7 @@ def plotReachPieces(
             # Show zones on example frame
             ##################################################
             # If this is the first video
-            if len(optoOn) == 0:
+            if idx == 0:
                 plotZonesOnExampleFrame(video, optoZone)
 
             ##################################################
@@ -102,6 +97,8 @@ def plotReachPieces(
             pbar = tqdm(total=nframes)
             counter = 0
             step = max(10, int(nframes / 100))
+            optoOn = []
+            optoVals = []
             while cap.isOpened():
                 if counter % step == 0:
                     pbar.update(step)
@@ -164,6 +161,9 @@ def plotReachPieces(
                 #plt.title("X")
                 #plt.show()
 
+                 # Find positive-going deflections in X when optoOn is True and False
+                optoOn_true_deflections = []
+                optoOn_false_deflections = []
                 copyX = X.copy()
                 for i in range(len(X) - RiseTimeInFrames):
                     # Check for a positive change greater than Rise in less than RiseTimeInFrames frames
@@ -185,29 +185,13 @@ def plotReachPieces(
                             plt.title("Deflection")
                             plt.show()
 
-                def update_sum(peak_idx, X, Y, Z, tip, avg_X, avg_Y, avg_Z, avg_tip):
-                    if peak_idx - window_size >= 0 and peak_idx + window_size < len(X):
-                        x_segment = X[peak_idx - window_size:peak_idx + window_size]
-                        y_segment = Y[peak_idx - window_size:peak_idx + window_size]
-                        z_segment = Z[peak_idx - window_size:peak_idx + window_size]
-                        tip_segment = tip[peak_idx - window_size:peak_idx + window_size]
-                        
-                        # Average ignoring NaNs
-                        avg_X = np.nansum([avg_X, x_segment], axis=0)
-                        avg_Y = np.nansum([avg_Y, y_segment], axis=0)
-                        avg_Z = np.nansum([avg_Z, z_segment], axis=0)
-                        avg_tip = np.nansum([avg_tip, tip_segment], axis=0)
-
-                    return avg_X, avg_Y, avg_Z, avg_tip
-
                 # Loop through the detected deflections for optoOn == True
-                for peak_idx in optoOn_true_deflections:
-                    avg_X_true, avg_Y_true, avg_Z_true, avg_tip_true = update_sum(peak_idx, X, Y, Z, tips, avg_X_true, avg_Y_true, avg_Z_true, avg_tip_true)
-                    num_deflections_true += 1
+                for peak_i in optoOn_true_deflections:
+                    avg_X_true, avg_Y_true, avg_Z_true, avg_tip_true, num_deflections_true = update_sum(peak_i, X, Y, Z, tips, avg_X_true, avg_Y_true, avg_Z_true, avg_tip_true, window_size, num_deflections_true)
 
                 # Loop through the detected deflections for optoOn == False
-                for peak_idx in optoOn_false_deflections:
-                    avg_X_false, avg_Y_false, avg_Z_false, avg_tip_false = update_sum(peak_idx, X, Y, Z, tips, avg_X_false, avg_Y_false, avg_Z_false, avg_tip_false)
+                for peak_i in optoOn_false_deflections:
+                    avg_X_false, avg_Y_false, avg_Z_false, avg_tip_false, num_deflections_false = update_sum(peak_i, X, Y, Z, tips, avg_X_false, avg_Y_false, avg_Z_false, avg_tip_false, window_size, num_deflections_false)
                     # Plot current avg_X_false
                     #plt.figure()
                     #plt.plot(avg_X_false, label='X (optoOn=False)')
@@ -217,8 +201,7 @@ def plotReachPieces(
                     #plt.xlabel("Frames (relative to peak)")
                     #plt.ylabel("Position")
                     #plt.show()
-                    num_deflections_false += 1
-
+                
     print("num_deflections_true: ", num_deflections_true)
     print("num_deflections_false: ", num_deflections_false)
 
@@ -233,31 +216,47 @@ def plotReachPieces(
     avg_tip_false /= num_deflections_false
     
     # Plot the averaged X, Y, and Z for optoOn == True
-    plt.figure(figsize=(10, 6))
-    plt.plot(avg_X_true, label='X (optoOn=True)')
-    plt.plot(avg_Y_true, label='Y (optoOn=True)')
-    plt.plot(avg_Z_true, label='Z (optoOn=True)')
-    plt.plot(avg_tip_true, label='tip (optoOn=True)')
-    plt.axvline(window_size, color='r', linestyle='--', label='Peak (optoOn=True)')
-    plt.legend()
-    plt.title(f"Averaged X, Y, Z around positive deflections (optoOn=True, N={num_deflections_true})")
-    plt.xlabel("Frames (relative to peak)")
-    plt.ylabel("Position")
-    plt.show()
+    plotAverageAroundDeflections(avg_X_true, True, window_size, num_deflections_true, "X")
+    plotAverageAroundDeflections(avg_Y_true, True, window_size, num_deflections_true, "Y")
+    plotAverageAroundDeflections(avg_Z_true, True, window_size, num_deflections_true, "Z")
+    plotAverageAroundDeflections(avg_tip_true, True, window_size, num_deflections_true, "tip")
 
     # Plot the averaged X, Y, and Z for optoOn == False
-    plt.figure(figsize=(10, 6))
-    plt.plot(avg_X_false, label='X (optoOn=False)')
-    plt.plot(avg_Y_false, label='Y (optoOn=False)')
-    plt.plot(avg_Z_false, label='Z (optoOn=False)')
-    plt.plot(avg_tip_false, label='tip (optoOn=False)')
-    plt.axvline(window_size, color='r', linestyle='--', label='Peak (optoOn=False)')
+    plotAverageAroundDeflections(avg_X_false, False, window_size, num_deflections_false, "X")
+    plotAverageAroundDeflections(avg_Y_false, False, window_size, num_deflections_false, "Y")
+    plotAverageAroundDeflections(avg_Z_false, False, window_size, num_deflections_false, "Z")
+    plotAverageAroundDeflections(avg_tip_false, False, window_size, num_deflections_false, "tip")
+
+
+
+def update_sum(peak_idx, X, Y, Z, tip, avg_X, avg_Y, avg_Z, avg_tip, window_size, num_deflections):
+    
+    if peak_idx - window_size >= 0 and peak_idx + window_size < len(X):
+        x_segment = X[peak_idx - window_size:peak_idx + window_size]
+        y_segment = Y[peak_idx - window_size:peak_idx + window_size]
+        z_segment = Z[peak_idx - window_size:peak_idx + window_size]
+        tip_segment = tip[peak_idx - window_size:peak_idx + window_size]
+                        
+        # Average ignoring NaNs
+        avg_X = np.nansum([avg_X, x_segment], axis=0)
+        avg_Y = np.nansum([avg_Y, y_segment], axis=0)
+        avg_Z = np.nansum([avg_Z, z_segment], axis=0)
+        avg_tip = np.nansum([avg_tip, tip_segment], axis=0)
+
+        num_deflections += 1
+    return avg_X, avg_Y, avg_Z, avg_tip, num_deflections
+
+
+
+def plotAverageAroundDeflections(av_X, optoOn_trueOrFalse, window_size, N, name):
+    plt.figure()
+    plt.plot(av_X, label=f"{name} (optoOn={optoOn_trueOrFalse})")
+    plt.axvline(window_size, color='r', linestyle='--', label=f"Peak")
     plt.legend()
-    plt.title(f"Averaged X, Y, Z around positive deflections (optoOn=False, N={num_deflections_false})")
+    plt.title(f"Averaged {name} around positive deflections (optoOn={optoOn_trueOrFalse}, N={N})")
     plt.xlabel("Frames (relative to peak)")
     plt.ylabel("Position")
     plt.show()
-
     
 
 def plotZonesOnExampleFrame(video, optoZone):
