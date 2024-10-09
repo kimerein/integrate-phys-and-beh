@@ -11,9 +11,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023175615\'; % directory containing experimental data
-behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log - Slimmed down w old mice added.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023175615\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt08Oct2024155731\'; % directory containing experimental data
+behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log20241008.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
+mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt08Oct2024155731\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -56,7 +56,7 @@ backup.metadata=metadata;
 % [alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,[4 5 19]);
 
 % Optional: discard preemptive
-[alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
+% [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
 
 % fix weird bug where reach batch sometimes get stuck at 1 (in less than 0.1% of trials), possibly an
 % interp problem somewhere?? not sure
@@ -112,11 +112,11 @@ alltbt.anyFail=single(alltbt.anyFail>0.5);
 
 % Optional: dprimes for each mouse, each session
 settingsDp=settingsForDprimes(alltbt,'cueZone_onVoff',true); % Check settings in settingsForDprimes
-[alltbt,trialTypes,metadata]=get_dprime_per_mouse(alltbt,trialTypes,metadata,false,settingsDp); % last arg is whether to get rates instead
+[alltbt,trialTypes,metadata]=get_dprime_per_mouse(alltbt,trialTypes,metadata,false,settingsDp); % 2nd to last arg is whether to get rates instead
 alltbt.dprimes(isinf(alltbt.dprimes))=3; 
 % Get cued vs uncued reach rates
 settingsRR=settingsForReachRates(alltbt,'cueZone_onVoff',false);
-[~,~,metadata]=get_dprime_per_mouse(alltbt,trialTypes,metadata,true,settingsRR); % last arg is whether to get rates instead
+[~,~,metadata]=get_dprime_per_mouse(alltbt,trialTypes,metadata,true,settingsRR); % 2nd to last arg is whether to get rates instead
 
 % Get dprimes after distractor
 % [~,~,met]=get_DistractorDprime_per_mouse(alltbt,trialTypes,metadata); alltbt.distract_dprimes(isinf(alltbt.distract_dprimes))=3;
@@ -183,10 +183,47 @@ temp=tbt_filter.name;
 temp(~ismember(temp,['A':'Z' 'a':'z' '0':'9']))=''; 
 temp=temp(~isspace(temp));
 tbt_filter.name=temp;
-tbt_filter.clock_progress=true;
+tbt_filter.clock_progress=true; % note that I turned off save sort details 
 
 % filter alltbt
 [alltbt,trialTypes,metadata]=filtTbt(alltbt,trialTypes,tbt_filter.sortField,tbt_filter.range_values,metadata,tbt_filter.clock_progress);
+
+%% for external cue only! use logistic regression to compare reaching to cue vs. distractor
+excue=questdlg('Is this external cue?', 'Question', 'Yes', 'No', 'No');
+switch excue
+    case 'Yes'
+        % hit rates and false alarms for cue-aligned tbt from this line above:
+        % [alltbt,trialTypes,metadata]=get_dprime_per_mouse(alltbt,trialTypes,metadata,false,settingsDp); % 2nd to last arg is whether to get rates instead
+        % Make alltbt aligned to distractor
+        distract_tbt=alltbt; metadata_distract=metadata; trialTypes_distract=trialTypes;
+        distract_tbt=realignToDistractor(distract_tbt,'movie_distractor');
+        wasDistract=any(distract_tbt.movie_distractor(:,settingsRR.maxIndNameOfCue:end)>0.05,2);
+        figure(); plot(nanmean(alltbt.all_reachBatch,1),'Color','r'); hold on;
+        plot(nanmean(distract_tbt.all_reachBatch(wasDistract==1,:),1),'Color','b');
+        legend({'align to cue','align to distract'});
+        % filter distract_tbt to get rid of trials lacking a distractor
+        distract_tbt.wasDistract=wasDistract; trialTypes_distract.wasDistract=wasDistract; metadata_distract.wasDistract=wasDistract;
+        tbt_filter.sortField='wasDistract';
+        tbt_filter.range_values=[0.5 1.5];
+        [distract_tbt,trialTypes_distract,metadata_distract]=filtTbt(distract_tbt,trialTypes_distract,tbt_filter.sortField,tbt_filter.range_values,metadata_distract,tbt_filter.clock_progress);
+        % Get dprimes, hit rates, etc. for tbt aligned to distractor
+        [distract_tbt,trialTypes_distract,metadata_distract]=get_dprime_per_mouse(distract_tbt,trialTypes_distract,metadata_distract,false,settingsDp);
+        [alltbt,metadata,trialTypes,distract_tbt,trialTypes_distract,metadata_distract]=getOddsRatio_cueVsDistract(alltbt,metadata,trialTypes,distract_tbt,trialTypes_distract,metadata_distract);
+        % plot learning curves using odds_ratio
+        backup.alltbt=alltbt;
+        backup.trialTypes=trialTypes;
+        backup.metadata=metadata;
+        backup.distract_tbt=distract_tbt;
+        backup.trialTypes_distract=trialTypes_distract;
+        backup.metadata_distract=metadata_distract;
+        alltbt.dprimes=alltbt.odds_ratio;
+        trialTypes.dprimes=trialTypes.odds_ratio;
+        metadata.dprimes=metadata.odds_ratio;
+        [learningC,days,~,~,dayNdprime,day1dprime]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1],[15:20],false);
+        alltbt=backup.alltbt;
+        trialTypes=backup.trialTypes;
+        metadata=backup.metadata;
+end
 
 %% realign everything to distractor (randomly select 1 distractor from each trial)
 % [alltbt,trialTypes,metadata]=realignToDistractor(alltbt,trialTypes,metadata);
@@ -264,7 +301,7 @@ cuedreachtimewindow=0.4; % in seconds
 % trialTypes.did_cued_reach_1forward=[trialTypes.did_cued_reach(2:end); 0];
 
 % settings for paired RT data set
-test.nInSequence=[7]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
+test.nInSequence=[2]; % defines trial pairs, e.g., 2 means will compare each trial with its subsequent trial, 3 means will compare each trial with the trial after next, etc.
 % requirement for first trial in pair
 % trial1='trialTypes.led==0';
 trialTypes.isLongITI_1forward=[trialTypes.isLongITI(2:end); 0];
@@ -278,12 +315,12 @@ trialTypes.led_11back=[ones(11,1); trialTypes.led(1:end-11)];
 trialTypes.led_7back=[ones(7,1); trialTypes.led(1:end-7)];
 trialTypes.led_6back=[ones(6,1); trialTypes.led(1:end-6)];
 
-trial1='trialTypes.led_1back==1 & trialTypes.led==1 & trialTypes.led_1forward==1 & trialTypes.led_2forward==1 & trialTypes.led_3forward==1 & trialTypes.led_4forward==1 & trialTypes.led_5forward==1';
-% % trial1='trialTypes.led==0'; % | trialTypes.led_1back==0 | trialTypes.led_2back==0';
+% trial1='trialTypes.led_1back==1 & trialTypes.led==1 & trialTypes.led_1forward==1 & trialTypes.led_2forward==1 & trialTypes.led_3forward==1 & trialTypes.led_4forward==1 & trialTypes.led_5forward==1';
+% trial1='trialTypes.led==0'; % | trialTypes.led_1back==0 | trialTypes.led_2back==0';
 % % memory
 % %this %trial1='trialTypes.led~=1'; 
 % % trial1='trialTypes.isLongITI==1';
-% trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
+trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
 % trial1='trialTypes.optoGroup~=1 & trialTypes.did_cued_reach_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.isLongITI_1forward==1';
 % % trial1='trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1'; % & trialTypes.isLongITI_1forward==1'];
 % % trial1='trialTypes.touch_in_cued_window_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup~=1';

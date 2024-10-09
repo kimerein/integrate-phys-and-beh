@@ -4,6 +4,7 @@ function settings=settingsForReachRates(alltbt,nameOfCue,display)
 timestep=mode(diff(nanmean(alltbt.times,1)));
 tims=0:timestep:(size(alltbt.times,2)-1)*timestep;
 [~,ma]=nanmax(nanmean(alltbt.(nameOfCue),1));
+settings.maxIndNameOfCue=ma;
 % figure(); plot(tims,nanmean(alltbt.cueZone_onVoff,1)); xlabel('Time (sec)'); ylabel('Cue');
 disp(['Cue turns on at ' num2str(tims(ma)) ' seconds']);
 cuetimeat=tims(ma);

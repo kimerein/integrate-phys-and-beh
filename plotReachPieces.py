@@ -16,16 +16,16 @@ def plotReachPieces(
     """
 
     #videos = r'Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20191127\April_short\DLC vids'
-    videos = r'Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20190510\3F_white\DLC output\new test'
+    videos = r'Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20200302\Oct_0\DLC output'
     videotype = ".avi"
     # User set these values
     # Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20190510\3F_white\DLC output
-    optoZone = [113, 143, 412, 463] # [x_start, x_end, y_start, y_end]
-    optoThresh = 180
+    optoZone = [217, 234, 315, 336] # [x_start, x_end, y_start, y_end]
+    optoThresh = 150  # Threshold for optoOn
     window_size = 200  # Window around the peak (e.g., 40 frames before and after)
     Rise = 20  # Minimum rise in X to be considered a deflection
     RiseTimeInFrames = 80  # Maximum time in frames for the rise to occur
-    showThisManyFiles=3 # Show the first this many files for debugging
+    showThisManyFiles=5 # Show the first this many files for debugging
 
     ##################################################
     # Looping over videos
@@ -49,6 +49,14 @@ def plotReachPieces(
     avg_tip_false = np.full(2 * window_size, np.nan)
     num_deflections_true = 0
     num_deflections_false = 0
+    all_X_true = []
+    all_Y_true = []
+    all_Z_true = []
+    all_tip_true = []
+    all_X_false = []
+    all_Y_false = []
+    all_Z_false = []
+    all_tip_false = []
     
     if len(Videos) > 0:
         # Go to location of videos
@@ -188,10 +196,12 @@ def plotReachPieces(
                 # Loop through the detected deflections for optoOn == True
                 for peak_i in optoOn_true_deflections:
                     avg_X_true, avg_Y_true, avg_Z_true, avg_tip_true, num_deflections_true = update_sum(peak_i, X, Y, Z, tips, avg_X_true, avg_Y_true, avg_Z_true, avg_tip_true, window_size, num_deflections_true)
+                    all_X_true, all_Y_true, all_Z_true, all_tip_true = update_append(peak_i, X, Y, Z, tips, all_X_true, all_Y_true, all_Z_true, all_tip_true, window_size)
 
                 # Loop through the detected deflections for optoOn == False
                 for peak_i in optoOn_false_deflections:
                     avg_X_false, avg_Y_false, avg_Z_false, avg_tip_false, num_deflections_false = update_sum(peak_i, X, Y, Z, tips, avg_X_false, avg_Y_false, avg_Z_false, avg_tip_false, window_size, num_deflections_false)
+                    all_X_false, all_Y_false, all_Z_false, all_tip_false = update_append(peak_i, X, Y, Z, tips, all_X_false, all_Y_false, all_Z_false, all_tip_false, window_size)
                     # Plot current avg_X_false
                     #plt.figure()
                     #plt.plot(avg_X_false, label='X (optoOn=False)')
@@ -237,6 +247,14 @@ def plotReachPieces(
     scipy.io.savemat("avg_Y_false.mat", {"avg_Y_false": avg_Y_false})
     scipy.io.savemat("avg_Z_false.mat", {"avg_Z_false": avg_Z_false})
     scipy.io.savemat("avg_tip_false.mat", {"avg_tip_false": avg_tip_false})
+    scipy.io.savemat("all_X_true.mat", {"all_X_true": all_X_true})
+    scipy.io.savemat("all_Y_true.mat", {"all_Y_true": all_Y_true})
+    scipy.io.savemat("all_Z_true.mat", {"all_Z_true": all_Z_true})
+    scipy.io.savemat("all_tip_true.mat", {"all_tip_true": all_tip_true})
+    scipy.io.savemat("all_X_false.mat", {"all_X_false": all_X_false})
+    scipy.io.savemat("all_Y_false.mat", {"all_Y_false": all_Y_false})
+    scipy.io.savemat("all_Z_false.mat", {"all_Z_false": all_Z_false})
+    scipy.io.savemat("all_tip_false.mat", {"all_tip_false": all_tip_false})
     print("Done!")
 
 
@@ -257,6 +275,35 @@ def update_sum(peak_idx, X, Y, Z, tip, avg_X, avg_Y, avg_Z, avg_tip, window_size
 
         num_deflections += 1
     return avg_X, avg_Y, avg_Z, avg_tip, num_deflections
+
+
+
+def update_append(peak_idx, X, Y, Z, tip, all_X, all_Y, all_Z, all_tip, window_size):
+    """
+    Appends each x_segment, y_segment, z_segment, and tip_segment to growing arrays.
+    
+    Parameters:
+    - peak_idx: The index of the detected peak.
+    - X, Y, Z, tip: The arrays containing X, Y, Z, and tip data.
+    - all_X, all_Y, all_Z, all_tip: Arrays where segments will be appended.
+    - window_size: Number of frames before and after the peak to include.
+    
+    Returns:
+    - all_X, all_Y, all_Z, all_tip: Arrays with appended segments.
+    """
+    if peak_idx - window_size >= 0 and peak_idx + window_size < len(X):
+        x_segment = X[peak_idx - window_size:peak_idx + window_size]
+        y_segment = Y[peak_idx - window_size:peak_idx + window_size]
+        z_segment = Z[peak_idx - window_size:peak_idx + window_size]
+        tip_segment = tip[peak_idx - window_size:peak_idx + window_size]
+        
+        # Append the segments to the growing lists
+        all_X.append(x_segment)
+        all_Y.append(y_segment)
+        all_Z.append(z_segment)
+        all_tip.append(tip_segment)
+
+    return all_X, all_Y, all_Z, all_tip
 
 
 

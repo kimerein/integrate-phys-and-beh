@@ -28,7 +28,7 @@ def getPawPosition(
 
     # For each .h5 file, get horizontal and vertical position of each bodypart
     #directory=r'Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20191127\April_short\DLC vids'
-    directory=r'Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20190510\3F_white\DLC output'
+    directory=r'Z:\MICROSCOPE\Kim\KER Behavior\By date\High speed\20200302\Oct_0\DLC output'
     for filename in sorted(os.listdir(directory)):
         if filename.endswith(".h5"):
             # If filename contains side, then use bodyparts_side

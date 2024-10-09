@@ -73,6 +73,7 @@ if doRawReachRates==false
     settings.reachAfterCueWindow_end=reachAfterCueWindow_end; % in sec, wrt cue onset
     disp(['preCueWindow 1 is ' num2str(settings.preCueWindow_start) ' to ' num2str(settings.preCueWindow_end) ' secs from beginning of trial']);
     [dprimes_preCue,hit_rates,FA_rates_preCue]=get_dprime_per_session(alltbt,out,metadata,reachName,nameOfCue,settings);
+    isreaching_out.hit_rates=hit_rates;
 
     settings=RTanalysis_settings();
     settings.preCueWindow_start=preCueWindow_start2; % define start of time window from trial onset, in seconds
@@ -85,6 +86,8 @@ if doRawReachRates==false
     [dprimes_postCue,~,FA_rates_postCue]=get_dprime_per_session(alltbt,out,metadata,reachName,nameOfCue,settings);
 
     max_FA=max([FA_rates_preCue; FA_rates_postCue],[],1);
+    isreaching_out.FA_rates_preCue=FA_rates_preCue;
+    isreaching_out.FA_rates_postCue=FA_rates_postCue;
 
     isreaching_out.dprimes_preCue=dprimes_preCue;
     isreaching_out.dprimes_postCue=dprimes_postCue;

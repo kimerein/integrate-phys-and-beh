@@ -55,15 +55,24 @@ for i=1:length(u)
     
     % get dprimes for this mouse
     [isreaching_out,dprimes]=getCuedResponseVsSuppression(alltbt,metadata,trialTypes,'cueZone_onVoff','all_reachBatch',[],1,settingsForDp.reachAfterCueWindow_start,settingsForDp.reachAfterCueWindow_end,false,getRatesInstead,settingsForDp);
+    if ~isfield(isreaching_out,'hit_rates')
+        hit_rates=[];
+        FA_rates_preCue=[];
+    else
+        hit_rates=isreaching_out.hit_rates;
+        FA_rates_preCue=isreaching_out.FA_rates_preCue;
+    end
     if isfield(isreaching_out,'cued_reach_rate')
         RRcued=isreaching_out.cued_reach_rate;
         RRuncued=isreaching_out.noncued_reach_rate;
     else
         RRcued=[];
-        RRuncued=[];
+        RRuncued=[]; 
     end
     metadata=addRR(metadata,RRcued,'reachrate_cued'); 
     metadata=addRR(metadata,RRuncued,'reachrate_uncued');
+    metadata=addRR(metadata,hit_rates,'hit_rates');
+    metadata=addRR(metadata,FA_rates_preCue,'FA_rates_preCue');
     isreachout_permouse{i}=isreaching_out;
 
     if ~isempty(dprimes)
@@ -115,6 +124,30 @@ for i=1:length(u)
             metadata_backup.reachrate_uncued=nan(size(metadata_backup.sessid));
         end
         f={'reachrate_uncued'}; 
+        for j=1:length(f)
+            temp=metadata_backup.(f{j});
+            temp(tookThese)=metadata.(f{j});
+            metadata_backup.(f{j})=temp;
+        end
+    end
+    if ~isempty(hit_rates)
+        % add to multi-mouse metadata
+        if ~isfield(metadata_backup,'hit_rates')
+            metadata_backup.hit_rates=nan(size(metadata_backup.sessid));
+        end
+        f={'hit_rates'}; 
+        for j=1:length(f)
+            temp=metadata_backup.(f{j});
+            temp(tookThese)=metadata.(f{j});
+            metadata_backup.(f{j})=temp;
+        end
+    end
+    if ~isempty(FA_rates_preCue)
+        % add to multi-mouse metadata
+        if ~isfield(metadata_backup,'FA_rates_preCue')
+            metadata_backup.FA_rates_preCue=nan(size(metadata_backup.sessid));
+        end
+        f={'FA_rates_preCue'}; 
         for j=1:length(f)
             temp=metadata_backup.(f{j});
             temp(tookThese)=metadata.(f{j});
