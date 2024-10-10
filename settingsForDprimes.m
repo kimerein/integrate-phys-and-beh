@@ -7,6 +7,7 @@ tims=0:timestep:(size(alltbt.times,2)-1)*timestep;
 % figure(); plot(tims,nanmean(alltbt.cueZone_onVoff,1)); xlabel('Time (sec)'); ylabel('Cue');
 disp(['Cue turns on at ' num2str(tims(ma)) ' seconds']);
 cuetimeat=tims(ma);
+settings.cuetimeat=cuetimeat;
 
 % used for first half, second half (or first quarter, second half)
 % settings.preCueWindow_start1=cuetimeat-0.4;

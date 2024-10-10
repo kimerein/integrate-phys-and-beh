@@ -11,9 +11,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt08Oct2024155731\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt10Oct2024090421\'; % directory containing experimental data
 behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log20241008.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt08Oct2024155731\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt10Oct2024090421\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -188,24 +188,32 @@ tbt_filter.clock_progress=true; % note that I turned off save sort details
 % filter alltbt
 [alltbt,trialTypes,metadata]=filtTbt(alltbt,trialTypes,tbt_filter.sortField,tbt_filter.range_values,metadata,tbt_filter.clock_progress);
 
-%% for external cue only! use logistic regression to compare reaching to cue vs. distractor
+%% for external cue only! use logistic regression to compare reaching to cue vs. distractor -- PART 1
+% realignToDistractor is slow
+distract_tbt=alltbt; metadata_distract=metadata; trialTypes_distract=trialTypes;
+[distract_tbt,trialTypes_distract,metadata_distract]=realignToDistractor(distract_tbt,trialTypes_distract,metadata_distract,true);
+
+%% for external cue only! use logistic regression to compare reaching to cue vs. distractor -- PART 2
+
 excue=questdlg('Is this external cue?', 'Question', 'Yes', 'No', 'No');
 switch excue
     case 'Yes'
-        % hit rates and false alarms for cue-aligned tbt from this line above:
-        % [alltbt,trialTypes,metadata]=get_dprime_per_mouse(alltbt,trialTypes,metadata,false,settingsDp); % 2nd to last arg is whether to get rates instead
-        % Make alltbt aligned to distractor
-        distract_tbt=alltbt; metadata_distract=metadata; trialTypes_distract=trialTypes;
-        distract_tbt=realignToDistractor(distract_tbt,'movie_distractor');
-        wasDistract=any(distract_tbt.movie_distractor(:,settingsRR.maxIndNameOfCue:end)>0.05,2);
-        figure(); plot(nanmean(alltbt.all_reachBatch,1),'Color','r'); hold on;
-        plot(nanmean(distract_tbt.all_reachBatch(wasDistract==1,:),1),'Color','b');
-        legend({'align to cue','align to distract'});
-        % filter distract_tbt to get rid of trials lacking a distractor
-        distract_tbt.wasDistract=wasDistract; trialTypes_distract.wasDistract=wasDistract; metadata_distract.wasDistract=wasDistract;
-        tbt_filter.sortField='wasDistract';
-        tbt_filter.range_values=[0.5 1.5];
-        [distract_tbt,trialTypes_distract,metadata_distract]=filtTbt(distract_tbt,trialTypes_distract,tbt_filter.sortField,tbt_filter.range_values,metadata_distract,tbt_filter.clock_progress);
+        umo=unique(metadata.mouseid);
+        for i=1:length(umo)
+            currmo=umo(i);
+            temp=metadata.sess_wrt_day1(metadata.mouseid==currmo);
+            temp=temp-min(temp,[],'omitnan');
+            metadata.sess_wrt_day1(metadata.mouseid==currmo)=temp;
+        end
+        trialTypes.sess_wrt_day1=metadata.sess_wrt_day1; alltbt.sess_wrt_day1=metadata.sess_wrt_day1;
+%         settingsDp=settingsForDprimes(alltbt,'cueZone_onVoff',true); % Check settings in settingsForDprimes
+%         settingsDp.preCueWindow_start1=settingsDp.cuetimeat-1;
+%         settingsDp.preCueWindow_end1=settingsDp.cuetimeat;
+%         settingsDp.reachAfterCueWindow_start=-0.05;
+%         settingsDp.reachAfterCueWindow_end=0.95;
+%         [alltbt,trialTypes,metadata]=get_dprime_per_mouse(alltbt,trialTypes,metadata,false,settingsDp); % 2nd to last arg is whether to get rates instead
+%         alltbt.dprimes(isinf(alltbt.dprimes))=3;
+
         % Get dprimes, hit rates, etc. for tbt aligned to distractor
         [distract_tbt,trialTypes_distract,metadata_distract]=get_dprime_per_mouse(distract_tbt,trialTypes_distract,metadata_distract,false,settingsDp);
         [alltbt,metadata,trialTypes,distract_tbt,trialTypes_distract,metadata_distract]=getOddsRatio_cueVsDistract(alltbt,metadata,trialTypes,distract_tbt,trialTypes_distract,metadata_distract);
