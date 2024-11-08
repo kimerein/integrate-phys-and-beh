@@ -191,10 +191,16 @@ switch whichEventType
 %         trial1_LED=['(trialTypes.optoGroup~=1 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.cued_reach_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1)' linkerForVariedTimingForward linkerForVariedTimingUncued]; 
 %         trial2_LED=['trialTypes.optoGroup~=1 & (trialTypes.led_1forward==0 | trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_1back==0)' linkerForVariedTimingUncued];
         % FOR VARIED TIMING EXPERIMENT
-        trial1=['(trialTypes.led==0 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.cued_reach_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0)' linkerForVariedTimingUncued]; 
-        trial2=['trialTypes.led==0' linkerForNoLED linkerForVariedTimingUncued];
-        trial1_LED=['(trialTypes.led==0 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.cued_reach_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1)' linkerForVariedTimingForward linkerForVariedTimingUncued]; 
-        trial2_LED=['trialTypes.led==0 & (trialTypes.led_1forward==0 | trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_1back==0)' linkerForVariedTimingUncued];
+%         trial1=['(trialTypes.led==0 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.cued_reach_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==0)' linkerForVariedTimingUncued]; 
+%         trial2=['trialTypes.led==0' linkerForNoLED linkerForVariedTimingUncued];
+%         trial1_LED=['(trialTypes.led==0 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.cued_reach_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1)' linkerForVariedTimingForward linkerForVariedTimingUncued]; 
+%         trial2_LED=['trialTypes.led==0 & (trialTypes.led_1forward==0 | trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_1back==0)' linkerForVariedTimingUncued];
+
+        % for uncued reaches 10/22/2024
+        trial1=['(trialTypes.reachedBeforeCue_1forward==0 & trialTypes.cued_reach_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.led_1forward==0 & trialTypes.isLongITI==1)']; 
+        trial2=['trialTypes.led==0 & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)'];
+        trial1_LED=['(trialTypes.reachedBeforeCue_1forward==0 & trialTypes.cued_reach_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.led_1forward==0 & trialTypes.isLongITI==1)']; 
+        trial2_LED=['trialTypes.optoGroup==1 & (trialTypes.led_1forward==0 | trialTypes.led_2forward==0 | trialTypes.led_3forward==0 | trialTypes.led_4forward==0 | trialTypes.led_1back==0)'];
 
 end
 

@@ -27,6 +27,9 @@ for i=1:length(continuingAnalysisDir)
     % modify settings in trialTypeSettings.m to change trial types
     [out,alltbt]=getSweepsFromBeh(alltbt,settings);
     %metadata=howFarThroughSession(metadata);
+    if ~isfield(metadata,'nth_session')
+        metadata.nth_session=metadata.sessid;
+    end
     [metadata,alltbt,out]=add_dprimes_to_tbt(alltbt,out,metadata,[],'all_reachBatch','cueZone_onVoff',settings);
 
     if i==1

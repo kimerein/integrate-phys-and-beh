@@ -1,6 +1,7 @@
 function checkForESPreaching(expt_dir,within_dir)
 
 overwriteExisting=false;
+isExternalCue=false;
 
 if ~iscell(expt_dir)
     ls=dir(expt_dir);
@@ -32,10 +33,19 @@ for i=1:length(ls)
         a=load([expt_dir '\' thisname '\tbt.mat']);
         tbt=a.tbt;
         interptimes=0:0.035:17;
-        figure(); 
-        plot(interptimes,nanmean(tbt.reachStarts,1),'Color','k'); 
-        hold on; 
-        plot(interptimes,nanmean(tbt.cueZone_onVoff,1),'Color','b');
+        if isExternalCue==true
+            cue_tbt=tbt;
+            tbt=realignToDistractor(tbt,[],[],false);
+            wasDistract=any(tbt.movie_distractor(:,92:end)>0.05,2);
+            % only consider pre-cue period, blind viewer to post-cue period
+            figure(); plot(nanmean(cue_tbt.all_reachBatch(:,1:85),1),'Color','r'); hold on;
+            plot(nanmean(tbt.all_reachBatch(wasDistract==1,1:85),1),'Color','b');
+        else
+            figure();
+            plot(interptimes,nanmean(tbt.reachStarts,1),'Color','k');
+            hold on;
+            plot(interptimes,nanmean(tbt.cueZone_onVoff,1),'Color','b');
+        end
         th=questdlg('Pre-emptive reaching?','Does mouse reach consistently before cue?');
         if isempty(th)
             break

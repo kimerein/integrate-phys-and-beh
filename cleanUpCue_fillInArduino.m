@@ -3,9 +3,14 @@ function [aligned,settings]=cleanUpCue_fillInArduino(varargin)
 isOrchestra=0;
 
 aligned=varargin{1};
-if length(varargin)>1
+if length(varargin)==4
     minProm=varargin{2};
     minProm2=varargin{3};
+    minArd=varargin{4};
+elseif length(varargin)>1
+    minProm=varargin{2};
+    minProm2=varargin{3};
+    minArd=0.7;
 else
     if isOrchestra==1
         %     minProm=prctile(aligned.cueZone,95)-prctile(aligned.cueZone,40);
@@ -35,10 +40,18 @@ for i=1:length(farduino)
     currArduinoPeak=farduino(i);
     [~,mi]=min(abs(currArduinoPeak-fmovie));
     for j=1:50
+        value=fmovie(mi)-j;
+        if ~(isnumeric(value) && isscalar(value) && (value > 0) && (mod(value, 1) == 0))
+            break
+        end
         temp=aligned.cueZone(fmovie(mi)-(j-1))-aligned.cueZone(fmovie(mi)-j);
         if temp>minProm2
             break
         end
+    end
+    value=fmovie(mi)-(j-1);
+    if ~(isnumeric(value) && isscalar(value) && (value > 0) && (mod(value, 1) == 0))
+        continue
     end
     usePeak(fmovie(mi)-(j-1))=1;
 end

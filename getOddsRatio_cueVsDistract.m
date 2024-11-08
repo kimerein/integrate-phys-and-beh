@@ -5,6 +5,8 @@ function [alltbt,metadata,trialTypes,distract_tbt,trialTypes_distract,metadata_d
 u=unique(metadata.sessid);
 metadata.odds_ratio=nan(size(metadata.hit_rates));
 metadata_distract.odds_ratio=nan(size(metadata_distract.hit_rates));
+metadata.hit_rate_minus_FA=nan(size(metadata.hit_rates));
+metadata_distract.hit_rate_minus_FA=nan(size(metadata_distract.hit_rates));
 % get hit rates after cue, hit rates after distractor
 for i=1:length(u)
     curr_sessid=u(i);
@@ -12,6 +14,14 @@ for i=1:length(u)
     distract_hit_rate=mode(metadata_distract.hit_rates(metadata_distract.sessid==curr_sessid));
     cue_FA_rate=mode(metadata.FA_rates_preCue(metadata.sessid==curr_sessid));
     distract_FA_rate=mode(metadata_distract.FA_rates_preCue(metadata_distract.sessid==curr_sessid));
+    cue_hit_rate=cue_hit_rate-cue_FA_rate;
+    if cue_hit_rate<0
+        cue_hit_rate=0;
+    end
+    distract_hit_rate=distract_hit_rate-distract_FA_rate;
+    if distract_hit_rate<0
+        distract_hit_rate=0;
+    end
     % get # trials
     ntrialscue=sum(metadata.sessid==curr_sessid,[],'omitnan');
     ntrialsdistract=sum(metadata_distract.sessid==curr_sessid,[],'omitnan');
@@ -19,10 +29,15 @@ for i=1:length(u)
     %x1=cue_hit_rate*ntrialscue;
     %x2=distract_hit_rate*ntrialsdistract;
     % calculate odds for each cue
-    odds1=cue_hit_rate/(1 - cue_hit_rate);
+    epsilon=1/ntrialscue; % for regularization
+    odds1=cue_hit_rate/(1 - cue_hit_rate); 
+    odds1=odds1+epsilon;
     odds2=distract_hit_rate/(1 - distract_hit_rate);
+    odds2=odds2+epsilon;
     % calculate the odds ratio
     odds_ratio=odds1/odds2;
+    metadata.hit_rate_minus_FA(metadata.sessid==curr_sessid)=cue_hit_rate;
+    metadata_distract.hit_rate_minus_FA(metadata_distract.sessid==curr_sessid)=distract_hit_rate;
     
 %     % reconstruct data from summary stats: hit rates and n trials
 %     hit_occurred=[ones(ceil(cue_hit_rate.*ntrialscue),1); zeros(ceil((1-cue_hit_rate).*ntrialscue),1); ...

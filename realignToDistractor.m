@@ -30,6 +30,30 @@ if ~isempty(metadata)
    end
 end
 
+% take distractors immediately after wheel turn, excluding distractors that come several seconds after the cue
+% do this to ensure that both distractor and cue are in the same context,
+% i.e., occur at same time in trial
+% wheelTurnBeforeDistract=any(distract_tbt.pelletPresented(:,1:settingsDp.cueind)>0.5,2);
+% f=fieldnames(distract_tbt);
+% for i=1:length(f)
+%     temp=distract_tbt.(f{i});
+%     if isvector(temp)
+%         distract_tbt.(f{i})=temp(wheelTurnBeforeDistract==1);
+%     else
+%         distract_tbt.(f{i})=temp(wheelTurnBeforeDistract==1,:);
+%     end
+% end
+% f=fieldnames(trialTypes_distract);
+% for i=1:length(f)
+%     trialTypes_distract.(f{i})=distract_tbt.(f{i});
+% end
+% f=fieldnames(metadata_distract);
+% for i=1:length(f)
+%     metadata_distract.(f{i})=distract_tbt.(f{i});
+% end
+
+
+
 end
 
 function alltbt=realignToADistractor(alltbt,distractName,realignToAllDistractors)
@@ -132,7 +156,6 @@ if realignToAllDistractors==true
 
 else
     randomDistractor=false;
-
     % for each trial, randomly choose one of the distractors and align trial to
     % this instead of cue
     % where is cue currently
@@ -170,7 +193,7 @@ else
             if isempty(f)
                 continue
             end
-            f=f(randperm(length(f)));
+            %f=f(randperm(length(f)));
             f=f(1);
             % realign to this
             shiftBy(i)=f-ma; % if positive, will shift backwards, else will shift forward in time

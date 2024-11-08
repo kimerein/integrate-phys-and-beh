@@ -1589,7 +1589,7 @@ scatter(xaxis(cued_success_Response.consensus_idx==2),yaxis(cued_success_Respons
 %% decode trial type
 % axis x is activity of gp1 units (use window 2 to 5 sec)
 % axis y is activity of gp2 units (use window 2 to 5 sec)
-figure(); nBoot=100; nUnits=200;
+figure(); nBoot=100; nUnits=41;
 takeThese_gp1=nan(nBoot,nUnits); takeThese_gp2=nan(nBoot,nUnits);
 for i=1:nBoot
     takeThese_gp1(i,:)=randsample(length(allgp1_cuedsuccFR),nUnits,true); takeThese_gp2(i,:)=randsample(length(allgp2_cuedsuccFR),nUnits,true);
@@ -1964,6 +1964,62 @@ Xmatrix=[Xmatrix; [-out_cuedir2.uncuedfail_temp1+out_cuedir1.uncuedfail_temp1 ou
 xlabel('cue vs uncue gp1'); ylabel('cue vs uncue gp2');
 % neuron type shuffle
 % decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cued_success_Response.consensus_idx(randperm(length(cued_success_Response.consensus_idx))),100,100,70,false,false,false);
+
+% LDA
+ldaModel=fitcdiscr(Xmatrix,ylabels);
+predictedY=predict(ldaModel,Xmatrix);
+accuracy=sum(predictedY==ylabels)/length(ylabels);
+disp(['Accuracy of LDA on training set 4-way: ', num2str(accuracy * 100), '%']);
+
+% 3-way classification
+ylabels(ylabels==4)=2;
+ldaModel=fitcdiscr(Xmatrix,ylabels);
+predictedY=predict(ldaModel,Xmatrix);
+accuracy=sum(predictedY==ylabels)/length(ylabels);
+disp(['Accuracy of LDA on training set 3-way: ', num2str(accuracy * 100), '%']);
+
+%% Trial by trial classification, sort by dprimes
+nbins=(5-2)/0.01;
+a=load('Z:\MICROSCOPE\Kim\Final Figs\Fig5\Main figure\attempt trial by trial classification\cuedsuccess_vs_cuedfailure_1to5sec.mat'); a.fortbytclass.unitfr_success=a.fortbytclass.unitfr_success./nbins; a.fortbytclass.unitfr_failure=a.fortbytclass.unitfr_failure./nbins;
+dropinds=ismember(a.fortbytclass.fromWhichUnit_failure,559:560); keepinds=~ismember(1:length(a.fortbytclass.fromWhichUnit_failure),dropinds);
+a.fortbytclass.unitfr_failure=a.fortbytclass.unitfr_failure(keepinds);
+a.fortbytclass.fromWhichUnit_failure=a.fortbytclass.fromWhichUnit_failure(keepinds);
+a.fortbytclass.fromWhichTrial_failure=a.fortbytclass.fromWhichTrial_failure(keepinds);
+a.fortbytclass.fromWhichSess_failure=a.fortbytclass.fromWhichSess_failure(keepinds);
+a.fortbytclass.fromWhichTrialID_failure=a.fortbytclass.fromWhichTrialID_failure(keepinds);
+% reassign unit ids
+currunitids=[1:558 561:1065];
+newunitids=1:1063;
+for i=1:length(currunitids)
+    a.fortbytclass.fromWhichUnit_failure(ismember(a.fortbytclass.fromWhichUnit_failure,currunitids(i)))=newunitids(i);
+end
+b=load('Z:\MICROSCOPE\Kim\Final Figs\Fig5\Main figure\attempt trial by trial classification\uncuedsuccess_vs_uncuedfailure_1to5sec.mat'); b.fortbytclass.unitfr_success=b.fortbytclass.unitfr_success./nbins; b.fortbytclass.unitfr_failure=b.fortbytclass.unitfr_failure./nbins;
+% reassign unit ids
+currunitids=[1:558 561:1065];
+newunitids=1:1063;
+for i=1:length(currunitids)
+    b.fortbytclass.fromWhichUnit_failure(ismember(b.fortbytclass.fromWhichUnit_failure,currunitids(i)))=newunitids(i);
+end
+curridx=idx;
+% curridx(unit_dprimes<-0.25 | unit_dprimes>0)=nan;
+% f=find(~isnan(curridx));
+% usef=f(randperm(50));
+% curridx(~ismember(1:length(curridx),usef))=nan;
+curridx(~ismember(cued_success_Response.fromWhichSess,unique_dp_then_sess(f_belowminus0point25_rep2,2)))=nan;
+out_decode=decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,curridx,100,50,50,true,false,false,false,false);
+% out_decode=decodeTrialByTrialType(a.fortbytclass,b.fortbytclass,cued_success_Response.consensus_idx,100,100,80,true,false,false,false,false); % nBoots,nUnits,nTrials,withReplacement,addThirdAxis,nanAllZeros,justBoostrapTrials,collapseWithinUnit
+
+% gp1 v gp2 mapping
+figure();
+scatter(out_decode.cuedsucc_temp1,out_decode.cuedsucc_temp2,[],'g'); hold on;
+Xmatrix=[out_decode.cuedsucc_temp1 out_decode.cuedsucc_temp2]; ylabels=[ones(size(out_decode.cuedsucc_temp1,1),1)];
+scatter(out_decode.cuedfail_temp1,out_decode.cuedfail_temp2,[],'r');
+Xmatrix=[Xmatrix; [out_decode.cuedfail_temp1 out_decode.cuedfail_temp2]]; ylabels=[ylabels; 2*ones(size(out_decode.cuedsucc_temp1,1),1)];
+scatter(out_decode.uncuedsucc_temp1,out_decode.uncuedsucc_temp2,[],'b');
+Xmatrix=[Xmatrix; [out_decode.uncuedsucc_temp1 out_decode.uncuedsucc_temp2]]; ylabels=[ylabels; 3*ones(size(out_decode.cuedsucc_temp1,1),1)];
+scatter(out_decode.uncuedfail_temp1,out_decode.uncuedfail_temp2,[],'y');
+Xmatrix=[Xmatrix; [out_decode.uncuedfail_temp1 out_decode.uncuedfail_temp2]]; ylabels=[ylabels; 4*ones(size(out_decode.cuedsucc_temp1,1),1)];
+xlabel('gp1'); ylabel('gp2');
 
 % LDA
 ldaModel=fitcdiscr(Xmatrix,ylabels);

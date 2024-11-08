@@ -11,9 +11,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt10Oct2024090421\'; % directory containing experimental data
-behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log20241008.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt10Oct2024090421\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt07Nov2024184231\'; % directory containing experimental data
+behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log20241107.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
+mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt07Nov2024184231\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -39,6 +39,9 @@ alltbt=setToSingle(alltbt,{'all_reachBatch','cueZone_onVoff','isChewing','isHold
 % Use behavior log table to fix nth_session, where possible
 a=load(mouseDBdir); mouse_database=a.mouse_database;
 metadata=getNthSession(behaviorLogDir,mouse_database,metadata,true,true); % last two args are alsoFixOptoOnHere, then excludeTrainingRig
+
+% Optional: fix times
+alltbt.times=repmat(0:0.03:(size(alltbt.times,2)-1)*0.03,size(alltbt.times,1),1); % resampling can cause some inconsistency, but ordering of events still always correct, bcz comes from movie frame inds
 
 % Optional: get day 1 for learning curves
 trialTypes.mouseid=metadata.mouseid;
@@ -152,7 +155,7 @@ alltbt.mouseid=metadata.mouseid;
 alltbt.sessid=metadata.sessid;
 trialTypes.sessid=metadata.sessid;
 % tbt_filter.sortField='sessid';
-% tbt_filter.sortField='led';
+% tbt_filter.sortField='mouseid';
 % tbt_filter.sortField='sess_wrt_day1';
 tbt_filter.sortField='dprimes';
 % tbt_filter.sortField='day1formice';
@@ -189,23 +192,25 @@ tbt_filter.clock_progress=true; % note that I turned off save sort details
 [alltbt,trialTypes,metadata]=filtTbt(alltbt,trialTypes,tbt_filter.sortField,tbt_filter.range_values,metadata,tbt_filter.clock_progress);
 
 %% for external cue only! use logistic regression to compare reaching to cue vs. distractor -- PART 1
-% realignToDistractor is slow
+% realignToDistractor can be slow
 distract_tbt=alltbt; metadata_distract=metadata; trialTypes_distract=trialTypes;
 [distract_tbt,trialTypes_distract,metadata_distract]=realignToDistractor(distract_tbt,trialTypes_distract,metadata_distract,true);
+distract_tbt.times=repmat(0:0.03:(size(distract_tbt.times,2)-1)*0.03,size(distract_tbt.times,1),1);
 
 %% for external cue only! use logistic regression to compare reaching to cue vs. distractor -- PART 2
 
 excue=questdlg('Is this external cue?', 'Question', 'Yes', 'No', 'No');
 switch excue
     case 'Yes'
-        umo=unique(metadata.mouseid);
-        for i=1:length(umo)
-            currmo=umo(i);
-            temp=metadata.sess_wrt_day1(metadata.mouseid==currmo);
-            temp=temp-min(temp,[],'omitnan');
-            metadata.sess_wrt_day1(metadata.mouseid==currmo)=temp;
-        end
-        trialTypes.sess_wrt_day1=metadata.sess_wrt_day1; alltbt.sess_wrt_day1=metadata.sess_wrt_day1;
+%         umo=unique(metadata.mouseid);
+%         for i=1:length(umo)
+%             currmo=umo(i);
+%             temp=metadata.sess_wrt_day1(metadata.mouseid==currmo);
+%             temp=temp-min(temp,[],'omitnan');
+%             metadata.sess_wrt_day1(metadata.mouseid==currmo)=temp;
+%         end
+%         trialTypes.sess_wrt_day1=metadata.sess_wrt_day1; alltbt.sess_wrt_day1=metadata.sess_wrt_day1;
+
 %         settingsDp=settingsForDprimes(alltbt,'cueZone_onVoff',true); % Check settings in settingsForDprimes
 %         settingsDp.preCueWindow_start1=settingsDp.cuetimeat-1;
 %         settingsDp.preCueWindow_end1=settingsDp.cuetimeat;
@@ -227,7 +232,20 @@ switch excue
         alltbt.dprimes=alltbt.odds_ratio;
         trialTypes.dprimes=trialTypes.odds_ratio;
         metadata.dprimes=metadata.odds_ratio;
-        [learningC,days,~,~,dayNdprime,day1dprime]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1],[15:20],false);
+        metadata.reachrate_cued=metadata.reachrate_cued-metadata.reachrate_uncued;
+        % Note metadata_distract.reachrate_cued doesn't mean anything, is
+        % just copied and reorganized from metadata.reachrate_cued
+        % didn't repopulate in get_dprime_per_mouse
+        % so get the reach rates now
+        settingsRR=settingsForReachRates(alltbt,'cueZone_onVoff',false);
+        settingsRR.reachAfterCueWindow_start=0;
+        settingsRR.reachAfterCueWindow_end=0.4;
+        [~,~,metadata_distract2]=get_dprime_per_mouse(distract_tbt,trialTypes_distract,metadata_distract,true,settingsRR); % 2nd to last arg is whether to get rates instead
+        usess=unique(metadata.sessid);
+        for i=1:length(usess)
+            metadata.reachrate_uncued(metadata.sessid==usess(i))=nanmean(metadata_distract2.reachrate_cued(metadata_distract2.sessid==usess(i))-metadata_distract2.reachrate_uncued(metadata_distract2.sessid==usess(i)));
+        end
+        [learningC,days,~,~,dayNdprime,day1dprime]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1],[10:15],false);
         alltbt=backup.alltbt;
         trialTypes=backup.trialTypes;
         metadata=backup.metadata;
@@ -336,9 +354,9 @@ trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start
 % % trial1='trialTypes.cued_reach_1forward==0  & trialTypes.touched_pellet_1forward==1 & (trialTypes.led_1forward==0) & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
 % % trial1='trialTypes.cued_reach_1forward==1 & trialTypes.consumed_pellet_1forward==0 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
 % % trial1='trialTypes.optoGroup~=1 & trialTypes.consumed_pellet_1back==1 & trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1';
-% trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
+trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
 % % memory
-trial2='trialTypes.led==0';
+% trial2='trialTypes.led==0';
 % trial2='(trialTypes.optoGroup~=1 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward==1)';
 % % this %trial2='trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3 & trialTypes.led_1forward==0';
 % % trial2='trialTypes.optoGroup~=1 & trialTypes.led==0 & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
