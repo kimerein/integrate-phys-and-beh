@@ -29,7 +29,7 @@ for i=1:length(u)
     %x1=cue_hit_rate*ntrialscue;
     %x2=distract_hit_rate*ntrialsdistract;
     % calculate odds for each cue
-    epsilon=1/ntrialscue; % for regularization
+    epsilon=1/(ntrialscue/4); % for regularization
     odds1=cue_hit_rate/(1 - cue_hit_rate); 
     odds1=odds1+epsilon;
     odds2=distract_hit_rate/(1 - distract_hit_rate);

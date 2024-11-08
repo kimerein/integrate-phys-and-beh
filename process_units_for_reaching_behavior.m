@@ -1589,7 +1589,7 @@ scatter(xaxis(cued_success_Response.consensus_idx==2),yaxis(cued_success_Respons
 %% decode trial type
 % axis x is activity of gp1 units (use window 2 to 5 sec)
 % axis y is activity of gp2 units (use window 2 to 5 sec)
-figure(); nBoot=100; nUnits=41;
+figure(); nBoot=1000; nUnits=22;
 takeThese_gp1=nan(nBoot,nUnits); takeThese_gp2=nan(nBoot,nUnits);
 for i=1:nBoot
     takeThese_gp1(i,:)=randsample(length(allgp1_cuedsuccFR),nUnits,true); takeThese_gp2(i,:)=randsample(length(allgp2_cuedsuccFR),nUnits,true);
@@ -1605,7 +1605,8 @@ for i=1:nBoot
     temp1(i)=nanmean(allgp1_cuedfailFR(takeThese_gp1(i,:))); temp2(i)=nanmean(allgp2_cuedfailFR(takeThese_gp2(i,:)));
 end
 Xmatrix=[Xmatrix; [temp1 temp2]]; ylabels=[ylabels; 2*ones(size(temp1,1),1)];
-scatter(temp1,temp2,[],'r'); scatter(nanmean(temp1),nanmean(temp2),[],'r','filled'); cuedfailmeanx=nanmean(temp1); cuedfailmeany=nanmean(temp2);
+% scatter(temp1,temp2,[],'r'); scatter(nanmean(temp1),nanmean(temp2),[],'r','filled'); 
+cuedfailmeanx=nanmean(temp1); cuedfailmeany=nanmean(temp2);
 temp1=nan(nBoot,1); temp2=nan(nBoot,1);
 for i=1:nBoot
     temp1(i)=nanmean(allgp1_uncuedsuccFR(takeThese_gp1(i,:))); temp2(i)=nanmean(allgp2_uncuedsuccFR(takeThese_gp2(i,:)));
@@ -1617,7 +1618,8 @@ for i=1:nBoot
     temp1(i)=nanmean(allgp1_uncuedfailFR(takeThese_gp1(i,:))); temp2(i)=nanmean(allgp2_uncuedfailFR(takeThese_gp2(i,:)));
 end
 Xmatrix=[Xmatrix; [temp1 temp2]]; ylabels=[ylabels; 4*ones(size(temp1,1),1)];
-scatter(temp1,temp2,[],'y'); scatter(nanmean(temp1),nanmean(temp2),[],'y','filled'); uncuedfailmeanx=nanmean(temp1); uncuedfailmeany=nanmean(temp2);
+% scatter(temp1,temp2,[],'y'); scatter(nanmean(temp1),nanmean(temp2),[],'y','filled'); 
+uncuedfailmeanx=nanmean(temp1); uncuedfailmeany=nanmean(temp2);
 scatter((cuedsuccmeanx+cuedfailmeanx+uncuedsuccmeanx+uncuedfailmeanx)/4,(cuedsuccmeany+cuedfailmeany+uncuedsuccmeany+uncuedfailmeany)/4,[],'k','filled');
 xlabel('Gp 1 average unit firing rate'); ylabel('Gp 2 average unit firing rate');
 

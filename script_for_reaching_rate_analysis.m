@@ -11,9 +11,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt07Nov2024184231\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt07Nov2024150027\'; % directory containing experimental data
 behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log20241107.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt07Nov2024184231\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt07Nov2024150027\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -202,14 +202,19 @@ distract_tbt.times=repmat(0:0.03:(size(distract_tbt.times,2)-1)*0.03,size(distra
 excue=questdlg('Is this external cue?', 'Question', 'Yes', 'No', 'No');
 switch excue
     case 'Yes'
-%         umo=unique(metadata.mouseid);
-%         for i=1:length(umo)
-%             currmo=umo(i);
-%             temp=metadata.sess_wrt_day1(metadata.mouseid==currmo);
-%             temp=temp-min(temp,[],'omitnan');
-%             metadata.sess_wrt_day1(metadata.mouseid==currmo)=temp;
-%         end
-%         trialTypes.sess_wrt_day1=metadata.sess_wrt_day1; alltbt.sess_wrt_day1=metadata.sess_wrt_day1;
+        umo=unique(metadata.mouseid);
+        for i=1:length(umo)
+            currmo=umo(i);
+            temp=metadata.sess_wrt_day1(metadata.mouseid==currmo);
+            umos=sort(unique(temp),'ascend');
+            tempnew=temp;
+            for j=1:length(umos)
+                tempnew(temp==umos(j))=j;
+            end
+            temp=tempnew;
+            metadata.sess_wrt_day1(metadata.mouseid==currmo)=temp;
+        end
+        trialTypes.sess_wrt_day1=metadata.sess_wrt_day1; alltbt.sess_wrt_day1=metadata.sess_wrt_day1;
 
 %         settingsDp=settingsForDprimes(alltbt,'cueZone_onVoff',true); % Check settings in settingsForDprimes
 %         settingsDp.preCueWindow_start1=settingsDp.cuetimeat-1;
