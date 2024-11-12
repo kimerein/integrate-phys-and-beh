@@ -1589,7 +1589,7 @@ scatter(xaxis(cued_success_Response.consensus_idx==2),yaxis(cued_success_Respons
 %% decode trial type
 % axis x is activity of gp1 units (use window 2 to 5 sec)
 % axis y is activity of gp2 units (use window 2 to 5 sec)
-figure(); nBoot=1000; nUnits=22;
+figure(); nBoot=1000; nUnits=21;
 takeThese_gp1=nan(nBoot,nUnits); takeThese_gp2=nan(nBoot,nUnits);
 for i=1:nBoot
     takeThese_gp1(i,:)=randsample(length(allgp1_cuedsuccFR),nUnits,true); takeThese_gp2(i,:)=randsample(length(allgp2_cuedsuccFR),nUnits,true);
@@ -1598,7 +1598,8 @@ temp1=nan(nBoot,1); temp2=nan(nBoot,1);
 for i=1:nBoot
     temp1(i)=nanmean(allgp1_cuedsuccFR(takeThese_gp1(i,:))); temp2(i)=nanmean(allgp2_cuedsuccFR(takeThese_gp2(i,:)));
 end
-Xmatrix=[temp1 temp2]; ylabels=[ones(size(temp1,1),1)];
+Xmatrix=[temp1 temp2]; ylabels=[ones(size(temp1,1),1)]; 
+Xmatrix_onlysuccess=[temp1 temp2]; ylabels_onlysuccess=[ones(size(temp1,1),1)];
 scatter(temp1,temp2,[],'g'); hold on; scatter(nanmean(temp1),nanmean(temp2),[],'g','filled'); cuedsuccmeanx=nanmean(temp1); cuedsuccmeany=nanmean(temp2);
 temp1=nan(nBoot,1); temp2=nan(nBoot,1);
 for i=1:nBoot
@@ -1612,6 +1613,7 @@ for i=1:nBoot
     temp1(i)=nanmean(allgp1_uncuedsuccFR(takeThese_gp1(i,:))); temp2(i)=nanmean(allgp2_uncuedsuccFR(takeThese_gp2(i,:)));
 end
 Xmatrix=[Xmatrix; [temp1 temp2]]; ylabels=[ylabels; 3*ones(size(temp1,1),1)];
+Xmatrix_onlysuccess=[Xmatrix_onlysuccess; [temp1 temp2]]; ylabels_onlysuccess=[ylabels_onlysuccess; 2*ones(size(temp1,1),1)];
 scatter(temp1,temp2,[],'b'); scatter(nanmean(temp1),nanmean(temp2),[],'b','filled'); uncuedsuccmeanx=nanmean(temp1); uncuedsuccmeany=nanmean(temp2);
 temp1=nan(nBoot,1); temp2=nan(nBoot,1);
 for i=1:nBoot
@@ -1635,6 +1637,12 @@ ldaModel=fitcdiscr(Xmatrix,ylabels);
 predictedY=predict(ldaModel,Xmatrix);
 accuracy=sum(predictedY==ylabels)/length(ylabels);
 disp(['Accuracy of LDA on training set 3-way: ', num2str(accuracy * 100), '%']);
+
+% LDA classification of successes only
+ldaModel=fitcdiscr(Xmatrix_onlysuccess,ylabels_onlysuccess);
+predictedY=predict(ldaModel,Xmatrix_onlysuccess);
+accuracy=sum(predictedY==ylabels_onlysuccess)/length(ylabels_onlysuccess);
+disp(['Accuracy of LDA on training set successes only: ', num2str(accuracy * 100), '%']);
 
 %% Trial type shuffle
 all1=[allgp1_cuedsuccFR; allgp1_cuedfailFR; allgp1_uncuedsuccFR; allgp1_uncuedfailFR];

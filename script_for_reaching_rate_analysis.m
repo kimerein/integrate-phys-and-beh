@@ -11,9 +11,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt07Nov2024150027\'; % directory containing experimental data
-behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log20241107.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt07Nov2024150027\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+exptDataDir='Z:\MICROSCOPE\Kim\alltbt12Nov2024085542\'; % directory containing experimental data
+behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log20241112.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
+mouseDBdir='Z:\MICROSCOPE\Kim\alltbt12Nov2024085542\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -202,55 +202,75 @@ distract_tbt.times=repmat(0:0.03:(size(distract_tbt.times,2)-1)*0.03,size(distra
 excue=questdlg('Is this external cue?', 'Question', 'Yes', 'No', 'No');
 switch excue
     case 'Yes'
-        umo=unique(metadata.mouseid);
-        for i=1:length(umo)
-            currmo=umo(i);
-            temp=metadata.sess_wrt_day1(metadata.mouseid==currmo);
-            umos=sort(unique(temp),'ascend');
-            tempnew=temp;
-            for j=1:length(umos)
-                tempnew(temp==umos(j))=j;
-            end
-            temp=tempnew;
-            metadata.sess_wrt_day1(metadata.mouseid==currmo)=temp;
-        end
-        trialTypes.sess_wrt_day1=metadata.sess_wrt_day1; alltbt.sess_wrt_day1=metadata.sess_wrt_day1;
-
-%         settingsDp=settingsForDprimes(alltbt,'cueZone_onVoff',true); % Check settings in settingsForDprimes
-%         settingsDp.preCueWindow_start1=settingsDp.cuetimeat-1;
-%         settingsDp.preCueWindow_end1=settingsDp.cuetimeat;
-%         settingsDp.reachAfterCueWindow_start=-0.05;
-%         settingsDp.reachAfterCueWindow_end=0.95;
-%         [alltbt,trialTypes,metadata]=get_dprime_per_mouse(alltbt,trialTypes,metadata,false,settingsDp); % 2nd to last arg is whether to get rates instead
-%         alltbt.dprimes(isinf(alltbt.dprimes))=3;
-
+        % Order days, skip days where mouse did not reach pellet at all, etc.
+%         umo=unique(metadata.mouseid);
+%         for i=1:length(umo)
+%             currmo=umo(i);
+%             temp=metadata.sess_wrt_day1(metadata.mouseid==currmo);
+%             umos=sort(unique(temp),'ascend');
+%             tempnew=temp;
+%             for j=1:length(umos)
+%                 tempnew(temp==umos(j))=j;
+%             end
+%             temp=tempnew;
+%             metadata.sess_wrt_day1(metadata.mouseid==currmo)=temp;
+%         end
+%         trialTypes.sess_wrt_day1=metadata.sess_wrt_day1; alltbt.sess_wrt_day1=metadata.sess_wrt_day1;
+        % Get dprimes and reach rates for cue
+        settingsDp=settingsForDprimes(alltbt,'cueZone_onVoff',true); % Check settings in settingsForDprimes
+        [alltbt,trialTypes,metadata]=get_dprime_per_mouse(alltbt,trialTypes,metadata,false,settingsDp); % 2nd to last arg is whether to get rates instead
+        alltbt.dprimes(isinf(alltbt.dprimes))=3;
+        metadata.dprimes=alltbt.dprimes; trialTypes.dprimes=alltbt.dprimes;
+        settingsRR=settingsForReachRates(alltbt,'cueZone_onVoff',false);
+        [~,~,metadata]=get_dprime_per_mouse(alltbt,trialTypes,metadata,true,settingsRR); % 2nd to last arg is whether to get rates instead
         % Get dprimes, hit rates, etc. for tbt aligned to distractor
         [distract_tbt,trialTypes_distract,metadata_distract]=get_dprime_per_mouse(distract_tbt,trialTypes_distract,metadata_distract,false,settingsDp);
+        distract_tbt.dprimes(isinf(distract_tbt.dprimes))=3;
+        metadata_distract.dprimes=distract_tbt.dprimes; trialTypes_distract.dprimes=distract_tbt.dprimes;
+        % Note metadata_distract.reachrate_cued doesn't mean anything, is
+        % just copied and reorganized from metadata.reachrate_cued
+        % didn't repopulate in get_dprime_per_mouse
+        % so get the reach rates now
+        [~,~,metadata_distract2]=get_dprime_per_mouse(distract_tbt,trialTypes_distract,metadata_distract,true,settingsRR); % 2nd to last arg is whether to get rates instead
+        % Get odds ratio
         [alltbt,metadata,trialTypes,distract_tbt,trialTypes_distract,metadata_distract]=getOddsRatio_cueVsDistract(alltbt,metadata,trialTypes,distract_tbt,trialTypes_distract,metadata_distract);
-        % plot learning curves using odds_ratio
+        % plot learning curves using odds_ratio and reach rates
         backup.alltbt=alltbt;
         backup.trialTypes=trialTypes;
         backup.metadata=metadata;
         backup.distract_tbt=distract_tbt;
         backup.trialTypes_distract=trialTypes_distract;
         backup.metadata_distract=metadata_distract;
+        % subtract off reach rate in uncued window
+        %metadata.reachrate_cued=metadata.reachrate_cued-metadata.reachrate_uncued;
+        usess=unique(metadata.sessid);
+        % set reach rate uncued to be response to distractor
+        for i=1:length(usess)
+            %metadata.reachrate_uncued(metadata.sessid==usess(i))=nanmean(metadata_distract2.reachrate_cued(metadata_distract2.sessid==usess(i))-metadata_distract2.reachrate_uncued(metadata_distract2.sessid==usess(i)));
+            metadata.reachrate_uncued(metadata.sessid==usess(i))=nanmean(metadata_distract2.reachrate_cued(metadata_distract2.sessid==usess(i)));
+        end
+        % get rate ratio
+        metadata.rate_ratio=metadata.reachrate_cued./metadata.reachrate_uncued;
+        metadata.rate_ratio(isinf(metadata.rate_ratio))=50;
+        alltbt.rate_ratio=metadata.rate_ratio;
+        trialTypes.rate_ratio=metadata.rate_ratio;
+        % which to plot
+        % odds ratio?
         alltbt.dprimes=alltbt.odds_ratio;
         trialTypes.dprimes=trialTypes.odds_ratio;
         metadata.dprimes=metadata.odds_ratio;
-        metadata.reachrate_cued=metadata.reachrate_cued-metadata.reachrate_uncued;
-        % Note metadata_distract.reachrate_cued doesn't mean anything, is
-        % just copied and reorganized from metadata.reachrate_cued
-        % didn't repopulate in get_dprime_per_mouse
-        % so get the reach rates now
-        settingsRR=settingsForReachRates(alltbt,'cueZone_onVoff',false);
-        settingsRR.reachAfterCueWindow_start=0;
-        settingsRR.reachAfterCueWindow_end=0.4;
-        [~,~,metadata_distract2]=get_dprime_per_mouse(distract_tbt,trialTypes_distract,metadata_distract,true,settingsRR); % 2nd to last arg is whether to get rates instead
-        usess=unique(metadata.sessid);
-        for i=1:length(usess)
-            metadata.reachrate_uncued(metadata.sessid==usess(i))=nanmean(metadata_distract2.reachrate_cued(metadata_distract2.sessid==usess(i))-metadata_distract2.reachrate_uncued(metadata_distract2.sessid==usess(i)));
-        end
-        [learningC,days,~,~,dayNdprime,day1dprime]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1],[10:15],false);
+        % or rate ratio?
+%         alltbt.dprimes=alltbt.rate_ratio;
+%         trialTypes.dprimes=trialTypes.rate_ratio;
+%         metadata.dprimes=metadata.rate_ratio;
+        [learningC,days,rrc,rru,dayNdprime,day1dprime]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1],[10:15],false);
+        % plot ratio
+        figure(); plot(nanmean(rrc,1)./nanmean(rru,1),'Color','k');
+        temp=rrc./rru; temp(isinf(temp))=10; temp(temp>3)=3;
+        figure(); plot(nanmean(temp,1)); hold on;
+        plot(nanmean(temp,1)+std(temp,[],1,'omitnan')./sqrt(size(temp,1)));
+        plot(nanmean(temp,1)-std(temp,[],1,'omitnan')./sqrt(size(temp,1)));
+        % return to correct values after plotting
         alltbt=backup.alltbt;
         trialTypes=backup.trialTypes;
         metadata=backup.metadata;
