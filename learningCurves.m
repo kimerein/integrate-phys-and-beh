@@ -1,4 +1,4 @@
-function [lc,udays,rr_cued_interp,rr_uncued_interp,lc_dayN,lc_day1,quiverTips,biases]=learningCurves(alltbt,trialTypes,metadata,dayField,day1is,dayNis,bestWithinDays)
+function [lc,udays,rr_cued_interp,rr_uncued_interp,lc_dayN,lc_day1,quiverTips,biases,rr_cued,rr_uncued]=learningCurves(alltbt,trialTypes,metadata,dayField,day1is,dayNis,bestWithinDays)
 
 fillInToEnd=true;
 subtractDay1_dprime=false;

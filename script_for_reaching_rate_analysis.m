@@ -11,9 +11,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\alltbt13Nov2024102932\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\alltbt13Nov2024121319\'; % directory containing experimental data
 behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log20241112.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\alltbt13Nov2024102932\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\alltbt13Nov2024121319\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -46,8 +46,8 @@ alltbt.times=repmat(0:0.03:(size(alltbt.times,2)-1)*0.03,size(alltbt.times,1),1)
 % Optional: get day 1 for learning curves
 trialTypes.mouseid=metadata.mouseid;
 [~,~,~,isreachout_permouse,permouse_mouseid]=get_dprime_per_mouse(alltbt,trialTypes,metadata,false,settingsForDprimes(alltbt,'cueZone_onVoff',false)); % last arg is filler, dprimes will be recalculated later
-[day1,metadata]=defineDay1(alltbt,trialTypes,metadata,isreachout_permouse,permouse_mouseid);
-alltbt.sess_wrt_day1=metadata.sess_wrt_day1; trialTypes.sess_wrt_day1=metadata.sess_wrt_day1;
+% [day1,metadata]=defineDay1(alltbt,trialTypes,metadata,isreachout_permouse,permouse_mouseid);
+% alltbt.sess_wrt_day1=metadata.sess_wrt_day1; trialTypes.sess_wrt_day1=metadata.sess_wrt_day1;
 
 % Optional
 % Back-up full, unfiltered alltbt in workspace
@@ -59,7 +59,7 @@ backup.metadata=metadata;
 % [alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,[4 5 19]);
 
 % Optional: discard preemptive
-[alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
+% [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
 
 % fix weird bug where reach batch sometimes get stuck at 1 (in less than 0.1% of trials), possibly an
 % interp problem somewhere?? not sure
@@ -197,6 +197,31 @@ distract_tbt=alltbt; metadata_distract=metadata; trialTypes_distract=trialTypes;
 [distract_tbt,trialTypes_distract,metadata_distract]=realignToDistractor(distract_tbt,trialTypes_distract,metadata_distract,true);
 distract_tbt.times=repmat(0:0.03:(size(distract_tbt.times,2)-1)*0.03,size(distract_tbt.times,1),1);
 
+%% get opto on v off for external cue only
+excue=questdlg('Is this external cue?', 'Question', 'Yes', 'No', 'No');
+switch excue
+    case 'Yes'
+        % all opto before this time
+        optoBefore=5; % opto must turn on before this many seconds from start of trial, or else opto not on this trial
+        minOptoDuration=0.5; % in sec
+        timesteptemp=mode(diff(nanmean(alltbt.times,1)));
+        timstemp=0:timesteptemp:(size(alltbt.times,2)-1)*timesteptemp;
+        [~,tempoptoby]=min(abs(timstemp-optoBefore));
+        trialTypes.led=nan(size(trialTypes.after_cue_drop));
+        for i=1:size(alltbt.optoZone,1)-10
+            temp=alltbt.optoZone(i:i+10,1:tempoptoby); temp=temp'; temp=temp(1:end);
+            mina=min(temp,[],'omitnan');
+            maxa=max(temp,[],'omitnan');
+            if sum(alltbt.optoZone(i,1:tempoptoby)>mean([mina maxa]))>floor(minOptoDuration/timesteptemp)
+                trialTypes.led(i)=1;
+            else
+                trialTypes.led(i)=0;
+            end
+        end
+        trialTypes.led(end-10)=nan;
+        questdlg('Note that rest of trialTypes.led e.g. trialTypes.led_1forward is still WRONG!', 'Continue?', 'Yes', 'No', 'No');
+end
+
 %% for external cue only! use logistic regression to compare reaching to cue vs. distractor -- PART 2
 
 excue=questdlg('Is this external cue?', 'Question', 'Yes', 'No', 'No');
@@ -256,7 +281,7 @@ switch excue
 %         alltbt.dprimes=alltbt.rate_ratio;
 %         trialTypes.dprimes=trialTypes.rate_ratio;
 %         metadata.dprimes=metadata.rate_ratio;
-        [learningC,days,rrc,rru,dayNdprime,day1dprime]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1],[10:15],false);
+        [learningC,days,rrc,rru,dayNdprime,day1dprime,~,~,rrcue,rruncue]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1],[10:15],false);
         % plot ratio
         figure(); plot(nanmean(rrc,1)./nanmean(rru,1),'Color','k');
         temp=rrc./rru; temp(isinf(temp))=10; 
@@ -372,9 +397,9 @@ trial1='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start
 % % trial1='trialTypes.cued_reach_1forward==0  & trialTypes.touched_pellet_1forward==1 & (trialTypes.led_1forward==0) & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
 % % trial1='trialTypes.cued_reach_1forward==1 & trialTypes.consumed_pellet_1forward==0 & trialTypes.led_1forward==0 & trialTypes.optoGroup_1forward~=1 & trialTypes.optoGroup~=1 & trialTypes.isLongITI_1forward==1';
 % % trial1='trialTypes.optoGroup~=1 & trialTypes.consumed_pellet_1back==1 & trialTypes.after_cue_success_1forward==1 & trialTypes.consumed_pellet_1forward==1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward~=1';
-trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
+% trial2='trialTypes.chewing_at_trial_start==0 | trialTypes.chewing_at_trial_start==1';
 % % memory
-% trial2='trialTypes.led==0';
+trial2='trialTypes.led==1';
 % trial2='(trialTypes.optoGroup~=1 & trialTypes.reachedBeforeCue_1forward==0 & trialTypes.reachedInTimeWindow_1forward==1 & trialTypes.optoGroup_1forward~=1 & trialTypes.led_1forward==1 & trialTypes.optoGroup_1forward==1)';
 % % this %trial2='trialTypes.led==1 & trialTypes.optoGroup~=1 & trialTypes.optoGroup~=3 & trialTypes.led_1forward==0';
 % % trial2='trialTypes.optoGroup~=1 & trialTypes.led==0 & (trialTypes.led_1forward==1 | trialTypes.led_2forward==1 | trialTypes.led_3forward==1 | trialTypes.led_4forward==1 | trialTypes.led_1back==1)';
