@@ -11,9 +11,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\alltbt12Nov2024085542\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\alltbt13Nov2024102932\'; % directory containing experimental data
 behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log20241112.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\alltbt12Nov2024085542\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\alltbt13Nov2024102932\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -59,7 +59,7 @@ backup.metadata=metadata;
 % [alltbt,metadata,trialTypes]=turnOffLED(alltbt,metadata,trialTypes,[4 5 19]);
 
 % Optional: discard preemptive
-% [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
+[alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
 
 % fix weird bug where reach batch sometimes get stuck at 1 (in less than 0.1% of trials), possibly an
 % interp problem somewhere?? not sure
@@ -171,8 +171,8 @@ tbt_filter.sortField='dprimes';
 % tbt_filter.range_values=[1 6 7 8 10 14 18];
 % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
 % tbt_filter.range_values=[0.75 100]; %[0.75 100];
-% tbt_filter.range_values=[0.5 1.5];
-% tbt_filter.range_values=[37.5 38.5] ;%0.471];
+% tbt_filter.range_values=[9.5 50];
+% tbt_filter.range_values=[0.5 1.5] ;%0.471];
 tbt_filter.range_values=[-100 100]; % beginner: d<0.25, intermediate: 0.25<=d<0.75, expert: d>=0.75
 % tbt_filter.range_values=[163.5 170];
 % tbt_filter.range_values=[77.5 78.5];
@@ -202,20 +202,13 @@ distract_tbt.times=repmat(0:0.03:(size(distract_tbt.times,2)-1)*0.03,size(distra
 excue=questdlg('Is this external cue?', 'Question', 'Yes', 'No', 'No');
 switch excue
     case 'Yes'
-        % Order days, skip days where mouse did not reach pellet at all, etc.
-%         umo=unique(metadata.mouseid);
-%         for i=1:length(umo)
-%             currmo=umo(i);
-%             temp=metadata.sess_wrt_day1(metadata.mouseid==currmo);
-%             umos=sort(unique(temp),'ascend');
-%             tempnew=temp;
-%             for j=1:length(umos)
-%                 tempnew(temp==umos(j))=j;
-%             end
-%             temp=tempnew;
-%             metadata.sess_wrt_day1(metadata.mouseid==currmo)=temp;
-%         end
-%         trialTypes.sess_wrt_day1=metadata.sess_wrt_day1; alltbt.sess_wrt_day1=metadata.sess_wrt_day1;
+        umo=unique(metadata.mouseid);
+        for i=1:length(umo)
+            currmo=umo(i);
+            temp=metadata.sess_wrt_day1(metadata.mouseid==currmo);
+            metadata.sess_wrt_day1(metadata.mouseid==currmo)=temp-nanmin(temp)+1;
+        end
+        trialTypes.sess_wrt_day1=metadata.sess_wrt_day1; alltbt.sess_wrt_day1=metadata.sess_wrt_day1;
         % Get dprimes and reach rates for cue
         settingsDp=settingsForDprimes(alltbt,'cueZone_onVoff',true); % Check settings in settingsForDprimes
         [alltbt,trialTypes,metadata]=get_dprime_per_mouse(alltbt,trialTypes,metadata,false,settingsDp); % 2nd to last arg is whether to get rates instead
@@ -266,7 +259,7 @@ switch excue
         [learningC,days,rrc,rru,dayNdprime,day1dprime]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1],[10:15],false);
         % plot ratio
         figure(); plot(nanmean(rrc,1)./nanmean(rru,1),'Color','k');
-        temp=rrc./rru; temp(isinf(temp))=10; temp(temp>3)=3;
+        temp=rrc./rru; temp(isinf(temp))=10; 
         figure(); plot(nanmean(temp,1)); hold on;
         plot(nanmean(temp,1)+std(temp,[],1,'omitnan')./sqrt(size(temp,1)));
         plot(nanmean(temp,1)-std(temp,[],1,'omitnan')./sqrt(size(temp,1)));
