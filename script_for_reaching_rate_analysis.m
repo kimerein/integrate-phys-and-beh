@@ -11,9 +11,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\alltbt13Nov2024121319\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\alltbt13Nov2024185810\'; % directory containing experimental data
 behaviorLogDir='C:\Users\sabatini\Downloads\Combo Behavior Log20241112.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\alltbt13Nov2024121319\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\alltbt13Nov2024185810\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -171,7 +171,7 @@ tbt_filter.sortField='dprimes';
 % tbt_filter.range_values=[1 6 7 8 10 14 18];
 % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
 % tbt_filter.range_values=[0.75 100]; %[0.75 100];
-% tbt_filter.range_values=[9.5 50];
+% tbt_filter.range_values=[2.5 50];
 % tbt_filter.range_values=[0.5 1.5] ;%0.471];
 tbt_filter.range_values=[-100 100]; % beginner: d<0.25, intermediate: 0.25<=d<0.75, expert: d>=0.75
 % tbt_filter.range_values=[163.5 170];
@@ -223,6 +223,9 @@ switch excue
 end
 
 %% for external cue only! use logistic regression to compare reaching to cue vs. distractor -- PART 2
+
+% note that I'm only actually using the cue window from
+% settingsForReachRates, not dprimes or any uncued windows
 
 excue=questdlg('Is this external cue?', 'Question', 'Yes', 'No', 'No');
 switch excue
