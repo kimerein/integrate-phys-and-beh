@@ -62,7 +62,7 @@ chDepthMapping=[1   21; ...
 % location of SU aligned to behavior, raw data binary name
 
 % ultimately, ingest this from .csv file
-dataTable='C:\Users\sabatini\Downloads\Spike sorting analysis - Combined phys and photo.csv';
+dataTable='C:\Users\kreinhold\Downloads\Spike sorting analysis - Combined phys and photo.csv';
 data_loc_array=table2cell(readtable(dataTable,'Format','%s%s%s%u%s%s%s%s%s%u%u%s%u%s%s','Delimiter', ',', 'HeaderLines', 0, 'ReadVariableNames', true));
 
 % data_loc_array=cell(2,6);
@@ -601,6 +601,8 @@ for i=446:450 %407:450 %351:381 %441:450
     GLM_analysis(i,data_loc_array,10);
     close all;
 end
+% Photometry GLM
+GLM_forPhoto_analysis(1,data_loc_array,1);
 
 % Read in unit names
 plotUnitCriteria=[1 0 0 1 0]; getCriteriaForUnitsToPlot(plotUnitCriteria); dd_more=cell(1,length(dd)); 
