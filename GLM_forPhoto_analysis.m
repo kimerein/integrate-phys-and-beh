@@ -1,10 +1,17 @@
-function GLM_forPhoto_analysis(whichSess,dd,downSampBy)
+function GLM_forPhoto_analysis(whichSess,dd,downSampBy,addtoDirec,saveToAppend)
 % wrapper for first pass at GLM, calls B's poissModel
+
+% NOTE THIS CODE WILL NOT THROW ERROR BUT WILL MISPOPULATE NEURON_DATA_MATRIX IF alignComp.y ends high, BCZ of challenge in
+% getAndSaveResponse.m
 
 % note that GLM feature names need to not contain other GLM feature names
 % if want to use Kim's plotting code, e.g., plotGLMcoef.m
 
-saveToAppend='_testing';
+% addtoDirec='';
+% addtoDirec='';
+% saveToAppend='_testing';
+dropArtifacts=true;
+% saveToAppend='_testing';
 % If settings.useTrainingSet are true, will zero out spiking activity in all
 % trials that are not part of the training set
 % And will zero out all behavior events for trials that are not part of the
@@ -52,7 +59,7 @@ if length(whichSess)>1
     [phystbtout,behtbtout,fromwhichday,evsGrabbed]=grabOtherBehaviorEvents(dd_m,mean(ResponseCued.unitbyunit_x,1,'omitnan')-temp(ma),whereIsTbt,'cue');
     unitnames=getUnitNames(dd_more); 
 else
-    ResponseCued=getAndSaveResponse([dd{whichSess} sep response_to_plot],whichUnitsToGrab,settingsForStriatumPhotometryPlots,[]);
+    ResponseCued=getAndSaveResponse([[dd{whichSess} addtoDirec] sep response_to_plot],whichUnitsToGrab,settingsForStriatumPhotometryPlots,[]);
 %     if isempty(ResponseCued.unitbyunit_y) && all(ResponseCued.excluded==1)
 %         disp(['None of the units in ' dd{whichSess} sep response_to_plot ' were of the type specified in settingsForStriatumUnits.m, so skipping this session']);
 %         return
@@ -151,6 +158,10 @@ disp(behtbtout);
 neuron_data_matrix(isnan(neuron_data_matrix))=0;
 doOrSaveGLM='save';
 % doOrSaveGLM='doAndSave';
+% Drop electrical artifacts
+if dropArtifacts==true
+    neuron_data_matrix(abs(neuron_data_matrix - mean(neuron_data_matrix)) > 5 * std(neuron_data_matrix)) = 0;
+end
 if strcmp(doOrSaveGLM,'save')
     if percentNeuronPresentThresh==0 && percentNeuronPresentThreshForPython~=0
         u=unique(ResponseCued.fromWhichUnit);

@@ -81,6 +81,17 @@ data_loc_array=table2cell(readtable(dataTable,'Format','%s%s%s%u%s%s%s%s%s%u%u%s
 % data_loc_array{i,14}='green_ch'; % which photo ch to use for photometry
 % data_loc_array{i,15}='Z:\MICROSCOPE\Kim\WHISPER recs\dLight1\20210311\photometry aligned to beh'; % where to save beh-aligned photometry data
 
+% CODE FOR NAcc photometry alignments to behavior
+% i=1; 
+% mkdir([data_loc_array{i,15} 'NAcc']);
+% switch data_loc_array{i,14}
+%     case 'green'
+%         nowproc='red';
+%     case 'red'
+%         nowproc='green';
+% end
+% saveBehaviorAlignmentsPhotometry(photometry_tbt,behavior_tbt,[data_loc_array{i,15} 'NAcc'],'',nowproc); 
+
 %% 2. Auto-populate SU QC and behavior alignments -- for 84 sessions, running all of this takes about 12 hrs
 % Discarding trials where unit dead or moved away
 errorInDirectories={};

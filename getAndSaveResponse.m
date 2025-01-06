@@ -1,5 +1,7 @@
 function [D1tagged_cueResponse,D1orD2taggingExpt,putAlignPeakAt]=getAndSaveResponse(dd_more,getThese,settings,putAlignPeakAtInput)
 
+% NOTE THIS CODE WILL GIVE ERROR IF alignComp.y ends high
+
 [~,~,~,unitbyunit_x,unitbyunit_y,aligncomp_x,aligncomp_y,excluded,ns,D1orD2taggingExpt,~,~,~,fromWhichSess,fromWhichUnit,fromWhichSess_forTrials,fromWhichTrial,isEventInThisTrial,D1tag,A2atag]=alignToCompanion(dd_more,false,[],[],[],getThese,settings,[]);
 [~,ma]=nanmax(nanmean(aligncomp_y,1));
 temp=nanmean(aligncomp_x,1);
