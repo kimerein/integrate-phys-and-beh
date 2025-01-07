@@ -1,6 +1,6 @@
 function runPhotometryGLMscript(data_loc_array)
 
-for i=1:2
+for i=125:253
 % for i=1:253
     % Get photometry signals, pDMSt and NAcc
     switch data_loc_array{i,14}
@@ -10,6 +10,9 @@ for i=1:2
             nowproc='green';
         otherwise
             continue
+    end
+    if ~exist(data_loc_array{i,6},'dir')
+        continue
     end
     if ~exist([data_loc_array{i,15} 'NAcc'],'dir')
         mkdir([data_loc_array{i,15} 'NAcc']);
@@ -61,6 +64,8 @@ for i=1:2
         behEvents=[behEvents(1:9,:); behEvents(4,:)+behEvents(5,:)+behEvents(6,:)>0.5; behEvents(10,:)];
         save([data_loc_array{i,15} sep 'forPhotoglmNAcc' sep 'behEvents.mat'],'behEvents');
     end
+
+    close all;
 end
 
 end

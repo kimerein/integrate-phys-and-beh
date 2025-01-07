@@ -383,7 +383,7 @@ for i=1:length(dd)
     dd_more{i}=[dd{i} sep response_to_plot];
 end
 whichUnitsToGrab='_'; % '_' for all units, or can be something like 'D1tagged'
-Response=e(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
+Response=getAndSaveResponse(dd_more,whichUnitsToGrab,settingsForStriatumUnitPlots,[]);
 % for opto-tagging comparing tagged v untagged
 % [tagged_Response,D1orD2taggingExpt,putAlignPeakAt]=getAndSaveResponse(dd_more,'D1tagged',settingsForStriatumUnitPlots,[]);
 % [untagged_Response]=getAndSaveResponse(dd_more,'__',settingsForStriatumUnitPlots,putAlignPeakAt);
