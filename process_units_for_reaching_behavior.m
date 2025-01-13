@@ -614,6 +614,11 @@ for i=446:450 %407:450 %351:381 %441:450
 end
 % Photometry GLM
 GLM_forPhoto_analysis(1,data_loc_array,1);
+% Read in photometry GLM results
+for i=1:length(dd)
+    dd_more{i}=[data_loc_array{i,15} sep 'forPhotoglm'];
+end
+[all_glm_coef,~,fromWhichSess_glm,pva_glm]=readInGLMCoefs(dd_more,settingsForStriatumPhotometryPlots);
 
 % Read in unit names
 plotUnitCriteria=[1 0 0 1 0]; getCriteriaForUnitsToPlot(plotUnitCriteria); dd_more=cell(1,length(dd)); 

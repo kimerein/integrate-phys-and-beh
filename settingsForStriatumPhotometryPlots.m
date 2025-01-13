@@ -11,7 +11,7 @@ settings.suppressPlots=true;
 settings.padsize=1000;
 settings.testForAlignment=false;
 settings.unitbaseline=300; %150;
-settings.maxUnitsPerSess=30; % can't get more than this many units per session
+settings.maxUnitsPerSess=1; % can't get more than this many units per session
 settings.keepAllSingleTrials=true;
 settings.isPhotometry=true;
 

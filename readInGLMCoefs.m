@@ -15,7 +15,8 @@ if ~isempty(r)
     isMatGLM=true;
 else
     isMatGLM=false;
-    r=regexp(s,'forglm', 'once');
+    %r=regexp(s,'forglm', 'once');
+    r=regexp(s,'for', 'once');
     if isempty(r)
         error('directories need to point to matglm or forglm folders in readInGLMCoefs.m');
     end
@@ -40,7 +41,13 @@ for j=1:length(dd)
             units_count=units_count+length(una);
             datadir=[datadir sep 'output'];
         else
-            continue
+            if isfield(settings,'isPhotometry')
+                if settings.isPhotometry==true
+                    datadir=[datadir sep 'output'];
+                else
+                    continue
+                end
+            end
         end
     end
     disp(['reading in from ' datadir]);
