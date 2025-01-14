@@ -86,12 +86,12 @@ for j=1:length(dd)
         end
         all_glm_coef(unitscount_coef,:)=glm_coef;
         all_glm_pva(unitscount_coef,:)=glm_pva;
-        unitscount_coef=unitscount_coef+1;
         if isfield(settings,'isPhotometry')
             if settings.isPhotometry==true
                 fromWhichSess(unitscount_coef)=j;
             end
         end
+        unitscount_coef=unitscount_coef+1;
     end
 end
 unitscount_coef=unitscount_coef-1;
