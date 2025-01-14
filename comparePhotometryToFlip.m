@@ -65,8 +65,8 @@ hold on; plot(nanmean(Response.aligncomp_x,1),nanmean(Response.aligncomp_y,1),'C
 legend({'DA','Average SU FR across trials','aligncomp'});
 
 % Relative to DA after aligncomp peak, what is timing of first next spike?
-ui=6;
-thresh=1.5; % DA peak thresh
+ui=4;
+thresh=0.5; % DA peak thresh
 spithresh=0.05; 
 ds=5;
 f=find(Response_photo.isEventInThisTrial==1);
@@ -74,6 +74,10 @@ dapeaks=nan(1,length(f));
 firstspiketimes=nan(1,length(f));
 temp=nanmean(Response.aligncomp_x,1);
 aligncomp_time=temp(find(nanmean(Response.aligncomp_y,1)>0.5,1,'first'));
+figure(); plot(downSampAv(nanmean(Response.unitbyunit_x(Response.fromWhichUnit==ui,:),1),ds),downSampAv(nanmean(Response.unitbyunit_y(Response.fromWhichUnit==ui,:),1),ds),'Color','b');
+hold on; plot(nanmean(Response_photo.unitbyunit_x,1),nanmean(Response_photo.unitbyunit_y,1),'Color','r');
+hold on; plot(nanmean(Response.aligncomp_x,1),nanmean(Response.aligncomp_y,1),'Color','k');
+figure(); plot(nanmean(Response_photo.unitbyunit_x,1),Response_photo.unitbyunit_y');
 for i=1:length(f)
     tri=Response_photo.fromWhichTrial(f(i));
     DAtimes=nanmean(Response_photo.unitbyunit_x,1);
