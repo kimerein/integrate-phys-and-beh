@@ -1,4 +1,4 @@
-function comparePhotometryToFlip(response_to_plot,data_loc_array,whichSessionsToLoad,shiftPhotoBack,dapeakoffset)
+function comparePhotometryToFlip(response_to_plot,data_loc_array,whichSessionsToLoad,dapeakoffset)
 
 % dapeakoffset is time delay in seconds between aligncomp peak and START of
 % success-related DA peak
@@ -47,24 +47,13 @@ for i=1:length(dd_photo)
 end
 Response_photo=getAndSaveResponse(dd_photo_more,'_',settingsForStriatumPhotometryPlots,[]);
 
-% Check photometry and unit trial alignment
-if max(Response_photo.fromWhichTrial)~=max(Response.fromWhichTrial)
-    disp('Trial lengths of photo and units do not match');
-    pause;
+if length(dd)>1
+    error('Not yet implemented for multiple sessions');
 end
-[~,si]=unique(Response_photo.fromWhichTrial);
-[~,siu]=unique(Response.fromWhichTrial);
-figure(); plot(si,Response_photo.isEventInThisTrial(si),'Color','r'); hold on;
-plot(siu,Response.isEventInThisTrial(siu),'Color','b');
-title('is event in this trial');
-if ~isempty(shiftPhotoBack)
-    Response_photo.fromWhichTrial=Response_photo.fromWhichTrial+shiftPhotoBack;
-    [rsi,si]=unique(Response_photo.fromWhichTrial);
-    [rsiu,siu]=unique(Response.fromWhichTrial);
-    figure(); plot(rsi,Response_photo.isEventInThisTrial(si),'Color','r'); hold on;
-    plot(rsiu,Response.isEventInThisTrial(siu),'Color','b');
-    title('is event in this trial AFTER PHOTO SHIFT BACK');
-end
+a=load([regexprep(dd{1}, 'SU aligned to behavior', 'tbt', 'ignorecase') '\behavior_tbt.mat']);
+b=load([regexprep(dd{1}, 'SU aligned to behavior', 'tbt', 'ignorecase') '\beh2_tbt.mat']);
+thesePhotoTrials=1:size(a.behavior_tbt.cue,1);
+referToThesePhysTrials=a.behavior_tbt.reference_into_beh2trialinds(:,1);
 
 % Plot simple averages
 ds=5; figure(); plot(nanmean(Response_photo.unitbyunit_x,1),nanmean(Response_photo.unitbyunit_y,1),'Color','r');
@@ -92,6 +81,7 @@ for uniu=1:length(uniunits)
     firstspiketimes=nan(1,length(f));
     temp=nanmean(Response.aligncomp_x,1);
     aligncomp_time=temp(find(nanmean(Response.aligncomp_y,1)>0.5,1,'first'));
+
     figure();
     subplot(2,1,1);
     plot(downSampAv(nanmean(Response.unitbyunit_x(Response.fromWhichUnit==ui,:),1),ds),downSampAv(nanmean(Response.unitbyunit_y(Response.fromWhichUnit==ui,:),1),ds),'Color','b');
@@ -99,11 +89,17 @@ for uniu=1:length(uniunits)
     hold on; plot(nanmean(Response.aligncomp_x,1),nanmean(Response.aligncomp_y,1),'Color','k');
     %figure(); plot(nanmean(Response_photo.unitbyunit_x,1),Response_photo.unitbyunit_y');
     for i=1:length(f)
+        % Get which phys trial corresponds to this photometry trial
         tri=Response_photo.fromWhichTrial(f(i));
+        if length(unique(Response_photo.fromWhichTrial))~=length(thesePhotoTrials)
+            error('inconsistent number of photometry trials');
+        end
+        phys_tri=referToThesePhysTrials(f(i));
+
         DAtimes=nanmean(Response_photo.unitbyunit_x,1);
         spiketimes=downSampAv(nanmean(Response.unitbyunit_x,1),ds);
         currDA=smooth(Response_photo.unitbyunit_y(Response_photo.fromWhichTrial==tri,:),10);
-        currspiking=downSampAv(Response.unitbyunit_y(Response.fromWhichTrial==tri & Response.fromWhichUnit==ui,:),ds);
+        currspiking=downSampAv(Response.unitbyunit_y(Response.fromWhichTrial==phys_tri & Response.fromWhichUnit==ui,:),ds);
         if isempty(currspiking)
             continue
         end
