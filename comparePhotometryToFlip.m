@@ -1,6 +1,14 @@
-function comparePhotometryToFlip(response_to_plot,data_loc_array,whichSessionsToLoad,shiftPhotoBack)
+function comparePhotometryToFlip(response_to_plot,data_loc_array,whichSessionsToLoad,shiftPhotoBack,dapeakoffset)
+
+% dapeakoffset is time delay in seconds between aligncomp peak and START of
+% success-related DA peak
+% negative means DA peak comes BEFORE aligncomp peak
 
 % Is it a flip or a reshuffle? idk
+tset=settingsForStriatumUnitPlots;
+if tset.keepAllSingleTrials==false
+    error('settingsForStriatumUnitPlots.keepAllSingleTrials must be true');
+end
 
 % Load units
 dd=cell(1,length(whichSessionsToLoad));
@@ -64,49 +72,64 @@ hold on; plot(downSampAv(nanmean(Response.unitbyunit_x,1),ds),downSampAv(nanmean
 hold on; plot(nanmean(Response.aligncomp_x,1),nanmean(Response.aligncomp_y,1),'Color','k');
 legend({'DA','Average SU FR across trials','aligncomp'});
 
-% Relative to DA after aligncomp peak, what is timing of first next spike?
-ui=4;
-thresh=0.5; % DA peak thresh
-spithresh=0.05; 
-ds=5;
 f=find(Response_photo.isEventInThisTrial==1);
-dapeaks=nan(1,length(f));
-firstspiketimes=nan(1,length(f));
-temp=nanmean(Response.aligncomp_x,1);
-aligncomp_time=temp(find(nanmean(Response.aligncomp_y,1)>0.5,1,'first'));
-figure(); plot(downSampAv(nanmean(Response.unitbyunit_x(Response.fromWhichUnit==ui,:),1),ds),downSampAv(nanmean(Response.unitbyunit_y(Response.fromWhichUnit==ui,:),1),ds),'Color','b');
-hold on; plot(nanmean(Response_photo.unitbyunit_x,1),nanmean(Response_photo.unitbyunit_y,1),'Color','r');
-hold on; plot(nanmean(Response.aligncomp_x,1),nanmean(Response.aligncomp_y,1),'Color','k');
-figure(); plot(nanmean(Response_photo.unitbyunit_x,1),Response_photo.unitbyunit_y');
-for i=1:length(f)
-    tri=Response_photo.fromWhichTrial(f(i));
-    DAtimes=nanmean(Response_photo.unitbyunit_x,1);
-    spiketimes=downSampAv(nanmean(Response.unitbyunit_x,1),ds);
-    currDA=smooth(Response_photo.unitbyunit_y(Response_photo.fromWhichTrial==tri,:),10);
-    currspiking=downSampAv(Response.unitbyunit_y(Response.fromWhichTrial==tri & Response.fromWhichUnit==ui,:),ds);
-    if isempty(currspiking)
-        continue
-    end
-    if isempty(currDA)
-        continue
-    end
-    % find first DA deflection above thresh
-    fda=find(currDA(DAtimes>aligncomp_time)>thresh,1,'first');
-    if ~isempty(fda)
-        DAtimes=DAtimes(DAtimes>aligncomp_time);
-        dapeaks(i)=DAtimes(fda);
-    end
-    % find time of first spike
-    fda=find(currspiking(spiketimes>aligncomp_time)>spithresh,1,'first');
-    if ~isempty(fda)
-        spiketimes=spiketimes(spiketimes>aligncomp_time);
-        firstspiketimes(i)=spiketimes(fda);
-    end
-end
 figure();
-scatter(dapeaks,firstspiketimes);
-xlabel('da peak time (sec)');
-ylabel('first spike time (sec)');
+plot(nanmean(Response_photo.unitbyunit_x,1),Response_photo.unitbyunit_y(f(randperm(length(f),5)),:)');
+hold on; plot(nanmean(Response.aligncomp_x,1),nanmean(Response.aligncomp_y,1),'Color','k');
+
+dathresh = input('DA event thresh: ');
+thresh=dathresh;
+
+% Relative to DA after aligncomp peak, what is timing of first next spike?
+uniunits=unique(Response.fromWhichUnit);
+for uniu=1:length(uniunits)
+    ui=uniunits(uniu);
+    %thresh=2; % DA peak thresh
+    spithresh=0.05;
+    ds=5;
+    f=find(Response_photo.isEventInThisTrial==1);
+    dapeaks=nan(1,length(f));
+    firstspiketimes=nan(1,length(f));
+    temp=nanmean(Response.aligncomp_x,1);
+    aligncomp_time=temp(find(nanmean(Response.aligncomp_y,1)>0.5,1,'first'));
+    figure();
+    subplot(2,1,1);
+    plot(downSampAv(nanmean(Response.unitbyunit_x(Response.fromWhichUnit==ui,:),1),ds),downSampAv(nanmean(Response.unitbyunit_y(Response.fromWhichUnit==ui,:),1),ds),'Color','b');
+    hold on; plot(nanmean(Response_photo.unitbyunit_x,1),nanmean(Response_photo.unitbyunit_y,1),'Color','r');
+    hold on; plot(nanmean(Response.aligncomp_x,1),nanmean(Response.aligncomp_y,1),'Color','k');
+    %figure(); plot(nanmean(Response_photo.unitbyunit_x,1),Response_photo.unitbyunit_y');
+    for i=1:length(f)
+        tri=Response_photo.fromWhichTrial(f(i));
+        DAtimes=nanmean(Response_photo.unitbyunit_x,1);
+        spiketimes=downSampAv(nanmean(Response.unitbyunit_x,1),ds);
+        currDA=smooth(Response_photo.unitbyunit_y(Response_photo.fromWhichTrial==tri,:),10);
+        currspiking=downSampAv(Response.unitbyunit_y(Response.fromWhichTrial==tri & Response.fromWhichUnit==ui,:),ds);
+        if isempty(currspiking)
+            continue
+        end
+        if isempty(currDA)
+            continue
+        end
+        % find first DA deflection above thresh
+        fda=find(currDA(DAtimes>aligncomp_time+dapeakoffset)>thresh,1,'first');
+        if ~isempty(fda)
+            DAtimes=DAtimes(DAtimes>aligncomp_time+dapeakoffset);
+            dapeaks(i)=DAtimes(fda);
+        end
+        % find time of first spike
+        fda=find(currspiking(spiketimes>aligncomp_time+dapeakoffset)>spithresh,1,'first');
+        if ~isempty(fda)
+            spiketimes=spiketimes(spiketimes>aligncomp_time+dapeakoffset);
+            firstspiketimes(i)=spiketimes(fda);
+        end
+    end
+    subplot(2,1,2);
+    scatter(dapeaks,firstspiketimes);
+    xlabel('da peak time (sec)');
+    ylabel('first spike time (sec)');
+    [r,p]=corrcoef(dapeaks(~isnan(dapeaks) & ~isnan(firstspiketimes)),firstspiketimes(~isnan(dapeaks) & ~isnan(firstspiketimes)));
+    title(['unit ' num2str(ui) ' r ' num2str(r(1,2)) ' p ' num2str(p(1,2))]);
+end
 
 % Test SU pop vec flip first
 
