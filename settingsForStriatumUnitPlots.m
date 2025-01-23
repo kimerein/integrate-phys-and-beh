@@ -12,7 +12,7 @@ settings.padsize=1000;
 settings.testForAlignment=false;
 settings.unitbaseline=600; %300; %150;
 settings.maxUnitsPerSess=300; % can't get more than this many units per session
-settings.keepAllSingleTrials=true;
+settings.keepAllSingleTrials=false;
 settings.fracForTrainingSet=0.5; % fraction of trials to use for training set
 settings.makeTrainingSet=false;
 settings.useTestSet=false;
@@ -24,8 +24,8 @@ settings.discardDrops=false;
 settings.dropFolderName='cued_drop';
 settings.dropFileName='cuedDrop';
 settings.discardTrialsWhereOptoDuringCue=false;
-settings.onlyTrialsWhereOptoDuringCue=false;
-settings.discardTrialsIfAnyOpto=true;
+settings.onlyTrialsWhereOptoDuringCue=true;
+settings.discardTrialsIfAnyOpto=false;
 settings.minTrialLength=9.5; % in seconds
 
 % basic checks

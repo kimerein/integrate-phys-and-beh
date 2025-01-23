@@ -69,6 +69,9 @@ hold on; plot(nanmean(Response.aligncomp_x,1),nanmean(Response.aligncomp_y,1),'C
 dathresh = input('DA event thresh: ');
 thresh=dathresh;
 
+dadipthresh = input('DA dip thresh: ');
+dipthresh=dadipthresh;
+
 % Relative to DA after aligncomp peak, what is timing of first next spike?
 uniunits=unique(Response.fromWhichUnit);
 for uniu=1:length(uniunits)
@@ -78,12 +81,14 @@ for uniu=1:length(uniunits)
     ds=5;
     f=find(Response_photo.isEventInThisTrial==1);
     dapeaks=nan(1,length(f));
+    dadips=nan(1,length(f));
     firstspiketimes=nan(1,length(f));
+    lastspiketimes=nan(1,length(f));
     temp=nanmean(Response.aligncomp_x,1);
     aligncomp_time=temp(find(nanmean(Response.aligncomp_y,1)>0.5,1,'first'));
 
     figure();
-    subplot(2,1,1);
+    subplot(3,1,1);
     plot(downSampAv(nanmean(Response.unitbyunit_x(Response.fromWhichUnit==ui,:),1),ds),downSampAv(nanmean(Response.unitbyunit_y(Response.fromWhichUnit==ui,:),1),ds),'Color','b');
     hold on; plot(nanmean(Response_photo.unitbyunit_x,1),nanmean(Response_photo.unitbyunit_y,1),'Color','r');
     hold on; plot(nanmean(Response.aligncomp_x,1),nanmean(Response.aligncomp_y,1),'Color','k');
@@ -112,19 +117,51 @@ for uniu=1:length(uniunits)
             DAtimes=DAtimes(DAtimes>aligncomp_time+dapeakoffset);
             dapeaks(i)=DAtimes(fda);
         end
+        % find first DA dip below dip thresh
+        fda=find(currDA(DAtimes>aligncomp_time+dapeakoffset)<dipthresh,1,'first');
+        if ~isempty(fda)
+            DAtimes=DAtimes(DAtimes>aligncomp_time+dapeakoffset);
+            dadips(i)=DAtimes(fda);
+        end
         % find time of first spike
         fda=find(currspiking(spiketimes>aligncomp_time+dapeakoffset)>spithresh,1,'first');
         if ~isempty(fda)
             spiketimes=spiketimes(spiketimes>aligncomp_time+dapeakoffset);
             firstspiketimes(i)=spiketimes(fda);
         end
+        % find time of last spike
+        fda=find(currspiking(spiketimes<=aligncomp_time+dapeakoffset)>spithresh,1,'last');
+        if ~isempty(fda)
+            spiketimes=spiketimes(spiketimes<=aligncomp_time+dapeakoffset);
+            lastspiketimes(i)=spiketimes(fda);
+        end
     end
-    subplot(2,1,2);
+    subplot(3,1,2);
     scatter(dapeaks,firstspiketimes);
     xlabel('da peak time (sec)');
     ylabel('first spike time (sec)');
     [r,p]=corrcoef(dapeaks(~isnan(dapeaks) & ~isnan(firstspiketimes)),firstspiketimes(~isnan(dapeaks) & ~isnan(firstspiketimes)));
-    title(['unit ' num2str(ui) ' r ' num2str(r(1,2)) ' p ' num2str(p(1,2))]);
+    if size(r,1)<2
+    else
+        title(['unit ' num2str(ui) ' r ' num2str(r(1,2)) ' p ' num2str(p(1,2))]);
+    end
+    subplot(3,1,3);
+    scatter(dadips,firstspiketimes);
+    xlabel('da dip time (sec)');
+    ylabel('first spike time (sec)');
+    [r,p]=corrcoef(dapeaks(~isnan(dapeaks) & ~isnan(firstspiketimes)),firstspiketimes(~isnan(dapeaks) & ~isnan(firstspiketimes)));
+    if size(r,1)<2
+    else
+        title(['unit ' num2str(ui) ' r ' num2str(r(1,2)) ' p ' num2str(p(1,2))]);
+    end
+%     scatter(dapeaks,lastspiketimes);
+%     xlabel('da peak time (sec)');
+%     ylabel('last spike time (sec)');
+%     [r,p]=corrcoef(dapeaks(~isnan(dapeaks) & ~isnan(lastspiketimes)),lastspiketimes(~isnan(dapeaks) & ~isnan(lastspiketimes)));
+%     if size(r,1)<2
+%     else
+%         title(['unit ' num2str(ui) ' r ' num2str(r(1,2)) ' p ' num2str(p(1,2))]);
+%     end
 end
 
 % Test SU pop vec flip first
