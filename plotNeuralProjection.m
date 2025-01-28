@@ -1,4 +1,4 @@
-function plotNeuralProjection(matrix1, matrix2, times1, times2, time_window)
+function [w]=plotNeuralProjection(matrix1, matrix2, times1, times2, time_window, passin_w)
 % plotNeuralProjection Projects and plots neural activity projections for two conditions.
 %
 % This function takes two neural response matrices corresponding to different conditions,
@@ -12,7 +12,9 @@ function plotNeuralProjection(matrix1, matrix2, times1, times2, time_window)
 %   matrix2    - N x T2 matrix for Condition 2 (N neurons x T2 timepoints)
 %   times1     - 1 x T1 vector of time points corresponding to the columns of matrix1
 %   times2     - 1 x T2 vector of time points corresponding to the columns of matrix2
-%   time_window - 1 x 2 vector specifying the [start_time, end_time] for averaging
+%   time_window - 1 x 2 vector specifying the [start_time, end_time] for
+%   averaging (or a cell array of 2 of these vectors, if want to use
+%   different time windows for matrix1 and matrix2)
 %
 % Example usage:
 %   plotNeuralProjection(cond1_matrix, cond2_matrix, time_vector1, time_vector2, [0.5, 1.5]);
@@ -31,9 +33,20 @@ function plotNeuralProjection(matrix1, matrix2, times1, times2, time_window)
         error('Length of times2 vector must match the number of columns in matrix2.');
     end
     
-    % Ensure time_window is a two-element vector
-    if length(time_window) ~= 2
-        error('time_window must be a two-element vector: [start_time, end_time].');
+    time_window2=[];
+    if iscell(time_window)
+        if length(time_window)~=2
+            error('time_window must be a two-element cell array (for matrix1 time window, then matrix2 time window), or a vector: [start_time, end_time]');
+        else
+            temp=time_window;
+            time_window=temp{1};
+            time_window2=temp{2};
+        end
+    else
+        % Ensure time_window is a two-element vector
+        if length(time_window) ~= 2
+            error('time_window must be a two-element vector: [start_time, end_time].');
+        end
     end
     
     % Ensure time_window is ordered correctly
@@ -43,7 +56,11 @@ function plotNeuralProjection(matrix1, matrix2, times1, times2, time_window)
 
     % Identify Timepoints Within the Specified Window for Each Condition
     idx_window1 = times1 >= time_window(1) & times1 <= time_window(2);
-    idx_window2 = times2 >= time_window(1) & times2 <= time_window(2);
+    if ~isempty(time_window2)
+        idx_window2 = times2 >= time_window3(1) & times2 <= time_window2(2);
+    else
+        idx_window2 = times2 >= time_window(1) & times2 <= time_window(2);
+    end
     
     if ~any(idx_window1)
         warning('No timepoints found within the specified time window for Condition 1.');
@@ -90,6 +107,11 @@ function plotNeuralProjection(matrix1, matrix2, times1, times2, time_window)
     % Normalize the Separation Direction to Unit Length
     w = w / w_norm;
     
+    % If passed in w, use this w instead of comparison
+    if ~isempty(passin_w)
+        w=passin_w;
+    end
+
     % Project Each Timepoint's Activity Onto the Separation Direction
     % For Condition 1
     proj1 = w' * matrix1; % 1 x T1 vector of projections
