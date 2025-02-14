@@ -11,9 +11,9 @@
 
 %% load in data
 
-exptDataDir='Z:\Kim\for_orchestra\combineReachData\O2 output\alltbt23Oct2024112946\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023170233\'; % directory containing experimental data
 behaviorLogDir='C:\Users\kreinhold\Downloads\Combo Behavior Log20241112.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\Kim\for_orchestra\combineReachData\O2 output\alltbt23Oct2024112946\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt03May2023170233\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -46,8 +46,8 @@ alltbt.times=repmat(0:0.03:(size(alltbt.times,2)-1)*0.03,size(alltbt.times,1),1)
 % Optional: get day 1 for learning curves
 trialTypes.mouseid=metadata.mouseid;
 [~,~,~,isreachout_permouse,permouse_mouseid]=get_dprime_per_mouse(alltbt,trialTypes,metadata,false,settingsForDprimes(alltbt,'cueZone_onVoff',false)); % last arg is filler, dprimes will be recalculated later
-% [day1,metadata]=defineDay1(alltbt,trialTypes,metadata,isreachout_permouse,permouse_mouseid);
-% alltbt.sess_wrt_day1=metadata.sess_wrt_day1; trialTypes.sess_wrt_day1=metadata.sess_wrt_day1;
+[day1,metadata]=defineDay1(alltbt,trialTypes,metadata,isreachout_permouse,permouse_mouseid);
+alltbt.sess_wrt_day1=metadata.sess_wrt_day1; trialTypes.sess_wrt_day1=metadata.sess_wrt_day1;
 
 % Optional
 % Back-up full, unfiltered alltbt in workspace
@@ -327,11 +327,11 @@ trialTypes.mouseLearned=alltbt.mouseLearned;
 
 %% learning curves
 % Optional: discard preemptive
-% [alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
+[alltbt,trialTypes,metadata]=discardPreemptive(alltbt,trialTypes,metadata);
 % % Optional: dprimes for each mouse, each session
-% settingsDp=settingsForDprimes(alltbt,'cueZone_onVoff',true); % Check settings in settingsForDprimes
-% [alltbt,trialTypes,metadata]=get_dprime_per_mouse(alltbt,trialTypes,metadata,false,settingsDp); % last arg is whether to get rates instead
-% alltbt.dprimes(isinf(alltbt.dprimes))=3; 
+settingsDp=settingsForDprimes(alltbt,'cueZone_onVoff',true); % Check settings in settingsForDprimes
+[alltbt,trialTypes,metadata]=get_dprime_per_mouse(alltbt,trialTypes,metadata,false,settingsDp); % last arg is whether to get rates instead
+alltbt.dprimes(isinf(alltbt.dprimes))=3; 
 % DURING INITIAL LEARNING CONTROL OR SILENCING
 [learningC,days,reachrate_cued,reachrate_uncued,dayNdprime,day1dprime,quiverTips,biases]=learningCurves(alltbt,trialTypes,metadata,'sess_wrt_day1',[1],[15:20],false);
 % for i=1:size(reachrate_cued,1)

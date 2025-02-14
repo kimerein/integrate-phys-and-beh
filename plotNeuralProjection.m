@@ -57,7 +57,7 @@ function [w]=plotNeuralProjection(matrix1, matrix2, times1, times2, time_window,
     % Identify Timepoints Within the Specified Window for Each Condition
     idx_window1 = times1 >= time_window(1) & times1 <= time_window(2);
     if ~isempty(time_window2)
-        idx_window2 = times2 >= time_window3(1) & times2 <= time_window2(2);
+        idx_window2 = times2 >= time_window2(1) & times2 <= time_window2(2);
     else
         idx_window2 = times2 >= time_window(1) & times2 <= time_window(2);
     end
