@@ -23,8 +23,8 @@ settings.useSameTrainingSetForAllNeurons=true;
 settings.discardDrops=false;
 settings.dropFolderName='cued_drop';
 settings.dropFileName='cuedDrop';
-settings.discardTrialsWhereOptoDuringCue=false;
-settings.onlyTrialsWhereOptoDuringCue=true;
+settings.discardTrialsWhereOptoDuringCue=true;
+settings.onlyTrialsWhereOptoDuringCue=false;
 settings.discardTrialsIfAnyOpto=false;
 settings.minTrialLength=9.5; % in seconds
 

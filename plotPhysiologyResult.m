@@ -333,6 +333,27 @@ switch alignTo
         typeOfReach=true;
         useReach='combo';
         useCombo=behavior_tbt.reachBatch_success_reachStarts+behavior_tbt.reachBatch_success_reachStarts_pawOnWheel;
+    case 'success_to_reachinwindow'
+        temp=withinRange{1};
+        % for trial n, take successes (window for trial n selected below)
+        typeOfReach=true;
+        useReach='combo';
+        useCombo=behavior_tbt.reachBatch_success_reachStarts+behavior_tbt.reachBatch_success_reachStarts_pawOnWheel;
+        % then only include trial n reaches when trial n+1 reach is cued
+        useComboFut=behavior_tbt.all_reachBatch;
+        useComboFut=[useComboFut(2:end,:); zeros(1,size(useComboFut,2))];
+        withinRange=withinRange{2};
+        timeStep=mode(diff(nanmean(behavior_tbt.times,1)));
+        cueInd=find(nanmean(behavior_tbt.(behaviorCue),1)>0,1,'first');
+        withinRange_inds=[cueInd+ceil(withinRange(1)/timeStep) cueInd+ceil(withinRange(2)/timeStep)];
+        if withinRange_inds(1)<1
+            withinRange_inds(1)=1;
+        end
+        if withinRange_inds(2)>size(useComboFut,2)
+            withinRange_inds(2)=size(useComboFut,2);
+        end
+        useCombo(~any(useComboFut(:,withinRange_inds(1):withinRange_inds(2))>0,2),:)=0;
+        withinRange=temp;
     case 'drop_fromPerchOrWheel'
         typeOfReach=true;
         useReach='combo';

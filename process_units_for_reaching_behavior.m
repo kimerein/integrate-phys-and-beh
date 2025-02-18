@@ -3,7 +3,7 @@
 
 clear all
 
-onVPN=false; %true; % if want to skip reading in spikes from raw data
+onVPN=true; %false; % if want to skip reading in spikes from raw data
 goodUnitLabel=2; 
 % for discarding units dead or moved away
 dsinds=225;
@@ -11,12 +11,13 @@ percentThresh=5;
 timeStretchThresh=60*10; % in seconds
 plotInference=false;
 channelSpacing=20; % in microns
-skipIfBehaviorAlignmentsAlreadyExist=true; % if true, will skip any units for which a behavior alignment already exists in the cue sub-folder
+skipIfBehaviorAlignmentsAlreadyExist=false; % if true, will skip any units for which a behavior alignment already exists in the cue sub-folder
 % CAN COMMENT OUT SOME BEHAVIOR ALIGNMENTS IN
 % saveBehaviorAlignmentsSingleNeuron.m IF DON'T WANT TO REPOPULATE
 % EVERYTHING
 skipUnitDetails=true; % if true, will skip populating the unit details
 skipUnitDetailsUnlessNoQCfig=true; % skips populating unit details unless QC fig does not yet exist
+skipPhotometry=true; % will skip repopulating photometry alignments
 % BUT NOTE WILL STILL REPOPULATE UNIT DETAILS
 % second row is Matlab index, first row is depth on probe, where 32 is most
 % dorsall, 1 is most ventral
@@ -103,23 +104,25 @@ for i=1:size(data_loc_array,1)
     [physiology_tbt,beh2_tbt,behavior_tbt,photometry_tbt]=loadReachingExptPhysData(data_loc_array(i,:));
     % save photometry alignments to behavior, if photometry was acquired
     if ~isempty(photometry_tbt) && ~strcmp(data_loc_array{i,14},'photo_not_working') && ~strcmp(data_loc_array{i,14},'not_finished')
-        mkdir(data_loc_array{i,15});
-        saveBehaviorAlignmentsPhotometry(photometry_tbt,behavior_tbt,data_loc_array{i,15},'',data_loc_array{i,14}); 
-        disp(['Photometry for ' data_loc_array{i,6} ': Done']);
+        if skipPhotometry==false
+            mkdir(data_loc_array{i,15});
+            saveBehaviorAlignmentsPhotometry(photometry_tbt,behavior_tbt,data_loc_array{i,15},'',data_loc_array{i,14}); 
+            disp(['Photometry for ' data_loc_array{i,6} ': Done']);
+        end
     end
     if strcmp(data_loc_array{i,7},'no_spikes')
         % no spikes recorded
         continue
     end
     if data_loc_array{i,13}==1
-        % recording is not in structure
+        % recording is not in structure+
         disp(['Skipping  ' data_loc_array{i,6} ' because not in structure']);
         continue
     end
     % get spikes if recorded physiology
     dd=dir(data_loc_array{i,7});
     disp(['Processing ' data_loc_array{i,7}]);
-    %try
+    try
     for j=1:length(dd)
         if ~isempty(regexp(dd(j).name,'spikes'))
             % load spikes
@@ -189,14 +192,14 @@ for i=1:size(data_loc_array,1)
                 doBecauseMissing=true;
             end
             % make opto-tagged alignment
-            if skipUnitDetails==false || doBecauseMissing==true
+            if skipUnitDetails==false && doBecauseMissing==true
                 [~,tbtspikes]=organizeSpikesToMatch_physiology_tbt(spikes,physiology_tbt);
             end
             % if no good units, just continue
             if isempty(gu)
                 continue
             end
-            if skipUnitDetails==false || doBecauseMissing==true
+            if skipUnitDetails==false && doBecauseMissing==true
                 optoAligned_phys_tbt=alignToOpto(addGoodUnitsAsFields(physiology_tbt,tbtspikes,2,1,false,true,true));
                 optoAligned_phys_tbt=checkWaveformsDuringOpto(optoAligned_phys_tbt,tbtspikes);
                 % save opto alignment
@@ -262,6 +265,7 @@ for i=1:size(data_loc_array,1)
                         else
                             % just redo behavior alignments, skipping QC fig
                             spikes.skipQC=true;
+                            %pause;
                             saveBehaviorAlignmentsSingleNeuron(physiology_tbt,spikes,currAssign,beh2_tbt,forplot_trodeChs,trodeChsForSpikes(end),data_loc_array{i,8},addTag,data_loc_array{i,3},[]);
                             unit_data=[data_loc_array{i,8} sep qc_fname];
                         end
@@ -314,10 +318,10 @@ for i=1:size(data_loc_array,1)
         end
     end
     disp(['Physiology for ' data_loc_array{i,7} ': Done']);
-%     catch
-%         disp(['caught error while processing ' data_loc_array{i,6}]);
-%         errorInDirectories{length(errorInDirectories)+1}=data_loc_array{i,6};
-%     end
+    catch
+        disp(['caught error while processing ' data_loc_array{i,6}]);
+        errorInDirectories{length(errorInDirectories)+1}=data_loc_array{i,6};
+    end
 end
 
 %% 3. Load data locations
@@ -370,7 +374,7 @@ figure(); histogram(photolocs,25);
 
 %% 4. Make figures -- about 6 min to load 84 sessions of unit data
 % choose type of response to plot
-response_to_plot='cue'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+response_to_plot='uncued_success_to_cued'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 
 % doUnitTest.m is used to test whether to include unit in this plot
 % will include unit if unitdets match the following
