@@ -100,7 +100,8 @@ data_loc_array=table2cell(readtable(dataTable,'Format','%s%s%s%u%s%s%s%s%s%u%u%s
 % and "unit217onCh2", can get confused think that QC fig already exists, in
 % which case will not repopulate if skipUnitDetailsUnlessNoQCfig is true
 errorInDirectories={};
-for i=1:size(data_loc_array,1)
+% for i=1:size(data_loc_array,1)
+for i=351:351
     if strcmp(data_loc_array{i,6},'no_tbt')
         continue
     end
@@ -271,7 +272,7 @@ for i=1:size(data_loc_array,1)
                         else
                             % just redo behavior alignments, skipping QC fig
                             spikes.skipQC=true;
-                            saveBehaviorAlignmentsSingleNeuron(physiology_tbt,spikes,currAssign,beh2_tbt,forplot_trodeChs,trodeChsForSpikes(end),data_loc_array{i,8},addTag,data_loc_array{i,3},[]);
+%                             saveBehaviorAlignmentsSingleNeuron(physiology_tbt,spikes,currAssign,beh2_tbt,forplot_trodeChs,trodeChsForSpikes(end),data_loc_array{i,8},addTag,data_loc_array{i,3},[]);
                             unit_data=[data_loc_array{i,8} sep qc_fname];
                         end
                     end
@@ -379,7 +380,7 @@ figure(); histogram(photolocs,25);
 
 %% 4. Make figures -- about 6 min to load 84 sessions of unit data
 % choose type of response to plot
-response_to_plot='cued_success_to_cued'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
+response_to_plot='uncued_success_to_cued'; % can be any of the directories created in saveBehaviorAlignmentsSingleNeuron.m
 
 % doUnitTest.m is used to test whether to include unit in this plot
 % will include unit if unitdets match the following
