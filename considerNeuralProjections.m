@@ -1,7 +1,7 @@
 function considerNeuralProjections(cued_success_Response,uncued_success_Response,cued_failure_Response,uncued_failure_Response,cue_Response,cued_succ_to_cued,cued_succ_to_uncued,uncued_succ_to_cued,uncued_succ_to_uncued)
 
-onlyOnD1tag=true;
-onlyOnA2atag=false;
+onlyOnD1tag=false;
+onlyOnA2atag=true;
 
 if onlyOnD1tag==true
     cued_success_Response.unitbyunit_y(cued_success_Response.D1tag(cued_success_Response.excluded==0)~=1,:)=0;
@@ -74,9 +74,9 @@ times_uncued_succ_to_uncued=nanmean(uncued_succ_to_uncued.unitbyunit_x,1)-findZe
 % then project neural activity onto this subspace
 % could be a different subspace that contains "reinforcement" after a
 % cued or uncued success, so do these independently
-w1=plotNeuralProjection(cued_success_Response.unitbyunit_y,uncued_success_Response.unitbyunit_y,times_cuedsuccess,times_uncuedsuccess,[0 5],[]);
-w2=plotNeuralProjection(cued_success_Response.unitbyunit_y,cued_failure_Response.unitbyunit_y,times_cuedsuccess,times_cuedfailure,[0 5],[]);
-w3=plotNeuralProjection(cued_succ_to_cued.unitbyunit_y,cued_succ_to_uncued.unitbyunit_y,times_cued_succ_to_cued,times_cued_succ_to_uncued,[0 5],[]);
+w1=plotNeuralProjection(cued_success_Response.unitbyunit_y,uncued_success_Response.unitbyunit_y,times_cuedsuccess,times_uncuedsuccess,[1 5],[]);
+w2=plotNeuralProjection(cued_success_Response.unitbyunit_y,cued_failure_Response.unitbyunit_y,times_cuedsuccess,times_cuedfailure,[1 5],[]);
+w3=plotNeuralProjection(cued_succ_to_cued.unitbyunit_y,cued_succ_to_uncued.unitbyunit_y,times_cued_succ_to_cued,times_cued_succ_to_uncued,[1 5],[]);
 w1(isnan(w1))=0;
 w2(isnan(w2))=0;
 w3(isnan(w2))=0;
@@ -122,10 +122,31 @@ plot(times_uncuedsuccess,magnitudes); title('uncued success projected onto uncue
 temp=cued_success_Response.unitbyunit_y;
 % drop all nan rows
 [R,P]=corr_timepoints(temp(~all(temp==0,2),:),25);
-figure(); imagesc(R);
-
+t=times_cuedsuccess;
+f=find(~isnan(t),1,'first');
+t(1:f-1)=t(f) - (t(f+1) - t(f)) * ((f-1):-1:1);
+figure(); imagesc(t,t,R);
 
 % CCA
+
+end
+
+function plot_imagesc(R,timerange)
+
+figure(); imagesc(t,t,R);
+% Get the current axes handle
+ax = gca;
+% Get current tick positions (these correspond to data indices)
+xticks_current = ax.XTick;
+yticks_current = ax.YTick;
+% Define a new range for the x- and y-axes. For instance,
+% map the x-axis from 1 to 10 into a new range [0, 100],
+% and the y-axis from 1 to 10 into a new range [0, 50].
+new_x_range = linspace(timerange(1), timerange(2), numel(xticks_current));
+new_y_range = linspace(timerange(1), timerange(2), numel(yticks_current));
+% Update the tick labels (this changes only the displayed numbers)
+ax.XTickLabel = new_x_range;
+ax.YTickLabel = new_y_range;
 
 end
 
