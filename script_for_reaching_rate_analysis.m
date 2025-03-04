@@ -11,9 +11,9 @@
 
 %% load in data
 
-exptDataDir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt11May2023170242\'; % directory containing experimental data
+exptDataDir='C:\Users\kreinhold\Documents\Data for Striatum supports fast learning but not memory recall\Step 3 data organized by experiment\alltbt19Apr2023110616\'; % directory containing experimental data
 behaviorLogDir='C:\Users\kreinhold\Downloads\Combo Behavior Log20241112.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='Z:\MICROSCOPE\Kim\for_orchestra\combineReachData\O2 output\alltbt11May2023170242\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='C:\Users\kreinhold\Documents\Data for Striatum supports fast learning but not memory recall\Step 3 data organized by experiment\alltbt19Apr2023110616\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
