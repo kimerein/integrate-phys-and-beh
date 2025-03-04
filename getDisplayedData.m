@@ -36,4 +36,33 @@ for k = 1:length(lineObjs)
     fprintf('Line %d: %d points visible\n', k, sum(inView));
 end
 
+% Process Scatter Objects
+% Find scatter objects in the current axes.
+% (Scatter objects in MATLAB are of type 'Scatter'.)
+scatterObjs = findobj(ax, 'Type', 'Scatter');
+
+% Initialize a cell array to store visible data points for each scatter object
+visibleScatterData = cell(length(scatterObjs), 1);
+
+% Loop through each scatter object
+for k = 1:length(scatterObjs)
+    % Get the data for this scatter object
+    xData = scatterObjs(k).XData;
+    yData = scatterObjs(k).YData;
+    
+    % Determine which points are within the current axis limits
+    inView = (xData >= xLimits(1)) & (xData <= xLimits(2)) & ...
+             (yData >= yLimits(1)) & (yData <= yLimits(2));
+    
+    % Extract only the visible data points
+    visibleX = xData(inView);
+    visibleY = yData(inView);
+    
+    % Store the visible data points in the cell array as a structure
+    visibleScatterData{k} = struct('x', visibleX, 'y', visibleY);
+    
+    % Optionally, display the number of visible points for this scatter object
+    fprintf('Scatter %d: %d points visible\n', k, sum(inView));
+end
+
 end
