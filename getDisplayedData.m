@@ -17,6 +17,10 @@ for k = 1:length(lineObjs)
     xData = lineObjs(k).XData;
     yData = lineObjs(k).YData;
     
+    if yLimits(1)==0
+        yLimits(1)=0-0.0001;
+    end
+
     % Determine which points are within the current axis limits
     inView = (xData >= xLimits(1)) & (xData <= xLimits(2)) & ...
              (yData >= yLimits(1)) & (yData <= yLimits(2));
