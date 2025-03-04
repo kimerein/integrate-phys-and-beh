@@ -58,11 +58,24 @@ for k = 1:length(scatterObjs)
     visibleX = xData(inView);
     visibleY = yData(inView);
     
-    % Store the visible data points in the cell array as a structure
-    visibleScatterData{k} = struct('x', visibleX, 'y', visibleY);
+    % Retrieve the color data for the scatter object
+    visibleColor = scatterObjs(k).MarkerEdgeColor;
+    
+    % Store the visible data points along with their color in the cell array
+    visibleScatterData{k} = struct('x', visibleX, 'y', visibleY, 'color', visibleColor);
     
     % Optionally, display the number of visible points for this scatter object
     fprintf('Scatter %d: %d points visible\n', k, sum(inView));
 end
+
+% takeColors={[0 0.7500 0],[0 1 1],[0.8000 0.8000 0.8000],[1 0 0]};
+% takeThisPointX=[]; takeThisPointY=[]; for i=1:length(visibleScatterData)
+% isMatch = any(cellfun(@(c) isequal(c, visibleScatterData{i}.color), takeColors));
+% if isMatch==true
+% takeThisPointX=[takeThisPointX visibleScatterData{i}.x];
+% takeThisPointY=[takeThisPointY visibleScatterData{i}.y];
+% end
+% end
+% figure(); scatter(takeThisPointX-2.27604,takeThisPointY);
 
 end
