@@ -76,6 +76,38 @@ end
 % takeThisPointY=[takeThisPointY visibleScatterData{i}.y];
 % end
 % end
-% figure(); scatter(takeThisPointX-2.27604,takeThisPointY);
+% figure(); scatter(takeThisPointX-2.47254,takeThisPointY);
+
+% Find all quiver objects in the current axes
+quiverObjs = findobj(ax, 'Type', 'quiver');
+fprintf('Found %d quiver object(s).\n', length(quiverObjs));
+
+% Initialize a cell array to store visible quiver data for each quiver object
+visibleQuiverData = cell(length(quiverObjs), 1);
+
+
+
+
+% Loop through each quiver object
+for k = 1:length(quiverObjs)
+    % Retrieve quiver data (position and vector components)
+    xData = quiverObjs(k).XData;
+    yData = quiverObjs(k).YData;
+    uData = quiverObjs(k).UData;
+    vData = quiverObjs(k).VData;
+    
+    % Determine which vectors are within the current axis limits
+    inView = (xData >= ax.XLim(1)) & (xData <= ax.XLim(2)) & ...
+             (yData >= ax.YLim(1)) & (yData <= ax.YLim(2));
+    
+    % Save the visible quiver data in a structure stored in the cell array.
+    visibleQuiverData{k} = struct('x', xData(inView), ...
+                                  'y', yData(inView), ...
+                                  'u', uData(inView), ...
+                                  'v', vData(inView));
+    
+    % Optionally display the number of visible vectors for this quiver object.
+    fprintf('Quiver %d: %d vector(s) visible\n', k, sum(inView));
+end
 
 end
