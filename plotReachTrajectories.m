@@ -18,9 +18,14 @@ scaleY=0.25;
 % startsinrange_X=[]; 
 % startsinrange_Y=[]; 
 % startsinrange_Z=[]; 
-startsinrange_X=[0 120]; %[0 110]; %[90 110];
-startsinrange_Y=[100 700]; %[0 680]; %[200 450];
-startsinrange_Z=[160 1000]; %[160 300]; %1000]; %[200 350];
+% for allison and john
+startsinrange_X=[0 140]; %[0 110]; %[90 110];
+startsinrange_Y=[60 750]; %[0 680]; %[200 450];
+startsinrange_Z=[130 1300]; %[160 300]; %1000]; %[200 350];
+% for my paper
+% startsinrange_X=[0 120]; %[0 110]; %[90 110];
+% startsinrange_Y=[100 700]; %[0 680]; %[200 450];
+% startsinrange_Z=[160 1000]; %[160 300]; %1000]; %[200 350];
 startTime=2; % in seconds
 flipZ=false;
 

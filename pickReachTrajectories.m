@@ -7,8 +7,10 @@ timeAfterReach=2.5;
 nReachesFromEachTrial='all';
 spaceOutReaches=true;
 spaceOutByTime=1; % in seconds
+% noReachesBeforeTime=-0.3; % wrt cue, to be sure have enough frames around reach
+% noReachesAfterTime=9; % wrt cue, to be sure have enough frames around reach
 noReachesBeforeTime=-0.3; % wrt cue, to be sure have enough frames around reach
-noReachesAfterTime=9; % wrt cue, to be sure have enough frames around reach
+noReachesAfterTime=3; % wrt cue, to be sure have enough frames around reach
 
 switch onlyLED
     case 'noLED'
