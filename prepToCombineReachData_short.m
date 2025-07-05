@@ -1,7 +1,9 @@
 % script for preparing directory structure before combining data across videos and days
 
 % assign mouse and session numbers
-expt_dir='Z:\MICROSCOPE\Kim\Behavior Final Data Sets\Controls for learning curves';
+foldersname='VID';
+% foldersname='processed_data';
+expt_dir='Z:\MICROSCOPE\Kim\20250530 for Allison\dLight and Behavior';
 optoOnHere=0; % 1 if there was opto, else 0
 onlySaveOptoIfDoesNotExist=true;
 startMouseNumberingAt=1; % if want to start mouse numbers at some offset
@@ -31,7 +33,8 @@ for i=1:length(ls) % iterate through mice
         for j=1:length(sub_ls) % iterate through sessions
             sub_thisname=sub_ls(j).name;
             sub_thisisdir=sub_ls(j).isdir;
-            if ~isempty(regexp(sub_thisname,'processed_data','ONCE')) && sub_thisisdir==1
+            %if ~isempty(regexp(sub_thisname,'processed_data','ONCE')) && sub_thisisdir==1
+            if ~isempty(regexp(sub_thisname,foldersname,'ONCE')) && sub_thisisdir==1
                 % add to list
                 continuingAnalysisDir{k}=[expt_dir '\' thisname '\' sub_thisname];
                 % set mouse id

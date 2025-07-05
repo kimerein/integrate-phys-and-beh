@@ -13,8 +13,10 @@ save(fullfile(saveTo,'metadata.mat'),"metadata");
 addtotrial2=' & (trialTypes.after_cue_success==1 | trialTypes.after_cue_drop==1 | trialTypes.after_cue_miss==1 | trialTypes.after_cue_no_pellet==1)';
 % After success
 whichEventName='cued success'; timeWindowToCountAsEventReach=[0 1]; whichReachName='reachBatch_success_reachStarts';
-[trialTypes,trial1,trial2,trial1_LED,trial2_LED]=whichTrialTypesToUse(alltbt,trialTypes,[],whichEventName,timeWindowToCountAsEventReach,whichReachName);
-trial2=[trial2 addtotrial2];
+% [trialTypes,trial1,trial2,trial1_LED,trial2_LED]=whichTrialTypesToUse(alltbt,trialTypes,[],whichEventName,timeWindowToCountAsEventReach,whichReachName);
+% trial2=[trial2 addtotrial2];
+trial1=['(trialTypes.optoGroup~=1 & trialTypes.after_cue_success==1 & trialTypes.led==0 & trialTypes.led_1forward==0)'];        
+trial2=['(trialTypes.after_cue_success==1 | trialTypes.after_cue_drop==1 | trialTypes.after_cue_miss==1 | trialTypes.after_cue_no_pellet==1) & trialTypes.optoGroup~=1'];
 logic1=eval(trial1); logic2=eval(trial2); % these are only no LED trial pairs
 logictogether=logic1(1:end-1) & logic2(2:end);
 disp('n successes:'); 
@@ -36,8 +38,10 @@ save(fullfile(saveTo,'trial2Z_success.mat'),"trial2Z_success");
 close all;
 % After failure
 whichEventName='all cued failures'; timeWindowToCountAsEventReach=[0 1]; whichReachName='anyFail';
-[trialTypes,trial1,trial2,trial1_LED,trial2_LED]=whichTrialTypesToUse(alltbt,trialTypes,[],whichEventName,timeWindowToCountAsEventReach,whichReachName);
-trial2=[trial2 addtotrial2];
+% [trialTypes,trial1,trial2,trial1_LED,trial2_LED]=whichTrialTypesToUse(alltbt,trialTypes,[],whichEventName,timeWindowToCountAsEventReach,whichReachName);
+% trial2=[trial2 addtotrial2];
+trial1=['trialTypes.optoGroup~=1 & (trialTypes.after_cue_drop==1 | trialTypes.after_cue_miss==1 | trialTypes.after_cue_no_pellet==1) & trialTypes.led==0 & trialTypes.led_1forward==0']; 
+trial2=['(trialTypes.after_cue_success==1 | trialTypes.after_cue_drop==1 | trialTypes.after_cue_miss==1 | trialTypes.after_cue_no_pellet==1) & trialTypes.optoGroup~=1'];
 logic1=eval(trial1); logic2=eval(trial2); % these are only no LED trial pairs
 logictogether=logic1(1:end-1) & logic2(2:end);
 disp('n failures:'); 
@@ -62,11 +66,14 @@ figure(); plot(nanmean(trial1Z_failure,1),'Color','k'); hold on; plot(nanmean(tr
 
 
 %% Get time to dislodge pellet
-addtotrial2=' & (trialTypes.after_cue_success==1 | trialTypes.after_cue_drop==1)';
+% addtotrial2=' & (trialTypes.after_cue_success==1 | trialTypes.after_cue_drop==1)';
+addtotrial2=' & (trialTypes.after_cue_success==1)';
 % After success
 whichEventName='cued success'; timeWindowToCountAsEventReach=[0 1]; whichReachName='reachBatch_success_reachStarts';
-[trialTypes,trial1,trial2,trial1_LED,trial2_LED]=whichTrialTypesToUse(alltbt,trialTypes,[],whichEventName,timeWindowToCountAsEventReach,whichReachName);
-trial2=[trial2 addtotrial2];
+% [trialTypes,trial1,trial2,trial1_LED,trial2_LED]=whichTrialTypesToUse(alltbt,trialTypes,[],whichEventName,timeWindowToCountAsEventReach,whichReachName);
+trial1=['(trialTypes.optoGroup~=1 & trialTypes.after_cue_success==1 & trialTypes.led==0 & trialTypes.led_1forward==0)'];        
+trial2=['trialTypes.after_cue_success==1 & trialTypes.optoGroup~=1'];
+% trial2=[trial2 addtotrial2];
 logic1=eval(trial1); logic2=eval(trial2); % these are only no LED trial pairs
 logictogether=logic1(1:end-1) & logic2(2:end);
 disp('n successes:'); 
@@ -89,8 +96,10 @@ save(fullfile(saveTo,'issuccess_secondtrial_aftersucc.mat'),"issuccess_secondtri
 save(fullfile(saveTo,'isdrop_secondtrial_aftersucc.mat'),"isdrop_secondtrial_aftersucc");
 % After failure
 whichEventName='all cued failures'; timeWindowToCountAsEventReach=[0 1]; whichReachName='anyFail';
-[trialTypes,trial1,trial2,trial1_LED,trial2_LED]=whichTrialTypesToUse(alltbt,trialTypes,[],whichEventName,timeWindowToCountAsEventReach,whichReachName);
-trial2=[trial2 addtotrial2];
+% [trialTypes,trial1,trial2,trial1_LED,trial2_LED]=whichTrialTypesToUse(alltbt,trialTypes,[],whichEventName,timeWindowToCountAsEventReach,whichReachName);
+trial1=['trialTypes.optoGroup~=1 & (trialTypes.after_cue_drop==1 | trialTypes.after_cue_miss==1 | trialTypes.after_cue_no_pellet==1) & trialTypes.led==0 & trialTypes.led_1forward==0']; 
+trial2=['trialTypes.after_cue_success==1 & trialTypes.optoGroup~=1'];
+% trial2=[trial2 addtotrial2];
 logic1=eval(trial1); logic2=eval(trial2); % these are only no LED trial pairs
 logictogether=logic1(1:end-1) & logic2(2:end);
 disp('n failures:'); 

@@ -1,5 +1,7 @@
 function checkForESPreaching(expt_dir,within_dir)
 
+foldersname='VID';
+% foldersname='processed_data';
 overwriteExisting=false;
 isExternalCue=false;
 
@@ -24,7 +26,8 @@ for i=1:length(ls)
         thisisdir=isempty(regexp(thisname,'\.','ONCE'));
         expt_dir=currdir(1:temp(end));
     end
-    if ~isempty(regexp(thisname,'processed_data','ONCE')) && thisisdir==1
+    %if ~isempty(regexp(thisname,'processed_data','ONCE')) && thisisdir==1
+    %if ~isempty(regexp(thisname,foldersname,'ONCE')) && thisisdir==1
         if exist([expt_dir '\' thisname '\preemptCue.mat'],'file')
             if overwriteExisting==false
                 continue

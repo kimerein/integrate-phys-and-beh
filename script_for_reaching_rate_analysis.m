@@ -11,9 +11,9 @@
 
 %% load in data
 
-exptDataDir='C:\Users\kreinhold\Documents\Data for Striatum supports fast learning but not memory recall\Step 3 data organized by experiment\alltbt19Apr2023110616\'; % directory containing experimental data
+exptDataDir='Z:\MICROSCOPE\Kim\20250530 for Allison\alltbt03Jul2025195915\'; % directory containing experimental data
 behaviorLogDir='C:\Users\kreinhold\Downloads\Combo Behavior Log20241112.csv'; % directory containing behavior log, download from Google spreadsheet as .tsv, change extension to .csv
-mouseDBdir='C:\Users\kreinhold\Documents\Data for Striatum supports fast learning but not memory recall\Step 3 data organized by experiment\alltbt19Apr2023110616\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
+mouseDBdir='Z:\MICROSCOPE\Kim\20250530 for Allison\alltbt03Jul2025195915\mouse_database.mat'; % directory containing mouse database, constructed during prepToCombineReachData_short.m
 
 if ismac==true
     sprtr='/';
@@ -24,7 +24,7 @@ end
 % only load these fields of alltbt
 disp('loading alltbt');
 % whichFieldsToLoad={'cue','all_reachBatch','cueZone_onVoff','dprimes','isChewing','isHold','optoOn','optoZone','pawOnWheel','pelletPresent','reachBatch_all_pawOnWheel','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','reachBatch_success_reachStarts','reachStarts','pelletmissingreach_reachStarts','reachStarts_pelletPresent','times','timesFromSessionStart','movie_distractor'};
-whichFieldsToLoad={'pelletPresented','cue','all_reachBatch','cueZone_onVoff','dprimes','isChewing','isHold','optoOn','optoZone','pawOnWheel','pelletPresent','reachBatch_all_pawOnWheel','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','reachBatch_success_reachStarts','reachStarts','pelletmissingreach_reachStarts','reachStarts_pelletPresent','times','timesFromSessionStart','movie_distractor'};
+whichFieldsToLoad={'pelletPresented','cue','all_reachBatch','cueZone_onVoff','dprimes','isChewing','isHold','optoOn','optoZone','pawOnWheel','pelletPresent','reachBatch_all_pawOnWheel','reachBatch_drop_reachStarts','reachBatch_miss_reachStarts','reachBatch_success_reachStarts','reachStarts','pelletmissingreach_reachStarts','reachStarts_pelletPresent','times','timesFromSessionStart','movie_distractor','cued_failureChunks','cued_failureChunks_pDMSt','cued_successChunks','cued_successChunks_pDMSt','all_successChunks','all_successChunks_pDMSt','all_failureChunks','all_failureChunks_pDMSt','isFidgeting','fidgetData'};
 alltbt=loadStructFieldByField([exptDataDir sprtr 'alltbt'],whichFieldsToLoad); % load alltbt
 disp('loading out');
 trialTypes=loadStructFieldByField([exptDataDir sprtr 'out']); % load out
@@ -171,9 +171,9 @@ tbt_filter.sortField='dprimes';
 % tbt_filter.range_values=[1 6 7 8 10 14 18];
 % tbt_filter.range_values=[1 2 6 9 10 11 12 18];
 % tbt_filter.range_values=[0.75 100]; %[0.75 100];
-tbt_filter.range_values=[-100 100];
+% tbt_filter.range_values=[0.5 1.5];
 % tbt_filter.range_values=[9.5 15.5] ;%0.471];
-% tbt_filter.range_values=[-100 100]; % beginner: d<0.25, intermediate: 0.25<=d<0.75, expert: d>=0.75
+tbt_filter.range_values=[-100 100]; % beginner: d<0.25, intermediate: 0.25<=d<0.75, expert: d>=0.75
 % tbt_filter.range_values=[163.5 170];
 % tbt_filter.range_values=[77.5 78.5];
 % tbt_filter.range_values=[0.5 0.9];
