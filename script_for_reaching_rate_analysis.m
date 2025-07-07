@@ -173,7 +173,7 @@ tbt_filter.sortField='dprimes';
 % tbt_filter.range_values=[0.75 100]; %[0.75 100];
 % tbt_filter.range_values=[0.5 1.5];
 % tbt_filter.range_values=[9.5 15.5] ;%0.471];
-tbt_filter.range_values=[-100 100]; % beginner: d<0.25, intermediate: 0.25<=d<0.75, expert: d>=0.75
+tbt_filter.range_values=[-0.25 0.75]; % beginner: d<0.25, intermediate: 0.25<=d<0.75, expert: d>=0.75
 % tbt_filter.range_values=[163.5 170];
 % tbt_filter.range_values=[77.5 78.5];
 % tbt_filter.range_values=[0.5 0.9];

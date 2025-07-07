@@ -1,16 +1,315 @@
-function analyzeDAvsRTchange(alltbt,trialTypes,metadata,DAbaselinewindow,DApostwindowstart,wtt,meanWindow)
+function analyzeDAvsRTchange_forAllison(alltbt,trialTypes,metadata,DAbaselinewindow,DApostwindowstart,wtt,meanWindow)
 
+% Kim is using 
+% analyzeDAvsRTchange(alltbt,trialTypes,metadata,1.5,12,[],[2.45 4.2]);
+% This sets the baseline for calculating the DA peak as the time window up
+% until the arm is outstretched (at 1.5 secs) 
+% 5th argument set to 12 secs indicates NO post-reach baseline time window
+% According to these arguments, the time window for calculating the DA mean 
+% is 2.45 to 4.2 secs, wrt the arm outstretched at 1.5 secs
+
+% if want to further subsample
+% otherwise leave wtt empty
 if isempty(wtt) % which to take
     wtt='ones(size(alltbt.RTs))==1';
 end
 
 timestep=mode(diff(nanmean(alltbt.times,1)));
 cueOffsetInds=0;
-% cueOffset if didn't realign to start of cue
+% only need cueOffset if didn't realign to start of cue
 % cueOffset=-0.16;
 % cueOffsetInds=ceil(abs(cueOffset)/timestep);
 
 % calculate reaction times
+alltbt=getReactionTimes(alltbt,cueOffsetInds,timestep);
+
+alltbt.RTs(alltbt.RTs<0.05)=nan;
+
+% dump artifacts of infrequent LabJack problem
+alltbt.cued_successChunks(alltbt.cued_successChunks<-4)=nan;
+alltbt.cued_failureChunks(alltbt.cued_failureChunks<-4)=nan;
+
+% get max and min for each
+alltbt.cued_successChunks_ma=nanmax(alltbt.cued_successChunks,[],2);
+alltbt.cued_successChunks_mi=nanmin(alltbt.cued_successChunks,[],2);
+alltbt.cued_failureChunks_ma=nanmax(alltbt.cued_failureChunks,[],2);
+alltbt.cued_failureChunks_mi=nanmin(alltbt.cued_failureChunks,[],2);
+
+% DA signals for successes and failures combined
+% alltbt.cued_allChunks=alltbt.cued_successChunks;
+alltbt.cued_allChunks(~isnan(alltbt.cued_failureChunks_ma),:)=alltbt.cued_failureChunks(~isnan(alltbt.cued_failureChunks_ma),:);
+
+% separate misses (paw never touches pellet) and drops (paw initially grabs
+% pellet, then pellet falls before mouse eats pellet)
+isdrop=any(alltbt.reachBatch_drop_reachStarts>0.05,2);
+ismiss=any(alltbt.reachBatch_miss_reachStarts>0.05,2) & ~any(alltbt.reachBatch_drop_reachStarts>0.05,2);
+
+% plot DA responses 
+nTime = size(alltbt.cued_successChunks, 2);
+x     = (0:nTime-1) * timestep;
+meanSuc = mean(alltbt.cued_successChunks, 1, 'omitnan');
+semSuc  = std(alltbt.cued_successChunks, 0, 1, 'omitnan') ./ ...
+          sqrt(sum(~isnan(alltbt.cued_successChunks), 1));
+meanFail = mean(alltbt.cued_failureChunks, 1, 'omitnan');
+semFail  = std(alltbt.cued_failureChunks, 0, 1, 'omitnan') ./ ...
+           sqrt(sum(~isnan(alltbt.cued_failureChunks), 1));
+% plot DA 3 outcomes
+figure; hold on;
+% success (green)
+plot(x, meanSuc, 'g-', 'LineWidth', 1.5);
+patch([x, fliplr(x)], [meanSuc+semSuc, fliplr(meanSuc-semSuc)], 'g', 'FaceAlpha', 0.2, 'EdgeColor', 'none');
+% drop (red)
+meanFail = mean(alltbt.cued_failureChunks(isdrop,:), 1, 'omitnan');
+semFail  = std(alltbt.cued_failureChunks(isdrop,:), 0, 1, 'omitnan') ./ ...
+           sqrt(sum(~isnan(alltbt.cued_failureChunks(isdrop,:)), 1));
+plot(x, meanFail, 'r-', 'LineWidth', 1.5);
+patch([x, fliplr(x)], [meanFail+semFail, fliplr(meanFail-semFail)], 'r', 'FaceAlpha', 0.2, 'EdgeColor', 'none');
+% miss (cyan)
+meanFail = mean(alltbt.cued_failureChunks(ismiss,:), 1, 'omitnan');
+semFail  = std(alltbt.cued_failureChunks(ismiss,:), 0, 1, 'omitnan') ./ ...
+           sqrt(sum(~isnan(alltbt.cued_failureChunks(ismiss,:)), 1));
+plot(x, meanFail, 'c-', 'LineWidth', 1.5);
+patch([x, fliplr(x)], [meanFail+semFail, fliplr(meanFail-semFail)], 'c', 'FaceAlpha', 0.2, 'EdgeColor', 'none');
+xlabel('Time (s)');
+ylabel('dLight signal');
+legend({'Success mean','Success ± SEM','Drop mean','Drop ± SEM','Miss mean','Miss ± SEM'}, ...
+       'Location','Best');
+title('Cued Success vs. Drop vs. Miss (±SEM)');
+hold off;
+
+% discard drops, may confuse things
+alltbt.cued_failureChunks(isdrop==1,:)=nan;
+alltbt.cued_allChunks(isdrop==1,:)=nan;
+disp('OMITTING DROPS!')
+
+DAbaseToInd=find(x<DAbaselinewindow,1,'last');
+DAbaseAtEnd=find(x>DApostwindowstart,1,'first');
+DAmeanInds=x>meanWindow(1) & x<=meanWindow(2);
+
+% plot DA 3 outcomes with baseline subtracted
+meanSuc = mean(alltbt.cued_successChunks-repmat(mean(alltbt.cued_successChunks(:,[1:DAbaseToInd DAbaseAtEnd:end]),2,'omitnan'),1,size(alltbt.cued_successChunks,2)), 1, 'omitnan');
+semSuc  = std(alltbt.cued_successChunks-repmat(mean(alltbt.cued_successChunks(:,[1:DAbaseToInd DAbaseAtEnd:end]),2,'omitnan'),1,size(alltbt.cued_successChunks,2)), 0, 1, 'omitnan') ./ ...
+          sqrt(sum(~isnan(alltbt.cued_successChunks), 1));
+figure; hold on;
+% success (green)
+plot(x, meanSuc, 'g-', 'LineWidth', 1.5);
+patch([x, fliplr(x)], [meanSuc+semSuc, fliplr(meanSuc-semSuc)], 'g', 'FaceAlpha', 0.2, 'EdgeColor', 'none');
+% miss (cyan)
+meanFail = mean(alltbt.cued_failureChunks(ismiss,:)-repmat(mean(alltbt.cued_failureChunks(ismiss,[1:DAbaseToInd DAbaseAtEnd:end]),2,'omitnan'),1,size(alltbt.cued_failureChunks,2)), 1, 'omitnan');
+semFail  = std(alltbt.cued_failureChunks(ismiss,:)-repmat(mean(alltbt.cued_failureChunks(ismiss,[1:DAbaseToInd DAbaseAtEnd:end]),2,'omitnan'),1,size(alltbt.cued_failureChunks,2)), 0, 1, 'omitnan') ./ ...
+           sqrt(sum(~isnan(alltbt.cued_failureChunks(ismiss,:)), 1));
+plot(x, meanFail, 'c-', 'LineWidth', 1.5);
+patch([x, fliplr(x)], [meanFail+semFail, fliplr(meanFail-semFail)], 'c', 'FaceAlpha', 0.2, 'EdgeColor', 'none');
+xlabel('Time (s)');
+ylabel('dLight signal');
+legend({'Success mean','Success ± SEM','Drop mean','Drop ± SEM','Miss mean','Miss ± SEM'}, ...
+       'Location','Best');
+title('Cued Success vs. Miss (±SEM) MINUS BASELINE');
+hold off;
+
+% get peak DA minus baseline 
+alltbt.cued_successChunks_peak=max(alltbt.cued_successChunks(:,:),[],2,'omitnan')-mean(alltbt.cued_successChunks(:,[1:DAbaseToInd DAbaseAtEnd:end]),2,'omitnan');
+% alltbt.cued_allChunks_peak=max(alltbt.cued_allChunks(:,:),[],2,'omitnan')-mean(alltbt.cued_allChunks(:,[1:DAbaseToInd DAbaseAtEnd:end]),2,'omitnan');
+alltbt.cued_failureChunks_peak=max(alltbt.cued_failureChunks(:,:),[],2,'omitnan')-mean(alltbt.cued_failureChunks(:,[1:DAbaseToInd DAbaseAtEnd:end]),2,'omitnan');
+% get DA means over initial response window
+alltbt.cued_failureChunks_mean=mean(alltbt.cued_failureChunks(:,DAmeanInds),2,'omitnan');
+alltbt.cued_successChunks_mean=mean(alltbt.cued_successChunks(:,DAmeanInds),2,'omitnan');
+% alltbt.cued_allChunks_mean=mean(alltbt.cued_allChunks(:,DAmeanInds),2,'omitnan');
+
+% plot scatter of peaks minus baseline for successes v failures
+figure(); scatter(ones(size(alltbt.cued_successChunks_peak))+rand(size(alltbt.cued_successChunks_peak)),alltbt.cued_successChunks_peak,[],[107 76 154]./255);
+hold on; scatter(2*ones(size(alltbt.cued_failureChunks_peak))+rand(size(alltbt.cued_failureChunks_peak)),alltbt.cued_failureChunks_peak,[],'r');
+title('DA peaks minus baseline, purple is success, red is failure');
+
+% plot scatter of DA means for successes v failures
+figure(); scatter(ones(size(alltbt.cued_successChunks_mean))+rand(size(alltbt.cued_successChunks_mean)),alltbt.cued_successChunks_mean,[],[107 76 154]./255);
+hold on; scatter(2*ones(size(alltbt.cued_failureChunks_mean))+rand(size(alltbt.cued_failureChunks_mean)),alltbt.cued_failureChunks_mean,[],'r');
+title('DA pmeans, purple is success, red is failure');
+
+% get change in RT from trial to trial = deltaRTs
+% put RT_n+1 - RT_n at the nth position
+alltbt.deltaRTs=alltbt.RTs(2:end)-alltbt.RTs(1:end-1);
+alltbt.deltaRTs=[alltbt.deltaRTs; nan];
+% then exclude any deltaRTs across session boundaries
+for i=2:size(alltbt.deltaRTs,1)
+    if metadata.sessid(i)~=metadata.sessid(i-1)
+        alltbt.deltaRTs(i)=nan;
+        alltbt.deltaRTs(i-1)=nan;
+    end
+end
+
+% plot DA signal vs. deltaRTs
+whichToTake=~isnan(alltbt.cued_successChunks_peak) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
+figure(); scatter(alltbt.cued_successChunks_peak(),alltbt.deltaRTs);
+xlabel('DA peak minus baseline -- Z-scored fluorescence units');
+ylabel('Change in RT (trial n+1 minus trial n)');
+title('DA peaks vs. change in RT for cued successes');
+figure(); scatter(alltbt.cued_successChunks_mean,alltbt.deltaRTs);
+xlabel('DA mean -- Z-scored fluorescence units');
+ylabel('Change in RT (trial n+1 minus trial n)');
+title('DA means vs. change in RT for cued successes');
+
+figure(); scatter(alltbt.cued_successChunks_peak,alltbt.deltaRTs,[],[107 76 154]./255); hold on;
+scatter(alltbt.cued_failureChunks_peak,alltbt.deltaRTs,[],'r');
+xlabel('DA peak minus baseline -- Z-scored fluorescence units');
+ylabel('Change in RT (trial n+1 minus trial n)');
+title('DA peaks vs. change in RT for cued successes and failures');
+
+% alltbt.cued_allChunks_peak=alltbt.cued_failureChunks_peak;
+% alltbt.cued_allChunks_peak(~isnan(alltbt.cued_successChunks_peak))=alltbt.cued_successChunks_peak(~isnan(alltbt.cued_successChunks_peak));
+
+whichToTake=~isnan(alltbt.cued_failureChunks_peak) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
+figure(); scatter(alltbt.cued_failureChunks_peak,alltbt.deltaRTs);
+xlabel('DA peak minus baseline -- Z-scored fluorescence units');
+ylabel('Change in RT (trial n+1 minus trial n)');
+title('DA peaks vs. change in RT for cued failures');
+figure(); scatter(alltbt.cued_failureChunks_mean,alltbt.deltaRTs);
+xlabel('DA mean -- Z-scored fluorescence units');
+ylabel('Change in RT (trial n+1 minus trial n)');
+title('DA means vs. change in RT for cued failures');
+
+alltbt.isLongITI=trialTypes.isLongITI;
+% shuffle_tbt=shuffleTbtTrialOrder(alltbt,metadata,trialTypes);
+
+% test correlations
+whichToTake=~isnan(alltbt.cued_successChunks_peak) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
+[r,p]=corrcoef(alltbt.cued_successChunks_peak(whichToTake),alltbt.deltaRTs(whichToTake));
+disp(['R correlation between DA peaks and deltaRTs for cued successes: ']); disp(r(1,2));
+disp(['pval correlation between DA peaks and deltaRTs for cued successes: ']); disp(p(1,2));
+% whichToTake=~isnan(alltbt.cued_successChunks_mean) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
+% [r,p]=corrcoef(alltbt.cued_successChunks_mean(whichToTake),alltbt.deltaRTs(whichToTake));
+% disp(['R correlation between DA means and deltaRTs for cued successes: ']); disp(r(1,2));
+% disp(['pval correlation between DA means and deltaRTs for cued successes: ']); disp(p(1,2));
+
+% whichToTake=~isnan(shuffle_tbt.cued_successChunks_peak) & ~isnan(shuffle_tbt.deltaRTs) & shuffle_tbt.isLongITI==1; % this won't take wtt
+% [r,p]=corrcoef(shuffle_tbt.cued_successChunks_peak(whichToTake),shuffle_tbt.deltaRTs(whichToTake));
+% disp(['SHUFFLE R correlation between DA peaks and deltaRTs for cued successes: ']); disp(r(1,2));
+% disp(['SHUFFLE pval correlation between DA peaks and deltaRTs for cued successes: ']); disp(p(1,2));
+
+whichToTake=~isnan(alltbt.cued_failureChunks_mean) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
+[r,p]=corrcoef(alltbt.cued_failureChunks_mean(whichToTake),alltbt.deltaRTs(whichToTake));
+disp(['R correlation between DA means and deltaRTs for cued failures: ']); disp(r(1,2));
+disp(['pval correlation between DA means and deltaRTs for cued failures: ']); disp(p(1,2));
+
+% whichToTake=~isnan(alltbt.cued_allChunks_peak) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
+% [r,p]=corrcoef(alltbt.cued_allChunks_peak(whichToTake),alltbt.deltaRTs(whichToTake));
+% disp(['R correlation between DA peaks and deltaRTs for all reaches: ']); disp(r(1,2));
+% disp(['pval correlation between DA peaks and deltaRTs for all reaches: ']); disp(p(1,2));
+
+% session by session cued_successChunks_peak
+whichToTake=~isnan(alltbt.cued_successChunks_peak) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
+u=unique(metadata.sessid);
+rs=nan(length(u),1); ps=nan(length(u),1);
+for i=1:length(u)
+    [r,p]=corrcoef(alltbt.cued_successChunks_peak(metadata.sessid==u(i) & whichToTake==1),alltbt.deltaRTs(metadata.sessid==u(i) & whichToTake==1));
+    if size(r,1)<2
+        continue
+    end
+    rs(i)=r(1,2); ps(i)=p(1,2);
+end
+figure(); bin_edges = getCenteredBinEdges(rs,1);
+histogram(rs,bin_edges); xlabel('Pearson corrcoef for successes session by session'); ylabel('Count');
+
+% session by session cued_failureChunks_mean
+whichToTake=~isnan(alltbt.cued_failureChunks_mean) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
+u=unique(metadata.sessid);
+rs=nan(length(u),1); ps=nan(length(u),1);
+for i=1:length(u)
+    [r,p]=corrcoef(alltbt.cued_failureChunks_mean(metadata.sessid==u(i) & whichToTake==1),alltbt.deltaRTs(metadata.sessid==u(i) & whichToTake==1));
+    if size(r,1)<2
+        continue
+    end
+    rs(i)=r(1,2); ps(i)=p(1,2);
+end
+figure(); bin_edges = getCenteredBinEdges(rs,1);
+histogram(rs,bin_edges); xlabel('Pearson corrcoef for failures session by session'); ylabel('Count');
+
+% whichToTake=~isnan(alltbt.cued_allChunks_mean) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
+% [r,p]=corrcoef(alltbt.cued_allChunks_mean(whichToTake),alltbt.deltaRTs(whichToTake));
+% disp(['R correlation between DA means and deltaRTs for all reaches: ']); disp(r(1,2));
+% disp(['pval correlation between DA means and deltaRTs for all reaches: ']); disp(p(1,2));
+
+% alltbt=normalizeWithinEachSession(metadata,alltbt,'cued_allChunks_mean');
+% figure(); scatter(alltbt.cued_allChunks_mean_normed,alltbt.deltaRTs); title('normed all reaches DA mean');
+% whichToTake=~isnan(alltbt.cued_allChunks_mean_normed) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
+% [r,p]=corrcoef(alltbt.cued_allChunks_mean_normed(whichToTake),alltbt.deltaRTs(whichToTake));
+% disp(['R correlation between normed DA means and deltaRTs for all reaches: ']); disp(r(1,2));
+% disp(['pval correlation between normed DA means and deltaRTs for all reaches: ']); disp(p(1,2));
+
+alltbt=normalizeWithinEachSession(metadata,alltbt,'cued_successChunks_peak');
+figure(); scatter(alltbt.cued_successChunks_peak_normed,alltbt.deltaRTs); title('normed successes DA peaks');
+xlabel('DA peak minus baseline -- Normed within each session');
+ylabel('Change in RT (trial n+1 minus trial n)');
+whichToTake=~isnan(alltbt.cued_successChunks_peak_normed) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
+[r,p]=corrcoef(alltbt.cued_successChunks_peak_normed(whichToTake),alltbt.deltaRTs(whichToTake));
+disp(['R correlation between normed DA peaks and deltaRTs for success reaches: ']); disp(r(1,2));
+disp(['pval correlation between normed DA peaks and deltaRTs for success reaches: ']); disp(p(1,2));
+[slope,pValue]=fitDeltaRTtoDA(alltbt,whichToTake,'cued_successChunks_peak_normed','deltaRTs');
+disp(['Regression coefficient for normed DA peaks and success reaches: ']); disp(slope);
+disp(['pval of regression coefficient for normed DA peaks and success reaches: ']); disp(pValue);
+alltbt.fidgetSum=sum(alltbt.fidgetData,2,'omitnan');
+% keep movement as regressor
+[DA_coeff,DA_pValue,mvmt_coeff,mvmt_pValue]=fitDeltaRTtoDA_wMovement(alltbt,whichToTake,'cued_successChunks_peak_normed','deltaRTs','fidgetSum');
+% session by session regression
+[rs,ps,std_DA,std_deltaRT,ns]=getCoefSessbySess(alltbt,trialTypes,metadata,'cued_successChunks_peak',wtt);
+figure(); bin_edges = getCenteredBinEdges(rs,3);
+histogram(rs,bin_edges); xlabel('Regression coefficients for successes session by session'); ylabel('Count');
+figure(); bin_edges = getCenteredBinEdges(rs(ns>=20),1);
+histogram(rs(ns>=20),bin_edges); xlabel('Regression coefficients for successes session by session EXCLUDING SESSIONS W n<20'); ylabel('Count');
+
+alltbt=normalizeWithinEachSession(metadata,alltbt,'cued_failureChunks_mean');
+figure(); scatter(alltbt.cued_failureChunks_mean_normed,alltbt.deltaRTs); title('normed failures DA means');
+xlabel('DA means -- Normed within each session');
+ylabel('Change in RT (trial n+1 minus trial n)');
+whichToTake=~isnan(alltbt.cued_failureChunks_mean_normed) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
+[r,p]=corrcoef(alltbt.cued_failureChunks_mean_normed(whichToTake),alltbt.deltaRTs(whichToTake));
+disp(['R correlation between normed DA means and deltaRTs for failure reaches: ']); disp(r(1,2));
+disp(['pval correlation between normed DA means and deltaRTs for failure reaches: ']); disp(p(1,2));
+
+[slope,pValue]=fitDeltaRTtoDA(alltbt,whichToTake,'cued_failureChunks_mean_normed','deltaRTs');
+disp(['Regression coefficient for normed DA means and failure reaches: ']); disp(slope);
+disp(['pval of regression coefficient for normed DA means and failure reaches: ']); disp(pValue);
+alltbt.fidgetSum=sum(alltbt.fidgetData,2,'omitnan');
+% keep movement as regressor
+[DA_coeff,DA_pValue,mvmt_coeff,mvmt_pValue]=fitDeltaRTtoDA_wMovement(alltbt,whichToTake,'cued_failureChunks_mean_normed','deltaRTs','fidgetSum');
+% session by session regression
+[rs,ps,std_DA,std_deltaRT,ns]=getCoefSessbySess(alltbt,trialTypes,metadata,'cued_failureChunks_mean',wtt);
+figure(); bin_edges = getCenteredBinEdges(rs,1);
+histogram(rs,bin_edges); xlabel('Regression coefficients for failures session by session'); ylabel('Count');
+figure(); bin_edges = getCenteredBinEdges(rs(ns>=20),1);
+histogram(rs(ns>=20),bin_edges); xlabel('Regression coefficients for failures session by session EXCLUDING SESSIONS W n<20'); ylabel('Count');
+
+end
+
+function [rs,ps,std_DA,std_deltaRT,ns]=getCoefSessbySess(alltbt,trialTypes,metadata,whichDAField,wtt)
+
+da=alltbt.(whichDAField);
+whichToTake=~isnan(da) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
+u=unique(metadata.sessid);
+rs=nan(length(u),1); ps=nan(length(u),1);
+std_DA=nan(length(u),1); std_deltaRT=nan(length(u),1);
+ns=nan(length(u),1); 
+for i=1:length(u)
+    % don't keep movement as regressor
+%     [r,p]=fitDeltaRTtoDA(alltbt,metadata.sessid==u(i) & whichToTake==1,whichDAField,'deltaRTs');
+    % keep movement as regressor
+    if nansum(metadata.sessid==u(i) & whichToTake==1)==0
+        rs(i)=nan; ps(i)=nan;
+    else
+        [r,p,mvmt_coeff,mvmt_pValue]=fitDeltaRTtoDA_wMovement(alltbt,metadata.sessid==u(i) & whichToTake==1,whichDAField,'deltaRTs','fidgetSum');
+        rs(i)=r; ps(i)=p;
+        temp=alltbt.(whichDAField);
+        std_DA(i)=std(temp(metadata.sessid==u(i) & whichToTake==1,:),[],1,'omitnan');
+        temp=alltbt.deltaRTs;
+        std_deltaRT(i)=std(temp(metadata.sessid==u(i) & whichToTake==1,:),[],1,'omitnan');
+        ns(i)=nansum(metadata.sessid==u(i) & whichToTake==1);
+    end
+end
+
+end
+
+function alltbt=getReactionTimes(alltbt,cueOffsetInds,timestep)
+
 usewhichreachfield='all_reachBatch';
 [~,startCol]=nanmax(nanmean(alltbt.cueZone_onVoff,1));
 startCol=startCol-cueOffsetInds;
@@ -46,329 +345,6 @@ end
 alltbt.RTs_fromReachStarts=(firstIdx-startCol).*timestep;
 % dump trials where reach is too extended in time
 alltbt.RTs(abs(alltbt.RTs-alltbt.RTs_fromReachStarts)>1)=nan;
-
-alltbt.RTs(alltbt.RTs<0.05)=nan;
-
-% make consistent with taking cued reaches only
-% alltbt.cued_successChunks(alltbt.RTs>3,:)=nan;
-% alltbt.cued_failureChunks(alltbt.RTs>3,:)=nan;
-
-% dump artifacts of infrequent LabJack problem
-alltbt.cued_successChunks(alltbt.cued_successChunks<-4)=nan;
-alltbt.cued_failureChunks(alltbt.cued_failureChunks<-4)=nan;
-
-% get max and min for each
-alltbt.cued_successChunks_ma=nanmax(alltbt.cued_successChunks,[],2);
-alltbt.cued_successChunks_mi=nanmin(alltbt.cued_successChunks,[],2);
-alltbt.cued_failureChunks_ma=nanmax(alltbt.cued_failureChunks,[],2);
-alltbt.cued_failureChunks_mi=nanmin(alltbt.cued_failureChunks,[],2);
-
-% DA signals for successes and failures combined
-alltbt.cued_allChunks=alltbt.cued_successChunks;
-alltbt.cued_allChunks(~isnan(alltbt.cued_failureChunks_ma),:)=alltbt.cued_failureChunks(~isnan(alltbt.cued_failureChunks_ma),:);
-
-% DA derivatives for successes and failures combined
-% alltbt.cued_derivChunks=[diff(alltbt.cued_allChunks,1,2) nan(size(alltbt.cued_allChunks,1),1)];
-
-% plot DA responses 
-nTime = size(alltbt.cued_successChunks, 2);
-x     = (0:nTime-1) * timestep;
-meanSuc = mean(alltbt.cued_successChunks, 1, 'omitnan');
-semSuc  = std(alltbt.cued_successChunks, 0, 1, 'omitnan') ./ ...
-          sqrt(sum(~isnan(alltbt.cued_successChunks), 1));
-meanFail = mean(alltbt.cued_failureChunks, 1, 'omitnan');
-semFail  = std(alltbt.cued_failureChunks, 0, 1, 'omitnan') ./ ...
-           sqrt(sum(~isnan(alltbt.cued_failureChunks), 1));
-figure; hold on;
-% success (green)
-plot(x, meanSuc, 'g-', 'LineWidth', 1.5);
-patch([x, fliplr(x)], ...
-      [meanSuc+semSuc, fliplr(meanSuc-semSuc)], ...
-      'g', 'FaceAlpha', 0.2, 'EdgeColor', 'none');
-% failure (red)
-plot(x, meanFail, 'r-', 'LineWidth', 1.5);
-patch([x, fliplr(x)], ...
-      [meanFail+semFail, fliplr(meanFail-semFail)], ...
-      'r', 'FaceAlpha', 0.2, 'EdgeColor', 'none');
-xlabel('Time (s)');
-ylabel('dLight signal');
-legend({'Success mean','Success ± SEM','Failure mean','Failure ± SEM'}, ...
-       'Location','Best');
-title('Cued Success vs. Failure (±SEM)');
-hold off;
-
-% separate misses (paw never touches pellet) and drops (paw initially grabs
-% pellet, then pellet falls before mouse eats pellet)
-isdrop=any(alltbt.reachBatch_drop_reachStarts>0.05,2);
-ismiss=any(alltbt.reachBatch_miss_reachStarts>0.05,2) & ~any(alltbt.reachBatch_drop_reachStarts>0.05,2);
-
-% plot DA 3 outcomes
-figure; hold on;
-% success (green)
-plot(x, meanSuc, 'g-', 'LineWidth', 1.5);
-patch([x, fliplr(x)], [meanSuc+semSuc, fliplr(meanSuc-semSuc)], 'g', 'FaceAlpha', 0.2, 'EdgeColor', 'none');
-% drop (red)
-meanFail = mean(alltbt.cued_failureChunks(isdrop,:), 1, 'omitnan');
-semFail  = std(alltbt.cued_failureChunks(isdrop,:), 0, 1, 'omitnan') ./ ...
-           sqrt(sum(~isnan(alltbt.cued_failureChunks(isdrop,:)), 1));
-plot(x, meanFail, 'r-', 'LineWidth', 1.5);
-patch([x, fliplr(x)], [meanFail+semFail, fliplr(meanFail-semFail)], 'r', 'FaceAlpha', 0.2, 'EdgeColor', 'none');
-% miss (cyan)
-meanFail = mean(alltbt.cued_failureChunks(ismiss,:), 1, 'omitnan');
-semFail  = std(alltbt.cued_failureChunks(ismiss,:), 0, 1, 'omitnan') ./ ...
-           sqrt(sum(~isnan(alltbt.cued_failureChunks(ismiss,:)), 1));
-plot(x, meanFail, 'c-', 'LineWidth', 1.5);
-patch([x, fliplr(x)], [meanFail+semFail, fliplr(meanFail-semFail)], 'c', 'FaceAlpha', 0.2, 'EdgeColor', 'none');
-xlabel('Time (s)');
-ylabel('dLight signal');
-legend({'Success mean','Success ± SEM','Drop mean','Drop ± SEM','Miss mean','Miss ± SEM'}, ...
-       'Location','Best');
-title('Cued Success vs. Drop vs. Miss (±SEM)');
-hold off;
-
-% discard drops, may confuse things
-alltbt.cued_failureChunks(isdrop==1,:)=nan;
-alltbt.cued_allChunks(isdrop==1,:)=nan;
-
-% plot DA derivs 
-% nTime = size(alltbt.cued_derivChunks, 2);
-% x     = (0:nTime-1) * timestep;
-% meanSuc = mean(alltbt.cued_derivChunks, 1, 'omitnan');
-% semSuc  = std(alltbt.cued_derivChunks, 0, 1, 'omitnan') ./ ...
-%           sqrt(sum(~isnan(alltbt.cued_derivChunks), 1));
-% figure; hold on;
-% plot(x, meanSuc, 'k-', 'LineWidth', 1.5);
-% patch([x, fliplr(x)], ...
-%       [meanSuc+semSuc, fliplr(meanSuc-semSuc)], ...
-%       'g', 'FaceAlpha', 0.2, 'EdgeColor', 'none');
-% title('Derivative of DA (±SEM)');
-% hold off;
-
-DAbaseToInd=find(x<DAbaselinewindow,1,'last');
-DAbaseAtEnd=find(x>DApostwindowstart,1,'first');
-% DAmeanInds=x>2.4 & x<=4.41;
-DAmeanInds=x>meanWindow(1) & x<=meanWindow(2);
-
-% plot DA 3 outcomes
-meanSuc = mean(alltbt.cued_successChunks-repmat(mean(alltbt.cued_successChunks(:,[1:DAbaseToInd DAbaseAtEnd:end]),2,'omitnan'),1,size(alltbt.cued_successChunks,2)), 1, 'omitnan');
-semSuc  = std(alltbt.cued_successChunks-repmat(mean(alltbt.cued_successChunks(:,[1:DAbaseToInd DAbaseAtEnd:end]),2,'omitnan'),1,size(alltbt.cued_successChunks,2)), 0, 1, 'omitnan') ./ ...
-          sqrt(sum(~isnan(alltbt.cued_successChunks), 1));
-figure; hold on;
-% success (green)
-plot(x, meanSuc, 'g-', 'LineWidth', 1.5);
-patch([x, fliplr(x)], [meanSuc+semSuc, fliplr(meanSuc-semSuc)], 'g', 'FaceAlpha', 0.2, 'EdgeColor', 'none');
-% miss (cyan)
-meanFail = mean(alltbt.cued_failureChunks(ismiss,:)-repmat(mean(alltbt.cued_failureChunks(ismiss,[1:DAbaseToInd DAbaseAtEnd:end]),2,'omitnan'),1,size(alltbt.cued_failureChunks,2)), 1, 'omitnan');
-semFail  = std(alltbt.cued_failureChunks(ismiss,:)-repmat(mean(alltbt.cued_failureChunks(ismiss,[1:DAbaseToInd DAbaseAtEnd:end]),2,'omitnan'),1,size(alltbt.cued_failureChunks,2)), 0, 1, 'omitnan') ./ ...
-           sqrt(sum(~isnan(alltbt.cued_failureChunks(ismiss,:)), 1));
-plot(x, meanFail, 'c-', 'LineWidth', 1.5);
-patch([x, fliplr(x)], [meanFail+semFail, fliplr(meanFail-semFail)], 'c', 'FaceAlpha', 0.2, 'EdgeColor', 'none');
-xlabel('Time (s)');
-ylabel('dLight signal');
-legend({'Success mean','Success ± SEM','Drop mean','Drop ± SEM','Miss mean','Miss ± SEM'}, ...
-       'Location','Best');
-title('Cued Success vs. Miss (±SEM) MINUS BASELINE');
-hold off;
-
-% get peak DA minus baseline
-% alltbt.cued_successChunks_peak=max(alltbt.cued_successChunks(:,x>DAbaselinewindow & x<DApostwindowstart),[],2,'omitnan')-mean(alltbt.cued_successChunks(:,[1:DAbaseToInd DAbaseAtEnd:end]),2,'omitnan');
-% alltbt.cued_successChunks_peak=max(alltbt.cued_successChunks,[],2,'omitnan')-mean(alltbt.cued_successChunks,2,'omitnan');
-alltbt.cued_successChunks_peak=max(alltbt.cued_successChunks(:,:),[],2,'omitnan')-mean(alltbt.cued_successChunks(:,[1:DAbaseToInd DAbaseAtEnd:end]),2,'omitnan');
-% alltbt.cued_allChunks_peak=max(alltbt.cued_allChunks(:,x>DAbaselinewindow & x<DApostwindowstart),[],2,'omitnan')-mean(alltbt.cued_allChunks(:,[1:DAbaseToInd DAbaseAtEnd:end]),2,'omitnan');
-alltbt.cued_allChunks_peak=max(alltbt.cued_allChunks(:,:),[],2,'omitnan')-mean(alltbt.cued_allChunks(:,[1:DAbaseToInd DAbaseAtEnd:end]),2,'omitnan');
-% alltbt.cued_successChunks_peak=max(alltbt.cued_successChunks(:,:),[],2,'omitnan');
-% alltbt.cued_allChunks_peak=max(alltbt.cued_allChunks(:,:),[],2,'omitnan');
-% cued failure peaks
-% alltbt.cued_failureChunks_peak=max(alltbt.cued_failureChunks(:,:),[],2,'omitnan')-mean(alltbt.cued_failureChunks(:,[1:DAbaseToInd DAbaseAtEnd:end]),2,'omitnan');
-alltbt.cued_failureChunks_peak=mean(alltbt.cued_failureChunks(:,DAmeanInds),2,'omitnan');
-
-% alltbt.cued_failureChunks_peak=max(alltbt.cued_failureChunks(:,:),[],2,'omitnan');
-% get mean DA
-% alltbt.cued_successChunks_mean=mean(alltbt.cued_successChunks(:,[1:DAbaseToInd DAbaseAtEnd:end]),2,'omitnan');
-% alltbt.cued_allChunks_mean=mean(alltbt.cued_allChunks(:,[1:DAbaseToInd DAbaseAtEnd:end]),2,'omitnan');
-alltbt.cued_successChunks_mean=mean(alltbt.cued_successChunks(:,DAmeanInds),2,'omitnan');
-alltbt.cued_allChunks_mean=mean(alltbt.cued_allChunks(:,DAmeanInds),2,'omitnan');
-% alltbt.cued_successChunks_mean=mean(alltbt.cued_successChunks(:,DAmeanInds),2,'omitnan')-mean(alltbt.cued_successChunks(:,[1:DAbaseToInd DAbaseAtEnd:end]),2,'omitnan');
-% alltbt.cued_allChunks_mean=mean(alltbt.cued_allChunks(:,DAmeanInds),2,'omitnan')-mean(alltbt.cued_allChunks(:,[1:DAbaseToInd DAbaseAtEnd:end]),2,'omitnan');
-% get derivative max
-% alltbt.cued_derivChunks_peak=max(alltbt.cued_derivChunks(:,:),[],2,'omitnan');
-
-% plot scatter of peaks minus baseline for successes v failures
-figure(); scatter(ones(size(alltbt.cued_successChunks_peak))+rand(size(alltbt.cued_successChunks_peak)),alltbt.cued_successChunks_peak,[],[107 76 154]./255);
-title('cued success peaks minus baseline');
-figure(); scatter(ones(size(alltbt.cued_failureChunks_peak))+rand(size(alltbt.cued_failureChunks_peak)),alltbt.cued_failureChunks_peak,[],'r');
-title('cued failure peaks minus baseline');
-
-% get change in RT from trial to trial = deltaRTs
-% put RT_n+1 - RT_n at the nth position
-alltbt.deltaRTs=alltbt.RTs(2:end)-alltbt.RTs(1:end-1);
-alltbt.deltaRTs=[alltbt.deltaRTs; nan];
-
-% then exclude any deltaRTs across session boundaries
-for i=2:size(alltbt.deltaRTs,1)
-    if metadata.sessid(i)~=metadata.sessid(i-1)
-        alltbt.deltaRTs(i)=nan;
-        alltbt.deltaRTs(i-1)=nan;
-    end
-end
-
-% plot DA signal vs. deltaRTs
-whichToTake=~isnan(alltbt.cued_successChunks_peak) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
-figure(); scatter(alltbt.cued_successChunks_peak(),alltbt.deltaRTs);
-xlabel('DA peak minus baseline -- Z-scored fluorescence units');
-ylabel('Change in RT (trial n+1 minus trial n)');
-title('DA peaks vs. change in RT for cued successes');
-figure(); scatter(alltbt.cued_successChunks_mean,alltbt.deltaRTs);
-xlabel('DA mean minus baseline -- Z-scored fluorescence units');
-ylabel('Change in RT (trial n+1 minus trial n)');
-title('DA means vs. change in RT for cued successes');
-
-figure(); scatter(alltbt.cued_successChunks_peak,alltbt.deltaRTs,[],[107 76 154]./255); hold on;
-scatter(alltbt.cued_failureChunks_peak,alltbt.deltaRTs,[],'r');
-xlabel('DA peak minus baseline -- Z-scored fluorescence units');
-ylabel('Change in RT (trial n+1 minus trial n)');
-title('DA peaks vs. change in RT for cued successes and failures');
-alltbt.cued_allChunks_peak=alltbt.cued_failureChunks_peak;
-alltbt.cued_allChunks_peak(~isnan(alltbt.cued_successChunks_peak))=alltbt.cued_successChunks_peak(~isnan(alltbt.cued_successChunks_peak));
-
-whichToTake=~isnan(alltbt.cued_failureChunks_peak) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
-figure(); scatter(alltbt.cued_failureChunks_peak,alltbt.deltaRTs);
-xlabel('DA peak minus baseline -- Z-scored fluorescence units');
-ylabel('Change in RT (trial n+1 minus trial n)');
-title('DA peaks vs. change in RT for cued failures');
-
-figure(); scatter(alltbt.cued_allChunks_peak,alltbt.deltaRTs);
-xlabel('DA peak minus baseline -- Z-scored fluorescence units');
-ylabel('Change in RT (trial n+1 minus trial n)');
-title('DA peaks vs. change in RT for cued all reaches');
-figure(); scatter(alltbt.cued_allChunks_mean,alltbt.deltaRTs);
-xlabel('DA mean minus baseline -- Z-scored fluorescence units');
-ylabel('Change in RT (trial n+1 minus trial n)');
-title('DA means vs. change in RT for cued all reaches');
-
-% figure(); scatter(alltbt.cued_derivChunks_peak,alltbt.deltaRTs);
-% xlabel('DA deriv peak -- Z-scored fluorescence units');
-% ylabel('Change in RT (trial n+1 minus trial n)');
-% title('DA derivative vs. change in RT for cued all reaches');
-
-alltbt.isLongITI=trialTypes.isLongITI;
-% shuffle_tbt=shuffleTbtTrialOrder(alltbt,metadata,trialTypes);
-
-% test correlations
-whichToTake=~isnan(alltbt.cued_successChunks_peak) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
-[r,p]=corrcoef(alltbt.cued_successChunks_peak(whichToTake),alltbt.deltaRTs(whichToTake));
-disp(['R correlation between DA peaks and deltaRTs for cued successes: ']); disp(r(1,2));
-disp(['pval correlation between DA peaks and deltaRTs for cued successes: ']); disp(p(1,2));
-whichToTake=~isnan(alltbt.cued_successChunks_mean) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
-[r,p]=corrcoef(alltbt.cued_successChunks_mean(whichToTake),alltbt.deltaRTs(whichToTake));
-disp(['R correlation between DA means and deltaRTs for cued successes: ']); disp(r(1,2));
-disp(['pval correlation between DA means and deltaRTs for cued successes: ']); disp(p(1,2));
-
-% whichToTake=~isnan(shuffle_tbt.cued_successChunks_peak) & ~isnan(shuffle_tbt.deltaRTs) & shuffle_tbt.isLongITI==1; % this won't take wtt
-% [r,p]=corrcoef(shuffle_tbt.cued_successChunks_peak(whichToTake),shuffle_tbt.deltaRTs(whichToTake));
-% disp(['SHUFFLE R correlation between DA peaks and deltaRTs for cued successes: ']); disp(r(1,2));
-% disp(['SHUFFLE pval correlation between DA peaks and deltaRTs for cued successes: ']); disp(p(1,2));
-
-whichToTake=~isnan(alltbt.cued_failureChunks_peak) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
-[r,p]=corrcoef(alltbt.cued_failureChunks_peak(whichToTake),alltbt.deltaRTs(whichToTake));
-disp(['R correlation between DA peaks and deltaRTs for cued failures: ']); disp(r(1,2));
-disp(['pval correlation between DA peaks and deltaRTs for cued failures: ']); disp(p(1,2));
-
-whichToTake=~isnan(alltbt.cued_allChunks_peak) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
-[r,p]=corrcoef(alltbt.cued_allChunks_peak(whichToTake),alltbt.deltaRTs(whichToTake));
-disp(['R correlation between DA peaks and deltaRTs for all reaches: ']); disp(r(1,2));
-disp(['pval correlation between DA peaks and deltaRTs for all reaches: ']); disp(p(1,2));
-
-% session by session cued_successChunks_peak
-whichToTake=~isnan(alltbt.cued_successChunks_peak) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
-u=unique(metadata.sessid);
-rs=nan(length(u),1); ps=nan(length(u),1);
-for i=1:length(u)
-[r,p]=corrcoef(alltbt.cued_successChunks_peak(metadata.sessid==u(i) & whichToTake==1),alltbt.deltaRTs(metadata.sessid==u(i) & whichToTake==1));
-if size(r,1)<2
-continue
-end
-rs(i)=r(1,2); ps(i)=p(1,2);
-end
-
-figure(); 
-histogram(rs,100);
-
-whichToTake=~isnan(alltbt.cued_allChunks_mean) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
-[r,p]=corrcoef(alltbt.cued_allChunks_mean(whichToTake),alltbt.deltaRTs(whichToTake));
-disp(['R correlation between DA means and deltaRTs for all reaches: ']); disp(r(1,2));
-disp(['pval correlation between DA means and deltaRTs for all reaches: ']); disp(p(1,2));
-
-alltbt=normalizeWithinEachSession(metadata,alltbt,'cued_allChunks_mean');
-figure(); scatter(alltbt.cued_allChunks_mean_normed,alltbt.deltaRTs); title('normed all reaches DA mean');
-whichToTake=~isnan(alltbt.cued_allChunks_mean_normed) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
-[r,p]=corrcoef(alltbt.cued_allChunks_mean_normed(whichToTake),alltbt.deltaRTs(whichToTake));
-disp(['R correlation between normed DA means and deltaRTs for all reaches: ']); disp(r(1,2));
-disp(['pval correlation between normed DA means and deltaRTs for all reaches: ']); disp(p(1,2));
-
-alltbt=normalizeWithinEachSession(metadata,alltbt,'cued_successChunks_peak');
-figure(); scatter(alltbt.cued_successChunks_peak_normed,alltbt.deltaRTs); title('normed success reaches DA peak');
-whichToTake=~isnan(alltbt.cued_successChunks_peak_normed) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
-[r,p]=corrcoef(alltbt.cued_successChunks_peak_normed(whichToTake),alltbt.deltaRTs(whichToTake));
-disp(['R correlation between normed DA peaks and deltaRTs for success reaches: ']); disp(r(1,2));
-disp(['pval correlation between normed DA peaks and deltaRTs for success reaches: ']); disp(p(1,2));
-fitDeltaRTtoDA(alltbt,whichToTake,'cued_successChunks_peak_normed','deltaRTs');
-alltbt.fidgetSum=sum(alltbt.fidgetData,2,'omitnan');
-[DA_coeff,DA_pValue,mvmt_coeff,mvmt_pValue]=fitDeltaRTtoDA_wMovement(alltbt,whichToTake,'cued_successChunks_peak_normed','deltaRTs','fidgetSum');
-[rs,ps]=getCoefSessbySess(alltbt,trialTypes,metadata,'cued_successChunks_peak',wtt);
-
-alltbt=normalizeWithinEachSession(metadata,alltbt,'cued_failureChunks_peak');
-figure(); scatter(alltbt.cued_failureChunks_peak_normed,alltbt.deltaRTs); title('normed failure reaches DA peak');
-whichToTake=~isnan(alltbt.cued_failureChunks_peak_normed) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
-[r,p]=corrcoef(alltbt.cued_failureChunks_peak_normed(whichToTake),alltbt.deltaRTs(whichToTake));
-disp(['R correlation between normed DA peaks and deltaRTs for failure reaches: ']); disp(r(1,2));
-disp(['pval correlation between normed DA peaks and deltaRTs for failure reaches: ']); disp(p(1,2));
-
-% alltbt=normalizeWithinEachSession(metadata,alltbt,'cued_allChunks_peak');
-% figure(); scatter(alltbt.cued_allChunks_peak_normed,alltbt.deltaRTs); title('normed all reaches DA peak');
-% whichToTake=~isnan(alltbt.cued_allChunks_peak_normed) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
-% [r,p]=corrcoef(alltbt.cued_allChunks_peak_normed(whichToTake),alltbt.deltaRTs(whichToTake));
-% disp(['R correlation between normed DA peaks and deltaRTs for all reaches: ']); disp(r(1,2));
-% disp(['pval correlation between normed DA peaks and deltaRTs for all reaches: ']); disp(p(1,2));
-
-% whichToTake=~isnan(alltbt.cued_derivChunks_peak) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
-% [r,p]=corrcoef(alltbt.cued_derivChunks_peak(whichToTake),alltbt.deltaRTs(whichToTake));
-% disp(['R correlation between DA derivs and deltaRTs for all reaches: ']); disp(r(1,2));
-% disp(['pval correlation between DA derivs and deltaRTs for all reaches: ']); disp(p(1,2));
-
-% new_baseline_window_sec = 300; 
-% alltbt.Zscored_DA=alltbt.cued_successChunks;
-% alltbt=recalculateZScore(alltbt, metadata, new_baseline_window_sec);
-% trial_to_plot = find(all(~isnan(alltbt.Zscored_DA),2));
-% trial_to_plot=trial_to_plot(randperm(length(trial_to_plot)));
-% trial_to_plot=trial_to_plot(1);
-% figure; hold on;
-% plot(alltbt.Zscored_DA(trial_to_plot, :), 'b-', 'DisplayName', 'Original Z-Score');
-% plot(alltbt.Zscored_DA_recalculated(trial_to_plot, :), 'r--', 'DisplayName', 'Recalculated Z-Score');
-% title(['Comparison for Trial ' num2str(trial_to_plot)]);
-% xlabel('Timepoints in Trial');
-% ylabel('Z-Scored Dopamine');
-% legend;
-% hold off;
-% alltbt.Zscored_DA_mean=mean(alltbt.Zscored_DA_recalculated(:,DAmeanInds),2,'omitnan');
-% whichToTake=~isnan(alltbt.cued_successChunks_mean) & ~isnan(alltbt.Zscored_DA_mean) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
-% [r,p]=corrcoef(alltbt.Zscored_DA_mean(whichToTake),alltbt.deltaRTs(whichToTake));
-% disp(['R correlation between DA means and deltaRTs for cued successes RE-Z-SCORED: ']); disp(r(1,2));
-% disp(['pval correlation between DA means and deltaRTs for cued successes RE-Z-SCORED: ']); disp(p(1,2));
-
-
-end
-
-function [rs,ps]=getCoefSessbySess(alltbt,trialTypes,metadata,whichDAField,wtt)
-
-da=alltbt.(whichDAField);
-whichToTake=~isnan(da) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
-u=unique(metadata.sessid);
-rs=nan(length(u),1); ps=nan(length(u),1);
-for i=1:length(u)
-    [r,p]=fitDeltaRTtoDA(alltbt,metadata.sessid==u(i) & whichToTake==1,whichDAField,'deltaRTs');
-    rs(i)=r; ps(i)=p;
-end
 
 end
 
@@ -551,5 +527,56 @@ for i = 1:num_sessions
 end
 
 fprintf('Re-Z-scoring complete.\n');
+
+end
+
+function bin_edges = getCenteredBinEdges(data,multiplyBins)
+%getCenteredBinEdges Calculates optimal histogram bin edges with one bin
+%   centered on zero.
+%
+%   bin_edges = getCenteredBinEdges(data)
+%
+%   INPUTS:
+%   - data: A numeric vector of data points.
+%
+%   OUTPUT:
+%   - bin_edges: A vector containing the calculated bin edges.
+
+% --- 1. Determine a "Reasonable" Bin Width using Freedman-Diaconis Rule ---
+
+n = length(data);
+iqr_val = iqr(data);
+
+% Handle edge case where IQR is zero (e.g., all data points are the same)
+if iqr_val == 0
+    % Fallback to a simpler rule, like Scott's rule, if IQR is 0
+    bin_width = 3.5 * std(data) / (n^(1/3));
+else
+    % Freedman-Diaconis rule for bin width
+    bin_width = 2 * iqr_val / (n^(1/3));
+end
+
+% If bin_width is still zero or NaN (e.g., for constant data), set a default.
+if bin_width <= 0 || isnan(bin_width)
+    bin_width = 1; % A sensible default
+end
+
+bin_width=bin_width/multiplyBins;
+
+
+% --- 2. Construct Bin Edges Centered Around Zero ---
+
+% Find the limits of the data
+min_val = min(data);
+max_val = max(data);
+
+% Create the positive-side bin edges, starting from the center
+pos_edges = (bin_width/2) : bin_width : (max_val + bin_width);
+
+% Create the negative-side bin edges, starting from the center
+neg_edges = (-bin_width/2) : -bin_width : (min_val - bin_width);
+
+% Combine and sort the edges to form the complete set of bins.
+bin_edges = unique([neg_edges, pos_edges]);
 
 end
