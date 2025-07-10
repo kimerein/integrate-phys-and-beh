@@ -16,13 +16,14 @@ end
 
 timestep=mode(diff(nanmean(alltbt.times,1)));
 cueOffsetInds=0;
-% only need cueOffset if didn't realign to start of cue
+% need cueOffset if didn't realign to start of cue
 % cueOffset=-0.16;
 % cueOffsetInds=ceil(abs(cueOffset)/timestep);
 
 % calculate reaction times
 alltbt=getReactionTimes(alltbt,cueOffsetInds,timestep);
-
+% mouse cannot physically respond to cue onset faster than 50 ms, so dump
+% these reaches--not really RTs
 alltbt.RTs(alltbt.RTs<0.05)=nan;
 
 % dump artifacts of infrequent LabJack problem
@@ -124,7 +125,7 @@ title('DA peaks minus baseline, purple is success, red is failure');
 % plot scatter of DA means for successes v failures
 figure(); scatter(ones(size(alltbt.cued_successChunks_mean))+rand(size(alltbt.cued_successChunks_mean)),alltbt.cued_successChunks_mean,[],[107 76 154]./255);
 hold on; scatter(2*ones(size(alltbt.cued_failureChunks_mean))+rand(size(alltbt.cued_failureChunks_mean)),alltbt.cued_failureChunks_mean,[],'r');
-title('DA pmeans, purple is success, red is failure');
+title('DA means, purple is success, red is failure');
 
 % get change in RT from trial to trial = deltaRTs
 % put RT_n+1 - RT_n at the nth position
@@ -209,6 +210,8 @@ for i=1:length(u)
 end
 figure(); bin_edges = getCenteredBinEdges(rs,1);
 histogram(rs,bin_edges); xlabel('Pearson corrcoef for successes session by session'); ylabel('Count');
+% choose an example session for successes
+f_successes=find(ps<=0.05);
 
 % session by session cued_failureChunks_mean
 whichToTake=~isnan(alltbt.cued_failureChunks_mean) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
@@ -223,6 +226,8 @@ for i=1:length(u)
 end
 figure(); bin_edges = getCenteredBinEdges(rs,1);
 histogram(rs,bin_edges); xlabel('Pearson corrcoef for failures session by session'); ylabel('Count');
+% choose an example session for failures
+f_failures=find(ps<=0.05);
 
 % whichToTake=~isnan(alltbt.cued_allChunks_mean) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
 % [r,p]=corrcoef(alltbt.cued_allChunks_mean(whichToTake),alltbt.deltaRTs(whichToTake));
@@ -237,10 +242,10 @@ histogram(rs,bin_edges); xlabel('Pearson corrcoef for failures session by sessio
 % disp(['pval correlation between normed DA means and deltaRTs for all reaches: ']); disp(p(1,2));
 
 alltbt=normalizeWithinEachSession(metadata,alltbt,'cued_successChunks_peak');
-figure(); scatter(alltbt.cued_successChunks_peak_normed,alltbt.deltaRTs); title('normed successes DA peaks');
+whichToTake=~isnan(alltbt.cued_successChunks_peak_normed) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
+figure(); scatter(alltbt.cued_successChunks_peak_normed(whichToTake,:),alltbt.deltaRTs(whichToTake,:)); title('normed successes DA peaks');
 xlabel('DA peak minus baseline -- Normed within each session');
 ylabel('Change in RT (trial n+1 minus trial n)');
-whichToTake=~isnan(alltbt.cued_successChunks_peak_normed) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
 [r,p]=corrcoef(alltbt.cued_successChunks_peak_normed(whichToTake),alltbt.deltaRTs(whichToTake));
 disp(['R correlation between normed DA peaks and deltaRTs for success reaches: ']); disp(r(1,2));
 disp(['pval correlation between normed DA peaks and deltaRTs for success reaches: ']); disp(p(1,2));
@@ -256,12 +261,23 @@ figure(); bin_edges = getCenteredBinEdges(rs,3);
 histogram(rs,bin_edges); xlabel('Regression coefficients for successes session by session'); ylabel('Count');
 figure(); bin_edges = getCenteredBinEdges(rs(ns>=20),1);
 histogram(rs(ns>=20),bin_edges); xlabel('Regression coefficients for successes session by session EXCLUDING SESSIONS W n<20'); ylabel('Count');
+% choose example session using Pearson's
+trythissess=f_successes(randperm(length(f_successes)));
+trythissess=trythissess(1);
+% Kim likes 159
+trythissess=159;
+figure(); scatter(alltbt.cued_successChunks_peak(metadata.sessid==u(trythissess),:),alltbt.deltaRTs(metadata.sessid==u(trythissess),:));
+xlabel('DA peak minus baseline -- Z-scored fluorescence units');
+ylabel('Change in RT (trial n+1 minus trial n)');
+title('DA peaks vs. change in RT for successes EXAMPLE SESSION');
+disp(['regression coefficient for example session successes: ' num2str(rs(trythissess))]);
+disp(['pval of regression coefficient for example session successes: ' num2str(ps(trythissess))]);
 
 alltbt=normalizeWithinEachSession(metadata,alltbt,'cued_failureChunks_mean');
-figure(); scatter(alltbt.cued_failureChunks_mean_normed,alltbt.deltaRTs); title('normed failures DA means');
+whichToTake=~isnan(alltbt.cued_failureChunks_mean_normed) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
+figure(); scatter(alltbt.cued_failureChunks_mean_normed(whichToTake,:),alltbt.deltaRTs(whichToTake,:)); title('normed failures DA means');
 xlabel('DA means -- Normed within each session');
 ylabel('Change in RT (trial n+1 minus trial n)');
-whichToTake=~isnan(alltbt.cued_failureChunks_mean_normed) & ~isnan(alltbt.deltaRTs) & trialTypes.isLongITI==1 & eval(wtt);
 [r,p]=corrcoef(alltbt.cued_failureChunks_mean_normed(whichToTake),alltbt.deltaRTs(whichToTake));
 disp(['R correlation between normed DA means and deltaRTs for failure reaches: ']); disp(r(1,2));
 disp(['pval correlation between normed DA means and deltaRTs for failure reaches: ']); disp(p(1,2));
@@ -278,6 +294,17 @@ figure(); bin_edges = getCenteredBinEdges(rs,1);
 histogram(rs,bin_edges); xlabel('Regression coefficients for failures session by session'); ylabel('Count');
 figure(); bin_edges = getCenteredBinEdges(rs(ns>=20),1);
 histogram(rs(ns>=20),bin_edges); xlabel('Regression coefficients for failures session by session EXCLUDING SESSIONS W n<20'); ylabel('Count');
+% choose example session using Pearson's
+trythissess=f_failures(randperm(length(f_failures)));
+trythissess=trythissess(1);
+% Kim likes 27
+trythissess=27;
+figure(); scatter(alltbt.cued_failureChunks_mean(metadata.sessid==u(trythissess),:),alltbt.deltaRTs(metadata.sessid==u(trythissess),:));
+xlabel('DA means -- Z-scored fluorescence units');
+ylabel('Change in RT (trial n+1 minus trial n)');
+title('DA means vs. change in RT for failures EXAMPLE SESSION');
+disp(['regression coefficient for example session failures: ' num2str(rs(trythissess))]);
+disp(['pval of regression coefficient for example session failures: ' num2str(ps(trythissess))]);
 
 end
 
